@@ -20,7 +20,7 @@
 #define ALL_DIRS		9	//compute all the list of transpose directions
 #define GPU_MULTI_SEQ	10	//Matrix-Vector GPU multiplication
 #define GPU_SF			11	//reachability algorithm using GPU for computing Support Function
-
+#define PBFS			12	//Parallel Breadth First Search Algorithm for Discrete Jumps
 // *********** Various Algorithms ******************
 
 // *********** Various Hybrid System Model ******************

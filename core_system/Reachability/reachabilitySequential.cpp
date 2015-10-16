@@ -169,7 +169,7 @@ template_polyhedra reachabilitySequential(Dynamics& SystemDynamics,
 		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
 				ReachParameters, invariant, lp_solver_type_choosen);
 	} //End of Invariant Directions
-
+//cout<<"\nNew shm_NewTotalIteration = "<<shm_NewTotalIteration <<"\n";
 	if (shm_NewTotalIteration == 1) {
 		template_polyhedra poly_emptyp;
 		return poly_emptyp;
@@ -277,7 +277,7 @@ template_polyhedra reachabilitySequential(Dynamics& SystemDynamics,
 	}
 	if (isInvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;
-		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
+		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constraints
 		inv_sfm.resize(num_inv, shm_NewTotalIteration);
 		for (int eachInvDirection = 0; eachInvDirection < num_inv;
 				eachInvDirection++) {

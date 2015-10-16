@@ -21,8 +21,21 @@
 #include "core_system/Reachability/reachabilityParallel_Process.h"
 #include "core_system/Reachability/NewApproach/SameDirections_Avoid_SuppFunction.h"
 #include "Utilities/computeInitialPolytope.h"
+#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
+#include "application/All_PP_Definition.h"
+#include "core_system/Reachability/reachabilitySequential_GPU_MatrixVector_Multiply.cuh"
+#include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
+#include "boost/timer/timer.hpp"
 
+//Sequential Search for Discrete Jumps
 std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
+		ReachabilityParameters& reach_parameters, int bound,
+		unsigned int Algorithm_Type, unsigned int Total_Partition,
+		int lp_solver_type_choosen, unsigned int number_of_streams,
+		int Solver_GLPK_Gurobi_GPU);
+
+//Parallel Breadth First Search for Discrete Jumps
+std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 		ReachabilityParameters& reach_parameters, int bound,
 		unsigned int Algorithm_Type, unsigned int Total_Partition,
 		int lp_solver_type_choosen, unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU);

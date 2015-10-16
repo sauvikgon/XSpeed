@@ -24,15 +24,28 @@
  *
  */
 
-#ifndef NAVIGATIONBENCHMARK_H_
-#define NAVIGATIONBENCHMARK_H_
+#ifndef NAVIGATIONBENCHMARK4Var_H_
+#define NAVIGATIONBENCHMARK4Var_H_
 
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "core_system/symbolic_states/symbolic_states.h"
 
-void SetNavigationBenchMark(hybrid_automata& Hybrid_Automata,
+void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 		symbolic_states& initial_symbolic_state,
 		ReachabilityParameters& reach_parameters);
 
-#endif /* NAVIGATIONBENCHMARK_H_ */
+//Only the desired-velocities of  Loc 3 and Loc 4 have been changed
+void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
+		symbolic_states& initial_symbolic_state,
+		ReachabilityParameters& reach_parameters);
+
+/*
+ * Only the desired-velocities of  Loc 1, Loc 2, Loc 3 and Loc 4 have been changed
+ * Standard model used by most researchers by the Model name : NAV04
+ */
+void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
+		symbolic_states& initial_symbolic_state,
+		ReachabilityParameters& reach_parameters);
+
+#endif /* NAVIGATIONBENCHMARK4Var_H_ */
