@@ -31,6 +31,7 @@ struct AllDirection {
 	unsigned int loop_no;	//loop/iteration number
 	std::vector<double> B_trans_dir_previous;		//absence in Loop 1
 	std::vector<double> direction;					// common in all loop
+	std::vector<double> direction1;					// common in all loop
 	std::vector<double> Phi_trans_dir;				// common in all loop
 	std::vector<double> B_trans_dir;				// common in all loop
 };

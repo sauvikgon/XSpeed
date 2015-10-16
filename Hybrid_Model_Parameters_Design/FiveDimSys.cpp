@@ -17,8 +17,11 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	polytope::ptr gaurd_polytope;
 	Dynamics system_dynamics;
 
-	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV, invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix, Bmatrix;
-	std::vector<double> boundValueI, boundValueV, invariantBoundValue, gaurdBoundValue;
+	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
+			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
+			Bmatrix;
+	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
+			gaurdBoundValue;
 	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
 
 	size_type row, col;
@@ -103,7 +106,8 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	boundSignI = 1;
 
 //	initial_polytope_I.setPolytope(ConstraintsMatrixI, boundValueI,boundSignI);
-	initial_polytope_I = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+	initial_polytope_I = polytope::ptr(
+			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
 	row = 5;
 	col = 5;
@@ -140,13 +144,12 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 
 //row= ;	col=
 	Bmatrix.resize(row, col);
-	for (unsigned int i=0;i<row;i++)
-		for (unsigned int j=0;j<col;j++)
-			if (i==j)
-				Bmatrix(i,j)=1;
+	for (unsigned int i = 0; i < row; i++)
+		for (unsigned int j = 0; j < col; j++)
+			if (i == j)
+				Bmatrix(i, j) = 1;
 			else
-				Bmatrix(i,j)=0;
-
+				Bmatrix(i, j) = 0;
 
 	//  * here polytope U == 0
 	row = 10;
@@ -226,22 +229,23 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 
 	boundSignV = 1;
 
-	invariant = polytope::ptr(new polytope());	//creating an universe polytope
+	invariant = polytope::ptr(new polytope()); //creating an universe polytope
 	invariant->setIsEmpty(true);
 	invariant->setIsUniverse(true);
 
 	system_dynamics.MatrixB = Bmatrix;
 	system_dynamics.MatrixA = Amatrix;
-	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
+	system_dynamics.U = polytope::ptr(
+			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 //	Dynamics Initalised ---------------------
 
-	transitions trans;	//empty transition
+	transitions trans; //empty transition
 	location source;
 	source.setLocId(1);
 	source.setName("Round_Figure");
 	source.setSystem_Dynamics(system_dynamics);
 	source.setInvariant(invariant);
-	source.setInvariantExists(false);	//no invariant available
+	source.setInvariantExists(false); //no invariant available
 	source.add_Out_Going_Transitions(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
@@ -251,17 +255,10 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.setDimension(dim);
 
 	discrete_set d_set;
-	d_set.insert_element(1);		//the initial Location ID
+	d_set.insert_element(1); //the initial Location ID
 
 	initial_symbolic_state.setDiscreteSet(d_set);
 	initial_symbolic_state.setContinuousSet(initial_polytope_I);
-
-
-
-
-
-
-
 
 }
 

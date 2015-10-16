@@ -24,6 +24,7 @@
 
 std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 		ReachabilityParameters& reach_parameters, int bound,
-		unsigned int Algorithm_Type, unsigned int Total_Partition, int lp_solver_type_choosen);
+		unsigned int Algorithm_Type, unsigned int Total_Partition,
+		int lp_solver_type_choosen, unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU);
 
 #endif /* REACHABILITY_HYBRIDAUTOMATA_H_ */

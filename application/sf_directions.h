@@ -12,6 +12,7 @@
 #include <vector>
 #include "application/DataStructureDirections.h"
 #include "application/CopyArray.h"
+#include <list>
 //#include "matrixOperation.h"
 
 /**
@@ -43,8 +44,17 @@ std::vector<AllDirection> get_DirectionList(
 /*
  * Generate two lists ie list1 and list2 of matrix of directions for X0 and U for computing SF using GPU
  */
-void getDirectionList_X0_and_U(std::vector<AllDirection> &directionList,
+void getDirectionList_X0_and_U_OLD(std::vector<AllDirection> &directionList,
 		unsigned int numDirections, unsigned int TotalIterations,
 		math::matrix<float> &list1, math::matrix<float> &list2);
+
+void getDirectionList_X0_and_U(ReachabilityParameters &ReachParameters,
+		unsigned int newiters, math::matrix<float> &list_X0,
+		math::matrix<float> &list_U, bool U_empty);
+
+void getDirectionList_X0_and_U_OnlyForGLPK(
+		ReachabilityParameters &ReachParameters, unsigned int newiters,
+		std::list<std::vector<double> > &list_X0,
+		std::list<std::vector<double> > &list_U, bool U_empty);
 
 #endif /* SF_DIRECTIONS_H_ */

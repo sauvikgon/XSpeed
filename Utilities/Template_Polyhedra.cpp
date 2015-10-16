@@ -127,6 +127,7 @@ polytope template_polyhedra::getPolytope(unsigned int Iterations_Number) {
 	p.setColumnVector(boundValue);
 	p.setInEqualitySign(1);	//Ax<=b		0 for = sign, 1 for <= sign and 2 for >= sign
 //	cout<<"4 INSIDE .....loop inside inside = "<<boundValue[9] <<"\n";
+
 	return p;
 }
 
@@ -160,13 +161,7 @@ const std::list<template_polyhedra> template_polyhedra::polys_intersection(
 		 * from the reach_region that is the calling template_polyhedra
 		 * add the invariant constraint and bound_value to p
 		 */
-
-
-
 		p.setMoreConstraints(this->getInvariantDirections(),constraint_bound_values);
-
-
-
 
 		//		cout<<"4 = INSIDE POLYTOPE OBTAINED FROM SUPPORTMATRIX/TEMPLATE_POLYHEDRA\n";
 

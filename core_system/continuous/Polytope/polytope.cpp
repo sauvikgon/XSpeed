@@ -61,8 +61,8 @@ polytope::polytope(math::matrix<double> coeffMatrix,
 	//lp.setConstraints(coeffMatrix, columnVector,InEqualitySign);
 }
 
-void polytope::setPolytope(const math::matrix<double> coeffMatrix,
-		const std::vector<double> columnVector, int inEqualitySign) {
+void polytope::setPolytope( math::matrix<double> coeffMatrix,
+		 std::vector<double> columnVector, int inEqualitySign) {
 	//this->setCoeffMatrix(coeffMatrix);
 	this->setNumberFacets(coeffMatrix.size1());
 	this->setSystemDimension(coeffMatrix.size2());
@@ -157,7 +157,7 @@ void polytope::setColumnVector(const std::vector<double> columnVector) {
 	this->columnVector = columnVector;
 	this->setNumberFacets(columnVector.size());
 }
-const std::vector<double> polytope::getColumnVector() const {
+std::vector<double> polytope::getColumnVector() {
 	return columnVector;
 }
 

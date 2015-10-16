@@ -82,15 +82,16 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 	scalar_type norm_A = system_dynamics.MatrixA.norm_inf();
 //	cout<<"\nInside Testing MatrixA norm = "<<norm_A<<endl;
 	double I_max_norm = I->max_norm(lp_solver_type_choosen);//R_X_o ie max_norm of the Initial polytope
-//	cout << "\nInside Testing I.max_norm = " << I_max_norm << endl;
+	cout << "\nInside Testing I.max_norm = " << I_max_norm << endl;
 
 	math::matrix<scalar_type> Btrans;
 	system_dynamics.MatrixB.transpose(Btrans);
 	supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 			new transMinkPoly(system_dynamics.U, Btrans));
+	cout<<"\nSuccessfull Test 1\n";
 	double V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
 	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U
-//	cout<<"\nInside Testing V_max_norm = "<<V_max_norm <<endl;
+	cout<<"\nInside Testing V_max_norm = "<<V_max_norm <<endl;
 	scalar_type result = (exp(tau * norm_A) - 1 - tau * norm_A)
 			* (I_max_norm + (V_max_norm / norm_A));
 //	cout<<"\nAlfa = "<<(double)result<<endl;

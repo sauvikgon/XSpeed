@@ -6,6 +6,8 @@
 // Description : Trying to implement Support Function
 //============================================================================
 
+// Working Version of XSpeedLocal but without parallelization of Breadth First Search for the Hybrid Automata.
+
 #include <iostream>
 #include <fstream>
 //#include <cstdlib>
@@ -37,7 +39,8 @@
  */
 #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
 #include "Hybrid_Model_Parameters_Design/FiveDimSys.h"
-#include "Hybrid_Model_Parameters_Design/NavigationBenchmark.h"
+//#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark.h"
+#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_FourLocation.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
@@ -147,14 +150,18 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 				reach_parameters);
 		//	std::cout << "\nParameter Assignment Completed!!!\n";
 	}
+
 	if (HybridSystem_Model_Type == NAVIGATION) {
 		//dim = 2;
 		//	std::cout << "\nRunning :: Benchmark Model of A Navigation\n";
 		//Setting the initial parameters for Bouncing Ball Model
-		SetNavigationBenchMark(Hybrid_Automata, initial_symbolic_states,
-				reach_parameters);
+		//SetNavigationBenchMark(Hybrid_Automata, initial_symbolic_states,reach_parameters);	//Using only 2 Variable
+		SetNavigationBenchMark4Var(Hybrid_Automata, initial_symbolic_states,reach_parameters);
 		//	cout<<"\nTesting 2 b\n";
 	}
+
+
+
 	if (HybridSystem_Model_Type == CIRCLE) {
 		//dim = 2;
 		//std::cout << "\nRunning :: Model of A CIRCLE 2 Dimensional Systems\n";
@@ -217,27 +224,33 @@ int main(int argc, char *argv[]) {
 	//cout<<"Started from here\n";
 	double time_bound;
 	unsigned int model_type, iterations_size, directions_type_or_size,
-			transition_size, Algorithm_Type;
-	int number_of_times = 1;		//Make this 1 for Memory Profiling
-
+			transition_size;
+	int Algorithm_Type;
+	int number_of_times = 10;		//Make this 1 for Memory Profiling
+	unsigned int number_of_streams = 1;
 	int lp_solver_type_choosen = 1;	//	1 for GLPK and 2 for Gurobi
-
+	int Solver_GLPK_Gurobi_GPU;	//if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
 	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
 
 	if (argc == 1) { //No argument or Running directly from the Eclipse Editor
 		//(1,2,3,4,5,6,7,8) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE,CIRCLE_FOUR_LOCATION, CIRCLE_ONE_LOC)
-		model_type = 3;
+		model_type = 5;
 		directions_type_or_size = 1;	//(1,2,>2) = (BOX, OCT, UNIFORM)
 		iterations_size = 1000;	//number of iterations
-		time_bound = 5;
-		transition_size = 1; //Number of iterations for transition of the Hybrid system
+		time_bound = 8;	//This is Local Time Horizon
+		transition_size = 3; //Number of iterations for transition of the Hybrid system
 		//Algorithms-Value(1,2,3,4,5,6,7,8,9,10,11)
 		//(SEQ,PAR_OMP,PAR_PROCESS,PAR_ITER,PAR_ITER_DIR,PAR_BY_PARTS,PAR_BY_PARTS_ITERS,SAME_DIRS, GPU_MULTI_SEQ,GPU_SF)
-		Algorithm_Type = 11;
-		Total_Partition = 1000; //maximum value = iterations_size (so that each partition will have at least 1 omega to be computed)
-		lp_solver_type_choosen = 1;
-	//	cout << "\nRunning Testing 1\n";
+		Algorithm_Type = 1;
+		Total_Partition = 16; //maximum value = iterations_size (so that each partition will have at least 1 omega to be computed)
+		number_of_streams = 1;	//Number of streams in GPU(division)
+		lp_solver_type_choosen = 1;	//For the entire Tool
+		number_of_times = 1;		//Make this 1 for Memory Profiling
+		Solver_GLPK_Gurobi_GPU = 3;	//if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
+
+		cout << "\nRunning Testing 1\n";
 	}
+
 	if (argc > 1) {
 		/*
 		 std::cout << "argc = "<<argc<<std::endl;
@@ -250,7 +263,7 @@ int main(int argc, char *argv[]) {
 		 std::cout << "argv[7] = "<<argv[7]<<std::endl;
 		 */
 
-		if (argc != 8) {		//1(ApplicationName) + 7 (Input Arguments)
+		if (argc != 11) {		//1(ApplicationName) + 10 (Input Arguments)
 			std::cout << "\nInsufficient Number of Arguments!!!\n";
 			std::cout << "Correct Usages/Syntax:\n";
 			std::cout
@@ -268,6 +281,11 @@ int main(int argc, char *argv[]) {
 					<< "\n6. Algorithm_Type :(1,2,3,4) = (SEQ, PAR_OMP, PAR_PROCESS, PAR_ITER)\n";
 			std::cout
 					<< "\n7. Total_Partition :Total number of partitions required for Parallel_Iteration_Algorithm\n";
+
+			std::cout<< "\n8. Total_GPU_Streams :Total number of GPU Streams or partitions\n";
+
+			std::cout<< "\n9. Averaging :Total number of times you want to run the algorithm to average the readings\n";
+			std::cout<< "\n10. Solver_GLPK_Gurobi_GPU :If Algorithm==11 then (Solver = 1 for GLPK; = 2 for Gurobi; = 3 for GPU)\n";
 			std::cout << endl;
 			return 0;
 
@@ -277,16 +295,15 @@ int main(int argc, char *argv[]) {
 			model_type = num;
 			directions_type_or_size = boost::lexical_cast<unsigned int>(
 					argv[2]);
-			;
 			iterations_size = boost::lexical_cast<unsigned int>(argv[3]);
-			;
 			double val = boost::lexical_cast<double>(argv[4]);
 			time_bound = val;
 			transition_size = boost::lexical_cast<unsigned int>(argv[5]);
-			;
 			Algorithm_Type = boost::lexical_cast<unsigned int>(argv[6]);
-			;
 			Total_Partition = boost::lexical_cast<unsigned int>(argv[7]);
+			number_of_streams = boost::lexical_cast<unsigned int>(argv[8]);
+			number_of_times = boost::lexical_cast<unsigned int>(argv[9]);
+			Solver_GLPK_Gurobi_GPU = boost::lexical_cast<unsigned int>(argv[10]);
 		}
 
 	}
@@ -315,34 +332,44 @@ int main(int argc, char *argv[]) {
 	for (int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		tt1.start();
 //cout<<"\nTesting 3\n";
-		//cout<<"\n Before reach call\n";
+		//cout<<"\n Before reach call\n";		
 		reachability_sfm = reach(Hybrid_Automata, initial_symbolic_states,
 				reach_parameters, transition_iterations, Algorithm_Type,
-				Total_Partition, lp_solver_type_choosen);
+				Total_Partition, lp_solver_type_choosen, number_of_streams, Solver_GLPK_Gurobi_GPU);
 //cout<<"\nTesting 4\n";
 		tt1.stop();
 
-		double wall_clock, user_clock, system_clock;
+		double wall_clock, user_clock, system_clock;		
 		wall_clock = tt1.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		user_clock = tt1.elapsed().user / 1000000;
 		system_clock = tt1.elapsed().system / 1000000;
-
-		Avg_wall_clock = Avg_wall_clock + wall_clock;
-		Avg_user_clock = Avg_user_clock + user_clock;
-		Avg_system_clock = Avg_system_clock + system_clock;
-
-		//glpk_lp_solver::free_environment_glpk_lp_solver(); //for next round for Average_Record
-
+		if (Algorithm_Type == 11){	
+		//11 is GPU:: First execution of GPU includes warm-up time, so this time should not be included for averaging
+			if (i==1){	//first run for averaging
+				continue;	//do not include time here
+			} 
+			Avg_wall_clock = Avg_wall_clock + wall_clock;
+			Avg_user_clock = Avg_user_clock + user_clock;
+			Avg_system_clock = Avg_system_clock + system_clock;
+		}else{	//Average all runs
+			Avg_wall_clock = Avg_wall_clock + wall_clock;
+			Avg_user_clock = Avg_user_clock + user_clock;
+			Avg_system_clock = Avg_system_clock + system_clock;
+		}				
 	}
-
 //	total_mem_used = getCurrentProcess_PhysicalMemoryUsed();
-
 	/*std::cout<<"\nSize = "<<reachability_sfm.size()<<"\n";
 	 std::cout<<"\nSize max_size = "<<reachability_sfm.max_size()<<"\n";*/
-	Avg_wall_clock = Avg_wall_clock / number_of_times;
-	Avg_user_clock = Avg_user_clock / number_of_times;
-	Avg_system_clock = Avg_system_clock / number_of_times;
-
+	if (Algorithm_Type == 11){
+		Avg_wall_clock = Avg_wall_clock / (number_of_times - 1);
+		Avg_user_clock = Avg_user_clock / (number_of_times - 1);
+		Avg_system_clock = Avg_system_clock / (number_of_times - 1);
+	}else{
+		Avg_wall_clock = Avg_wall_clock / number_of_times;
+		Avg_user_clock = Avg_user_clock / number_of_times;
+		Avg_system_clock = Avg_system_clock / number_of_times;
+	}
+	
 	std::cout << std::fixed;	//to assign precision on the std::output stream
 	std::cout.precision(7);			//cout << setprecision(17);
 	double return_Time = Avg_wall_clock / (double) 1000;

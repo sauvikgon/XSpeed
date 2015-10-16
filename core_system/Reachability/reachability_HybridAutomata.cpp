@@ -10,6 +10,7 @@
 #include "application/All_PP_Definition.h"
 #include "core_system/Reachability/reachabilitySequential_GPU_MatrixVector_Multiply.cuh"
 #include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
+#include "boost/timer/timer.hpp"
 
 //bound is the maximum number of transitions or jumps permitted.
 //reach_parameters includes the different parameters needed in the computation of reachability.
@@ -25,7 +26,8 @@
 std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 		ReachabilityParameters& reach_parameters, int bound,
 		unsigned int Algorithm_Type, unsigned int Total_Partition,
-		int lp_solver_type_choosen) {
+		int lp_solver_type_choosen, unsigned int number_of_streams,
+		int Solver_GLPK_Gurobi_GPU) {
 //	std::cout<<"Algorithm_Type = "<<Algorithm_Type<<std::endl;
 	std::list<template_polyhedra> Reachability_Region;
 	template_polyhedra reach_region;
@@ -74,7 +76,7 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 			continue; //do not compute the continuous reachability algorithm
 
 		//current_location = H.getLocation(name);
-//			cout<<"\nTesting 2 a 8 \n";
+			cout<<"\nTesting 2 a 8 \n";
 		//Convert string to number
 		//int value = boost::lexical_cast<int>(str);
 
@@ -96,7 +98,7 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 
 		//	cout << "\nReach_Parameters.time_step = " << reach_parameters.time_step << endl;
 		//			cout << "\n1st Compute Alfa = " << result_alfa << endl;
-//			cout<<"\nTesting 2 c\n";
+			cout<<"\nTesting 2 c\n";
 		double result_beta = compute_beta(current_location.getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
 		//		cout << "\n1st Compute Beta = " << result_beta << endl;
@@ -155,14 +157,20 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 			//		std::cout<<"\nBefore entering reachability Sequential = " << gurobi_lp_solver::gurobi_lp_count;
 			//		std::cout<<"\nBefore entering reachability Sequential = " << lp_solver::lp_solver_count;
 //			int a;			std::cin>>a;
+			boost::timer::cpu_timer AllReach_time;
+			AllReach_time.start();
 			reach_region = reachabilitySequential(
 					current_location.getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location.getInvariant(),
 					current_location.isInvariantExists(),
 					lp_solver_type_choosen);
-			//		std::cout << "\nAfter exit from reachability Sequential = " << gurobi_lp_solver::gurobi_lp_count;
-			//		std::cout << "\nAfter exit from reachability Sequential = " << lp_solver::lp_solver_count;
+			AllReach_time.stop();
+			double wall_clock1;
+			wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+			double return_Time1 = wall_clock1 / (double) 1000;
+			std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
+					<< return_Time1 << std::endl;
 		}
 
 		if (Algorithm_Type == PAR_OMP) {
@@ -180,16 +188,27 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 
 		if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 			cout << "\nRunning GPU Sequential\n";
+			boost::timer::cpu_timer AllReachGPU_time;
+			AllReachGPU_time.start();
 			reach_region = reachabilitySequential_GPU(
 					current_location.getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location.getInvariant(),
 					current_location.isInvariantExists(),
-					lp_solver_type_choosen);
+					lp_solver_type_choosen, number_of_streams,
+					Solver_GLPK_Gurobi_GPU);
+			AllReachGPU_time.stop();
+			double wall_clock1;
+			wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+			double return_Time1 = wall_clock1 / (double) 1000;
+			std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
+					<< return_Time1 << std::endl;
+
 		}
 
 		if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
-			cout << "\nRunning Parallel-over-Iterations(PARTITIONS) Using OMP Thread\n";
+			cout
+					<< "\nRunning Parallel-over-Iterations(PARTITIONS) Using OMP Thread\n";
 			bool invertible;
 			math::matrix<double> A_inv(
 					current_location.getSystem_Dynamics().MatrixA.size1(),
@@ -311,7 +330,7 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 				current_location.getOut_Going_Transitions().begin();
 				t != current_location.getOut_Going_Transitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
 			if ((*t).getTransitionId() == -1) //Indicates empty transition or no transition exists
-				break; //out from transition for-loop as there is no transtion for this location
+				break; //out from transition for-loop as there is no transition for this location
 			location current_destination;
 			Assign current_assignment;
 			polytope::ptr gaurd_polytope;
@@ -403,8 +422,7 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 		} //end of multiple transaction
 		  //	cout << "\nLocation Name 3 = " << name << "\n";
 		number_times++;
-		if (number_times >= bound)
-
+		if (number_times >= bound)	//check to see how many jumps have been made(i.e., number of discrete transitions made)
 			break;
 		//}	//end-of Number of transition's Loop
 	} //end of while loop checking waiting_list != empty

@@ -15,7 +15,8 @@
 
 using namespace std;
 /*
- * Combination of the matrices All_Directions and Matrix_SupportFunction consists of all the reachable set of only one flow-pipe.
+ * Combination of the matrices All_Directions and
+ * Matrix_SupportFunction consists of all the reachable set of only one flow-pipe.
  * getPolytope :
  *
  *

@@ -294,8 +294,9 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 			//res1 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,	s_per_thread_U, s_per_thread_U, Min_Or_Max);
 			result1 = term2;		//replacement--optimizing
 			double beta = ReachParameters.result_beta;
-			double res_beta = beta
-					* (double) support_unitball_infnorm(rVariable);
+			//double res_beta = beta	* (double) support_unitball_infnorm(rVariable);
+			double res_beta = beta	* term3b;	//replace from Previous step UnitBall
+
 			result = result1 + res_beta;
 			zV = result;
 			//  **************  W_Support Function Over  ********************
@@ -306,7 +307,7 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 			//  **************    Omega Function   ********************
 			//res1 = Initial->computeSupportFunction(r1Variable, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 			res1 = term1;	//replacement--optimizing
-			double term3, term3a, term3b, res2;
+			double term3, term3a, res2;
 			phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
 			term1 = Initial->computeSupportFunction(phi_trans_dir,
 					s_per_thread_I, s_per_thread_U, Min_Or_Max);

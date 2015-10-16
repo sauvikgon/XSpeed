@@ -60,281 +60,165 @@ std::vector<std::vector<double> > get_octagonal_directions(unsigned int dim) {
 	return mydirs;
 }
 
-//iters : required as the iteration size may change due to invariant check
-std::vector<D> get_directions(ReachabilityParameters reach_parameter,
-		unsigned int iters) {
-
-	int facet_dimension = reach_parameter.Directions.size2(); //the dimension of the System
-	unsigned int number_of_facet = reach_parameter.Directions.size1(); //number of directions
-
-	std::vector<D> AllDirect;
-
-	for (unsigned int eachDirection = 0; eachDirection < number_of_facet;
-			eachDirection++) {
-		std::vector<double> rVariable, r1Variable;
-		r1Variable.resize(facet_dimension);
-		rVariable.resize(facet_dimension);
-		// ******* First direction of the iteration *******
-		unsigned int loopIteration = 0;
-		struct D newDirection1;
-		newDirection1.v.resize(facet_dimension);
-		for (int i = 0; i < facet_dimension; i++) {
-			rVariable[i] = reach_parameter.Directions(eachDirection, i);
-			newDirection1.v[i] = rVariable[i]; //initial direction of the iteration
-		}
-		//newDirection1.v = rVariable	//this might work
-		newDirection1.flag_I = UNSOLVED; //UNSOLVED =0
-		newDirection1.flag_V = UNSOLVED; //UNSOLVED =0
-		newDirection1.C = loopIteration;
-		newDirection1.R = eachDirection;
-		AllDirect.push_back(newDirection1);
-		//for (loopIteration = 1; loopIteration < reach_parameter.Iterations; loopIteration++) {
-		for (loopIteration = 1; loopIteration < iters; loopIteration++) {
-			reach_parameter.phi_trans.mult_vector(rVariable, r1Variable);
-			struct D newDirection;
-			newDirection.v.resize(facet_dimension);
-			for (int x = 0; x < facet_dimension; x++) {
-				newDirection.v[x] = r1Variable[x]; //initialize the directions
-			}
-			//newDirection.v = r1Variable;	//this might work
-			newDirection.flag_I = UNSOLVED; //UNSOLVED =0
-			newDirection.flag_V = UNSOLVED; //UNSOLVED =0
-			newDirection.C = loopIteration;
-			newDirection.R = eachDirection;
-			AllDirect.push_back(newDirection);
-			rVariable = CopyVector(r1Variable); //source to destination
-			//rVariable = r1Variable;		//might work
-		}
-	}
-	return AllDirect;
-}
-
 /*
- * Creates all the list of directions for computing support function using GPU
+ * Directly generating separate Direction List for polytope -- X0 and U
+ * Optimising the Computation within the Loop to avoid duplicate directions at the same time
+ *
+ * Now making the index suitable for parallelizing using #pragma OMP parallel for each numVectors
  */
-/*
-std::vector<AllDirection> get_DirectionList(
-		ReachabilityParameters &ReachParameters, unsigned int newiters) {
+void getDirectionList_X0_and_U(ReachabilityParameters &ReachParameters,
+		unsigned int newiters, math::matrix<float> &list_X0,
+		math::matrix<float> &list_U, bool U_empty) {
+
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = ReachParameters.Directions.size2();
-	unsigned int index = 0, total_dirs = numVectors * newiters;
-	std::vector<AllDirection> Direction_List(total_dirs);
+
 	math::matrix<double> B_trans, phi_tau_Transpose;
 	B_trans = ReachParameters.B_trans;
 	phi_tau_Transpose = ReachParameters.phi_trans;
-	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
-		std::vector<double> rVariable(dimension), r1Variable(dimension); //now single dimension
-		for (int i = 0; i < dimension; i++) {
-			rVariable[i] = ReachParameters.Directions(eachDirection, i);
-		}
-		unsigned int loopIteration = 0;
-		// ********** Omega's Directions  **********************
-		Direction_List[index].direction = rVariable;
-		std::vector<double> phi_trans_dir, B_trans_dir;
-		phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
-		Direction_List[index].Phi_trans_dir = phi_trans_dir;
-		B_trans.mult_vector(rVariable, B_trans_dir);
-		Direction_List[index].B_trans_dir = B_trans_dir;
-
-		Direction_List[index].dir_no = eachDirection;
-		Direction_List[index].loop_no = loopIteration;
-		index++;
-		// ********** Omega's Directions End **********************
-		loopIteration++;
-		for (; loopIteration < newiters;) { //Now stopping condition is only "shm_NewTotalIteration"
-			ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);
-			// ********** W_Support's Directions  **********************
-			std::vector<double> Btrans_dir;
-			B_trans.mult_vector(rVariable, Btrans_dir);
-			Direction_List[index].B_trans_dir_previous = Btrans_dir;
-			// ********** W_Support's Directions End **********************
-			// ********** Omega's Directions  **********************
-			Direction_List[index].direction = r1Variable;
-			std::vector<double> phi_trans_dir1, B_trans_dir1;
-			phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir1);
-			Direction_List[index].Phi_trans_dir = phi_trans_dir1;
-			B_trans.mult_vector(r1Variable, B_trans_dir1);
-			Direction_List[index].B_trans_dir = B_trans_dir1;
-
-			Direction_List[index].dir_no = eachDirection;
-			Direction_List[index].loop_no = loopIteration;
-			index++;
-			// ********** Omega's Directions End **********************
-			rVariable = CopyVector(r1Variable); //source to destination
-			loopIteration++; //for the next iteration
-		} //end of iteration for each direction
-	} //end of all directions
-	return Direction_List;
-}
-*/
-/*
- * Optimising the Computation within the Loop to avoid duplicate directions
- */
-std::vector<AllDirection> get_DirectionList(
-		ReachabilityParameters &ReachParameters, unsigned int newiters) {
-	int numVectors = ReachParameters.Directions.size1();
-	int dimension = ReachParameters.Directions.size2();
-	unsigned int index = 0, total_dirs = numVectors * newiters;
-	std::vector<AllDirection> Direction_List(total_dirs);
-	math::matrix<double> B_trans, phi_tau_Transpose;
-	B_trans = ReachParameters.B_trans;
-	phi_tau_Transpose = ReachParameters.phi_trans;
-	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
-		std::vector<double> rVariable(dimension), r1Variable(dimension); //now single dimension
-		for (int i = 0; i < dimension; i++) {
-			rVariable[i] = ReachParameters.Directions(eachDirection, i);
-		}
-		unsigned int loopIteration = 0;
-		// ********** Omega's Directions  **********************
-		Direction_List[index].direction = rVariable;
-		std::vector<double> phi_trans_dir, B_trans_dir;
-		phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
-		Direction_List[index].Phi_trans_dir = phi_trans_dir;
-		B_trans.mult_vector(rVariable, B_trans_dir);
-		Direction_List[index].B_trans_dir = B_trans_dir;
-
-		Direction_List[index].dir_no = eachDirection;
-		Direction_List[index].loop_no = loopIteration;
-		index++;
-		// ********** Omega's Directions End **********************
-		loopIteration++;
-		for (; loopIteration < newiters;) { //Now stopping condition is only "shm_NewTotalIteration"
-	//		ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);	//replacement from previous step
-			r1Variable = phi_trans_dir;	//direct replacement from previous computation
-			// ********** W_Support's Directions  **********************
-	//		std::vector<double> Btrans_dir;
-	//		B_trans.mult_vector(rVariable, Btrans_dir);
-	//		Direction_List[index].B_trans_dir_previous = Btrans_dir;	//replacement from previous step
-			// ********** W_Support's Directions End **********************
-
-			// ********** Omega's Directions  **********************
-		//	Direction_List[index].direction = r1Variable;		//replacement from previous step
-			std::vector<double> phi_trans_dir1, B_trans_dir1;
-			phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
-			Direction_List[index].Phi_trans_dir = phi_trans_dir;
-			B_trans.mult_vector(r1Variable, B_trans_dir1);
-			Direction_List[index].B_trans_dir = B_trans_dir1;
-
-			Direction_List[index].dir_no = eachDirection;
-			Direction_List[index].loop_no = loopIteration;
-			index++;
-			// ********** Omega's Directions End **********************
-			rVariable = CopyVector(r1Variable); //source to destination
-			loopIteration++; //for the next iteration
-		} //end of iteration for each direction
-	} //end of all directions
-	return Direction_List;
-}
-
-
-
-//Computing list of all directions seperately for polytope X0 and U
-/*
-void getDirectionList_X0_and_U(std::vector<AllDirection> &directionList,
-		unsigned int numDirections, unsigned int TotalIterations,
-		math::matrix<float> &list_X0, math::matrix<float> &list_U) {
-	unsigned int index = 0, loop = 0, index_X0 = 0, index_U = 0;
-	unsigned int total_list_X0 = list_X0.size1(); //total number of directions for X0 is [ numDirs * 2 * iters ]
-	unsigned int total_list_U = list_U.size1(); //total number of directions for U is [ numDirs * ((2 * iters)-1) ]
-	std::vector<double> tempdir;
-
-	for (unsigned int i = 0; i < numDirections; i++) {
-		loop = 0;
-		tempdir = directionList[index].direction; //need to verify
-		for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-			list_X0(index_X0, x) = (float) tempdir[x];
-		}
-		index_X0++; //for next entry
-		tempdir = directionList[index].Phi_trans_dir;
-		for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-			list_X0(index_X0, x) = (float) tempdir[x];
-		}
-		index_X0++; //for next entry
-		tempdir = directionList[index].B_trans_dir;
-		for (unsigned int x = 0; x < list_U.size2(); x++) { //dimension of direction
-			list_U(index_U, x) = (float) tempdir[x];
-		}
-		index_U++; //for next entry
-		index++;
-		loop++;
-		for (; loop < TotalIterations;) {
-			tempdir = directionList[index].B_trans_dir_previous;
-			for (unsigned int x = 0; x < list_U.size2(); x++) { //dimension of direction
-				list_U(index_U, x) = (float) tempdir[x];
-			}
-			index_U++; //for next entry
-
-			tempdir = directionList[index].direction; //need to verify
-			for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-				list_X0(index_X0, x) = (float) tempdir[x];
-			}
-			index_X0++; //for next entry
-			tempdir = directionList[index].Phi_trans_dir;
-			for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-				list_X0(index_X0, x) = (float) tempdir[x];
-			}
-			index_X0++; //for next entry
-			tempdir = directionList[index].B_trans_dir;
-			for (unsigned int x = 0; x < list_U.size2(); x++) { //dimension of direction
-				list_U(index_U, x) = (float) tempdir[x];
-			}
-			index_U++; //for next entry
-			index++;
-			loop++;
-		} //end of iterations
-	} //end of all directions
-//	if ((index_X0 == total_list_X0) && (index_U == total_list_U)) {
-//		std::cout << "Directions for GPU computation correctly assigned\n";
-//	}
-}
-*/
-
-/*
- * Optimising the list of all direction for Polytope X0 and U after removing the duplicate.
- */
-void getDirectionList_X0_and_U(std::vector<AllDirection> &directionList,
-		unsigned int numDirections, unsigned int TotalIterations,
-		math::matrix<float> &list_X0, math::matrix<float> &list_U) {
-	unsigned int index = 0, loop = 0, index_X0 = 0, index_U = 0;
 	unsigned int total_list_X0 = list_X0.size1(); //total number of directions for X0 is [ numDirs * (iters+1) ]
 	unsigned int total_list_U = list_U.size1(); //total number of directions for U is [ numDirs * iters ]
-	std::vector<double> tempdir;
 
-	for (unsigned int i = 0; i < numDirections; i++) {
-		loop = 0;
-		tempdir = directionList[index].direction; //need to verify
+#pragma omp parallel for
+	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
+		unsigned int index_X, indexU; //making the index suitable for parallelizing
+		if (!U_empty) {
+			indexU = eachDirection * newiters;
+		}
+		if (eachDirection == 0) { //only starting loop begins with 0
+			index_X = eachDirection * newiters;
+		} else { //
+			index_X = eachDirection * newiters + eachDirection; //only X0(list_X0) has 2 directions for first-iter
+		}
+		std::vector<double> rVariable(dimension), r1Variable(dimension); //now single dimension
+		for (int i = 0; i < dimension; i++) {
+			rVariable[i] = ReachParameters.Directions(eachDirection, i);
+			list_X0(index_X, i) = (float) rVariable[i];
+		}
+		index_X++; //1st
+		unsigned int loopIteration = 0;
+		// ********** Omega's Directions  **********************
+		std::vector<double> phi_trans_dir, B_trans_dir;
+		phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
+
+		if (!U_empty) {	//if not only than will be required to multiply
+			B_trans.mult_vector(rVariable, B_trans_dir);
+		}
+		//std::cout << index_X0 << " ";
 		for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-			list_X0(index_X0, x) = (float) tempdir[x];
+			list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
+			if (!U_empty) {	//if not only than will be required to multiply
+				list_U(indexU, x) = (float) B_trans_dir[x]; //optimizing in a single loop
+			}
 		}
-		index_X0++; //for next entry
-		tempdir = directionList[index].Phi_trans_dir;
-		for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-			list_X0(index_X0, x) = (float) tempdir[x];
+		index_X++; //2nd
+		if (!U_empty) {	//if not only than will be required to multiply
+			indexU++; //for next entry
 		}
-		index_X0++; //for next entry
-		tempdir = directionList[index].B_trans_dir;
-		for (unsigned int x = 0; x < list_U.size2(); x++) { //dimension of direction
-			list_U(index_U, x) = (float) tempdir[x];
-		}
-		index_U++; //for next entry
-		index++;
-		loop++;
-		for (; loop < TotalIterations;) {
-			tempdir = directionList[index].Phi_trans_dir;
+
+		// ********** Omega's Directions End **********************
+		loopIteration++;
+		for (; loopIteration < newiters;) { //Now stopping condition is only "shm_NewTotalIteration"
+			//		ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);	//replacement from previous step
+			r1Variable = phi_trans_dir; //direct replacement from previous computation
+
+			// ********** W_Support's Directions  **********************
+			//		std::vector<double> Btrans_dir;
+			//		B_trans.mult_vector(rVariable, Btrans_dir);	//replacement from previous step
+			// ********** W_Support's Directions End **********************
+			// ********** Omega's Directions  **********************
+			std::vector<double> B_trans_dir1;
+			phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
+			if (!U_empty) {	//if not only than will be required to multiply
+				B_trans.mult_vector(r1Variable, B_trans_dir1);
+			}
 			for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-				list_X0(index_X0, x) = (float) tempdir[x];
+				list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
+				if (!U_empty) {	//if not only than will be required to multiply
+					list_U(indexU, x) = (float) B_trans_dir1[x]; //optimizing in a single loop
+				}
 			}
-			index_X0++; //for next entry
-			tempdir = directionList[index].B_trans_dir;
-			for (unsigned int x = 0; x < list_U.size2(); x++) { //dimension of direction
-				list_U(index_U, x) = (float) tempdir[x];
+			index_X++;	//for next entry
+			if (!U_empty) {	//if not only than will be required to multiply
+				indexU++; //for next entry
 			}
-			index_U++; //for next entry
-			index++;
-			loop++;
-		} //end of iterations
+
+			// ********** Omega's Directions End **********************
+			rVariable = CopyVector(r1Variable); //source to destination
+			loopIteration++; //for the next iteration
+		} //end of iteration for each direction
+		  //std::cout<<"Over eachDirection = "<< eachDirection<<std::endl;
 	} //end of all directions
-	/*if ((index_X0 == total_list_X0) && (index_U == total_list_U)) {
-		std::cout << "Directions for GPU computation correctly assigned\n";
-	}*/
+	  //std::cout<<"what is the Problem?"<<std::endl;
+	  //std::cout<<std::endl;
+	  //return Direction_List;
+}
+
+//Only for profiling GLPK solver Time for comparison with boundary value implementation
+void getDirectionList_X0_and_U_OnlyForGLPK(
+		ReachabilityParameters &ReachParameters, unsigned int newiters,
+		std::list<std::vector<double> > &list_X0,
+		std::list<std::vector<double> > &list_U, bool U_empty) {
+	int numVectors = ReachParameters.Directions.size1();
+	int dimension = ReachParameters.Directions.size2();
+//std::cout<<"\nCalling the GLPK directions Vector List\n";
+
+	math::matrix<double> B_trans, phi_tau_Transpose;
+	B_trans = ReachParameters.B_trans;
+	phi_tau_Transpose = ReachParameters.phi_trans;
+//	unsigned int total_list_X0 = list_X0.size(); //total number of directions for X0 is [ numDirs * (iters+1) ]
+//	unsigned int total_list_U = list_U.size(); //total number of directions for U is [ numDirs * iters ]
+	unsigned int total_list_X0 = numVectors * (newiters + 1); //1 extra for loop1
+	unsigned int total_list_U = numVectors * newiters; //'n' dirs for each 'n' loops
+
+	std::list<std::vector<double> >::iterator index_X;
+	std::list<std::vector<double> >::iterator indexU;
+	index_X = list_X0.begin();	//starts with 0
+	indexU = list_U.begin();	//starts with 0
+	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
+
+		std::vector<double> rVariable(dimension), r1Variable(dimension); //now single dimension
+		for (int i = 0; i < dimension; i++) {
+			rVariable[i] = ReachParameters.Directions(eachDirection, i);
+			//list_X0(index_X, i) = (float) rVariable[i];
+		}
+		list_X0.insert(index_X, rVariable);
+		unsigned int loopIteration = 0;
+		// ********** Omega's Directions  **********************
+		std::vector<double> phi_trans_dir, B_trans_dir;
+		phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
+
+		if (!U_empty) {	//if not only than will be required to multiply
+			B_trans.mult_vector(rVariable, B_trans_dir);
+		}
+
+		list_X0.insert(index_X, phi_trans_dir); //X0 and U both has the same dimension
+		if (!U_empty) {	//if not only than will be required to multiply
+			list_U.insert(indexU, B_trans_dir); //optimizing in a single loop
+		}
+		// ********** Omega's Directions End **********************
+		loopIteration++;
+		for (; loopIteration < newiters;) { //Now stopping condition is only "shm_NewTotalIteration"
+			//		ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);	//replacement from previous step
+			r1Variable = phi_trans_dir; //direct replacement from previous computation
+			// ********** W_Support's Directions  **********************
+			//		std::vector<double> Btrans_dir;
+			//		B_trans.mult_vector(rVariable, Btrans_dir);	//replacement from previous step
+			// ********** W_Support's Directions End **********************
+			// ********** Omega's Directions  **********************
+			std::vector<double> B_trans_dir1;
+			phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
+			if (!U_empty) {	//if not only than will be required to multiply
+				B_trans.mult_vector(r1Variable, B_trans_dir1);
+			}
+
+			list_X0.insert(index_X, phi_trans_dir); //X0 and U both has the same dimension
+			if (!U_empty) {	//if not only than will be required to multiply
+				list_U.insert(indexU, B_trans_dir1); //optimizing in a single loop
+			}
+			// ********** Omega's Directions End **********************
+			rVariable = CopyVector(r1Variable); //source to destination
+			loopIteration++; //for the next iteration
+		} //end of iteration for each direction
+	} //end of all directions
 }

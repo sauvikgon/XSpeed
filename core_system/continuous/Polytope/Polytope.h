@@ -57,7 +57,7 @@ public:
 	void setIsUniverse(bool universe);
 	bool getIsUniverse();
 
-	void setPolytope(const math::matrix<double> coeffMatrix, const std::vector<double> columnVector, int inEqualitySign);
+	void setPolytope(math::matrix<double> coeffMatrix, std::vector<double> columnVector, int inEqualitySign);
 	/*
 	 * Adds one constraint to the existing polytope by adding the
 	 * coefficient constraint with the bound value to the existing list.
@@ -79,8 +79,7 @@ void setMoreConstraints(math::matrix<double> coeff_constraints, std::vector<doub
 
 	int getInEqualitySign() const;
 	void setInEqualitySign(int inEqualitySign);
-
-	const std::vector<double> getColumnVector() const;
+	std::vector<double> getColumnVector();
 
 	unsigned int getSystemDimension() const;
 	void setSystemDimension(unsigned int systemDimension);//returns the number of variables of the polytopes.

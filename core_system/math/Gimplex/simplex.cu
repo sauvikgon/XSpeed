@@ -1,107 +1,150 @@
 #include "simplex.cuh"
-//Tested Working for Both Helicopter and Five Dimensional system with Reduction for Min
-//Implemented Reduction. But without Streams.
+#include <omp.h>
+#include "iostream"
+//Trying Pivot row as "First positive coefficient Rule"
+//Tested Working for Both Helicopter and Five Dimensional system
+//Streaming working for General GPU Simplex but only for Helicopter Model but not for Five Dimensional System
+__global__ void bound_simplex(float *bound_value, float *C, float *result,
+		int dimension, unsigned int N_S, int offset) {
 
+	/*
+	 //Each thread solves one LP
+	 unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+	 if (i < N_S) {
+	 float sum = 0.0;
+	 for (int j = 0; j < dimension; j++) { //every column is obj_coeff
+	 float obj_value = C[i * dimension + j];
+	 if (obj_value < 0) {
+	 sum = sum + -1 * obj_value * bound_value[j * 2 + 1];
+	 } else {
+	 sum = sum + obj_value * bound_value[j * 2];
+	 }
+	 }
+	 result[i] = sum;
+	 }
+	 */
+
+	//Each block solves one LP with only one thread working in each block
+	int index = blockIdx.x + offset; //LP to be solved
+
+	if (index < N_S) {
+
+		int i = index * blockDim.x; //address of each LP(object_function) is (index x size of one LP)
+		if (threadIdx.x == 0) {
+			float sum = 0.0;
+			for (int j = 0; j < blockDim.x; j++) { //every column is obj_coeff
+				float obj_value = C[index * blockDim.x + j];
+				if (obj_value < 0) {
+					sum = sum + -1 * obj_value * bound_value[j * 2 + 1];
+				} else {
+					sum = sum + obj_value * bound_value[j * 2];
+				}
+			}
+			result[index] = sum;
+		} //end of working thread=0
+	}
+}
+
+//New Implementation
+/*
+ * N_S_for_X :: number of simplex for polytope X
+ * Kernel Launch::
+ * 	GridSize:: nos. of LPs to be solved: N_S_for_X
+ * 	BlockSize/threads:: is the dimension of the System/Model/direction.size()
+ */__global__ void bounded_Solver_for_X_UnitBall(float *bound_value_for_X,
+		float *C, float *result_for_X, unsigned int N_S_for_X,
+		float *result_for_UnitBall, int offset) {
+	//Each block solves one LP with only one thread working in each block
+	int index = blockIdx.x + offset; //LP to be solved
+	if (threadIdx.x == 0) {
+		if (index < N_S_for_X) { //if index is greater(for UnitBall case) then it will not be evaluated
+			int i = index * blockDim.x; //address of each LP(object_function) is (index x size of one LP)
+			float sum_for_X = 0.0;
+			float sum_for_UnitBall = 0.0;
+			float obj_value_for_X;
+			for (int j = 0; j < blockDim.x; j++) { //every column is obj_coeff:: Here blockDim.x is the dimension
+				obj_value_for_X = C[index * blockDim.x + j];
+				//	printf("obj_value_for_X = %f  ",obj_value_for_X);
+				if (obj_value_for_X < 0) {
+					sum_for_X = sum_for_X
+							+ -1 * obj_value_for_X
+									* bound_value_for_X[j * 2 + 1];
+					sum_for_UnitBall += (-1 * obj_value_for_X);	//making abs(UnitBall)
+				} else {
+					sum_for_X = sum_for_X
+							+ obj_value_for_X * bound_value_for_X[j * 2];
+					sum_for_UnitBall += obj_value_for_X;//making abs(UnitBall)
+				}
+			}
+			result_for_X[index] = sum_for_X;
+			result_for_UnitBall[index] = sum_for_UnitBall;
+			//printf("result_for_X = %f  result_for_UnitBall = %f\n",result_for_X[index], sum_for_UnitBall);
+		} //end of thread/block check for N_S_for_X
+	} //end of threadIdx.x==0
+}
+
+//__global__ void mykernel(float *S_MAT, int S_row, int S_col, float *Result, int S_N, int *S_Sel, float *R_data, int *R_index) {
 __global__ void mykernel(float *S_MAT, int S_row, int S_col, float *Result,
-		int S_N, int *S_Sel, float *R_data, int *R_index) {
-
-	//int index = threadIdx.x + (blockIdx.x * blockDim.x);
-	int index = blockIdx.x;
-	if (index < S_N) {
+		int S_N, float *R_data, int *R_index, int offset_res) {
+//offset_res :: is the pointer to the LP number(start of the stream_block) to be solved
+//int index = threadIdx.x + (blockIdx.x * blockDim.x);
+//int index = blockIdx.x;
+	int index = offset_res + blockIdx.x;
+	if (index < (offset_res + S_N)) { //offset_size of lps plus block_size(ie., S_N)
+//	if (index < S_N) {
 		int tid;
 		int i; // used for for index
 		unsigned int temp_index;
 		unsigned int temp_index1;
 		int base = index * S_row * S_col;
-		int R_base = index * blockDim.x;  // blockDim.x = 96
-		__shared__ bool c;
+		int R_base = index * blockDim.x; // blockDim.x = 96
+		__shared__ int c;
 		__shared__ int rm;
-		__shared__ int row;	//pivotRow
-		__shared__ int pivotCol;//pivotCol this can remove global variable S_Sel
+		__shared__ int row; //pivotRow
+		__shared__ int pivotCol; //pivotCol this can remove global variable S_Sel
 
 		int col = 1;
-		/** remember, col1 arrays exclusively accessed by the threads of a block
-		 * Data shared between threads in a block
-		 * */
 		__shared__ int remember[96]; //Found a column which is negative but theta/Min has no positive value
-		__shared__ float col1[60];	//pivotColumn
-		/*************/
-		c = false;
-		rm = 0;
-		row = -1;		//pivotRow
-		pivotCol = -1;
+		__shared__ float col1[60]; //pivotColumn
+
+		if (threadIdx.x == 0) {
+			c = 0;
+			rm = 0;
+			row = -1; //pivotRow
+			pivotCol = -1;
+		}
 		__syncthreads();
 		while (!c) {
-			c = true;
 			__syncthreads();
-			//   ***************** Get_Pivot function begins  *****************
-			//this get_pivot should be done by only one thread as there is too many critical section to handle
-			/*if (threadIdx.x == 0) {
-			 row = get_pivot(&S_MAT[0], S_row, S_col, &S_Sel[0], base, index);
-			 }	//end of if one thread
-			 __syncthreads();*/
-
-			//int minValue = 0, newpivotcol = -1;
-			int Last_row = S_row - 1;	// Last row
-			//if (threadIdx.x == 0) {
-			//using reduction to compute min and newpivotcol
-			//	__shared__ bool notEntered;
-			__shared__ float minValue;
+			int minValue = 0;
 			__shared__ int newpivotcol;
+			int Last_row = S_row - 1; // Last row
 			if (threadIdx.x == 0) {
-				minValue = 0;
 				newpivotcol = -1;
-				//	notEntered = true;
-				//printf("R_base = %d\n",R_base);
+				c = 1;
 			}
-			__syncthreads();	//making sure newpivotcol is initialised to -1
-
+			__syncthreads(); //make sure that c and newpivotcol is initialized
+			//   ***************** Get_Pivot function begins  *****************
+			//for (int j = 2; j < S_col - 1; j++) {//only last row but all column
 			if (threadIdx.x >= 2 && threadIdx.x < (S_col - 1)) {
-				tid = threadIdx.x - 2;//here my tid should be from 0 to (evenThreadId - 1)
-				int j = threadIdx.x;//is the actual column/index number less than (S_col - 1)
-				int data_size = (S_col - 1) - 2;
-				//printf("Data_size = %d ", data_size);
-				temp_index = Last_row + j * S_row + base;//avoiding re-computation
-				R_data[tid + R_base] = S_MAT[temp_index];	//	g_data[i];
-				R_index[tid + R_base] = j;//tid; should be the real index of the data
-				__syncthreads();//here will have all values in shared memory from 0 to index
-
-				for (i = (data_size / 2); i > 0;) {
-					if (tid < i) {
-						//	if ((R_data[tid] >= R_data[tid + s]) && ((R_data[tid + s] < 0) && (R_data[tid] < 0))){
-						if (R_data[tid + R_base] >= R_data[tid + R_base + i]) {
-							R_data[tid + R_base] = R_data[tid + R_base + i];
-							R_index[tid + R_base] = R_index[tid + R_base + i];
-							//	notEntered = false;  //race condition avoided
-						}
-					}
-					__syncthreads();
-					i >>= 1;
-					if ((i != 1) && (i % 2) != 0) {	//if s is odd
-						i = i + 1;
-					}
+				int j = threadIdx.x;
+				unsigned int temp_index1 = Last_row + j * S_row + base; //avoiding re-computation
+				if (S_MAT[temp_index1] < minValue) {
+					//minValue = S_MAT[temp_index1];
+					newpivotcol = j; //"First positive coefficient rule"
+					int local_NewPivotCol;
+					local_NewPivotCol = *(volatile int*) &newpivotcol;
+					//atomicCAS(&newpivotcol, local_NewPivotCol, j);
+					/*
+					 http://stackoverflow.com/questions/27616417/cuda-is-there-any-way-to-prevent-other-threads-from-changing-a-shared-or-global
+					 if (atomicCAS(&newpivotcol, local_NewPivotCol, j)==local_NewPivotCol){
+					 //this thread won the write
+					 printf("Thread ID = %d ",threadIdx.x);
+					 }*/
+					//break;
 				}
-				// if (notEntered == false && tid == 2) { // tid==0 is always true if minValue is still -1 then what?
-				if (tid == 0) { // tid==0 is always true if minValue is still -1 then what?
-					//	if (notEntered == false) {
-					minValue = R_data[0 + R_base];
-					newpivotcol = R_index[0 + R_base];
-					//	}
-				}
-				__syncthreads();
 			}
-			__syncthreads();	//here we have min and newpivotcol
-			/*	//TODO:: use reduction to compute min and newpivotcol
-			 for (int j = 2; j < S_col - 1; j++) {//only last row but all column
-			 unsigned int temp_index1 = Last_row + j * S_row + base;	//avoiding re-computation
-			 if (S_MAT[temp_index1] < minValue) {
-			 minValue = S_MAT[temp_index1];
-			 newpivotcol = j;
-			 }
-			 }
-			 }
-			 __syncthreads();	//here we have min and newpivotcol
-			 */
+			__syncthreads(); //here we have min and newpivotcol
 
 			if (threadIdx.x == 0) {
 				if (newpivotcol == -1) {
@@ -113,7 +156,6 @@ __global__ void mykernel(float *S_MAT, int S_row, int S_col, float *Result,
 					//TODO:: this temp_res can be an array of value computed in parallel
 					//TODO:: row_min and row_num can then be computed using reduction
 					for (i = 0; i < S_row - 1; i++) {
-
 						temp_index = newpivotcol * S_row + i + base; //avoiding re-computation
 						temp_index1 = i + (S_col - 1) * S_row + base; //avoiding re-computation
 						if ((S_MAT[temp_index] > 0)
@@ -126,9 +168,9 @@ __global__ void mykernel(float *S_MAT, int S_row, int S_col, float *Result,
 							}
 						}
 					}
-					//*S_Sel = newpivotcol;
-					//pivotCol = newpivotcol;
-					S_Sel[index] = newpivotcol;
+					// *S_Sel = newpivotcol;
+					pivotCol = newpivotcol;
+					//S_Sel[index] = newpivotcol;
 					if (row_min == INT_MAX) {
 						//return -1;
 						row = -1;
@@ -143,9 +185,9 @@ __global__ void mykernel(float *S_MAT, int S_row, int S_col, float *Result,
 
 			//   ***************** Get_Pivot function ends  *****************
 
-			col = S_Sel[index];
+			//col = S_Sel[index];
 			//col = *S_Sel;
-			//col = pivotCol;
+			col = pivotCol;
 			if (row > -1) {
 				tid = threadIdx.x;
 				if (threadIdx.x >= 2 && threadIdx.x < S_col) {
@@ -154,28 +196,28 @@ __global__ void mykernel(float *S_MAT, int S_row, int S_col, float *Result,
 						temp_index = (S_row - 1) + (tid * S_row) + base; //avoiding re-computation
 						S_MAT[temp_index] = -1 * S_MAT[temp_index]; //replacing back to original
 					}
-				}		//Data Parallel section 1 done
+				} //Data Parallel section 1 done
 				__syncthreads();
 				tid = threadIdx.x;
 				if (threadIdx.x >= 0 && threadIdx.x < S_row) {
 					//for (int i = 0; i < S_row; i++) {	//Data Parallel section 2
-					col1[tid] = S_MAT[(tid + col * S_row) + base];//keeping the old pivotcol coeff
-				}	//Data Parallel section 2 done
+					col1[tid] = S_MAT[(tid + col * S_row) + base]; //keeping the old pivotcol coeff
+				} //Data Parallel section 2 done
 				__syncthreads();
 
-				unsigned int temp_row_base = row + base;//avoiding re-computation
+				unsigned int temp_row_base = row + base; //avoiding re-computation
 				S_MAT[temp_row_base + S_row] =
 						S_MAT[temp_row_base + col * S_row];
 				//S_MAT[temp_row_base] = col - 1;
-				S_MAT[row + base] = col - 1;//now temp_row_base is not required
+				S_MAT[row + base] = col - 1; //now temp_row_base is not required
 				tid = threadIdx.x;
 				if (threadIdx.x >= 2 && threadIdx.x < S_col) {
 					//for (int j = 2; j < S_col; j++){		//Data Parallel section 3
-					unsigned int row_base = row + base;	//avoiding re-computation
-					temp_index = row_base + (tid * S_row);//avoiding re-computation
-					S_MAT[temp_index] = S_MAT[temp_index] / col1[row];//S_MAT[row_base + S_row];
+					unsigned int row_base = row + base; //avoiding re-computation
+					temp_index = row_base + (tid * S_row); //avoiding re-computation
+					S_MAT[temp_index] = S_MAT[temp_index] / col1[row]; //S_MAT[row_base + S_row];
 					//S_MAT[temp_index] = S_MAT[temp_index] / S_MAT[row_base + S_row];
-				}		//Data Parallel section 3 done
+				} //Data Parallel section 3 done
 				__syncthreads();
 				//printf("Row here = %d",row);
 				tid = threadIdx.x;
@@ -191,42 +233,48 @@ __global__ void mykernel(float *S_MAT, int S_row, int S_col, float *Result,
 							break;
 						}
 					}
-				}	//Data Parallel section 4 done
+				} //Data Parallel section 4 done
 				__syncthreads();
 
-				//if (threadIdx.x >= 2 && threadIdx.x < (S_col - 1)){
-				//tid = threadIdx.x;
-				if (threadIdx.x == 0) {
-					for (i = 2; i < (S_col - 1); i++) {
-						if (S_MAT[((S_row - 1) + i * S_row) + base] < 0) {
-							c = false; // check needed for race condition here.
-							break;
-						}
+				if (threadIdx.x >= 2 && threadIdx.x < (S_col - 1)) {
+					i = threadIdx.x;
+					//if (threadIdx.x == 0) {
+					//for (i = 2; i < (S_col - 1); i++) {	//Data Parallel section 5
+					if (S_MAT[((S_row - 1) + i * S_row) + base] < 0) {
+
+						c = false; // check needed for race condition here.
+						int local_c;
+						local_c = *(volatile int*) &c;
+						//atomicCAS(&c, local_c, 0);
+						//break;	not needed for parallel
 					}
+					//}//Data Parallel section 5 done here
 				}
 				__syncthreads();
 
 			} else if (row == -1) {
-				c = true;
-				remember[rm] = col;
 				if (threadIdx.x == 0) {
+					remember[rm] = col;
+					c = 1;
 					rm++;
 				}
 				__syncthreads();
 
-				temp_index = (S_row - 1) + (col * S_row) + base;
-				S_MAT[temp_index] = -1 * S_MAT[temp_index];	//remembering by making positive
+				temp_index = (S_row - 1) + (col * S_row) + base; //if col==-1 than problem for base==0 i.e. temp_index==-1
+				S_MAT[temp_index] = -1 * S_MAT[temp_index]; //remembering by making positive
 
-				//if (threadIdx.x >= 2 && threadIdx.x < (S_col - 1)){
-				// tid = threadIdx.x;
-				if (threadIdx.x == 0) {
-					for (i = 2; i < (S_col - 1); i++) {		//Data parallel 5
-						if ((S_MAT[((S_row - 1) + i * S_row) + base] < 0)) {
-							c = false; // check needed for race condition here.
-							break;
-						}
+				if (threadIdx.x >= 2 && threadIdx.x < (S_col - 1)) {
+					i = threadIdx.x;
+					//if (threadIdx.x == 0) {
+					//for (i = 2; i < (S_col - 1); i++) {		//Data parallel section 6
+					if ((S_MAT[((S_row - 1) + i * S_row) + base] < 0)) {
+						c = false; // check needed for race condition here.
+						int local_c;
+						local_c = *(volatile int*) &c;
+						//atomicCAS(&c, local_c, 0);
+						//break;	not needed for parallel
 					}
-				}
+				} //Data parallel section 6 done
 				__syncthreads();
 			}
 		} //end of while
@@ -235,32 +283,22 @@ __global__ void mykernel(float *S_MAT, int S_row, int S_col, float *Result,
 			//printf("Value = %f ",S_MAT[(S_row - 1 + (S_col - 1) * S_row) + base]);
 			Result[index] = S_MAT[(S_row - 1 + (S_col - 1) * S_row) + base];
 		}
-	}
+	} //endif
 }
 
-__host__ Simplex::Simplex(int N_S) {
+__host__ Simplex::Simplex(unsigned int N_S) {
 	number_of_LPs = N_S;
-	i = 0;
-	a = 0.0;
 	M = 0;
 	N = 0;
-	NB = 0;
 	c = 0;
 	No_c = 0;
-	f = j = 0;
-//	Sel = (int *) malloc(N_S * sizeof(int));
-	R = (float*) malloc(N_S * sizeof(float));
-	/*
-	 MAT = (float *) malloc(N_S * M * N * sizeof(float));
-	 N_MAT = (float *) malloc(N_S * M * N * sizeof(float));
-	 cudaMalloc((void **) &G_MAT, (N_S * M * (N + 1) * sizeof(float)));*/
-	/*	cudaError_t err;
-	 err = cudaMalloc((void **) &G_R, N_S * sizeof(float));
-	 */
-
-	//printf("CUDA malloc G_R: %s\n", cudaGetErrorString(err));
-	cudaMalloc((void **) &G_Sel, N_S * sizeof(int));
-	//printf("CUDA malloc G_Sel: %s\n", cudaGetErrorString(err));
+	/*unsigned int memSize = N_S * sizeof(float);
+	 R = (float*) malloc(memSize);*/
+}
+// ************ All New Implementation ********
+__host__ Simplex::Simplex(int UnitBall, unsigned int N_S_for_X) {
+	//New implementation
+	number_of_LPs_for_X = N_S_for_X;
 }
 
 //get status of particular simplex
@@ -269,20 +307,19 @@ __host__ int Simplex::getStatus(int n) {
 	for (int i = 0; i < C.size1(); i++) {
 		if (i == (n - 1)) {
 			if (R[i] == -1) {
-				s = 6;	// 6 = Simplex Is Unbounded
+				s = 6; // 6 = Simplex Is Unbounded
 			} else if (R[i] > 0) {
-				s = 2;	// 2= Simplex has feasible and Optimal solution
+				s = 2; // 2= Simplex has feasible and Optimal solution
 			}
 		}
 	}
 	return s;
-
-}	//get status of particular simplex
+} //get status of particular simplex
 
 //get the No of simplex the object is ruuning on GPU
 __host__ int Simplex::getNo_OF_Simplx() {
 	return C.size1();
-}	//get the No of simplex the object is ruuning on GPU
+} //get the No of simplex the object is ruuning on GPU
 
 //get the result of all simplex
 __host__ std::vector<float> Simplex::getResultAll() {
@@ -293,11 +330,30 @@ __host__ std::vector<float> Simplex::getResultAll() {
 	}
 	return Res;
 }
+__host__ void Simplex::getResult_X(std::vector<float> &result) { //New implementation
+	result.resize(number_of_LPs_for_X);
+	for (int i = 0; i < number_of_LPs_for_X; i++) {
+		result[i] = R_X[i];
+	}
+
+}
+__host__ void Simplex::getResult_U(std::vector<float> &result) { //New implementation
+	result.resize(number_of_LPs_for_U);
+	for (int i = 0; i < number_of_LPs_for_U; i++) {
+		result[i] = R_U[i];
+	}
+}
+__host__ void Simplex::getResult_UnitBall(std::vector<float> &result) { //New implementation
+	result.resize(number_of_LPs_for_X);
+	for (int i = 0; i < number_of_LPs_for_X; i++) {
+		result[i] = R_UnitBall[i];
+	}
+}
 
 //get the result of all simplex
 
 __host__ float Simplex::getResult(int n) {
-	// get result of particular simplex
+// get result of particular simplex
 	float r;
 	for (int i = 0; i < C.size1(); i++) {
 		if (i == (n - 1)) {
@@ -305,7 +361,7 @@ __host__ float Simplex::getResult(int n) {
 		}
 	}
 	return r;
-}	// get result of particular simplex
+} // get result of particular simplex
 
 __host__ std::vector<int> Simplex::getStatusAll() {
 
@@ -317,471 +373,652 @@ __host__ std::vector<int> Simplex::getStatusAll() {
 			Status[i] = 2;
 	}
 	return Status;
-}	//get the status of all simplex
+} //get the status of all simplex
 
-__host__ void Simplex::setConstratint(math::matrix<double> &A,
-		std::vector<double> &B) {
-	int N_S = number_of_LPs;
+__host__ void Simplex::setConstratint(math::matrix<double> A,
+		std::vector<double> B) { //Old implementation
+	unsigned int N_S = number_of_LPs;
 	orig_CoefficientMatrix = A;
 	BoundValue = B;
 
-//	A = math::matrix<float>(A1);
-//	B = std::vector<float>(B1);
-	int No_O = A.size2();
-	//std::cout << "No of Variable is " << A.size2() << " And no of constraints "	<< A.size1() << std::endl;
-	int No_C = A.size1();
-	M = No_C + 1;
-	N = No_O + 3 + No_C;
-	c = 1 + No_O;
-	NB = c;
-	f = 0;
+	bool single_bound_flag = false;
+	int count = 0;
 
-	/*Sel = (int *) malloc(N_S * sizeof(int));
-	 R = (float*) malloc(N_S * sizeof(float));*/
-	MAT = (float *) malloc(N_S * M * N * sizeof(float));
-	/*cudaMalloc((void **) &G_MAT, (N_S * M * N * sizeof(float)));
-	 cudaMalloc((void **) &G_R, N_S * sizeof(float));
-	 cudaMalloc((void **) &G_Sel, N_S * sizeof(int));*/
+	for (int i = 0; i < A.size1(); i++) {
+		single_bound_flag = false;
+		for (int j = 0; j < A.size2(); j++) {
+			if (A(i, j) != 0) {
+				count++; //keeping track of the single variable
+			}
+		}
+		if (count == 1) {
+			single_bound_flag = true;
+			count = 0;
+		}
+	}
+//single_bound_flag = false;
+	single_bound_flag_result = single_bound_flag;
 
-	for (int s = 0; s < N_S; s++) {
-		for (i = 0; i < M; i++) {
-			for (j = 0; j < N; j++) {
-				if ((j == 0) && (i != (M - 1))) {
-					MAT[(int) ((i + j * M) + (M * N * s))] = NB;
-					NB = NB + 1;
-				} else if (j == 1) {
-					MAT[(int) ((i + j * M) + (M * N * s))] = 0;
-				} else if ((j > 1) && (i != (M - 1))) {
-					if (j < (No_O + 2)) {
-						//Coefficient of A
-						MAT[(int) ((i + j * M) + (M * N * s))] = (float) A(i,
-								j - 2);
-					} else if (j == N - 1) {
-						//std::cout<<"Enter RHS of coefficient "<< i+1 <<"\n";
-						MAT[(int) ((i + j * M) + (M * N * s))] = (float) B[i];
-					} else if (j < N - 1) {
-						if ((MAT[(int) ((i + j * M) + (M * N * s))] != 1)
-								&& (f == 0)) {
-							if (j > c) {
-								MAT[(int) ((i + j * M) + (M * N * s))] = 1;
-								f = 1;
-								c = j;
-							} else {
-								MAT[(int) ((i + j * M) + (M * N * s))] = 0;
-							}
-						} else {
-							MAT[(int) ((i + j * M) + (M * N * s))] = 0;
+	if (!single_bound_flag) { //If not single bound value
+		//std::cout << "\nNot a Boundary Check Model!!!!\n";
+
+		int No_O = A.size2();
+		int No_C = A.size1();
+		M = No_C + 1;
+		N = No_O + 3 + No_C;
+		c = 1 + No_O;
+		//MAT = (float *) calloc(N_S * M * N, sizeof(float));
+		unsigned int memSize = N_S * M * N * sizeof(float);
+		cudaError_t err;
+		err = cudaMallocHost(&MAT, memSize); //Pinned memory Syntax:: cudaMallocHost(&h_ptr,bytes);
+		printf("CUDA cudaMallocHost-- MAT: %s\n", cudaGetErrorString(err));
+		cudaMemset(MAT, 0, memSize); //initializing all elements to zero
+		//std::cout << "Before OMP for MAT!!!" << std::endl;
+#pragma omp parallel for
+		for (int s = 0; s < N_S; s++) {
+			for (int i = 0; i < M - 1; i++) {
+				for (int j = 0; j < N; j++) {
+					if (j == 0) {
+						MAT[(int) ((i + j * M) + (M * N * s))] = c + i;
+					} else if (j > 1) {
+						if (j < (No_O + 2)) {
+							//Coefficient of A
+							MAT[(int) ((i + j * M) + (M * N * s))] = (float) A(
+									i, j - 2);
+						} else if (j == N - 1) {
+							MAT[(int) ((i + j * M) + (M * N * s))] =
+									(float) B[i];
+						} else if (j < N - 1) {
+							MAT[(int) ((i + (No_O + 2 + i) * M) + (M * N * s))] =
+									1;
+
 						}
 					}
-				} else if ((i == M - 1) && (j > 1)) {
-					if (j < 2 + No_O) {
-						continue;
-
-					} else {
-						MAT[(int) ((i + j * M) + (M * N * s))] = 0;
-					}
-				} else {
-					MAT[(int) ((i + j * M) + (M * N * s))] = 0;
 				}
 			}
-			f = 0;
+		} //pragma for-loop
+		  //	std::cout << "Going out from setConstraints()!!!" << std::endl;
+	} //endif
+} //setting constraints of simplex
+
+__host__ void Simplex::setConstratint(math::matrix<double> coeffMatrix_for_X,
+		std::vector<double> columVector_for_X, int UnitBall) { //New implementation
+	BoundValue_for_X = columVector_for_X;
+
+	bool single_bound_flag_for_X = false;
+	int count = 0;
+
+	for (int i = 0; i < coeffMatrix_for_X.size1(); i++) {
+		single_bound_flag_for_X = false;
+		for (int j = 0; j < coeffMatrix_for_X.size2(); j++) {
+			if (coeffMatrix_for_X(i, j) != 0) {
+				count++; //keeping track of the single variable
+			}
 		}
-		NB = M, f = 0, c = 1 + No_O;
+		if (count == 1) {
+			single_bound_flag_for_X = true;
+			count = 0;
+		}
 	}
-}	//setting constraints of simplex
 
-__host__ void Simplex::ComputeLP(math::matrix<float> &C1) {
+//single_bound_flag = false;
+	if (single_bound_flag_for_X) {
+		single_bound_flag_result = true;
+	} else {
+		single_bound_flag_result = false;
+		std::cout << "\nModel does not has Bounded Variable!!!\n"; //Todo::Take care of this condition
+	}
+}
 
+__host__ void Simplex::ComputeLP(math::matrix<float> &C1,
+		unsigned int number_of_streams) { //OLD implementation
 	cudaError_t err;
-	//If the size of threads exceeds 32(warp-size) be careful of (unknown error/deadlock/abort) situation
-	//For helicopter the variable=28+slack(56 constraints) + 0 (artificial) + 3(extra) = 87 NEEDS 32 * INT(87/32) + 32
-	//For Five Dim System the variable=5+slack(10 constraints) + 1 (artificial) + 3(extra) = 19 NEEDS 32 * INT(19/32) + 32
-	unsigned int threads_per_block;	//Maximum threads depends on CC 1.x =512 2.x and > = 1024
+//If the size of threads exceeds 32(warp-size) be careful of (unknown error/deadlock/abort) situation
+//For helicopter the variable=28+slack(56 constraints) + 0 (artificial) + 3(extra) = 87 NEEDS 32 * INT(87/32) + 32
+//For Five Dim System the variable=5+slack(10 constraints) + 1 (artificial) + 3(extra) = 19 NEEDS 32 * INT(19/32) + 32
+	unsigned int threads_per_block; //Maximum threads depends on CC 1.x =512 2.x and > = 1024
 
-	unsigned int number_of_blocks;//depends on our requirements (better to be much more than the number of SMs)
-
-	int device;
-	cudaDeviceProp props;
-	cudaGetDevice(&device);
-	cudaGetDeviceProperties(&props, device);
-	/*
-	 std::cout<<"\nprops.major = "<<props.major;
-	 std::cout<<"\nprops.minor = "<<props.minor;
-	 std::cout<<"\nprops.maxThreadsPerBlock = "<<props.maxThreadsPerBlock;
-	 std::cout<<"\nprops.sharedMemPerMultiprocessor = "<<props.sharedMemPerMultiprocessor;
-	 std::cout<<"\nprops.sharedMemPerBlock = "<<props.sharedMemPerBlock;
-	 std::cout<<"\nprops.multiProcessorCount = "<<props.multiProcessorCount;
-
-	 int total_SMs = props.multiProcessorCount;//returns the number of SMs the device has
-
-	 if (props.major < 2) {	//only 512 threads per block :: but number of resident blocks per SM is 2.x/3.x/5.x = 8/16/32 times the SM
-	 if (this->number_of_LPs > (total_SMs * 8)){ //at least 8 times the SMs
-	 std::cout<<"Too many LPs to solve!!! DEVICE unable to handle";
-	 number_of_blocks = this->number_of_LPs;
-	 }
-	 }else{	//1024 threads per block supported    ::
-
-	 number_of_blocks = this->number_of_LPs;
-
-	 }
-	 */
-
+	unsigned int number_of_blocks; //depends on our requirements (better to be much more than the number of SMs)
+	int N_S = C1.size1();
 	int No_C = orig_CoefficientMatrix.size1();
 	C = math::matrix<float>(C1);
+//single_bound_flag_result = true;
 
-	int N_S = C.size1(), i, j, k, count = 0, basen, base;
+	unsigned int memSize = N_S * sizeof(float);
+//R = (float*) malloc(memSize);
+	cudaMallocHost(&R, memSize); //PINNED Memory		//Doing here First Time
 
-	err = cudaMalloc((void **) &G_R, N_S * sizeof(float));//Doing it here for the First Time
+	if (single_bound_flag_result) {
+		printf("\nOur New Optimizations Result %d\n", single_bound_flag_result);
+		unsigned int mysize = N_S * sizeof(float);
+		//cudaMallocHost(&R, mysize);	//PINNED Memory		//Doing here First Time
+		err = cudaMalloc((void **) &G_R, mysize); //Doing here First Time
 
-	int No_O = C.size2();
-	M = No_C + 1, N = No_O + 3 + No_C;
-	int N_C = No_C, ch;
-	NB = M, f = 0, c = 1 + No_O;
-	float sum = 0;
-	for (int s = 0; s < N_S; s++) {
-		for (i = M - 1; i < M; i++) {
-			for (j = 2; j < N; j++) {
-				if (j < 2 + No_O) {
-					MAT[(int) ((i + j * M) + (M * N * s))] = -C(s, j - 2);
-				} else {
-					MAT[(int) ((i + j * M) + (M * N * s))] = 0;
-				}
+		mysize = BoundValue.size() * sizeof(float);
+		err = cudaMalloc((void **) &d_bound_result, mysize); //C1.size1() * 96 being the maximum threads
+		//	printf("CUDA malloc d_bound_result: %s\n", cudaGetErrorString(err));
+		mysize = C1.size1() * C1.size2() * sizeof(float);
+		err = cudaMalloc((void **) &d_obj_coeff, mysize); //C1.size1() * 96 being the maximum threads
+		//	printf("CUDA malloc d_obj_coeff: %s\n", cudaGetErrorString(err));
+
+		mysize = BoundValue.size() * sizeof(float);
+		//only single variable per constraints
+		//bound_result = (float *) malloc(BoundValue.size() * sizeof(float));	//creating bound_values for kernel compute
+		cudaMallocHost(&bound_result, mysize); //Pinned memory Syntax:: cudaMallocHost(&h_ptr,bytes);
+		//printf("CUDA cudaMallocHost-- bound_result: %s\n", cudaGetErrorString(err));
+		for (int i = 0; i < BoundValue.size(); i++)
+			bound_result[i] = BoundValue[i];
+
+		mysize = C1.size1() * C1.size2() * sizeof(float);
+		//obj_coeff = (float *) malloc(C1.size1() * C1.size2() * sizeof(float));//creating obj_coeff_values for kernel compute
+		cudaMallocHost(&obj_coeff, mysize); //Pinned memory Syntax:: cudaMallocHost(&h_ptr,bytes);
+		//printf("CUDA cudaMallocHost-- obj_coeff: %s\n", cudaGetErrorString(err));
+
+		threads_per_block = C1.size2(); //dimension size is the number of threads per block
+		//threads_per_block = 512;	//1024;	//Maximum on CC 3.0
+
+		// **** Begin of Stream Processing *******	//Using Asynchronous Memory copy:: needs //MAT to be a PINNED memory
+		//100% Occupancy with 1024 threads using 4 registers shows 2 active thread blocks per Multiprocessor
+		// we have 7 SM = 7 x 2 = 14 blocks
+		//14 blocks x 1024 threads(or LPs) = 14336 LPs per Stream
+		int num_streams = number_of_streams; //number of streams desired to create ::Note check for odd numbers
+		int num_LPs_perStream;
+
+		if (N_S % num_streams == 0) {
+			num_LPs_perStream = (N_S / num_streams);
+		} else {
+			num_LPs_perStream = (N_S / num_streams); //last will not be the same will be less
+			num_streams = num_streams + 1; //one extra streams. though nos of LPs to be solved will be less;
+		}
+		cudaStream_t stream[num_streams];
+		cudaError_t result;
+		//int Each_LP_size = M * N;	// * sizeof(float);
+
+		//Creation of Streams
+		for (int i = 0; i < num_streams; i++) {
+			result = cudaStreamCreate(&stream[i]);
+		}
+
+		cudaMemcpy(d_bound_result, bound_result,
+				(BoundValue.size() * sizeof(float)), cudaMemcpyHostToDevice);
+		//cudaMemcpy(d_obj_coeff, obj_coeff,(C1.size1() * C1.size2() * sizeof(float)),cudaMemcpyHostToDevice);
+#pragma omp parallel for
+		for (unsigned int s = 0; s < C1.size1(); s++) {
+			for (int i = 0; i < C1.size2(); i++) {
+				obj_coeff[s * C1.size2() + i] = C1(s, i); //Row major Copy
 			}
 		}
-	}
 
-	for (i = 0; i < N_C; i++) {
-		//std::cout << B[i] << "\n";
-		if (BoundValue[i] < 0) {
-			count++;
-			//std::cout<<B[i]<<"\n";
+		//cudaMemcpy(G_MAT, MAT, (N_S * M * N * sizeof(float)),	cudaMemcpyHostToDevice);
+		//Stream -- memcopy Host to Device
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream * C1.size2();
+			/*cudaMemcpyAsync(&d_bound_result, &bound_result,
+			 (BoundValue.size() * sizeof(float)), cudaMemcpyHostToDevice,
+			 stream[i]);*/
+
+			cudaMemcpyAsync(&d_obj_coeff[offset], &obj_coeff[offset],
+					(num_LPs_perStream * C1.size2() * sizeof(float)),
+					cudaMemcpyHostToDevice, stream[i]); //TODO:: What happens to the Last stream
 		}
-	}
-	//std::cout<<"C="<<count<<"\n";
-	int nc = N + count;
-	threads_per_block = 32 * (nc / 32) + 32; //if count equal 0 than nc=N so works for for Model
-	if (threads_per_block > props.maxThreadsPerBlock) //Assuming maximum threads supported by CC is 1024
-		threads_per_block = props.maxThreadsPerBlock;
-
-	int *R_index;	//reduction data
-	float *R_data;	//reduction index
-	err = cudaMalloc((void **) &R_data, C1.size1() * threads_per_block * sizeof(float));//C1.size1() * 96 being the maximum threads
-	err = cudaMalloc((void **) &R_index, C1.size1() * threads_per_block * sizeof(int));//C1.size1() being the number of LPs
-	//printf("CUDA malloc R_index: %s\n", cudaGetErrorString(err));
-
-	//std::cout << "Number of threads per block = " << threads_per_block << "\n";
-
-	if (count > 0) {		//Helicopter model has no negative bound so count=0
-		N_MAT = (float *) malloc(N_S * M * nc * sizeof(float));
-		for (i = 0; i < N_S; i++) {
-			for (j = 0; j < M; j++) {
-				base = i * M * N;
-				basen = i * M * nc;
-				//base=i*M*N;
-				N_MAT[j + ((nc - 1) * M) + basen] =
-						MAT[j + ((N - 1) * M) + base];
-			}
-		}
-//Creating Artificial Variables
-		for (k = 0; k < N_S; k++) {
-			base = k * M * N;
-			basen = k * M * nc;
-			for (i = 0; i < M; i++) {
-				ch = 0;
-				for (j = 0; j < nc; j++) {
-					if (MAT[i + ((N - 1) * M) + base] < 0) {
-						if ((j >= (N - 1)) && (j < (nc - 1))) {
-							/*if(i==(S_row-1))
-							 binayak[(i+j*S_row)+base]=-1;
-							 else*/if (!ch) {
-								N_MAT[(i + j * M) + basen] = 1;
-								ch = 1;
-							}
-						} else if (j == (nc - 1)) {
-							N_MAT[(i + j * M) + basen] = -1
-									* N_MAT[(i + j * M) + basen];
-						} else if (j == 1) {
-							N_MAT[(i + j * M) + basen] = -1;
-						}
-
-						else if (j == 0) {
-							N_MAT[((i + j * M)) + basen] = ((N - M) + i + 3
-									+ No_O);
-						}
-
-						/*else if(j==0){
-						 //int cb=S_col+i;
-						 binayak[(int)((i+j*S_row)+base)]=S_col+i;
-						 }
-						 */
-						else if (j > 1) {
-							N_MAT[(i + j * M) + basen] = -1
-									* (MAT[(i + j * M) + base]);
-						}
-					} else if ((i != (M - 1)) && (j < N - 1)) {
-						N_MAT[(i + j * M) + basen] = MAT[(i + j * M) + base];
-					} else if ((i != (M - 1)) && (j == nc - 1)) {
-						continue;
-					} else if (i == (M - 1)) {
-						if ((j >= (N - 1)) && (j < nc - 1)) {
-							N_MAT[(i + j * M) + basen] = -1;
-						} else if (j == nc - 1) {
-							continue;
-						} else {
-							N_MAT[(i + j * M) + basen] = 0;
-						}
-						//else{
-						//N_MAT[(i+j*M)]=-1;
-						//}
-					} else {
-						N_MAT[(i + j * M) + basen] = 0;
-					}
-				}
-			}
-		}
-		//Checked
-		//Creation of new Z
-		/*std::cout << "Simplex -BEFORE CREATION OF Z\n";
-		 for (k = 0; k < N_S; k++) {
-		 basen = k * M * nc;
-		 for (i = 0; i < M; i++) {
-		 for (j = 0; j < nc; j++) {
-		 std::cout << N_MAT[(i + j * M) + basen] << "("
-		 << ((i + j * M) + basen) << ")\t";
-		 }
-		 std::cout << "\n";
-		 }
-		 std::cout << "\n";
-		 }*/
-//Creation of Last Row or Z-Value(Z-C)
-		for (k = 0; k < N_S; k++) {
-			sum = 0;
-			//base = k * M * N;
-			basen = k * M * nc;
-			for (int k1 = 2; k1 < nc; k1++) {
-				sum = 0;
-				for (j = 0; j < (M - 1); j++) {
-					sum = sum
-							+ (N_MAT[(j + k1 * M) + basen]
-									* N_MAT[(j + 1 * M) + basen]);
-					//std::cout << N_MAT[(j + k1 * M) + basen] << "*"<< N_MAT[(j + 1 * M) + basen] << "\t";
-				}
-				//std::cout << sum << "-"	<< N_MAT[((M - 1) + k1 * M) + basen];
-				N_MAT[((M - 1) + k1 * M) + basen] = sum
-						- N_MAT[((M - 1) + k1 * M) + basen];
-				//std::cout << "=" << N_MAT[((M - 1) + k1 * M) + basen]
-				//<< "\n";
-
-			}
-		}
-		//cudaEvent_t start, stop;
-		/*std::cout << "Simplex -AFTER CREATION OF Z\n";
-		 for (k = 0; k < N_S; k++) {
-		 basen = k * M * nc;
-		 for (i = 0; i < M; i++) {
-		 for (j = 0; j < nc; j++) {
-		 std::cout << N_MAT[(i + j * M) + basen] << "("
-		 << ((i + j * M) + basen) << ")\t";
-		 }
-		 std::cout << "\n";
-		 }
-		 std::cout << "\n";
+		/*for (int i = 0; i < num_streams; i++) {
+		 cudaMemcpyAsync(&d_bound_result, &bound_result,
+		 (BoundValue.size() * sizeof(float)), cudaMemcpyHostToDevice,
+		 stream[i]);
 		 }*/
 
-		cudaMalloc((void **) &G_MAT, (N_S * M * nc * sizeof(float)));
-		//printf("CUDA malloc G_MAT: %s\n", cudaGetErrorString(err));
-		cudaMemcpy(G_MAT, N_MAT, (N_S * M * nc * sizeof(float)),
-				cudaMemcpyHostToDevice);
-		//printf("CUDA malloc N_MAT: %s\n", cudaGetErrorString(err));
-		//	cudaMemcpy(G_Sel, Sel, sizeof(int), cudaMemcpyHostToDevice);
-		//printf("CUDA malloc G_Sel: %s\n", cudaGetErrorString(err));
+		int dimension = C1.size2();
+		//std::cout << "\nnum_LPs_perStream  = " << num_LPs_perStream << "\n";
 
-		mykernel<<<N_S, threads_per_block>>>(G_MAT, M, nc, G_R, N_S, G_Sel, R_data, R_index);
-		//mykernel<<<N_S, 96>>>(G_MAT, M, nc, G_R, N_S, R_data, R_index);
-
-		cudaDeviceSynchronize();
-		cudaMemcpy(R, G_R, N_S * sizeof(float), cudaMemcpyDeviceToHost);
-		cudaMemcpy(N_MAT, G_MAT, (N_S * M * nc * sizeof(float)),
-				cudaMemcpyDeviceToHost);
-		/*std::cout<< "***********Final SIMPLEX from GPU*************\n Time took:\n";
-		 for (k = 0; k < N_S; k++) {
-		 // base=k*M*N;
-		 basen = k * M * nc;
-		 for (i = 0; i < M; i++) {
-		 for (j = 0; j < nc; j++) {
-		 std::cout << N_MAT[(i + j * M) + basen] << "("
-		 << ((i + j * M)) << ")\t";
-		 }
-		 std::cout << "\n";
-		 }
-		 std::cout << "\n";
-		 }*/
-
-		//	std::cout << "Result for Artificial\n";
-		for (i = 0; i < N_S; i++) {
-			base = i * M * N;
-			basen = i * M * nc;
-			for (j = 0; j < M; j++) {
-				for (k = 0; k < N; k++) {
-					if (N_MAT[j + basen] == k + 1) {
-						//std::cout<<"Row value="<<N_MAT[j+basen]<<"\n N_MAT[j+M+basen]"<<N_MAT[j+M+basen];
-						//std::cout<<"MAT[1+(2+j)*M+base]"<<MAT[(M-1)+(2+k)*M+base]<<"\n";
-						N_MAT[j + M + basen] =
-								MAT[(M - 1) + (2 + k) * M + base];
-					}
-				}
-			}
+		//Stream -- Kernel		//streaming is easy if each block solves one LP
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
+			//bound_simplex<<<grid_size, threads_per_block>>>(d_bound_result, d_obj_coeff, G_R, dimension, C1.size1());
+			bound_simplex<<<num_LPs_perStream, threads_per_block, 0, stream[i]>>>(d_bound_result, d_obj_coeff, G_R, dimension, N_S, offset);
 		}
 
+		//Stream -- memcopy Device to Host
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
+			cudaMemcpyAsync(&R[offset], &G_R[offset],
+					num_LPs_perStream * sizeof(float), cudaMemcpyDeviceToHost,
+					stream[i]); //TODO:: What happens to the Last stream
+		}
+		// **** End of Stream Processing *******
+		//cudaMemcpy(R, G_R, C1.size1() * sizeof(float), cudaMemcpyDeviceToHost);
+		cudaFree(G_R);
+		cudaFree(d_bound_result);
+		cudaFree(d_obj_coeff);
+
+		cudaFreeHost(obj_coeff); //Newly Added but not tested
+		cudaFreeHost(bound_result); //Newly Added but not tested
+	} else { //otherwise normal simplex algorithm
+
+		unsigned int threads_per_block; //Maximum threads depends on CC 1.x =512 2.x and > = 1024
+		unsigned int number_of_blocks; //depends on our requirements (better to be much more than the number of SMs)
+		int device;
+		cudaDeviceProp props;
+		cudaGetDevice(&device);
+		cudaGetDeviceProperties(&props, device);
+
+		int No_O = C.size2();
+		M = No_C + 1, N = No_O + 3 + No_C;
+		int N_C = No_C;
+		c = 1 + No_O;
+#pragma omp parallel for
 		for (int s = 0; s < N_S; s++) {
+			for (int i = M - 1; i < M; i++) { //int i=M-1; //should be enough
+				for (int j = 2; j < N; j++) {
+					if (j < 2 + No_O) {
+						MAT[(int) ((i + j * M) + (M * N * s))] = -C(s, j - 2);
+					}
+				}
+			}
+		}
+		std::vector<int> rem;
+		for (int i = 0; i < N_C; i++) {
+			if (BoundValue[i] < 0) {
+				rem.push_back(i);
+			}
+		}
+		//std::cout << "C= " << rem.size() << "\n";
+		int nc = N + rem.size();
+		threads_per_block = 32 * (nc / 32) + 32; //if count equal 0 than nc=N so works for for Model
+		if (threads_per_block > props.maxThreadsPerBlock) //Assuming maximum threads supported by CC is 1024
+			threads_per_block = props.maxThreadsPerBlock;
 
-			if (R[s] == 0) {
-				sum = 0;
-				base = s * M * N;
-				basen = s * M * nc;
-				for (i = 0; i < N; i++) {
-					sum = 0;
-					for (j = 0; j < M; j++) {
-						if ((j < M - 1)) {
-							if (i != (N - 1)) {
-								//std::cout<<N_MAT[(j+(i*M))+basen]<<"*"<<N_MAT[(j+(1*M))+basen]<<std::endl;
-								sum = sum
-										+ (N_MAT[(j + (i * M)) + basen]
-												* N_MAT[(j + (1 * M)) + basen]);
-								MAT[(j + (i * M)) + base] = N_MAT[(j + (i * M))
-										+ basen];
-							} else if (i == N - 1) {
-								sum = sum
-										+ (N_MAT[(j + (nc - 1) * M) + basen]
-												* N_MAT[(j + (1 * M)) + basen]);
-								MAT[(j + (i * M)) + base] = N_MAT[(j
-										+ (nc - 1) * M) + basen];
-							}
-						}
-						if (j == (M - 1)) {
-							if (i > 1) {
-								//std::cout<<sum<<" And "<<MAT[(j+(i*M))+base]<<std::endl;
-								MAT[(j + (i * M)) + base] = MAT[(j + (i * M))
-										+ base] + (-1) * sum;
+		int offset; //temporary fixing for this if- part
+		//	int num_LPs_perStream;	//temporary fixing for this if- part
+
+		int *R_index; //reduction data
+		float *R_data; //reduction index
+		err = cudaMalloc((void **) &R_data,
+				C1.size1() * threads_per_block * sizeof(float)); //C1.size1() * 96 being the maximum threads
+		err = cudaMalloc((void **) &R_index,
+				C1.size1() * threads_per_block * sizeof(int)); //C1.size1() being the number of LPs
+
+		err = cudaMalloc((void **) &G_R, N_S * sizeof(float)); //Doing it here for the First Time
+
+		if (rem.size() > 0) { //Helicopter model has no negative bound so count=0
+			N_MAT = (float *) calloc(N_S * M * nc, sizeof(float));
+
+#pragma omp parallel for
+			for (int i = 0; i < N_S; i++) {
+				for (int j = 0; j < M; j++) {
+					int base = i * M * N;
+					int basen = i * M * nc;
+					N_MAT[j + ((nc - 1) * M) + basen] = MAT[j + ((N - 1) * M)
+							+ base];
+				}
+			}
+
+//Creating Artificial Variables
+#pragma omp parallel for
+			for (int k = 0; k < N_S; k++) {
+				int base = k * M * N;
+				int basen = k * M * nc;
+				for (int i = 0; i < rem.size(); i++) {
+					//ch = 0;
+					for (int j = 0; j < nc; j++) {
+						if (MAT[rem[i] + ((N - 1) * M) + base] < 0) {
+							if ((j >= (N - 1)) && (j < (nc - 1))) {
+								N_MAT[(rem[i] + j * M) + basen] = 1;
+							} else if (j == (nc - 1)) {
+								N_MAT[(rem[i] + j * M) + basen] = -1
+										* N_MAT[(rem[i] + j * M) + basen];
+							} else if (j == 1) {
+								N_MAT[(rem[i] + j * M) + basen] = -1;
+							} else if (j == 0) {
+								N_MAT[((rem[i] + j * M)) + basen] = ((N - M)
+										+ rem[i] + 3 + No_O);
+							} else if (j > 1) {
+								N_MAT[(rem[i] + j * M) + basen] = -1
+										* (MAT[(rem[i] + j * M) + base]);
 							}
 						}
 					}
-					//}
-					//}
+				}
+			}
+
+#pragma omp parallel for
+			for (int k = 0; k < N_S; k++) {
+				int base = k * M * N;
+				int basen = k * M * nc;
+				for (int j = (N - 1); j < (nc - 1); j++) {
+					N_MAT[((M - 1) + j * M) + basen] = -1;
+				}
+			}
+
+//Creation of Last Row or Z-Value(Z-C)
+#pragma omp parallel for
+			for (int k = 0; k < N_S; k++) {
+				int basen = k * M * nc;
+				for (int k1 = 2; k1 < nc; k1++) {
+					float sum = 0;
+					for (int j = 0; j < (M - 1); j++) {
+						sum = sum
+								+ (N_MAT[(j + k1 * M) + basen]
+										* N_MAT[(j + 1 * M) + basen]);
+					}
+					N_MAT[((M - 1) + k1 * M) + basen] = sum
+							- N_MAT[((M - 1) + k1 * M) + basen];
+				}
+			}
+
+			cudaMalloc((void **) &G_MAT, (N_S * M * nc * sizeof(float)));
+			//printf("CUDA malloc G_MAT: %s\n", cudaGetErrorString(err));
+			cudaMemcpy(G_MAT, N_MAT, (N_S * M * nc * sizeof(float)),
+					cudaMemcpyHostToDevice);
+			//printf("CUDA malloc N_MAT: %s\n", cudaGetErrorString(err));
+			//	cudaMemcpy(G_Sel, Sel, sizeof(int), cudaMemcpyHostToDevice);
+			//printf("CUDA malloc G_Sel: %s\n", cudaGetErrorString(err));
+			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, nc, G_R, N_S, G_Sel, R_data, R_index);
+			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, nc, G_R, N_S, R_data, R_index);
+			mykernel<<<N_S, threads_per_block>>>(G_MAT, M, nc, G_R, N_S, R_data, R_index, offset);
+
+			cudaDeviceSynchronize();
+			cudaMemcpy(R, G_R, N_S * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(N_MAT, G_MAT, (N_S * M * nc * sizeof(float)),
+					cudaMemcpyDeviceToHost);
+
+			//	std::cout << "Result for Artificial\n";
+#pragma omp parallel for
+			for (int i = 0; i < N_S; i++) {
+				int base = i * M * N;
+				int basen = i * M * nc;
+				for (int j = 0; j < M; j++) {
+					for (int k = 0; k < N; k++) {
+						if (N_MAT[j + basen] == k + 1) {
+							N_MAT[j + M + basen] = MAT[(M - 1) + (2 + k) * M
+									+ base];
+						}
+					}
+				}
+			}
+
+#pragma omp parallel for
+			for (int s = 0; s < N_S; s++) {
+				if (R[s] == 0) {
+					int base = s * M * N;
+					int basen = s * M * nc;
+					for (int i = 0; i < N; i++) {
+						float sum = 0;
+						for (int j = 0; j < M; j++) {
+							if ((j < M - 1)) {
+								if (i != (N - 1)) {
+									sum = sum
+											+ (N_MAT[(j + (i * M)) + basen]
+													* N_MAT[(j + (1 * M))
+															+ basen]);
+									MAT[(j + (i * M)) + base] = N_MAT[(j
+											+ (i * M)) + basen];
+								} else if (i == N - 1) {
+									sum = sum
+											+ (N_MAT[(j + (nc - 1) * M) + basen]
+													* N_MAT[(j + (1 * M))
+															+ basen]);
+									MAT[(j + (i * M)) + base] = N_MAT[(j
+											+ (nc - 1) * M) + basen];
+								}
+							}
+							if (j == (M - 1)) {
+								if (i > 1) {
+									MAT[(j + (i * M)) + base] =
+											MAT[(j + (i * M)) + base]
+													+ (-1) * sum;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			cudaFree(G_MAT);
+			//		cudaFree(G_R);
+			//cudaFree(G_Sel);
+			//cudaDeviceSynchronize();
+			//		cudaMalloc((void **) &G_R, N_S * sizeof(float));
+			cudaMalloc((void **) &G_MAT, (N_S * M * N * sizeof(float)));
+			// printf("CUDA malloc G_MAT: %s\n", cudaGetErrorString(err));
+			cudaMemcpy(G_MAT, MAT, (N_S * M * N * sizeof(float)),
+					cudaMemcpyHostToDevice);
+			//printf("CUDA malloc N_MAT: %s\n", cudaGetErrorString(err));
+			//	cudaMemcpy(G_Sel, Sel, sizeof(int), cudaMemcpyHostToDevice);
+			//printf("CUDA malloc G_Sel: %s\n", cudaGetErrorString(err));
+
+			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, G_Sel, R_data, R_index);
+			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, R_data, R_index);
+			mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, R_data, R_index, offset);
+			cudaDeviceSynchronize();
+			cudaMemcpy(R, G_R, N_S * sizeof(float), cudaMemcpyDeviceToHost);
+
+			/*cudaMemcpy(MAT, G_MAT, (N_S * M * N * sizeof(float)),
+			 cudaMemcpyDeviceToHost);*/
+			//std::cout
+			// << "***********Final SIMPLEX from GPU*************\n Time took:\n";*/
+		} else {
+
+			err = cudaMalloc((void **) &G_MAT, (N_S * M * N * sizeof(float)));
+			//printf("CUDA malloc G_MAT : %s\n", cudaGetErrorString(err));
+			// **** Begin of Stream Processing *******
+			//Using Asynchronous Memory copy:: needs //MAT to be a PINNED memory
+			int num_streams = number_of_streams; //number of streams desired to create ::Note check for odd numbers
+			int Each_LP_size = M * N; // * sizeof(float);
+			int num_LPs_perStream;
+			bool equal_stream = true;
+			if (N_S % num_streams == 0) {
+				num_LPs_perStream = (N_S / num_streams);
+				equal_stream = true;
+			} else {
+				num_LPs_perStream = (N_S / num_streams); //last stream will not be of the same size
+				num_streams = num_streams + 1; //one extra streams.where nos of LPs to be solved will be less;
+				equal_stream = false;
+			}
+			cudaStream_t stream[num_streams];
+			cudaError_t result;
+
+			//Creation of Streams
+			for (int i = 0; i < num_streams; i++) {
+				result = cudaStreamCreate(&stream[i]);
+			}
+
+			//err = cudaMemcpy(G_MAT, MAT, (N_S * M * N * sizeof(float)),cudaMemcpyHostToDevice);
+			//Stream -- memcopy Host to Device
+			std::cout << "\nNumber of LPs_perStream = " << num_LPs_perStream
+					<< std::endl;
+			unsigned int lastBlock_size;
+			if (equal_stream == false) {
+				lastBlock_size = N_S
+						- (N_S / (num_streams - 1)) * (num_streams - 1); //LAST Stream Size
+				std::cout << "\nAmit Last Block size (LPs is )= "
+						<< lastBlock_size << std::endl;
+			}
+
+			for (int i = 0; i < num_streams; i++) {
+				if (equal_stream == false && i == (num_streams - 1)) { //last stream
+					int offset = i * Each_LP_size * lastBlock_size; //for memory copy
+					cudaMemcpyAsync(&G_MAT[offset], &MAT[offset],
+							(lastBlock_size * M * N * sizeof(float)),
+							cudaMemcpyHostToDevice, stream[i]);
+				} else {
+					int offset = i * Each_LP_size * num_LPs_perStream; //for memory copy
+					cudaMemcpyAsync(&G_MAT[offset], &MAT[offset],
+							(num_LPs_perStream * M * N * sizeof(float)),
+							cudaMemcpyHostToDevice, stream[i]);
+				}
+			}
+			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, G_Sel, R_data, R_index);
+			//	mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, R_data, R_index);
+			//std::cout << "Before Kernel Call!!!" << std::endl;
+			//Stream -- Kernel
+			for (int i = 0; i < num_streams; i++) {
+				if (equal_stream == false && i == (num_streams - 1)) { //last stream
+					int offset_res = i * lastBlock_size; //for result here offset_res is a pointer to the LP number
+					//mykernel<<<num_LPs_perStream, 256, 0, stream[i]>>>(G_MAT, M, N, G_R, G_Sel, num_LPs_perStream, offset_res);
+					mykernel<<<lastBlock_size, threads_per_block, 0, stream[i]>>>(G_MAT, M, N, G_R, lastBlock_size, R_data, R_index, offset_res);
+				} else {
+					int offset_res = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
+					//mykernel<<<num_LPs_perStream, 256, 0, stream[i]>>>(G_MAT, M, N, G_R, G_Sel, num_LPs_perStream, offset_res);
+					mykernel<<<num_LPs_perStream, threads_per_block, 0, stream[i]>>>(G_MAT, M, N, G_R, num_LPs_perStream, R_data, R_index, offset_res);
 				}
 
 			}
+			//	std::cout << "After Kernel Call!!!" << std::endl;
+			//cudaDeviceSynchronize();//removed as hopping that cudaFree will handle it
+			//err = cudaMemcpy(R, G_R, N_S * sizeof(float),cudaMemcpyDeviceToHost);
 
+			//Stream -- memcopy Device to Host
+			for (int i = 0; i < num_streams; i++) {
+				if (equal_stream == false && i == (num_streams - 1)) { //last stream
+					int offset_res = i * lastBlock_size; //for result here offset_res is a pointer to the LP number
+					cudaMemcpyAsync(&R[offset_res], &G_R[offset_res],
+							(lastBlock_size * sizeof(float)),
+							cudaMemcpyDeviceToHost, stream[i]);
+				} else {
+					int offset_res = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
+					cudaMemcpyAsync(&R[offset_res], &G_R[offset_res],
+							(num_LPs_perStream * sizeof(float)),
+							cudaMemcpyDeviceToHost, stream[i]);
+				}
+			}
+			// **** End of Stream Processing *******
+
+			//printf("CUDA memcpy G_R: %s\n", cudaGetErrorString(err));
+			//	std::cout << "N_S = " << N_S << std::endl;
 		}
-
 		cudaFree(G_MAT);
-		//		cudaFree(G_R);
-		//cudaFree(G_Sel);
-		//cudaDeviceSynchronize();
-		//		cudaMalloc((void **) &G_R, N_S * sizeof(float));
-		cudaMalloc((void **) &G_MAT, (N_S * M * N * sizeof(float)));
-		// printf("CUDA malloc G_MAT: %s\n", cudaGetErrorString(err));
-		cudaMemcpy(G_MAT, MAT, (N_S * M * N * sizeof(float)),
-				cudaMemcpyHostToDevice);
-		//printf("CUDA malloc N_MAT: %s\n", cudaGetErrorString(err));
-		//	cudaMemcpy(G_Sel, Sel, sizeof(int), cudaMemcpyHostToDevice);
-		//printf("CUDA malloc G_Sel: %s\n", cudaGetErrorString(err));
-
-		mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, G_Sel, R_data, R_index);
-		//mykernel<<<N_S, 96>>>(G_MAT, M, N, G_R, N_S, R_data, R_index);
-		cudaDeviceSynchronize();
-		cudaMemcpy(R, G_R, N_S * sizeof(float), cudaMemcpyDeviceToHost);
-
-		/*cudaMemcpy(MAT, G_MAT, (N_S * M * N * sizeof(float)),
-		 cudaMemcpyDeviceToHost);*/
-		//std::cout
-		// << "***********Final SIMPLEX from GPU*************\n Time took:\n";*/
+		cudaFree(G_R);
+		cudaFree(R_index); //Only to synchronise with the cudamemcpy
+		cudaFree(R_data); //Only to synchronise with the cudamemcpy
+		cudaFreeHost(MAT); //This is needed to avoid Segmentation fault error
+		//cudaDeviceReset();
 	}
-
-	else {
-		//cudaEvent_t start, stop;
-
-		err = cudaMalloc((void **) &G_MAT, (N_S * M * N * sizeof(float)));
-		//printf("CUDA malloc G_MAT : %s\n", cudaGetErrorString(err));
-		err = cudaMemcpy(G_MAT, MAT, (N_S * M * N * sizeof(float)),
-				cudaMemcpyHostToDevice);
-		//printf("CUDA memcpy G_MAT : %s\n", cudaGetErrorString(err));
-
-		//err = cudaMemcpy(G_Sel, Sel, sizeof(int), cudaMemcpyHostToDevice);
-		//printf("CUDA memcpy G_Sel: %s\n", cudaGetErrorString(err));
-		/*std::cout << "Simplex -AFTER CREATION OF Z\n";
-
-		 for (i = 0; i < M; i++) {
-		 for (j = 0; j < N; j++) {
-		 std::cout << MAT[(i + j * M)] << "(" << (i + j * M) << ")\t";
-		 }
-		 std::cout << "\n";
-		 }*/
-		mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, G_Sel, R_data, R_index);
-		//mykernel<<<N_S, 96>>>(G_MAT, M, N, G_R, N_S, R_data, R_index);
-		//	cudaDeviceSynchronize();		//removed as hopping that cudaFree will handle it
-		err = cudaMemcpy(R, G_R, N_S * sizeof(float), cudaMemcpyDeviceToHost);
-		//printf("CUDA memcpy G_R: %s\n", cudaGetErrorString(err));
-		//cudaMemcpy(MAT, G_MAT, (N_S * M * N * sizeof(float)), cudaMemcpyDeviceToHost);
-		//	std::cout << "N_S = " << N_S << std::endl;
-	}
-//	cudaFree(G_MAT);
-//	cudaFree(G_Sel);
-	cudaFree(R_index);	//Only to synchronise with the cudamemcpy
-//	cudaDeviceReset();
-
 }
 
-//  Computes the entire list of LPs by diving into different blocks :: this interface not use at present
-std::vector<float> Simplex::bulkSolver(math::matrix<float> &List_of_ObjValue) {
-	unsigned int tot_lp = List_of_ObjValue.size1();
-	std::cout << "Total LPs " << tot_lp << std::endl;
-	int lp_block_size = 1000;//input how many LPs you want to solve at a time ??????
-	unsigned int number_of_blocks;
-	if (tot_lp % lp_block_size == 0)
-		number_of_blocks = tot_lp / lp_block_size;
-	else
-		number_of_blocks = (tot_lp / lp_block_size) + 1;
-	std::cout << "Total Blocks " << number_of_blocks << std::endl;
+/*	Used here due to lack of proper place
+ * numVectors:: number of Template Directions/Vectors
+ * NewTotalIteration :: Iterations
+ */
 
-	std::list<block_lp> bulk_lps(number_of_blocks);	//list of sub-division of LPs
-	struct block_lp myLPList;
-	myLPList.block_obj_coeff.resize(lp_block_size, List_of_ObjValue.size2());
-	math::matrix<float> block_obj_coeff(lp_block_size,
-			List_of_ObjValue.size2());
-	unsigned int index = 0;
-	for (unsigned int lp_number = 0; lp_number < tot_lp; lp_number++) {
-		for (unsigned int i = 0; i < List_of_ObjValue.size2(); i++) {
-			myLPList.block_obj_coeff(index, i) = List_of_ObjValue(lp_number, i);
-		}
-		index++;
-		if (index == lp_block_size) {
-			index = 0;
-			bulk_lps.push_back(myLPList);
-		}
-	}	//end of all LPs
-	std::list<block_lp_result> bulk_result(number_of_blocks);
-	struct block_lp_result eachBlock;
-	eachBlock.results.resize(lp_block_size);	//last block will be less
+__host__ void Simplex::ComputeLP(math::matrix<float> &obj_funs_for_X,
+		int UnitBall, unsigned int number_of_streams) { //NEW implementation
+	cudaError_t err;
+	unsigned int threads_per_block; //Maximum threads depends on CC 1.x =512 2.x and > = 1024
+	unsigned int number_of_blocks; //depends on our requirements (better to be much more than the number of SMs)
+	int N_S = this->number_of_LPs_for_X;
+//std::cout<<"N_S = "<<N_S<<"\n";
+//single_bound_flag_result = true;
 
-	for (std::list<block_lp>::iterator it = bulk_lps.begin();
-			it != bulk_lps.end(); it++) {
-		ComputeLP((*it).block_obj_coeff);
-		eachBlock.results = this->getResultAll();
-		bulk_result.push_back(eachBlock);
-	}
-	std::vector<float> res(tot_lp);
-	unsigned int index_res = 0;
-	for (std::list<block_lp_result>::iterator it = bulk_result.begin();
-			it != bulk_result.end(); it++) {
-		unsigned int block_result_size = (*it).results.size();
-		for (unsigned int i = 0; i < block_result_size; i++) {
-			res[index_res] = (*it).results[i];
-			index_res++;
+	unsigned int memSize = N_S * sizeof(float);
+//R = (float*) malloc(memSize);
+	cudaMallocHost(&R_X, memSize); //PINNED Memory		//Doing here First Time
+	cudaMallocHost(&R_UnitBall, memSize); //PINNED Memory		//Doing here First Time
+
+	if (single_bound_flag_result) {
+		//printf("\nOur New Optimizations Result %d\n", single_bound_flag_result);
+		unsigned int mysize = N_S * sizeof(float);
+		//cudaMallocHost(&R, mysize);	//PINNED Memory		//Doing here First Time
+		err = cudaMalloc((void **) &G_R_X, mysize); //Doing here First Time
+		err = cudaMalloc((void **) &G_R_UnitBall, mysize); //Doing here First Time
+
+		mysize = BoundValue_for_X.size() * sizeof(float);
+		err = cudaMalloc((void **) &d_bound_result_for_X, mysize); //C1.size1() * 96 being the maximum threads
+		//	printf("CUDA malloc d_bound_result: %s\n", cudaGetErrorString(err));
+		mysize = obj_funs_for_X.size1() * obj_funs_for_X.size2()
+				* sizeof(float);
+		err = cudaMalloc((void **) &d_obj_coeff_for_X, mysize); //C1.size1() * 96 being the maximum threads
+		//	printf("CUDA malloc d_obj_coeff: %s\n", cudaGetErrorString(err));
+		//mysize = obj_funs_for_X.size1() * obj_funs_for_X.size2()* sizeof(float);
+		//obj_coeff = (float *) malloc(C1.size1() * C1.size2() * sizeof(float));//creating obj_coeff_values for kernel compute
+		cudaMallocHost(&obj_coeff_for_X, mysize); //Pinned memory Syntax:: cudaMallocHost(&h_ptr,bytes);
+		//printf("CUDA cudaMallocHost-- obj_coeff: %s\n", cudaGetErrorString(err));
+		int dimension = obj_funs_for_X.size2();
+
+		mysize = BoundValue_for_X.size() * sizeof(float);
+		//only single variable per constraints
+		//bound_result = (float *) malloc(BoundValue.size() * sizeof(float));	//creating bound_values for kernel compute
+		cudaMallocHost(&bound_result_for_X, mysize); //Pinned memory Syntax:: cudaMallocHost(&h_ptr,bytes);
+		//printf("CUDA cudaMallocHost-- bound_result: %s\n", cudaGetErrorString(err));
+		for (int i = 0; i < BoundValue_for_X.size(); i++) {
+			bound_result_for_X[i] = BoundValue_for_X[i];
 		}
+		threads_per_block = obj_funs_for_X.size2(); //dimension size is the number of threads per block
+		//threads_per_block = 512;	//1024;	//Maximum on CC 3.0
+
+		// **** Begin of Stream Processing *******	//Using Asynchronous Memory copy:: needs //MAT to be a PINNED memory
+		//100% Occupancy with 1024 threads using 4 registers shows 2 active thread blocks per Multiprocessor
+
+		int num_streams = number_of_streams; //number of streams desired to create ::Note check for odd numbers
+		int num_LPs_perStream;
+
+		if (N_S % num_streams == 0) { //Maximum nos. of LPs is of UnitBall_infinity_norm
+			num_LPs_perStream = (N_S / num_streams);
+		} else {
+			num_LPs_perStream = (N_S / num_streams); //last will not be the same will be less
+			num_streams = num_streams + 1; //one extra streams. though nos of LPs to be solved will be less in the extra stream;
+		}
+		//std::cout<<"num_LPs_perStream = " <<num_LPs_perStream<<"\n";
+		cudaStream_t stream[num_streams];
+		cudaError_t result;
+		//int Each_LP_size = M * N;	// * sizeof(float);
+
+		//Creation of Streams
+		for (int i = 0; i < num_streams; i++) {
+			result = cudaStreamCreate(&stream[i]);
+		}
+
+		cudaMemcpy(d_bound_result_for_X, bound_result_for_X,
+				(BoundValue_for_X.size() * sizeof(float)),
+				cudaMemcpyHostToDevice);
+		//cudaMemcpy(d_obj_coeff, obj_coeff,(C1.size1() * C1.size2() * sizeof(float)),cudaMemcpyHostToDevice);
+#pragma omp parallel for
+		for (unsigned int s = 0; s < obj_funs_for_X.size1(); s++) {
+			for (int i = 0; i < obj_funs_for_X.size2(); i++) {
+				obj_coeff_for_X[s * obj_funs_for_X.size2() + i] =
+						obj_funs_for_X(s, i); //Row major Copy
+				//std::cout<<" obj_coeff_for_X = "<<obj_coeff_for_X[s * obj_funs_for_X.size2() + i]<<"\t";
+			}
+		}
+		//cudaMemcpy(G_MAT, MAT, (N_S * M * N * sizeof(float)),	cudaMemcpyHostToDevice);
+		//Stream -- memcopy Host to Device
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream * obj_funs_for_X.size2();
+			cudaMemcpyAsync(&d_obj_coeff_for_X[offset],
+					&obj_coeff_for_X[offset],
+					(num_LPs_perStream * obj_funs_for_X.size2() * sizeof(float)),
+					cudaMemcpyHostToDevice, stream[i]);
+		}
+		//std::cout << "\nnum_LPs_perStream  = " << num_LPs_perStream << "\n";
+		//Stream -- Kernel		//streaming is easy if each block solves one LP
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
+			//bound_simplex<<<grid_size, threads_per_block>>>(d_bound_result, d_obj_coeff, G_R, dimension, C1.size1());
+			bounded_Solver_for_X_UnitBall<<<num_LPs_perStream, threads_per_block, 0, stream[i]>>>(d_bound_result_for_X, d_obj_coeff_for_X, G_R_X, N_S, G_R_UnitBall, offset);
+		}
+
+		//Stream -- memcopy Device to Host
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
+			cudaMemcpyAsync(&R_X[offset], &G_R_X[offset],
+					num_LPs_perStream * sizeof(float), cudaMemcpyDeviceToHost,
+					stream[i]);
+		}
+		mysize = N_S * sizeof(float); //dimension is same for UnitBall's direction also
+		cudaMemcpy(R_UnitBall, G_R_UnitBall, mysize, cudaMemcpyDeviceToHost); //TODO:: make this as Async memcopy this is Big Chunk
+		printf("CUDA cudaMemcpy-- R_UnitBall: %s\n", cudaGetErrorString(err));
+
+		// **** End of Stream Processing *******
+		//cudaMemcpy(R, G_R, C1.size1() * sizeof(float), cudaMemcpyDeviceToHost);
+
+		cudaFree(G_R_X);
+		cudaFree(d_bound_result_for_X);
+		cudaFree(d_obj_coeff_for_X);
+		cudaFree(G_R_UnitBall);
+
+		cudaFreeHost(obj_coeff_for_X); //Newly Added but not tested
+		cudaFreeHost(bound_result_for_X); //Newly Added but not tested
+	} else { //otherwise normal simplex algorithm
+		std::cout << "\nModel does not has Bounded Variable!!!\n";
+		//TODO:: take care of this condition
 	}
-	std::cout << "Result size = " << res.size() << std::endl;
-//R = res;
-	return res;
 }
-
