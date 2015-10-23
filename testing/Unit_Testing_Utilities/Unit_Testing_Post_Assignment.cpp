@@ -10,8 +10,8 @@
 #include "UnitTest++/UnitTest++.h"
 #include <vector>
 #include "Utilities/StandardVector.h"
-#include "math/matrix.h"
-#include "MySrc/Polytope/Polytope.h"
+#include "core_system/math/matrix.h"
+#include "core_system/continuous/Polytope/Polytope.h"
 #include "Utilities/Post_Assignment.h"
 
 using namespace std;

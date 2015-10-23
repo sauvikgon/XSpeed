@@ -34,7 +34,7 @@ using namespace std;
  * M_Matrix : is the matrix with the optimal reachability result
  *
  */
-
+/*
 std::vector<std::vector<double> > ImprovedReachabilitySequentialWithDelete(
 		std::vector<std::vector<double> > coeffMatrix,
 		std::vector<double> bMatrix, std::vector<int> boundBGreaterThenExpr,
@@ -183,5 +183,5 @@ std::vector<std::vector<double> > ImprovedReachabilitySequentialWithDelete(
 			myfile.close();
 			return M_Matrix;
 		}
-
+*/
 #endif /* IMPROVEDREACHSEQUENTIALWITHDELETE_H_ */

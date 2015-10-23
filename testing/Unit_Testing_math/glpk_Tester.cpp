@@ -7,7 +7,7 @@
 #include <sstream>
 #include <iostream>
 //#include "UnitTest++/UnitTest++.h"
-#include "unittest++/UnitTest++.h"
+#include "UnitTest++/UnitTest++.h"
 
 #include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 #include "core_system/math/matrix.h"
@@ -37,7 +37,7 @@ TEST_FIXTURE(Glpk_LPSolver, CPU_LP_Test) {
 	std::vector<int> status_val;
 
 
-	/*int N_S = 1000;
+	int N_S = 1000;
 	int N_C = 2;
 	int N_V = 2;
 
@@ -61,7 +61,7 @@ TEST_FIXTURE(Glpk_LPSolver, CPU_LP_Test) {
 
 	direction.resize(2);	//Down Direction
 	direction[0] = 1.0;
-	direction[1] = 20.0;*/
+	direction[1] = 20.0;
 
 	boundSignI = 1;
 

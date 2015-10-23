@@ -2,13 +2,13 @@
 #include <iostream>
 #include "UnitTest++/UnitTest++.h"
 
-#include "math/uni_sphere.h"
-#include "MySrc/DataStructureDirections.h"
-#include "MySrc/sf_directions.h"
-#include "MySrc/Reachability/reachabilitySequential.h"
-#include "MySrc/Reachability/reachabilityParallel_Process.h"
-#include "math/basic_functions.h"
-#include "math/matrix.h"
+#include "core_system/math/uni_sphere.h"
+#include "application/DataStructureDirections.h"
+#include "application/sf_directions.h"
+#include "core_system/Reachability/reachabilitySequential.h"
+#include "core_system/Reachability/reachabilityParallel_Process.h"
+#include "core_system/math/basic_functions.h"
+#include "core_system/math/matrix.h"
 
 #include "Utilities/Template_Polyhedra.h"
 #include "Utilities/Post_Assignment.h"
@@ -441,9 +441,9 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 	system_dynamics.MatrixB = Bmatrix;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.U.setCoeffMatrix(ConstraintsMatrixV);//I have a doubt here whether without resize it can set or not?????
-	system_dynamics.U.setColumnVector(boundValueV);
-	system_dynamics.U.setInEqualitySign(boundSignV);//Assuming size is <= .... as we are only using  Ax<=b format.
+	system_dynamics.U->setCoeffMatrix(ConstraintsMatrixV);//I have a doubt here whether without resize it can set or not?????
+	system_dynamics.U->setColumnVector(boundValueV);
+	system_dynamics.U->setInEqualitySign(boundSignV);//Assuming size is <= .... as we are only using  Ax<=b format.
 
 	initial_polytope_I.setCoeffMatrix(ConstraintsMatrixI);
 	initial_polytope_I.setColumnVector(boundValueI);

@@ -7,6 +7,7 @@
 
 #include "core_system/Reachability/reachability_HybridAutomata.h"
 
+using namespace std;
 //bound is the maximum number of transitions or jumps permitted.
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
@@ -19,7 +20,7 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		polytope::ptr continuous_initial_polytope,
 		ReachabilityParameters& reach_parameters, int lp_solver_type_choosen,
 		unsigned int Total_Partition, unsigned int number_of_streams,
-		int Solver_GLPK_Gurobi_GPU, vector<template_polyhedra>& reach_region,
+		int Solver_GLPK_Gurobi_GPU, std::vector<template_polyhedra>& reach_region,
 		unsigned int id) {
 
 	if (Algorithm_Type == SEQ) { //Continuous Sequential Algorithm
@@ -53,7 +54,7 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		//	std::cout << "Parallel Done\n";
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
-
+	/*
 	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 		cout << "\nRunning GPU Sequential\n";
 		boost::timer::cpu_timer AllReachGPU_time;
@@ -71,7 +72,7 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
 				<< return_Time1 << std::endl;
 
-	}
+	} */
 
 	if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout
@@ -148,18 +149,18 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 				current_location.isInvariantExists(), NCores, PAR_ITER_DIR,
 				lp_solver_type_choosen);
 	}
-
+    /*
 	if (Algorithm_Type == GPU_MULTI_SEQ) {
 		//Continuous Sequential Algorithm mixed with Cublas Multiplication
 		cout << "\nRunning Mixed CPU - GPU Sequntial\n";
-		/*	reach_region = reachabilitySequential_GPU_MatrixVector_Multiply(
-		 current_location.getSystem_Dynamics(),
-		 continuous_initial_polytope, reach_parameters,
-		 current_location.getInvariant(),
-		 current_location.isInvariantExists(),
-		 lp_solver_type_choosen);*/
-	}	// Performance degraded
-
+		//	reach_region = reachabilitySequential_GPU_MatrixVector_Multiply(
+		// current_location.getSystem_Dynamics(),
+		// continuous_initial_polytope, reach_parameters,
+		// current_location.getInvariant(),
+		// current_location.isInvariantExists(),
+		// lp_solver_type_choosen);
+	}	 Performance degraded
+ 	*/
 	if (Algorithm_Type == PAR_PROCESS) { //Continuous Parallel Algorithm parallelizing the Directions
 		//Parallel implementation using Process Creation
 //			 cout << "\nRunning Parallel Using Process Creation\n";
@@ -193,10 +194,10 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 
 		unsigned int count = pwlist.get_waiting_list_size();//get the size of PWList
 		cout << "\nCount = " << count << "\n";
-		vector<template_polyhedra> reach_region_list(count);//each thread write's flowpipe on separate index
+		std::vector<template_polyhedra> reach_region_list(count);//each thread write's flowpipe on separate index
 
 		//Create a sublist of symbolic_states and work with it inside the parallel region(each thread accesses uniquely)
-		vector<symbolic_states> list_U(count);	//SubList for parallel
+		std::vector<symbolic_states> list_U(count);	//SubList for parallel
 		for (int i = 0; i < count; i++) {
 			list_U[i] = pwlist.WaitingList_delete_front();
 			pwlist.PassedList_insert(list_U[i]);
@@ -314,13 +315,13 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 						symbolic_states newState(ds, newShiftedPolytope);
 #pragma omp critical
 						{
-/*
- * Todo:: we insert all the symbolic_states into the pwlist for computing FlowPipe iff 1) and 2) holds
- * Step 1) the new current_destination.getLocID() is NOT in the Passed List and
- * Step 2) the "New Initial Polytope" or "the newShiftedPolytope" is NOT contained in the FlowPipe of LocationID of step 1
- *  as the FlowPipe in the same location will be same if the newShiftedPolytope is IN FlowPipe
- *  But if Step 1 holds and Step 2 does not then it will be inserted in pwlist even if the LocationID is in Passed List
- */
+//
+// Todo:: we insert all the symbolic_states into the pwlist for computing FlowPipe iff 1) and 2) holds
+// Step 1) the new current_destination.getLocID() is NOT in the Passed List and
+// Step 2) the "New Initial Polytope" or "the newShiftedPolytope" is NOT contained in the FlowPipe of LocationID of step 1
+//  as the FlowPipe in the same location will be same if the newShiftedPolytope is IN FlowPipe
+//  But if Step 1 holds and Step 2 does not then it will be inserted in pwlist even if the LocationID is in Passed List
+//
 							pwlist.WaitingList_insert(newState); //RACE CONDITION HERE
 						}
 					} //end of multiple intersected region with guard
@@ -352,3 +353,4 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 	} //end of while loop checking waiting_list != empty
 	return Reachability_Region;
 }
+

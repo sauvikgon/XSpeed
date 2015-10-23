@@ -13,10 +13,10 @@
 #include <list>
 #include <iterator>
 
-#include "MySrc/DataStructureDirections.h"
-#include "HybridAutomata/Hybrid_Automata.h"
-#include "HybridAutomata/Transition.h"
-#include "math/matrix.h"
+#include "application/DataStructureDirections.h"
+#include "core_system/HybridAutomata/Hybrid_Automata.h"
+#include "core_system/HybridAutomata/Transition.h"
+#include "core_system/math/matrix.h"
 /*
  hybrid_automata();
  hybrid_automata(std::list<transitions> transition, location init_loc, int dim);
@@ -77,9 +77,9 @@ struct ClassHybridAutomata {
 
 		boundSignI = 1;
 
-		D.U.setCoeffMatrix(ConstraintsMatrixI);
-		D.U.setColumnVector(boundValueI);
-		D.U.setInEqualitySign(boundSignI);
+		D.U->setCoeffMatrix(ConstraintsMatrixI);
+		D.U->setColumnVector(boundValueI);
+		D.U->setInEqualitySign(boundSignI);
 
 		Inv.setCoeffMatrix(ConstraintsMatrixI);
 		Inv.setColumnVector(boundValueI);

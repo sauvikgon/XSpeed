@@ -1,8 +1,8 @@
 #include <sstream>
 #include <iostream>
 #include "UnitTest++/UnitTest++.h"
-#include "math/matrix.h"
-#include "math/lp_solver_ourSimplex/simplex.h"
+#include "core_system/math/matrix.h"
+#include "core_system/math/ourSimplex_lp_solver/simplex.h"
 #include <omp.h>
 #include "boost/timer/timer.hpp"
 

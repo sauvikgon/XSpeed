@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
 //#include "UnitTest++/UnitTest++.h"
-#include "unittest++/UnitTest++.h"
+#include "UnitTest++/UnitTest++.h"
 #include "core_system/math/matrix.h"
 #include "core_system/math/ourSimplex_lp_solver/simplex.h"
 #include <omp.h>

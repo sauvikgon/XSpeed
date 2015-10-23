@@ -40,3 +40,7 @@ void pwl::PassedList_insert(symbolic_states s){
 void pwl::WaitingList_insert(symbolic_states s){
 	waiting_list.push_back(s);
 }
+
+int pwl::get_waiting_list_size(){
+	return waiting_list.size();
+}

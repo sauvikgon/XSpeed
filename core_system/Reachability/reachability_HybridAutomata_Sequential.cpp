@@ -180,7 +180,7 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 			//	std::cout << "Parallel Done\n";
 			//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 		}
-
+		/*
 		if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 			cout << "\nRunning GPU Sequential\n";
 			boost::timer::cpu_timer AllReachGPU_time;
@@ -199,7 +199,8 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 			std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
 					<< return_Time1 << std::endl;
 
-		}
+
+		} */
 
 		if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 			cout

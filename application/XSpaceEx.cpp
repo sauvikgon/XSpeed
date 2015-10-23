@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
 		number_of_streams = 1;	//Number of streams in GPU(division)
 		lp_solver_type_choosen = 1;	//For the entire Tool
 		number_of_times = 1;		//Make this 1 for Memory Profiling
-		Solver_GLPK_Gurobi_GPU = 3;	//if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
+		Solver_GLPK_Gurobi_GPU = 1;	//if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
 		//	cout << "\nRunning Testing 1\n";
 	}
 

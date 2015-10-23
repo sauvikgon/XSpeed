@@ -9,8 +9,8 @@
 #include <iostream>
 #include "UnitTest++/UnitTest++.h"
 
-#include "MySrc/DataStructureDirections.h"
-#include "HybridAutomata/Location.h"
+#include "application/DataStructureDirections.h"
+#include "core_system/HybridAutomata/Location.h"
 
 using namespace std;
 
@@ -60,9 +60,9 @@ struct ClassLocation {
 
 		boundSignI = 1;
 
-		D.U.setCoeffMatrix(ConstraintsMatrixI);
-		D.U.setColumnVector(boundValueI);
-		D.U.setInEqualitySign(boundSignI);
+		D.U->setCoeffMatrix(ConstraintsMatrixI);
+		D.U->setColumnVector(boundValueI);
+		D.U->setInEqualitySign(boundSignI);
 
 		Inv.setCoeffMatrix(ConstraintsMatrixI);
 		Inv.setColumnVector(boundValueI);
