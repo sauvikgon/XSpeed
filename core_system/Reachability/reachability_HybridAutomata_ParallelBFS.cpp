@@ -27,19 +27,18 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		//		std::cout<<"\nBefore entering reachability Sequential = " << gurobi_lp_solver::gurobi_lp_count;
 		//		std::cout<<"\nBefore entering reachability Sequential = " << lp_solver::lp_solver_count;
 //			int a;			std::cin>>a;
-		boost::timer::cpu_timer AllReach_time;
-		AllReach_time.start();
+		/*boost::timer::cpu_timer AllReach_time;
+		AllReach_time.start();*/
 		reach_region[id] = reachabilitySequential(
 				current_location.getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location.getInvariant(),
 				current_location.isInvariantExists(), lp_solver_type_choosen);
-		AllReach_time.stop();
+		/*AllReach_time.stop();
 		double wall_clock1;
 		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
-				<< return_Time1 << std::endl;
+		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "	<< return_Time1 << std::endl;*/
 	}
 
 	if (Algorithm_Type == PAR_OMP) {
@@ -158,7 +157,7 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		 current_location.getInvariant(),
 		 current_location.isInvariantExists(),
 		 lp_solver_type_choosen);*/
-	}	// Performance degraded
+	} // Performance degraded
 
 	if (Algorithm_Type == PAR_PROCESS) { //Continuous Parallel Algorithm parallelizing the Directions
 		//Parallel implementation using Process Creation
@@ -169,7 +168,7 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 				current_location.getInvariant(),
 				current_location.isInvariantExists(), lp_solver_type_choosen);
 //		 cout << "\nContinuous Reachability Parallel Using Process Creation COMPLETTED!!!\n";
-	}	//to be removed from the Project
+	} //to be removed from the Project
 
 }
 
@@ -191,31 +190,31 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 		// write in its respective index. So need a unique ID for each thread which can be obtained from
 		// the size of the PWList at each iteration
 
-		unsigned int count = pwlist.get_waiting_list_size();//get the size of PWList
-		cout << "\nCount = " << count << "\n";
-		vector<template_polyhedra> reach_region_list(count);//each thread write's flowpipe on separate index
+		unsigned int count = pwlist.get_waiting_list_size(); //get the size of PWList
+	//	cout << "\nCount = " << count << "\n";
+		vector<template_polyhedra> reach_region_list(count); //each thread write's flowpipe on separate index
 
 		//Create a sublist of symbolic_states and work with it inside the parallel region(each thread accesses uniquely)
-		vector<symbolic_states> list_U(count);	//SubList for parallel
+		vector<symbolic_states> list_U(count); //SubList for parallel
 		for (int i = 0; i < count; i++) {
 			list_U[i] = pwlist.WaitingList_delete_front();
 			pwlist.PassedList_insert(list_U[i]);
-		}	//All symbolic_states have been deleted	//	cout<<"\nIdentifed pwList Done";
+		} //All symbolic_states have been deleted	//	cout<<"\nIdentifed pwList Done";
 // ********************************* BFS Starts **********************************************************
 //Threads or OMP can be used here
 #pragma omp parallel for
 		for (unsigned int id = 0; id < count; id++) {
 			//there will be different current_location, continuous_initial_polytope, reach_parameters
-			symbolic_states U;	//local
-			U = list_U[id];	//independent symbolic state to work with
-			discrete_set discrete_state;	//local
-			polytope::ptr continuous_initial_polytope;	//local
-			ReachabilityParameters reach_parameter_local;	//local
+			symbolic_states U; //local
+			U = list_U[id]; //independent symbolic state to work with
+			discrete_set discrete_state; //local
+			polytope::ptr continuous_initial_polytope; //local
+			ReachabilityParameters reach_parameter_local; //local
 
 			discrete_state = U.getDiscreteSet();
 			continuous_initial_polytope = U.getContinuousSet();
 			reach_parameter_local = reach_parameters;
-			reach_parameter_local.X0 = continuous_initial_polytope;//	cout<<"\nInside for Loop";
+			reach_parameter_local.X0 = continuous_initial_polytope; //	cout<<"\nInside for Loop";
 			int location_id;
 			for (std::set<int>::iterator it =
 					discrete_state.getDiscreteElements().begin();
@@ -260,8 +259,8 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 			// Returns the Flow_Pipe in reach_region_list[id]
 			//  ********************* FlowPipe or Reach Computation Done ********************
 //  ************** Check to see if Computed FlowPipe is Empty  **********
-			if (reach_region_list[id].getTotalIterations() != 0) { //computed reach_region is empty
-				cout <<"\nLoc ID = "<<current_location.getLocId() <<" Location Name = " << name << "\n";
+			if (reach_region_list[id].getTotalIterations() != 0 && number_times < bound) { //computed reach_region is empty && optimize computation
+				//cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
 
 				for (std::list<transitions>::iterator t =
 						current_location.getOut_Going_Transitions().begin();
@@ -279,7 +278,7 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 					current_destination = H.getLocation(
 							(*t).getDestination_Location_Id());
 					string locName = current_destination.getName();
-					cout <<"\nNext Loc ID = "<<current_destination.getLocId()<< " Location Name = " << locName << "\n";
+				//	cout << "\nNext Loc ID = " << current_destination.getLocId() << " Location Name = " << locName << "\n";
 					if ((locName.compare("BAD") == 0)
 							|| (locName.compare("GOOD") == 0)
 							|| (locName.compare("FINAL") == 0)
@@ -300,7 +299,7 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 					for (std::list<template_polyhedra>::iterator i =
 							intersected_polyhedra.begin();
 							i != intersected_polyhedra.end(); i++) {
-						cout<<"\nNumber of Intersections #1\n";
+					//	cout << "\nNumber of Intersections #1\n";
 						intersectedRegion = (*i).getTemplate_approx(
 								lp_solver_type_choosen);
 						//Returns a single over-approximated polytope from the list of intersected polytopes
@@ -314,13 +313,13 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 						symbolic_states newState(ds, newShiftedPolytope);
 #pragma omp critical
 						{
-/*
- * Todo:: we insert all the symbolic_states into the pwlist for computing FlowPipe iff 1) and 2) holds
- * Step 1) the new current_destination.getLocID() is NOT in the Passed List and
- * Step 2) the "New Initial Polytope" or "the newShiftedPolytope" is NOT contained in the FlowPipe of LocationID of step 1
- *  as the FlowPipe in the same location will be same if the newShiftedPolytope is IN FlowPipe
- *  But if Step 1 holds and Step 2 does not then it will be inserted in pwlist even if the LocationID is in Passed List
- */
+							/*
+							 * Todo:: we insert all the symbolic_states into the pwlist for computing FlowPipe iff 1) and 2) holds
+							 * Step 1) the new current_destination.getLocID() is NOT in the Passed List and
+							 * Step 2) the "New Initial Polytope" or "the newShiftedPolytope" is NOT contained in the FlowPipe of LocationID of step 1
+							 *  as the FlowPipe in the same location will be same if the newShiftedPolytope is IN FlowPipe
+							 *  But if Step 1 holds and Step 2 does not then it will be inserted in pwlist even if the LocationID is in Passed List
+							 */
 							pwlist.WaitingList_insert(newState); //RACE CONDITION HERE
 						}
 					} //end of multiple intersected region with guard
@@ -328,26 +327,19 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 				} //end of multiple transaction
 				  //Here we have again populated the pwlist for next-round's parallel process
 			} // End-if  ******* Check for Empty FlowPipe Done *********
-#pragma omp critical
-			{
-				number_times++;	//RACE CONDITION HERE
-				cout << "\nnumber_times = " << number_times << "\n";
-			//	cout << "\nBound = " << bound << "\n";
-			}
-			if (number_times >= bound) { //check to see how many jumps have been made(i.e., number of discrete transitions made)
-				stop_loop = true;
-				//break;	//So all threads does this in common
-			}
 		} //END of parallel FOR-LOOP
-		  // ************************* BFS Ends *************************************
+//:: Can be optimize if we can count number_times inside the parallel loop per breadth then we can avoid transaction and intersection
+//:: computation for next transition if number_times exceeds bound ....
+		number_times++; //One Level or one Breadth Search over
+		//cout << "\nnumber_times = " << number_times << "  Bound = " << bound << "\n";
+		// ************************* BFS Ends *************************************
 //Here i need to join threads and get there computed flowpipe(i.e., reach_region)
 //Creating a list of objects of "Reachability Set" for each transition
 		for (unsigned int index = 0; index < count; index++) {
 			if (reach_region_list[index].getTotalIterations() != 0) //computed reach_region is NOT empty
 				Reachability_Region.push_back(reach_region_list[index]);
 		}
-
-		if (stop_loop)	//Number of jump over
+		if (number_times > bound) //check to see how many jumps have been made(i.e., number of discrete transitions made)
 			break;
 	} //end of while loop checking waiting_list != empty
 	return Reachability_Region;

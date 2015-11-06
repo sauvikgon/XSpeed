@@ -48,4 +48,8 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 		symbolic_states& initial_symbolic_state,
 		ReachabilityParameters& reach_parameters);
 
+void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
+		symbolic_states& initial_symbolic_state,
+		ReachabilityParameters& reach_parameters);
+
 #endif /* NAVIGATIONBENCHMARK4Var_H_ */

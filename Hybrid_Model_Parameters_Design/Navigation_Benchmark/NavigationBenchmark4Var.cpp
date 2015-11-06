@@ -87,33 +87,42 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueI.resize(row);
 	// ********************* start_location=2:: (0.2 <=x1<=0.6,0.1<=x2<=0.5,v1==0,v2==0) ************************
 	/*boundValueI[0] = 0.6;
-	boundValueI[1] = -0.2;
-	boundValueI[2] = 0.5;
-	boundValueI[3] = -0.1;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
+	 boundValueI[1] = -0.2;
+	 boundValueI[2] = 0.5;
+	 boundValueI[3] = -0.1;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;*/
+	// ********************* start_location=1:: (0.5 <=x1<=0.5, 0.5<=x2<=0.5,v1==0,v2==0) ************************
+	boundValueI[0] = 0.5; //
+	 boundValueI[1] = -0.5;
+	 boundValueI[2] = 0.5;
+	 boundValueI[3] = -0.5;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+/*
+	boundValueI[0] = 1; //  **** start_location=1:: (0 <=x1<=1, 1<=x2<=2,v1==3,v2==0) ***
+	boundValueI[1] = 0;
+	boundValueI[2] = 2;
+	boundValueI[3] = -1;
+	boundValueI[4] = 3;
+	boundValueI[5] = -3;
 	boundValueI[6] = 0;
 	boundValueI[7] = 0;*/
-	// ********************* start_location=1:: (0.5 <=x1<=0.8, 1.5<=x2<=1.8,v1==0,v2==0) ************************
-	boundValueI[0] = 0.8; //
-	boundValueI[1] = -0.5;
-	boundValueI[2] = 1.8;
-	boundValueI[3] = -1.5;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;
 
-/*	// ********************* start_location=5:: (1.2 <=x1<=1.4, 2.5<=x2<=2.7,v1==0,v2==0) ************************
-	boundValueI[0] = 1.4; //
-	boundValueI[1] = -1.2;
-	boundValueI[2] = 2.7;
-	boundValueI[3] = -2.5;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;
-*/
+	/*	// ********************* start_location=5:: (1.2 <=x1<=1.4, 2.5<=x2<=2.7,v1==0,v2==0) ************************
+	 boundValueI[0] = 1.4; //
+	 boundValueI[1] = -1.2;
+	 boundValueI[2] = 2.7;
+	 boundValueI[3] = -2.5;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+	 */
 	boundSignI = 1;
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
@@ -124,7 +133,6 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	//d_set.insert_element(2); //the initial Location ID = 2
 	//d_set.insert_element(5);		//the initial Location ID = 5
 	//d_set.insert_element(6);		//the initial Location ID = 6
-
 
 	/*	*************** Common Parameter Initialization *******************
 	 * Common Parameter for all Locations or transitions
@@ -797,7 +805,6 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l7);
 	Hybrid_Automata.addLocation(l8);
 	Hybrid_Automata.addLocation(l9);
-
 
 	initial_symbolic_state.setDiscreteSet(d_set);
 	initial_symbolic_state.setContinuousSet(initial_polytope_I);

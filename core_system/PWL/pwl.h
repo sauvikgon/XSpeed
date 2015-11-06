@@ -29,9 +29,12 @@ public:
 	//return TRUE if the waiting_list is empty otherwise FALSE
 	bool WaitingList_isEmpty();
 
+	unsigned int get_waiting_list_size();
+
 private:
 	std::list<symbolic_states> waiting_list;
 	std::list<symbolic_states> passed_list;
+	unsigned int waiting_list_size;	//number of elements currently present in the waiting_list
 };
 
 

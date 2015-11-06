@@ -69,6 +69,7 @@ struct Dynamics {
 	//std::vector<std::vector <double> > MatrixB;
 	math::matrix<double> MatrixB;
 	polytope::ptr U;
+	std::vector<double> C;
 
 };
 struct TransitionDynamics {			//May not be used

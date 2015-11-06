@@ -99,7 +99,6 @@ private:
 //	math::matrix<double> All_Directions;//Number of Rows or facets of the Convex Set/Polytoe including the invariants(template_dirs + invariant_dirs)
 	math::matrix<double> invariant_Directions;	//only the invariant directions
 
-
 	//unsigned int total_Directions;	//Number of rows or the number of faces/constraints of the Convex Set/Polytoe Omega's
 	unsigned int total_template_Directions;	//total number of template directions
 	unsigned int total_invariant_Directions;	//total number of invariant directions

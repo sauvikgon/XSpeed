@@ -76,7 +76,7 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	Amatrix(1, 1) = 0;
 
 	Bmatrix.resize(row, col);
-	Bmatrix(0, 0) = 1;
+	Bmatrix(0, 0) = 0;
 	Bmatrix(0, 1) = 0;
 	Bmatrix(1, 0) = 0;
 	Bmatrix(1, 1) = 1;

@@ -29,7 +29,7 @@ __global__ void bound_simplex(float *bound_value, float *C, float *result,
 
 	if (index < N_S) {
 
-		int i = index * blockDim.x; //address of each LP(object_function) is (index x size of one LP)
+	//	int i = index * blockDim.x; //address of each LP(object_function) is (index x size of one LP)
 		if (threadIdx.x == 0) {
 			float sum = 0.0;
 			for (int j = 0; j < blockDim.x; j++) { //every column is obj_coeff

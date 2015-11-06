@@ -26,11 +26,11 @@ double Omega_Support(const ReachabilityParameters& ReachParameters,
 		int Min_Or_Max);
 
 /* This function is called by the algorithm which avoids support function computation for the same/similar directions  */
-double Omega_Support_Similar_Direction(const ReachabilityParameters& ReachParameters,
+double Omega_Support_Similar_Direction(
+		const ReachabilityParameters& ReachParameters,
 		std::vector<double> direction, supportFunctionProvider::ptr Initial_X0,
 		Dynamics& system_dynamics, lp_solver &lp, lp_solver &lp_U,
 		int Min_Or_Max, bool same_dir, Optimize_Omega_Support& optimize_omega);
-
 
 double W_Support(const ReachabilityParameters& ReachParameters,
 		Dynamics& system_dynamics, std::vector<double> direction, lp_solver &lp,
@@ -58,10 +58,14 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		int lp_solver_type_choosen) {
 	scalar_type norm_A = SysD.MatrixA.norm_inf();
 	math::matrix<scalar_type> Btrans;
-	SysD.MatrixB.transpose(Btrans);
-	supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
-			new transMinkPoly(SysD.U, Btrans));
-	double V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
+	double V_max_norm = 0.0;
+
+	if (!SysD.U->getIsEmpty()) {// if U not empty
+		SysD.MatrixB.transpose(Btrans);
+		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
+				new transMinkPoly(SysD.U, Btrans));
+		V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
+	}
 	scalar_type result = (exp(tau * norm_A) - 1 - tau * norm_A)
 			* (V_max_norm / norm_A);
 //	cout<<"\nBeta = "<<(double)result<<endl;
@@ -78,7 +82,6 @@ template<typename scalar_type>
 scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		supportFunctionProvider::ptr I, int lp_solver_type_choosen)	// polytope V
 		{
-
 	scalar_type norm_A = system_dynamics.MatrixA.norm_inf();
 	//cout<<"\nInside Testing MatrixA norm = "<<norm_A<<endl;
 	double I_max_norm = I->max_norm(lp_solver_type_choosen);//R_X_o ie max_norm of the Initial polytope
@@ -86,8 +89,10 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 
 	math::matrix<scalar_type> Btrans;
 	system_dynamics.MatrixB.transpose(Btrans);
+
 	supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 			new transMinkPoly(system_dynamics.U, Btrans));
+
 	double V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
 	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U
 //	cout<<"\nInside Testing V_max_norm = "<<V_max_norm <<endl;

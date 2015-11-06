@@ -36,7 +36,10 @@ void pwl::PassedList_insert(symbolic_states s){
 	passed_list.push_back(s);
 }
 
-
 void pwl::WaitingList_insert(symbolic_states s){
 	waiting_list.push_back(s);
+}
+
+unsigned int pwl::get_waiting_list_size(){
+	return waiting_list.size();
 }

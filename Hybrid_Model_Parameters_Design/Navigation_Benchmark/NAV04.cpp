@@ -83,47 +83,72 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixI(7, 2) = 0;
 	ConstraintsMatrixI(7, 3) = -1;
 
+	discrete_set d_set;
+
+	//d_set.insert_element(6);		//the initial Location ID = 6
+
 	boundValueI.resize(row);
 	// ********************* start_location=2:: (0.2 <=x1<=0.6,0.1<=x2<=0.5,v1==0,v2==0) ************************
-	boundValueI[0] = 0.6;
-	boundValueI[1] = -0.2;
-	boundValueI[2] = 0.5;
-	boundValueI[3] = -0.1;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;
-/*	// ********************* start_location=1:: (0.5 <=x1<=0.8, 1.5<=x2<=1.8,v1==0,v2==0) ************************
-	boundValueI[0] = 0.8; //
-	boundValueI[1] = -0.5;
-	boundValueI[2] = 1.8;
-	boundValueI[3] = -1.5;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;
 
-	// ********************* start_location=5:: (1.2 <=x1<=1.4, 2.5<=x2<=2.7,v1==0,v2==0) ************************
-	boundValueI[0] = 1.4; //
-	boundValueI[1] = -1.2;
-	boundValueI[2] = 2.7;
-	boundValueI[3] = -2.5;
+	d_set.insert_element(2); //the initial Location ID = 2
+	boundValueI[0] = 0.5; //	(0.5<=x1<=0.5, 0.5<=x2<=0.5, v1==0,v2==0) ************************
+	boundValueI[1] = -0.5;
+	boundValueI[2] = 0.5;
+	boundValueI[3] = -0.5;
 	boundValueI[4] = 0;
 	boundValueI[5] = 0;
 	boundValueI[6] = 0;
 	boundValueI[7] = 0;
-*/
+	/*
+	 boundValueI[0] = 0.6;
+	 boundValueI[1] = -0.2;
+	 boundValueI[2] = 0.5;
+	 boundValueI[3] = -0.1;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+
+	 boundValueI[0] = 1;	// ************ :: (0 <=x1<=1,0<=x2<=1,v1==0,v2==0) ************************
+	 boundValueI[1] = 0;
+	 boundValueI[2] = 1;
+	 boundValueI[3] = 0;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+	 */
+
+	/*	// ********************* start_location=1:: (0.5 <=x1<=0.8, 1.5<=x2<=1.8,v1==0,v2==0) ************************
+
+	 d_set.insert_element(1);		//the initial Location ID = 1
+
+	 boundValueI[0] = 0.8; //
+	 boundValueI[1] = -0.5;
+	 boundValueI[2] = 1.8;
+	 boundValueI[3] = -1.5;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+
+	 // ********************* start_location=5:: (1.2 <=x1<=1.4, 2.5<=x2<=2.7,v1==0,v2==0) ************************
+
+	 d_set.insert_element(5);		//the initial Location ID = 5
+
+	 boundValueI[0] = 1.4; //
+	 boundValueI[1] = -1.2;
+	 boundValueI[2] = 2.7;
+	 boundValueI[3] = -2.5;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+	 */
 	boundSignI = 1;
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 	//initial_polytope_I.setPolytope(ConstraintsMatrixI, boundValueI, boundSignI);
-
-	discrete_set d_set;
-	//d_set.insert_element(1);		//the initial Location ID = 1
-	d_set.insert_element(2); //the initial Location ID = 2
-	//d_set.insert_element(5);		//the initial Location ID = 5
-	//d_set.insert_element(6);		//the initial Location ID = 6
-
 
 	/*	*************** Common Parameter Initialization *******************
 	 * Common Parameter for all Locations or transitions
@@ -322,8 +347,8 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 					gaurdBoundSign));
 	transitions t4(4, "2 to 1", 2, 1, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 1.01; // x==1 and 0<=y<=1 and -1000<=v1<=1000 &  -1000<=v2<=1000
-	gaurdBoundValue[1] = -0.95;	//testing  0.95<=x<=1
+	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1 and -1000<=v1<=1000 &  -1000<=v2<=1000
+	gaurdBoundValue[1] = -1; //testing  0.95<=x<=1
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = 0;
 	gaurdBoundValue[4] = 1000;
@@ -899,7 +924,6 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l7);
 	Hybrid_Automata.addLocation(l8);
 	Hybrid_Automata.addLocation(l9);
-
 
 	initial_symbolic_state.setDiscreteSet(d_set);
 	initial_symbolic_state.setContinuousSet(initial_polytope_I);

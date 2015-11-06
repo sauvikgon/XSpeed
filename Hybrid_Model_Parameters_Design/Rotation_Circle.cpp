@@ -103,8 +103,10 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 //Common Parameters : initial polytope and dynamics
 	system_dynamics.MatrixB = Bmatrix;
 	system_dynamics.MatrixA = Amatrix;
+
 	system_dynamics.U = polytope::ptr(new polytope());
 	system_dynamics.U->setIsEmpty(true);	//set empty
+
 //	Dynamics Initalised ---------------------
 	// Initial Polytope is initialised
 	initial_polytope_I = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));

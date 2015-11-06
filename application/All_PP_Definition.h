@@ -28,10 +28,13 @@
 #define TBBALL				2		//Timed Bouncing Ball
 #define HELICOPTER			3		//HELICOPTER Model
 #define FIVEDIMSYS			4		//Model of A Five Dimensional System
-#define NAVIGATION			5		//NAVIGATION Benchmark model
-#define CIRCLE				6		//CIRCLE model with two locations
-#define CIRCLE_FOUR_LOC		7		//CIRCLE model with four locations
-#define CIRCLE_ONE_LOC		8		//CIRCLE model with one location
+#define NAVIGATION_1		5		//NAVIGATION Benchmark model - NAV01 (3 x 3)
+#define NAVIGATION_2		6		//NAVIGATION Benchmark model - NAV02 (3 x 3)
+#define NAVIGATION_3		7		//NAVIGATION Benchmark model - NAV03 (3 x 3)
+#define NAVIGATION_4		8		//NAVIGATION Benchmark model - NAV04 (5 x 5)
+#define CIRCLE_ONE_LOC		9		//CIRCLE model with one location
+#define CIRCLE_TWO_LOC		10		//CIRCLE model with two locations
+#define CIRCLE_FOUR_LOC		11		//CIRCLE model with four locations
 //**************** Hybrid Automata Definition ***********************
 
 // *********** Different Template Directions ******************
