@@ -14,6 +14,7 @@
 #include "Utilities/invariantBoundaryCheck.h"
 #include "core_system/math/matrix.h"
 #include "Utilities/Template_Polyhedra.h"
+#include "application/sf_utility.h"
 
 using namespace std;
 

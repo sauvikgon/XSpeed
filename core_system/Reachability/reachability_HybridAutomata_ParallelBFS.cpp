@@ -28,17 +28,17 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		//		std::cout<<"\nBefore entering reachability Sequential = " << lp_solver::lp_solver_count;
 //			int a;			std::cin>>a;
 		/*boost::timer::cpu_timer AllReach_time;
-		AllReach_time.start();*/
+		 AllReach_time.start();*/
 		reach_region[id] = reachabilitySequential(
 				current_location.getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location.getInvariant(),
 				current_location.isInvariantExists(), lp_solver_type_choosen);
 		/*AllReach_time.stop();
-		double wall_clock1;
-		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "	<< return_Time1 << std::endl;*/
+		 double wall_clock1;
+		 wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		 double return_Time1 = wall_clock1 / (double) 1000;
+		 std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "	<< return_Time1 << std::endl;*/
 	}
 
 	if (Algorithm_Type == PAR_OMP) {
@@ -74,26 +74,34 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 
 	if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout
-				<< "\nRunning Parallel-over-Iterations(PARTITIONS) Using OMP Thread\n";
+				<< "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
 		bool invertible;
-		math::matrix<double> A_inv(
-				current_location.getSystem_Dynamics().MatrixA.size1(),
-				current_location.getSystem_Dynamics().MatrixA.size2());
-		invertible = current_location.getSystem_Dynamics().MatrixA.inverse(
-				A_inv); //size of A_inv must be declared else error
-		if (!invertible)
-			std::cout << "\nDynamics Matrix A is not invertible\n"; //later can give option to stop or select different algorithm
-		else
-			reach_parameters.A_inv = A_inv;
+		if (!current_location.getSystem_Dynamics().isEmptyMatrixA) {
 
-		int NCores = Total_Partition; //Number of Partitions (number of threads)
-		reach_region[id] = reachParallelExplore(
-				current_location.getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters,
-				current_location.getInvariant(),
-				current_location.isInvariantExists(), NCores, PAR_ITER,
-				lp_solver_type_choosen);
-		//		std::cout << "Finished computing reachable states\n";
+			math::matrix<double> A_inv(
+					current_location.getSystem_Dynamics().MatrixA.size1(),
+					current_location.getSystem_Dynamics().MatrixA.size2());
+			invertible = current_location.getSystem_Dynamics().MatrixA.inverse(
+					A_inv); //size of A_inv must be declared else error
+			if (!invertible)
+				std::cout << "\nDynamics Matrix A is not invertible\n"; //later can give option to stop or select different algorithm
+			else
+				reach_parameters.A_inv = A_inv;
+
+			int NCores = Total_Partition; //Number of Partitions (number of threads)
+			reach_region[id] = reachParallelExplore(
+					current_location.getSystem_Dynamics(),
+					continuous_initial_polytope, reach_parameters,
+					current_location.getInvariant(),
+					current_location.isInvariantExists(), NCores, PAR_ITER,
+					lp_solver_type_choosen);
+			//		std::cout << "Finished computing reachable states\n";
+		} else {
+			std::cout << "\nFlow Dynamics Matrix A does not exists!!!\n";
+			template_polyhedra poly_emptyp;
+			reach_region[id] = poly_emptyp; //returning an empty reach_region for this location
+
+		}
 	}
 
 //Continuous Parallel Algorithm ::by set partitioning
@@ -129,23 +137,29 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		//using OMP:: Parallel implementation with a combination of Iterations and Directions
 		//	cout << "\nRunning Parallel Using combination of Iterations and Directions\n";
 		bool invertible;
-		math::matrix<double> A_inv(
-				current_location.getSystem_Dynamics().MatrixA.size1(),
-				current_location.getSystem_Dynamics().MatrixA.size2());
-		invertible = current_location.getSystem_Dynamics().MatrixA.inverse(
-				A_inv); //size of A_inv must be declared else error
-		if (!invertible)
-			std::cout << "\nDynamics Matrix A is not invertible\n"; //later can give option to stop or select different algorithm
-		else
-			reach_parameters.A_inv = A_inv;
+		if (!current_location.getSystem_Dynamics().isEmptyMatrixA) {
+			math::matrix<double> A_inv(
+					current_location.getSystem_Dynamics().MatrixA.size1(),
+					current_location.getSystem_Dynamics().MatrixA.size2());
+			invertible = current_location.getSystem_Dynamics().MatrixA.inverse(
+					A_inv); //size of A_inv must be declared else error
+			if (!invertible)
+				std::cout << "\nDynamics Matrix A is not invertible\n"; //later can give option to stop or select different algorithm
+			else
+				reach_parameters.A_inv = A_inv;
 
-		int NCores = Total_Partition; //Number of Partitions (number of threads)
-		reach_region[id] = reachParallelExplore(
-				current_location.getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters,
-				current_location.getInvariant(),
-				current_location.isInvariantExists(), NCores, PAR_ITER_DIR,
-				lp_solver_type_choosen);
+			int NCores = Total_Partition; //Number of Partitions (number of threads)
+			reach_region[id] = reachParallelExplore(
+					current_location.getSystem_Dynamics(),
+					continuous_initial_polytope, reach_parameters,
+					current_location.getInvariant(),
+					current_location.isInvariantExists(), NCores, PAR_ITER_DIR,
+					lp_solver_type_choosen);
+		} else {
+			std::cout << "\nFlow Dynamics Matrix A does not exists!!!\n";
+			template_polyhedra poly_emptyp;
+			reach_region[id] = poly_emptyp; //returning an empty reach_region for this location
+		}
 	}
 
 	if (Algorithm_Type == GPU_MULTI_SEQ) {
@@ -191,7 +205,7 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 		// the size of the PWList at each iteration
 
 		unsigned int count = pwlist.get_waiting_list_size(); //get the size of PWList
-	//	cout << "\nCount = " << count << "\n";
+		//	cout << "\nCount = " << count << "\n";
 		vector<template_polyhedra> reach_region_list(count); //each thread write's flowpipe on separate index
 
 		//Create a sublist of symbolic_states and work with it inside the parallel region(each thread accesses uniquely)
@@ -243,13 +257,18 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 			reach_parameter_local.result_beta = result_beta;
 
 			math::matrix<double> phi_matrix, phi_trans;
-			current_location.getSystem_Dynamics().MatrixA.matrix_exponentiation(
-					phi_matrix, reach_parameter_local.time_step);
-			phi_matrix.transpose(phi_trans);
-			reach_parameter_local.phi_trans = phi_trans;
+			if (!current_location.getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
+				current_location.getSystem_Dynamics().MatrixA.matrix_exponentiation(
+						phi_matrix, reach_parameter_local.time_step);
+				phi_matrix.transpose(phi_trans);
+				reach_parameter_local.phi_trans = phi_trans;
+			}
 			math::matrix<double> B_trans;
-			current_location.getSystem_Dynamics().MatrixB.transpose(B_trans);
-			reach_parameter_local.B_trans = B_trans;
+			if (!current_location.getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
+				current_location.getSystem_Dynamics().MatrixB.transpose(
+						B_trans);
+				reach_parameter_local.B_trans = B_trans;
+			}
 			// ******************* Computing Parameters Done *******************************
 			//  ********************* FlowPipe or Reach Computation *************************
 			ReachFunction(Algorithm_Type, current_location,
@@ -259,8 +278,9 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 			// Returns the Flow_Pipe in reach_region_list[id]
 			//  ********************* FlowPipe or Reach Computation Done ********************
 //  ************** Check to see if Computed FlowPipe is Empty  **********
-			if (reach_region_list[id].getTotalIterations() != 0 && number_times < bound) { //computed reach_region is empty && optimize computation
-				//cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
+			if (reach_region_list[id].getTotalIterations() != 0
+					&& number_times < bound) { //computed reach_region is empty && optimize computation
+					//cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
 
 				for (std::list<transitions>::iterator t =
 						current_location.getOut_Going_Transitions().begin();
@@ -278,7 +298,7 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 					current_destination = H.getLocation(
 							(*t).getDestination_Location_Id());
 					string locName = current_destination.getName();
-				//	cout << "\nNext Loc ID = " << current_destination.getLocId() << " Location Name = " << locName << "\n";
+					//	cout << "\nNext Loc ID = " << current_destination.getLocId() << " Location Name = " << locName << "\n";
 					if ((locName.compare("BAD") == 0)
 							|| (locName.compare("GOOD") == 0)
 							|| (locName.compare("FINAL") == 0)
@@ -299,7 +319,7 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 					for (std::list<template_polyhedra>::iterator i =
 							intersected_polyhedra.begin();
 							i != intersected_polyhedra.end(); i++) {
-					//	cout << "\nNumber of Intersections #1\n";
+						//	cout << "\nNumber of Intersections #1\n";
 						intersectedRegion = (*i).getTemplate_approx(
 								lp_solver_type_choosen);
 						//Returns a single over-approximated polytope from the list of intersected polytopes

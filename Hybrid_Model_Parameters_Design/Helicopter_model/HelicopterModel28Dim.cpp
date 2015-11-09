@@ -220,8 +220,14 @@ unsigned int index_i = 0, index_j = 0;
 	invariant->setIsEmpty(true);
 
 
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
 	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	system_dynamics.U = polytope::ptr(new polytope());	//empty polytope is set by default
 	system_dynamics.U->setIsEmpty(true);	//set empty = true which is by default
 

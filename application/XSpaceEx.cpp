@@ -262,11 +262,11 @@ int main(int argc, char *argv[]) {
 	double time_bound;
 	unsigned int model_type, iterations_size, directions_type_or_size;
 	int transition_size;
-	int Algorithm_Type, DiscreteAlgorithm;
-	int number_of_times = 10; //Make this 1 for Memory Profiling
+	int Algorithm_Type, DiscreteAlgorithm=0;
+	int number_of_times = 1; //Make this 1 for Memory Profiling
 	unsigned int number_of_streams = 1;
 	int lp_solver_type_choosen = 1; //	1 for GLPK and 2 for Gurobi
-	int Solver_GLPK_Gurobi_GPU; //if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
+	int Solver_GLPK_Gurobi_GPU=3; //if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
 	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
 
 	if (argc == 1) { //No argument or Running directly from the Eclipse Editor

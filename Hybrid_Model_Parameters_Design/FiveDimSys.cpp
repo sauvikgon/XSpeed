@@ -233,8 +233,14 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	invariant->setIsEmpty(true);
 	invariant->setIsUniverse(true);
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 //	Dynamics Initalised ---------------------

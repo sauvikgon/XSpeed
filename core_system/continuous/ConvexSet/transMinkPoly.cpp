@@ -19,7 +19,7 @@ transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU,
 }
 transMinkPoly::transMinkPoly(polytope::ptr myX0, math::matrix<double> myTRANS) {
 	//cout<<"\nDim of myX0 which is U = "<<myX0->getSystemDimension()<<"\n";
-	X0 = myX0;	//This is POINTER COPY
+	X0 = myX0; //This is POINTER COPY
 	//X0->setSystemDimension(myX0->getSystemDimension());//NOT REQUIRED due to pointer copy
 	U = polytope::ptr(new polytope(true));
 	TRANS = myTRANS;
@@ -43,26 +43,17 @@ double transMinkPoly::computeSupportFunction(std::vector<double> direction,
 	std::vector<double> dprime;
 //	cout << "\nCalling transMinkPoly ComputerSupportFunction\n";
 	TRANS.mult_vector(direction, dprime);
-	/*for (int i = 0; i < dprime.size(); i++)
-	 cout << "\n" << dprime[i];
-	 cout << "\n*********************************\n";
-	 for (int i = 0; i < X0->getCoeffMatrix().size1(); i++) {
-	 for (int j = 0; j < X0->getCoeffMatrix().size2(); j++) {
-	 cout << X0->getCoeffMatrix()(i, j) << "  ";
-	 }
-	 cout <<"\t <= "<<X0->getColumnVector()[i] << "\n";
-	 }*/
+
 	double res1 = 0;
 	if (!X0->getIsEmpty()) {
 		res1 = X0->computeSupportFunction(dprime, lp, lp_U, Min_Or_Max);
 	}
 	//cout << "\nres1 = " << res1;
-	double res2 = 0;
+	double res2 = 0.0;
 	if (!U->getIsEmpty()) {
 		B_TRANS.mult_vector(direction, dprime);
 		res2 = U->computeSupportFunction(dprime, lp_U, lp, Min_Or_Max);
 	}
-
 	double res = res1 + time * res2;
 	if (beta != 0) {
 		double dir_norm = support_unitball_infnorm(direction);
@@ -76,7 +67,7 @@ double transMinkPoly::max_norm(int lp_solver_type_choosen) {
 	double Max_A, sf, Max = 0.0;
 	//std::cout << "Inside transMink max_norm\n";
 	if (this->getIsEmpty()) {
-		sf = 0.0;	//returns zero for empty polytope
+		sf = 0.0; //returns zero for empty polytope
 		//std::cout << "Inside transmink max_norm.. set empty\n";
 	}
 	/*else if (this->getIsUniverse())
@@ -84,31 +75,31 @@ double transMinkPoly::max_norm(int lp_solver_type_choosen) {
 	else {
 		//sf = lp.Compute_LLP(direction);	//since lp has already been created and set with constraints at the time of creation
 
-		std::vector<std::vector<double> > generator_directions;	//this vector-vector is used only in this function not affecting the rest of the codes
+		std::vector<std::vector<double> > generator_directions; //this vector-vector is used only in this function not affecting the rest of the codes
 		//Generator for Positive Directions for example Right and Up
 		for (unsigned int i = 0; i < dimension_size; i++) {
 			std::vector<double> directions(dimension_size, 0.0);
-			directions[i] = 1;		//Positive Generators
+			directions[i] = 1; //Positive Generators
 			generator_directions.push_back(directions);
 		}
 		//Generator for Negative Directions for example Left and Down
 		for (unsigned int i = 0; i < dimension_size; i++) {
 			std::vector<double> directions(dimension_size, 0.0);
-			directions[i] = -1;		//Negative Generators
+			directions[i] = -1; //Negative Generators
 			generator_directions.push_back(directions);
 		}
 		int type = lp_solver_type_choosen;
 		lp_solver lp(type), lp_U(type);
 		//	cout << "\nBefore Not Empty\n";
 		if (!X0->getIsEmpty()) {
-			lp.setMin_Or_Max(2);	//Setting GLP_MAX
+			lp.setMin_Or_Max(2); //Setting GLP_MAX
 			lp.setConstraints(X0->getCoeffMatrix(), X0->getColumnVector(),
 					X0->getInEqualitySign());
 			//		cout << "\nX0 Not Empty\n";
 		}
 
 		if (!U->getIsEmpty()) {
-			lp_U.setMin_Or_Max(2);	//Setting GLP_MAX
+			lp_U.setMin_Or_Max(2); //Setting GLP_MAX
 			lp_U.setConstraints(U->getCoeffMatrix(), U->getColumnVector(),
 					U->getInEqualitySign());
 			//	cout << "\nU Not Empty\n";

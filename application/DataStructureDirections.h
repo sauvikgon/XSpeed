@@ -65,11 +65,14 @@ struct ReachabilityParameters {
 struct Dynamics {
 	//std::vector<std::vector <double> > MatrixA;
 	math::matrix<double> MatrixA;
+	bool isEmptyMatrixA;	//True if empty otherwise False
 	/** The transformation matrix of the input convex set U */
 	//std::vector<std::vector <double> > MatrixB;
-	math::matrix<double> MatrixB;
+	math::matrix<double> MatrixB;	//polytope U will determine if MatrixB is empty
+	bool isEmptyMatrixB;	//True if empty otherwise False
 	polytope::ptr U;
 	std::vector<double> C;
+	bool isEmptyC;	//True if empty otherwise False
 
 };
 struct TransitionDynamics {			//May not be used

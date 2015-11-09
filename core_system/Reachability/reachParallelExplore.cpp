@@ -30,9 +30,9 @@ const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
 	ReachParameters.TimeBound = newTimeBound; //correct one.
 	//ReachParameters.TimeBound = 1;
 	ReachParameters.Iterations = ReachParameters.TimeBound
-			/ ReachParameters.time_step;//required in Invarian_Boundary_Check
+			/ ReachParameters.time_step; //required in Invarian_Boundary_Check
 //	cout << "partition_iterations" << ReachParameters.Iterations << "\n";
-	//ReachParameters.time_step = newTimeBound/ partition_iterations;	//computed for 1st partition
+			//ReachParameters.time_step = newTimeBound/ partition_iterations;	//computed for 1st partition
 	template_polyhedra reachability_region;
 	//std::list<polytope::ptr> initial_polys_list;
 //omp_set_nested(1);		//Enabling the Nested Loop in OpenMP Programming
@@ -40,16 +40,16 @@ const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
 
 //use g++ -fopenmp for compiling #pragma omp
 #pragma omp parallel for
-	for (int i = 0; i < CORES; i++) {//for (double i = 0; i < T; i += newTimeBound) {
+	for (int i = 0; i < CORES; i++) { //for (double i = 0; i < T; i += newTimeBound) {
 
 		template_polyhedra Tpoly;
 		math::matrix<double> phi, phi_trans, A_inv_phi, y_matrix, y_trans;
-		double START_TIME = i * newTimeBound;//first iteration START_TIME = i = 0 which make beta = 0
-	//	std::cout << "\nStart_Time = " << START_TIME << "\n";
-		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME);
-		phi.transpose(phi_trans);		//phi_trans computed
+		double START_TIME = i * newTimeBound; //first iteration START_TIME = i = 0 which make beta = 0
+		//	std::cout << "\nStart_Time = " << START_TIME << "\n";
+		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME);	//if MatrixA is empty will not perform this function
+		phi.transpose(phi_trans); //phi_trans computed
 
-		math::matrix<double> A_inv;	//(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
+		math::matrix<double> A_inv; //(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
 		A_inv = ReachParameters.A_inv;
 		A_inv.multiply(phi, A_inv_phi);
 		A_inv_phi.minus(A_inv, y_matrix);
@@ -61,11 +61,11 @@ const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
 						phi_trans, y_trans, 1, 0));
 		//Calling Sequential algorithm here and later can mix with parallel for direction
 		if (Algorithm_Type == PAR_ITER) {
-		//	std::cout << "\nFrom Parallel Only Iterations BEFORE\n";
+			//	std::cout << "\nFrom Parallel Only Iterations BEFORE\n";
 			Tpoly = reachabilitySequential_For_Parallel_Iterations(
 					SystemDynamics, Initial, ReachParameters, invariant,
 					invariantExists, lp_solver_type_choosen);
-		//	std::cout << "\nFrom Parallel Only Iterations AFTER\n";
+			//	std::cout << "\nFrom Parallel Only Iterations AFTER\n";
 		}
 
 		if (Algorithm_Type == PAR_ITER_DIR) {
@@ -75,14 +75,13 @@ const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
 			//	std::cout << "\nFrom Parallel over Iterations and Directions\n";
 		}
 #pragma omp critical
-	//	if (i != 0)
-			reachability_region = reachability_region.union_TemplatePolytope(
-					Tpoly);
-	}		//end of pragma for loop
+		//	if (i != 0)
+		reachability_region = reachability_region.union_TemplatePolytope(Tpoly);
+	} //end of pragma for loop
 
 	//this may not be required if Average_number_of_times = 1 otherwise must.
 	ReachParameters.Iterations = original_Iterations;
-	ReachParameters.TimeBound = T;//restore the original timebound for next transition or location
+	ReachParameters.TimeBound = T; //restore the original timebound for next transition or location
 	//GenerateInitialPolytopePlotter(initial_polys_list);
 	return reachability_region;
 }
@@ -209,19 +208,24 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 	//int tid;
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
-	unsigned int shm_NewTotalIteration = ReachParameters.Iterations;//Shared Variable for resize iterations number on crossing with invariant
+	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	int Min_Or_Max = 2;
 
-	math::matrix<double> MatrixValue;	//Shared Matrix for all child thread
+	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 	//size_type row = numVectors, col = shm_NewTotalIteration;
 	boost::numeric::ublas::matrix<double>::size_type row = numVectors, col =
 			shm_NewTotalIteration;
 
-	if (isInvariantExist == true) {	//if invariant exist. Computing
+	if (isInvariantExist == true) { //if invariant exist. Computing
 		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
 				ReachParameters, invariant, lp_solver_type_choosen);
 		//	cout <<"\nInvariant Exists!!!\n";
-	}	//End of Invariant Directions
+	} //End of Invariant Directions
+	if (shm_NewTotalIteration == 1) {
+		template_polyhedra poly_emptyp;
+		return poly_emptyp;
+	}
+
 	col = shm_NewTotalIteration;
 	MatrixValue.resize(row, col);
 
@@ -240,13 +244,13 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 		lp_solver s_per_thread_I(type), s_per_thread_U(type), s_per_thread_inv(
 				type);
 		s_per_thread_I.setMin_Or_Max(2);
-		if (!Initial->getIsEmpty()) {//set glpk constraints If not an empty polytope
+		if (!Initial->getIsEmpty()) { //set glpk constraints If not an empty polytope
 			s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
 					ReachParameters.X0->getColumnVector(),
 					ReachParameters.X0->getInEqualitySign());
 		}
 		s_per_thread_U.setMin_Or_Max(2);
-		if (SystemDynamics.U->getIsEmpty()) {	//empty polytope
+		if (SystemDynamics.U->getIsEmpty()) { //empty polytope
 			//Polytope is empty so no glpk object constraints to be set
 		} else {
 			s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
@@ -261,22 +265,32 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 			rVariable[i] = ReachParameters.Directions(eachDirection, i);
 		}
 		unsigned int loopIteration = 0;
+		double term3, term3a, term3b, res2, term3c = 0.0;
 		sVariable = 0.0; //initialize s0
 		//  **************    Omega Function   ********************
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I,
 				s_per_thread_U, Min_Or_Max);
-		phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
-		double term3, term3a, term3b, res2;
-		term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I,
-				s_per_thread_U, Min_Or_Max);
-		B_trans.mult_vector(rVariable, Btrans_dir);
-		term2 = ReachParameters.time_step
-				* SystemDynamics.U->computeSupportFunction(Btrans_dir,
-						s_per_thread_U, s_per_thread_I, Min_Or_Max);
+		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
+			term1 = Initial->computeSupportFunction(phi_trans_dir,
+					s_per_thread_I, s_per_thread_U, Min_Or_Max);
+		}
+
+		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
+			B_trans.mult_vector(rVariable, Btrans_dir);
+
+		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
+			term2 = ReachParameters.time_step
+					* SystemDynamics.U->computeSupportFunction(Btrans_dir,
+							s_per_thread_U, s_per_thread_I, Min_Or_Max);
 		term3a = ReachParameters.result_alfa;
 		term3b = support_unitball_infnorm(rVariable);
+		if (!SystemDynamics.isEmptyC) {
+			term3c = ReachParameters.time_step
+					* dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
+		}
 		term3 = term3a * term3b;
-		res2 = term1 + term2 + term3;
+		res2 = term1 + term2 + term3 + term3c; //term3c Added
 		if (res1 > res2)
 			zIInitial = res1;
 		else
@@ -292,34 +306,43 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 			//  **************    W_Support Function   ********************
 			//	B_trans.mult_vector(rVariable, Btrans_dir);
 			//res1 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,	s_per_thread_U, s_per_thread_U, Min_Or_Max);
-			result1 = term2;		//replacement--optimizing
+			result1 = term2; //replacement--optimizing
 			double beta = ReachParameters.result_beta;
 			//double res_beta = beta	* (double) support_unitball_infnorm(rVariable);
-			double res_beta = beta	* term3b;	//replace from Previous step UnitBall
-
-			result = result1 + res_beta;
+			double res_beta = beta * term3b; //replace from Previous step UnitBall
+			result = result1 + res_beta + term3c; //Added term3c
 			zV = result;
 			//  **************  W_Support Function Over  ********************
 			s1Variable = sVariable + zV;
 			//phi_tau_Transpose.mult_vector(rVariable, r1Variable);
-			r1Variable = phi_trans_dir;		//replacement--optimizing
+			r1Variable = phi_trans_dir; //replacement--optimizing
 
 			//  **************    Omega Function   ********************
 			//res1 = Initial->computeSupportFunction(r1Variable, s_per_thread_I, s_per_thread_U, Min_Or_Max);
-			res1 = term1;	//replacement--optimizing
+			res1 = term1; //replacement--optimizing
 			double term3, term3a, res2;
-			phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
-			term1 = Initial->computeSupportFunction(phi_trans_dir,
-					s_per_thread_I, s_per_thread_U, Min_Or_Max);
 
-			B_trans.mult_vector(r1Variable, Btrans_dir);
-			term2 = ReachParameters.time_step
-					* SystemDynamics.U->computeSupportFunction(Btrans_dir,
-							s_per_thread_U, s_per_thread_I, Min_Or_Max);
+			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+				phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
+				term1 = Initial->computeSupportFunction(phi_trans_dir,
+						s_per_thread_I, s_per_thread_U, Min_Or_Max);
+			}
+
+			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
+				B_trans.mult_vector(r1Variable, Btrans_dir);
+				term2 = ReachParameters.time_step
+						* SystemDynamics.U->computeSupportFunction(Btrans_dir,
+								s_per_thread_U, s_per_thread_I, Min_Or_Max);
+			}
+
 			term3a = ReachParameters.result_alfa;
 			term3b = support_unitball_infnorm(r1Variable);
+			if (!SystemDynamics.isEmptyC) {
+				term3c = ReachParameters.time_step
+						* dot_product(SystemDynamics.C, r1Variable); //Added +tau* sf_C(l) 8/11/2015
+			}
 			term3 = term3a * term3b;
-			res2 = term1 + term2 + term3;
+			res2 = term1 + term2 + term3 + term3c;
 			if (res1 > res2)
 				zI = res1;
 			else
@@ -331,11 +354,11 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 			sVariable = s1Variable;
 			loopIteration++; //for the next Omega-iteration or Time-bound
 		} //end of while for each vector
-	}	//end of pragma omp parallel for
+	} //end of pragma omp parallel for
 
-	if (isInvariantExist == true) {		//if invariant exist. Computing
+	if (isInvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;
-		int num_inv = invariant->getColumnVector().size();//number of Invariant's constriants
+		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
 		inv_sfm.resize(num_inv, shm_NewTotalIteration);
 		for (int eachInvDirection = 0; eachInvDirection < num_inv;
 				eachInvDirection++) {
@@ -350,7 +373,7 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections, ReachParameters.Directions, invariant->getCoeffMatrix());
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
 	} else {
-		MatrixValue.resize(numVectors, shm_NewTotalIteration, true);//but writing or resizing only upto the NewTotalIteration
+		MatrixValue.resize(numVectors, shm_NewTotalIteration, true); //but writing or resizing only upto the NewTotalIteration
 		return template_polyhedra(MatrixValue, ReachParameters.Directions);
 	}
 }
@@ -366,19 +389,19 @@ const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
-	unsigned int shm_NewTotalIteration = ReachParameters.Iterations;//Shared Variable for resize iterations number on crossing with invariant
+	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	int Min_Or_Max = 2;
 
-	math::matrix<double> MatrixValue;	//Shared Matrix for all child thread
+	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 	//size_type row = numVectors, col = shm_NewTotalIteration;
 	boost::numeric::ublas::matrix<double>::size_type row = numVectors, col =
 			shm_NewTotalIteration;
 	MatrixValue.resize(row, col);
 
-	if (isInvariantExist == true) {	//if invariant exist. Computing
+	if (isInvariantExist == true) { //if invariant exist. Computing
 		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
 				ReachParameters, invariant, lp_solver_type_choosen);
-	}	//End of Invariant Directions
+	} //End of Invariant Directions
 //omp_set_nested(4);
 	int type = lp_solver_type_choosen;
 #pragma omp parallel for
@@ -389,13 +412,13 @@ const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
 				type);
 
 		s_per_thread_I.setMin_Or_Max(2);
-		if (!Initial->getIsEmpty()) {//set glpk constraints If not an empty polytope
+		if (!Initial->getIsEmpty()) { //set glpk constraints If not an empty polytope
 			s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
 					ReachParameters.X0->getColumnVector(),
 					ReachParameters.X0->getInEqualitySign());
 		}
 		s_per_thread_U.setMin_Or_Max(2);
-		if (!SystemDynamics.U->getIsEmpty()) {	//empty polytope
+		if (!SystemDynamics.U->getIsEmpty()) { //empty polytope
 			s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
 					SystemDynamics.U->getColumnVector(),
 					SystemDynamics.U->getInEqualitySign());
@@ -404,7 +427,7 @@ const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
 		double sVariable, s1Variable;
 		//std::cout<<"omp_get_max_active_levels() = "<<omp_get_max_active_levels()<<std::endl;
 		//std::cout<<"omp_get_thread_limit() = "<<omp_get_thread_limit()<<std::endl;
-		std::vector<double> r1Variable;	//now single dimension
+		std::vector<double> r1Variable; //now single dimension
 		r1Variable.resize(dimension);
 		std::vector<double> rVariable;
 		rVariable.resize(dimension);
@@ -412,7 +435,7 @@ const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
 			rVariable[i] = ReachParameters.Directions(eachDirection, i);
 		}
 		unsigned int loopIteration = 0;
-		sVariable = 0.0; 		//initialize s0
+		sVariable = 0.0; //initialize s0
 		zIInitial = Omega_Support(ReachParameters, rVariable, Initial,
 				SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 		MatrixValue(eachDirection, loopIteration) = zIInitial;
@@ -422,27 +445,27 @@ const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
 			//		std::cout<<"\tHello = "<<loopIteration;
 			ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);
 			zV = W_Support(ReachParameters, SystemDynamics, rVariable,
-					s_per_thread_U, Min_Or_Max);	//cout<<"zV= "<<zV<<"\t";
+					s_per_thread_U, Min_Or_Max); //cout<<"zV= "<<zV<<"\t";
 			s1Variable = sVariable + zV;
 			zI = Omega_Support(ReachParameters, r1Variable, Initial,
 					SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 			//	cout<<"zi= "<<zI<<"\t";
-			TempOmega = zI + s1Variable; 		//Y1
-			MatrixValue(eachDirection, loopIteration) = TempOmega; 		//Y1
-			rVariable = CopyVector(r1Variable);		//source to destination
+			TempOmega = zI + s1Variable; //Y1
+			MatrixValue(eachDirection, loopIteration) = TempOmega; //Y1
+			rVariable = CopyVector(r1Variable); //source to destination
 			sVariable = s1Variable;
-			loopIteration++;	//for the next Omega-iteration or Time-bound
-		}	//end of while for each vector
-		//cout<<endl;
-	}	//end of pragma omp parallel for
-	//cout<<"Outside Parallel\n";
+			loopIteration++; //for the next Omega-iteration or Time-bound
+		} //end of while for each vector
+		  //cout<<endl;
+	} //end of pragma omp parallel for
+	  //cout<<"Outside Parallel\n";
 	/*
 	 * Appending invariant directions and invariant constraints/bounds(alfa)
 	 * Goal : To truncate the reachable region within the Invariant region
 	 */
-	if (isInvariantExist == true) {	//if invariant exist. Computing
+	if (isInvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;
-		int num_inv = invariant->getColumnVector().size();//number of Invariant's constriants
+		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
 		inv_sfm.resize(num_inv, shm_NewTotalIteration);
 		for (int eachInvDirection = 0; eachInvDirection < num_inv;
 				eachInvDirection++) {
@@ -474,8 +497,8 @@ const template_polyhedra reachabilityPartitions(Dynamics& SystemDynamics,
 
 	std::list<polytope::ptr> polys;
 	template_polyhedra reachability_region;
-	unsigned int nVar = 4;	//number of variables to partition
-	unsigned int p = 2;	//number of partitions for each variables(eg 2 for 2 equal halfs or 3 equal halfs,etc
+	unsigned int nVar = 4; //number of variables to partition
+	unsigned int p = 2; //number of partitions for each variables(eg 2 for 2 equal halfs or 3 equal halfs,etc
 	polys = Partition_BoundingPolytope(Initial, nVar, p);
 	cout << "Partitions size = " << polys.size() << endl;
 	polytope::ptr initial_set;
@@ -499,7 +522,7 @@ const template_polyhedra reachabilityPartitions(Dynamics& SystemDynamics,
 		{
 			reachability_region = reachability_region.union_TemplatePolytope(
 					Tpoly);
-		}		//end of pragma for loop
+		} //end of pragma for loop
 	}
 	return reachability_region;
 	//No IMPROVEMENT WHERE SEEN BY THIS APPROACH
@@ -520,7 +543,7 @@ const template_polyhedra reachabilityPartitions_par_iters(
 	std::list<polytope::ptr> polys;
 	template_polyhedra reachability_region;
 	unsigned int nVar = 1;
-	unsigned int p = 2;	//number of partitions for each variables(eg 2 for 2 equal halfs or 3 equal halfs,etc
+	unsigned int p = 2; //number of partitions for each variables(eg 2 for 2 equal halfs or 3 equal halfs,etc
 	polys = Partition_BoundingPolytope(Initial, nVar, p);
 
 	polytope::ptr initial_set;
@@ -545,7 +568,7 @@ const template_polyhedra reachabilityPartitions_par_iters(
 		{
 			reachability_region = reachability_region.union_TemplatePolytope(
 					Tpoly);
-		}		//end of pragma for loop
+		} //end of pragma for loop
 	}
 	return reachability_region;
 }

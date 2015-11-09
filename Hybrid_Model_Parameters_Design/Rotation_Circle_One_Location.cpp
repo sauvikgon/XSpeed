@@ -130,8 +130,15 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	assignment.b = w;
 
 //Common Parameters : initial polytope and dynamics
-	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	system_dynamics.U = polytope::ptr(new polytope());
 	system_dynamics.U->setIsEmpty(true);	//set empty
 //	Dynamics Initalised ---------------------

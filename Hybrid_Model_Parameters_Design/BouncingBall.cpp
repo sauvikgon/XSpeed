@@ -60,8 +60,8 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixV(3, 1) = 0;
 
 	boundValueV.resize(4);
-	boundValueV[0] = 1;		//10;
-	boundValueV[1] = -1;		//-10;
+	boundValueV[0] = 1; //10;
+	boundValueV[1] = -1; //-10;
 	boundValueV[2] = 0;
 	boundValueV[3] = 0;
 
@@ -94,7 +94,7 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurdBoundValue.resize(3);
 	gaurdBoundValue[0] = 0;
 	gaurdBoundValue[1] = 1;
-	gaurdBoundValue[2] = 0;	//gaurd is:: Position==0 and velocity <=0         0 <=x<= 0 and y<=0
+	gaurdBoundValue[2] = 0; //gaurd is:: Position==0 and velocity <=0         0 <=x<= 0 and y<=0
 
 	gaurdBoundSign = 1;
 	/*
@@ -113,40 +113,53 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	invariantBoundSign = 1;
 
 	//invariant.setPolytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign);
-	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign));
+	invariant = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 	// Invariant Initialised above
 	//ReachParameters.TotalDirections(lastDirs + eachInvDirection + 1, i) = invariant->getCoeffMatrix()(eachInvDirection, i);
 
-	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U->setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
-	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
+	system_dynamics.U = polytope::ptr(
+			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 //	Dynamics Initalised ---------------------
 
 	// Initial Polytope is initialised
 	//initial_polytope_I.setPolytope(ConstraintsMatrixI, boundValueI, boundSignI);
-	initial_polytope_I = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+	initial_polytope_I = polytope::ptr(
+			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 	//--------------
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,	gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
 
-/*
-	math::matrix<double> inv_directions;
-	inv_directions.resize(2, 2);
-	inv_directions(0, 0) = -1;			// L1 directions
-	inv_directions(0, 1) = 0;
-	inv_directions(1, 0) = 1;			// L2 directions
-	inv_directions(1, 1) = 0;
-	//some improvement has to be done here later to avoid repeated Direction in the case of Box
-//	reach_parameters.InvariantDirections = inv_directions;
-	reach_parameters.InvariantExists = true;	//Invariant exists.
-	//Invariant's Directions iniatialised ------
-*/
+	/*
+	 math::matrix<double> inv_directions;
+	 inv_directions.resize(2, 2);
+	 inv_directions(0, 0) = -1;			// L1 directions
+	 inv_directions(0, 1) = 0;
+	 inv_directions(1, 0) = 1;			// L2 directions
+	 inv_directions(1, 1) = 0;
+	 //some improvement has to be done here later to avoid repeated Direction in the case of Box
+	 //	reach_parameters.InvariantDirections = inv_directions;
+	 reach_parameters.InvariantExists = true;	//Invariant exists.
+	 //Invariant's Directions iniatialised ------
+	 */
 
 	/*
 	 * Transition Dynamics  Rx + w where R is the Assignment Mapping and w is a vector
 	 */
-	math::matrix<double> R;	//Transition Dynamics
+	math::matrix<double> R; //Transition Dynamics
 	row = 2;
 	col = 2;
 	R.resize(row, col);
@@ -163,8 +176,7 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 
-
-	transitions trans(1,"hop",1,1,gaurd_polytope,assignment);
+	transitions trans(1, "hop", 1, 1, gaurd_polytope, assignment);
 	location source;
 	source.setLocId(1);
 	source.setName("Always");
@@ -180,11 +192,10 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.setDimension(dim);
 
 	discrete_set d_set;
-	d_set.insert_element(1);		//the initial Location ID
+	d_set.insert_element(1); //the initial Location ID
 
 	initial_symbolic_state.setDiscreteSet(d_set);
 	initial_symbolic_state.setContinuousSet(initial_polytope_I);
 
 }
-
 

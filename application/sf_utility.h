@@ -36,6 +36,18 @@ double W_Support(const ReachabilityParameters& ReachParameters,
 		Dynamics& system_dynamics, std::vector<double> direction, lp_solver &lp,
 		int Min_Or_Max);
 
+//dot product of vector1 and vector2
+template<typename scalar_type>
+scalar_type dot_product(std::vector<scalar_type> vector1,
+		std::vector<scalar_type> vector2) {
+	scalar_type res = 0;
+	assert(vector1.size()==vector2.size());
+	for (int i = 0; i < vector1.size(); i++) {
+		res = res + vector1[i] * vector2[i];
+	}
+	return res;
+}
+
 /**
  * Returns the support function of the unit ball with infinity norm in a passed direction
  */
@@ -56,18 +68,19 @@ scalar_type support_unitball_infnorm(std::vector<scalar_type> dir) {
 template<typename scalar_type>
 scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		int lp_solver_type_choosen) {
-	scalar_type norm_A = SysD.MatrixA.norm_inf();
+	scalar_type norm_A = 0.0, result;
+	if (!SysD.isEmptyMatrixA) //if Not Empty
+		norm_A = SysD.MatrixA.norm_inf();
 	math::matrix<scalar_type> Btrans;
 	double V_max_norm = 0.0;
 
-	if (!SysD.U->getIsEmpty()) {// if U not empty
+	if (!SysD.isEmptyMatrixB) { //if NOT Empty
 		SysD.MatrixB.transpose(Btrans);
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(SysD.U, Btrans));
 		V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
 	}
-	scalar_type result = (exp(tau * norm_A) - 1 - tau * norm_A)
-			* (V_max_norm / norm_A);
+	result = (exp(tau * norm_A) - 1 - tau * norm_A) * (V_max_norm / norm_A);
 //	cout<<"\nBeta = "<<(double)result<<endl;
 	return result;
 }
@@ -80,23 +93,28 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 
 template<typename scalar_type>
 scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
-		supportFunctionProvider::ptr I, int lp_solver_type_choosen)	// polytope V
+		supportFunctionProvider::ptr I, int lp_solver_type_choosen) // polytope V
 		{
-	scalar_type norm_A = system_dynamics.MatrixA.norm_inf();
+	scalar_type norm_A = 0.0, result;
+	double V_max_norm = 0.0, I_max_norm = 0.0;
+	if (!system_dynamics.isEmptyMatrixA) //if Not Empty
+		norm_A = system_dynamics.MatrixA.norm_inf();
+
 	//cout<<"\nInside Testing MatrixA norm = "<<norm_A<<endl;
-	double I_max_norm = I->max_norm(lp_solver_type_choosen);//R_X_o ie max_norm of the Initial polytope
+	I_max_norm = I->max_norm(lp_solver_type_choosen); //R_X_o ie max_norm of the Initial polytope
 //	cout << "\nInside Testing I.max_norm = " << I_max_norm << endl;
 
 	math::matrix<scalar_type> Btrans;
-	system_dynamics.MatrixB.transpose(Btrans);
+	if (!system_dynamics.isEmptyMatrixB) { //if NOT Empty
+		system_dynamics.MatrixB.transpose(Btrans);
+		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
+				new transMinkPoly(system_dynamics.U, Btrans));
+		V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
+	}
 
-	supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
-			new transMinkPoly(system_dynamics.U, Btrans));
-
-	double V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
 	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U
 //	cout<<"\nInside Testing V_max_norm = "<<V_max_norm <<endl;
-	scalar_type result = (exp(tau * norm_A) - 1 - tau * norm_A)
+	result = (exp(tau * norm_A) - 1 - tau * norm_A)
 			* (I_max_norm + (V_max_norm / norm_A));
 //	cout<<"\nAlfa = "<<(double)result<<endl;
 	return result;
@@ -111,7 +129,7 @@ void get_ublas_matrix(std::vector<std::vector<scalar_type> > std_Matrix,
 	size_type row = r;
 	size_type col = c;
 	//math::matrix<scalar_type> m = math::matrix<scalar_type>(r, c, std_Matrix.data());
-	math::matrix<scalar_type> m(row, col);		//, std_Matrix.data());
+	math::matrix<scalar_type> m(row, col); //, std_Matrix.data());
 	for (int i = 0; i < r; i++)
 		for (int j = 0; j < c; j++)
 			m(i, j) = std_Matrix[i][j];

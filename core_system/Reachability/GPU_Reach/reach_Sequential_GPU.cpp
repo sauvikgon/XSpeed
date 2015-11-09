@@ -90,7 +90,7 @@ void bulk_Solver(math::matrix<double> constraint_matrix,
 				list_obj_funs.size2());
 		unsigned int index = 0;
 		unsigned int lp_number;
-		lp_number = (number_of_blocks - 1) * lp_block_size;	//starting of Last Block
+		lp_number = (number_of_blocks - 1) * lp_block_size; //starting of Last Block
 #pragma omp parallel for
 		for (int lp_left = lp_number; lp_left < tot_lp; lp_left++) {
 			index = lp_left - lp_number; //index starts from 0 to last LP
@@ -311,11 +311,11 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 	if (Solver == 3) {
 		//scope for OMP -- done but cuda not supporting OMP-- so added library "lgomp"; build-stage -Xcompiler -fopenmp
 		getDirectionList_X0_and_U(ReachParameters, NewTotalIteration,
-				List_for_X0, List_for_U, U_empty); //Optimized into a single function the 2 Tasks
+				List_for_X0, List_for_U, U_empty, SystemDynamics); //Optimized into a single function the 2 Tasks
 	} else {
 		//Only for profiling GLPK solver Time for comparison with boundary value implementation
 		getDirectionList_X0_and_U_OnlyForGLPK(ReachParameters,
-				NewTotalIteration, List_X0, List_U, U_empty); //Optimized into a single function the 2 Tasks
+				NewTotalIteration, List_X0, List_U, U_empty, SystemDynamics); //Optimized into a single function the 2 Tasks
 	}
 	DirectionsGenerate_time.stop();
 	double wall_clock1;
@@ -345,12 +345,11 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 	if (Solver == 3) { // ************ GRAPHIC PROCESSING UNIT Computations  ********
 		//result obtained from GPU interface // OMP can also be tried and compared
 
-		bool IsBoundedLPSolver = true;//Remember to make this false when testing General Gimplex
+		bool IsBoundedLPSolver = true; //Remember to make this false when testing General Gimplex
 		double eachLP_Size;
 		if (IsBoundedLPSolver) {
 			/*
 			 * ToDo::recompute the LP size based on NEW Implementataion of Single Kernel
-			 *
 			 * For bounded LP Solver:: each lp size is just objective function size * number of LPs to be solved
 			 * and a constant factor:: size of the bound vectors
 			 */
@@ -388,21 +387,23 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			if (IsBoundedLPSolver) {
 				//:: Solve in a single call for both X0 and supFunUnitBall to same multiple memory transfer and separately for U
 				if (!U_empty) { //polytope U can be empty set
-					std::cout << "totalDirList2 LP = " << totalDirList2 << std::endl;
+					std::cout << "totalDirList2 LP = " << totalDirList2
+							<< std::endl;
 					Simplex simplex_for_U(totalDirList2);
-					simplex_for_U.setConstratint(SystemDynamics.U->getCoeffMatrix(),
+					simplex_for_U.setConstratint(
+							SystemDynamics.U->getCoeffMatrix(),
 							SystemDynamics.U->getColumnVector());
 					simplex_for_U.ComputeLP(List_for_U, number_of_streams);
 					supp_func_U = simplex_for_U.getResultAll();
-				}	//working
+				} //working
 				//compute only X0 and supp_unitBall in one kernel
-				int UnitBall = 1;//just to have different signature for the overloaded functions of class Simplex
+				int UnitBall = 1; //just to have different signature for the overloaded functions of class Simplex
 				Simplex solver(UnitBall, totalDirList1);
 				solver.setConstratint(ReachParameters.X0->getCoeffMatrix(),
 						ReachParameters.X0->getColumnVector(), UnitBall);
 				solver.ComputeLP(List_for_X0, UnitBall, number_of_streams);
-				solver.getResult_X(supp_func_X0);//return the result as argument
-			//	solver.getResult_UnitBall(supp_func_UnitBall);
+				solver.getResult_X(supp_func_X0); //return the result as argument
+				//	solver.getResult_UnitBall(supp_func_UnitBall);
 
 			} else { //OLD implementation with single call of kernel for X0 and U
 					 //TODO::But now missing supp_fun_UnitBall_infinity_norm
@@ -435,14 +436,14 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 						number_of_streams, no_lps_possible, supp_func_X0,
 						supp_func_UnitBall); //ONLY UnitBall result will extra
 
-				if (!U_empty) {	//polytope U can be empty set	//NO CHANGE REQUIRED HERE IN BULK SOLVER
+				if (!U_empty) { //polytope U can be empty set	//NO CHANGE REQUIRED HERE IN BULK SOLVER
 					bulk_Solver(SystemDynamics.U->getCoeffMatrix(),
 							SystemDynamics.U->getColumnVector(), List_for_U,
 							number_of_streams, no_lps_possible, supp_func_U);
 				}
-			}else{
+			} else {
 				//OLD implementation with single call of kernel for X0 and U
-				 //TODO::But now missing supp_fun_UnitBall_infinity_norm
+				//TODO::But now missing supp_fun_UnitBall_infinity_norm
 			}
 		}
 		onlyGimplex_time.stop();
@@ -490,7 +491,9 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 		double wall_clock, user_clock, system_clock;
 		wall_clock = onlyGimplex_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return_Time = wall_clock / (double) 1000;
-		std::cout<< "\nCPU(GLPK/Gurobi) Solver: Boost Time taken:Wall  (in Seconds) = "<< return_Time << std::endl;
+		std::cout
+				<< "\nCPU(GLPK/Gurobi) Solver: Boost Time taken:Wall  (in Seconds) = "
+				<< return_Time << std::endl;
 
 	} // ************ CPU Solver Over ****************
 
@@ -500,8 +503,6 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 	std::cout << std::endl;
 	//Breaking here	for TESTING/Reading LP_Solver
 	return template_polyhedra(MatrixValue, ReachParameters.Directions);
-
-
 
 	boost::timer::cpu_timer reachLoop_time;
 	reachLoop_time.start();
@@ -529,10 +530,10 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 		//  ************** Omega Function   ********************
 		res1 = supp_func_X0[index_X0]; //X0->SF(direction)			//	0
 		//term3b = support_unitball_infnorm(Direction_List[index].direction);
-		term3b = (double) supp_func_UnitBall[index_X0];		//  needed  0
-		index_X0++;		//	made 1
-		term1 = supp_func_X0[index_X0];		//X0->SF(phi_trans_dir)		//  1
-		index_X0++;		//	made 2
+		term3b = (double) supp_func_UnitBall[index_X0]; //  needed  0
+		index_X0++; //	made 1
+		term1 = supp_func_X0[index_X0]; //X0->SF(phi_trans_dir)		//  1
+		index_X0++; //	made 2
 		if (!U_empty) {
 			term2 = ReachParameters.time_step * supp_func_U[index_U]; //U->SF(Btrans_dir)
 			index_U++;
@@ -562,8 +563,8 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			//res_sup = (double) support_unitball_infnorm(Direction_List[index].direction);
 			//res_sup = (double) supp_func_UnitBall[d_index];  d_index++;	//Should replace from previous computation
 			//res_sup = term3b; //replaced from previous steps
-			if (loopIteration == 1)			// needed  0 again here
-				res_sup = supp_func_UnitBall[index_X0 - 2];	//Should replace from previous computation
+			if (loopIteration == 1) // needed  0 again here
+				res_sup = supp_func_UnitBall[index_X0 - 2]; //Should replace from previous computation
 
 			double res_beta = beta * res_sup;
 			result = res1 + res_beta;
@@ -572,10 +573,10 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			s1Variable = sVariable + zV;
 			//  ************** Omega Function   ********************
 			//double res1;
-			res1 = supp_func_X0[index_X0 - 1];////replace previous value....  X0->SF(direction)		//	(2 -1)=1
+			res1 = supp_func_X0[index_X0 - 1]; ////replace previous value....  X0->SF(direction)		//	(2 -1)=1
 			double term1, term2, term3, term3a, res2;
-			term1 = supp_func_X0[index_X0];	//X0->SF(phi_trans_dir)		//	2
-			index_X0++;			// 	made 3
+			term1 = supp_func_X0[index_X0]; //X0->SF(phi_trans_dir)		//	2
+			index_X0++; // 	made 3
 			if (!U_empty) {
 				term2 = ReachParameters.time_step * supp_func_U[index_U]; //U->SF(Btrans_dir)
 				index_U++;
@@ -586,7 +587,7 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			//term3b = support_unitball_infnorm(Direction_List[index - 1].Phi_trans_dir);
 			//term3b = support_unitball_infnorm(Direction_List[index].direction1);
 			if (loopIteration == 1)
-				term3b = (double) supp_func_UnitBall[index_X0 - 2];	//Compute here		//needed 1
+				term3b = (double) supp_func_UnitBall[index_X0 - 2]; //Compute here		//needed 1
 			else
 				term3b = (double) supp_func_UnitBall[index_X0 - 1];
 			term3 = term3a * term3b;
@@ -598,11 +599,10 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 				zI = res2;
 			//  ************** Omega Function   ********************
 			double TempOmega;
-			TempOmega = zI + s1Variable;			//Y1
-			MatrixValue(eachDirection, loopIteration) = TempOmega;			//Y1
-
-			sVariable = s1Variable;			//	index++;
-			loopIteration++;		//for the next Omega-iteration or Time-bound
+			TempOmega = zI + s1Variable; //Y1
+			MatrixValue(eachDirection, loopIteration) = TempOmega; //Y1
+			sVariable = s1Variable; //	index++;
+			loopIteration++; //for the next Omega-iteration or Time-bound
 		} //end of all Iterations of each vector/direction
 	} //end of for each vector/directions
 

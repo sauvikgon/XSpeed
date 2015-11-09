@@ -94,24 +94,24 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	 boundValueI[5] = 0;
 	 boundValueI[6] = 0;
 	 boundValueI[7] = 0;*/
-	// ********************* start_location=1:: (0.5 <=x1<=0.5, 0.5<=x2<=0.5,v1==0,v2==0) ************************
+	// ********************* start_location=2:: (0.5 <=x1<=0.5, 0.5<=x2<=0.5,v1==0,v2==0) ************************
 	boundValueI[0] = 0.5; //
-	 boundValueI[1] = -0.5;
-	 boundValueI[2] = 0.5;
-	 boundValueI[3] = -0.5;
-	 boundValueI[4] = 0;
-	 boundValueI[5] = 0;
-	 boundValueI[6] = 0;
-	 boundValueI[7] = 0;
-/*
-	boundValueI[0] = 1; //  **** start_location=1:: (0 <=x1<=1, 1<=x2<=2,v1==3,v2==0) ***
-	boundValueI[1] = 0;
-	boundValueI[2] = 2;
-	boundValueI[3] = -1;
-	boundValueI[4] = 3;
-	boundValueI[5] = -3;
+	boundValueI[1] = -0.5;
+	boundValueI[2] = 0.5;
+	boundValueI[3] = -0.5;
+	boundValueI[4] = 0;
+	boundValueI[5] = 0;
 	boundValueI[6] = 0;
-	boundValueI[7] = 0;*/
+	boundValueI[7] = 0;
+	/*
+	 boundValueI[0] = 1; //  **** start_location=1:: (0 <=x1<=1, 1<=x2<=2,v1==3,v2==0) ***
+	 boundValueI[1] = 0;
+	 boundValueI[2] = 2;
+	 boundValueI[3] = -1;
+	 boundValueI[4] = 3;
+	 boundValueI[5] = -3;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;*/
 
 	/*	// ********************* start_location=5:: (1.2 <=x1<=1.4, 2.5<=x2<=2.7,v1==0,v2==0) ************************
 	 boundValueI[0] = 1.4; //
@@ -129,8 +129,8 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	//initial_polytope_I.setPolytope(ConstraintsMatrixI, boundValueI, boundSignI);
 
 	discrete_set d_set;
-	d_set.insert_element(1);		//the initial Location ID = 1
-	//d_set.insert_element(2); //the initial Location ID = 2
+	//d_set.insert_element(1);		//the initial Location ID = 1
+	d_set.insert_element(2); //the initial Location ID = 2
 	//d_set.insert_element(5);		//the initial Location ID = 5
 	//d_set.insert_element(6);		//the initial Location ID = 6
 
@@ -546,8 +546,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 1;
 	boundValueV[7] = -1;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -579,8 +585,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 0;
 	boundValueV[7] = 0;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -610,8 +622,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 0;
 	boundValueV[7] = 0;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -642,8 +660,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 0.70711;
 	boundValueV[7] = -0.70711;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -675,8 +699,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 0;
 	boundValueV[7] = 0;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -707,8 +737,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 1;
 	boundValueV[7] = -1;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -739,8 +775,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 1;
 	boundValueV[7] = -1;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -773,8 +815,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 0;
 	boundValueV[7] = 0;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));

@@ -119,10 +119,10 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	boundValueV.resize(row);
 	boundValueV[0] = 0;
 	boundValueV[1] = 0;
-	boundValueV[2] = 1;			//10;  bound for g
-	boundValueV[3] = -1;		//-10; bound for g
-	boundValueV[4] = 1;		//1		bound for t
-	boundValueV[5] = -1;		//-1	bound for t
+	boundValueV[2] = 1; //10;  bound for g
+	boundValueV[3] = -1; //-10; bound for g
+	boundValueV[4] = 1; //1		bound for t
+	boundValueV[5] = -1; //-1	bound for t
 
 	boundSignV = 1;
 
@@ -151,7 +151,7 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	Bmatrix(2, 2) = 1;
 
 	// TO BE CHANGED LATER  WHEN DISCRETE JUMP WILL BE CHECKED
-	row = 3;		//4;
+	row = 3; //4;
 	col = 3;
 	gaurdConstraintsMatrix.resize(row, col);
 	gaurdConstraintsMatrix(0, 0) = 1;
@@ -171,7 +171,7 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	 gaurdConstraintsMatrix(3, 2) = 0;*/
 
 	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;	//gaurd is:: Position==0 and velocity <=0 and time <=0        0 <=x<= 0 and y<=0 and t<=0
+	gaurdBoundValue[0] = 0; //gaurd is:: Position==0 and velocity <=0 and time <=0        0 <=x<= 0 and y<=0 and t<=0
 	gaurdBoundValue[1] = 0;
 	gaurdBoundValue[2] = 0;
 	//gaurdBoundValue[3] = 0;
@@ -210,11 +210,10 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	 reach_parameters.InvariantDirections = inv_directions;*/
 //	reach_parameters.InvariantExists = true;	//false;	//Invariant exists.
 	//Invariant's Directions and  Invariant polytope Initialised above
-
 	/*
 	 ************** Transition Assignment for TimedBouncing Ball *************
 	 */
-	math::matrix<double> R;	//Transition Dynamics
+	math::matrix<double> R; //Transition Dynamics
 	row = 3;
 	col = 3;
 	R.resize(row, col);
@@ -233,8 +232,14 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	w[2] = 0;
 // ***********************************************************
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U->setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -304,7 +309,7 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	 */
 
 	discrete_set d_set;
-	d_set.insert_element(1);		//the initial Location ID
+	d_set.insert_element(1); //the initial Location ID
 
 	initial_symbolic_state.setDiscreteSet(d_set);
 	initial_symbolic_state.setContinuousSet(initial_polytope_I);
