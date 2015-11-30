@@ -14,6 +14,8 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
 template_polyhedra::template_polyhedra() {
 	total_iterations = 0;
+	total_template_Directions = 0;
+	total_invariant_Directions = 0;
 }
 template_polyhedra::template_polyhedra(
 		math::matrix<double> matrix_support_function,
@@ -23,7 +25,9 @@ template_polyhedra::template_polyhedra(
 //	this->setAllDirections(all_directions);
 	this->setTemplateDirections(template_directions); //no more working with all_directions
 //	this->setTotalTemplateDirections(all_directions.size1());
+	this->setTotalInvariantDirections(0);
 }
+
 /*template_polyhedra::template_polyhedra(
  math::matrix<double> matrix_support_function,
  math::matrix<double> all_directions,
@@ -180,7 +184,7 @@ const std::list<template_polyhedra> template_polyhedra::polys_intersection(
 			for (unsigned int j = 0; j < p.getCoeffMatrix().size1(); j++) {
 				mat_sf(j, col - 1) = p.getColumnVector()[j];//	mat_sf.addColumn(p.getColumnVector()); add column in matrix class
 			}
-		//	cout << "\nIntersection Found at = " << i << endl;
+			//	cout << "\nIntersection Found at = " << i << endl;
 			/*if (i = )
 			 polytope::ptr pp;
 			 pp = polytope::ptr(new polytope(p.getCoeffMatrix(),p.getColumnVector(),1));
@@ -202,12 +206,12 @@ const std::list<template_polyhedra> template_polyhedra::polys_intersection(
 			intersection_ended = false;
 			//cout << "\nIntersection Ended at = " << i << "\n";
 		}
-	//	i2 = i;
+		//	i2 = i;
 	}
 	if (intersection_started == true && intersection_ended == false) {
 		intersected_region.push_back(
 				template_polyhedra(mat_sf, p.getCoeffMatrix()));
-	//	cout << "\nIntersection did not End = " << i2 << "\n";
+		//	cout << "\nIntersection did not End = " << i2 << "\n";
 	}
 
 	/*	if (foundIntersection == 0)
@@ -233,7 +237,7 @@ const polytope::ptr template_polyhedra::getTemplate_approx(
 	 * Get the number of directions as rows for each rows compute sf of all omega's and take the maximum of
 	 these sf and add it as column vector then return the polytop p as p(direction, columnvector);
 	 */
-	unsigned int rows, max_or_min= 2;	//Maximizing
+	unsigned int rows, max_or_min = 2;	//Maximizing
 	double Max_sf, sf;
 	int type = lp_solver_type_choosen;
 	rows = this->getTotalTemplateDirections();//cout << "\nrows here = " << rows << endl;
@@ -247,7 +251,8 @@ const polytope::ptr template_polyhedra::getTemplate_approx(
 		lp.setConstraints(p.getCoeffMatrix(), p.getColumnVector(),
 				p.getInEqualitySign());
 
-		for (unsigned int dim = 0; dim < this->template_Directions.size2(); dim++)
+		for (unsigned int dim = 0; dim < this->template_Directions.size2();
+				dim++)
 			each_direction[dim] = this->getTemplateDirections()(i, dim);//get each direction
 
 		Max_sf = p.computeSupportFunction(each_direction, lp, lp, max_or_min);//First Omega's support function value//std::cout<<"\nMax_sf = "<<Max_sf<<"\n";
@@ -256,7 +261,7 @@ const polytope::ptr template_polyhedra::getTemplate_approx(
 			p = this->getPolytope(j);
 			lp1.setMin_Or_Max(2);
 			lp1.setConstraints(p.getCoeffMatrix(), p.getColumnVector(),
-						p.getInEqualitySign());
+					p.getInEqualitySign());
 			sf = p.computeSupportFunction(each_direction, lp1, lp1, max_or_min);
 			if (sf > Max_sf)
 				Max_sf = sf;
@@ -265,10 +270,10 @@ const polytope::ptr template_polyhedra::getTemplate_approx(
 	}
 //std::cout<<"\nTotal_iterations = " <<this->total_iterations<<"\n";
 
-/*	polytope::ptr pp;
-	pp = polytope::ptr(new polytope(this->getTemplateDirections(), columnVector, 1));
-	//pp = polytope::ptr(new polytope(this->getPolytope(this->total_iterations-1).getCoeffMatrix(), this->getPolytope(this->total_iterations-1).getColumnVector(), 1));
-	GeneratePolytopePlotter(pp);*/
+	/*	polytope::ptr pp;
+	 pp = polytope::ptr(new polytope(this->getTemplateDirections(), columnVector, 1));
+	 //pp = polytope::ptr(new polytope(this->getPolytope(this->total_iterations-1).getCoeffMatrix(), this->getPolytope(this->total_iterations-1).getColumnVector(), 1));
+	 GeneratePolytopePlotter(pp);*/
 	return polytope::ptr(
 			new polytope(this->getTemplateDirections(), columnVector, 1));//1 as all signs are <=
 }

@@ -16,6 +16,11 @@
 #include "core_system/math/basic_functions.h"
 #include "core_system/math/matrix.h"
 #include "Utilities/StandardVector.h"
+#include "Utilities/vector_operations.h"
+#include "core_system/math/2d_geometry.h"
+#include <set>
+#include <utility>
+
 //#include "math/lp_solver_ourSimplex/simplex.h"
 
 using namespace std;
@@ -330,5 +335,78 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 
 	return flag;
 }
+/*
+ * Searches the 2D vertices of the polytope between the directions u and v
+ */
+
+void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v, int i, int j,
+		std::set<std::pair<double,double> >& pts){
+	std::vector<double> sv_u(getSystemDimension(),0), sv_v(getSystemDimension(),0);
+	std::vector<double> sv_bisect;
+	lp_solver solver(1); // to choose glpk
+	solver.setConstraints(getCoeffMatrix(),getColumnVector(),getInEqualitySign());
+
+	// get the support
+	computeSupportFunction(u,solver,solver,2);
+	sv_u = solver.get_sv();
+	computeSupportFunction(v,solver,solver,2);
+	sv_v = solver.get_sv();
+	// add the sv's to the set of points
+	// make a point of 2 dimension point
+
+	std::pair<double,double> p1,p2,p3;
+	p1.first = sv_u[i];
+	p1.second = sv_u[j];
+
+	p2.first = sv_v[i];
+	p2.second = sv_v[j];
+
+	pts.insert(p1);
+	pts.insert(p2);
+
+	//get the bisector vector;
+	std::vector<double> bisector = bisect_vector(normalize_vector(u),normalize_vector(v));
+	computeSupportFunction(bisector,solver,solver,2);
+	sv_bisect = solver.get_sv();
+	p3.first = sv_bisect[i];
+	p3.second = sv_bisect[j];
+
+	if(is_collinear(p1,p2,p3)){
+		return;
+	}
+	else{
+		pts.insert(p3);
+		enum_2dVert_restrict(u,bisector,i,j,pts);
+		enum_2dVert_restrict(bisector,v,i,j,pts);
+	}
+}
+
+std::set<std::pair<double,double> > polytope::enumerate_2dVertices(int i, int j){
+	std::set<std::pair<double,double> > All_vertices;
+
+	//enumerate the vertices in the first quadrant
+	std::vector<double> u(getSystemDimension(),0);
+	u[i]=1;
+	std::vector<double> v(getSystemDimension(),0);
+	v[j]=1;
+
+
+	enum_2dVert_restrict(u,v,i,j,All_vertices);
+
+	//enumerate vertices in the second quadrant
+	u[i]=-1;
+	enum_2dVert_restrict(u,v,i,j,All_vertices);
+
+	//enumerate vertices in the third quadrant
+	v[j]=-1;
+	enum_2dVert_restrict(u,v,i,j,All_vertices);
+
+	//enumerate vertices in the fourth quadrant
+	u[i]=1;
+	enum_2dVert_restrict(u,v,i,j,All_vertices);
+
+	return All_vertices;
+}
+
 
 #endif /* POLYTOPE_CPP_ */

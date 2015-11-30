@@ -57,13 +57,15 @@ public:
 	 */
 	double Compute_LLP(std::vector<double> coeff_function) ;
 
+	//returns the vector/point that gives the maximum value
+	std::vector<double> getMaximizing_Variables();
+
 	/*
 	 * Executes the simplex method with the objective function set to zero. That is assigning all coefficient to zero
 	 * This results in checking if the specified constraints has feasible solution or solution is infeasible or has no feasible soultion
 	 * This application can be used to test the intersection of polytope with gaurd or with another polytope.
 	 */
 	unsigned int TestConstraints();
-
 
 	// ******* Functions to be Interfaced later to the common LP_Solver class **********
 	void displayMaxVariables();
@@ -87,7 +89,7 @@ private:
 
 	int dimension;				//dimension of the system
 	int number_of_constraints;	//rows in glpk or facets of a polytope
-	std::vector<double> Maximizing_Variables;// values of the variable that maximizes the result
+	std::vector<double> sv;// values of the variable that maximizes the result
 	double result;				//Maximize or Minimize value
 
 };

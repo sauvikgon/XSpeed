@@ -14,6 +14,8 @@
 #include "core_system/math/lp_solver/lp_solver.h"
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
 #include <boost/shared_ptr.hpp>
+#include<set>
+#include<utility>
 
 using namespace std;
 /*
@@ -33,7 +35,7 @@ using namespace std;
  * Also include function to return the Dimension of the defined polytope.
  */
 
-class polytope : public supportFunctionProvider {
+class polytope: public supportFunctionProvider {
 
 private:
 	//glpk_lp_solver lp;	//Create only one lp at the time of creation of the polytope
@@ -53,22 +55,25 @@ public:
 	polytope(math::matrix<double> coeffMatrix, std::vector<double> columnVector,
 			int InEqualitySign);
 	void setIsEmpty(bool empty);
-	bool getIsEmpty() const ;
+	bool getIsEmpty() const;
 	void setIsUniverse(bool universe);
 	bool getIsUniverse();
 
-	void setPolytope(math::matrix<double> coeffMatrix, std::vector<double> columnVector, int inEqualitySign);
+	void setPolytope(math::matrix<double> coeffMatrix,
+			std::vector<double> columnVector, int inEqualitySign);
 	/*
 	 * Adds one constraint to the existing polytope by adding the
 	 * coefficient constraint with the bound value to the existing list.
 	 */
-void setMoreConstraints(std::vector<double> coeff_constraint, double bound_value);
+	void setMoreConstraints(std::vector<double> coeff_constraint,
+			double bound_value);
 
-/*
- * Adds one or more constraints to the existing polytope by adding the
- * coefficient_constraints with the bound_values to the existing list.
- */
-void setMoreConstraints(math::matrix<double> coeff_constraints, std::vector<double> bound_values);
+	/*
+	 * Adds one or more constraints to the existing polytope by adding the
+	 * coefficient_constraints with the bound_values to the existing list.
+	 */
+	void setMoreConstraints(math::matrix<double> coeff_constraints,
+			std::vector<double> bound_values);
 
 	// void set_Default_lp_init();
 	// void set_lp_object(glpk_lp_solver* newObject);
@@ -86,7 +91,8 @@ void setMoreConstraints(math::matrix<double> coeff_constraints, std::vector<doub
 	unsigned int getNumberFacets() const;
 	void setNumberFacets(unsigned int numberFacets);
 
-	double computeSupportFunction(std::vector<double> direction, lp_solver &lp, lp_solver &lp_U, int Min_Or_Max) ;
+	double computeSupportFunction(std::vector<double> direction, lp_solver &lp,
+			lp_solver &lp_U, int Min_Or_Max);
 
 	/*
 	 * Returns Max norm of the polytope
@@ -96,9 +102,22 @@ void setMoreConstraints(math::matrix<double> coeff_constraints, std::vector<doub
 	 * Returns True if polytope P1(the calling polytope object) and P2 intersects each other
 	 *  i.e., True iff	P1 intersection P2 != empty set
 	 */
-	bool check_polytope_intersection(polytope::ptr P2, int lp_solver_type_choosen);
-	const polytope::ptr GetPolytope_Intersection(polytope::ptr P2, int lp_solver_type_choosen);
+	bool check_polytope_intersection(polytope::ptr P2,
+			int lp_solver_type_choosen);
+	const polytope::ptr GetPolytope_Intersection(polytope::ptr P2,
+			int lp_solver_type_choosen);
 
+	/**
+	 * Enumerate all vertices of the polytope between the two vectors
+	 * given as arguments
+	 */
+	void enum_2dVert_restrict(std::vector<double> u, std::vector<double> v, int i, int j,
+			std::set<std::pair<double, double> >&pts);
+
+	/**
+	 * enumerate all vertices of the polytope
+	 */
+	std::set<std::pair<double,double> > enumerate_2dVertices(int i, int j);
 };
 
 #endif /* POLYTOPE_H_ */

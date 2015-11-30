@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
 	int lp_solver_type_choosen = 1; //	1 for GLPK and 2 for Gurobi
 	int Solver_GLPK_Gurobi_GPU = 3; //if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
 	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
-	int hey=0;
+	int hey = 0;
 	bool isConfigFileAssigned = false;
 	po::options_description desc("XSpeed options");
 	po::variables_map vm;
@@ -453,19 +453,23 @@ int main(int argc, char *argv[]) {
 				st = cmdStr.c_str();
 				system(st); //calling hyst interface to generate the file
 
+				std::cout
+						<< "\n\nGenerating Hybrid Automata Model for XSpeed!!! ....\n";
+				std::cout << "This may take some time please wait!!! ....\n\n";
+
 				std::string cmdStr2, compile_CmdStr, outputFile_debug,
 						outputFile_release, dependenciesFile;
+				/*
+				 outputFile_debug =
+				 "XSpeed/Debug/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
+				 outputFile_release =
+				 "XSpeed/Release/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
+				 //	dependenciesFile ="XSpeed/src/Hybrid_Model_Parameters_Design/user_model/user_model.d";
+				 //todo :: generate and copy .d
 
-				outputFile_debug =
-						"XSpeed/Debug/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
-				outputFile_release =
-						"XSpeed/Release/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
-				//	dependenciesFile ="XSpeed/src/Hybrid_Model_Parameters_Design/user_model/user_model.d";
-				//todo :: generate and copy .d
+				 std::string cmdStr3, copy_CmdStr;
 
-				std::string cmdStr3, copy_CmdStr;
-
-				/*	compile_CmdStr = "g++";
+				 compile_CmdStr = "g++";
 				 cmdStr2.append(compile_CmdStr);
 				 cmdStr2.append(SingleSpace);
 				 cmdStr2.append(projLocation);
@@ -492,6 +496,7 @@ int main(int argc, char *argv[]) {
 				std::string cmdStr4, debug_loc, release_loc, cmd_option;
 
 				system("make clean");
+				//system("make clean > /tmp/MakeClean_output_file.txt");
 
 				debug_loc = "XSpeed/Debug/";
 				release_loc = "XSpeed/Release/";
@@ -511,6 +516,7 @@ int main(int argc, char *argv[]) {
 					cmdStr4.append(projLocation);
 					cmdStr4.append(release_loc);
 				}
+				//cmdStr4.append(" > /tmp/MakeBuild_output_file.txt");
 				st4 = cmdStr4.c_str();
 				system(st4);
 
@@ -750,17 +756,17 @@ int main(int argc, char *argv[]) {
 		 }*/
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
-/*	if (hey == 1) {
-		user_model(Hybrid_Automata, initial_symbolic_states, reach_parameters,
-				transition_iterations);
-		// --------- Setting configuration parameters ---------
-		time_bound = reach_parameters.TimeBound;
-		iterations_size = reach_parameters.Iterations;
-		//	model_type = 0; //set to default
-		//	directions_type_or_size = 0;	//set to default
-		transition_size = transition_iterations;
-		// --------- Setting configuration parameters ---------
-	}*/
+	/*	if (hey == 1) {
+	 user_model(Hybrid_Automata, initial_symbolic_states, reach_parameters,
+	 transition_iterations);
+	 // --------- Setting configuration parameters ---------
+	 time_bound = reach_parameters.TimeBound;
+	 iterations_size = reach_parameters.Iterations;
+	 //	model_type = 0; //set to default
+	 //	directions_type_or_size = 0;	//set to default
+	 transition_size = transition_iterations;
+	 // --------- Setting configuration parameters ---------
+	 }*/
 	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
 			transition_size); //Initialising the variables
 //	cout<<"Initialisation of reachability problem complete\n";
@@ -840,7 +846,8 @@ int main(int argc, char *argv[]) {
 		std::cout << "\nBoost Time taken:System  (in Seconds) = "
 				<< Avg_system_clock / (double) 1000 << std::endl;
 
-		cout << endl << "Number of Vectors = " << reach_parameters.Directions.size1();
+		cout << endl << "Number of Vectors = "
+				<< reach_parameters.Directions.size1();
 		cout << endl << "Number of Iteration = " << iterations_size << endl;
 	} //endif of argc == 1
 
@@ -1033,7 +1040,8 @@ int main(int argc, char *argv[]) {
 				<< Avg_user_clock / (double) 1000 << std::endl;
 		std::cout << "\nBoost Time taken:System  (in Seconds) = "
 				<< Avg_system_clock / (double) 1000 << std::endl;
-		cout << endl << "Number of Vectors = " << reach_parameters.Directions.size1();
+		cout << endl << "Number of Vectors = "
+				<< reach_parameters.Directions.size1();
 		cout << endl << "Number of Iteration = " << iterations_size << endl;
 
 	} //endif of argc == 1
