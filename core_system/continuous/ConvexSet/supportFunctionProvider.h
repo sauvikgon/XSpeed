@@ -28,7 +28,7 @@ public:
 	 * The compute support will be a function of the support function of the initial set and the input set as polytopes.
 	 */
 	virtual double computeSupportFunction(std::vector<double> direction, lp_solver &lp, lp_solver &lp_U, int Min_Or_Max) = 0;
-	virtual double max_norm(int lp_solver_type_choosen) = 0;
+	virtual double max_norm(int lp_solver_type_choosen, unsigned int dim_size) = 0;
 
 };
 

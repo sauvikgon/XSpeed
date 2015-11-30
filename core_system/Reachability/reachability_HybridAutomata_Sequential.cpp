@@ -73,6 +73,14 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 				|| (name.compare("FINAL") == 0))
 			continue; //do not compute the continuous reachability algorithm
 //TODO --stop-location locID to stop
+		bool foundSkippingLocation=false;
+		for (int StopLoc=0;StopLoc<reach_parameters.Stop_locID.size();StopLoc++){
+			if (location_id == reach_parameters.Stop_locID[StopLoc]){
+				foundSkippingLocation=true;
+			}
+		}
+		if (foundSkippingLocation)//do not compute the continuous reachability algorithm
+			continue;
 
 		//current_location = H.getLocation(name);
 		//	cout<<"\nTesting 2 a 8 \n";
@@ -85,7 +93,7 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 		 * Computing the parameters to avoid multiple computation in the child process
 		 * Items Required :: time_step, phi_trans , B_trans, compute_alfa,compute_beta
 		 */
-//			cout<<"\nTesting 2 b\n";
+		//	cout<<"\nTesting 2 b\n";
 		//	GeneratePolytopePlotter(continuous_initial_polytope);
 		/*
 		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
@@ -322,6 +330,9 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 					lp_solver_type_choosen);
 //		 cout << "\nContinuous Reachability Parallel Using Process Creation COMPLETTED!!!\n";
 		} //to be removed from the Project
+
+		std::cout << "\nFlowpipe computed\n";
+
 //	*********************************************** Reach or Flowpipe Computed **************************************************************************
 		if (previous_level != levelDeleted) {
 			previous_level = levelDeleted;
@@ -355,7 +366,8 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 						(*t).getDestination_Location_Id());
 				//				std::cout<<"\nTest location insde = "<<current_destination.getName()<<"\n";
 				string locName = current_destination.getName();
-				//cout << "\nNext Loc ID = " << current_destination.getLocId() << " Location Name = " << locName << "\n";
+				cout << "\nNext Loc ID = " << current_destination.getLocId()
+						<< " Location Name = " << locName << "\n";
 				if ((locName.compare("BAD") == 0)
 						|| (locName.compare("GOOD") == 0)
 						|| (locName.compare("FINAL") == 0)
@@ -380,7 +392,9 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 //			std::cout << "Before calling getTemplate_approx\n";
 				int element = (*t).getDestination_Location_Id();
 				ds.insert_element(element);
-				//	std::cout << "\nNumber of intersection with Flowpipe and guard = "<< intersected_polyhedra.size();
+				std::cout
+						<< "\nNumber of intersection with Flowpipe and guard = "
+						<< intersected_polyhedra.size();
 				for (std::list<template_polyhedra>::iterator i =
 						intersected_polyhedra.begin();
 						i != intersected_polyhedra.end(); i++) {

@@ -38,7 +38,7 @@ public:
 	unsigned int getSystemDimension() const;
 	bool getIsEmpty() const;
 	double computeSupportFunction(std::vector<double> direction, lp_solver &lp, lp_solver& lp_U, int Min_Or_Max);
-	double max_norm(int lp_solver_type_choosen);
+	double max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_Norm);
 };
 
 

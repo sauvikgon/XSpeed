@@ -199,8 +199,9 @@ void polytope::setSystemDimension(unsigned int systemDimension) {
 	system_dimension = systemDimension;
 }
 
-double polytope::max_norm(int lp_solver_type_choosen) {
-	unsigned int dimension_size = this->system_dimension;
+double polytope::max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_Norm) {
+	//unsigned int dimension_size = this->system_dimension;
+	unsigned int dimension_size = dim_for_Max_Norm;
 	double Max_A, sf, Max = 0.0;
 	if (this->getIsEmpty())
 		sf = 0;	//returns zero for empty polytope

@@ -69,6 +69,7 @@ template<typename scalar_type>
 scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		int lp_solver_type_choosen) {
 	scalar_type norm_A = 0.0, result;
+	unsigned int dim_for_Max_norm;
 	if (!SysD.isEmptyMatrixA) //if Not Empty
 		norm_A = SysD.MatrixA.norm_inf();
 	math::matrix<scalar_type> Btrans;
@@ -76,9 +77,10 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 
 	if (!SysD.isEmptyMatrixB) { //if NOT Empty
 		SysD.MatrixB.transpose(Btrans);
+		dim_for_Max_norm = SysD.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(SysD.U, Btrans));
-		V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
+		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
 	}
 	result = (exp(tau * norm_A) - 1 - tau * norm_A) * (V_max_norm / norm_A);
 //	cout<<"\nBeta = "<<(double)result<<endl;
@@ -96,12 +98,14 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		supportFunctionProvider::ptr I, int lp_solver_type_choosen) // polytope V
 		{
 	scalar_type norm_A = 0.0, result;
+	unsigned int dim_for_Max_norm;
 	double V_max_norm = 0.0, I_max_norm = 0.0;
 	if (!system_dynamics.isEmptyMatrixA) //if Not Empty
 		norm_A = system_dynamics.MatrixA.norm_inf();
 
 	//cout<<"\nInside Testing MatrixA norm = "<<norm_A<<endl;
-	I_max_norm = I->max_norm(lp_solver_type_choosen); //R_X_o ie max_norm of the Initial polytope
+	dim_for_Max_norm = I->getSystemDimension();	//I is initial polytope
+	I_max_norm = I->max_norm(lp_solver_type_choosen, dim_for_Max_norm); //R_X_o ie max_norm of the Initial polytope
 //	cout << "\nInside Testing I.max_norm = " << I_max_norm << endl;
 
 	math::matrix<scalar_type> Btrans;
@@ -109,7 +113,8 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		system_dynamics.MatrixB.transpose(Btrans);
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(system_dynamics.U, Btrans));
-		V_max_norm = Vptr->max_norm(lp_solver_type_choosen);
+		dim_for_Max_norm = system_dynamics.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
+		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
 	}
 
 	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U

@@ -180,7 +180,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(
 		ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 		matrix mat1;
 		mat1 = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
-		row = row + mat2.size1(); //only row will increase as the col=system_dimension so will not change
+		row = row + mat2.size1(); //only row will increase as the col is the system_dimension, so will not change
 		matrix mat2_temp(row, col);
 		//cout << "This is the new Rows = " << mat2_temp.size1() << "AmitJI" << endl;
 		mat1.matrix_copy(mat2_temp);

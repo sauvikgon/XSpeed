@@ -165,12 +165,14 @@ template_polyhedra reachabilitySequential(Dynamics& SystemDynamics,
 
 	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 	size_type row = numVectors, col = shm_NewTotalIteration;
+//	cout << "\nBefore calling InvariantBoundaryCheck"<< "\n";
 	if (isInvariantExist == true) { //if invariant exist. Computing
 		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
 				ReachParameters, invariant, lp_solver_type_choosen);
+		shm_NewTotalIteration = shm_NewTotalIteration - 1;//because Omega_0 is computed in all cases which is 1 extra
 	} //End of Invariant Directions
-//cout<<"\nNew shm_NewTotalIteration = "<<shm_NewTotalIteration <<"\n";
-	if (shm_NewTotalIteration == 1) {
+	cout << "\nNew shm_NewTotalIteration = " << shm_NewTotalIteration << "\n";
+	if (shm_NewTotalIteration < 1) {
 		template_polyhedra poly_emptyp;
 		return poly_emptyp;
 	}

@@ -91,7 +91,7 @@ void setMoreConstraints(math::matrix<double> coeff_constraints, std::vector<doub
 	/*
 	 * Returns Max norm of the polytope
 	 */
-	double max_norm(int lp_solver_type_choosen);
+	double max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_Norm);
 	/*
 	 * Returns True if polytope P1(the calling polytope object) and P2 intersects each other
 	 *  i.e., True iff	P1 intersection P2 != empty set

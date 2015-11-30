@@ -15,8 +15,7 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 	int dimension = Initial->getSystemDimension();
 	int Min_Or_Max = 2;
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
-	std::vector<int> boundaryIterations(numberOfInvariants,
-			shm_NewTotalIteration); // size(dimension_size,initial_value)
+	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
 	int foundStart = 0, intersection_start, intersection_end;
 
 // *************************** For Positive ************************************
@@ -273,6 +272,9 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 			TempOmega_min = zI_min + s1Variable_min; //Y1
 			// ************************************************   Negative Direction Ends *******************************************
 
+			loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
+
+
 // ******************************************* Intersection Detection Section Starts *******************************************
 			if (((-1 * TempOmega_min) < invariant_SupportFunction)
 					&& (invariant_SupportFunction < TempOmega)) { //Should have been correct
@@ -293,7 +295,6 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 			rVariable_minus = CopyVector(r1Variable_minus);
 			sVariable_min = s1Variable_min;
 
-			loopIteration++; //for the next Omega-iteration or Time-bound
 		} //end of iterations
 	} //end of parallel for each Iterations or Time-Bound
 // At the end of the For-Loop or all invariant_Directions we have boundaryIterations vector with the different limit to stop iterations
