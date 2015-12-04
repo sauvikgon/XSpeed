@@ -153,7 +153,7 @@
  */
 
 //Reachability Algorithm after optimization of the duplicate support function computation
-template_polyhedra reachabilitySequential(Dynamics& SystemDynamics,
+template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen) {
@@ -173,7 +173,7 @@ template_polyhedra reachabilitySequential(Dynamics& SystemDynamics,
 	} //End of Invariant Directions
 	cout << "\nNew shm_NewTotalIteration = " << shm_NewTotalIteration << "\n";
 	if (shm_NewTotalIteration < 1) {
-		template_polyhedra poly_emptyp;
+		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
 
@@ -306,10 +306,10 @@ template_polyhedra reachabilitySequential(Dynamics& SystemDynamics,
 						invariant->getColumnVector()[eachInvDirection];
 			}
 		}
-		return template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix());
+		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, inv_sfm,
+				ReachParameters.Directions, invariant->getCoeffMatrix()));
 	} else {
-		return template_polyhedra(MatrixValue, ReachParameters.Directions);
+		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 }
 
@@ -444,7 +444,7 @@ template_polyhedra reachabilitySequential(Dynamics& SystemDynamics,
  * Code AFTER optimising the support function computation
  * Same Code as above but with critical region in InvariantExist block
  */
-template_polyhedra reachabilitySequential_For_Parallel_Iterations(
+template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen) {
@@ -463,7 +463,7 @@ template_polyhedra reachabilitySequential_For_Parallel_Iterations(
 				ReachParameters, invariant, lp_solver_type_choosen);
 	} //End of Invariant Directions
 	if (shm_NewTotalIteration == 1) {
-		template_polyhedra poly_emptyp;
+		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
 
@@ -595,7 +595,7 @@ template_polyhedra reachabilitySequential_For_Parallel_Iterations(
 		} //end of for each iteration
 	} //end of for all directions
 
-	template_polyhedra tpolys;
+	template_polyhedra::ptr tpolys;
 #pragma omp critical
 	{/*this critical is used when we call the module PAR_ITER as we are updating the variable ReachParameters
 	 and MatrixValue if this function is called from the module SEQ this #pragma will be ignored*/
@@ -610,15 +610,15 @@ template_polyhedra reachabilitySequential_For_Parallel_Iterations(
 							invariant->getColumnVector()[eachInvDirection];
 				}
 			}
-			tpolys.setTemplateDirections(ReachParameters.Directions);
-			tpolys.setMatrixSupportFunction(MatrixValue);
-			tpolys.setInvariantDirections(invariant->getCoeffMatrix());
-			tpolys.setMatrix_InvariantBound(inv_sfm);
+			tpolys->setTemplateDirections(ReachParameters.Directions);
+			tpolys->setMatrixSupportFunction(MatrixValue);
+			tpolys->setInvariantDirections(invariant->getCoeffMatrix());
+			tpolys->setMatrix_InvariantBound(inv_sfm);
 			//return template_polyhedra(MatrixValue, inv_sfm,ReachParameters.Directions, invariant->getCoeffMatrix());
 			//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
 		} else {
-			tpolys.setTemplateDirections(ReachParameters.Directions);
-			tpolys.setMatrixSupportFunction(MatrixValue);
+			tpolys->setTemplateDirections(ReachParameters.Directions);
+			tpolys->setMatrixSupportFunction(MatrixValue);
 			//return template_polyhedra(MatrixValue, ReachParameters.Directions);
 		}
 	} //end of the Critical Section

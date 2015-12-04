@@ -21,8 +21,8 @@
 //		Balanced Flow Equations into 4x4 for A and B
 //		Invariants converted to 4 Variables
 //		Similarly Guard is also converted to 4 Variables
-void SetNavigationModel4OurFile(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -37,6 +37,7 @@ void SetNavigationModel4OurFile(hybrid_automata& Hybrid_Automata,
 	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
 
 	size_type row, col;
+	unsigned int initial_location_id; //the initial Location ID
 
 	//Polytope I Declaration in the form of Ax<=b
 	//Input Polytope I as a point(x,y,x1,x2) (0.2 <=x<=0.6,0.1<=y<=0.5,x1==0,x2==0) in the grid of cells
@@ -83,14 +84,10 @@ void SetNavigationModel4OurFile(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixI(7, 2) = 0;
 	ConstraintsMatrixI(7, 3) = -1;
 
-	discrete_set d_set;
-
-	//d_set.insert_element(6);		//the initial Location ID = 6
-
 	boundValueI.resize(row);
 	// ********************* start_location=2:: (0.2 <=x1<=0.6,0.1<=x2<=0.5,v1==0,v2==0) ************************
+	initial_location_id = 2; //the initial Location ID
 
-	d_set.insert_element(2); //the initial Location ID = 2
 	boundValueI[0] = 0.5; //	(0.5<=x1<=0.5, 0.5<=x2<=0.5, v1==0,v2==0) ************************
 	boundValueI[1] = -0.5;
 	boundValueI[2] = 0.5;
@@ -121,7 +118,7 @@ void SetNavigationModel4OurFile(hybrid_automata& Hybrid_Automata,
 
 	/*	// ********************* start_location=1:: (0.5 <=x1<=0.8, 1.5<=x2<=1.8,v1==0,v2==0) ************************
 
-	 d_set.insert_element(1);		//the initial Location ID = 1
+	 initial_location_id=1; //the initial Location ID
 
 	 boundValueI[0] = 0.8; //
 	 boundValueI[1] = -0.5;
@@ -134,7 +131,7 @@ void SetNavigationModel4OurFile(hybrid_automata& Hybrid_Automata,
 
 	 // ********************* start_location=5:: (1.2 <=x1<=1.4, 2.5<=x2<=2.7,v1==0,v2==0) ************************
 
-	 d_set.insert_element(5);		//the initial Location ID = 5
+	 initial_location_id=5; //the initial Location ID
 
 	 boundValueI[0] = 1.4; //
 	 boundValueI[1] = -1.2;
@@ -973,15 +970,20 @@ void SetNavigationModel4OurFile(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l8);
 	Hybrid_Automata.addLocation(l9);
 
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+	int transition_id = 0; //initial location no transition taken yet
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
+
+	init_state = I;
 
 }
 
 //Hyst interface generated Output
 
-void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+void SetNavigationModel4OurFile(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -3479,8 +3481,12 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l9);
 	Hybrid_Automata.setDimension(dim);
 
-	discrete_set d_set;
-	d_set.insert_element(9);
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	int initial_location_id=9;
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+	int transition_id = 0; //initial location no transition taken yet
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
+
+	init_state = I;
 }

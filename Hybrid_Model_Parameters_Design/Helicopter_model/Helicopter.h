@@ -300,7 +300,7 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 	system_dynamics.MatrixB = Bmatrix;
 	system_dynamics.MatrixA = AUmatrix;
 	system_dynamics.U->setIsEmpty(true);	//set empty = true which is by default
-	reach_parameters.InvariantExists = false;
+	//reach_parameters.InvariantExists = false;
 //	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
 //	Dynamics Initalised ---------------------
 

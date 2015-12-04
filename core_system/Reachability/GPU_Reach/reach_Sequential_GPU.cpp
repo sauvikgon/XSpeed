@@ -262,7 +262,7 @@ void bulk_Solver_With_UnitBall(int UnitBall,
  * After optimising the duplicate Support Function computation
  */
 
-template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
+template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen,
@@ -277,7 +277,7 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 				ReachParameters, invariant, lp_solver_type_choosen);
 	} //End of Invariant Directions
 	if (NewTotalIteration == 1) {
-		template_polyhedra poly_empty;
+		template_polyhedra::ptr poly_empty;
 		return poly_empty; //NO need to proceed Algorithm further
 	}
 
@@ -502,7 +502,7 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 	std::cout << "\n Before Final Reach Algorithm ";
 	std::cout << std::endl;
 	//Breaking here	for TESTING/Reading LP_Solver
-	return template_polyhedra(MatrixValue, ReachParameters.Directions);
+//	return template_polyhedra(MatrixValue, ReachParameters.Directions);
 
 	boost::timer::cpu_timer reachLoop_time;
 	reachLoop_time.start();
@@ -626,10 +626,10 @@ template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
 						invariant->getColumnVector()[eachInvDirection];
 			}
 		}
-		return template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix());
+		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, inv_sfm,
+				ReachParameters.Directions, invariant->getCoeffMatrix()));
 	} else {
-		return template_polyhedra(MatrixValue, ReachParameters.Directions);
+		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 }
 

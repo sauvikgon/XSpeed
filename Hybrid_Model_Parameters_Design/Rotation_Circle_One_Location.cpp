@@ -11,7 +11,7 @@
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
 
 void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -53,11 +53,11 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixI(3, 0) = -1;
 	ConstraintsMatrixI(3, 1) = 1;
 
-	boundValueI.resize(row);		//Input Polytope I see my note copy
-	boundValueI[0] = -50;		//-2;	//-5
-	boundValueI[1] = 53;		//5;	//13
-	boundValueI[2] = 2;		//5
-	boundValueI[3] = 1;		//3
+	boundValueI.resize(row); //Input Polytope I see my note copy
+	boundValueI[0] = -50; //-2;	//-5
+	boundValueI[1] = 53; //5;	//13
+	boundValueI[2] = 2; //5
+	boundValueI[3] = 1; //3
 
 	/*boundValueI.resize(row);		//Input Polytope I as a x==0.5 and y==0.5.
 	 boundValueI[0] = 0.5;
@@ -114,7 +114,7 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	Bmatrix(1, 1) = 1;
 
 //Transition Dynamics  Rx + w where R is the Assignment Mapping and w is a vector
-	math::matrix<double> R;	//Transition Dynamics
+	math::matrix<double> R; //Transition Dynamics
 	R.resize(row, col);
 	R(0, 0) = 1;
 	R(0, 1) = 0;
@@ -140,7 +140,7 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyC = true;
 
 	system_dynamics.U = polytope::ptr(new polytope());
-	system_dynamics.U->setIsEmpty(true);	//set empty
+	system_dynamics.U->setIsEmpty(true); //set empty
 //	Dynamics Initalised ---------------------
 			// Initial Polytope is initialised
 	initial_polytope_I = polytope::ptr(
@@ -192,11 +192,14 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l1);
 //	Hybrid_Automata.addLocation(l2);
 
-	discrete_set d_set;
-	d_set.insert_element(1);		//the initial Location ID
+	unsigned int initial_location_id = 1; //the initial Location ID
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+	int transition_id = 0; //initial location no transition taken yet
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
 
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	init_state = I;
 
 }
 

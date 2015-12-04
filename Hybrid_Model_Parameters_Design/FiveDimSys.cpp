@@ -8,7 +8,7 @@
 #include "Hybrid_Model_Parameters_Design/FiveDimSys.h"
 
 void setSysParams(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -260,11 +260,14 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 
-	discrete_set d_set;
-	d_set.insert_element(1); //the initial Location ID
+	unsigned int initial_location_id = 1; //the initial Location ID
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+	int transition_id = 0; //initial location no transition taken yet
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
 
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	init_state = I;
 
 }
 

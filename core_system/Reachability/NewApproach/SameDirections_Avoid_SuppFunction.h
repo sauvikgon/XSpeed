@@ -22,7 +22,7 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 /*
  * Called By pure Sequential Algorithm with no critical section in this Algorithm
  */
-template_polyhedra reachabilitySameDirection(Dynamics& SystemDynamics,
+template_polyhedra::ptr reachabilitySameDirection(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);

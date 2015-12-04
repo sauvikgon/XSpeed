@@ -13,7 +13,7 @@
 #include "Utilities/Template_Polyhedra.h"
 
 //Mixing CPU with GPU for Matrix-Vector Multiplication
-template_polyhedra reachabilitySequential_GPU_MatrixVector_Multiply(
+template_polyhedra::ptr reachabilitySequential_GPU_MatrixVector_Multiply(
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);

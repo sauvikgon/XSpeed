@@ -6,8 +6,8 @@
  */
 #include "plotter_utility.h"
 
-
-void plot_output(std::list<template_polyhedra> reachability_sfm) {
+//std::list<template_polyhedra>
+void plot_output(std::list<symbolic_states::ptr>& Symbolic_states) {
 	/*Steps:
 	 * 1) Generate a single polytope from the reachability_sfm(which is a list of template_polyhedra)
 	 * 2) Call create constraint representation of the single polytope in the form of a string
@@ -19,8 +19,8 @@ void plot_output(std::list<template_polyhedra> reachability_sfm) {
 	 *    This FILE can be plotted using the system(graph -T -B .... )utility
 	 */
 
-	std::list<template_polyhedra>::iterator it;
-	for (it = reachability_sfm.begin(); it != reachability_sfm.end(); it++) { //Each (*it) is an individual flowpipe
+	std::list<symbolic_states::ptr>::iterator it;
+	for (it = Symbolic_states.begin(); it != Symbolic_states.end(); it++) { //Each (*it) is an individual flowpipe
 
 		math::matrix<double> sfm, template_direction, invariant_bound_values,
 				invariant_direction;
@@ -30,10 +30,10 @@ void plot_output(std::list<template_polyhedra> reachability_sfm) {
 
 		math::matrix<double> SupportFunction_Values, All_Directions;
 
-		sfm = (*it).getMatrixSupportFunction();	//MatrixSupportFunction
-		template_direction = (*it).getTemplateDirections();	//Direction
-		invariant_direction = (*it).getInvariantDirections(); //invariant_directions
-		invariant_bound_values = (*it).getMatrix_InvariantBound(); //invariant_bound_matrix
+		sfm = (*it)->getContinuousSetptr()->getMatrixSupportFunction();	//MatrixSupportFunction
+		template_direction = (*it)->getContinuousSetptr()->getTemplateDirections();	//Direction
+		invariant_direction = (*it)->getContinuousSetptr()->getInvariantDirections(); //invariant_directions
+		invariant_bound_values = (*it)->getContinuousSetptr()->getMatrix_InvariantBound(); //invariant_bound_matrix
 
 		sfm.matrix_join(invariant_bound_values, SupportFunction_Values);
 		template_direction.matrix_join(invariant_direction, All_Directions);

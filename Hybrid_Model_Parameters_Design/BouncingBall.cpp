@@ -8,7 +8,7 @@
 #include "Hybrid_Model_Parameters_Design/BouncingBall.h"
 
 void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -119,7 +119,6 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	// Invariant Initialised above
 	//ReachParameters.TotalDirections(lastDirs + eachInvDirection + 1, i) = invariant->getCoeffMatrix()(eachInvDirection, i);
 
-
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
@@ -191,11 +190,20 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 
-	discrete_set d_set;
-	d_set.insert_element(1); //the initial Location ID
+	/*discrete_set d_set;		//now not needed
+	 d_set.insert_element(1);*/
 
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	unsigned int initial_location_id = 1; //the initial Location ID
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+//	S=symbolic_states::ptr (new symbolic_states());
+	int transition_id = 0; //initial location no transition taken yet
+	initial_state::ptr Init_state;
+
+	Init_state = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
+
+	init_state = Init_state;
 
 }
 

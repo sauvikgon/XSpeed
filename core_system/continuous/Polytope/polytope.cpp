@@ -245,8 +245,7 @@ double polytope::max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_N
 	return Max;
 }
 
-const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2,
-		int lp_solver_type) {
+const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2) {
 
 	math::matrix<double> total_coeffMatrix, m1;
 	m1 = this->getCoeffMatrix();//assigning constant matrix to matrix m1 so that matrix_join function can be called
@@ -349,6 +348,8 @@ void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v
 	// get the support
 	computeSupportFunction(u,solver,solver,2);
 	sv_u = solver.get_sv();
+
+
 	computeSupportFunction(v,solver,solver,2);
 	sv_v = solver.get_sv();
 	// add the sv's to the set of points
@@ -358,8 +359,14 @@ void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v
 	p1.first = sv_u[i];
 	p1.second = sv_u[j];
 
+	cout << "direction: (" << u[i] << ", " << u[j] << ")" <<std::endl;
+	cout << "support vector: (" << sv_u[i] << ", " << sv_u[j] << ")\n";
+
 	p2.first = sv_v[i];
 	p2.second = sv_v[j];
+
+	cout << "direction: (" << v[i] << ", " << v[j] << ")" <<std::endl;
+	cout << "support vector: (" << sv_v[i] <<", "<< sv_v[j] << ")\n";
 
 	pts.insert(p1);
 	pts.insert(p2);
@@ -375,6 +382,9 @@ void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v
 		return;
 	}
 	else{
+		cout << "direction: (" << bisector[i] << ", " << bisector[j] << ")" << std::endl;
+		cout << "support vector: (" << sv_bisect[i] <<", "<< sv_bisect[j] << ")\n";
+
 		pts.insert(p3);
 		enum_2dVert_restrict(u,bisector,i,j,pts);
 		enum_2dVert_restrict(bisector,v,i,j,pts);

@@ -8,8 +8,8 @@
 #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
 //With empty polytope U
 
-void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -18,12 +18,12 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 	polytope::ptr gaurd_polytope;
 	Dynamics system_dynamics;
 
-	std::cout << std::fixed;	//to assign precision on the std::output stream
-	std::cout.precision(12);			//cout << setprecision(17);
+	std::cout << std::fixed; //to assign precision on the std::output stream
+	std::cout.precision(12); //cout << setprecision(17);
 
 	math::matrix<double> ConstraintsMatrixI, invariantConstraintsMatrix,
-			gaurdConstraintsMatrix, Amatrix, AUmatrix, Bmatrix;	//ConstraintsMatrixV,
-	std::vector<double> boundValueI, invariantBoundValue, gaurdBoundValue;//boundValueV,
+			gaurdConstraintsMatrix, Amatrix, AUmatrix, Bmatrix; //ConstraintsMatrixV,
+	std::vector<double> boundValueI, invariantBoundValue, gaurdBoundValue; //boundValueV,
 	int boundSignI;
 //	int	invariantBoundSign, gaurdBoundSign;		//boundSignV
 
@@ -31,26 +31,26 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 
 	//Initial Polytope Declaration in the form of Ax<=b
 	//this variable not required but just gives us idea about the number of rows and cols generated
-	row = 56;			//18	//56	//68		//70;
-	col = 28;			//28	//34		//35;
+	row = 56; //18	//56	//68		//70;
+	col = 28; //28	//34		//35;
 	ConstraintsMatrixI.resize(row, col);
 	boundValueI.resize(row);
 
-	for (unsigned int i = 0; i < col; i++) {		//28		//34		//35
-		for (unsigned int j = 0; j < col; j++) {	//28		//34		//35
-			if (i == j) {	//for diagonal elements assign 1 and -1
-				ConstraintsMatrixI(2 * i, j) = 1;			//for xi
-				ConstraintsMatrixI(2 * i + 1, j) = -1;		//for -xi
-			} else {	//for all other elements assign zeros
-				ConstraintsMatrixI(2 * i, j) = 0;			//for xi
-				ConstraintsMatrixI(2 * i + 1, j) = 0;		//for -xi
+	for (unsigned int i = 0; i < col; i++) { //28		//34		//35
+		for (unsigned int j = 0; j < col; j++) { //28		//34		//35
+			if (i == j) { //for diagonal elements assign 1 and -1
+				ConstraintsMatrixI(2 * i, j) = 1; //for xi
+				ConstraintsMatrixI(2 * i + 1, j) = -1; //for -xi
+			} else { //for all other elements assign zeros
+				ConstraintsMatrixI(2 * i, j) = 0; //for xi
+				ConstraintsMatrixI(2 * i + 1, j) = 0; //for -xi
 			}
 		}
-		if (i < 8) {		//x1  to x8
+		if (i < 8) { //x1  to x8
 			boundValueI[2 * i] = 0.1;
 			boundValueI[2 * i + 1] = 0;
 		}
-		if ((i >= 8) && (i < col)) {		//x9  to x28
+		if ((i >= 8) && (i < col)) { //x9  to x28
 			boundValueI[2 * i] = 0;
 			boundValueI[2 * i + 1] = 0;
 		}
@@ -120,12 +120,12 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 	string Matrix_U(
 			"0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, -0.000022507624, -0.050176870833, 0.003161246171, -0.003826227932, 0.486165175190, -0.266739403717, 0.000010307207, 0.019757788570, -0.009012833714, 0.001602140073, -0.311015942657, -2.810095522339, 0.000013852188, 0.030385323449, -0.003110159427, 0.002331730630, -0.312812882924, -0.287229690327, -0.000000329150, -0.002667394037, -0.004496152836, -0.000146052012, -0.045956750452, -1.764522071270, -0.000010762331, -0.024056576806, 0.001361685819, -0.001832537128, 0.230715295944, -0.185649147617, 0.000862889566, 1.753103616578, -0.521869609890, 0.138741289403, -23.319318958026, -145.074852087154, -0.000725566870, -1.708539622488, -0.111898315003, -0.127584976026, 13.174473231922, -91.469578800748, 0.000038146360, 0.069753861204, -0.041269247265, 0.005772466581, -1.243498527057, -13.467174945528, 0.227719797948, 0.000000000000, 0.000000000000, 0.000000000000, -0.000000000000, 0.000000000000, 0.000000000000, 11.385989897412, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 4.554395958965, 0.000000000000, 0.000000000000, 0.000000000000, -0.000000000000, -0.000000000000, 0.000000000000, 4.554395958965, 0.000000000000, 0.000000000000, -0.000000000000, -0.000000000000, -0.000000000000, -0.000000000000, 4.554395958965, -0.000000000000, -0.000000000000, -0.000000000000, 0.000000000000, -0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 11.385989897412, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000");
 
-	boost::char_separator<char> sep(", ");//, and " " a single space is the separator
+	boost::char_separator<char> sep(", "); //, and " " a single space is the separator
 	boost::tokenizer<boost::char_separator<char> > tok(Matrix_U, sep);
 	//   tokenizer<> tok(s);
 	//   for(tokenizer<boost::char_separator<double> >::iterator beg=tok.begin(); beg!=tok.end();++beg){
-	row = 28;	//x1 to x28 and then last row for t==0
-	col = 6;	//u1 to u6 columns and last col for t==0
+	row = 28; //x1 to x28 and then last row for t==0
+	col = 6; //u1 to u6 columns and last col for t==0
 	Bmatrix.resize(row, col);
 	unsigned int index_i = 0, index_j = 0;
 	BOOST_FOREACH (const string& t, tok) {
@@ -171,7 +171,7 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 	col = 28;
 	Amatrix.resize(row, col);
 	unsigned int i = 0, j = 0;
-	boost::char_separator<char> delimet(", ");//, and " " a single space is the separator
+	boost::char_separator<char> delimet(", "); //, and " " a single space is the separator
 	boost::tokenizer<boost::char_separator<char> > token(Matrix_A, delimet);
 	BOOST_FOREACH (const string& tex, token) {
 		try {
@@ -215,7 +215,7 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 	 }
 	 */
 
-	invariant = polytope::ptr(new polytope());	//creating an universe polytope
+	invariant = polytope::ptr(new polytope()); //creating an universe polytope
 	invariant->setIsEmpty(true);
 
 	system_dynamics.isEmptyMatrixA = false;
@@ -226,19 +226,19 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 
 	system_dynamics.isEmptyC = true;
 
-	system_dynamics.U = polytope::ptr(new polytope());//empty polytope is set by default
-	system_dynamics.U->setIsEmpty(true);//set empty = true which is by default
+	system_dynamics.U = polytope::ptr(new polytope()); //empty polytope is set by default
+	system_dynamics.U->setIsEmpty(true); //set empty = true which is by default
 
 //	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
 //	Dynamics Initalised ---------------------
 
-	transitions trans;	//empty transition
+	transitions trans; //empty transition
 	location source;
 	source.setLocId(1);
 	source.setName("Flying");
 	source.setSystem_Dynamics(system_dynamics);
 	source.setInvariant(invariant);
-	source.setInvariantExists(false);	//no invariant available
+	source.setInvariantExists(false); //no invariant available
 	source.add_Out_Going_Transitions(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
@@ -247,18 +247,20 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 
-	discrete_set d_set;
-	d_set.insert_element(1);		//the initial Location ID
-
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	unsigned int initial_location_id = 1; //the initial Location ID
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+	int transition_id = 0; //initial location no transition taken yet
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
+	init_state = I;
 
 }
 
 //Hyst Generated output
 
-void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -1348,8 +1350,8 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	invariant0 = polytope::ptr(new polytope());
 
 	/*invariant0 = polytope::ptr(
-			new polytope(invariantConstraintsMatrix0, invariantBoundValue0,
-					invariantBoundSign));*/
+	 new polytope(invariantConstraintsMatrix0, invariantBoundValue0,
+	 invariantBoundSign));*/
 	invariant0->setIsUniverse(true);
 
 	row = 12;
@@ -3204,8 +3206,13 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.setDimension(dim);
 
-	discrete_set d_set;
-	d_set.insert_element(1);
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	unsigned int initial_location_id = 1; //the initial Location ID
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+	int transition_id = 0; //initial location no transition taken yet
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
+
+	init_state = I;
+
 }

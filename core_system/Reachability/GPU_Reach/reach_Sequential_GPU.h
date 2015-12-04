@@ -14,7 +14,7 @@
 #include "Utilities/Template_Polyhedra.h"
 #include "application/sf_directions.h"
 
-template_polyhedra reachabilitySequential_GPU(Dynamics& SystemDynamics,
+template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen, unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU);

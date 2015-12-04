@@ -314,18 +314,18 @@ void template_polyhedra::resize_matrix_SupportFunction(int dir_nums,
 	Matrix_SupportFunction.resize(row, col, true);
 }
 
-template_polyhedra template_polyhedra::union_TemplatePolytope(
-		template_polyhedra& Tpoly) {
+template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
+		template_polyhedra::ptr& Tpoly) {
 
 	if (this->total_iterations == 0)	//if the calling polyhedra is empty
-		return template_polyhedra(Tpoly.getMatrixSupportFunction(),
-				Tpoly.getTemplateDirections());
+		return template_polyhedra::ptr(new template_polyhedra(Tpoly->getMatrixSupportFunction(),
+				Tpoly->getTemplateDirections()));
 
 	//std::cout<<"\nEntered inside Union_templatePolytope\n";
-	size_type rows = Tpoly.getMatrixSupportFunction().size1();//rows will not change only column size will increase
+	size_type rows = Tpoly->getMatrixSupportFunction().size1();//rows will not change only column size will increase
 	unsigned int k;
 	size_type cols = Matrix_SupportFunction.size2()
-			+ Tpoly.getMatrixSupportFunction().size2();
+			+ Tpoly->getMatrixSupportFunction().size2();
 	//std::cout<<"\nRows = "<<rows<<"Cols = "<<cols<<"\n";
 
 	math::matrix<double> new_SFMatrix;
@@ -334,14 +334,14 @@ template_polyhedra template_polyhedra::union_TemplatePolytope(
 
 	for (unsigned int i = 0; i < rows; i++) {
 		k = Matrix_SupportFunction.size2();	//for each row k should begin from Maximum column size of calling Object's SFMatrix
-		for (unsigned int j = 0; j < Tpoly.getMatrixSupportFunction().size2();
+		for (unsigned int j = 0; j < Tpoly->getMatrixSupportFunction().size2();
 				j++) {
-			new_SFMatrix(i, k) = Tpoly.getMatrixSupportFunction()(i, j);
+			new_SFMatrix(i, k) = Tpoly->getMatrixSupportFunction()(i, j);
 			//	std::cout<<Tpoly.getMatrixSupportFunction()(i,j)<<"\t";
 			k++;
 		}
 		//std::cout<<endl;
 	}
-	return template_polyhedra(new_SFMatrix, this->getTemplateDirections());
+	return template_polyhedra::ptr(new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
 }
 

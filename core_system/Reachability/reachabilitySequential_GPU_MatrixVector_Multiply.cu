@@ -11,7 +11,7 @@
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-template_polyhedra reachabilitySequential_GPU_MatrixVector_Multiply(
+template_polyhedra::ptr reachabilitySequential_GPU_MatrixVector_Multiply(
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen) {
@@ -41,7 +41,7 @@ template_polyhedra reachabilitySequential_GPU_MatrixVector_Multiply(
 	} //End of Invariant Directions
 
 	if (shm_NewTotalIteration == 1) {
-		template_polyhedra poly_emptyp;
+		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
 
@@ -177,12 +177,12 @@ template_polyhedra reachabilitySequential_GPU_MatrixVector_Multiply(
 			}
 		}
 		//cout<<"\nAmit"<<MatrixValue.size2()<<"\n";
-		return template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix());
+		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, inv_sfm,
+				ReachParameters.Directions, invariant->getCoeffMatrix()));
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections,ReachParameters.Directions,invariant->getCoeffMatrix());
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
 	} else {
-		return template_polyhedra(MatrixValue, ReachParameters.Directions);
+		return template_polyhedra::ptr( new  template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 }
 

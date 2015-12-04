@@ -49,6 +49,7 @@
 #include "core_system/HybridAutomata/Transition.h"
 #include "core_system/HybridAutomata/Location.h"
 #include "core_system/symbolic_states/symbolic_states.h"
+#include "core_system/symbolic_states/initial_state.h"
 //**************** Hybrid Automata Definition ***********************
 #include "application/All_PP_Definition.h"
 //#include "math/lp_gurobi_simplex.h"
@@ -67,7 +68,8 @@
 namespace po = boost::program_options;
 using namespace std;
 
-symbolic_states initial_symbolic_states;
+//symbolic_states initial_symbolic_states;
+initial_state::ptr init_state;
 //**************** Hybrid Automata Definition ***********************
 
 ReachabilityParameters reach_parameters;
@@ -113,7 +115,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//Setting the initial parameters for Bouncing Ball Model
 		//	std::cout << "\nRunning :: Model of A Bouncing Ball\n";
 		//SetBouncingBall_Parameters(reach_parameters, initial_polytope_I, system_dynamics, invariant,gaurd_polytope, AssignRw);
-		SetBouncingBall_Parameters(Hybrid_Automata, initial_symbolic_states,
+		SetBouncingBall_Parameters(Hybrid_Automata, init_state,
 				reach_parameters);
 	}
 	if (HybridSystem_Model_Type == TBBALL) {
@@ -125,7 +127,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		 system_dynamics, invariant, gaurd_polytope, AssignRw);*/
 
 		SetTimedBouncingBall_Parameters(Hybrid_Automata,
-				initial_symbolic_states, reach_parameters);
+				init_state, reach_parameters);
 		//	cout<<"\nTesting 2 b\n";
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {
@@ -143,7 +145,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//				gaurd_polytope);	//29 variables including t
 		/*SetHelicopter_Parameters3(reach_parameters, initial_polytope_I, system_dynamics, invariant,
 		 gaurd_polytope);	//28 variables with empty polytope U*/
-		SetHelicopter_Parameters3(Hybrid_Automata, initial_symbolic_states,
+		SetHelicopter_Parameters3(Hybrid_Automata, init_state,
 				reach_parameters);
 
 		//	SetHelicopter_Parameters4(reach_parameters, initial_polytope_I, system_dynamics, invariant,
@@ -155,7 +157,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//dim = 5;
 		//	std::cout << "\nRunning :: Model of A Five Dimensional Systems\n";
 		//setSysParams(reach_parameters, initial_polytope_I, system_dynamics, invariant);
-		setSysParams(Hybrid_Automata, initial_symbolic_states,
+		setSysParams(Hybrid_Automata, init_state,
 				reach_parameters);
 		//	std::cout << "\nParameter Assignment Completed!!!\n";
 	}
@@ -165,7 +167,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//	std::cout << "\nRunning :: Benchmark Model of A Navigation\n";
 		//Setting the initial parameters for Bouncing Ball Model
 		//SetNavigationBenchMark(Hybrid_Automata, initial_symbolic_states,reach_parameters);//only 2 Variable
-		SetNavigationBenchMark4Var(Hybrid_Automata, initial_symbolic_states,
+		SetNavigationBenchMark4Var(Hybrid_Automata, init_state,
 				reach_parameters); //Paper's Model
 		//	cout<<"\nTesting 2 b\n";
 	}
@@ -173,7 +175,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 	if (HybridSystem_Model_Type == NAVIGATION_2) {
 		//	std::cout << "\nRunning :: Benchmark Model of A Navigation\n";
 		//Setting the initial parameters for Bouncing Ball Model
-		SetNavigationModel2(Hybrid_Automata, initial_symbolic_states,
+		SetNavigationModel2(Hybrid_Automata, init_state,
 				reach_parameters); //My own testing Model NAV2
 		//	cout<<"\nTesting 2 b\n";
 	}
@@ -184,7 +186,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//Setting the initial parameters for Bouncing Ball Model
 		//SetNavigationBenchMark(Hybrid_Automata, initial_symbolic_states,reach_parameters);//only 2 Variable
 
-		SetNavigationModel4(Hybrid_Automata, initial_symbolic_states,
+		SetNavigationModel4(Hybrid_Automata, init_state,
 				reach_parameters); //Model NAV04
 
 		//	cout<<"\nTesting 2 b\n";
@@ -195,7 +197,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//Setting the initial parameters for Bouncing Ball Model
 		//SetNavigationBenchMark(Hybrid_Automata, initial_symbolic_states,reach_parameters);//only 2 Variable
 
-		SetNavigationModel5by5(Hybrid_Automata, initial_symbolic_states,
+		SetNavigationModel5by5(Hybrid_Automata, init_state,
 				reach_parameters); //My own testing Model NAV_5by5
 
 		//	cout<<"\nTesting 2 b\n";
@@ -206,13 +208,13 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		std::cout
 				<< "\nRunning :: Model of A CIRCLE with ONE Location 2-Dimensional Systems\n";
 		SetRotationCircleOneLocation_Parameters(Hybrid_Automata,
-				initial_symbolic_states, reach_parameters);
+				init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == CIRCLE_TWO_LOC) {
 		//dim = 2;
 		std::cout
 				<< "\nRunning :: Model of A CIRCLE with TWO Locations 2-Dimensional Systems\n";
-		SetRotationCircle_Parameters(Hybrid_Automata, initial_symbolic_states,
+		SetRotationCircle_Parameters(Hybrid_Automata, init_state,
 				reach_parameters);
 	}
 	if (HybridSystem_Model_Type == CIRCLE_FOUR_LOC) {
@@ -220,10 +222,10 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		std::cout
 				<< "\nRunning :: Model of A CIRCLE with Four Locations 2-Dimensional Systems\n";
 		SetRotationCircle4Location_Parameters(Hybrid_Automata,
-				initial_symbolic_states, reach_parameters);
+				init_state, reach_parameters);
 	}
 
-	dim = initial_symbolic_states.getContinuousSet()->getSystemDimension();
+	dim = init_state->getInitialSet()->getSystemDimension();
 
 //Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
 	std::vector<std::vector<double> > newDirections;
@@ -261,6 +263,18 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 
 }
 
+bool isNumber(const string& s) {
+	bool hitDecimal = 0;
+	for (int i = 0; i < s.length(); i++) {
+		char c = s[i];
+		if (c == '.' && !hitDecimal) // 2 '.' in string mean invalid
+			hitDecimal = 1; // first hit here, we forgive and skip
+		else if (!isdigit(c))
+			return 0; // not ., not
+	}
+	return 1;
+}
+
 int main(int argc, char *argv[]) {
 
 	char ch;
@@ -275,6 +289,8 @@ int main(int argc, char *argv[]) {
 	// -----------------
 
 	//cout<<"Started from here\n";
+	std::set<std::pair<int, polytope::ptr> > forbidden_set; //{(locID1,Polytope1)},{(locID2,Polytope2)}
+
 	double time_bound;
 	unsigned int iterations_size;
 	unsigned int model_type = 0, directions_type_or_size = 0; //set to default
@@ -357,10 +373,15 @@ int main(int argc, char *argv[]) {
 			"Set the maximum number of Time Sliced(or partitions)")("pbfs",
 			"Enable Parallel Breadth First Exploration of Hybrid Automata Locations. PBFS is OFF by default")
 
+	("forbidden,F", po::value<std::string>(),
+			"forbidden location_ID and forbidden set/region within that location")
+
 	("include-path,I", po::value<std::string>(), "include file path")(
 			"model-file,m", po::value<std::string>(), "include model file")(
 			"config-file,c", po::value<std::string>(),
-			"include configuration file");
+			"include configuration file")
+
+			;
 
 	// Declare a group of options that will be allowed both on command line and in config file
 	/*po::options_description config("Configuration");
@@ -550,11 +571,11 @@ int main(int argc, char *argv[]) {
 				st5 = cmdStr5.c_str();
 				system(st5); //re-run the project
 				std::cout << "This Main parent process to be stopped!!!\n";
-				return 0; //todo ::delete/kill from the stack the 1st recursive data
+				return 0; //stop the 1st recursive executable
 			}
 
 			//hyst generated code to be used
-			user_model(Hybrid_Automata, initial_symbolic_states,
+			user_model(Hybrid_Automata, init_state,
 					reach_parameters, transition_iterations);
 
 			// --------- Setting configuration parameters ---------
@@ -570,6 +591,171 @@ int main(int argc, char *argv[]) {
 					"/home/amit/cuda-workspace/XSpeed/src/sys_files/system_var.txt");
 			outfile << 0;
 			outfile.close();
+		}
+
+		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
+			std::string allStr;
+
+			allStr = vm["forbidden"].as<std::string>();
+			std::cout << "\All forbidden arguments\n";
+
+			math::matrix<double> coeff;
+			std::vector<double> colVector;
+
+			std::list<std::string> all_args;
+
+			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+			boost::char_separator<char> sep("& ");
+			tokenizer tokens(allStr, sep);
+			for (tokenizer::iterator tok_iter = tokens.begin();
+					tok_iter != tokens.end(); ++tok_iter) {
+				//std::cout << "<" << *tok_iter << ">" << std::endl;
+				all_args.push_back((std::string)*tok_iter);
+			}
+
+			std::pair<int, polytope::ptr> forbid_pair;
+			int pair_started = -1;
+			bool polytope_created = false;
+			int constraints_count = 0;
+			std::list<std::vector<double> > list_of_bounds;
+			for (std::list<std::string>::iterator it = all_args.begin();
+					it != all_args.end(); it++) {
+				std::string eachStr = (*it);
+				//		std::cout << "eachStr = " << eachStr << std::endl;
+				boost::char_separator<char> sep_symbol("="); //handles = or ==
+				tokenizer each_tokens(eachStr, sep_symbol);
+				bool is_loc = false;
+
+				if (each_tokens.begin().current_token().compare("loc") == 0) { //check the 1st token if "loc"
+					//std::cout<<"each_tokens.begin().current_token() = "<<each_tokens.begin().current_token()<<"  amit\n";
+					pair_started = 1;
+					for (tokenizer::iterator tok_it = each_tokens.begin();
+							tok_it != each_tokens.end(); tok_it++) {
+						if (is_loc) { //2nd token
+							std::cout << "Loc=" << *tok_it << "\n";
+							forbid_pair.first = boost::lexical_cast<int>((std::string)(*tok_it));
+							pair_started = 0;
+						}
+						if (each_tokens.begin().current_token().compare("loc")
+								== 0) { //1st token
+							is_loc = true;
+							if (polytope_created) {	//previous polytope created but not stored in pair
+								//forbid_pair.second = poly;
+								//first store the polytope
+								//false reset all previous coeff's values
+								coeff.resize(2 * list_of_bounds.size(),
+										list_of_bounds.size());	//assuming simple-case of bounded input
+								for (int i = 0; i < coeff.size2(); i++) {// both till col
+									for (int j = 0; j < coeff.size2(); j++) {// both till col
+										if (i == j) {
+											coeff(2 * i, j) = -1;
+											coeff(2 * i + 1, j) = 1;
+										} else {
+											coeff(2 * i, j) = 0;
+											coeff(2 * i + 1, j) = 0;
+										}
+									}
+								}
+								int res = 2 * list_of_bounds.size();
+								colVector.resize(res);
+								int col_index = 0;
+								for (std::list<std::vector<double> >::iterator it =
+										list_of_bounds.begin();
+										it != list_of_bounds.end(); it++) {
+									std::vector<double> v = (*it);
+									colVector[col_index] = v[0];
+									col_index++;
+									colVector[col_index] = v[1];
+									col_index++;
+								}
+								std::cout << "coeff = " << coeff << std::endl;
+								std::cout << "colVector = ";
+								for (int i = 0; i < colVector.size(); i++) {
+									std::cout << colVector[i] << "\t";
+								}
+								polytope::ptr forbidden_polytope;
+								forbidden_polytope = polytope::ptr(
+										new polytope(coeff, colVector, 1));
+								forbid_pair.second = forbidden_polytope;
+
+								forbidden_set.insert(forbid_pair);
+
+								polytope_created = false;//store here the polytope
+								constraints_count = 0;
+								list_of_bounds.clear();	//removes all previous elements from the list
+
+							}
+						}
+					}
+				} else { //Always user's first input is loc=locID. So forbid_pair.first is populated 1st
+					pair_started = 0; //this token is a constraint string and not a loc=locID
+					//New Parser for parsing each constraints
+					std::vector<double> bounds(2);//every constraints will have left and right value
+					//int tmp=0;
+					while (pair_started != 1) { //parse and create Polytope p for forbid_pair.second
+						std::string constraint_Str = eachStr;
+						boost::char_separator<char> sep_symbol("<="); //handles < or <= (or even error input =<
+						tokenizer each_tokens(constraint_Str, sep_symbol);
+						/*tmp++;
+						 bounds.resize(tmp);*/
+						int index_val = 0;
+						for (tokenizer::iterator tok_it = each_tokens.begin();
+								tok_it != each_tokens.end(); tok_it++) {
+							if (isNumber((std::string)*tok_it)) { //tokens
+								std::cout << "tok_it = " << *tok_it<<"\n";
+								bounds[index_val] = boost::lexical_cast<double>((std::string)(*tok_it));
+								index_val++;
+								//bounds.push_back(boost::lexical_cast<int>((*tok_it))); //forbid_pair.first = boost::lexical_cast<int>((*tok_it));
+							}
+						}
+						bounds[0] = -1 * bounds[0]; //n<=x1 so n converted to -n
+						list_of_bounds.push_back(bounds);
+						polytope_created = true;	//constraint(s) parsed
+						pair_started = 1;//end of a constraint to exit from while-loop
+					}	//end of a constraint
+				}
+				constraints_count++; //number of constraints count
+			}	//End of all forbidden string
+
+			if (polytope_created) {
+				//constraints count can be obtained from 'constraints_count' or list_of_bounds.size()
+
+				coeff.resize(2 * list_of_bounds.size(), list_of_bounds.size());	//assuming simple-case of bounded input
+				for (int i = 0; i < coeff.size2(); i++) {	// both till col
+					for (int j = 0; j < coeff.size2(); j++) {	// both till col
+						if (i == j) {
+							coeff(2 * i, j) = -1;
+							coeff(2 * i + 1, j) = 1;
+						} else {
+							coeff(2 * i, j) = 0;
+							coeff(2 * i + 1, j) = 0;
+						}
+					}
+				}
+				int res = 2 * list_of_bounds.size();
+				colVector.resize(res);
+				int col_index = 0;
+				for (std::list<std::vector<double> >::iterator it =
+						list_of_bounds.begin(); it != list_of_bounds.end();
+						it++) {
+					std::vector<double> v = (*it);
+					colVector[col_index] = v[0];
+					col_index++;
+					colVector[col_index] = v[1];
+					col_index++;
+				}
+				std::cout << "coeff = " << coeff << std::endl;
+				std::cout << "colVector = ";
+				for (int i = 0; i < colVector.size(); i++) {
+					std::cout << colVector[i] << "\t";
+				}
+				polytope::ptr forbidden_polytope;
+				forbidden_polytope = polytope::ptr(
+						new polytope(coeff, colVector, 1));
+				forbid_pair.second = forbidden_polytope;
+				forbidden_set.insert(forbid_pair);
+				polytope_created = false;
+			}
 		}
 
 		if (vm.count("model") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
@@ -771,9 +957,10 @@ int main(int argc, char *argv[]) {
 			transition_size); //Initialising the variables
 //	cout<<"Initialisation of reachability problem complete\n";
 
-	std::list<template_polyhedra> reachability_sfm;
-	//List/Array of Reachability Region/FlowPipe of all transitions.
-	//to be changed into a single variable instead of list.
+	//std::list<template_polyhedra> reachability_sfm;
+	std::list<symbolic_states::ptr> Symbolic_states_list;
+//List/Array of Reachability Region/FlowPipe of all transitions.
+//to be changed into a single variable instead of list.
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
 //	long total_mem_used=0;
@@ -785,17 +972,17 @@ int main(int argc, char *argv[]) {
 		//cout<<"\n Before reach call\n";
 		if (DiscreteAlgorithm != PBFS) { //Sequential Search implemented for Discrete Jumps
 			std::cout << "\nRunning Sequential BFS\n";
-			reachability_sfm = reach(Hybrid_Automata, initial_symbolic_states,
+			Symbolic_states_list = reach(Hybrid_Automata, init_state,
 					reach_parameters, transition_iterations, Algorithm_Type,
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
-					Solver_GLPK_Gurobi_GPU);
+					Solver_GLPK_Gurobi_GPU, forbidden_set);
 		} else { //Parallel Breadth First Search implemented for Discrete Jumps
 			std::cout << "\nRunning Parallel BFS\n";
-			reachability_sfm = reach_pbfs(Hybrid_Automata,
-					initial_symbolic_states, reach_parameters,
+			Symbolic_states_list = reach_pbfs(Hybrid_Automata,
+					init_state, reach_parameters,
 					transition_iterations, Algorithm_Type, Total_Partition,
 					lp_solver_type_choosen, number_of_streams,
-					Solver_GLPK_Gurobi_GPU);
+					Solver_GLPK_Gurobi_GPU, forbidden_set);
 		}
 //cout<<"\nTesting 4\n";
 		tt1.stop();
@@ -855,7 +1042,7 @@ int main(int argc, char *argv[]) {
 
 	int ploter = 0;
 	if (ploter == 1) { //choosing SpaceEx ploter
-		plot_output(reachability_sfm);
+		plot_output(Symbolic_states_list);
 		//SpaceEx_plotter();
 	} else { //Plotting using MatLab with our temporary matlab code
 
@@ -924,7 +1111,7 @@ int main(int argc, char *argv[]) {
 		//Populating the Invariants_Directions :: copying all invariants directions from the reachRegion or the reachability flow-pipe
 		//returned from the reach Algorithm in the form of template_polyhedra list.
 		//Traverse through each of the list and extract invariant_directions.
-		std::list<template_polyhedra>::iterator it;
+		std::list<symbolic_states::ptr>::iterator it;
 		std::ofstream MatLabFileConfiguration;
 //	std::ofstream MatLabFileInvariantBoundValues;
 		MatLabFileConfiguration.open(
@@ -932,14 +1119,14 @@ int main(int argc, char *argv[]) {
 //	MatLabFileInvariantBoundValues.open("/home/amit/matlabTest/ProjectOutput/Invariants_BoundValue.txt");
 		int number_of_invariants = 0, inv_size = 0, state_number = 0,
 				state_iterations = 0;
-		for (it = reachability_sfm.begin(); it != reachability_sfm.end();
+		for (it = Symbolic_states_list.begin(); it != Symbolic_states_list.end();
 				it++) {
 			math::matrix<double> invariant_directions, invariant_bound_values;
-			invariant_directions = (*it).getInvariantDirections(); //invariant_directions
-			invariant_bound_values = (*it).getMatrix_InvariantBound(); //invariant_bound_matrix
+			invariant_directions = (*it)->getContinuousSetptr()->getInvariantDirections(); //invariant_directions
+			invariant_bound_values = (*it)->getContinuousSetptr()->getMatrix_InvariantBound(); //invariant_bound_matrix
 
 			state_number++; //Each state has a Flow-pipe, (state_number begins from 1 to n)
-			state_iterations = (*it).getMatrixSupportFunction().size2(); //total number of columns of SFM is iterations in each state
+			state_iterations = (*it)->getContinuousSetptr()->getMatrixSupportFunction().size2(); //total number of columns of SFM is iterations in each state
 
 			number_of_invariants = invariant_directions.size1(); //ASSUMING SAME NUMBER OF INVARIANTS FOR ALL LOCATIONS
 
@@ -973,7 +1160,7 @@ int main(int argc, char *argv[]) {
 		MatLabFile_InvariantsDirections.close();
 //	MatLabFileInvariantBoundValues.close();
 		MatLabFile_TemplateDirections.close();
-		std::list<template_polyhedra>::iterator i_sfm;
+		std::list<symbolic_states::ptr>::iterator i_sfm;
 		std::ofstream MatLabFileSupportFunctionMatrix;
 		Totaldirs = reach_parameters.Directions.size1(); // + number_of_invariants;	//if no invariants Totaldirs = dir_nums
 		MatLabFileSupportFunctionMatrix.open(
@@ -981,12 +1168,12 @@ int main(int argc, char *argv[]) {
 
 //Only SupportFunctionMatrix of FlowPipe
 		for (int i = 0; i < Totaldirs; i++) {
-			for (i_sfm = reachability_sfm.begin();
-					i_sfm != reachability_sfm.end(); i_sfm++) {
+			for (i_sfm = Symbolic_states_list.begin();
+					i_sfm != Symbolic_states_list.end(); i_sfm++) {
 				for (unsigned int k = 0;
-						k < (*i_sfm).getMatrixSupportFunction().size2(); k++) {
+						k < (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction().size2(); k++) {
 					MatLabFileSupportFunctionMatrix
-							<< (*i_sfm).getMatrixSupportFunction()(i, k) << " ";
+							<< (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction()(i, k) << " ";
 				}
 			}
 			MatLabFileSupportFunctionMatrix << endl;
@@ -994,12 +1181,12 @@ int main(int argc, char *argv[]) {
 //Now adding invariantBoundMatrix of Flowpipe into the file
 //ASSUMING SAME NUMBER OF INVARIANTS FOR ALL LOCATIONS
 		for (int i = 0; i < number_of_invariants; i++) {
-			for (it = reachability_sfm.begin(); it != reachability_sfm.end();
+			for (it = Symbolic_states_list.begin(); it != Symbolic_states_list.end();
 					it++) {
 				for (unsigned int k = 0;
-						k < (*it).getMatrix_InvariantBound().size2(); k++) {
+						k < (*it)->getContinuousSetptr()->getMatrix_InvariantBound().size2(); k++) {
 					MatLabFileSupportFunctionMatrix
-							<< (*it).getMatrix_InvariantBound()(i, k) << " ";
+							<< (*it)->getContinuousSetptr()->getMatrix_InvariantBound()(i, k) << " ";
 				}
 			}
 			MatLabFileSupportFunctionMatrix << std::endl;

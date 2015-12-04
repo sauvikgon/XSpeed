@@ -17,7 +17,7 @@
 /*
  * Called from Parallel_Iterations with different initial sets
  */
-const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachParallelExplore(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool invariantExists, int CORES, unsigned int Algorithm_Type,
@@ -33,7 +33,7 @@ const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
 			/ ReachParameters.time_step; //required in Invarian_Boundary_Check
 //	cout << "partition_iterations" << ReachParameters.Iterations << "\n";
 			//ReachParameters.time_step = newTimeBound/ partition_iterations;	//computed for 1st partition
-	template_polyhedra reachability_region;
+	template_polyhedra::ptr reachability_region;
 	//std::list<polytope::ptr> initial_polys_list;
 //omp_set_nested(1);		//Enabling the Nested Loop in OpenMP Programming
 	//std::cout<<"omp_get_nested() = "<<omp_get_nested()<<std::endl;
@@ -42,11 +42,11 @@ const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
 #pragma omp parallel for
 	for (int i = 0; i < CORES; i++) { //for (double i = 0; i < T; i += newTimeBound) {
 
-		template_polyhedra Tpoly;
+		template_polyhedra::ptr Tpoly;
 		math::matrix<double> phi, phi_trans, A_inv_phi, y_matrix, y_trans;
 		double START_TIME = i * newTimeBound; //first iteration START_TIME = i = 0 which make beta = 0
 		//	std::cout << "\nStart_Time = " << START_TIME << "\n";
-		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME);	//if MatrixA is empty will not perform this function
+		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
 		phi.transpose(phi_trans); //phi_trans computed
 
 		math::matrix<double> A_inv; //(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
@@ -76,7 +76,7 @@ const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
 		}
 #pragma omp critical
 		//	if (i != 0)
-		reachability_region = reachability_region.union_TemplatePolytope(Tpoly);
+		reachability_region = reachability_region->union_TemplatePolytope(Tpoly);
 	} //end of pragma for loop
 
 	//this may not be required if Average_number_of_times = 1 otherwise must.
@@ -197,7 +197,7 @@ const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
  */
 
 //Optimizing Supp_Func Computation:: Implementation of parallel reachability using OMP approach
-const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen) {
@@ -222,7 +222,7 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 		//	cout <<"\nInvariant Exists!!!\n";
 	} //End of Invariant Directions
 	if (shm_NewTotalIteration == 1) {
-		template_polyhedra poly_emptyp;
+		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
 
@@ -368,20 +368,23 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 			}
 		}
 		//cout<<"\nAmit"<<MatrixValue.size2()<<"\n";
-		return template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix());
+		return template_polyhedra::ptr(
+				new template_polyhedra(MatrixValue, inv_sfm,
+						ReachParameters.Directions,
+						invariant->getCoeffMatrix()));
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections, ReachParameters.Directions, invariant->getCoeffMatrix());
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
 	} else {
 		MatrixValue.resize(numVectors, shm_NewTotalIteration, true); //but writing or resizing only upto the NewTotalIteration
-		return template_polyhedra(MatrixValue, ReachParameters.Directions);
+		return template_polyhedra::ptr(
+				new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 }
 
 /*
  * Same Code as Above but Called from Nested OMP Parallel FOR
  */
-const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
+const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen) {
@@ -474,13 +477,13 @@ const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
 						invariant->getColumnVector()[eachInvDirection];
 			}
 		}
-		return template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix());
+		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, inv_sfm,
+				ReachParameters.Directions, invariant->getCoeffMatrix()));
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections,ReachParameters.Directions, invariant->getCoeffMatrix());
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
 	} else {
 		//MatrixValue.resize(numVectors, shm_NewTotalIteration, true);//but writing or resizing only upto the NewTotalIteration
-		return template_polyhedra(MatrixValue, ReachParameters.Directions);
+		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 
 }
@@ -490,19 +493,19 @@ const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
  * Algorithm type = PAR_BY_PARTS
  */
 
-const template_polyhedra reachabilityPartitions(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachabilityPartitions(Dynamics& SystemDynamics,
 		polytope::ptr Initial, ReachabilityParameters& ReachParameters,
 		polytope::ptr invariant, bool isInvariantExist,
 		int lp_solver_type_choosen) {
 
 	std::list<polytope::ptr> polys;
-	template_polyhedra reachability_region;
+	template_polyhedra::ptr reachability_region;
 	unsigned int nVar = 4; //number of variables to partition
 	unsigned int p = 2; //number of partitions for each variables(eg 2 for 2 equal halfs or 3 equal halfs,etc
 	polys = Partition_BoundingPolytope(Initial, nVar, p);
 	cout << "Partitions size = " << polys.size() << endl;
 	polytope::ptr initial_set;
-	template_polyhedra Tpoly;
+	template_polyhedra::ptr Tpoly;
 //#pragma omp parallel for
 	for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end();
 			i++) {
@@ -520,7 +523,7 @@ const template_polyhedra reachabilityPartitions(Dynamics& SystemDynamics,
 
 #pragma omp critical
 		{
-			reachability_region = reachability_region.union_TemplatePolytope(
+			reachability_region = reachability_region->union_TemplatePolytope(
 					Tpoly);
 		} //end of pragma for loop
 	}
@@ -534,20 +537,20 @@ const template_polyhedra reachabilityPartitions(Dynamics& SystemDynamics,
  * Algorithm type = PAR_BY_PARTS_PAR_ITERS
  */
 
-const template_polyhedra reachabilityPartitions_par_iters(
+const template_polyhedra::ptr reachabilityPartitions_par_iters(
 		Dynamics& SystemDynamics, polytope::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int partitions_size,
 		int lp_solver_type_choosen) {
 
 	std::list<polytope::ptr> polys;
-	template_polyhedra reachability_region;
+	template_polyhedra::ptr reachability_region;
 	unsigned int nVar = 1;
 	unsigned int p = 2; //number of partitions for each variables(eg 2 for 2 equal halfs or 3 equal halfs,etc
 	polys = Partition_BoundingPolytope(Initial, nVar, p);
 
 	polytope::ptr initial_set;
-	template_polyhedra Tpoly;
+	template_polyhedra::ptr Tpoly;
 
 	cout << "Partition Done" << endl;
 	for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end();
@@ -566,7 +569,7 @@ const template_polyhedra reachabilityPartitions_par_iters(
 		cout << "First round Done" << endl;
 #pragma omp critical
 		{
-			reachability_region = reachability_region.union_TemplatePolytope(
+			reachability_region = reachability_region->union_TemplatePolytope(
 					Tpoly);
 		} //end of pragma for loop
 	}

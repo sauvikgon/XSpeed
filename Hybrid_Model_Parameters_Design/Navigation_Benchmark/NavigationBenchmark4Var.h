@@ -3,7 +3,7 @@
  *
  *  Created on: 15-Nov-2014
  *      Author: amit
- *      Navigation Benchmark:: deals with an boject that moves in the R^2 plane with
+ *      Navigation Benchmark:: deals with an object that moves in the R^2 plane with
  *      velocity V_d is determined by the position of the object in an n x m grid, and the desired velocities may
  *      take values [sin(i * pi/4), cos(i * pi/4)], for i=0, . . . , 7.
  *      The Grid is labled as below *
@@ -30,14 +30,15 @@
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "core_system/symbolic_states/symbolic_states.h"
+#include "core_system/symbolic_states/initial_state.h"
 
 void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
 
 //Only the desired-velocities of  Loc 3 and Loc 4 have been changed
 void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
 
 /*
@@ -45,11 +46,11 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
  * Standard model used by most researchers by the Model name : NAV04
  */
 void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
 
 void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* NAVIGATIONBENCHMARK4Var_H_ */

@@ -5,7 +5,7 @@
 
 #include "user_model.h"
 void user_model(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters, int& transition_iterations) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -2502,12 +2502,16 @@ void user_model(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l9);
 	Hybrid_Automata.setDimension(dim);
 
-	discrete_set d_set;
-	d_set.insert_element(9);
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	unsigned int initial_location_id = 9; //the initial Location ID
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+	int transition_id = 0;	//initial location no transition taken yet
+	initial_state::ptr I = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
 
-	dim = initial_symbolic_state.getContinuousSet()->getSystemDimension();
+	init_state = I;
+
+	dim = init_state->getInitialSet()->getSystemDimension();
+
 	std::vector<std::vector<double> > newDirections;
 	math::matrix<double> Real_Directions;
 	unsigned int dir_nums;

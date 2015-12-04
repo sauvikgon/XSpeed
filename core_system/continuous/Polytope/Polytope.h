@@ -104,8 +104,11 @@ public:
 	 */
 	bool check_polytope_intersection(polytope::ptr P2,
 			int lp_solver_type_choosen);
-	const polytope::ptr GetPolytope_Intersection(polytope::ptr P2,
-			int lp_solver_type_choosen);
+	/*
+	 * Returns a new polytope after appending the constraints of P2
+	 * which is an intersection-region
+	 */
+	const polytope::ptr GetPolytope_Intersection(polytope::ptr P2);
 
 	/**
 	 * Enumerate all vertices of the polytope between the two vectors
@@ -116,6 +119,9 @@ public:
 
 	/**
 	 * enumerate all vertices of the polytope
+	 * int i is the 1st projecting variable and
+	 * 	   j is the second projecting variable
+	 * 	   the value/index of i and j begins with 0 to n-1
 	 */
 	std::set<std::pair<double,double> > enumerate_2dVertices(int i, int j);
 };
