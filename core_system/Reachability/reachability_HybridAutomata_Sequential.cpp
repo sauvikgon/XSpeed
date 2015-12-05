@@ -393,9 +393,12 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							}
 							std::cout << "(" << locationID << ", " << transID
 									<< ")";
-							current_forbidden_state =
-									searchSymbolic_state(Reachability_Region,
-											current_forbidden_state->getParentPtrSymbolicState());
+							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) {//searching only if not NULL
+								current_forbidden_state =
+										searchSymbolic_state(
+												Reachability_Region,
+												current_forbidden_state->getParentPtrSymbolicState());
+							}
 							cc++;
 						} while (current_forbidden_state->getParentPtrSymbolicState()
 								!= NULL);
@@ -413,8 +416,8 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 
 							int transID =
 									current_forbidden_state->getTransitionId();
-							std::cout << " -->  (" << locationID << ", " << transID
-									<< ")\n";
+							std::cout << " -->  (" << locationID << ", "
+									<< transID << ")\n";
 
 						}
 						saftey_violated = true;

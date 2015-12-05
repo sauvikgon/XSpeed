@@ -26,6 +26,7 @@
 #include "Utilities/Template_Polyhedra.h"
 #include "Utilities/Post_Assignment.h"
 #include <list>
+#include <utility>	//for std::pair
 #include <iterator>
 #include "Hybrid_Model_Parameters_Design/BouncingBall.h"
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
@@ -126,8 +127,8 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		/*	SetTimedBouncingBall_Parameters(reach_parameters, initial_polytope_I,
 		 system_dynamics, invariant, gaurd_polytope, AssignRw);*/
 
-		SetTimedBouncingBall_Parameters(Hybrid_Automata,
-				init_state, reach_parameters);
+		SetTimedBouncingBall_Parameters(Hybrid_Automata, init_state,
+				reach_parameters);
 		//	cout<<"\nTesting 2 b\n";
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {
@@ -157,8 +158,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//dim = 5;
 		//	std::cout << "\nRunning :: Model of A Five Dimensional Systems\n";
 		//setSysParams(reach_parameters, initial_polytope_I, system_dynamics, invariant);
-		setSysParams(Hybrid_Automata, init_state,
-				reach_parameters);
+		setSysParams(Hybrid_Automata, init_state, reach_parameters);
 		//	std::cout << "\nParameter Assignment Completed!!!\n";
 	}
 
@@ -175,8 +175,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 	if (HybridSystem_Model_Type == NAVIGATION_2) {
 		//	std::cout << "\nRunning :: Benchmark Model of A Navigation\n";
 		//Setting the initial parameters for Bouncing Ball Model
-		SetNavigationModel2(Hybrid_Automata, init_state,
-				reach_parameters); //My own testing Model NAV2
+		SetNavigationModel2(Hybrid_Automata, init_state, reach_parameters); //My own testing Model NAV2
 		//	cout<<"\nTesting 2 b\n";
 	}
 
@@ -186,8 +185,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//Setting the initial parameters for Bouncing Ball Model
 		//SetNavigationBenchMark(Hybrid_Automata, initial_symbolic_states,reach_parameters);//only 2 Variable
 
-		SetNavigationModel4(Hybrid_Automata, init_state,
-				reach_parameters); //Model NAV04
+		SetNavigationModel4(Hybrid_Automata, init_state, reach_parameters); //Model NAV04
 
 		//	cout<<"\nTesting 2 b\n";
 	}
@@ -197,8 +195,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//Setting the initial parameters for Bouncing Ball Model
 		//SetNavigationBenchMark(Hybrid_Automata, initial_symbolic_states,reach_parameters);//only 2 Variable
 
-		SetNavigationModel5by5(Hybrid_Automata, init_state,
-				reach_parameters); //My own testing Model NAV_5by5
+		SetNavigationModel5by5(Hybrid_Automata, init_state, reach_parameters); //My own testing Model NAV_5by5
 
 		//	cout<<"\nTesting 2 b\n";
 	}
@@ -207,8 +204,8 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//dim = 2;
 		std::cout
 				<< "\nRunning :: Model of A CIRCLE with ONE Location 2-Dimensional Systems\n";
-		SetRotationCircleOneLocation_Parameters(Hybrid_Automata,
-				init_state, reach_parameters);
+		SetRotationCircleOneLocation_Parameters(Hybrid_Automata, init_state,
+				reach_parameters);
 	}
 	if (HybridSystem_Model_Type == CIRCLE_TWO_LOC) {
 		//dim = 2;
@@ -221,8 +218,8 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//dim = 2;
 		std::cout
 				<< "\nRunning :: Model of A CIRCLE with Four Locations 2-Dimensional Systems\n";
-		SetRotationCircle4Location_Parameters(Hybrid_Automata,
-				init_state, reach_parameters);
+		SetRotationCircle4Location_Parameters(Hybrid_Automata, init_state,
+				reach_parameters);
 	}
 
 	dim = init_state->getInitialSet()->getSystemDimension();
@@ -575,8 +572,8 @@ int main(int argc, char *argv[]) {
 			}
 
 			//hyst generated code to be used
-			user_model(Hybrid_Automata, init_state,
-					reach_parameters, transition_iterations);
+			user_model(Hybrid_Automata, init_state, reach_parameters,
+					transition_iterations);
 
 			// --------- Setting configuration parameters ---------
 			time_bound = reach_parameters.TimeBound;
@@ -610,7 +607,7 @@ int main(int argc, char *argv[]) {
 			for (tokenizer::iterator tok_iter = tokens.begin();
 					tok_iter != tokens.end(); ++tok_iter) {
 				//std::cout << "<" << *tok_iter << ">" << std::endl;
-				all_args.push_back((std::string)*tok_iter);
+				all_args.push_back((std::string) *tok_iter);
 			}
 
 			std::pair<int, polytope::ptr> forbid_pair;
@@ -633,7 +630,8 @@ int main(int argc, char *argv[]) {
 							tok_it != each_tokens.end(); tok_it++) {
 						if (is_loc) { //2nd token
 							std::cout << "Loc=" << *tok_it << "\n";
-							forbid_pair.first = boost::lexical_cast<int>((std::string)(*tok_it));
+							forbid_pair.first = boost::lexical_cast<int>(
+									(std::string) (*tok_it));
 							pair_started = 0;
 						}
 						if (each_tokens.begin().current_token().compare("loc")
@@ -701,9 +699,10 @@ int main(int argc, char *argv[]) {
 						int index_val = 0;
 						for (tokenizer::iterator tok_it = each_tokens.begin();
 								tok_it != each_tokens.end(); tok_it++) {
-							if (isNumber((std::string)*tok_it)) { //tokens
-								std::cout << "tok_it = " << *tok_it<<"\n";
-								bounds[index_val] = boost::lexical_cast<double>((std::string)(*tok_it));
+							if (isNumber((std::string) *tok_it)) { //tokens
+								std::cout << "tok_it = " << *tok_it << "\n";
+								bounds[index_val] = boost::lexical_cast<double>(
+										(std::string) (*tok_it));
 								index_val++;
 								//bounds.push_back(boost::lexical_cast<int>((*tok_it))); //forbid_pair.first = boost::lexical_cast<int>((*tok_it));
 							}
@@ -978,10 +977,9 @@ int main(int argc, char *argv[]) {
 					Solver_GLPK_Gurobi_GPU, forbidden_set);
 		} else { //Parallel Breadth First Search implemented for Discrete Jumps
 			std::cout << "\nRunning Parallel BFS\n";
-			Symbolic_states_list = reach_pbfs(Hybrid_Automata,
-					init_state, reach_parameters,
-					transition_iterations, Algorithm_Type, Total_Partition,
-					lp_solver_type_choosen, number_of_streams,
+			Symbolic_states_list = reach_pbfs(Hybrid_Automata, init_state,
+					reach_parameters, transition_iterations, Algorithm_Type,
+					Total_Partition, lp_solver_type_choosen, number_of_streams,
 					Solver_GLPK_Gurobi_GPU, forbidden_set);
 		}
 //cout<<"\nTesting 4\n";
@@ -1099,6 +1097,7 @@ int main(int argc, char *argv[]) {
 //  ***************** This was Commented  ****************************
 		boost::timer::cpu_timer time_file_operation;
 		time_file_operation.start(); //Started recording the MatLab File Generation time
+//	XXXX---------------------------------------------------------XXXXX
 		//Populating the Template_Directions :: simply copy from Template_Directions from reach_parameter structure
 		for (int i = 0; i < reach_parameters.Directions.size1(); i++) {
 			for (int j = 0; j < reach_parameters.Directions.size2(); j++) {
@@ -1107,7 +1106,7 @@ int main(int argc, char *argv[]) {
 			}
 			MatLabFile_TemplateDirections << std::endl;
 		}
-
+//	XXXX---------------------------------------------------------XXXXX
 		//Populating the Invariants_Directions :: copying all invariants directions from the reachRegion or the reachability flow-pipe
 		//returned from the reach Algorithm in the form of template_polyhedra list.
 		//Traverse through each of the list and extract invariant_directions.
@@ -1119,14 +1118,19 @@ int main(int argc, char *argv[]) {
 //	MatLabFileInvariantBoundValues.open("/home/amit/matlabTest/ProjectOutput/Invariants_BoundValue.txt");
 		int number_of_invariants = 0, inv_size = 0, state_number = 0,
 				state_iterations = 0;
-		for (it = Symbolic_states_list.begin(); it != Symbolic_states_list.end();
-				it++) {
+
+//	XXXX---------------------------------------------------------XXXXX
+		for (it = Symbolic_states_list.begin();
+				it != Symbolic_states_list.end(); it++) {
 			math::matrix<double> invariant_directions, invariant_bound_values;
-			invariant_directions = (*it)->getContinuousSetptr()->getInvariantDirections(); //invariant_directions
-			invariant_bound_values = (*it)->getContinuousSetptr()->getMatrix_InvariantBound(); //invariant_bound_matrix
+			invariant_directions =
+					(*it)->getContinuousSetptr()->getInvariantDirections(); //invariant_directions
+			invariant_bound_values =
+					(*it)->getContinuousSetptr()->getMatrix_InvariantBound(); //invariant_bound_matrix
 
 			state_number++; //Each state has a Flow-pipe, (state_number begins from 1 to n)
-			state_iterations = (*it)->getContinuousSetptr()->getMatrixSupportFunction().size2(); //total number of columns of SFM is iterations in each state
+			state_iterations =
+					(*it)->getContinuousSetptr()->getMatrixSupportFunction().size2(); //total number of columns of SFM is iterations in each state
 
 			number_of_invariants = invariant_directions.size1(); //ASSUMING SAME NUMBER OF INVARIANTS FOR ALL LOCATIONS
 
@@ -1154,7 +1158,7 @@ int main(int argc, char *argv[]) {
 			}
 			MatLabFileConfiguration << " " << number_of_invariants << std::endl;
 		}
-//cout<<"\nTesting 6b\n";
+//	XXXX---------------------------------------------------------XXXXX
 
 		MatLabFileConfiguration.close();
 		MatLabFile_InvariantsDirections.close();
@@ -1166,189 +1170,263 @@ int main(int argc, char *argv[]) {
 		MatLabFileSupportFunctionMatrix.open(
 				"/home/amit/matlabTest/ProjectOutput/SupportFunctionMatrix.txt");
 
-//Only SupportFunctionMatrix of FlowPipe
-		for (int i = 0; i < Totaldirs; i++) {
+//	XXXX---------------------------------------------------------XXXXX
+		//Only SupportFunctionMatrix of FlowPipe
+
+		for (int i = 0; i < Totaldirs; i++) {	//i==row_number
 			for (i_sfm = Symbolic_states_list.begin();
 					i_sfm != Symbolic_states_list.end(); i_sfm++) {
+				//Each sysmbolic_state or each Location
 				for (unsigned int k = 0;
-						k < (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction().size2(); k++) {
+						k
+								< (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction().size2();
+						k++) {		//k==col_number
 					MatLabFileSupportFunctionMatrix
-							<< (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction()(i, k) << " ";
+							<< (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction()(
+									i, k) << " ";
 				}
 			}
 			MatLabFileSupportFunctionMatrix << endl;
 		}
+//	XXXX---------------------------------------------------------XXXXX
+
+//	XXXX---------------------------------------------------------XXXXX
+		typedef std::vector<std::pair<double, double> > Intervals;
+		Intervals Interval_Outputs(
+				init_state->getInitialSet()->getSystemDimension());
+		std::list<std::pair<int, Intervals> > location_interval_outputs;
+		double max_value;
+		std::list<symbolic_states::ptr>::iterator SS;
+		for (SS = Symbolic_states_list.begin();
+				SS != Symbolic_states_list.end(); SS++) {
+			//Each sysmbolic_state or each Location
+			int locID;
+			discrete_set ds;
+			ds = (*SS)->getDiscreteSet();
+			for (std::set<int>::iterator it = ds.getDiscreteElements().begin();
+					it != ds.getDiscreteElements().end(); ++it) {
+				locID = (*it);//Assuming only a single element exist in the discrete_set
+			}
+			std::pair<int, Intervals> loc_interval;
+			loc_interval.first = locID;
+			math::matrix<double> each_sfm;
+			each_sfm = (*SS)->getContinuousSetptr()->getMatrixSupportFunction();
+			for (int i = 0; i < Totaldirs; i++) {	//i==row_number
+				for (unsigned int k = 0; k < each_sfm.size2(); k++) {//k==col_number
+					double sfm_value = each_sfm(i, k);
+					if (k == 0) {
+						max_value = sfm_value;
+					} else {
+						if (sfm_value > max_value) {
+							max_value = sfm_value;
+						}
+					}
+				}
+				int index = i / (int) 2;	//getting the variable_index
+				if ((i % 2) == 0) {	//even row is right_value of the interval(ie Max value)
+					Interval_Outputs[index].second = max_value;
+				} else {	//left_value of the interval(ie Min value)
+					Interval_Outputs[index].first = -1 * max_value;
+				}
+			}	//end of sfm returns vector of all variables[min,max] intervals
+
+			loc_interval.second = Interval_Outputs;
+			location_interval_outputs.push_back(loc_interval);
+		}	// end-of-SS
+
+		std::cout
+				<< "\nOutputs for Each Location:: Output-Format is Interval \n";
+		for (std::list<std::pair<int, Intervals> >::iterator it =
+				location_interval_outputs.begin();
+				it != location_interval_outputs.end(); it++) {
+			int locID = (*it).first;
+			Intervals interval_values = (*it).second;
+			cout << "\nLocation == " << locID << "\n";
+			for (int i = 0; i < interval_values.size(); i++) {
+				cout << "\t\tx" << i + 1 << " [" << interval_values[i].first
+						<< ", " << interval_values[i].second << "]\n";
+			}
+		}
+//	XXXX---------------------------------------------------------XXXXX
+
+//	XXXX---------------------------------------------------------XXXXX
 //Now adding invariantBoundMatrix of Flowpipe into the file
 //ASSUMING SAME NUMBER OF INVARIANTS FOR ALL LOCATIONS
-		for (int i = 0; i < number_of_invariants; i++) {
-			for (it = Symbolic_states_list.begin(); it != Symbolic_states_list.end();
-					it++) {
-				for (unsigned int k = 0;
-						k < (*it)->getContinuousSetptr()->getMatrix_InvariantBound().size2(); k++) {
-					MatLabFileSupportFunctionMatrix
-							<< (*it)->getContinuousSetptr()->getMatrix_InvariantBound()(i, k) << " ";
+			for (int i = 0; i < number_of_invariants; i++) {
+				for (it = Symbolic_states_list.begin();
+						it != Symbolic_states_list.end(); it++) {
+					for (unsigned int k = 0;
+							k
+									< (*it)->getContinuousSetptr()->getMatrix_InvariantBound().size2();
+							k++) {
+						MatLabFileSupportFunctionMatrix
+								<< (*it)->getContinuousSetptr()->getMatrix_InvariantBound()(
+										i, k) << " ";
+					}
 				}
+				MatLabFileSupportFunctionMatrix << std::endl;
 			}
-			MatLabFileSupportFunctionMatrix << std::endl;
-		}
-
-		MatLabFileSupportFunctionMatrix.close();
+//	XXXX---------------------------------------------------------XXXXX
+			MatLabFileSupportFunctionMatrix.close();
 
 //	cout<<"\nTesting 6c\n";
 
-		time_file_operation.stop();
-		double wall_clock_file_operation, user_clock_file_operation,
-				system_clock_file_operation;
-		wall_clock_file_operation = time_file_operation.elapsed().wall
-				/ 1000000; //convert nanoseconds to milliseconds
-		user_clock_file_operation = time_file_operation.elapsed().user
-				/ 1000000;
-		system_clock_file_operation = time_file_operation.elapsed().system
-				/ 1000000;
-		if (argc == 1) { //No argument or Running directly from the Eclipse Editor
-			std::cout
-					<< "\nTime taken for generating Output File to be executed in MATLAB!!!\n";
-			std::cout << "\nBoost Time taken:Wall  (in Seconds) = "
-					<< wall_clock_file_operation / (double) 1000 << std::endl;
-			std::cout << "\nBoost Time taken:User  (in Seconds) = "
-					<< user_clock_file_operation / (double) 1000 << std::endl;
-			std::cout << "\nBoost Time taken:System  (in Seconds) = "
-					<< system_clock_file_operation / (double) 1000 << std::endl;
+			time_file_operation.stop();
+			double wall_clock_file_operation, user_clock_file_operation,
+					system_clock_file_operation;
+			wall_clock_file_operation = time_file_operation.elapsed().wall
+					/ 1000000; //convert nanoseconds to milliseconds
+			user_clock_file_operation = time_file_operation.elapsed().user
+					/ 1000000;
+			system_clock_file_operation = time_file_operation.elapsed().system
+					/ 1000000;
+			if (argc == 1) { //No argument or Running directly from the Eclipse Editor
+				std::cout
+						<< "\nTime taken for generating Output File to be executed in MATLAB!!!\n";
+				std::cout << "\nBoost Time taken:Wall  (in Seconds) = "
+						<< wall_clock_file_operation / (double) 1000
+						<< std::endl;
+				std::cout << "\nBoost Time taken:User  (in Seconds) = "
+						<< user_clock_file_operation / (double) 1000
+						<< std::endl;
+				std::cout << "\nBoost Time taken:System  (in Seconds) = "
+						<< system_clock_file_operation / (double) 1000
+						<< std::endl;
+			}
 		}
+
+		if (argc > 1) { //running from command Line for output generation
+			//std::cout << return_Time; //running from command Line for output generation
+
+			//----Disabling the console Output to Generate the Data using Shell Script
+			std::cout << "\nBoost Time taken:Wall  (in Seconds) = "
+					<< return_Time << std::endl;
+			std::cout << "\nBoost Time taken:User  (in Seconds) = "
+					<< Avg_user_clock / (double) 1000 << std::endl;
+			std::cout << "\nBoost Time taken:System  (in Seconds) = "
+					<< Avg_system_clock / (double) 1000 << std::endl;
+			cout << endl << "Number of Vectors = "
+					<< reach_parameters.Directions.size1();
+			cout << endl << "Number of Iteration = " << iterations_size << endl;
+
+		} //endif of argc == 1
+
+		return 0; //returning only the Wall time taken to execute the Hybrid System
 	}
-
-	if (argc > 1) { //running from command Line for output generation
-		//std::cout << return_Time; //running from command Line for output generation
-
-		//----Disabling the console Output to Generate the Data using Shell Script
-		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
-				<< std::endl;
-		std::cout << "\nBoost Time taken:User  (in Seconds) = "
-				<< Avg_user_clock / (double) 1000 << std::endl;
-		std::cout << "\nBoost Time taken:System  (in Seconds) = "
-				<< Avg_system_clock / (double) 1000 << std::endl;
-		cout << endl << "Number of Vectors = "
-				<< reach_parameters.Directions.size1();
-		cout << endl << "Number of Iteration = " << iterations_size << endl;
-
-	} //endif of argc == 1
-
-	return 0; //returning only the Wall time taken to execute the Hybrid System
-}
 
 // ************************************************************************************************************
 
-/*
- location l = Hybrid_Automata.getInitial_Location();
- for (std::list<transitions>::iterator t =
- l.getOut_Going_Transitions().begin();
- t != l.getOut_Going_Transitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
- polytope::ptr gaurd_polytope;
- gaurd_polytope = (*t).getGaurd();
- std::vector<double> dir(4);
- dir[0] = 0;
- dir[1] = 0;
- dir[2] = 0;
- dir[3] = 1;
- lp_solver s(1), U(1);
- s.setMin_Or_Max(2);
- s.setConstraints(gaurd_polytope->getCoeffMatrix(),
- gaurd_polytope->getColumnVector(),
- gaurd_polytope->getInEqualitySign());
- double res = s.Compute_LLP(dir);
- std::cout << "Hello = " << res << std::endl;
- }
- */
+	/*
+	 location l = Hybrid_Automata.getInitial_Location();
+	 for (std::list<transitions>::iterator t =
+	 l.getOut_Going_Transitions().begin();
+	 t != l.getOut_Going_Transitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
+	 polytope::ptr gaurd_polytope;
+	 gaurd_polytope = (*t).getGaurd();
+	 std::vector<double> dir(4);
+	 dir[0] = 0;
+	 dir[1] = 0;
+	 dir[2] = 0;
+	 dir[3] = 1;
+	 lp_solver s(1), U(1);
+	 s.setMin_Or_Max(2);
+	 s.setConstraints(gaurd_polytope->getCoeffMatrix(),
+	 gaurd_polytope->getColumnVector(),
+	 gaurd_polytope->getInEqualitySign());
+	 double res = s.Compute_LLP(dir);
+	 std::cout << "Hello = " << res << std::endl;
+	 }
+	 */
 
 //	cout<<"\ncompute beta = " <<reach_parameters.result_beta<<endl;
-/*lp_gurobi_simplex problem;
- std::vector<double> direction;
- direction.resize(2);	//Down Direction
- direction[0] = 0;
- direction[1] = -1;
- problem.setMin_Or_Max(2);
- problem.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
- double status = problem.Compute_LPP(direction);
- cout<<"Amit = "<<status<<endl;*/
+	/*lp_gurobi_simplex problem;
+	 std::vector<double> direction;
+	 direction.resize(2);	//Down Direction
+	 direction[0] = 0;
+	 direction[1] = -1;
+	 problem.setMin_Or_Max(2);
+	 problem.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
+	 double status = problem.Compute_LPP(direction);
+	 cout<<"Amit = "<<status<<endl;*/
 
-/*
- boost::timer::cpu_timer time_file_operation;
- time_file_operation.start();//Started recording the MatLab File Generation time
- //Populating the Template_Directions :: simply copy from Template_Directions from reach_parameter structure
- for (int i = 0; i < dir_nums; i++) {
- for (int j = 0; j < dim; j++) {
- MatLabFile_TemplateDirections << reach_parameters.Directions(i, j)
- << " ";
- }
- MatLabFile_TemplateDirections << std::endl;
- }
- //Populating the Invariants_Directions :: copying all invariants directions from the reachRegion or the reachability flow-pipe
- //returned from the reach Algorithm in the form of template_polyhedra list.
- //Traverse through each of the list and extract invariant_directions.
- std::list<template_polyhedra>::iterator it;
- std::ofstream MatLabFileConfiguration;
- std::ofstream MatLabFileInvariantBoundValues;
- MatLabFileConfiguration.open(
- "/home/amit/matlabTest/ProjectOutput/State_Iterations_Invariants.txt");
- MatLabFileInvariantBoundValues.open(
- "/home/amit/matlabTest/ProjectOutput/Invariants_BoundValue.txt");
- int number_of_invariants = 0, inv_size = 0, state_number = 0,
- state_iterations = 0;
- for (it = reachability_sfm.begin(); it != reachability_sfm.end(); it++) {
- math::matrix<double> invariant_directions, invariant_bound_values;
- invariant_directions = (*it).getInvariantDirections();//invariant_directions
- invariant_bound_values = (*it).getMatrix_InvariantBound();//invariant_bound_matrix
+	/*
+	 boost::timer::cpu_timer time_file_operation;
+	 time_file_operation.start();//Started recording the MatLab File Generation time
+	 //Populating the Template_Directions :: simply copy from Template_Directions from reach_parameter structure
+	 for (int i = 0; i < dir_nums; i++) {
+	 for (int j = 0; j < dim; j++) {
+	 MatLabFile_TemplateDirections << reach_parameters.Directions(i, j)
+	 << " ";
+	 }
+	 MatLabFile_TemplateDirections << std::endl;
+	 }
+	 //Populating the Invariants_Directions :: copying all invariants directions from the reachRegion or the reachability flow-pipe
+	 //returned from the reach Algorithm in the form of template_polyhedra list.
+	 //Traverse through each of the list and extract invariant_directions.
+	 std::list<template_polyhedra>::iterator it;
+	 std::ofstream MatLabFileConfiguration;
+	 std::ofstream MatLabFileInvariantBoundValues;
+	 MatLabFileConfiguration.open(
+	 "/home/amit/matlabTest/ProjectOutput/State_Iterations_Invariants.txt");
+	 MatLabFileInvariantBoundValues.open(
+	 "/home/amit/matlabTest/ProjectOutput/Invariants_BoundValue.txt");
+	 int number_of_invariants = 0, inv_size = 0, state_number = 0,
+	 state_iterations = 0;
+	 for (it = reachability_sfm.begin(); it != reachability_sfm.end(); it++) {
+	 math::matrix<double> invariant_directions, invariant_bound_values;
+	 invariant_directions = (*it).getInvariantDirections();//invariant_directions
+	 invariant_bound_values = (*it).getMatrix_InvariantBound();//invariant_bound_matrix
 
- state_number++;	//Each state has a Flow-pipe, (state_number begins from 1 to n)
- state_iterations = (*it).getMatrixSupportFunction().size2();//total number of columns of SFM is iterations in each state
+	 state_number++;	//Each state has a Flow-pipe, (state_number begins from 1 to n)
+	 state_iterations = (*it).getMatrixSupportFunction().size2();//total number of columns of SFM is iterations in each state
 
- MatLabFileConfiguration << state_number << " " << state_iterations;
- if (invariant_directions.size1() >= 1) { //or  invariant_directions.size1() != 0
- inv_size = invariant_directions.size1(); //number of invariants of the state
- if (inv_size > number_of_invariants) {
- number_of_invariants = inv_size;
- }
- for (unsigned int i = 0; i < invariant_directions.size1(); i++) {
- for (unsigned int j = 0; j < invariant_directions.size2();
- j++) {
- MatLabFile_InvariantsDirections
- << invariant_directions(i, j) << " ";
- }
- for (unsigned int k = 0; k < invariant_bound_values.size2();
- k++) {
- MatLabFileInvariantBoundValues
- << invariant_bound_values(i, k) << " ";
- }
- MatLabFile_InvariantsDirections << std::endl;
- MatLabFileInvariantBoundValues << std::endl;
- }
- }
- MatLabFileConfiguration << " " << number_of_invariants << std::endl;
- }
- MatLabFileConfiguration.close();
- MatLabFile_InvariantsDirections.close();
- MatLabFileInvariantBoundValues.close();
- MatLabFile_TemplateDirections.close();
- std::list<template_polyhedra>::iterator i_sfm;
- std::ofstream MatLabFileSupportFunctionMatrix;
- Totaldirs = dir_nums; // + number_of_invariants;	//if no invariants Totaldirs = dir_nums
- MatLabFileSupportFunctionMatrix.open(
- "/home/amit/matlabTest/ProjectOutput/SupportFunctionMatrix.txt");
+	 MatLabFileConfiguration << state_number << " " << state_iterations;
+	 if (invariant_directions.size1() >= 1) { //or  invariant_directions.size1() != 0
+	 inv_size = invariant_directions.size1(); //number of invariants of the state
+	 if (inv_size > number_of_invariants) {
+	 number_of_invariants = inv_size;
+	 }
+	 for (unsigned int i = 0; i < invariant_directions.size1(); i++) {
+	 for (unsigned int j = 0; j < invariant_directions.size2();
+	 j++) {
+	 MatLabFile_InvariantsDirections
+	 << invariant_directions(i, j) << " ";
+	 }
+	 for (unsigned int k = 0; k < invariant_bound_values.size2();
+	 k++) {
+	 MatLabFileInvariantBoundValues
+	 << invariant_bound_values(i, k) << " ";
+	 }
+	 MatLabFile_InvariantsDirections << std::endl;
+	 MatLabFileInvariantBoundValues << std::endl;
+	 }
+	 }
+	 MatLabFileConfiguration << " " << number_of_invariants << std::endl;
+	 }
+	 MatLabFileConfiguration.close();
+	 MatLabFile_InvariantsDirections.close();
+	 MatLabFileInvariantBoundValues.close();
+	 MatLabFile_TemplateDirections.close();
+	 std::list<template_polyhedra>::iterator i_sfm;
+	 std::ofstream MatLabFileSupportFunctionMatrix;
+	 Totaldirs = dir_nums; // + number_of_invariants;	//if no invariants Totaldirs = dir_nums
+	 MatLabFileSupportFunctionMatrix.open(
+	 "/home/amit/matlabTest/ProjectOutput/SupportFunctionMatrix.txt");
 
- for (int i = 0; i < Totaldirs; i++) {
- for (i_sfm = reachability_sfm.begin(); i_sfm != reachability_sfm.end();
- i_sfm++) {
- for (unsigned int k = 0;
- k < (*i_sfm).getMatrixSupportFunction().size2(); k++) {
- MatLabFileSupportFunctionMatrix
- << (*i_sfm).getMatrixSupportFunction()(i, k) << " ";
- }
- }
- MatLabFileSupportFunctionMatrix << endl;
- }
- MatLabFileSupportFunctionMatrix.close();
+	 for (int i = 0; i < Totaldirs; i++) {
+	 for (i_sfm = reachability_sfm.begin(); i_sfm != reachability_sfm.end();
+	 i_sfm++) {
+	 for (unsigned int k = 0;
+	 k < (*i_sfm).getMatrixSupportFunction().size2(); k++) {
+	 MatLabFileSupportFunctionMatrix
+	 << (*i_sfm).getMatrixSupportFunction()(i, k) << " ";
+	 }
+	 }
+	 MatLabFileSupportFunctionMatrix << endl;
+	 }
+	 MatLabFileSupportFunctionMatrix.close();
 
 
 
- */
+	 */
 

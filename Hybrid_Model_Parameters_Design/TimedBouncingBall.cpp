@@ -320,8 +320,8 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 }
 
 //Hyst Generated output
-void SetTimedBouncingBall_ParametersOurHystFile(
-		hybrid_automata& Hybrid_Automata, initial_state::ptr& init_state,
+void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;

@@ -23,7 +23,7 @@
 //		Balanced Flow Equations into 4x4 for A and B
 //		Invariants converted to 4 Variables
 //		Similarly Guard is also converted to 4 Variables
-void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
+void SetNavigationModel5by5OurFile(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
@@ -2356,7 +2356,7 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 }
 
 //Hyst generated Output
-void SetNavigationModel5by5OurFile(hybrid_automata& Hybrid_Automata,
+void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
