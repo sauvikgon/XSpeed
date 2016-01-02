@@ -12,10 +12,8 @@ int lp_solver::lp_solver_count = 0;
 lp_solver::lp_solver(int solver_type) {
 
 	lp_solver_count++; //one instance of either glpk or gurobi object is created
-//	std::cout<<"Hello lp_solver Object created!!"<<std::endl;
+
 	lp_solver_type = solver_type;
-	//glpk_lp_problem =NULL;
-	//gurobi_lp_problem = NULL;
 
 	if (lp_solver_type == GLPK_SOLVER) {
 		glpk_lp_problem = glpk_lp_solver::glpk_ptr(new glpk_lp_solver());

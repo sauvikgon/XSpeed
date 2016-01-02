@@ -7,10 +7,13 @@
 
 #include <sstream>
 #include <iostream>
+#include <list>
 #include "UnitTest++/UnitTest++.h"
 
 #include "application/DataStructureDirections.h"
 #include "core_system/HybridAutomata/Location.h"
+#include "core_system/HybridAutomata/Transition.h"
+#include "core_system/math/lp_solver/lp_solver.h"
 
 using namespace std;
 
@@ -64,16 +67,17 @@ struct ClassLocation {
 		D.U->setColumnVector(boundValueI);
 		D.U->setInEqualitySign(boundSignI);
 
-		Inv.setCoeffMatrix(ConstraintsMatrixI);
-		Inv.setColumnVector(boundValueI);
-		Inv.setInEqualitySign(boundSignI);
+		Inv = polytope::ptr(new polytope());
+		Inv->setCoeffMatrix(ConstraintsMatrixI);
+		Inv->setColumnVector(boundValueI);
+		Inv->setInEqualitySign(boundSignI);
 	}
 	~ClassLocation() { /* some teardown */
 	}
 	string nn;
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	Dynamics D, outD;
-	polytope Inv, outInv;
+	polytope::ptr Inv, outInv;
 	math::matrix<double> ConstraintsMatrixI;
 	int boundSignI;
 	std::vector<double> boundValueI;
@@ -91,8 +95,8 @@ TEST_FIXTURE(ClassLocation, constructor2_location_Test) {
 //location(string Name, Dynamics System_Dynamics, polytope Invariant);
 	cout << "\n\n\nRuning From Module Hybrid Automata" << endl;
 	cout << "*********************************************" << endl;
-
-	location loc(nn, D, Inv);	//creating object of location as loc
+	std::list<transition> t;
+	location loc(1, nn, D, Inv, true,t);	//creating object of location as loc
 
 	cout << "Name = " << loc.getName() << endl;
 	outD = loc.getSystem_Dynamics();
@@ -105,16 +109,19 @@ TEST_FIXTURE(ClassLocation, constructor2_location_Test) {
 	std::vector<double> direction(2, 0.0);
 	direction[0] = 1;
 	direction[1] = 0;
+	// create an lp solver
+	lp_solver testLP(GLPK_SOLVER);
+	testLP.setConstraints(outD.U->getCoeffMatrix(),outD.U->getColumnVector(),outD.U->getInEqualitySign());
+	testLP.setMin_Or_Max(2);
+	double sf1 = outD.U->computeSupportFunction(direction, testLP);
 
-	double sf1 = outD.U.computeSupportFunction(direction, 2);
-	cout << "Support Function = " << sf1 << endl;
 
 	outInv = loc.getInvariant();
 
-	double sf2 = outInv.computeSupportFunction(direction, 2);
+	double sf2 = outInv->computeSupportFunction(direction, testLP);
 
-	cout << "This should also return the same Support Function Result =" << sf2
-			<< endl;
+	cout << "This should also return the same Support Function Result = <tester interface to be changed>" << sf2 << endl;
+
 	out << sf2;
 	proper << "3";
 	CHECK_EQUAL(proper.str(), out.str());

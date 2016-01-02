@@ -35,17 +35,17 @@ bool transMinkPoly::getIsEmpty() const {
 		return false;
 }
 
-double transMinkPoly::computeSupportFunction(std::vector<double> direction, lp_solver &lp, lp_solver &lp_U, int Min_Or_Max) {
+double transMinkPoly::computeSupportFunction(std::vector<double> direction, lp_solver &lp) {
 //this function is also called from compute_beta, compute_alfa, etc
 	std::vector<double> dprime;
 	TRANS.mult_vector(direction,dprime);
-	double res1 = X0->computeSupportFunction(dprime,lp,lp_U,Min_Or_Max);
+	double res1 = X0->computeSupportFunction(dprime,lp);
 
 	double res2 = 0;
 
 	if(!U->getIsEmpty()){
 		B_TRANS.mult_vector(direction,dprime);
-		res2 = U->computeSupportFunction(dprime,lp_U,lp,Min_Or_Max);
+		res2 = U->computeSupportFunction(dprime,lp);
 	}
 
 	double res = res1 + time * res2;
@@ -104,7 +104,7 @@ double transMinkPoly::max_norm(int lp_solver_type_choosen)
 				std::vector<double> each_generator;
 				each_generator = generator_directions[i];
 				//cout<<"Each Generator = (" << each_generator[0]<<" , "<<each_generator[1]<<") "<<endl;
-				sf = computeSupportFunction(each_generator,lp,lp_U,2);
+				sf = computeSupportFunction(each_generator,lp);
 				Max_A = (abs(sf));
 				if (Max_A > Max)
 					Max = Max_A;

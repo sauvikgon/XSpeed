@@ -31,7 +31,7 @@ lp_solver lp(type), lp_dummy(type);
 	clock_dir = dir;
 	anticlock_dir = dir;
 	best_dir = dir;
-	min_sf = initial->computeSupportFunction(dir, lp, lp_dummy, 2);
+	min_sf = initial->computeSupportFunction(dir, lp);
 	//Now rotate the direction in +/- 45 degrees(can be improved later) and compute sf and get the min of all sf
 	for (int degree = 1; degree <= 45; degree += 3) {
 		sin_val = sin(degree / 57.295);	//sin(-theta) = - sin(+theta)
@@ -42,8 +42,7 @@ lp_solver lp(type), lp_dummy(type);
 			R_anti_clock_wise(1, 0) = sin_val;
 			R_anti_clock_wise(1, 1) = cos_val;
 			R_anti_clock_wise.mult_vector(dir, anticlock_dir); //best_dir = R * best_dir;	//rotated/transformation of dir is computed
-			sf_anticlockwise = initial->computeSupportFunction(anticlock_dir,
-					lp, lp_dummy, 2);
+			sf_anticlockwise = initial->computeSupportFunction(anticlock_dir, lp);
 		}
 		if (flag_clockwise == 1) {
 			R_clock_wise(0, 0) = cos_val;
@@ -51,8 +50,7 @@ lp_solver lp(type), lp_dummy(type);
 			R_clock_wise(1, 0) = -1 * sin_val;
 			R_clock_wise(1, 1) = cos_val;
 			R_clock_wise.mult_vector(dir, clock_dir); //best_dir = R * best_dir;	//rotated/transformation of dir is computed
-			sf_clockwise = initial->computeSupportFunction(clock_dir, lp,
-					lp_dummy, 2);
+			sf_clockwise = initial->computeSupportFunction(clock_dir, lp);
 		}
 		if (sf_anticlockwise < min_sf) {
 			min_sf = sf_anticlockwise;

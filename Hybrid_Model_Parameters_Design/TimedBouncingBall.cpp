@@ -268,7 +268,7 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata, symbolic_
 
 /*transitions t;
 t=NULL;*/
-transitions trans(1,"hop",1,1,gaurd_polytope,assignment);
+transition trans(1,"hop",1,1,gaurd_polytope,assignment);
 
 
 location source;

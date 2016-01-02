@@ -65,14 +65,14 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionPro
 		// ******** Lamda Computation for each invariant's directions/constraints **********
 			double invariant_SupportFunction;
 			int type=lp_solver_type_choosen;
-			lp_solver lpSolver(type), lp_U_dummy(type);
+			lp_solver lpSolver(type);
 
 			lpSolver.setMin_Or_Max(2);
 			if (!invariant->getIsEmpty() && !invariant->getIsUniverse()) { //set glpk constraints If not an empty polytope
 				lpSolver.setConstraints(invariant->getCoeffMatrix(),
 						invariant->getColumnVector(), invariant->getInEqualitySign());
 				invariant_SupportFunction = invariant->computeSupportFunction(
-						rVariable, lpSolver, lp_U_dummy, 2);
+						rVariable, lpSolver);
 			//	std::cout << "Invariant SupportFunction = " << invariant_SupportFunction<< endl;
 			}
 

@@ -13,7 +13,7 @@ using namespace std;
 location::location() {
 	Name = "";
 }
-location::location(int Loc_ID, string name, Dynamics system_dynamics, polytope::ptr invariant, bool inv_exists, std::list<transitions> Out_Going_Trans) {
+location::location(int Loc_ID, string name, Dynamics system_dynamics, polytope::ptr invariant, bool inv_exists, std::list<transition> Out_Going_Trans) {
 	loc_id = Loc_ID;
 	Name = name;
 	System_Dynamics = system_dynamics;
@@ -55,11 +55,11 @@ void location::setLocId(int locId) {
 	loc_id = locId;
 }
 
-std::list<transitions>& location::getOut_Going_Transitions(){
+std::list<transition>& location::getOut_Going_Transitions(){
 	return Out_Going_Transitions;
 }
 
-void location::add_Out_Going_Transitions(transitions& t){
+void location::add_Out_Going_Transitions(transition& t){
 	this->Out_Going_Transitions.push_back(t);
 	//Adj_Transitions.max_size()		//returns the size of the adjacent transitions/locations
 }

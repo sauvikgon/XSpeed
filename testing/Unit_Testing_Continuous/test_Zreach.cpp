@@ -47,9 +47,9 @@ struct ReachExamples {
 
 		invariantBoundSign = 1;
 
-		invariant.setCoeffMatrix(invariantConstraintsMatrix);
-		invariant.setColumnVector(invariantBoundValue);
-		invariant.setInEqualitySign(invariantBoundSign); //Assuming size is <= .... as we are only using  Ax<=b format.
+		invariant->setCoeffMatrix(invariantConstraintsMatrix);
+		invariant->setColumnVector(invariantBoundValue);
+		invariant->setInEqualitySign(invariantBoundSign); //Assuming size is <= .... as we are only using  Ax<=b format.
 
 	}
 
@@ -78,7 +78,7 @@ struct ReachExamples {
 	std::vector<std::vector<double> > directions; //List of all directions
 	math::matrix<double> Real_Directions; //List of all directions
 
-	polytope initial_polytope_I, invariant;
+	polytope::ptr initial_polytope_I, invariant;
 };
 
 /* I should try this but by just finding how to use plotter to plot in different axis
@@ -445,9 +445,9 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 	system_dynamics.U->setColumnVector(boundValueV);
 	system_dynamics.U->setInEqualitySign(boundSignV);//Assuming size is <= .... as we are only using  Ax<=b format.
 
-	initial_polytope_I.setCoeffMatrix(ConstraintsMatrixI);
-	initial_polytope_I.setColumnVector(boundValueI);
-	initial_polytope_I.setInEqualitySign(boundSignI); //Assuming size is <= .... as we are only using  Ax<=b format.
+	initial_polytope_I->setCoeffMatrix(ConstraintsMatrixI);
+	initial_polytope_I->setColumnVector(boundValueI);
+	initial_polytope_I->setInEqualitySign(boundSignI); //Assuming size is <= .... as we are only using  Ax<=b format.
 
 	std::vector<double> invariant_direction(dimension);
 	std::vector<std::vector<double> > newDirections;
@@ -487,11 +487,12 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 	}
 	MatLabfile.close();
 
-	polytope gaurd_polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-			gaurdBoundSign);
+	polytope::ptr gaurd_polytope = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+			gaurdBoundSign));
+
 	template_polyhedra intersected_polyhedra;
-	polytope intersectedRegion, newPolytope;
-	polytope newShiftedPolytope;
+	polytope::ptr intersectedRegion, newPolytope;
+	polytope::ptr newShiftedPolytope;
 	/*
 	 * Transition Dynamics  Rx + w
 	 */
@@ -520,7 +521,7 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 				initial_polytope_I, reach_paramters);
 #else
 		Templet_polys = reachabilitySequential(system_dynamics,
-				initial_polytope_I, reach_paramters, invariant);
+				initial_polytope_I, reach_paramters, invariant, true, 1);
 #endif
 		cout << "\n3 = Testing amit \n";
 		 cout << "\nPrinting the New number of Iteration = "
@@ -535,14 +536,15 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 			MatLabfile2 << endl;
 		}
 
-		intersected_polyhedra = Templet_polys.polys_intersection(
-				gaurd_polytope);//, intersection_start_point); //returns the list of polytopes that intersects with the gaurd_polytope
+		std::list<template_polyhedra> intersected_polyhedra = Templet_polys.polys_intersection(
+				gaurd_polytope,1);//, intersection_start_point); //returns the list of polytopes that intersects with the gaurd_polytope
 		//unsigned int iterations_before_intersection = intersection_start_point - 1;
 		//Templet_polys.resize_matrix_SupportFunction(dir_nums, iterations_before_intersection);
 
-		intersectedRegion = intersected_polyhedra.getTemplate_approx();	//Returns a single over-approximated polytope from the list of intersected polytopes
-		newPolytope = intersectedRegion.GetPolytope_Intersection(
-				gaurd_polytope);//Retuns only the intersected region as a single newpolytope.
+		/* Todo: deprecated after change of interface */
+	//	intersectedRegion = intersected_polyhedra.getTemplate_approx(1);	//Returns a single over-approximated polytope from the list of intersected polytopes
+	//	newPolytope = intersectedRegion->GetPolytope_Intersection(
+	//			gaurd_polytope,1);//Retuns only the intersected region as a single newpolytope.
 
 		/*		std::ofstream MatLabfile5;
 		 MatLabfile5.open(
@@ -563,7 +565,7 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 		 }
 		 MatLabfile3.close();
 		 */
-		initial_polytope_I = post_assign_exact(newPolytope, R, w);//newShiftedPolytope = post_assign_exact(newPolytope, R, w);
+//		initial_polytope_I = post_assign_exact(newPolytope, R, w);//newShiftedPolytope = post_assign_exact(newPolytope, R, w);
 
 	}	//end-of Number of transition's Loop
 

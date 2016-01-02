@@ -1,6 +1,7 @@
 /**
- * Base class to represent a convex set whose support function can be computed. This is an ABSTRACT class.
- * Any convex set whose support function can be computed should be derived from this base class
+ * Base class to represent a convex set whose support function can be computed by linear programming.
+ * This is an ABSTRACT class. Any convex set whose support function can be computed
+ * using an lp solver should be derived from this base class
  * @Rajarshi
  */
 
@@ -25,9 +26,10 @@ public:
 	virtual unsigned int getSystemDimension() const = 0;
 	virtual bool getIsEmpty() const = 0;
 	/**
-	 * The compute support will be a function of the support function of the initial set and the input set as polytopes.
+	 * The compute support will be a function of the support function of the initial set
+	 * and the input set.
 	 */
-	virtual double computeSupportFunction(std::vector<double> direction, lp_solver &lp, lp_solver &lp_U, int Min_Or_Max) = 0;
+	virtual double computeSupportFunction(std::vector<double> direction, lp_solver &lp) = 0;
 	virtual double max_norm(int lp_solver_type_choosen) = 0;
 
 };

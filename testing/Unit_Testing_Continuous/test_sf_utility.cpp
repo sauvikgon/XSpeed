@@ -77,9 +77,12 @@ SUITE(sf_utility_TestSuite)
 			boundSignV = 1;
 
 
-			V.setCoeffMatrix(ConstraintsMatrixV);
-			V.setColumnVector(boundValueV);
-			V.setInEqualitySign(boundSignV);
+			V->setCoeffMatrix(ConstraintsMatrixV);
+			V->setColumnVector(boundValueV);
+			V->setInEqualitySign(boundSignV);
+
+			system_dynamics.U = V;
+			system_dynamics.MatrixA = A;
 
 		}
 		~ExampleSF_Utility(){ /* some teardown */}
@@ -87,7 +90,7 @@ SUITE(sf_utility_TestSuite)
 		typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 			size_type row,col;
 		Dynamics system_dynamics;
-		polytope V;
+		polytope::ptr V;
 		int boundSignV;
 		std::vector<double> boundValueV;
 		math::matrix<double> ConstraintsMatrixV;
@@ -110,7 +113,7 @@ SUITE(sf_utility_TestSuite)
 	{
 		math::matrix<double> res = math::matrix<double>();
 		double tau=2,result;
-		result = compute_beta(A,tau,V);
+		result = compute_beta(system_dynamics,tau,1);
 
 		//m2.matrix_exponentiation(res);
 
@@ -126,9 +129,8 @@ SUITE(sf_utility_TestSuite)
 	{
 		math::matrix<double> res = math::matrix<double>();
 		double tau=2,result;
-		system_dynamics.U = V;
-		system_dynamics.MatrixA = A;
-		result = compute_alfa(tau,system_dynamics,V);
+
+		result = compute_alfa(tau,system_dynamics,V,1);
 
 		cout<<"\nResult of compute_alfa = ";
 		cout<<result<<"\t";
@@ -165,19 +167,25 @@ SUITE(sf_utility_TestSuite)
 	{
 
 		system_dynamics.MatrixA = A;
-		system_dynamics.U.setCoeffMatrix(ConstraintsMatrixV);
-		system_dynamics.U.setColumnVector(boundValueV);
-		system_dynamics.U.setInEqualitySign(boundSignV);
+		system_dynamics.U->setCoeffMatrix(ConstraintsMatrixV);
+		system_dynamics.U->setColumnVector(boundValueV);
+		system_dynamics.U->setInEqualitySign(boundSignV);
 		double tau=2,result;
-		cout << "\nAll Output from W_Support Function\n";
-		cout <<"\ttau * SF = "<< tau * V.computeSupportFunction(direction2, 2);
 
-		result = compute_beta(A,tau,V);
+		lp_solver lp(1);
+		lp.setConstraints(V->getCoeffMatrix(),V->getColumnVector(),V->getInEqualitySign());
+
+		cout << "\nAll Output from W_Support Function\n";
+		cout <<"\ttau * SF = "<< tau * V->computeSupportFunction(direction2, lp);
+
+		result = compute_beta(system_dynamics,tau,1);
 		cout<<"\t"<<"Beta = "<<result<<"\t";
 		double res = support_unitball_infnorm(direction2);
 		cout<<"\t"<<"SF_UnitBall = "<<res<<"\t";
-		double final = W_Support(tau,system_dynamics,direction2,2);
-		cout<<"\t"<<"Final W_Support Result = "<<final<<"\t";
+		/* todo: deprecated interface  */
+
+		//double final = W_Support(tau,system_dynamics,direction2,2);
+//		cout<<"\t"<<"Final W_Support Result = "<<final<<"\t";
 		cout<<"Output Over\n ";
 
 	/*	out<<final;
@@ -188,14 +196,18 @@ SUITE(sf_utility_TestSuite)
 	TEST_FIXTURE(ExampleSF_Utility, Omega_Support_Test)
 	{
 		system_dynamics.MatrixA = A;
-		system_dynamics.U.setCoeffMatrix(ConstraintsMatrixV);
-		system_dynamics.U.setColumnVector(boundValueV);
-		system_dynamics.U.setInEqualitySign(boundSignV);
+		system_dynamics.U->setCoeffMatrix(ConstraintsMatrixV);
+		system_dynamics.U->setColumnVector(boundValueV);
+		system_dynamics.U->setInEqualitySign(boundSignV);
+
+		lp_solver lp(1);
+		lp.setConstraints(V->getCoeffMatrix(),V->getColumnVector(),V->getInEqualitySign());
+
 
 		double tau=0.5,res1;
 		int Min_Or_Max=2;
 		cout << "\nAll Output from Omega_Support Function\n";
-		res1 = V.computeSupportFunction(direction2, 2);
+		res1 = V->computeSupportFunction(direction2, lp);
 		cout <<"\tSF of X_0 = "<< res1;
 
 
@@ -206,16 +218,17 @@ SUITE(sf_utility_TestSuite)
 		phi_tau.transpose(phi_tau_Transpose);
 		phi_tau_Transpose.mult_vector(direction2,r);
 
-		double term1 = V.computeSupportFunction(r, Min_Or_Max);
-		double term2 = tau*V.computeSupportFunction(direction2, Min_Or_Max);
-		double term3 = compute_alfa(tau,system_dynamics,V) * support_unitball_infnorm(direction2);
+		double term1 = V->computeSupportFunction(r, lp);
+		double term2 = tau*V->computeSupportFunction(direction2, lp);
+		double term3 = compute_alfa(tau,system_dynamics,V,1) * support_unitball_infnorm(direction2);
 		double result = term1 + term2 + term3;
 		cout<<"\t"<<"Expression 1 = "<<term1<<"\t";
 		cout<<"\t"<<"Expression 2 = "<<term2<<"\t";
 		cout<<"\t"<<"Expression 3 = "<<term3<<"\t";
 		cout<<"\t"<<"Final Expression = "<<result<<"\t";
-		double final = Omega_Support(tau,direction2,V,system_dynamics,Min_Or_Max);
-		cout<<"\n"<<"Final Output of OmegaSupport = "<<final<<endl;
+		/* todo: deprecated interface */
+	//	double final = Omega_Support(tau,direction2,V,system_dynamics,Min_Or_Max);
+	//	cout<<"\n"<<"Final Output of OmegaSupport = "<<final<<endl;
 		cout<<"Output Over\n ";
 
 	}

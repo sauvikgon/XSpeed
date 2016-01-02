@@ -36,8 +36,7 @@ polytope::ptr create_polytope_from_set(supportFunctionProvider::ptr Initial,
 			direction[j] = ReachParameters.Directions(i, j);
 			//	std::cout << "loop 2 \n";
 		}
-		columnvector[i] = Initial->computeSupportFunction(direction, lp, lp_U,
-				2);
+		columnvector[i] = Initial->computeSupportFunction(direction, lp);
 
 	}
 	/*p.setCoeffMatrix(ReachParameters.Directions);

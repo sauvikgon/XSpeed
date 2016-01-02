@@ -164,7 +164,7 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	assignment.b = w;
 
 
-	transitions trans(1,"hop",1,1,gaurd_polytope,assignment);
+	transition trans(1,"hop",1,1,gaurd_polytope,assignment);
 	location source;
 	source.setLocId(1);
 	source.setName("Always");

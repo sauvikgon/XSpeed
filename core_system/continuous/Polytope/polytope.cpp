@@ -162,23 +162,17 @@ std::vector<double> polytope::getColumnVector() {
 }
 
 double polytope::computeSupportFunction(std::vector<double> direction,
-		lp_solver &lp, lp_solver& lp_U, int Min_Or_Max) {
+		lp_solver &lp) {
 	double sf;
-
-	/*
-	 glpk_lp_solver lp1;	//Create only one lp at the time of creation of the polytope
-	 lp1.setMin_Or_Max(Min_Or_Max);
-	 lp1.setConstraints(this->coeffMatrix, this->columnVector,
-	 this->InEqualitySign);
-	 sf = lp1.Compute_LLP(direction);
-	 */
+	// To Amit: Why is Min_or_Max passed when not used?
 
 	if (this->getIsEmpty())
 		sf = 0;	//returns zero for empty polytope
 	else if (this->getIsUniverse())
-		throw("\nUniverse Unbounded Polytope!!!\n");
+		throw("\n Cannot Compute Support Function of a Universe Polytope.\n");
 	else
-		sf = lp.Compute_LLP(direction);	//since lp has already been created and set with constraints at the time of creation
+		sf = lp.Compute_LLP(direction);	//since lp has already been created and set
+										//with constraints at the time of creation
 
 	return sf;
 }

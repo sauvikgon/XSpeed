@@ -230,7 +230,7 @@ unsigned int index_i = 0, index_j = 0;
 //	Dynamics Initalised ---------------------
 
 
-	transitions trans;	//empty transition
+	transition trans;	//empty transition
 	location source;
 	source.setLocId(1);
 	source.setName("Flying");

@@ -252,10 +252,10 @@ const polytope::ptr template_polyhedra::getTemplate_approx(
 		for (unsigned int dim = 0; dim < this->template_Directions.size2();
 				dim++)
 			each_direction[dim] = this->getTemplateDirections()(i, dim);//get each direction
-		Max_sf = p.computeSupportFunction(each_direction, lp, lp, max_or_min);//First Omega's support function value
+		Max_sf = p.computeSupportFunction(each_direction, lp);//First Omega's support function value
 		for (unsigned int j = 1; j < this->total_iterations; j++) {
 			p = this->getPolytope(j);
-			sf = p.computeSupportFunction(each_direction, lp, lp, max_or_min);
+			sf = p.computeSupportFunction(each_direction, lp);
 			if (sf > Max_sf)
 				Max_sf = sf;
 		}

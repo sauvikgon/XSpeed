@@ -86,7 +86,7 @@ void setMoreConstraints(math::matrix<double> coeff_constraints, std::vector<doub
 	unsigned int getNumberFacets() const;
 	void setNumberFacets(unsigned int numberFacets);
 
-	double computeSupportFunction(std::vector<double> direction, lp_solver &lp, lp_solver &lp_U, int Min_Or_Max) ;
+	double computeSupportFunction(std::vector<double> direction, lp_solver &lp) ;
 
 	/*
 	 * Returns Max norm of the polytope

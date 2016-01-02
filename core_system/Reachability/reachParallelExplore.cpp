@@ -263,16 +263,13 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 		unsigned int loopIteration = 0;
 		sVariable = 0.0; //initialize s0
 		//  **************    Omega Function   ********************
-		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I,
-				s_per_thread_U, Min_Or_Max);
+		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
 		phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
 		double term3, term3a, term3b, res2;
-		term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I,
-				s_per_thread_U, Min_Or_Max);
+		term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
 		B_trans.mult_vector(rVariable, Btrans_dir);
 		term2 = ReachParameters.time_step
-				* SystemDynamics.U->computeSupportFunction(Btrans_dir,
-						s_per_thread_U, s_per_thread_I, Min_Or_Max);
+				* SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = support_unitball_infnorm(rVariable);
 		term3 = term3a * term3b;
@@ -310,12 +307,12 @@ const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
 			double term3, term3a, res2;
 			phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
 			term1 = Initial->computeSupportFunction(phi_trans_dir,
-					s_per_thread_I, s_per_thread_U, Min_Or_Max);
+					s_per_thread_I);
 
 			B_trans.mult_vector(r1Variable, Btrans_dir);
 			term2 = ReachParameters.time_step
 					* SystemDynamics.U->computeSupportFunction(Btrans_dir,
-							s_per_thread_U, s_per_thread_I, Min_Or_Max);
+							s_per_thread_U);
 			term3a = ReachParameters.result_alfa;
 			term3b = support_unitball_infnorm(r1Variable);
 			term3 = term3a * term3b;

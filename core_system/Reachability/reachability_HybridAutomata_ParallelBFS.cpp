@@ -264,7 +264,7 @@ std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
 			if (reach_region_list[id].getTotalIterations() != 0) { //computed reach_region is empty
 				cout <<"\nLoc ID = "<<current_location.getLocId() <<" Location Name = " << name << "\n";
 
-				for (std::list<transitions>::iterator t =
+				for (std::list<transition>::iterator t =
 						current_location.getOut_Going_Transitions().begin();
 						t != current_location.getOut_Going_Transitions().end();
 						t++) { // get each destination_location_id and push into the pwl.waiting_list

@@ -239,7 +239,7 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 //	Dynamics Initalised ---------------------
 
-	transitions trans; //empty transition
+	transition trans; //empty transition
 	location source;
 	source.setLocId(1);
 	source.setName("Round_Figure");

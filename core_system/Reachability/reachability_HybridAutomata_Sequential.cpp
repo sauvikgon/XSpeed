@@ -323,7 +323,7 @@ std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
 		 std::cout<<"\nLocation's transition's source_location's Name = "<<current_location.getAdjTransitions().front().getSource().getName()<<"\n";
 		 */
 		//cout << "\nLocation Name = " << name << "\n";
-		for (std::list<transitions>::iterator t =
+		for (std::list<transition>::iterator t =
 				current_location.getOut_Going_Transitions().begin();
 				t != current_location.getOut_Going_Transitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
 			if ((*t).getTransitionId() == -1) //Indicates empty transition or no transition exists
