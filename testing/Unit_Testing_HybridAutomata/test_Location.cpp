@@ -20,6 +20,7 @@ using namespace std;
 SUITE(Location_TestSuite) {
 struct ClassLocation {
 	ClassLocation() {
+		D.U = polytope::ptr(new polytope());
 		nn = "Hello testing";
 
 		size_type row = 2;

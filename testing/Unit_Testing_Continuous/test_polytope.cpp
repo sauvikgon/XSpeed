@@ -272,8 +272,6 @@ cout<<"\n\n\nHello A mit my output from here \n\n\n";
 		sfunc = quad3.computeSupportFunction(direction, 2);
 		cout<<"\n AmitShouldbe = -4 it is? = "<<sfunc<<endl;
 */
-
-
 }
 TEST_FIXTURE(ExamplePolytope, polytope_intersection_Test) {
 
@@ -320,6 +318,4 @@ TEST_FIXTURE(ExamplePolytope, NOTintersectingPolytopes_Test) {
 	proper << false;
 	CHECK_EQUAL(proper.str(), out.str());
 }
-
 }
-

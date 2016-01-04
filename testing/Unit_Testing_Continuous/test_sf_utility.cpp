@@ -76,7 +76,7 @@ SUITE(sf_utility_TestSuite)
 
 			boundSignV = 1;
 
-
+			V = polytope::ptr(new polytope());
 			V->setCoeffMatrix(ConstraintsMatrixV);
 			V->setColumnVector(boundValueV);
 			V->setInEqualitySign(boundSignV);

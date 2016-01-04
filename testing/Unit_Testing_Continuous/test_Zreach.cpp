@@ -28,9 +28,9 @@ struct ReachExamples {
 #endif
 		transition_iterations = 3;//Number of iterations for transition of the Hybrid system
 		iterations = 100; // number of iterations :: try with iterations = 1000
-		reach_paramters.TimeBound = 2; //Total Time Interval and ::reach_paramters.TimeBound = 5;
+		reach_parameters.TimeBound = 2; //Total Time Interval and ::reach_paramters.TimeBound = 5;
 
-		reach_paramters.Iterations = iterations;
+		reach_parameters.Iterations = iterations;
 		dimension = 2;	//Number of Dimension for the Current Working System
 		/*
 		 * Invariant constraint
@@ -47,6 +47,7 @@ struct ReachExamples {
 
 		invariantBoundSign = 1;
 
+		invariant = polytope::ptr(new polytope());
 		invariant->setCoeffMatrix(invariantConstraintsMatrix);
 		invariant->setColumnVector(invariantBoundValue);
 		invariant->setInEqualitySign(invariantBoundSign); //Assuming size is <= .... as we are only using  Ax<=b format.
@@ -72,7 +73,7 @@ struct ReachExamples {
 	template_polyhedra Templet_polys;
 
 	Dynamics system_dynamics;
-	ReachabilityParameters reach_paramters;
+	ReachabilityParameters reach_parameters;
 	unsigned int dir_nums;
 	int iterations, dimension, transition_iterations;
 	std::vector<std::vector<double> > directions; //List of all directions
@@ -441,13 +442,21 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 	system_dynamics.MatrixB = Bmatrix;
 	system_dynamics.MatrixA = Amatrix;
 
+	system_dynamics.U = polytope::ptr(new polytope());
 	system_dynamics.U->setCoeffMatrix(ConstraintsMatrixV);//I have a doubt here whether without resize it can set or not?????
 	system_dynamics.U->setColumnVector(boundValueV);
 	system_dynamics.U->setInEqualitySign(boundSignV);//Assuming size is <= .... as we are only using  Ax<=b format.
 
+	initial_polytope_I = polytope::ptr(new polytope());
 	initial_polytope_I->setCoeffMatrix(ConstraintsMatrixI);
 	initial_polytope_I->setColumnVector(boundValueI);
 	initial_polytope_I->setInEqualitySign(boundSignI); //Assuming size is <= .... as we are only using  Ax<=b format.
+
+	reach_parameters.X0 = polytope::ptr(new polytope());
+
+	reach_parameters.X0->setCoeffMatrix(initial_polytope_I->getCoeffMatrix());
+	reach_parameters.X0->setColumnVector(initial_polytope_I->getColumnVector());
+	reach_parameters.X0->setInEqualitySign(initial_polytope_I->getInEqualitySign());
 
 	std::vector<double> invariant_direction(dimension);
 	std::vector<std::vector<double> > newDirections;
@@ -472,7 +481,7 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 
 	row = dir_nums;
 	col = dimension;
-	reach_paramters.Directions.resize(row, col);
+	reach_parameters.Directions.resize(row, col);
 
 	std::ofstream MatLabfile;
 	//file for making matrix 'A' for MatLab output function con2vert(A,b) to be executed from plotoutput.m
@@ -480,7 +489,7 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 	for (int i = 0; i < dir_nums; i++) {
 		for (int j = 0; j < dimension; j++) {
 			//	Vector_R[i][j] = directions[i][j];
-			reach_paramters.Directions(i, j) = Real_Directions(i, j); //directions[i][j];
+			reach_parameters.Directions(i, j) = Real_Directions(i, j); //directions[i][j];
 			MatLabfile << Real_Directions(i, j) << " ";		//Vector_R[i][j]
 		}
 		MatLabfile << std::endl;
@@ -521,7 +530,7 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 				initial_polytope_I, reach_paramters);
 #else
 		Templet_polys = reachabilitySequential(system_dynamics,
-				initial_polytope_I, reach_paramters, invariant, true, 1);
+				initial_polytope_I, reach_parameters, invariant, true, 1);
 #endif
 		cout << "\n3 = Testing amit \n";
 		 cout << "\nPrinting the New number of Iteration = "

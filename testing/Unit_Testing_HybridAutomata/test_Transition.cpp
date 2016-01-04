@@ -35,6 +35,7 @@ struct ClassTransition {
 		nn = "Hello Welcome";
 		size_type row = 2;
 		size_type col = 2;
+		D.U = polytope::ptr(new polytope());
 		D.MatrixA.resize(row, col);
 		D.MatrixA(0, 0) = 1;
 		D.MatrixA(0, 1) = 2;
@@ -78,6 +79,7 @@ struct ClassTransition {
 		D.U->setColumnVector(boundValueI);
 		D.U->setInEqualitySign(boundSignI);
 
+		Inv = polytope::ptr(new polytope());
 		Inv->setCoeffMatrix(ConstraintsMatrixI);
 		Inv->setColumnVector(boundValueI);
 		Inv->setInEqualitySign(boundSignI);
@@ -107,7 +109,7 @@ TEST_FIXTURE(ClassTransition , constructor2_transitions_Test) {
 
 	location loc_src(1, nn, D, Inv, true,t), loc_dest(2, "Good Bey", D, Inv, true, t), loc_src_out,
 			loc_dest_out;
-
+	Gaurd = polytope::ptr(new polytope());
 	Gaurd->setCoeffMatrix(ConstraintsMatrixI);
 	Gaurd->setColumnVector(boundValueI);
 	Gaurd->setInEqualitySign(boundSignI);

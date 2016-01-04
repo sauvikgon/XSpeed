@@ -16,13 +16,6 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionPro
 	//int numberOfInvDirections = ReachParameters.InvariantDirections.size1();
 	//int numberOfInvariants = numberOfInvDirections / 2;
 	int numberOfInvariants = invariant->getColumnVector().size();	//total number of Invariant's constraints
-//	cout<<"\nNumber of Invariants = "<< numberOfInvariants<<endl;
-//	cout<<"\nInvariants = "<< endl;
-/*
-	for (int i=0;i<numberOfInvariants;i++)
-		for (int j=0;j<invariant->getCoeffMatrix().size2();j++)
-		cout<<invariant->getCoeffMatrix()(i,j) <<"\t";
-*/
 
 	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
 
@@ -89,10 +82,11 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionPro
 		s_per_thread_U.setMin_Or_Max(2);
 		if (SystemDynamics.U->getIsEmpty()) {	//empty polytope
 			//Polytope is empty so no glpk object constraints to be set
+			std::cout << "InvariantBoundCheck: Input set U is empty\n";
 		} else {
 			s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
-					SystemDynamics.U->getColumnVector(),
-					SystemDynamics.U->getInEqualitySign());
+			SystemDynamics.U->getColumnVector(),
+			SystemDynamics.U->getInEqualitySign());
 		}
 //  *****************************************************************************************
 		lp_solver s_per_thread_I_minus(type), s_per_thread_U_minus(type);
@@ -105,6 +99,7 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionPro
 				s_per_thread_U_minus.setMin_Or_Max(2);
 				if (SystemDynamics.U->getIsEmpty()) {	//empty polytope
 					//Polytope is empty so no glpk object constraints to be set
+					std::cout << "InvariantBoundCheck: Input set U is empty\n";
 				} else {
 					s_per_thread_U_minus.setConstraints(SystemDynamics.U->getCoeffMatrix(),
 							SystemDynamics.U->getColumnVector(),
@@ -118,16 +113,9 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionPro
 		//cout<<"Testing Location Omega\n";
 		zIInitial = Omega_Support(ReachParameters, rVariable, Initial,
 				SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
-		//	cout<<"z_I_Initial = "<<zIInitial <<endl;
+
 		math::matrix<double> phi_trans;
 		phi_trans = ReachParameters.phi_trans;
-
-		//cout<<"\tAmit = "<<zIInitial <<"\n";
-//		zValue(eachInvariantDirection, loopIteration) = zIInitial;			//Y0 = pI(r0)
-		/*
-		 * zIInitial = Omega_Support(time_tou, rVariable_minus, Initial, SystemDynamics, Min_Or_Max);
-		 * zValue(eachVector+1,loopIteration) = zIInitial;	//i should store this also
-		 */
 
 		loopIteration++;
 		while (loopIteration < shm_NewTotalIteration) {	//iterationNum		changed 27 July 2014 for invariant
@@ -199,7 +187,3 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionPro
 //	cout<<"\nmin_Total_Iteration = "<<min_Total_Iteration<<endl;
 	return min_Total_Iteration;
 }
-
-
-
-
