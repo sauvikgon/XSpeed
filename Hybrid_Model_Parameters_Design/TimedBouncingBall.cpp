@@ -468,9 +468,9 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	transitions t1(1, "hop", 1, 1, gaurd_polytope0, assignment0);
+	transition t1(1, "hop", 1, 1, gaurd_polytope0, assignment0);
 
-	std::list<transitions> Out_Going_Trans_fromalways_running;
+	std::list<transition> Out_Going_Trans_fromalways_running;
 
 	Out_Going_Trans_fromalways_running.push_back(t1);
 	location l1(1, "always_running", system_dynamics0, invariant0, true,

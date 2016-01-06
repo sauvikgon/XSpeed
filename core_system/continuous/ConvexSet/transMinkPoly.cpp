@@ -48,6 +48,8 @@ double transMinkPoly::computeSupportFunction(std::vector<double> direction, lp_s
 		res1 = X0->computeSupportFunction(dprime, lp);
 
 	}
+	lp_solver lp_U(1);
+	lp_U.setConstraints(U->getCoeffMatrix(),U->getColumnVector(),U->getInEqualitySign());
 	//cout << "\nres1 = " << res1;
 	double res2 = 0.0;
 	if (!U->getIsEmpty()) {

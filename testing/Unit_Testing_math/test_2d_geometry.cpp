@@ -8,7 +8,7 @@
 #include <sstream>
 #include <iostream>
 //#include "UnitTest++/UnitTest++.h"
-#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "core_system/math/2d_geometry.h"
 
 #include <string>

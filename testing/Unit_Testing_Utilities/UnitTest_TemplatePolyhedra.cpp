@@ -39,15 +39,17 @@ TEST_FIXTURE(TemplatePolyhedra, union_TemplatePolytope_Test) {
 	dirs(1,0) = 2;
 	dirs(1,1) = 2;
 
-	template_polyhedra t(sfm,dirs), t2(sfm2,dirs), test;
+	template_polyhedra::ptr t = template_polyhedra::ptr(new template_polyhedra(sfm,dirs));
+	template_polyhedra::ptr t2 = template_polyhedra::ptr(new template_polyhedra(sfm2,dirs));
+	template_polyhedra::ptr	test;
 
-	test = t.union_TemplatePolytope(t2);
-	test = test.union_TemplatePolytope(t);
+	test = t->union_TemplatePolytope(t2);
+	test = test->union_TemplatePolytope(t);
 
 	std::cout << "output union template Polytope \n ";
-	for(unsigned int i = 0; i<test.getMatrixSupportFunction().size1();i++){
-		for(unsigned int j=0;j<test.getMatrixSupportFunction().size2();j++){
-			std::cout << test.getMatrixSupportFunction()(i,j) << "\t";
+	for(unsigned int i = 0; i<test->getMatrixSupportFunction().size1();i++){
+		for(unsigned int j=0;j<test->getMatrixSupportFunction().size2();j++){
+			std::cout << test->getMatrixSupportFunction()(i,j) << "\t";
 		}
 		cout << endl;
 	}

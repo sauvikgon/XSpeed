@@ -439,7 +439,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		 reach_region.getPolytope(61).getColumnVector(), 1));
 		 GeneratePolytopePlotter(test);	 */
 			//	cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
-			for (std::list<transitions>::iterator t =
+			for (std::list<transition>::iterator t =
 					current_location.getOut_Going_Transitions().begin();
 					t != current_location.getOut_Going_Transitions().end();
 					t++) { // get each destination_location_id and push into the pwl.waiting_list

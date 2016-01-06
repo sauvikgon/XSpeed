@@ -590,6 +590,7 @@ void SetNavigationBenchMark(hybrid_automata& Hybrid_Automata,
 	//d_set.insert_element(5);		//the initial Location ID = 5
 	//d_set.insert_element(6);		//the initial Location ID = 6
 	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	//todo: interface not correct. commented the line below
+	//initial_symbolic_state.setContinuousSetptr(initial_polytope_I);
 
 }

@@ -3382,33 +3382,33 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	transitions t1(1, "t13", 2, 5, gaurd_polytope0, assignment0);
-	transitions t2(2, "t14", 2, 3, gaurd_polytope1, assignment1);
-	transitions t3(3, "t15", 2, 1, gaurd_polytope2, assignment2);
-	transitions t4(4, "t19", 3, 6, gaurd_polytope3, assignment3);
-	transitions t5(5, "t20", 3, 2, gaurd_polytope4, assignment4);
-	transitions t6(6, "t1", 4, 1, gaurd_polytope5, assignment5);
-	transitions t7(7, "t2", 4, 5, gaurd_polytope6, assignment6);
-	transitions t8(8, "t3", 4, 9, gaurd_polytope7, assignment7);
-	transitions t9(9, "t9", 5, 4, gaurd_polytope8, assignment8);
-	transitions t10(10, "t10", 5, 2, gaurd_polytope9, assignment9);
-	transitions t11(11, "t11", 5, 6, gaurd_polytope10, assignment10);
-	transitions t12(12, "t12", 5, 7, gaurd_polytope11, assignment11);
-	transitions t13(13, "t16", 6, 3, gaurd_polytope12, assignment12);
-	transitions t14(14, "t17", 6, 5, gaurd_polytope13, assignment13);
-	transitions t15(15, "t18", 6, 8, gaurd_polytope14, assignment14);
-	transitions t16(16, "t6", 7, 5, gaurd_polytope15, assignment15);
-	transitions t17(17, "t7", 7, 9, gaurd_polytope16, assignment16);
-	transitions t18(18, "t8", 7, 8, gaurd_polytope17, assignment17);
-	transitions t19(19, "t5", 9, 7, gaurd_polytope18, assignment18);
-	transitions t20(20, "t4", 9, 4, gaurd_polytope19, assignment19);
+	transition t1(1, "t13", 2, 5, gaurd_polytope0, assignment0);
+	transition t2(2, "t14", 2, 3, gaurd_polytope1, assignment1);
+	transition t3(3, "t15", 2, 1, gaurd_polytope2, assignment2);
+	transition t4(4, "t19", 3, 6, gaurd_polytope3, assignment3);
+	transition t5(5, "t20", 3, 2, gaurd_polytope4, assignment4);
+	transition t6(6, "t1", 4, 1, gaurd_polytope5, assignment5);
+	transition t7(7, "t2", 4, 5, gaurd_polytope6, assignment6);
+	transition t8(8, "t3", 4, 9, gaurd_polytope7, assignment7);
+	transition t9(9, "t9", 5, 4, gaurd_polytope8, assignment8);
+	transition t10(10, "t10", 5, 2, gaurd_polytope9, assignment9);
+	transition t11(11, "t11", 5, 6, gaurd_polytope10, assignment10);
+	transition t12(12, "t12", 5, 7, gaurd_polytope11, assignment11);
+	transition t13(13, "t16", 6, 3, gaurd_polytope12, assignment12);
+	transition t14(14, "t17", 6, 5, gaurd_polytope13, assignment13);
+	transition t15(15, "t18", 6, 8, gaurd_polytope14, assignment14);
+	transition t16(16, "t6", 7, 5, gaurd_polytope15, assignment15);
+	transition t17(17, "t7", 7, 9, gaurd_polytope16, assignment16);
+	transition t18(18, "t8", 7, 8, gaurd_polytope17, assignment17);
+	transition t19(19, "t5", 9, 7, gaurd_polytope18, assignment18);
+	transition t20(20, "t4", 9, 4, gaurd_polytope19, assignment19);
 
-	std::list<transitions> Out_Going_Trans_fromloc9;
+	std::list<transition> Out_Going_Trans_fromloc9;
 
 	location l1(1, "loc9", system_dynamics0, invariant0, true,
 			Out_Going_Trans_fromloc9);
 
-	std::list<transitions> Out_Going_Trans_fromloc5;
+	std::list<transition> Out_Going_Trans_fromloc5;
 
 	Out_Going_Trans_fromloc5.push_back(t1);
 	Out_Going_Trans_fromloc5.push_back(t2);
@@ -3416,14 +3416,14 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	location l2(2, "loc5", system_dynamics1, invariant1, true,
 			Out_Going_Trans_fromloc5);
 
-	std::list<transitions> Out_Going_Trans_fromloc7;
+	std::list<transition> Out_Going_Trans_fromloc7;
 
 	Out_Going_Trans_fromloc7.push_back(t4);
 	Out_Going_Trans_fromloc7.push_back(t5);
 	location l3(3, "loc7", system_dynamics2, invariant2, true,
 			Out_Going_Trans_fromloc7);
 
-	std::list<transitions> Out_Going_Trans_fromloc1;
+	std::list<transition> Out_Going_Trans_fromloc1;
 
 	Out_Going_Trans_fromloc1.push_back(t6);
 	Out_Going_Trans_fromloc1.push_back(t7);
@@ -3431,7 +3431,7 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	location l4(4, "loc1", system_dynamics3, invariant3, true,
 			Out_Going_Trans_fromloc1);
 
-	std::list<transitions> Out_Going_Trans_fromloc4;
+	std::list<transition> Out_Going_Trans_fromloc4;
 
 	Out_Going_Trans_fromloc4.push_back(t9);
 	Out_Going_Trans_fromloc4.push_back(t10);
@@ -3440,7 +3440,7 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	location l5(5, "loc4", system_dynamics4, invariant4, true,
 			Out_Going_Trans_fromloc4);
 
-	std::list<transitions> Out_Going_Trans_fromloc6;
+	std::list<transition> Out_Going_Trans_fromloc6;
 
 	Out_Going_Trans_fromloc6.push_back(t13);
 	Out_Going_Trans_fromloc6.push_back(t14);
@@ -3448,7 +3448,7 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	location l6(6, "loc6", system_dynamics5, invariant5, true,
 			Out_Going_Trans_fromloc6);
 
-	std::list<transitions> Out_Going_Trans_fromloc3;
+	std::list<transition> Out_Going_Trans_fromloc3;
 
 	Out_Going_Trans_fromloc3.push_back(t16);
 	Out_Going_Trans_fromloc3.push_back(t17);
@@ -3456,12 +3456,12 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	location l7(7, "loc3", system_dynamics6, invariant6, true,
 			Out_Going_Trans_fromloc3);
 
-	std::list<transitions> Out_Going_Trans_fromloc8;
+	std::list<transition> Out_Going_Trans_fromloc8;
 
 	location l8(8, "loc8", system_dynamics7, invariant7, true,
 			Out_Going_Trans_fromloc8);
 
-	std::list<transitions> Out_Going_Trans_fromloc2;
+	std::list<transition> Out_Going_Trans_fromloc2;
 
 	Out_Going_Trans_fromloc2.push_back(t19);
 	Out_Going_Trans_fromloc2.push_back(t20);

@@ -340,11 +340,11 @@ void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v
 	solver.setConstraints(getCoeffMatrix(),getColumnVector(),getInEqualitySign());
 
 	// get the support
-	computeSupportFunction(u,solver,solver,2);
+	computeSupportFunction(u,solver);
 	sv_u = solver.get_sv();
 
 
-	computeSupportFunction(v,solver,solver,2);
+	computeSupportFunction(v,solver);
 	sv_v = solver.get_sv();
 	// add the sv's to the set of points
 	// make a point of 2 dimension point
@@ -367,7 +367,7 @@ void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v
 
 	//get the bisector vector;
 	std::vector<double> bisector = bisect_vector(normalize_vector(u),normalize_vector(v));
-	computeSupportFunction(bisector,solver,solver,2);
+	computeSupportFunction(bisector,solver);
 	sv_bisect = solver.get_sv();
 	p3.first = sv_bisect[i];
 	p3.second = sv_bisect[j];

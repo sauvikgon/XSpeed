@@ -187,7 +187,7 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		 current_location.getInvariant(),
 		 current_location.isInvariantExists(),
 		 lp_solver_type_choosen);*/
-	} // Performance degraded
+//	} // Performance degraded
 
 	if (Algorithm_Type == PAR_PROCESS) { //Continuous Parallel Algorithm parallelizing the Directions
 		//Parallel implementation using Process Creation
@@ -315,8 +315,9 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			//  ********************* FlowPipe or Reach Computation Done ********************
 
 			//  ************** Check to see if Computed FlowPipe is Empty  **********
-			if (S[id]->getContinuousSetptr()->getTotalIterations() != 0
-					&& number_times < bound) { //computed reach_region is empty && optimize computation
+			template_polyhedra::ptr t_poly = S[id]->getContinuousSetptr();
+
+			if (t_poly->getTotalIterations() != 0 && number_times < bound) { //computed reach_region is empty && optimize computation
 					//cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
 
 				for (std::list<transition>::iterator t =
@@ -348,9 +349,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 
 					//this intersected_polyhedra will have invariant direction added in it
 					string trans_name = (*t).getLabel();
-					intersected_polyhedra =
-							S[id]->getContinuousSetptr()->polys_intersection(
-									gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
+					intersected_polyhedra = t_poly->polys_intersection(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 //			std::cout << "Before calling getTemplate_approx\n";
 
 					int destination_locID = (*t).getDestination_Location_Id();
@@ -403,11 +402,13 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 
 		//Creating a list of objects of "Reachability Set"/Symbolic_states
 		for (unsigned int index = 0; index < count; index++) {
-			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0) //computed reach_region is NOT empty
+
+			template_polyhedra::ptr t_poly = S[index]->getContinuousSetptr();
+			if (t_poly->getTotalIterations() != 0) //computed reach_region is NOT empty
 				Reachability_Region.push_back(S[index]);
 
 			//  ******************************** Safety Verification section ********************************
-			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0) { //flowpipe exists
+			if (t_poly->getTotalIterations() != 0) { //flowpipe exists
 				//so perform intersection with forbidden set provided locID matches
 
 				int locID;
@@ -431,7 +432,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 						//GeneratePolytopePlotter(forbid_poly);
 						std::list<template_polyhedra> forbid_intersects;
 						forbid_intersects =
-								S[index]->getContinuousSetptr()->polys_intersection(
+								t_poly->polys_intersection(
 										forbid_poly, lp_solver_type_choosen);
 						if (forbid_intersects.size() == 0) {
 							std::cout

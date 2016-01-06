@@ -73,7 +73,7 @@ struct ExamplePolytope {
 TEST_FIXTURE(ExamplePolytope, polytope_max_norm_Test) {
 	double res;
 
-	res = I.max_norm(1);	//temp solu
+	res = I.max_norm(1,1);	//temp solu
 	out << res;
 	//std::cout << res;
 	proper << "7";
@@ -104,7 +104,7 @@ TEST_FIXTURE(ExamplePolytope, polytope_max_norm_Test) {
 	G.setColumnVector(boundValueV);
 	G.setInEqualitySign(boundSignV);
 	cout << endl << "Amit Gurung Value = " << endl;
-	double val = G.max_norm(1);		//temp solu
+	double val = G.max_norm(1,1);		//temp solu
 	cout << endl << "Amit Gurung Over" << val << endl;
 	out << "";
 	proper << "";
@@ -137,7 +137,7 @@ TEST_FIXTURE(ExamplePolytope, polytope_max_norm_Test) {
 	k.setInEqualitySign(boundSignV);
 
 	cout << endl << "Raj Gurung Value = " << endl;
-	val = k.max_norm(1);		//temp solu
+	val = k.max_norm(1,1);		//temp solu
 	cout << endl << "Raj Gurung Over" << val << endl;
 
 }
