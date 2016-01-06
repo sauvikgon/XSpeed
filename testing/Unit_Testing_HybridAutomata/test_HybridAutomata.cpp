@@ -8,15 +8,15 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
-
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <list>
 #include <iterator>
 
-#include "MySrc/DataStructureDirections.h"
-#include "HybridAutomata/Hybrid_Automata.h"
-#include "HybridAutomata/Transition.h"
-#include "math/matrix.h"
+#include "application/DataStructureDirections.h"
+#include "core_system/HybridAutomata/Hybrid_Automata.h"
+#include "core_system/HybridAutomata/Transition.h"
+#include "core_system/math/matrix.h"
 /*
  hybrid_automata();
  hybrid_automata(std::list<transitions> transition, location init_loc, int dim);

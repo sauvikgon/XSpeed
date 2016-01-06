@@ -7,10 +7,11 @@
 
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 
-#include "MySrc/DataStructureDirections.h"
-#include "HybridAutomata/Location.h"
+#include "application/DataStructureDirections.h"
+#include "core_system/HybridAutomata/Location.h"
 
 using namespace std;
 

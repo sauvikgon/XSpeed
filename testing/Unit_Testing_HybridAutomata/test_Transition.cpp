@@ -7,13 +7,13 @@
 
 #include <string>
 #include <sstream>
-#include <iostream>//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include <iostream>
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 #include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 
-
-#include "MySrc/DataStructureDirections.h"
-#include "HybridAutomata/Transition.h"
-#include "math/matrix.h"
+#include "application/DataStructureDirections.h"
+#include "core_system/HybridAutomata/Transition.h"
+#include "core_system/math/matrix.h"
 
 using namespace std;
 using namespace math;

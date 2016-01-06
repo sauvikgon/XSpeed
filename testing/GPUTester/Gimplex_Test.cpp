@@ -1,7 +1,8 @@
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
-//#include "unittest++/UnitTest++.h"
+
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "core_system/math/Gimplex/simplex.cuh"
 #include "core_system/math/matrix.h"
 //#include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
@@ -146,7 +147,8 @@ TEST_FIXTURE(Example_GimplexSolver, gimplex3) {
 	std::vector<double> b;
 	std::vector<float> result;
 	std::vector<int> status_val;
-	int N_S = 10300;
+
+	int N_S = 1;
 
 	//Tester for Helicopter Model
 
@@ -188,13 +190,13 @@ TEST_FIXTURE(Example_GimplexSolver, gimplex3) {
 			b[2 * i + 1] = 0;
 		}
 	}
-
+	int no_streams = 1;
 	Simplex s(N_S);
 	s.setConstratint(A, b);
-	s.ComputeLP(C);
+	s.ComputeLP(C, no_streams);
 	status_val = s.getStatusAll();
 
-	std::cout << "\n**Answer_Of_All_Simplex**\n";
+/*	std::cout << "\n**Answer_Of_All_Simplex**\n";
 	result = s.getResultAll();
 	for (int i = 0; i < N_S; i++) {
 		if (result[i] > 0)
@@ -202,7 +204,7 @@ TEST_FIXTURE(Example_GimplexSolver, gimplex3) {
 		else if (result[i] == -1)
 			std::cout << "Simplex " << i + 1 << " is unbounded\n\n";
 	}
-	std::cout << "Number of Simplex Solved = " << N_S << std::endl;
+	std::cout << "Number of Simplex Solved = " << N_S << std::endl;*/
 }
 
 }
