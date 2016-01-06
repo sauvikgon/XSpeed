@@ -11,7 +11,10 @@
 
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "core_system/symbolic_states/symbolic_states.h"
-#include "core_system/PWL/pwl.h"
+//#include "core_system/PWL/pwl.h"
+#include "core_system/PWL/pwlist.h"
+#include "core_system/symbolic_states/initial_state.h"
+#include "core_system/symbolic_states/symbolic_states_utility.h"
 
 #include "Utilities/testPolytopePlotting.h"
 #include "Utilities/Post_Assignment.h"
@@ -27,17 +30,24 @@
 //#include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
 #include "boost/timer/timer.hpp"
 
+
+
+
 //Sequential Search for Discrete Jumps
-std::list<template_polyhedra> reach(hybrid_automata& H, symbolic_states& I,
+std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		ReachabilityParameters& reach_parameters, int bound,
 		unsigned int Algorithm_Type, unsigned int Total_Partition,
 		int lp_solver_type_choosen, unsigned int number_of_streams,
-		int Solver_GLPK_Gurobi_GPU);
+		int Solver_GLPK_Gurobi_GPU,
+		std::set<std::pair<int, polytope::ptr> > forbidden_set);
+
 
 //Parallel Breadth First Search for Discrete Jumps
-std::list<template_polyhedra> reach_pbfs(hybrid_automata& H, symbolic_states& I,
+std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H, initial_state::ptr& I,
 		ReachabilityParameters& reach_parameters, int bound,
 		unsigned int Algorithm_Type, unsigned int Total_Partition,
-		int lp_solver_type_choosen, unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU);
+		int lp_solver_type_choosen, unsigned int number_of_streams,
+		int Solver_GLPK_Gurobi_GPU,
+		std::set<std::pair<int, polytope::ptr> > forbidden_set);
 
 #endif /* REACHABILITY_HYBRIDAUTOMATA_H_ */

@@ -30,7 +30,8 @@ public:
 	 * and the input set.
 	 */
 	virtual double computeSupportFunction(std::vector<double> direction, lp_solver &lp) = 0;
-	virtual double max_norm(int lp_solver_type_choosen) = 0;
+	virtual double max_norm(int lp_solver_type_choosen, unsigned int dim_size) = 0;
+
 
 };
 

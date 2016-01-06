@@ -27,6 +27,8 @@ public:
 	void setMin_Or_Max(int Min_Or_Max);
 	double Compute_LLP(std::vector<double> coeff_function);
 
+	//returns the vector/point that gives the maximum value
+	std::vector<double> get_sv();
 	//  ****** Extra Functions **********
 	int getMin_Or_Max();
 	void setIteration_Limit(int limits);

@@ -16,6 +16,11 @@
 #include "core_system/math/basic_functions.h"
 #include "core_system/math/matrix.h"
 #include "Utilities/StandardVector.h"
+#include "Utilities/vector_operations.h"
+#include "core_system/math/2d_geometry.h"
+#include <set>
+#include <utility>
+
 //#include "math/lp_solver_ourSimplex/simplex.h"
 
 using namespace std;
@@ -193,8 +198,9 @@ void polytope::setSystemDimension(unsigned int systemDimension) {
 	system_dimension = systemDimension;
 }
 
-double polytope::max_norm(int lp_solver_type_choosen) {
-	unsigned int dimension_size = this->system_dimension;
+double polytope::max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_Norm) {
+	//unsigned int dimension_size = this->system_dimension;
+	unsigned int dimension_size = dim_for_Max_Norm;
 	double Max_A, sf, Max = 0.0;
 	if (this->getIsEmpty())
 		sf = 0;	//returns zero for empty polytope
@@ -233,8 +239,7 @@ double polytope::max_norm(int lp_solver_type_choosen) {
 	return Max;
 }
 
-const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2,
-		int lp_solver_type) {
+const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2) {
 
 	math::matrix<double> total_coeffMatrix, m1;
 	m1 = this->getCoeffMatrix();//assigning constant matrix to matrix m1 so that matrix_join function can be called
@@ -323,5 +328,89 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 
 	return flag;
 }
+/*
+ * Searches the 2D vertices of the polytope between the directions u and v
+ */
+
+void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v, int i, int j,
+		std::set<std::pair<double,double> >& pts){
+	std::vector<double> sv_u(getSystemDimension(),0), sv_v(getSystemDimension(),0);
+	std::vector<double> sv_bisect;
+	lp_solver solver(1); // to choose glpk
+	solver.setConstraints(getCoeffMatrix(),getColumnVector(),getInEqualitySign());
+
+	// get the support
+	computeSupportFunction(u,solver,solver,2);
+	sv_u = solver.get_sv();
+
+
+	computeSupportFunction(v,solver,solver,2);
+	sv_v = solver.get_sv();
+	// add the sv's to the set of points
+	// make a point of 2 dimension point
+
+	std::pair<double,double> p1,p2,p3;
+	p1.first = sv_u[i];
+	p1.second = sv_u[j];
+
+	cout << "direction: (" << u[i] << ", " << u[j] << ")" <<std::endl;
+	cout << "support vector: (" << sv_u[i] << ", " << sv_u[j] << ")\n";
+
+	p2.first = sv_v[i];
+	p2.second = sv_v[j];
+
+	cout << "direction: (" << v[i] << ", " << v[j] << ")" <<std::endl;
+	cout << "support vector: (" << sv_v[i] <<", "<< sv_v[j] << ")\n";
+
+	pts.insert(p1);
+	pts.insert(p2);
+
+	//get the bisector vector;
+	std::vector<double> bisector = bisect_vector(normalize_vector(u),normalize_vector(v));
+	computeSupportFunction(bisector,solver,solver,2);
+	sv_bisect = solver.get_sv();
+	p3.first = sv_bisect[i];
+	p3.second = sv_bisect[j];
+
+	if(is_collinear(p1,p2,p3)){
+		return;
+	}
+	else{
+		cout << "direction: (" << bisector[i] << ", " << bisector[j] << ")" << std::endl;
+		cout << "support vector: (" << sv_bisect[i] <<", "<< sv_bisect[j] << ")\n";
+
+		pts.insert(p3);
+		enum_2dVert_restrict(u,bisector,i,j,pts);
+		enum_2dVert_restrict(bisector,v,i,j,pts);
+	}
+}
+
+std::set<std::pair<double,double> > polytope::enumerate_2dVertices(int i, int j){
+	std::set<std::pair<double,double> > All_vertices;
+
+	//enumerate the vertices in the first quadrant
+	std::vector<double> u(getSystemDimension(),0);
+	u[i]=1;
+	std::vector<double> v(getSystemDimension(),0);
+	v[j]=1;
+
+
+	enum_2dVert_restrict(u,v,i,j,All_vertices);
+
+	//enumerate vertices in the second quadrant
+	u[i]=-1;
+	enum_2dVert_restrict(u,v,i,j,All_vertices);
+
+	//enumerate vertices in the third quadrant
+	v[j]=-1;
+	enum_2dVert_restrict(u,v,i,j,All_vertices);
+
+	//enumerate vertices in the fourth quadrant
+	u[i]=1;
+	enum_2dVert_restrict(u,v,i,j,All_vertices);
+
+	return All_vertices;
+}
+
 
 #endif /* POLYTOPE_CPP_ */

@@ -53,7 +53,7 @@ void glpk_lp_solver::setDefalultObject() {		//if this is a virtual member functi
 
 void glpk_lp_solver::displayMaxVariables() {
 	for (int i = 0; i < dimension; i++)
-		cout << "\t x" << i + 1 << " = " << Maximizing_Variables[i];
+		cout << "\t x" << i + 1 << " = " << sv[i];
 }
 
 glpk_lp_solver::glpk_lp_solver(math::matrix<double> coeff_constraints,
@@ -193,11 +193,15 @@ double glpk_lp_solver::Compute_LLP(std::vector<double> coeff_function) {//Here a
 	glp_simplex(mylp, &param);
 	//glp_simplex(mylp, NULL);
 	double result = glp_get_obj_val(mylp);
-	Maximizing_Variables.resize(dimension, 0.0);
+	sv.resize(dimension, 0.0);
 	for (int i = 0; i < dimension; i++)
-		Maximizing_Variables[i] = glp_get_col_prim(mylp, i + 1);
+		sv[i] = glp_get_col_prim(mylp, i + 1);
 
 	return result;
+}
+
+std::vector<double> glpk_lp_solver::getMaximizing_Variables(){
+	return this->sv;
 }
 
 /*

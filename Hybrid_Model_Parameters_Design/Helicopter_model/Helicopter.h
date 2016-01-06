@@ -300,10 +300,14 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 	system_dynamics.MatrixB = Bmatrix;
 	system_dynamics.MatrixA = AUmatrix;
 	system_dynamics.U->setIsEmpty(true);	//set empty = true which is by default
+<<<<<<< local
 	//@Rajarshi: invariantExists should not be a reachability parameter. It should
 	//be a location parameter
 	///
 //	reach_parameters.InvariantExists = false;
+=======
+	//reach_parameters.InvariantExists = false;
+>>>>>>> other
 //	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
 //	Dynamics Initalised ---------------------
 

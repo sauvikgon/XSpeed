@@ -7,7 +7,7 @@
 
 #include "core_system/Reachability/NewApproach/SameDirections_Avoid_SuppFunction.h"
 
-template_polyhedra reachabilitySameDirection(Dynamics& SystemDynamics,
+template_polyhedra::ptr reachabilitySameDirection(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen) {
@@ -26,7 +26,7 @@ template_polyhedra reachabilitySameDirection(Dynamics& SystemDynamics,
 	}	//End of Invariant Directions
 
 	if (shm_NewTotalIteration == 1) {
-		template_polyhedra poly_emptyp;
+		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
 
@@ -124,9 +124,9 @@ unsigned int temp=0;
 				inv_sfm(eachInvDirection, i) = invariant->getColumnVector()[eachInvDirection];
 			}
 		}
-		return template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix());
+		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, inv_sfm,
+				ReachParameters.Directions, invariant->getCoeffMatrix()));
 	} else {
-		return template_polyhedra(MatrixValue, ReachParameters.Directions);
+		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 }

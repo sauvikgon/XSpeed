@@ -79,6 +79,23 @@ double lp_solver::Compute_LLP(std::vector<double> coeff_function) {
 	}
 	return res;
 }
+/**
+ * Return the support vector,i.e., the maximimizing/minimizing
+ * vector for the given objection function
+ */
+std::vector<double> lp_solver::get_sv() {
+	std::vector<double> Maximum_point;
+	if (lp_solver_type == GLPK_SOLVER) {
+		Maximum_point = glpk_lp_problem->getMaximizing_Variables();
+	}
+	if (lp_solver_type == GUROBI_SOLVER) {
+		//Maximum_point = gurobi_lp_problem->Compute_LPP(coeff_function);
+	}
+	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
+		//Maximum_point = simplex_cpu_lp_problem->ComputeLP_CPU(coeff_function);
+	}
+	return Maximum_point;
+}
 
 int lp_solver::getMin_Or_Max() {
 	int res = 2;

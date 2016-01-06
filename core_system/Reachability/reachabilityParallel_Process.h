@@ -57,7 +57,7 @@ void reachFunction(unsigned int eachDirection, Dynamics& SystemDynamics,
 		lp_solver &s_per_thread_I, lp_solver &s_per_thread_U,
 		double* sf_vals);
 
-const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachabilityParallel_Process(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);

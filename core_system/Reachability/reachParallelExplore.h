@@ -22,20 +22,20 @@
  *
  * CORES: Its the number of parallel compute cores available in the hardware architecture.
  */
-const template_polyhedra reachParallelExplore(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachParallelExplore(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, const polytope::ptr invariant,
 		bool isInvariantExist, int CORES, unsigned int Algorithm_Type,
 		int lp_solver_type_choosen);
 
-const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);
 /*
  * Called from Parallel Algorithm for combining parallelizing over Iterations and Directions
  */
-const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
+const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);
@@ -43,13 +43,13 @@ const template_polyhedra reachabilityParallel_For_Parallel_Iter_Dir(
 /*
  * Implementation of reachability for each partitions can be made parallel using OMP approach
  */
-const template_polyhedra reachabilityPartitions(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachabilityPartitions(Dynamics& SystemDynamics,
 		polytope::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);
 
 
-const template_polyhedra reachabilityPartitions_par_iters(
+const template_polyhedra::ptr reachabilityPartitions_par_iters(
 		Dynamics& SystemDynamics, polytope::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int partitions_size,

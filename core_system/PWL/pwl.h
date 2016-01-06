@@ -7,11 +7,14 @@
 
 #ifndef PWL_H_
 #define PWL_H_
+/*
+ * Passed-Waiting-List of symbolic_states. A class that handles Queue data_structure of sysmbolic_states
+ */
 
 #include "core_system/symbolic_states/symbolic_states.h"
 #include <list>
 
-class pwl{
+class pwl {
 public:
 	const std::list<symbolic_states>& getPassedList() const;
 	void setPassedList(const std::list<symbolic_states>& passedList);
@@ -31,10 +34,12 @@ public:
 	// Get the size of the waiting list, i.e. the number of elements in the list
 	int get_waiting_list_size();
 
+	unsigned int get_waiting_list_size();
+
 private:
 	std::list<symbolic_states> waiting_list;
 	std::list<symbolic_states> passed_list;
+	unsigned int waiting_list_size;	//number of elements currently present in the waiting_list
 };
-
 
 #endif /* PWL_H_ */

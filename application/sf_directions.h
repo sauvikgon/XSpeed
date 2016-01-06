@@ -50,11 +50,11 @@ void getDirectionList_X0_and_U_OLD(std::vector<AllDirection> &directionList,
 
 void getDirectionList_X0_and_U(ReachabilityParameters &ReachParameters,
 		unsigned int newiters, math::matrix<float> &list_X0,
-		math::matrix<float> &list_U, bool U_empty);
+		math::matrix<float> &list_U, bool U_empty, Dynamics& SystemDynamics);
 
 void getDirectionList_X0_and_U_OnlyForGLPK(
 		ReachabilityParameters &ReachParameters, unsigned int newiters,
 		std::list<std::vector<double> > &list_X0,
-		std::list<std::vector<double> > &list_U, bool U_empty);
+		std::list<std::vector<double> > &list_U, bool U_empty, Dynamics& SystemDynamics);
 
 #endif /* SF_DIRECTIONS_H_ */

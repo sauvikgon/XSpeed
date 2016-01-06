@@ -12,17 +12,16 @@
 
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
 
-//Todo:: Have to convert the system to Four Variables
 /*
- * velocity x1 in the x-axis directions and velocity x2 in the y-coordinate directions
- * So the system has Four variables, (x,y) the positions and (x1,x2) the velocities.
+ * velocity v1 in the x-axis directions and velocity v2 in the y-coordinate directions
+ * So the system has Four variables, (x,y) the positions and (v1,v2) the velocities.
  */
 //converted ::  Input Polytope U into 4 Variables.
 //		Balanced Flow Equations into 4x4 for A and B
-//		Invariants converted to 4 Variables, but it seems not working
+//		Invariants converted to 4 Variables
 //		Similarly Guard is also converted to 4 Variables
 void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
-		symbolic_states& initial_symbolic_state,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -37,6 +36,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
 
 	size_type row, col;
+	unsigned int initial_location_id; //the initial Location ID
 
 	//Polytope I Declaration in the form of Ax<=b
 	//Input Polytope I as a point(x,y,x1,x2) (0.2 <=x<=0.6,0.1<=y<=0.5,x1==0,x2==0) in the grid of cells
@@ -83,57 +83,82 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixI(7, 2) = 0;
 	ConstraintsMatrixI(7, 3) = -1;
 
+	discrete_set d_set;
+
 	boundValueI.resize(row);
 	// ********************* start_location=2:: (0.2 <=x1<=0.6,0.1<=x2<=0.5,v1==0,v2==0) ************************
-/*	boundValueI[0] = 0.6;
-	boundValueI[1] = -0.2;
-	boundValueI[2] = 0.5;
-	boundValueI[3] = -0.1;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;
+	/*
+	 initial_location_id = 2; //the initial Location ID = 2
+
+	 boundValueI[0] = 0.6;
+	 boundValueI[1] = -0.2;
+	 boundValueI[2] = 0.5;
+	 boundValueI[3] = -0.1;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+	 */
 	// ********************* start_location=1:: (0.5 <=x1<=0.8, 1.5<=x2<=1.8,v1==0,v2==0) ************************
-	boundValueI[0] = 0.8; //
-	boundValueI[1] = -0.5;
-	boundValueI[2] = 1.8;
-	boundValueI[3] = -1.5;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;
+	/*
+	 initial_location_id = 1; //the initial Location ID = 1
+
+	 boundValueI[0] = 0.8; //
+	 boundValueI[1] = -0.5;
+	 boundValueI[2] = 1.8;
+	 boundValueI[3] = -1.5;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;*/
+
+	/*boundValueI[0] = 1; //
+	 boundValueI[1] = 0.4;
+	 boundValueI[2] = 2;
+	 boundValueI[3] = -1;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;*/
+
 	// ********************* start_location=5:: (1.2 <=x1<=1.4, 2.5<=x2<=2.7,v1==0,v2==0) ************************
-	boundValueI[0] = 1.4; //
-	boundValueI[1] = -1.2;
-	boundValueI[2] = 2.7;
-	boundValueI[3] = -2.5;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;
-*/
-	// ********************* start_location=4:: (1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==0,v2==0) ************************
-	boundValueI[0] = 1.7; //
+	/*
+	 initial_location_id = 5;		//the initial Location ID = 5
+
+	 boundValueI[0] = 1.4; //
+	 boundValueI[1] = -1.2;
+	 boundValueI[2] = 2.7;
+	 boundValueI[3] = -2.5;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+	 */
+	// ********************* start_location=4:: (1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==-1,v2==0) ************************
+	initial_location_id = 4; //the initial Location ID = 4
+
+	/* boundValueI[0] = 1.7; //(1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==-1,v2==0)
+	 boundValueI[1] = -1.5;
+	 boundValueI[2] = 1.7;
+	 boundValueI[3] = -1.5;
+	 boundValueI[4] = -1;
+	 boundValueI[5] = 1;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;*/
+
+	boundValueI[0] = 1.7; //(1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==-1,v2==0.5)
 	boundValueI[1] = -1.5;
 	boundValueI[2] = 1.7;
 	boundValueI[3] = -1.5;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;
+	boundValueI[4] = -1;
+	boundValueI[5] = 1;
+	boundValueI[6] = 0.5;
+	boundValueI[7] = -0.5;
 
 	boundSignI = 1;
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 	//initial_polytope_I.setPolytope(ConstraintsMatrixI, boundValueI, boundSignI);
-
-	discrete_set d_set;
-	//d_set.insert_element(1);		//the initial Location ID = 1
-	//d_set.insert_element(2); //the initial Location ID = 2
-	//d_set.insert_element(5);		//the initial Location ID = 5
-	d_set.insert_element(4);		//the initial Location ID = 4
-	//d_set.insert_element(6);		//the initial Location ID = 6
-
 
 	/*	*************** Common Parameter Initialization *******************
 	 * Common Parameter for all Locations or transition
@@ -227,7 +252,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	 *  List of transition are t1, t2, ... , t20 including transition towards the Locations labelled "A" and "B"
 	 *  where Label "A" is the "Final location" to be reached and "B" the "Bad location" to be avoided.
 	 */
-	row = 4;
+	row = 8;
 	col = 4;
 	gaurdConstraintsMatrix.resize(row, col); //this matrix will be common for all transition except the gaurdBoundValue.
 	gaurdConstraintsMatrix(0, 0) = 1;
@@ -250,13 +275,37 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurdConstraintsMatrix(3, 2) = 0;
 	gaurdConstraintsMatrix(3, 3) = 0;
 
+	gaurdConstraintsMatrix(4, 0) = 0;
+	gaurdConstraintsMatrix(4, 1) = 0;
+	gaurdConstraintsMatrix(4, 2) = 1;
+	gaurdConstraintsMatrix(4, 3) = 0;
+
+	gaurdConstraintsMatrix(5, 0) = 0;
+	gaurdConstraintsMatrix(5, 1) = 0;
+	gaurdConstraintsMatrix(5, 2) = -1;
+	gaurdConstraintsMatrix(5, 3) = 0;
+
+	gaurdConstraintsMatrix(6, 0) = 0;
+	gaurdConstraintsMatrix(6, 1) = 0;
+	gaurdConstraintsMatrix(6, 2) = 0;
+	gaurdConstraintsMatrix(6, 3) = 1;
+
+	gaurdConstraintsMatrix(7, 0) = 0;
+	gaurdConstraintsMatrix(7, 1) = 0;
+	gaurdConstraintsMatrix(7, 2) = 0;
+	gaurdConstraintsMatrix(7, 3) = -1;
+
 	gaurdBoundSign = 1;
 
 	gaurdBoundValue.resize(row); //gaurd is:: V_d[sin(loc_name * pi/4), cos(loc_name * pi/4)]
-	gaurdBoundValue[0] = 1; // y==2 and 0<=x<=1
+	gaurdBoundValue[0] = 1; // 0<=x<=1 and y==2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = 0;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -2;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
@@ -264,190 +313,266 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 					gaurdBoundSign));
 	transition t1(1, "1 to Bad", 1, 9, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 1; // x==1 and 1<=y<=2
+	gaurdBoundValue[0] = 1; // x==1 and 1<=y<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t2(2, "1 to 4", 1, 4, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 1; // y==1 and 0<=x<=1
+	gaurdBoundValue[0] = 1; //  0<=x<=1 and y==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = 0;
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t3(3, "1 to 2", 1, 2, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 1; // y==1 and 0<=x<=1
+	gaurdBoundValue[0] = 1; //  0<=x<=1 and y==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = 0;
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t4(4, "2 to 1", 2, 1, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1
+	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = 0;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t5(5, "2 to 3", 2, 3, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // y==1 and 1<=x<=2
+	gaurdBoundValue[0] = 2; // y==1 and 1<=x<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t6(6, "3 to 4", 3, 4, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1
+	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = 0;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t7(7, "3 to 2", 3, 2, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // x==2 and 0<=y<=1
+	gaurdBoundValue[0] = 2; // x==2 and 0<=y<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = 0;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t8(8, "3 to A", 3, 8, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 1; // x==1 and 1<=y<=2
+	gaurdBoundValue[0] = 1; // x==1 and 1<=y<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t9(9, "4 to 1", 4, 1, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // y==2 and 1<=x<=2
+	gaurdBoundValue[0] = 2; // y==2 and 1<=x<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -2;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t10(10, "4 to 5", 4, 5, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // x==2 and 1<=y<=2
+	gaurdBoundValue[0] = 2; // x==2 and 1<=y<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t11(11, "4 to 6", 4, 6, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // y==1 and 1<=x<=2
+	gaurdBoundValue[0] = 2; // y==1 and 1<=x<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t12(12, "4 to 3", 4, 3, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // y==2 and 1<=x<=2
+	gaurdBoundValue[0] = 2; // y==2 and 1<=x<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t13(13, "5 to 4", 5, 4, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // x==2 and 2<=y<=3
+	gaurdBoundValue[0] = 2; // x==2 and 2<=y<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
 	gaurdBoundValue[2] = 3;
 	gaurdBoundValue[3] = -2;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t14(14, "5 to 7", 5, 7, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 1; // x==1 and 2<=y<=3
+	gaurdBoundValue[0] = 1; // x==1 and 2<=y<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
 	gaurdBoundValue[2] = 3;
 	gaurdBoundValue[3] = -2;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t15(15, "5 to Bad", 5, 9, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 3; // y==2 and 2<=x<=3
+	gaurdBoundValue[0] = 3; // y==2 and 2<=x<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -2;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t16(16, "6 to 7", 6, 7, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // x==2 and 1<=y<=2
+	gaurdBoundValue[0] = 2; // x==2 and 1<=y<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t17(17, "6 to 4", 6, 4, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 3; // y==1 and 2<=x<=3
+	gaurdBoundValue[0] = 3; // y==1 and 2<=x<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
 	gaurdBoundValue[2] = 1;
 	gaurdBoundValue[3] = -1;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t18(18, "6 to A", 6, 8, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 3; // y==2 and 2<=x<=3
+	gaurdBoundValue[0] = 3; // y==2 and 2<=x<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
 	gaurdBoundValue[2] = 2;
 	gaurdBoundValue[3] = -2;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t19(19, "7 to 6", 7, 6, gaurd_polytope, assignment);
 
-	gaurdBoundValue[0] = 2; // x==2 and 2<=y<=3
+	gaurdBoundValue[0] = 2; // x==2 and 2<=y<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
 	gaurdBoundValue[2] = 3;
 	gaurdBoundValue[3] = -2;
+	gaurdBoundValue[4] = 1000;
+	gaurdBoundValue[5] = 1000;
+	gaurdBoundValue[6] = 1000;
+	gaurdBoundValue[7] = 1000;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
@@ -547,8 +672,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 1;
 	boundValueV[7] = -1;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -580,8 +711,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 0;
 	boundValueV[7] = 0;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -611,8 +748,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = -0.70711;
 	boundValueV[7] = 0.70711;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -643,8 +786,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = -0.70711;
 	boundValueV[7] = 0.70711;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -676,8 +825,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 0;
 	boundValueV[7] = 0;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -708,8 +863,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 1;
 	boundValueV[7] = -1;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -740,8 +901,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 1;
 	boundValueV[7] = -1;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -774,8 +941,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueV[6] = 0;
 	boundValueV[7] = 0;
 
-	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
+
+	system_dynamics.isEmptyMatrixB = false;
+	system_dynamics.MatrixB = Bmatrix;
+
+	system_dynamics.isEmptyC = true;
+
 	//system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
@@ -807,8 +980,12 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l8);
 	Hybrid_Automata.addLocation(l9);
 
+	symbolic_states::ptr S; //null_pointer as there is no instantiation
+	int transition_id = 0; //initial location no transition taken yet
+	initial_state::ptr I;
+	I = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
 
-	initial_symbolic_state.setDiscreteSet(d_set);
-	initial_symbolic_state.setContinuousSet(initial_polytope_I);
+	init_state = I;
 
 }

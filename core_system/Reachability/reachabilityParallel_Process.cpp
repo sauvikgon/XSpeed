@@ -19,7 +19,7 @@ void reachFunction(unsigned int eachDirection, Dynamics& SystemDynamics,
 	double zIInitial = 0.0, zI = 0.0, zV = 0.0;
 	double sVariable, s1Variable;
 
-	std::vector<double> r1Variable;	//now single dimension
+	std::vector<double> r1Variable; //now single dimension
 	r1Variable.resize(dimension);
 
 	// ****** SharedMemory Requirement Code	Begins :: For Client or Child Process to access or modify SharedMemory ********* /
@@ -51,14 +51,14 @@ void reachFunction(unsigned int eachDirection, Dynamics& SystemDynamics,
 	}
 
 	sf_vals[0] = eachDirection; //First Element is the Direction/Vector Number
-	int loopIteration = 1;				//So loop can begin from 1
-	sVariable = 0.0; 		//initialize s0
+	int loopIteration = 1; //So loop can begin from 1
+	sVariable = 0.0; //initialize s0
 	int Min_Or_Max = 2;
 
 	zIInitial = Omega_Support(ReachParameters, rVariable, Initial,
 			SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 
-	sf_vals[loopIteration] = zIInitial; 		//Y0 = pI(r0)
+	sf_vals[loopIteration] = zIInitial; //Y0 = pI(r0)
 	loopIteration++;
 	//int conditionMet = 0;	//for Optimization of First Vector from computing after crossing invariant's boundary
 
@@ -73,20 +73,20 @@ void reachFunction(unsigned int eachDirection, Dynamics& SystemDynamics,
 		s1Variable = sVariable + zV;
 		zI = Omega_Support(ReachParameters, r1Variable, Initial, SystemDynamics,
 				s_per_thread_I, s_per_thread_U, Min_Or_Max);
-		TempOmega = zI + s1Variable; 		//Y1
+		TempOmega = zI + s1Variable; //Y1
 		sf_vals[loopIteration] = TempOmega;
-		rVariable = CopyVector(r1Variable);	//source to destination
+		rVariable = CopyVector(r1Variable); //source to destination
 		sVariable = s1Variable;
-		loopIteration++;	//for the next Omega-iteration or Time-bound
+		loopIteration++; //for the next Omega-iteration or Time-bound
 
-	}	//end of while for each vector
+	} //end of while for each vector
 	//	cout<<"\nChild Function has Ended\n"<<eachDirection<<endl<<loopIteration<<endl<<found;
 }
 
 //Implementation of reachability parallel using PROCESS FORKING approach
 
-const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
+const template_polyhedra::ptr reachabilityParallel_Process(
+		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen) {
 
@@ -112,7 +112,7 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 	}
 	// ************ Now put some things into the memory for the other process to read.************ /
 
-	if (isInvariantExist == true) {	//if invariant exist. Computing
+	if (isInvariantExist == true) { //if invariant exist. Computing
 		/*
 		 * Computing support function for polytope for the pair of invairant's direction
 		 * to determine the iteration's number at which the polytope is completely outside the invariant's region
@@ -121,9 +121,9 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 		*shm_number = InvariantBoundaryCheck(SystemDynamics, Initial,
 				ReachParameters, invariant, lp_solver_type_choosen);
 		//	cout <<"\nInvariant Exists!!!\n";
-	}	//End of Invariant Directions
+	} //End of Invariant Directions
 	else {
-		*shm_number = iterationNum;	//initial Actual Total iterations
+		*shm_number = iterationNum; //initial Actual Total iterations
 	}
 
 //	cout << "\nTotal Initial Iteration before = " << *shm_number;
@@ -132,7 +132,7 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 
 	// IPC with pipes to get computed results from the child processes
 	//int fd[2];	//single pipe for all child process
-	int fd[numVectors][2];//as many as number of vectors/Process so as the number of Reading pipes
+	int fd[numVectors][2]; //as many as number of vectors/Process so as the number of Reading pipes
 
 //	//
 //	 if (pipe(fd) < 0) {
@@ -155,7 +155,7 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 			cout << "Error in FORKing child processes" << endl;
 			exit(1);
 		}
-		if (pID == 0)                // child
+		if (pID == 0) // child
 				{
 			// define glpk object here. We have one glpk object per process local.
 			// polytope.set_glpk_obj(glpk_obj* obj);
@@ -164,14 +164,14 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 
 			lp_solver s_per_thread_I(type), s_per_thread_U(type);
 			s_per_thread_I.setMin_Or_Max(2);
-			if (!Initial->getIsEmpty())	//set glpk constraints If not an empty polytope
+			if (!Initial->getIsEmpty()) //set glpk constraints If not an empty polytope
 				s_per_thread_I.setConstraints(
 						ReachParameters.X0->getCoeffMatrix(),
 						ReachParameters.X0->getColumnVector(),
 						ReachParameters.X0->getInEqualitySign());
 
 			s_per_thread_U.setMin_Or_Max(2);
-			if (SystemDynamics.U->getIsEmpty()) {	//empty polytope
+			if (SystemDynamics.U->getIsEmpty()) { //empty polytope
 				//Polytope is empty so no glpk object constraints to be set
 			} else {
 				s_per_thread_U.setConstraints(
@@ -197,22 +197,22 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 			//	R[*shm_number] = eachDirection; // last entry to contain the direction/vector.
 			//R[iterationNum] = eachDirection; // last entry to contain the direction/vector.
 			if (write(fd[eachDirection][1], R,
-					sizeof(double) * (iterationNum + 1)) < 0) {	//Accessing the SharedMemory to know the size of the last Iterations
+					sizeof(double) * (iterationNum + 1)) < 0) { //Accessing the SharedMemory to know the size of the last Iterations
 				cout
 						<< "reachabilityParallel_Process: Error in writing into the pipe by the child\n";
 				printf(
 						"Error Writing into the Pipe:Error Code : %d  Description: %s\n",
 						errno, strerror(errno));
 			}
-			exit(1);		//important to stop the child from forking again
-		} else if (pID < 0)            // failed to fork
+			exit(1); //important to stop the child from forking again
+		} else if (pID < 0) // failed to fork
 				{
 			std::cout << "reachabilityParallel_Process: Failed to fork" << endl;
 			//printf ("Error Writing into the Pipe Description: %s\n", strerror( errno ) );
 			exit(1);
-		} else {		 // Code only executed by Parent process
+		} else { // Code only executed by Parent process
 			//	std::cout << "Child process created with Process ID = " << pID << std::endl;
-			arr[eachDirection] = pID;	//List of process id's
+			arr[eachDirection] = pID; //List of process id's
 		}
 	}
 //	close(fd[1]); // write end of the pipe closed at the parent side
@@ -240,7 +240,7 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 			//MatrixValue(d, i) = BUF[i + 1];
 		}
 		//}
-	}	//end of pragma omp parallel for
+	} //end of pragma omp parallel for
 
 	////// *
 	// while ((n = read(fd[0], BUF, sizeof(double) * (iterationNum + 1))) > 0) {	//Reading all buffer that has been written in the pipe
@@ -270,9 +270,9 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 	 * Appending invariant directions and invariant constraints/bounds(alfa)
 	 * Goal : To truncate the reachable region within the Invariant region
 	 */
-	if (isInvariantExist == true) {	//if invariant exist. Computing
+	if (isInvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;
-		int num_inv = invariant->getColumnVector().size();//number of Invariant's constriants
+		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
 		inv_sfm.resize(num_inv, *shm_number);
 		for (int eachInvDirection = 0; eachInvDirection < num_inv;
 				eachInvDirection++) {
@@ -309,8 +309,10 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 		 * Now free the environment for all glpk objects created inside the pthread when all threads completed
 		 */
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections,ReachParameters.Directions, invariant->getCoeffMatrix());
-		return template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix());
+		return template_polyhedra::ptr(
+				new template_polyhedra(MatrixValue, inv_sfm,
+						ReachParameters.Directions,
+						invariant->getCoeffMatrix()));
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
 	} else {
 		/*
@@ -321,7 +323,8 @@ const template_polyhedra reachabilityParallel_Process(Dynamics& SystemDynamics,
 		shmctl(shmid, IPC_RMID, NULL);
 		// ***************************
 		//but writing or resizing only upto the NewTotalIteration
-		return template_polyhedra(MatrixValue, ReachParameters.Directions);
+		return template_polyhedra::ptr(
+				new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 }
 
