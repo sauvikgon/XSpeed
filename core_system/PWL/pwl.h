@@ -31,6 +31,8 @@ public:
 	void WaitingList_insert(symbolic_states s);
 	//return TRUE if the waiting_list is empty otherwise FALSE
 	bool WaitingList_isEmpty();
+	// Get the size of the waiting list, i.e. the number of elements in the list
+	int get_waiting_list_size();
 
 	unsigned int get_waiting_list_size();
 

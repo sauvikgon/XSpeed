@@ -12,7 +12,7 @@
 #include "core_system/continuous/Polytope/Polytope.h"
 
 
-class transitions {
+class transition {
 	int trans_id;
 	string label;
 	int source_location_id;
@@ -20,8 +20,8 @@ class transitions {
 	polytope::ptr Gaurd;
 	Assign Assign_T;
 public:
-	transitions();
-	transitions(int trans_id, string label, int source_id, int destination_id,
+	transition();
+	transition(int trans_id, string label, int source_id, int destination_id,
 			polytope::ptr Gaurd, Assign& Assign_T);
 	Assign& getAssignT();
 	void setAssignT(Assign assignT);

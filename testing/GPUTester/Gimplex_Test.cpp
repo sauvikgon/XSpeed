@@ -196,8 +196,14 @@ TEST_FIXTURE(Example_GimplexSolver, gimplex3) {
 	s.ComputeLP(C, no_streams);
 	status_val = s.getStatusAll();
 
-/*	std::cout << "\n**Answer_Of_All_Simplex**\n";
 	result = s.getResultAll();
+	//out<< "";
+	out<< result;
+	proper << "0.99";
+	CHECK_EQUAL(proper.str(),out.str());
+
+/*
+	std::cout << "\n**Answer_Of_All_Simplex**\n";
 	for (int i = 0; i < N_S; i++) {
 		if (result[i] > 0)
 			std::cout << result[i] << "\n";

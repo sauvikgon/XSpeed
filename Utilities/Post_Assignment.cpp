@@ -99,8 +99,8 @@ polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double>
 			each_direction[j] = Directions(i, j);
 		R_transpose.mult_vector(each_direction, direction_trans);
 
-		b[i] = newPolytope->computeSupportFunction(direction_trans, lp, lp, max_or_min)
-				+ W.computeSupportFunction(each_direction, lp, lp,  max_or_min);
+		b[i] = newPolytope->computeSupportFunction(direction_trans, lp)
+				+ W.computeSupportFunction(each_direction, lp);
 	}
 
 	return polytope::ptr(new polytope(Directions, b, 1));

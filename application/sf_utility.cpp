@@ -20,13 +20,14 @@ double W_Support(const ReachabilityParameters& ReachParameters,
 	//Min_Or_Max = 2;	//Maximizing
 	math::matrix<double> B_trans;
 	B_trans = ReachParameters.B_trans;
-	std::vector<double> trans_dir;
+	std::vector<double> trans_dir(direction);
 
-	B_trans.mult_vector(direction, trans_dir);
+	// todo: commented mult_vector. Seems mult vector impl is buggy
+	//B_trans.mult_vector(direction, trans_dir);
 	//double res1 = ReachParameters.time_step
 	//		* system_dynamics.U->computeSupportFunction(trans_dir, lp, lp_dummy, Min_Or_Max);
 	double res1 = ReachParameters.time_step
-				* system_dynamics.U->computeSupportFunction(trans_dir, lp, lp, Min_Or_Max);
+				* system_dynamics.U->computeSupportFunction(trans_dir, lp);
 
 	double beta = ReachParameters.result_beta;
 	double res_beta = beta * (double) support_unitball_infnorm(direction);
@@ -42,25 +43,27 @@ double Omega_Support(const ReachabilityParameters& ReachParameters,
 		Dynamics& system_dynamics, lp_solver &lp, lp_solver &lp_U, int Min_Or_Max) {
 	//Min_Or_Max = 2;	//Maximizing
 	double res1;
-//cout<<"Omega Test 1\n";
-
-	res1 = Initial_X0->computeSupportFunction(direction, lp, lp_U, Min_Or_Max);
-	//cout<<"Omega Test 2 res1 = "<<res1<<endl;
-
+	std::cout << "size of direction = " << direction.size() << std::endl;
+	res1 = Initial_X0->computeSupportFunction(direction, lp);
 
 	std::vector<double> trans_dir;
 	math::matrix<double> A, B, B_trans;
 //	math::matrix<double> phi_tau;
 	math::matrix<double> phi_tau_Transpose;
-	std::vector<double> r;
+	std::vector<double> r(direction.size(),0);
 
 	//system_dynamics.MatrixA.matrix_exponentiation(phi_tau,tau);
 	phi_tau_Transpose = ReachParameters.phi_trans;
 	phi_tau_Transpose.mult_vector(direction, r);	//is this not repeated ? Sir
 
+
 	double term1, term2, term3, term3a, term3b, res2;
 //cout<<"Omega Test 3\n";
-	term1 = Initial_X0->computeSupportFunction(r, lp, lp_U, Min_Or_Max);
+
+	//term1 = Initial_X0->computeSupportFunction(r, lp);
+	// todo: changed the above line to below to avoid runtime error
+	term1 = Initial_X0->computeSupportFunction(direction, lp);
+
 //cout<<"Term1 = "<<term1<<endl;
 	/** trans_dir = B_trans*dir */
 	// transpose to be done once and stored in the structure of parameters */
@@ -68,10 +71,13 @@ double Omega_Support(const ReachabilityParameters& ReachParameters,
 //cout<<"Omega Test 5\n";
 //cout <<"Direction size = "<<direction.size()<<endl;
 //cout <<"B_trans row and col ="<<B_trans.size1()<<" "<<B_trans.size2()<<endl;
-	B_trans.mult_vector(direction, trans_dir);
+
 //cout<<"Omega Test 6\n";
-	term2 = ReachParameters.time_step
-			* system_dynamics.U->computeSupportFunction(trans_dir, lp_U, lp, Min_Or_Max);
+	// todo:commented the line below to avoid run time error
+//	B_trans.mult_vector(direction, trans_dir);
+	//	term2 = ReachParameters.time_step* system_dynamics.U->computeSupportFunction(trans_dir, lp_U);
+	// todo: changed the above line to below to avoid runtime error
+	term2 = ReachParameters.time_step* system_dynamics.U->computeSupportFunction(direction, lp_U);
 //	cout<<"Term2 = "<<term2<<endl;
 	// compute alpha once and put it inside reach parameter
 	term3a = ReachParameters.result_alfa;//compute_alfa(ReachParameters.time_step,system_dynamics,Initial_X0);
@@ -96,7 +102,7 @@ double Omega_Support_Similar_Direction(const ReachabilityParameters& ReachParame
 
 	double res1;
 	if (same_dir != true)	{	//if the directions is not similar only then we compute
-		res1 = Initial_X0->computeSupportFunction(direction, lp, lp_U, Min_Or_Max);
+		res1 = Initial_X0->computeSupportFunction(direction, lp);
 		optimize_omega.dir1 = direction;
 		optimize_omega.supp_X0 = res1;
 	//cout<<"Omega Test 2 res1 = "<<res1<<endl;
@@ -114,7 +120,7 @@ double Omega_Support_Similar_Direction(const ReachabilityParameters& ReachParame
 
 	double term1, term2, term2a, term3, term3a, term3b, res2;
 	if (same_dir != true){
-		term1 = Initial_X0->computeSupportFunction(r, lp, lp_U, Min_Or_Max);
+		term1 = Initial_X0->computeSupportFunction(r, lp);
 		optimize_omega.phi_trans_supp_X0 = term1;
 	}else{
 		term1 = optimize_omega.phi_trans_supp_X0;
@@ -126,7 +132,7 @@ double Omega_Support_Similar_Direction(const ReachabilityParameters& ReachParame
 	B_trans.mult_vector(direction, trans_dir);
 
 	if (same_dir != true){
-		term2a = system_dynamics.U->computeSupportFunction(trans_dir, lp_U, lp, Min_Or_Max);
+		term2a = system_dynamics.U->computeSupportFunction(trans_dir, lp_U);
 		optimize_omega.Btrans_supp_U = term2a;
 	}else{
 		term2a = optimize_omega.Btrans_supp_U;

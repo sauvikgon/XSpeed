@@ -38,7 +38,7 @@ std::list<polytope::ptr> Partition_BoundingPolytope(polytope::ptr S,
 		for (unsigned int j = 0; j < Real_Directions.size2(); j++) {
 			eachDirs[j] = Real_Directions(i, j);
 		}
-		boundvalue[i] = S->computeSupportFunction(eachDirs, lp, lp, 2);
+		boundvalue[i] = S->computeSupportFunction(eachDirs, lp);
 	}
 	/*for (unsigned int i = 0; i < boundvalue.size(); i++) {
 	 cout << boundvalue[i] << endl;

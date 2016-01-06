@@ -2,13 +2,13 @@
 #include <iostream>
 #include "UnitTest++/UnitTest++.h"
 
-#include "math/uni_sphere.h"
-#include "MySrc/DataStructureDirections.h"
-#include "MySrc/sf_directions.h"
-#include "MySrc/Reachability/reachabilitySequential.h"
-#include "MySrc/Reachability/reachabilityParallel_Process.h"
-#include "math/basic_functions.h"
-#include "math/matrix.h"
+#include "core_system/math/uni_sphere.h"
+#include "application/DataStructureDirections.h"
+#include "application/sf_directions.h"
+#include "core_system/Reachability/reachabilitySequential.h"
+#include "core_system/Reachability/reachabilityParallel_Process.h"
+#include "core_system/math/basic_functions.h"
+#include "core_system/math/matrix.h"
 
 #include "Utilities/Template_Polyhedra.h"
 #include "Utilities/Post_Assignment.h"
@@ -28,9 +28,9 @@ struct ReachExamples {
 #endif
 		transition_iterations = 3;//Number of iterations for transition of the Hybrid system
 		iterations = 100; // number of iterations :: try with iterations = 1000
-		reach_paramters.TimeBound = 2; //Total Time Interval and ::reach_paramters.TimeBound = 5;
+		reach_parameters.TimeBound = 2; //Total Time Interval and ::reach_paramters.TimeBound = 5;
 
-		reach_paramters.Iterations = iterations;
+		reach_parameters.Iterations = iterations;
 		dimension = 2;	//Number of Dimension for the Current Working System
 		/*
 		 * Invariant constraint
@@ -47,9 +47,10 @@ struct ReachExamples {
 
 		invariantBoundSign = 1;
 
-		invariant.setCoeffMatrix(invariantConstraintsMatrix);
-		invariant.setColumnVector(invariantBoundValue);
-		invariant.setInEqualitySign(invariantBoundSign); //Assuming size is <= .... as we are only using  Ax<=b format.
+		invariant = polytope::ptr(new polytope());
+		invariant->setCoeffMatrix(invariantConstraintsMatrix);
+		invariant->setColumnVector(invariantBoundValue);
+		invariant->setInEqualitySign(invariantBoundSign); //Assuming size is <= .... as we are only using  Ax<=b format.
 
 	}
 
@@ -72,13 +73,13 @@ struct ReachExamples {
 	template_polyhedra Templet_polys;
 
 	Dynamics system_dynamics;
-	ReachabilityParameters reach_paramters;
+	ReachabilityParameters reach_parameters;
 	unsigned int dir_nums;
 	int iterations, dimension, transition_iterations;
 	std::vector<std::vector<double> > directions; //List of all directions
 	math::matrix<double> Real_Directions; //List of all directions
 
-	polytope initial_polytope_I, invariant;
+	polytope::ptr initial_polytope_I, invariant;
 };
 
 /* I should try this but by just finding how to use plotter to plot in different axis
@@ -441,13 +442,21 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 	system_dynamics.MatrixB = Bmatrix;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.U.setCoeffMatrix(ConstraintsMatrixV);//I have a doubt here whether without resize it can set or not?????
-	system_dynamics.U.setColumnVector(boundValueV);
-	system_dynamics.U.setInEqualitySign(boundSignV);//Assuming size is <= .... as we are only using  Ax<=b format.
+	system_dynamics.U = polytope::ptr(new polytope());
+	system_dynamics.U->setCoeffMatrix(ConstraintsMatrixV);//I have a doubt here whether without resize it can set or not?????
+	system_dynamics.U->setColumnVector(boundValueV);
+	system_dynamics.U->setInEqualitySign(boundSignV);//Assuming size is <= .... as we are only using  Ax<=b format.
 
-	initial_polytope_I.setCoeffMatrix(ConstraintsMatrixI);
-	initial_polytope_I.setColumnVector(boundValueI);
-	initial_polytope_I.setInEqualitySign(boundSignI); //Assuming size is <= .... as we are only using  Ax<=b format.
+	initial_polytope_I = polytope::ptr(new polytope());
+	initial_polytope_I->setCoeffMatrix(ConstraintsMatrixI);
+	initial_polytope_I->setColumnVector(boundValueI);
+	initial_polytope_I->setInEqualitySign(boundSignI); //Assuming size is <= .... as we are only using  Ax<=b format.
+
+	reach_parameters.X0 = polytope::ptr(new polytope());
+
+	reach_parameters.X0->setCoeffMatrix(initial_polytope_I->getCoeffMatrix());
+	reach_parameters.X0->setColumnVector(initial_polytope_I->getColumnVector());
+	reach_parameters.X0->setInEqualitySign(initial_polytope_I->getInEqualitySign());
 
 	std::vector<double> invariant_direction(dimension);
 	std::vector<std::vector<double> > newDirections;
@@ -472,7 +481,7 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 
 	row = dir_nums;
 	col = dimension;
-	reach_paramters.Directions.resize(row, col);
+	reach_parameters.Directions.resize(row, col);
 
 	std::ofstream MatLabfile;
 	//file for making matrix 'A' for MatLab output function con2vert(A,b) to be executed from plotoutput.m
@@ -480,18 +489,19 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 	for (int i = 0; i < dir_nums; i++) {
 		for (int j = 0; j < dimension; j++) {
 			//	Vector_R[i][j] = directions[i][j];
-			reach_paramters.Directions(i, j) = Real_Directions(i, j); //directions[i][j];
+			reach_parameters.Directions(i, j) = Real_Directions(i, j); //directions[i][j];
 			MatLabfile << Real_Directions(i, j) << " ";		//Vector_R[i][j]
 		}
 		MatLabfile << std::endl;
 	}
 	MatLabfile.close();
 
-	polytope gaurd_polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-			gaurdBoundSign);
+	polytope::ptr gaurd_polytope = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+			gaurdBoundSign));
+
 	template_polyhedra intersected_polyhedra;
-	polytope intersectedRegion, newPolytope;
-	polytope newShiftedPolytope;
+	polytope::ptr intersectedRegion, newPolytope;
+	polytope::ptr newShiftedPolytope;
 	/*
 	 * Transition Dynamics  Rx + w
 	 */
@@ -520,7 +530,7 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 				initial_polytope_I, reach_paramters);
 #else
 		Templet_polys = reachabilitySequential(system_dynamics,
-				initial_polytope_I, reach_paramters, invariant);
+				initial_polytope_I, reach_parameters, invariant, true, 1);
 #endif
 		cout << "\n3 = Testing amit \n";
 		 cout << "\nPrinting the New number of Iteration = "
@@ -535,14 +545,15 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 			MatLabfile2 << endl;
 		}
 
-		intersected_polyhedra = Templet_polys.polys_intersection(
-				gaurd_polytope);//, intersection_start_point); //returns the list of polytopes that intersects with the gaurd_polytope
+		std::list<template_polyhedra> intersected_polyhedra = Templet_polys.polys_intersection(
+				gaurd_polytope,1);//, intersection_start_point); //returns the list of polytopes that intersects with the gaurd_polytope
 		//unsigned int iterations_before_intersection = intersection_start_point - 1;
 		//Templet_polys.resize_matrix_SupportFunction(dir_nums, iterations_before_intersection);
 
-		intersectedRegion = intersected_polyhedra.getTemplate_approx();	//Returns a single over-approximated polytope from the list of intersected polytopes
-		newPolytope = intersectedRegion.GetPolytope_Intersection(
-				gaurd_polytope);//Retuns only the intersected region as a single newpolytope.
+		/* Todo: deprecated after change of interface */
+	//	intersectedRegion = intersected_polyhedra.getTemplate_approx(1);	//Returns a single over-approximated polytope from the list of intersected polytopes
+	//	newPolytope = intersectedRegion->GetPolytope_Intersection(
+	//			gaurd_polytope,1);//Retuns only the intersected region as a single newpolytope.
 
 		/*		std::ofstream MatLabfile5;
 		 MatLabfile5.open(
@@ -563,7 +574,7 @@ TEST_FIXTURE(ReachExamples, Reach_BBall_Xposition_and_Yvelocity_Test) {
 		 }
 		 MatLabfile3.close();
 		 */
-		initial_polytope_I = post_assign_exact(newPolytope, R, w);//newShiftedPolytope = post_assign_exact(newPolytope, R, w);
+//		initial_polytope_I = post_assign_exact(newPolytope, R, w);//newShiftedPolytope = post_assign_exact(newPolytope, R, w);
 
 	}	//end-of Number of transition's Loop
 

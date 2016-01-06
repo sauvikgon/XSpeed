@@ -34,6 +34,7 @@ struct ClassTransition {
 		nn = "Hello Welcome";
 		size_type row = 2;
 		size_type col = 2;
+		D.U = polytope::ptr(new polytope());
 		D.MatrixA.resize(row, col);
 		D.MatrixA(0, 0) = 1;
 		D.MatrixA(0, 1) = 2;
@@ -73,30 +74,31 @@ struct ClassTransition {
 
 		boundSignI = 1;
 
-		D.U.setCoeffMatrix(ConstraintsMatrixI);
-		D.U.setColumnVector(boundValueI);
-		D.U.setInEqualitySign(boundSignI);
+		D.U->setCoeffMatrix(ConstraintsMatrixI);
+		D.U->setColumnVector(boundValueI);
+		D.U->setInEqualitySign(boundSignI);
 
-		Inv.setCoeffMatrix(ConstraintsMatrixI);
-		Inv.setColumnVector(boundValueI);
-		Inv.setInEqualitySign(boundSignI);
+		Inv = polytope::ptr(new polytope());
+		Inv->setCoeffMatrix(ConstraintsMatrixI);
+		Inv->setColumnVector(boundValueI);
+		Inv->setInEqualitySign(boundSignI);
 	}
 	~ClassTransition() { /* some teardown */
 	}
 	string nn;
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	Dynamics D, outD;
-	polytope Gaurd, GaurdOut, Inv, outInv;
+	polytope::ptr Gaurd, GaurdOut, Inv, outInv;
 	math::matrix<double> ConstraintsMatrixI;
 	int boundSignI;
 	std::vector<double> boundValueI;
-
+	std::list<transition> t;
 	stringstream out, proper;
 };
 TEST_FIXTURE(ClassTransition , constructor1_transitions_Test) {
 
-	transitions tt;
-	cout << "Just testing and Empty Label of the Transition = " << tt.getLabel()
+	transition tt;
+	cout << "Just testing an Empty Label of the Transition = " << tt.getLabel()
 			<< "\t" << endl;
 	//proper << "7";
 	//CHECK_EQUAL(proper.str(), out.str());
@@ -104,13 +106,13 @@ TEST_FIXTURE(ClassTransition , constructor1_transitions_Test) {
 TEST_FIXTURE(ClassTransition , constructor2_transitions_Test) {
 //transitions(string label,location source,location destination,polytope Gaurd,Assign Assign_T);
 
-	location loc_src(nn, D, Inv), loc_dest("Good Bey", D, Inv), loc_src_out,
+	location loc_src(1, nn, D, Inv, true,t), loc_dest(2, "Good Bey", D, Inv, true, t), loc_src_out,
 			loc_dest_out;
-
-	Gaurd.setCoeffMatrix(ConstraintsMatrixI);
-	Gaurd.setColumnVector(boundValueI);
-	Gaurd.setInEqualitySign(boundSignI);
-	string nam = "Amit Gurung";
+	Gaurd = polytope::ptr(new polytope());
+	Gaurd->setCoeffMatrix(ConstraintsMatrixI);
+	Gaurd->setColumnVector(boundValueI);
+	Gaurd->setInEqualitySign(boundSignI);
+	string name = "Amit Gurung";
 	math::matrix<double> m(2, 2);
 	m(0, 0) = 7;
 	m(0, 1) = 7;
@@ -121,7 +123,7 @@ TEST_FIXTURE(ClassTransition , constructor2_transitions_Test) {
 	T.Map = m;
 	T.b = b;
 
-	transitions trans(nam, loc_src, loc_dest, Gaurd, T);//creating object of location as loc
+	transition trans(10, name, 20, 30, Gaurd, T);//creating object of location as loc
 	cout << "Printing Output from Transition Test Suite" << endl;
 	cout << "**********************************************" << endl;
 	cout << "Label = " << trans.getLabel() << endl;
@@ -139,8 +141,16 @@ TEST_FIXTURE(ClassTransition , constructor2_transitions_Test) {
 	cout << endl;
 
 	GaurdOut = trans.getGaurd();
-	loc_src_out = trans.getSource();
-	loc_dest_out = trans.getDestination();
+	int loc_src_id = trans.getSource_Location_Id();
+	int loc_dst_id = trans.getDestination_Location_Id();
+
+	out << loc_src_id;
+	proper << "20";
+	CHECK_EQUAL(proper.str(), out.str());
+
+	out << loc_dst_id;
+	proper << "30";
+	CHECK_EQUAL(proper.str(), out.str());
 
 	Dynamics outD, outDDest;
 	cout << "Name From Source Location= " << loc_src_out.getName() << endl;

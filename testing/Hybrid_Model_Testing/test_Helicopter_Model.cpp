@@ -10,9 +10,9 @@
 
 #include <boost/tokenizer.hpp>
 #include "UnitTest++/UnitTest++.h"
-#include "MySrc/Polytope/Polytope.h"
-#include "MySrc/DataStructureDirections.h"
-#include "Hybrid_Model_Parameters_Design/Helicopter.h"
+#include "core_system/continuous/Polytope/Polytope.h"
+#include "application/DataStructureDirections.h"
+#include "Hybrid_Model_Parameters_Design/Helicopter_model/Helicopter.h"
 
 //#include "math/matrix.h"
 //#include <boost/numeric/ublas/matrix.hpp>
