@@ -16,6 +16,7 @@
 #include <boost/shared_ptr.hpp>
 #include<set>
 #include<utility>
+#include "core_system/math/2d_geometry.h"
 
 using namespace std;
 /*
@@ -124,6 +125,13 @@ public:
 	 * 	   the value/index of i and j begins with 0 to n-1
 	 */
 	std::set<std::pair<double,double> > enumerate_2dVertices(int i, int j);
+
+	/*
+	 * Returns the list of vertices of the polytope in 2d with the given inputs as
+	 * i and j where i and j are the 1st and 2nd projecting variables
+	 */
+
+	math::matrix<double> get_2dVertices(int i, int j);
 };
 
 #endif /* POLYTOPE_H_ */

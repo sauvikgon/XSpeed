@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
-//#include "UnitTest++/UnitTest++.h"
-#include "unittest++/UnitTest++.h"
+#include "UnitTest++/UnitTest++.h"
+//#include "unittest++/UnitTest++.h"
 #include "core_system/math/Gimplex/simplex.cuh"
 #include "core_system/math/matrix.h"
 //#include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions

@@ -1,3 +1,13 @@
+/*
+ * simplex1.hpp
+ *
+ *  Created/Modified to #define-header on: 05-Jan-2016
+ *      Author: amit
+ */
+
+#ifndef SIMPLEX1_HPP_
+#define SIMPLEX1_HPP_
+
 //#include "simplex.h"
 #include <climits>
 #include <iomanip>
@@ -20,8 +30,7 @@ simplex<T>::~simplex() {
 }
 template<typename T>
 void simplex<T>::pivot(int e, int lv) {
-	std::cout << "pivot called with entering var =" << e << "leaving var = "
-			<< lv << std::endl;
+//	std::cout << "pivot called with entering var =" << e << "leaving var = "<< lv << std::endl;
 	// Compute the coefficeints of the equation for new basic variables x_e
 	math::matrix<T> Anew(As.size1(), As.size2());
 	std::vector<T> bnew(bs.size(), 0);
@@ -29,8 +38,7 @@ void simplex<T>::pivot(int e, int lv) {
 
 	assert(As(lv, e) != 0);
 	bnew[e] = bs[lv] / As(lv, e);
-	std::cout << " bs[lv] = " << bs[lv] << " As[lv,e] = " << As(lv, e)
-			<< "bnew[e] = " << bnew[e] << std::endl;
+//	std::cout << " bs[lv] = " << bs[lv] << " As[lv,e] = " << As(lv, e)<< "bnew[e] = " << bnew[e] << std::endl;
 
 	typename std::set<int>::iterator it, it1;
 	for (it = N.begin(); it != N.end(); it++) {
@@ -59,11 +67,11 @@ void simplex<T>::pivot(int e, int lv) {
 				continue;
 			}
 			Anew(i, j) = As(i, j) - As(i, e) * Anew(e, j);
-			std::cout << " Anew(i, j) = " << Anew(i, j) << std::endl;
+		//	std::cout << " Anew(i, j) = " << Anew(i, j) << std::endl;
 		}
 		Anew(i, lv) = -1 * As(i, e) * Anew(e, lv);
 		Anew(i, i) = 0;	//AMIT for the same basic variable, coefficient is set to 0
-		std::cout << " Anew(i, lv) AMIT = " << Anew(i, lv) << std::endl;
+	//	std::cout << " Anew(i, lv) AMIT = " << Anew(i, lv) << std::endl;
 	}
 
 	/*std::cout << "state of the constraints matrix Amit Check here\n";
@@ -196,7 +204,7 @@ std::vector<T> simplex<T>::solve() {
 			//		std::cout << "Landed inside exit condition\n";
 			break;// break from the while loop;
 		} else {
-			std::cout << "The entering variable is " << e << std::endl;
+		//	std::cout << "The entering variable is " << e << std::endl;
 			for (std::set<int>::iterator it2 = B.begin(); it2 != B.end();
 					it2++) {
 				int i = *it2;
@@ -220,17 +228,19 @@ std::vector<T> simplex<T>::solve() {
 					l = i;
 				}
 			}
-			std::cout << "min delta = " << min << std::endl;
-			std::cout << "leaving variable = " << l << std::endl;
+		//	std::cout << "min delta = " << min << std::endl;
+		//	std::cout << "leaving variable = " << l << std::endl;
 			if (min == INT_MAX) {
 				std::cout << "Unbounded LP";
 				exit(0);
+				//throw 10;
+				//return;
 			} else {
-				std::cout << "simplex state BEFORE calling pivot from solve:\n";
+			//	std::cout << "simplex state BEFORE calling pivot from solve:\n";
 				//	display_state();
 
 				pivot(e, l);
-				std::cout << "simplex state AFTER calling pivot from solve:\n";
+			//	std::cout << "simplex state AFTER calling pivot from solve:\n";
 				//	display_state();
 			}
 			/*
@@ -261,7 +271,7 @@ void simplex<T>::process_lp() {
 	k = k + 1; // since we start indexing arrays at 1 in our simplex implementation
 	m = A.size1(); // no. of constraints of the LP
 	n = A.size2(); // no. of variables in the LP
-	std::cout << "k= " << k << " m =" << m << ", n = " << n << std::endl;
+//	std::cout << "k= " << k << " m =" << m << ", n = " << n << std::endl;
 
 	std::vector<T> x(m + n, 0);
 	bool flag = false;
@@ -301,18 +311,19 @@ void simplex<T>::process_lp() {
 
 	int lv = N.size() + k; // set the leaving variable
 	int e = N.size(); // the entering variable is the var added in the Auxiliary LP.
+/*
 	std::cout << "leaving  = " << lv << ", entering = " << e << std::endl;
 	std::cout << "Before pivot Call\n";
-//	display_state();
+	display_state();
+*/
 	pivot(e, lv);	//Data Mismatch for matrix A detected here
 	//display_state();
-	std::cout << "After first pivot successful\n";
+//	std::cout << "After first pivot successful\n";
 //	display_state();
 
 	solve(); // run simplex on the previously obtained slack form. it is guaranteed that the initial basic solution is feasible.
 
-	std::cout << "process_lp: reached after call to solve auxiliary LP"
-			<< std::endl;
+//	std::cout << "process_lp: reached after call to solve auxiliary LP"<< std::endl;
 //	display_state();
 
 	if (get_obj_val() == 0) { // To be changed to check the value of x[e], e being the index of the auxiliary variable
@@ -332,7 +343,7 @@ void simplex<T>::process_lp() {
 			}
 		}
 
-		std::cout << "STATE BEFORE RESTORING TO ORIGINAL OBJECTIVE FUNCTION\n";
+	//	std::cout << "STATE BEFORE RESTORING TO ORIGINAL OBJECTIVE FUNCTION\n";
 		//	display_state();
 
 		//Anew = math::matrix<T>(As.size1() - 1, As.size2() - 1);
@@ -382,7 +393,7 @@ void simplex<T>::process_lp() {
 			cnew[i + 1] = c_orig[i];
 		}
 
-		std::cout << "STATE AFTER RESTORING THE ORIGINAL OBJECTIVE FUNCTION\n";
+	//	std::cout << "STATE AFTER RESTORING THE ORIGINAL OBJECTIVE FUNCTION\n";
 		//	display_state();
 
 		//debug
@@ -476,13 +487,16 @@ void simplex<T>::process_lp() {
 				B.insert(*iter);		//Does Not requires variable renaming
 		}
 
-		std::cout << "LP processed\n";
+	//	std::cout << "LP processed\n";
 		//	display_state();
-		std::cout
-				<< "\n===============Initialize Simplex Call Over=====================\n";
+	//	std::cout<< "\n===============Initialize Simplex Call Over=====================\n";
 	} else {
 		std::cout << "Simplex::process_lp: LP has infeasible solution\n";
 		exit(0);
 	}
 }
 
+
+
+
+#endif /* SIMPLEX1_HPP_ */

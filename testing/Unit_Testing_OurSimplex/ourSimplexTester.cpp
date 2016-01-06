@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
-//#include "unittest++/UnitTest++.h"
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "core_system/math/matrix.h"
 #include "core_system/math/ourSimplex_lp_solver/simplex.h"
 #include <omp.h>
@@ -11,7 +11,7 @@
 using namespace std;
 using namespace math;
 
-SUITE(templated_matrix_class_TestSuite) {
+SUITE(templated_matrix_class_TestSuite3) {
 struct simplex_class {
 	simplex_class() {
 	}
@@ -56,15 +56,15 @@ TEST_FIXTURE(simplex_class, solve_Test) {
 	b[2] = 4;
 
 	s = simplex<double>(A, b, obj_dir);
-	std::cout << "AMIT Here it is Running";
+	//std::cout << "AMIT Here it is Running";
 	s.process_lp();
 	//s.display_state();
-	r = s.solve();
+/*	r = s.solve();
 	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << "AMIT TEST OUR SIMPLEX OBJECTIVE VALUE = ";
 	std::cout << s.get_obj_val();
-	std::cout << std::endl;
+	std::cout << std::endl;*/
 
 }
 

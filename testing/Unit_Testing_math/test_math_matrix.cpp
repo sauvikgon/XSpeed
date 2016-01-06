@@ -7,7 +7,8 @@
 
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "core_system/math/matrix.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 
@@ -18,7 +19,6 @@ using namespace math;
 SUITE(matrix_class_TestSuite) {
 struct matrix_class {
 	matrix_class() {
-
 
 	}
 	~matrix_class() { /* some teardown */
@@ -34,9 +34,9 @@ struct matrix_class {
 TEST_FIXTURE(matrix_class, minus_Test) {
 	row = 3;
 	col = 3;
-	math::matrix<double> m1(row, col);
-	math::matrix<double> m2(row, col);
-	math::matrix<double> output(row, col);
+	math::matrix<int> m1(row, col);
+	math::matrix<int> m2(row, col);
+	math::matrix<int> output(row, col);
 
 	m1(0, 0) = 1;
 	m1(0, 1) = 2;
@@ -64,13 +64,18 @@ TEST_FIXTURE(matrix_class, minus_Test) {
 
 	m1.minus(m2, output);
 
-	cout << "\nResult of Matrix_Minus \n";
+/*	cout << "\nResult of Matrix_Minus \n";
 	for (unsigned int i = 0; i < output.size1(); i++) {
 		for (unsigned int j = 0; j < output.size2(); j++)
 			std::cout << output(i, j) << "\t";
 		cout << endl;
-	}
-	cout << "Result Over\n ";
+	}*/
+	out << output;
+
+	proper <<"[3,3]((0,0,2),(2,2,4),(6,6,6))";
+
+	CHECK_EQUAL(proper.str(),out.str());
+
 }
 
 }

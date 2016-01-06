@@ -7,7 +7,8 @@
 
 
 
-#include "UnitTest++/UnitTest++.h"
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <string>
 #include "Utilities/Template_Polyhedra.h"
 
@@ -20,7 +21,7 @@ struct TemplatePolyhedra {
 	}
 	~TemplatePolyhedra() { /* some teardown */
 	}
-
+	stringstream out, proper;
 };
 
 TEST_FIXTURE(TemplatePolyhedra, union_TemplatePolytope_Test) {
@@ -39,18 +40,24 @@ TEST_FIXTURE(TemplatePolyhedra, union_TemplatePolytope_Test) {
 	dirs(1,0) = 2;
 	dirs(1,1) = 2;
 
-	template_polyhedra t(sfm,dirs), t2(sfm2,dirs), test;
+	template_polyhedra::ptr t,t2, test;
+	//t(sfm,dirs), t2(sfm2,dirs), test;
+t = template_polyhedra::ptr (new template_polyhedra(sfm,dirs));
+t2 = template_polyhedra::ptr (new template_polyhedra(sfm2,dirs));
+	test = t->union_TemplatePolytope(t2);
+	test = test->union_TemplatePolytope(t);
 
-	test = t.union_TemplatePolytope(t2);
-	test = test.union_TemplatePolytope(t);
-
-	std::cout << "output union template Polytope \n ";
-	for(unsigned int i = 0; i<test.getMatrixSupportFunction().size1();i++){
-		for(unsigned int j=0;j<test.getMatrixSupportFunction().size2();j++){
-			std::cout << test.getMatrixSupportFunction()(i,j) << "\t";
+	/*std::cout << "output union template Polytope \n ";
+	for(unsigned int i = 0; i<test->getMatrixSupportFunction().size1();i++){
+		for(unsigned int j=0;j<test->getMatrixSupportFunction().size2();j++){
+			std::cout << test->getMatrixSupportFunction()(i,j) << "\t";
 		}
 		cout << endl;
-	}
+	}*/
+	out << test->getMatrixSupportFunction();
+	proper << "[2,6]((1,1,3,3,1,1),(2,2,3,3,2,2))";
+
+	CHECK_EQUAL(proper.str(), out.str());
 }
 
 }

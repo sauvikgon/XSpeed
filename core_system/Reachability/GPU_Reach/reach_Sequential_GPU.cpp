@@ -309,7 +309,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 	boost::timer::cpu_timer DirectionsGenerate_time;
 	DirectionsGenerate_time.start();
 	if (Solver == 3) {
-		//scope for OMP -- done but cuda not supporting OMP-- so added library "lgomp"; build-stage -Xcompiler -fopenmp
+		//for OMP --cuda not supporting OMP-- so added library "lgomp"; build-stage -Xcompiler -fopenmp
 		getDirectionList_X0_and_U(ReachParameters, NewTotalIteration,
 				List_for_X0, List_for_U, U_empty, SystemDynamics); //Optimized into a single function the 2 Tasks
 	} else {

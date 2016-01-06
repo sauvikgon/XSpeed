@@ -1629,14 +1629,26 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixI(7, 2) = 0;
 	ConstraintsMatrixI(7, 3) = -1;
 	boundValueI.resize(row);
-	boundValueI[0] = 0.5;
-	boundValueI[1] = -0.5;
-	boundValueI[2] = 0.5;
-	boundValueI[3] = -0.5;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
+
+	/*boundValueI[0] = 0.5;
+	 boundValueI[1] = -0.5;
+	 boundValueI[2] = 0.5;
+	 boundValueI[3] = -0.5;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;
+	 */
+
+	boundValueI[0] = 0.7;
+	boundValueI[1] = -0.2;
+	boundValueI[2] = 0.7;
+	boundValueI[3] = -0.2;
+	boundValueI[4] = 0.8;
+	boundValueI[5] = -0.8;
 	boundValueI[6] = 0;
 	boundValueI[7] = 0;
+
 	boundSignI = 1;
 
 	// The transition label ist13
@@ -3405,8 +3417,8 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 
 	std::list<transitions> Out_Going_Trans_fromloc9;
 
-	location l1(1, "loc9", system_dynamics0, invariant0, true,
-			Out_Going_Trans_fromloc9);
+	location l1(1, "BAD", system_dynamics0, invariant0, true,
+			Out_Going_Trans_fromloc9);	//loc1 changed to "BAD"
 
 	std::list<transitions> Out_Going_Trans_fromloc5;
 
@@ -3458,8 +3470,8 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 
 	std::list<transitions> Out_Going_Trans_fromloc8;
 
-	location l8(8, "loc8", system_dynamics7, invariant7, true,
-			Out_Going_Trans_fromloc8);
+	location l8(8, "GOOD", system_dynamics7, invariant7, true,
+			Out_Going_Trans_fromloc8);	//loc8 changed to "GOOD"
 
 	std::list<transitions> Out_Going_Trans_fromloc2;
 
@@ -3481,7 +3493,7 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l9);
 	Hybrid_Automata.setDimension(dim);
 
-	int initial_location_id=9;
+	int initial_location_id = 9;
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet
 	initial_state::ptr I = initial_state::ptr(

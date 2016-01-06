@@ -338,7 +338,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 //		 cout << "\nContinuous Reachability Parallel Using Process Creation COMPLETTED!!!\n";
 		} //to be removed from the Project
 
-		std::cout << "\nFlowpipe computed\n";
+	//	std::cout << "\nFlowpipe computed\n";
 
 //	*********************************************** Reach or Flowpipe Computed **************************************************************************
 		if (previous_level != levelDeleted) {
@@ -457,8 +457,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 						(*t).getDestination_Location_Id());
 				//				std::cout<<"\nTest location insde = "<<current_destination.getName()<<"\n";
 				string locName = current_destination.getName();
-				cout << "\nNext Loc ID = " << current_destination.getLocId()
-						<< " Location Name = " << locName << "\n";
+			//	cout << "\nNext Loc ID = " << current_destination.getLocId()<< " Location Name = " << locName << "\n";
 				if ((locName.compare("BAD") == 0)
 						|| (locName.compare("GOOD") == 0)
 						|| (locName.compare("FINAL") == 0)
@@ -483,9 +482,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 //			std::cout << "Before calling getTemplate_approx\n";
 				int destination_locID = (*t).getDestination_Location_Id();
 				ds.insert_element(destination_locID);
-				std::cout
-						<< "\nNumber of intersection with Flowpipe and guard = "
-						<< intersected_polyhedra.size();
+				//std::cout<< "\nNumber of intersection with Flowpipe and guard = "<< intersected_polyhedra.size();
 				for (std::list<template_polyhedra>::iterator i =
 						intersected_polyhedra.begin();
 						i != intersected_polyhedra.end(); i++) {

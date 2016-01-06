@@ -66,8 +66,8 @@ polytope::polytope(math::matrix<double> coeffMatrix,
 	//lp.setConstraints(coeffMatrix, columnVector,InEqualitySign);
 }
 
-void polytope::setPolytope( math::matrix<double> coeffMatrix,
-		 std::vector<double> columnVector, int inEqualitySign) {
+void polytope::setPolytope(math::matrix<double> coeffMatrix,
+		std::vector<double> columnVector, int inEqualitySign) {
 	//this->setCoeffMatrix(coeffMatrix);
 	this->setNumberFacets(coeffMatrix.size1());
 	this->setSystemDimension(coeffMatrix.size2());
@@ -204,7 +204,8 @@ void polytope::setSystemDimension(unsigned int systemDimension) {
 	system_dimension = systemDimension;
 }
 
-double polytope::max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_Norm) {
+double polytope::max_norm(int lp_solver_type_choosen,
+		unsigned int dim_for_Max_Norm) {
 	//unsigned int dimension_size = this->system_dimension;
 	unsigned int dimension_size = dim_for_Max_Norm;
 	double Max_A, sf, Max = 0.0;
@@ -230,7 +231,8 @@ double polytope::max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_N
 		int type = lp_solver_type_choosen;
 		lp_solver lp1(type);
 		lp1.setMin_Or_Max(2);	//Setting GLP_MAX
-		lp1.setConstraints(this->coeffMatrix, this->columnVector, this->InEqualitySign);
+		lp1.setConstraints(this->coeffMatrix, this->columnVector,
+				this->InEqualitySign);
 //Finding the maximum of all Direction : Returns the max element
 		for (unsigned int i = 0; i < generator_directions.size(); i++) {
 			std::vector<double> each_generator;
@@ -338,85 +340,164 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
  * Searches the 2D vertices of the polytope between the directions u and v
  */
 
-void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v, int i, int j,
-		std::set<std::pair<double,double> >& pts){
-	std::vector<double> sv_u(getSystemDimension(),0), sv_v(getSystemDimension(),0);
+/*
+ *
+ * Old Working with redundant points and missing some vertices
+ *
+ void polytope::enum_2dVert_restrict(std::vector<double> u, std::vector<double> v, int i, int j,
+ std::set<std::pair<double,double> >& pts){
+ std::vector<double> sv_u(getSystemDimension(),0), sv_v(getSystemDimension(),0);
+ std::vector<double> sv_bisect;
+ lp_solver solver(1); // to choose glpk
+ solver.setConstraints(getCoeffMatrix(),getColumnVector(),getInEqualitySign());
+
+ // get the support
+ computeSupportFunction(u,solver,solver,2);
+ sv_u = solver.get_sv();
+
+
+ computeSupportFunction(v,solver,solver,2);
+ sv_v = solver.get_sv();
+ // add the sv's to the set of points
+ // make a point of 2 dimension point
+
+ std::pair<double,double> p1,p2,p3;
+ p1.first = sv_u[i];
+ p1.second = sv_u[j];
+
+ cout << "direction: (" << u[i] << ", " << u[j] << ")" <<std::endl;
+ cout << "support vector: (" << sv_u[i] << ", " << sv_u[j] << ")\n";
+
+ p2.first = sv_v[i];
+ p2.second = sv_v[j];
+
+ cout << "direction: (" << v[i] << ", " << v[j] << ")" <<std::endl;
+ cout << "support vector: (" << sv_v[i] <<", "<< sv_v[j] << ")\n";
+
+ pts.insert(p1);
+ pts.insert(p2);
+
+ //get the bisector vector;
+ std::vector<double> bisector = bisect_vector(normalize_vector(u),normalize_vector(v));
+ computeSupportFunction(bisector,solver,solver,2);
+ sv_bisect = solver.get_sv();
+ p3.first = sv_bisect[i];
+ p3.second = sv_bisect[j];
+
+ if(is_collinear(p1,p2,p3)){
+ return;
+ }
+ else{
+ cout << "direction: (" << bisector[i] << ", " << bisector[j] << ")" << std::endl;
+ cout << "support vector: (" << sv_bisect[i] <<", "<< sv_bisect[j] << ")\n";
+
+ pts.insert(p3);
+ enum_2dVert_restrict(u,bisector,i,j,pts);
+ enum_2dVert_restrict(bisector,v,i,j,pts);
+ }
+ }
+ */
+
+void polytope::enum_2dVert_restrict(std::vector<double> u,
+		std::vector<double> v, int i, int j,
+		std::set<std::pair<double, double> >& pts) {
+	std::vector<double> sv_u(getSystemDimension(), 0), sv_v(
+			getSystemDimension(), 0);
 	std::vector<double> sv_bisect;
 	lp_solver solver(1); // to choose glpk
-	solver.setConstraints(getCoeffMatrix(),getColumnVector(),getInEqualitySign());
+	solver.setConstraints(getCoeffMatrix(), getColumnVector(),
+			getInEqualitySign());
 
 	// get the support
-	computeSupportFunction(u,solver,solver,2);
+	computeSupportFunction(u, solver, solver, 2);
 	sv_u = solver.get_sv();
 
-
-	computeSupportFunction(v,solver,solver,2);
+	computeSupportFunction(v, solver, solver, 2);
 	sv_v = solver.get_sv();
 	// add the sv's to the set of points
 	// make a point of 2 dimension point
 
-	std::pair<double,double> p1,p2,p3;
+	std::pair<double, double> p1, p2, p3;
 	p1.first = sv_u[i];
 	p1.second = sv_u[j];
 
-	cout << "direction: (" << u[i] << ", " << u[j] << ")" <<std::endl;
-	cout << "support vector: (" << sv_u[i] << ", " << sv_u[j] << ")\n";
+	/*cout << "direction: (" << u[i] << ", " << u[j] << ")" << std::endl;
+	 cout << "support vector: (" << sv_u[i] << ", " << sv_u[j] << ")\n";*/
 
 	p2.first = sv_v[i];
 	p2.second = sv_v[j];
 
-	cout << "direction: (" << v[i] << ", " << v[j] << ")" <<std::endl;
-	cout << "support vector: (" << sv_v[i] <<", "<< sv_v[j] << ")\n";
+	/*cout << "direction: (" << v[i] << ", " << v[j] << ")" << std::endl;
+	 cout << "support vector: (" << sv_v[i] << ", " << sv_v[j] << ")\n";*/
 
 	pts.insert(p1);
 	pts.insert(p2);
 
 	//get the bisector vector;
-	std::vector<double> bisector = bisect_vector(normalize_vector(u),normalize_vector(v));
-	computeSupportFunction(bisector,solver,solver,2);
+	std::vector<double> bisector = bisect_vector(normalize_vector(u),
+			normalize_vector(v));
+	computeSupportFunction(bisector, solver, solver, 2);
 	sv_bisect = solver.get_sv();
 	p3.first = sv_bisect[i];
 	p3.second = sv_bisect[j];
 
-	if(is_collinear(p1,p2,p3)){
+	/*cout << "direction: (" << bisector[i] << ", " << bisector[j] << ")"<< std::endl;
+	 cout << "support vector: (" << sv_bisect[i] << ", " << sv_bisect[j]<< ")\n";*/
+	double uv_angle = angle_uv(u, v), threshold_angle = 1; //threshold_angle= 1 degree
+	//std::cout << "angle_uv = " << uv_angle << std::endl << std::endl;
+
+	if (uv_angle <= threshold_angle) { //if computed angle between u and v is less than the threshold
 		return;
 	}
-	else{
-		cout << "direction: (" << bisector[i] << ", " << bisector[j] << ")" << std::endl;
-		cout << "support vector: (" << sv_bisect[i] <<", "<< sv_bisect[j] << ")\n";
 
+	if (isEqual_Vectors(sv_bisect, sv_v)) {
+		//std::cout<<"match with vector v\n";
+		enum_2dVert_restrict(u, bisector, i, j, pts);
+	} else if (isEqual_Vectors(sv_bisect, sv_u)) {
+		//std::cout<<"match with vector u\n";
+		enum_2dVert_restrict(bisector, v, i, j, pts);
+	}
+
+	if (is_collinear(p1, p2, p3)) {
+		return;
+	} else {
 		pts.insert(p3);
-		enum_2dVert_restrict(u,bisector,i,j,pts);
-		enum_2dVert_restrict(bisector,v,i,j,pts);
+		enum_2dVert_restrict(u, bisector, i, j, pts);
+		enum_2dVert_restrict(bisector, v, i, j, pts);
 	}
 }
 
-std::set<std::pair<double,double> > polytope::enumerate_2dVertices(int i, int j){
-	std::set<std::pair<double,double> > All_vertices;
+std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
+		int j) {
+	std::set<std::pair<double, double> > All_vertices;
 
 	//enumerate the vertices in the first quadrant
-	std::vector<double> u(getSystemDimension(),0);
-	u[i]=1;
-	std::vector<double> v(getSystemDimension(),0);
-	v[j]=1;
+	std::vector<double> u(getSystemDimension(), 0);
+	u[i] = 1;
+	std::vector<double> v(getSystemDimension(), 0);
+	v[j] = 1;
 
-
-	enum_2dVert_restrict(u,v,i,j,All_vertices);
+	enum_2dVert_restrict(u, v, i, j, All_vertices);
 
 	//enumerate vertices in the second quadrant
-	u[i]=-1;
-	enum_2dVert_restrict(u,v,i,j,All_vertices);
+	u[i] = -1;
+	enum_2dVert_restrict(u, v, i, j, All_vertices);
 
 	//enumerate vertices in the third quadrant
-	v[j]=-1;
-	enum_2dVert_restrict(u,v,i,j,All_vertices);
+	v[j] = -1;
+	enum_2dVert_restrict(u, v, i, j, All_vertices);
 
 	//enumerate vertices in the fourth quadrant
-	u[i]=1;
-	enum_2dVert_restrict(u,v,i,j,All_vertices);
+	u[i] = 1;
+	enum_2dVert_restrict(u, v, i, j, All_vertices);
 
 	return All_vertices;
 }
-
-
+math::matrix<double> polytope::get_2dVertices(int i, int j){
+	std::set<std::pair<double, double> > set_vertices;
+	set_vertices = enumerate_2dVertices(i,j);
+	math::matrix<double> my_vertices;
+	my_vertices = sort_vertices(set_vertices);
+	return my_vertices;
+}
 #endif /* POLYTOPE_CPP_ */

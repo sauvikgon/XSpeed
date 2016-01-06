@@ -114,6 +114,7 @@ std::vector<double> template_polyhedra::getInvariantBoundValue(
 	return bound_value;
 }
 
+//this have to be modified to include the invariant directions as well
 polytope template_polyhedra::getPolytope(unsigned int Iterations_Number) {
 	polytope p;
 //	cout<<"1 INSIDE .....loop inside  \n";

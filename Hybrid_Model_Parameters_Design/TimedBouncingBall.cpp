@@ -7,7 +7,7 @@
 
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
 
-void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
+void SetTimedBouncingBall_ParametersOurFile(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
@@ -320,7 +320,7 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 }
 
 //Hyst Generated output
-void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
+void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 

@@ -7,11 +7,12 @@
 
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <vector>
 #include "Utilities/StandardVector.h"
-#include "math/matrix.h"
-#include "MySrc/Polytope/Polytope.h"
+#include "core_system/math/matrix.h"
+#include "core_system/continuous/Polytope/Polytope.h"
 #include "Utilities/Post_Assignment.h"
 
 using namespace std;
@@ -53,7 +54,7 @@ TEST_FIXTURE(ExamplePostAssignment, post_assign_exact_Test) {
 	w[0] = 0;
 	w[1] = 0;
 
-	polytope newPolytope, newShiftedPolytope;
+	polytope::ptr newPolytope, newShiftedPolytope;
 	size_type row = 4;
 	size_type col = 2;
 	ConstraintsMatrixI.resize(row, col);
@@ -73,29 +74,34 @@ TEST_FIXTURE(ExamplePostAssignment, post_assign_exact_Test) {
 	boundValueI[3] = 5;
 
 	boundSignI = 1;
-	newPolytope.setCoeffMatrix(ConstraintsMatrixI);
+
+	newPolytope = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+
+/*	newPolytope.setCoeffMatrix(ConstraintsMatrixI);
 	newPolytope.setColumnVector(boundValueI);
-	newPolytope.setInEqualitySign(boundSignI);
-	//newShiftedPolytope = post_assign_exact(newPolytope, R, w);
+	newPolytope.setInEqualitySign(boundSignI);*/
 
-	cout << "\nAmit here is A_dash Of newPolytope \n";
-	for (int i = 0; i < newShiftedPolytope.getCoeffMatrix().size1(); i++) {
-		for (int j = 0; j < newShiftedPolytope.getCoeffMatrix().size2(); j++)
-			cout << newShiftedPolytope.getCoeffMatrix()(i, j) << "\t";
+	newShiftedPolytope = post_assign_exact(newPolytope, R, w);
+
+/*	cout << "\nAmit here is A_dash Of newPolytope \n";
+	for (int i = 0; i < newShiftedPolytope->getCoeffMatrix().size1(); i++) {
+		for (int j = 0; j < newShiftedPolytope->getCoeffMatrix().size2(); j++)
+			cout << newShiftedPolytope->getCoeffMatrix()(i, j) << "\t";
 		cout << endl;
-	}
+	}*/
+
+	out << newShiftedPolytope->getCoeffMatrix();
+	proper << "[4,2]((1,0),(-1,0),(0,-1.66667),(0,1.66667))";
+
+/*
 	cout << "\nAmit here is bp of newShiftedPolytope \n";
-	for (int j = 0; j < newShiftedPolytope.getColumnVector().size(); j++)
-		cout << newShiftedPolytope.getColumnVector()[j] << "\t";
+	for (int j = 0; j < newShiftedPolytope->getColumnVector().size(); j++)
+		cout << newShiftedPolytope->getColumnVector()[j] << "\t";
 	cout << endl;
+*/
 
-	/*out<<"amit";
-	 proper << "true";
-	 CHECK_EQUAL(proper.str(), out.str());*/
-}
 
-TEST_FIXTURE(ExamplePostAssignment, Vector_Add_Test) {
-
+	 CHECK_EQUAL(proper.str(), out.str());
 }
 
 }

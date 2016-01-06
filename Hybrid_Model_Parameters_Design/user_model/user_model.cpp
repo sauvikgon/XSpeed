@@ -2505,7 +2505,8 @@ void user_model(hybrid_automata& Hybrid_Automata,
 	unsigned int initial_location_id = 9; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0;	//initial location no transition taken yet
-	initial_state::ptr I = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I, S,
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
 
 	init_state = I;
@@ -2537,4 +2538,5 @@ void user_model(hybrid_automata& Hybrid_Automata,
 	reach_parameters.TimeBound = time_horizon;
 	reach_parameters.time_step = reach_parameters.TimeBound
 			/ reach_parameters.Iterations;
+
 }

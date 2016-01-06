@@ -21,7 +21,7 @@ int gurobi_lp_solver::gurobi_lp_count=0;
 gurobi_lp_solver::gurobi_lp_solver() {
 
 	try {
-		std::cout<<"Hello Gurobi\n";
+	//	std::cout<<"Hello Gurobi\n";
 		gurobi_lp_count++;
 
 		env = new GRBEnv("/home/amit/GurobiOutput.log");	//creating an output log file
