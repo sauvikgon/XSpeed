@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
 
 	if (argc == 1) { //No argument:: When Running directly from the Eclipse Editor
 		//(1,2,3,4,5,6,7,8) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE,CIRCLE_FOUR_LOCATION, CIRCLE_ONE_LOC)
-		model_type = 0;
+		model_type = 4;
 		directions_type_or_size = 1; //(1,2,>2) = (BOX, OCT, UNIFORM)
 		iterations_size = 100; //number of iterations
 		time_bound = 10; //This is Local Time Horizon
@@ -1133,6 +1133,7 @@ int main(int argc, char *argv[]) {
 
 				polytope::ptr p = polytope::ptr(new polytope(A, b, 1));
 				vertices_list = p->get_2dVertices(x, y); //
+				//vertices_list = p->enumerate_2dVertices(x, y); //
 
 				// ------------- Printing the vertices on the Output File -------------
 				for (int i = 0; i < vertices_list.size1(); i++) {

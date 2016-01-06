@@ -268,12 +268,10 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 		double term3, term3a, term3b, res2, term3c = 0.0;
 		sVariable = 0.0; //initialize s0
 		//  **************    Omega Function   ********************
-		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I,
-				s_per_thread_U, Min_Or_Max);
+		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
-			term1 = Initial->computeSupportFunction(phi_trans_dir,
-					s_per_thread_I, s_per_thread_U, Min_Or_Max);
+			term1 = Initial->computeSupportFunction(phi_trans_dir,s_per_thread_I);
 		}
 
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
@@ -282,7 +280,7 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
 			term2 = ReachParameters.time_step
 					* SystemDynamics.U->computeSupportFunction(Btrans_dir,
-							s_per_thread_U, s_per_thread_I, Min_Or_Max);
+							s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = support_unitball_infnorm(rVariable);
 		if (!SystemDynamics.isEmptyC) {
@@ -325,14 +323,14 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 				phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
 				term1 = Initial->computeSupportFunction(phi_trans_dir,
-						s_per_thread_I, s_per_thread_U, Min_Or_Max);
+						s_per_thread_I);
 			}
 
 			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable, Btrans_dir);
 				term2 = ReachParameters.time_step
 						* SystemDynamics.U->computeSupportFunction(Btrans_dir,
-								s_per_thread_U, s_per_thread_I, Min_Or_Max);
+								s_per_thread_U);
 			}
 
 			term3a = ReachParameters.result_alfa;

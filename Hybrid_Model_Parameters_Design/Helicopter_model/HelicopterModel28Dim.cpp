@@ -232,7 +232,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 //	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
 //	Dynamics Initalised ---------------------
 
-	transitions trans; //empty transition
+	transition trans; //empty transition
 	location source;
 	source.setLocId(1);
 	source.setName("Flying");
@@ -3196,7 +3196,7 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	std::list<transitions> Out_Going_Trans_fromticking_idle;
+	std::list<transition> Out_Going_Trans_fromticking_idle;
 
 	location l1(1, "ticking_idle", system_dynamics0, invariant0, false,
 			Out_Going_Trans_fromticking_idle);

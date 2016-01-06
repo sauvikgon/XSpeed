@@ -11,7 +11,7 @@
 
 #include <iostream>
 //#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "UnitTest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "unitTest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 //#include "DebugOutputReporter.h"
 #include <sys/ptrace.h>
 #include <stdio.h>

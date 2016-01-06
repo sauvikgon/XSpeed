@@ -202,26 +202,27 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 			//	std::cout << "Parallel Done\n";
 			//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 		}
+		/*
+		 if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
+		 cout << "\nRunning GPU Sequential\n";
+		 boost::timer::cpu_timer AllReachGPU_time;
+		 AllReachGPU_time.start();
+		 reach_region = reachabilitySequential_GPU(
+		 current_location.getSystem_Dynamics(),
+		 continuous_initial_polytope, reach_parameters,
+		 current_location.getInvariant(),
+		 current_location.isInvariantExists(),
+		 lp_solver_type_choosen, number_of_streams,
+		 Solver_GLPK_Gurobi_GPU);
+		 AllReachGPU_time.stop();
+		 double wall_clock1;
+		 wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		 double return_Time1 = wall_clock1 / (double) 1000;
+		 std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
+		 << return_Time1 << std::endl;
 
-		if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
-			cout << "\nRunning GPU Sequential\n";
-			boost::timer::cpu_timer AllReachGPU_time;
-			AllReachGPU_time.start();
-			reach_region = reachabilitySequential_GPU(
-					current_location.getSystem_Dynamics(),
-					continuous_initial_polytope, reach_parameters,
-					current_location.getInvariant(),
-					current_location.isInvariantExists(),
-					lp_solver_type_choosen, number_of_streams,
-					Solver_GLPK_Gurobi_GPU);
-			AllReachGPU_time.stop();
-			double wall_clock1;
-			wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-			double return_Time1 = wall_clock1 / (double) 1000;
-			std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
-					<< return_Time1 << std::endl;
 
-		}
+		 } */
 
 		if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 			cout
@@ -338,7 +339,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 //		 cout << "\nContinuous Reachability Parallel Using Process Creation COMPLETTED!!!\n";
 		} //to be removed from the Project
 
-	//	std::cout << "\nFlowpipe computed\n";
+		std::cout << "\nFlowpipe computed\n";
 
 //	*********************************************** Reach or Flowpipe Computed **************************************************************************
 		if (previous_level != levelDeleted) {
@@ -393,7 +394,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							}
 							std::cout << "(" << locationID << ", " << transID
 									<< ")";
-							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) {//searching only if not NULL
+							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) {	//searching only if not NULL
 								current_forbidden_state =
 										searchSymbolic_state(
 												Reachability_Region,
@@ -437,7 +438,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		 reach_region.getPolytope(61).getColumnVector(), 1));
 		 GeneratePolytopePlotter(test);	 */
 			//	cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
-			for (std::list<transitions>::iterator t =
+			for (std::list<transition>::iterator t =
 					current_location.getOut_Going_Transitions().begin();
 					t != current_location.getOut_Going_Transitions().end();
 					t++) { // get each destination_location_id and push into the pwl.waiting_list
@@ -457,7 +458,8 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 						(*t).getDestination_Location_Id());
 				//				std::cout<<"\nTest location insde = "<<current_destination.getName()<<"\n";
 				string locName = current_destination.getName();
-			//	cout << "\nNext Loc ID = " << current_destination.getLocId()<< " Location Name = " << locName << "\n";
+				cout << "\nNext Loc ID = " << current_destination.getLocId()
+						<< " Location Name = " << locName << "\n";
 				if ((locName.compare("BAD") == 0)
 						|| (locName.compare("GOOD") == 0)
 						|| (locName.compare("FINAL") == 0)
@@ -482,7 +484,9 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 //			std::cout << "Before calling getTemplate_approx\n";
 				int destination_locID = (*t).getDestination_Location_Id();
 				ds.insert_element(destination_locID);
-				//std::cout<< "\nNumber of intersection with Flowpipe and guard = "<< intersected_polyhedra.size();
+				std::cout
+						<< "\nNumber of intersection with Flowpipe and guard = "
+						<< intersected_polyhedra.size();
 				for (std::list<template_polyhedra>::iterator i =
 						intersected_polyhedra.begin();
 						i != intersected_polyhedra.end(); i++) {
@@ -514,4 +518,3 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 	} //end of while loop checking waiting_list != empty
 	return Reachability_Region;
 }
-

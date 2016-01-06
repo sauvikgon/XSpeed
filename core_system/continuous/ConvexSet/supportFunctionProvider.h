@@ -18,18 +18,18 @@ class supportFunctionProvider
 {
 
 public:
-	typedef boost::shared_ptr<supportFunctionProvider> ptr;
-	supportFunctionProvider(){};
-	virtual ~supportFunctionProvider(){};
-	/** Returns the dimension of the continuous set */
-	virtual unsigned int getSystemDimension() const = 0;
-	virtual bool getIsEmpty() const = 0;
-	/**
-	 * The compute support will be a function of the support function of the initial set and the input set as polytopes.
-	 */
-	virtual double computeSupportFunction(std::vector<double> direction, lp_solver &lp) = 0;
-	virtual double max_norm(int lp_solver_type_choosen) = 0;
-
+		typedef boost::shared_ptr<supportFunctionProvider> ptr;
+		supportFunctionProvider(){};
+		virtual ~supportFunctionProvider(){};
+		/** Returns the dimension of the continuous set */
+		virtual unsigned int getSystemDimension() const = 0;
+		virtual bool getIsEmpty() const = 0;
+		/**
+		 * The compute support will be a function of the support function of the initial set
+		 * and the input set.
+		 */
+		virtual double computeSupportFunction(std::vector<double> direction, lp_solver &lp) = 0;
+		virtual double max_norm(int lp_solver_type_choosen, unsigned int dim_size) = 0;
 };
 
 #endif
