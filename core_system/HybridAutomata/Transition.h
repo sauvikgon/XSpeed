@@ -20,6 +20,7 @@ class transition {
 	polytope::ptr Gaurd;
 	Assign Assign_T;
 public:
+	typedef boost::shared_ptr<transition> ptr;
 	transition();
 	transition(int trans_id, string label, int source_id, int destination_id,
 			polytope::ptr Gaurd, Assign& Assign_T);

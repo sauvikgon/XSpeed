@@ -42,6 +42,4 @@ public:
 
 };
 
-
-
 #endif /* TRANSMINKPOLY_H_ */
