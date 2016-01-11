@@ -603,7 +603,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing5) {
 	direction[1] = 0;
 	direction[2] = 0;
 
-	std::cout << endl << endl << endl;
+	std::cout << endl;
 	/*
 	 std::cout << "Testing for Gurobi with a Given Problem" << endl;
 	 std::cout << "**************************************" << endl;

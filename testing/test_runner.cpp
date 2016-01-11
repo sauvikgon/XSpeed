@@ -11,8 +11,7 @@
 
 #include <iostream>
 //#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "unitTest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
-//#include "DebugOutputReporter.h"
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <sys/ptrace.h>
 #include <stdio.h>
 #include <assert.h>
@@ -20,7 +19,7 @@
 using namespace std;
 
 int main() {
-
 	std::cout << "testers called\n";
 	return UnitTest::RunAllTests();
+//UnitTest::
 }

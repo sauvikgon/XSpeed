@@ -47,11 +47,4 @@ SUITE(directions_TestSuite) {
 
 	}
 
-		 //CHECK_EQUAL(proper.str(),out.str());
-
-}
-
-
-
-
 }

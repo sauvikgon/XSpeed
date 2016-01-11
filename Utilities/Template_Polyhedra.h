@@ -8,6 +8,7 @@
 #ifndef TEMPLATE_POLYHEDRA_H_
 #define TEMPLATE_POLYHEDRA_H_
 
+
 #include "core_system/math/matrix.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 #include <list>
@@ -114,5 +115,7 @@ private:
 	void setTotalInvariantDirections(unsigned int total_invariant_directions);
 
 };
+
+
 
 #endif /* TEMPLATE_POLYHEDRA_H_ */

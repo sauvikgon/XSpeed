@@ -153,4 +153,3 @@ double Omega_Support_Similar_Direction(const ReachabilityParameters& ReachParame
 	else
 		return res2;
 }
-

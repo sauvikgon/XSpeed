@@ -489,7 +489,7 @@ __host__ void Simplex::ComputeLP(math::matrix<float> &C1,
 	cudaMallocHost(&R, memSize); //PINNED Memory		//Doing here First Time
 
 	if (single_bound_flag_result) {
-		printf("\nOur New Optimizations Result %d\n", single_bound_flag_result);
+	//	printf("\nOur New Optimizations Result %d\n", single_bound_flag_result);
 		unsigned int mysize = N_S * sizeof(float);
 		//cudaMallocHost(&R, mysize);	//PINNED Memory		//Doing here First Time
 		err = cudaMalloc((void **) &G_R, mysize); //Doing here First Time

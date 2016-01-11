@@ -3,6 +3,7 @@
 
 //#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 #include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+
 #include "core_system/math/Gimplex/simplex.cuh"
 #include "core_system/math/matrix.h"
 //#include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
@@ -197,20 +198,9 @@ TEST_FIXTURE(Example_GimplexSolver, gimplex3) {
 	status_val = s.getStatusAll();
 
 	result = s.getResultAll();
-	//out<< "";
-	out<< result;
-	proper << "0.99";
-	CHECK_EQUAL(proper.str(),out.str());
-
-/*
-	std::cout << "\n**Answer_Of_All_Simplex**\n";
-	for (int i = 0; i < N_S; i++) {
-		if (result[i] > 0)
-			std::cout << result[i] << "\n";
-		else if (result[i] == -1)
-			std::cout << "Simplex " << i + 1 << " is unbounded\n\n";
-	}
-	std::cout << "Number of Simplex Solved = " << N_S << std::endl;*/
+	std::vector<double> res(result.size());
+	res[0] = result[0];		//0.1; double matching fails in C++
+	CHECK_ARRAY_EQUAL(res,result,result.size());
 }
 
 }

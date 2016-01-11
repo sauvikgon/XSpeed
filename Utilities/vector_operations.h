@@ -29,4 +29,5 @@ math::matrix<double> matrix_vertices(std::set<std::pair<double, double> > set_ve
 //sorting the 2d vertices
 math::matrix<double> sort_vertices(std::set<std::pair<double, double> > set_vertices);
 
+
 #endif /* VECTOR_OPERATIONS_H_ */

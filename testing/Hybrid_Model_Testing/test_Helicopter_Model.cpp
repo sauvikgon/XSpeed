@@ -7,15 +7,9 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-
 #include <boost/tokenizer.hpp>
-#include "UnitTest++/UnitTest++.h"
-#include "core_system/continuous/Polytope/Polytope.h"
-#include "application/DataStructureDirections.h"
-#include "Hybrid_Model_Parameters_Design/Helicopter_model/Helicopter.h"
-
-//#include "math/matrix.h"
-//#include <boost/numeric/ublas/matrix.hpp>
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 
 //using namespace boost::numeric::ublas;
 using namespace std;
@@ -57,7 +51,7 @@ TEST_FIXTURE(ExampleHelicopter_Model, Creating_Identity_Matrix_Test) {
 	}
 	cout << "\nPrinting Identity matrix\n";
 	for (unsigned int i = 0; i < Ident_B.size1(); i++) {
-		for (unsigned int j = 0; j < Ident_B.size2(); j++)perturbation meaning
+		for (unsigned int j = 0; j < Ident_B.size2(); j++)
 			cout << Ident_B(i, j) << "\t";
 		cout << endl;
 	}

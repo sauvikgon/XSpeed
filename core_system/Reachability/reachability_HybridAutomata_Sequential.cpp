@@ -64,7 +64,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		S->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-//		cout<<"\nTesting 2 a 3\n";
+	//	cout<<"\nTesting 2 a 3\n";
 		pw_list.PassedList_insert(U); //todo:: confirm from sir why do we need this (space issue)
 
 		/*	We don't need this now
@@ -105,6 +105,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
 		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
 		 * */
+	//	cout<<"\nTesting 2 c\n";
 		double result_alfa = compute_alfa(reach_parameters.time_step,
 				current_location.getSystem_Dynamics(),
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
@@ -114,7 +115,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		//	cout<<"\nTesting 2 c\n";
 		double result_beta = compute_beta(current_location.getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
-		//		cout << "\n1st Compute Beta = " << result_beta << endl;
+	//	cout << "\n1st Compute Beta = " << result_beta << endl;
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
 		//	cout<<"\nTesting 2 d\n";
@@ -203,26 +204,26 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 			//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 		}
 		/*
-		 if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
-		 cout << "\nRunning GPU Sequential\n";
-		 boost::timer::cpu_timer AllReachGPU_time;
-		 AllReachGPU_time.start();
-		 reach_region = reachabilitySequential_GPU(
-		 current_location.getSystem_Dynamics(),
-		 continuous_initial_polytope, reach_parameters,
-		 current_location.getInvariant(),
-		 current_location.isInvariantExists(),
-		 lp_solver_type_choosen, number_of_streams,
-		 Solver_GLPK_Gurobi_GPU);
-		 AllReachGPU_time.stop();
-		 double wall_clock1;
-		 wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		 double return_Time1 = wall_clock1 / (double) 1000;
-		 std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
-		 << return_Time1 << std::endl;
+		if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
+			cout << "\nRunning GPU Sequential\n";
+			boost::timer::cpu_timer AllReachGPU_time;
+			AllReachGPU_time.start();
+			reach_region = reachabilitySequential_GPU(
+					current_location.getSystem_Dynamics(),
+					continuous_initial_polytope, reach_parameters,
+					current_location.getInvariant(),
+					current_location.isInvariantExists(),
+					lp_solver_type_choosen, number_of_streams,
+					Solver_GLPK_Gurobi_GPU);
+			AllReachGPU_time.stop();
+			double wall_clock1;
+			wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+			double return_Time1 = wall_clock1 / (double) 1000;
+			std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
+					<< return_Time1 << std::endl;
 
 
-		 } */
+		} */
 
 		if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 			cout
@@ -387,6 +388,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 									it != ds.getDiscreteElements().end(); ++it)
 								locationID = (*it);	//Assuming only a single element exist in the discrete_set
 
+
 							int transID =
 									current_forbidden_state->getTransitionId();
 							if (cc != 0) {
@@ -394,7 +396,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							}
 							std::cout << "(" << locationID << ", " << transID
 									<< ")";
-							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) {	//searching only if not NULL
+							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) {//searching only if not NULL
 								current_forbidden_state =
 										searchSymbolic_state(
 												Reachability_Region,

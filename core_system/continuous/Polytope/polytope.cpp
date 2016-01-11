@@ -8,6 +8,13 @@
  *      Author: amit
  */
 
+/*
+ * polytope.cpp
+ *
+ *  Created on: 30-Jun-2014
+ *      Author: amit
+ */
+
 #include "core_system/continuous/Polytope/Polytope.h"
 //#include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 //#include "math/lp_gurobi_simplex.h"
@@ -60,8 +67,8 @@ polytope::polytope(math::matrix<double> coeffMatrix,
 	this->columnVector = columnVector;
 	this->InEqualitySign = InEqualitySign;
 	//Since constraints are set So it is not empty and is Universe but 'bounded'
-	this->setIsEmpty(false);	//Not an empty Polytope
-	this->setIsUniverse(false);	//Not a universe Polytope and is now a 'Bounded' polytope
+	this->setIsEmpty(false); //Not an empty Polytope
+	this->setIsUniverse(false); //Not a universe Polytope and is now a 'Bounded' polytope
 
 	//lp.setConstraints(coeffMatrix, columnVector,InEqualitySign);
 }
@@ -81,7 +88,7 @@ void polytope::setPolytope(math::matrix<double> coeffMatrix,
 	//this->setInEqualitySign(inEqualitySign);
 	this->InEqualitySign = inEqualitySign;
 
-	this->setIsUniverse(false);	//Not a Universe Polytope and is now 'Bounded' polytope
+	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
 
 	//call to lp.set_Min_Or_Max() must be call before setConstraints()
 	//lp.setConstraints(coeffMatrix, columnVector,inEqualitySign);
@@ -117,15 +124,15 @@ void polytope::setCoeffMatrix(const math::matrix<double> coeffMatrix) {
 	this->setSystemDimension(coeffMatrix.size2());
 
 	this->coeffMatrix = coeffMatrix;
-	this->setIsUniverse(false);	//Not a Universe Polytope and is now 'Bounded' polytope
+	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
 }
 void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 		double bound_value) {
 	unsigned int row_size, col_size;
 	row_size = this->getCoeffMatrix().size1();
-	col_size = this->getCoeffMatrix().size2();	//dimension of the polytope
-	this->coeffMatrix.resize(row_size + 1, col_size, true);	//adding one more constraint
-	this->columnVector.resize(row_size + 1);//adding one more constraint's bound value
+	col_size = this->getCoeffMatrix().size2(); //dimension of the polytope
+	this->coeffMatrix.resize(row_size + 1, col_size, true); //adding one more constraint
+	this->columnVector.resize(row_size + 1); //adding one more constraint's bound value
 	for (unsigned int i = 0; i < col_size; i++) {
 		this->coeffMatrix(row_size, i) = coeff_constraint[i];
 	}
@@ -136,13 +143,13 @@ void polytope::setMoreConstraints(math::matrix<double> coeff_constraints,
 		std::vector<double> bound_values) {
 	unsigned int row_size, dim_size, rows_new;
 	row_size = this->getCoeffMatrix().size1();
-	dim_size = this->getCoeffMatrix().size2();	//dimension of the polytope
+	dim_size = this->getCoeffMatrix().size2(); //dimension of the polytope
 	rows_new = coeff_constraints.size1();
 	//dim_size =coeff_constraints.size2();
 	unsigned int new_total_rows = row_size + rows_new;
 
-	this->coeffMatrix.resize(new_total_rows, dim_size, true);//adding more constraints
-	this->columnVector.resize(new_total_rows);//adding more constraint's bound values
+	this->coeffMatrix.resize(new_total_rows, dim_size, true); //adding more constraints
+	this->columnVector.resize(new_total_rows); //adding more constraint's bound values
 	for (unsigned int i = 0; i < rows_new; i++) {
 		for (unsigned int j = 0; j < dim_size; j++) {
 			this->coeffMatrix(row_size + i, j) = coeff_constraints(i, j);
@@ -172,11 +179,11 @@ double polytope::computeSupportFunction(std::vector<double> direction,
 	// To Amit: Why is Min_or_Max passed when not used?
 
 	if (this->getIsEmpty())
-		sf = 0;	//returns zero for empty polytope
+		sf = 0; //returns zero for empty polytope
 	else if (this->getIsUniverse())
 		throw("\n Cannot Compute Support Function of a Universe Polytope.\n");
 	else
-		sf = lp.Compute_LLP(direction);	//since lp has already been created and set
+		sf = lp.Compute_LLP(direction); //since lp has already been created and set
 										//with constraints at the time of creation
 
 	return sf;
@@ -204,27 +211,27 @@ double polytope::max_norm(int lp_solver_type_choosen,
 	unsigned int dimension_size = dim_for_Max_Norm;
 	double Max_A, sf, Max = 0.0;
 	if (this->getIsEmpty())
-		sf = 0;	//returns zero for empty polytope
+		sf = 0; //returns zero for empty polytope
 	else if (this->getIsUniverse())
 		throw("\nUniverse Unbounded Polytope!!!\n");
 	else {
 		//sf = lp.Compute_LLP(direction);	//since lp has already been created and set with constraints at the time of creation
-		std::vector<std::vector<double> > generator_directions;	//this vector-vector is used only in this function not affecting the rest of the codes
+		std::vector < std::vector<double> > generator_directions; //this vector-vector is used only in this function not affecting the rest of the codes
 		//Generator for Positive Directions for example Right and Up
 		for (unsigned int i = 0; i < dimension_size; i++) {
 			std::vector<double> directions(dimension_size, 0.0);
-			directions[i] = 1;		//Positive Generators
+			directions[i] = 1; //Positive Generators
 			generator_directions.push_back(directions);
 		}
 		//Generator for Negative Directions for example Left and Down
 		for (unsigned int i = 0; i < dimension_size; i++) {
 			std::vector<double> directions(dimension_size, 0.0);
-			directions[i] = -1;		//Negative Generators
+			directions[i] = -1; //Negative Generators
 			generator_directions.push_back(directions);
 		}
 		int type = lp_solver_type_choosen;
 		lp_solver lp1(type);
-		lp1.setMin_Or_Max(2);	//Setting GLP_MAX
+		lp1.setMin_Or_Max(2); //Setting GLP_MAX
 		lp1.setConstraints(this->coeffMatrix, this->columnVector,
 				this->InEqualitySign);
 //Finding the maximum of all Direction : Returns the max element
@@ -244,7 +251,7 @@ double polytope::max_norm(int lp_solver_type_choosen,
 const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2) {
 
 	math::matrix<double> total_coeffMatrix, m1;
-	m1 = this->getCoeffMatrix();//assigning constant matrix to matrix m1 so that matrix_join function can be called
+	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
 	m1.matrix_join(P2->getCoeffMatrix(), total_coeffMatrix);
 	std::vector<double> total_columnVector;
 	total_columnVector = vector_join(this->getColumnVector(),
@@ -303,7 +310,7 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 	lp2.setMin_Or_Max(Min_Or_Max);
 
 	math::matrix<double> total_coeffMatrix, m1;
-	m1 = this->getCoeffMatrix();//assigning constant matrix to matrix m1 so that matrix_join function can be called
+	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
 	m1.matrix_join(p2->getCoeffMatrix(), total_coeffMatrix);
 
 	std::vector<double> total_columnVector;
@@ -357,14 +364,14 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 	p1.first = sv_u[i];
 	p1.second = sv_u[j];
 
-	cout << "direction: (" << u[i] << ", " << u[j] << ")" << std::endl;
-	cout << "support vector: (" << sv_u[i] << ", " << sv_u[j] << ")\n";
+	//cout << "direction: (" << u[i] << ", " << u[j] << ")" << std::endl;
+	//cout << "support vector: (" << sv_u[i] << ", " << sv_u[j] << ")\n";
 
 	p2.first = sv_v[i];
 	p2.second = sv_v[j];
 
-	cout << "direction: (" << v[i] << ", " << v[j] << ")" << std::endl;
-	cout << "support vector: (" << sv_v[i] << ", " << sv_v[j] << ")\n";
+	//cout << "direction: (" << v[i] << ", " << v[j] << ")" << std::endl;
+	//cout << "support vector: (" << sv_v[i] << ", " << sv_v[j] << ")\n";
 
 	pts.insert(p1);
 	pts.insert(p2);
@@ -380,10 +387,8 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 	if (is_collinear(p1, p2, p3)) {
 		return;
 	} else {
-		cout << "direction: (" << bisector[i] << ", " << bisector[j] << ")"
-				<< std::endl;
-		cout << "support vector: (" << sv_bisect[i] << ", " << sv_bisect[j]
-				<< ")\n";
+		//cout << "direction: (" << bisector[i] << ", " << bisector[j] << ")"	<< std::endl;
+		//cout << "support vector: (" << sv_bisect[i] << ", " << sv_bisect[j]	<< ")\n";
 
 		pts.insert(p3);
 		enum_2dVert_restrict(u, bisector, i, j, pts);
@@ -393,7 +398,7 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 
 std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 		int j) {
-	std::set<std::pair<double, double> > All_vertices;
+	std::set < std::pair<double, double> > All_vertices;
 
 	//enumerate the vertices in the first quadrant
 	std::vector<double> u(getSystemDimension(), 0);
@@ -418,11 +423,12 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 	return All_vertices;
 }
 
-math::matrix<double> polytope::get_2dVertices(int i, int j) {
+math::matrix<double> polytope::get_2dVertices(int i, int j){
 	std::set<std::pair<double, double> > set_vertices;
-	set_vertices = enumerate_2dVertices(i, j);
+	set_vertices = enumerate_2dVertices(i,j);
 	math::matrix<double> my_vertices;
 	my_vertices = sort_vertices(set_vertices);
 	return my_vertices;
 }
+
 #endif /* POLYTOPE_CPP_ */

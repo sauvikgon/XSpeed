@@ -57,9 +57,12 @@
 //#include <boost/tokenizer.hpp>
 
 // *********** Command Line Boost Program Options ********
+#include <boost/program_options/config.hpp>
+
 #include "boost/program_options.hpp"
 #include <boost/config.hpp>
 #include <boost/program_options/detail/config_file.hpp>
+
 #include <boost/program_options/parsers.hpp>
 // *********** Command Line Boost Program Options ********
 #include "plotter_utility.h"

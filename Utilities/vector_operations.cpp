@@ -4,6 +4,7 @@
  *  Created on: 30-Nov-2015
  *      Author: amit
  */
+
 #include <math.h>
 #include "vector_operations.h"
 
@@ -30,16 +31,17 @@ std::vector<double> bisect_vector(std::vector<double> u,
 		std::vector<double> v) {
 	std::vector<double> z(u.size());
 
-	assert(u.size() == v.size());	//checking if u and v are of same dimension
+	assert(u.size() == v.size()); //checking if u and v are of same dimension
 	for (int i = 0; i < u.size(); i++) {
 		z[i] = (u[i] + v[i]) / 2;
 	}
 	return z;
 }
+
 //Returns true if every elements of the two vectors u & v are equal otherwise false
 bool isEqual_Vectors(std::vector<double> u, std::vector<double> v) {
 	bool isEqual = true;
-	assert(u.size() == v.size());	//checking if u and v are of same dimension
+	assert(u.size() == v.size()); //checking if u and v are of same dimension
 	for (int i = 0; i < u.size(); i++) {
 		if (u[i] != v[i]) {
 			isEqual = false;

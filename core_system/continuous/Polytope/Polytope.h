@@ -69,14 +69,6 @@ public:
 			double bound_value);
 
 	/*
-
-/*
- * polytope.cpp
- *
- *  Created on: 30-Jun-2014
- *      Author: amit
-
-
 	 * Adds one or more constraints to the existing polytope by adding the
 	 * coefficient_constraints with the bound_values to the existing list.
 	 */
@@ -95,7 +87,7 @@ public:
 	std::vector<double> getColumnVector();
 
 	unsigned int getSystemDimension() const;
-	void setSystemDimension(unsigned int systemDimension);//returns the number of variables of the polytopes.
+	void setSystemDimension(unsigned int systemDimension); //returns the number of variables of the polytopes.
 	unsigned int getNumberFacets() const;
 	void setNumberFacets(unsigned int numberFacets);
 
@@ -139,6 +131,7 @@ public:
 	 */
 
 	math::matrix<double> get_2dVertices(int i, int j);
+
 };
 
 #endif /* POLYTOPE_H_ */
