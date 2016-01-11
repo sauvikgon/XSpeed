@@ -119,11 +119,6 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t1(1, "T1", 1, 2, gaurd_polytope1, assignment);
-<<<<<<< local
-
-=======
->>>>>>> other
-
 //Location 1:: Invariant constraint : y >=0
 	row = 2;
 	col = 2;

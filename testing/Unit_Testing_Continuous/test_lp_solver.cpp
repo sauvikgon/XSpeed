@@ -7,8 +7,7 @@
 
 #include <sstream>
 #include <iostream>
-//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 #include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 #include "core_system/math/matrix.h"
 #include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions

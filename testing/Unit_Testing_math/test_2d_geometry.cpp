@@ -9,15 +9,12 @@
 #include <iostream>
 #include "UnitTest++/UnitTest++.h"
 #include "core_system/math/2d_geometry.h"
-
 #include <string>
 using namespace std;
 
 SUITE(2d_geometry_TestSuite) {
 struct geometry_2d {
-	geometry_2d() {
-
-	}
+	geometry_2d() {}
 	~geometry_2d() { /* some teardown */
 	}
 
@@ -135,6 +132,5 @@ TEST_FIXTURE(geometry_2d, angle_uv_test2) {
 
 	CHECK_EQUAL(proper.str(), out.str());
 }
-
 }
 
