@@ -64,7 +64,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		S->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-//		cout<<"\nTesting 2 a 3\n";
+	//	cout<<"\nTesting 2 a 3\n";
 		pw_list.PassedList_insert(U); //todo:: confirm from sir why do we need this (space issue)
 
 		/*	We don't need this now
@@ -105,6 +105,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
 		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
 		 * */
+	//	cout<<"\nTesting 2 c\n";
 		double result_alfa = compute_alfa(reach_parameters.time_step,
 				current_location.getSystem_Dynamics(),
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
@@ -114,7 +115,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		//	cout<<"\nTesting 2 c\n";
 		double result_beta = compute_beta(current_location.getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
-		//		cout << "\n1st Compute Beta = " << result_beta << endl;
+	//	cout << "\n1st Compute Beta = " << result_beta << endl;
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
 		//	cout<<"\nTesting 2 d\n";
@@ -519,4 +520,3 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 	} //end of while loop checking waiting_list != empty
 	return Reachability_Region;
 }
-

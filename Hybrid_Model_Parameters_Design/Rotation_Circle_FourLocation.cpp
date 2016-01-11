@@ -68,7 +68,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	Bmatrix(1, 1) = 1;
 
 //Transition Dynamics  Rx + w where R is the Assignment Mapping and w is a vector
-	math::matrix<double> R; //Transition Dynamics
+	math::matrix<double> R;	//Transition Dynamics
 	R.resize(row, col);
 	R(0, 0) = 1;
 	R(0, 1) = 0;
@@ -119,7 +119,10 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t1(1, "T1", 1, 2, gaurd_polytope1, assignment);
+<<<<<<< local
 
+=======
+>>>>>>> other
 
 //Location 1:: Invariant constraint : y >=0
 	row = 2;
@@ -162,8 +165,6 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t2(2, "T2", 2, 3, gaurd_polytope2, assignment);
-
-
 //Location 2:: Invariant constraint : y <=0
 	row = 2;
 	col = 2;
@@ -205,7 +206,6 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t3(3, "T3", 3, 4, gaurd_polytope3, assignment);
-
 
 	//Location 3:: Invariant constraint : x<=0 & y<=0
 	row = 2;
@@ -292,6 +292,5 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 					transition_id));
 
 	init_state = I;
-
 }
 

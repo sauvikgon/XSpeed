@@ -12,30 +12,66 @@
 
 #include "application/DataStructureDirections.h"
 #include "core_system/HybridAutomata/Location.h"
+
 #include "core_system/HybridAutomata/Transition.h"
+
 #include "core_system/math/lp_solver/lp_solver.h"
 
 using namespace std;
 
 SUITE(Location_TestSuite) {
-struct ClassLocation {
-	ClassLocation() {
-		D.U = polytope::ptr(new polytope());
-		nn = "Hello testing";
+	struct ClassLocation {
+		ClassLocation() {
+
+		}
+		~ClassLocation() { /* some teardown */
+		}
+		std::string nn;
+		typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
+		Dynamics D, outD;
+		polytope::ptr Inv, outInv;
+		math::matrix<double> ConstraintsMatrixI;
+		int boundSignI;
+		std::vector<double> boundValueI;
+
+		stringstream out, proper;
+	};
+
+	TEST_FIXTURE(ClassLocation, constructor1_location_Test) {
+
+		location ll;
+		//	cout << "Just testing and Empty Name = " << ll.getName() << "\t" << endl;
+		out <<ll.getName();
+		proper << "";
+		CHECK_EQUAL(proper.str(), out.str());
+	}
+
+	TEST_FIXTURE(ClassLocation, constructor2_location_Test) {
+//location(string Name, Dynamics System_Dynamics, polytope Invariant);
+		/*	cout << "\n\n\nRuning From Module Hybrid Automata" << endl;
+		 cout << "*********************************************" << endl;*/
+		nn = "Hello Testing";
 
 		size_type row = 2;
 		size_type col = 2;
+
+		D.isEmptyMatrixA = false;
+
 		D.MatrixA.resize(row, col);
 		D.MatrixA(0, 0) = 1;
 		D.MatrixA(0, 1) = 2;
 		D.MatrixA(1, 0) = 3;
 		D.MatrixA(1, 1) = 4;
 
+		D.isEmptyMatrixB = false;
+
 		D.MatrixB.resize(row, col);
 		D.MatrixB(0, 0) = 5;
 		D.MatrixB(0, 1) = 6;
 		D.MatrixB(1, 0) = 7;
 		D.MatrixB(1, 1) = 8;
+
+		D.isEmptyC = true;
 
 		row = 6;
 		col = 2;
@@ -64,69 +100,66 @@ struct ClassLocation {
 
 		boundSignI = 1;
 
-		D.U->setCoeffMatrix(ConstraintsMatrixI);
-		D.U->setColumnVector(boundValueI);
-		D.U->setInEqualitySign(boundSignI);
+		polytope::ptr u;
+		std::list<transition> Out_Going_Trans;
 
-		Inv = polytope::ptr(new polytope());
-		Inv->setCoeffMatrix(ConstraintsMatrixI);
-		Inv->setColumnVector(boundValueI);
-		Inv->setInEqualitySign(boundSignI);
+
+		u = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+		D.U = u;
+
+		Inv = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+
+		location loc(1, nn, D, Inv, true,Out_Going_Trans); //creating object of location as loc
+		//cout << "Name = " << loc.getName() << endl;
+		out << "";
+		out << loc.getName();
+		proper << "Hello Testing";
+		CHECK_EQUAL(proper.str(), out.str());
+
+		outD = loc.getSystem_Dynamics();
+
+		//	std::cout<< "\nMatrix A : "<< outD.MatrixA;
+		out << "";
+		out << outD.MatrixA;
+		proper <<"[2,2]((1,2),(3,4))";
+
+		CHECK_EQUAL(proper.str(), out.str());
+
+		//	std::cout<< "\nMatrix B : "<< outD.MatrixB;
+
+		out << outD.MatrixB;
+		proper << "[2,2]((5,6),(7,8))";
+		CHECK_EQUAL(proper.str(), out.str());
+
+		std::vector<double> direction(2, 0.0);
+		direction[0] = 1;
+		direction[1] = 0;
+
+		lp_solver lp(1);
+		lp.setMin_Or_Max(2);
+		lp.setConstraints(outD.U->getCoeffMatrix(), outD.U->getColumnVector(), outD.U->getInEqualitySign());
+		double sf1 = outD.U->computeSupportFunction(direction, lp);
+		//	cout << "Support Function = " << sf1 << endl;
+		out << "";
+		out << sf1;
+		proper << "";
+		proper << "3";
+		CHECK_EQUAL(proper.str(), out.str());
+
+		outInv = loc.getInvariant();
+
+		lp_solver lp2(1);
+		lp2.setMin_Or_Max(2);
+		lp2.setConstraints(outInv->getCoeffMatrix(), outInv->getColumnVector(), outInv->getInEqualitySign());
+
+		double sf2 = outInv->computeSupportFunction(direction, lp2);
+
+		//	 cout << "This should also return the same Support Function Result =" << sf2 << endl;
+		out << "";
+		out << sf2;
+		proper << "";
+		proper << "3";
+		CHECK_EQUAL(proper.str(), out.str());
 	}
-	~ClassLocation() { /* some teardown */
-	}
-	string nn;
-	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
-	Dynamics D, outD;
-	polytope::ptr Inv, outInv;
-	math::matrix<double> ConstraintsMatrixI;
-	int boundSignI;
-	std::vector<double> boundValueI;
-
-	stringstream out, proper;
-};
-TEST_FIXTURE(ClassLocation, constructor1_location_Test) {
-
-	location ll;
-	cout << "Just testing and Empty Name = " << ll.getName() << "\t" << endl;
-	//proper << "7";
-	//CHECK_EQUAL(proper.str(), out.str());
-}
-TEST_FIXTURE(ClassLocation, constructor2_location_Test) {
-//location(string Name, Dynamics System_Dynamics, polytope Invariant);
-	cout << "\n\n\nRuning From Module Hybrid Automata" << endl;
-	cout << "*********************************************" << endl;
-	std::list<transition> t;
-	location loc(1, nn, D, Inv, true,t);	//creating object of location as loc
-
-	cout << "Name = " << loc.getName() << endl;
-	outD = loc.getSystem_Dynamics();
-	cout << "Dynamic matrixA :" << endl;
-	for (unsigned int i = 0; i < outD.MatrixA.size1(); i++) {
-		for (unsigned int j = 0; j < outD.MatrixA.size2(); j++)
-			cout << outD.MatrixA(i,j) << "\t";
-		cout << endl;
-	}
-	std::vector<double> direction(2, 0.0);
-	direction[0] = 1;
-	direction[1] = 0;
-	// create an lp solver
-	lp_solver testLP(GLPK_SOLVER);
-	testLP.setConstraints(outD.U->getCoeffMatrix(),outD.U->getColumnVector(),outD.U->getInEqualitySign());
-	testLP.setMin_Or_Max(2);
-	double sf1 = outD.U->computeSupportFunction(direction, testLP);
-
-
-	outInv = loc.getInvariant();
-
-	double sf2 = outInv->computeSupportFunction(direction, testLP);
-
-	cout << "This should also return the same Support Function Result = <tester interface to be changed>" << sf2 << endl;
-
-	out << sf2;
-	proper << "3";
-	CHECK_EQUAL(proper.str(), out.str());
-}
-
 }
 

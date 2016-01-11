@@ -69,7 +69,7 @@ void symbolic_states::setTransitionId(int transitionId) {
 polytope::ptr symbolic_states::getInitial_ContinousSetptr() const {
 
 	polytope p;
-	p = this->ContinuousSetptr->getPolytope(0);	//gets the 1st polytope from the sfm
+	p = this->ContinuousSetptr->getPolytope(0); //gets the 1st polytope from the sfm
 	polytope::ptr initial_polytope_I;
 
 	initial_polytope_I = polytope::ptr(

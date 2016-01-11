@@ -345,4 +345,3 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 	}
 	return template_polyhedra::ptr(new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
 }
-

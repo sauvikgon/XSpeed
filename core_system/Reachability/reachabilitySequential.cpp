@@ -5,6 +5,7 @@
  *      Author: amit
  */
 
+
 #include "core_system/Reachability/reachabilitySequential.h"
 //#include "Utilities/testPolytopePlotting.h"
 /*
@@ -171,7 +172,7 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 				ReachParameters, invariant, lp_solver_type_choosen);
 		shm_NewTotalIteration = shm_NewTotalIteration - 1;//because Omega_0 is computed in all cases which is 1 extra
 	} //End of Invariant Directions
-	cout << "\nNew shm_NewTotalIteration = " << shm_NewTotalIteration << "\n";
+	//cout << "\nNew shm_NewTotalIteration = " << shm_NewTotalIteration << "\n";
 	if (shm_NewTotalIteration < 1) {
 		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;

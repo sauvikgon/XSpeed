@@ -208,10 +208,14 @@ template <> long double approx_comparator<long double>::neg_error_bound;
 template <> long double approx_comparator<long double>::lg_rel_error;
 template <> long double approx_comparator<long double>::sm_rel_error;
 
-template <> __float128 approx_comparator<__float128>::pos_error_bound;
+
+/* this templates has issue with the use of header <math.h>
+ *
+ *
+ template <> __float128 approx_comparator<__float128>::pos_error_bound;
 template <> __float128 approx_comparator<__float128>::neg_error_bound;
 template <> __float128 approx_comparator<__float128>::lg_rel_error;
-template <> __float128 approx_comparator<__float128>::sm_rel_error;
+template <> __float128 approx_comparator<__float128>::sm_rel_error;*/
 
 }
 }

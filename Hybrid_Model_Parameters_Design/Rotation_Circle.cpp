@@ -133,8 +133,6 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t1(1, "T1", 1, 2, gaurd_polytope1, assignment);
-
-
 //Location 1:: Invariant constraint : y >=0
 	row = 1;
 	col = 2;
@@ -170,8 +168,6 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
 	transition t2(2, "T2", 2, 1, gaurd_polytope2, assignment);
-
-
 //Location 2:: Invariant constraint : y <=0
 	row = 1;
 	col = 2;

@@ -232,8 +232,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 //	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
 //	Dynamics Initalised ---------------------
 
-	transition trans;	//empty transition
-
+	transition trans; //empty transition
 	location source;
 	source.setLocId(1);
 	source.setName("Flying");

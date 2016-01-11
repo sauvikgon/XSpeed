@@ -87,11 +87,11 @@ public:
 	std::vector<double> getColumnVector();
 
 	unsigned int getSystemDimension() const;
-	void setSystemDimension(unsigned int systemDimension);//returns the number of variables of the polytopes.
+	void setSystemDimension(unsigned int systemDimension); //returns the number of variables of the polytopes.
 	unsigned int getNumberFacets() const;
 	void setNumberFacets(unsigned int numberFacets);
 
-	double computeSupportFunction(std::vector<double> direction, lp_solver &lp) ;
+	double computeSupportFunction(std::vector<double> direction, lp_solver &lp);
 
 	/*
 	 * Returns Max norm of the polytope
@@ -113,8 +113,8 @@ public:
 	 * Enumerate all vertices of the polytope between the two vectors
 	 * given as arguments
 	 */
-	void enum_2dVert_restrict(std::vector<double> u, std::vector<double> v, int i, int j,
-			std::set<std::pair<double, double> >&pts);
+	void enum_2dVert_restrict(std::vector<double> u, std::vector<double> v,
+			int i, int j, std::set<std::pair<double, double> >&pts);
 
 	/**
 	 * enumerate all vertices of the polytope
@@ -122,7 +122,16 @@ public:
 	 * 	   j is the second projecting variable
 	 * 	   the value/index of i and j begins with 0 to n-1
 	 */
-	std::set<std::pair<double,double> > enumerate_2dVertices(int i, int j);
+	std::set<std::pair<double, double> > enumerate_2dVertices(int i, int j);
+
+
+	/*
+	 * Returns the list of vertices of the polytope in 2d with the given inputs as
+	 * i and j where i and j are the 1st and 2nd projecting variables
+	 */
+
+	math::matrix<double> get_2dVertices(int i, int j);
+
 };
 
 #endif /* POLYTOPE_H_ */

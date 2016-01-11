@@ -1,6 +1,6 @@
 
-
 #include "UnitTest++/UnitTest++.h"
+
 #include <nlopt.hpp>
 #include <iostream>
 #include <sstream>
@@ -11,31 +11,33 @@
 using namespace std;
 
 typedef struct {
-		    double a, b;
+
+	double a, b;
+
 } my_constraint_data;
+
 
 double myvconstraint(const std::vector<double> &x, std::vector<double> &grad, void *data)
 {
 	my_constraint_data *d = reinterpret_cast<my_constraint_data*>(data);
 	double a = d->a, b = d->b;
 	if (!grad.empty()) {
+
 		grad[0] = 3 * a * (a*x[0] + b) * (a*x[0] + b);
 		grad[1] = -1.0;
 	}
+
 	return ((a*x[0] + b) * (a*x[0] + b) * (a*x[0] + b) - x[1]);
 }
 double myvfunc(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data)
 {
-	std::cout << "sampling point inside obj function: ";
-	std::cout << "x1=" << x[0] << ", x2 = " << x[1] << std::endl;
-
-
 	if (!grad.empty()) {
 		grad[0] = 0.0;
 		grad[1] = 0.5 / sqrt(x[1]);
 	}
 	return sqrt(x[1]);
 }
+
 SUITE(NLOpt_TestSuite)
 {
 	struct ExampleOptProb
@@ -50,24 +52,27 @@ SUITE(NLOpt_TestSuite)
 		stringstream expected,test;
 		~ExampleOptProb(){ /* some teardown */}
 
+
 	};
 	TEST_FIXTURE(ExampleOptProb, derivative_Test)
 	{
 		nlopt::opt myopt(nlopt::LN_COBYLA,2);
 		myopt.set_min_objective(myobjfunc,NULL);
 
+
 		my_constraint_data data[2] = {{2,0},{-1,1}};
 		myopt.add_inequality_constraint(myvconstraint,&data[0],1e-8);
 		myopt.add_inequality_constraint(myvconstraint,&data[1],1e-8);
-
-
 
 		// Initial value
 		std:vector<double> x(2);
 		x[0] = 1.234; x[1] = 5.678;
 
+
 		std::vector<double> lb(2);
 		lb[0]=-HUGE_VAL;lb[1]=0;
+
+
 
 		myopt.set_lower_bounds(lb);
 		myopt.set_stopval(sqrt(8./27.)+1e-3);
@@ -88,4 +93,3 @@ SUITE(NLOpt_TestSuite)
 		CHECK_EQUAL(expected.str(),test.str());
 	}
 }
-

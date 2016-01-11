@@ -572,4 +572,3 @@ const template_polyhedra::ptr reachabilityPartitions_par_iters(
 	}
 	return reachability_region;
 }
-

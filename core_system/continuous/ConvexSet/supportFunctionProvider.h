@@ -8,7 +8,6 @@
 #ifndef __SUPPFUNC_PROV__
 #define __SUPPFUNC_PROV__
 
-
 #include <vector>
 #include "core_system/math/matrix.h"
 //#include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
@@ -20,8 +19,12 @@ class supportFunctionProvider
 
 public:
 	typedef boost::shared_ptr<supportFunctionProvider> ptr;
-	supportFunctionProvider(){};
-	virtual ~supportFunctionProvider(){};
+	supportFunctionProvider() {
+	}
+	;
+	virtual ~supportFunctionProvider() {
+	}
+	;
 	/** Returns the dimension of the continuous set */
 	virtual unsigned int getSystemDimension() const = 0;
 	virtual bool getIsEmpty() const = 0;
@@ -29,10 +32,10 @@ public:
 	 * The compute support will be a function of the support function of the initial set
 	 * and the input set.
 	 */
-	virtual double computeSupportFunction(std::vector<double> direction, lp_solver &lp) = 0;
-	virtual double max_norm(int lp_solver_type_choosen, unsigned int dim_size) = 0;
-
-
+	virtual double computeSupportFunction(std::vector<double> direction,
+			lp_solver &lp) = 0;
+	virtual double max_norm(int lp_solver_type_choosen,
+			unsigned int dim_size) = 0;
 };
 
 #endif

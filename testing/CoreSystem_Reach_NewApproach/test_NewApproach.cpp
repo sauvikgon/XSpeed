@@ -7,8 +7,8 @@
 
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
-
+//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "core_system/math/matrix.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "application/sf_directions.h"
@@ -73,21 +73,22 @@ struct NewApproach {
 };
 
 TEST_FIXTURE(NewApproach, Partition_BoundingPolytope_Test) {
-	std::list<polytope::ptr> polys;
+	/*
+	 std::list<polytope::ptr> polys;
 
-	unsigned int N=2;	//number of variables to be partitioned
-	unsigned int part=2;	//number of partition size
-	polys = Partition_BoundingPolytope(p,N,part);
+	 unsigned int N = 2;	//number of variables to be partitioned
+	 unsigned int part = 2;	//number of partition size
+	 polys = Partition_BoundingPolytope(p, N, part);
 
-	for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end();
-			i++) {
-
-		cout << "\nCoeff1 = " << (*i)->getCoeffMatrix()<< endl;
-		cout << "\nBoundvalue1 = " << endl;
-		for (unsigned int j = 0; j < (*i)->getColumnVector().size();j++) {
-			cout << (*i)->getColumnVector()[j] << endl;
-		}
-	}
+	 for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end();
+	 i++) {
+	 cout << "\nCoeff1 = " << (*i)->getCoeffMatrix() << endl;
+	 cout << "\nBoundvalue1 = " << endl;
+	 for (unsigned int j = 0; j < (*i)->getColumnVector().size(); j++) {
+	 cout << (*i)->getColumnVector()[j] << endl;
+	 }
+	 }
+	 */
 }
 
 }

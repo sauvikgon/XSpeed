@@ -103,7 +103,7 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 	if (!system_dynamics.isEmptyMatrixA) //if Not Empty
 		norm_A = system_dynamics.MatrixA.norm_inf();
 
-	//cout<<"\nInside Testing MatrixA norm = "<<norm_A<<endl;
+//	cout<<"\nInside Testing MatrixA norm = "<<norm_A<<endl;
 	dim_for_Max_norm = I->getSystemDimension();	//I is initial polytope
 	I_max_norm = I->max_norm(lp_solver_type_choosen, dim_for_Max_norm); //R_X_o ie max_norm of the Initial polytope
 //	cout << "\nInside Testing I.max_norm = " << I_max_norm << endl;
@@ -111,10 +111,14 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 	math::matrix<scalar_type> Btrans;
 	if (!system_dynamics.isEmptyMatrixB) { //if NOT Empty
 		system_dynamics.MatrixB.transpose(Btrans);
+	//	cout <<"test11111\n";
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(system_dynamics.U, Btrans));
+	//	cout <<"test2222222\n";
 		dim_for_Max_norm = system_dynamics.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
+	//	cout <<"dim_for_Max_norm = "<<dim_for_Max_norm<<"\n";
 		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
+	//	cout <<"test33333\n";
 	}
 
 	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U
