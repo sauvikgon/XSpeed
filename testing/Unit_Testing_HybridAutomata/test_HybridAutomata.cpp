@@ -8,8 +8,8 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <list>
 #include <iterator>
 
@@ -108,7 +108,7 @@ SUITE(HybridAutomata_TestSuite) {
 	}
 	TEST_FIXTURE(ClassHybridAutomata , constructor2_HybridAutomata_Test) {
 
-		std::list<transition> all_trans;
+		std::list<transition::ptr> all_trans;
 		Gaurd = polytope::ptr(new polytope(ConstraintsMatrixI,boundValueI,boundSignI));
 
 		int dimen = 2;
@@ -128,8 +128,8 @@ SUITE(HybridAutomata_TestSuite) {
 
 		int srcLocID=1, destLocID=2;
 
-		transition trans1(1, label1, srcLocID, destLocID, Gaurd, T);//creating object of location as loc
-		transition trans2(2, label2, srcLocID, destLocID, Gaurd, T);//creating object of location as loc
+		transition::ptr trans1 = transition::ptr(new transition(1, label1, srcLocID, destLocID, Gaurd, T));//creating object of location as loc
+		transition::ptr trans2 = transition::ptr(new transition(2, label2, srcLocID, destLocID, Gaurd, T));//creating object of location as loc
 		all_trans.push_back(trans1);
 		all_trans.push_back(trans2);
 

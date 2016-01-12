@@ -7,8 +7,8 @@
 
 #include <sstream>
 #include <iostream>
-//#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "application/DataStructureDirections.h"
 #include "core_system/HybridAutomata/Location.h"
 #include "core_system/math/lp_solver/lp_solver.h"
@@ -97,14 +97,14 @@ SUITE(Location_TestSuite) {
 		boundSignI = 1;
 
 		polytope::ptr u;
-		std::list<transition> Out_Going_Trans;
+		std::list<transition::ptr> Out_Going_Trans;
 
 		u = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 		D.U = u;
 
 		Inv = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-		location loc(1, nn, D, Inv, true,Out_Going_Trans); //creating object of location as loc
+		location loc(1, nn, D, Inv, true, Out_Going_Trans); //creating object of location as loc
 		//cout << "Name = " << loc.getName() << endl;
 		out << "";
 		out << loc.getName();

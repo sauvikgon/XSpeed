@@ -118,7 +118,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope1 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t1(1, "T1", 1, 2, gaurd_polytope1, assignment);
+	transition::ptr t1 = transition::ptr(new transition(1, "T1", 1, 2, gaurd_polytope1, assignment));
 
 //Location 1:: Invariant constraint : y >=0
 	row = 2;
@@ -137,7 +137,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
 
-	std::list<transition> Out_Going_Trans_fromLoc1;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	Out_Going_Trans_fromLoc1.push_back(t1);
 
 	location l1(1, "Loc-1", system_dynamics, invariant1, true,
@@ -160,7 +160,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope2 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t2(2, "T2", 2, 3, gaurd_polytope2, assignment);
+	transition::ptr t2 = transition::ptr(new transition(2, "T2", 2, 3, gaurd_polytope2, assignment));
 
 //Location 2:: Invariant constraint : y <=0
 	row = 2;
@@ -179,7 +179,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
 
-	std::list<transition> Out_Going_Trans_fromLoc2;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc2;
 	Out_Going_Trans_fromLoc2.push_back(t2);
 
 	location l2(2, "Loc-2", system_dynamics, invariant2, true,
@@ -202,7 +202,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope3 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t3(3, "T3", 3, 4, gaurd_polytope3, assignment);
+	transition::ptr t3 = transition::ptr(new transition(3, "T3", 3, 4, gaurd_polytope3, assignment));
 
 	//Location 3:: Invariant constraint : x<=0 & y<=0
 	row = 2;
@@ -221,7 +221,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
 
-	std::list<transition> Out_Going_Trans_fromLoc3;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc3;
 	Out_Going_Trans_fromLoc3.push_back(t3);
 
 	location l3(3, "Loc-3", system_dynamics, invariant3, true,
@@ -244,7 +244,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope4 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t4(4, "T4", 4, 1, gaurd_polytope4, assignment);
+	transition::ptr t4 = transition::ptr(new transition(4, "T4", 4, 1, gaurd_polytope4, assignment));
 
 	//Location 4:: Invariant constraint : x>=0 & y<=0
 	row = 2;
@@ -263,7 +263,7 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
 
-	std::list<transition> Out_Going_Trans_fromLoc4;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc4;
 	Out_Going_Trans_fromLoc4.push_back(t4);
 
 	location l4(4, "Loc-4", system_dynamics, invariant4, true,

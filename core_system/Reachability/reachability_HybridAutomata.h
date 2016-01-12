@@ -24,10 +24,10 @@
 #include "core_system/Reachability/reachabilityParallel_Process.h"
 #include "core_system/Reachability/NewApproach/SameDirections_Avoid_SuppFunction.h"
 #include "Utilities/computeInitialPolytope.h"
-//#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
+#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
 #include "application/All_PP_Definition.h"
 //#include "core_system/Reachability/reachabilitySequential_GPU_MatrixVector_Multiply.cuh"
-//#include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
+#include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
 #include "boost/timer/timer.hpp"
 
 

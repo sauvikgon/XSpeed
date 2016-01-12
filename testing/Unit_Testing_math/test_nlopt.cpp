@@ -1,5 +1,5 @@
 //#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <nlopt.hpp>
 #include <iostream>
 #include <sstream>

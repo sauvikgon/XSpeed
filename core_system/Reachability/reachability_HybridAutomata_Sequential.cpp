@@ -64,7 +64,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		S->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-	//	cout<<"\nTesting 2 a 3\n";
+		//	cout<<"\nTesting 2 a 3\n";
 		pw_list.PassedList_insert(U); //todo:: confirm from sir why do we need this (space issue)
 
 		/*	We don't need this now
@@ -105,7 +105,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
 		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
 		 * */
-	//	cout<<"\nTesting 2 c\n";
+		//	cout<<"\nTesting 2 c\n";
 		double result_alfa = compute_alfa(reach_parameters.time_step,
 				current_location.getSystem_Dynamics(),
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
@@ -115,7 +115,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		//	cout<<"\nTesting 2 c\n";
 		double result_beta = compute_beta(current_location.getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
-	//	cout << "\n1st Compute Beta = " << result_beta << endl;
+		//	cout << "\n1st Compute Beta = " << result_beta << endl;
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
 		//	cout<<"\nTesting 2 d\n";
@@ -203,7 +203,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 			//	std::cout << "Parallel Done\n";
 			//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 		}
-		/*
+
 		if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 			cout << "\nRunning GPU Sequential\n";
 			boost::timer::cpu_timer AllReachGPU_time;
@@ -222,8 +222,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 			std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
 					<< return_Time1 << std::endl;
 
-
-		} */
+		}
 
 		if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 			cout
@@ -362,7 +361,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 				if (forbid_locID == (*it).first) { //forbidden locID matches
 					polytope::ptr forbid_poly = (*it).second;
 					//check intersection with flowpipe/reach_region
-					GeneratePolytopePlotter(forbid_poly);
+					//GeneratePolytopePlotter(forbid_poly);
 					std::list<template_polyhedra> forbid_intersects;
 					forbid_intersects = reach_region->polys_intersection(
 							forbid_poly, lp_solver_type_choosen);
@@ -386,8 +385,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							for (std::set<int>::iterator it =
 									ds.getDiscreteElements().begin();
 									it != ds.getDiscreteElements().end(); ++it)
-								locationID = (*it);	//Assuming only a single element exist in the discrete_set
-
+								locationID = (*it); //Assuming only a single element exist in the discrete_set
 
 							int transID =
 									current_forbidden_state->getTransitionId();
@@ -396,7 +394,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							}
 							std::cout << "(" << locationID << ", " << transID
 									<< ")";
-							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) {//searching only if not NULL
+							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
 								current_forbidden_state =
 										searchSymbolic_state(
 												Reachability_Region,
@@ -407,7 +405,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 								!= NULL);
 						if ((cc > 1)
 								&& (current_forbidden_state->getParentPtrSymbolicState()
-										== NULL)) {	//root is missed
+										== NULL)) { //root is missed
 							int locationID;
 							discrete_set ds;
 							ds = current_forbidden_state->getDiscreteSet();
@@ -415,7 +413,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							for (std::set<int>::iterator it =
 									ds.getDiscreteElements().begin();
 									it != ds.getDiscreteElements().end(); ++it)
-								locationID = (*it);	//Assuming only a single element exist in the discrete_set
+								locationID = (*it); //Assuming only a single element exist in the discrete_set
 
 							int transID =
 									current_forbidden_state->getTransitionId();
@@ -427,10 +425,10 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 						break;
 					}
 				}
-			}	//end of all forbidden_state check
-		}	//computed flowpipe is not empty
+			} //end of all forbidden_state check
+		} //computed flowpipe is not empty
 		if (saftey_violated) {
-			break;	//no need to compute rest of the locations
+			break; //no need to compute rest of the locations
 		}
 //  ******************************** Safety Verification section ********************************
 
@@ -440,11 +438,11 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		 reach_region.getPolytope(61).getColumnVector(), 1));
 		 GeneratePolytopePlotter(test);	 */
 			//	cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
-			for (std::list<transition>::iterator t =
+			for (std::list<transition::ptr>::iterator t =
 					current_location.getOut_Going_Transitions().begin();
 					t != current_location.getOut_Going_Transitions().end();
 					t++) { // get each destination_location_id and push into the pwl.waiting_list
-				int transition_id = (*t).getTransitionId();
+				int transition_id = (*t)->getTransitionId();
 				if (transition_id == -1) //Indicates empty transition or no transition exists
 					break; //out from transition for-loop as there is no transition for this location
 				location current_destination;
@@ -457,7 +455,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 				//	std::cout<<"\nOut_Going_Transition's Destination_Location_ID = "<< (*t).getDestination_Location_Id()<<"\n";
 				//	std::cout<<"\nOut_Going_Transition's Label = "<< (*t).getLabel()<<"\n";
 				current_destination = H.getLocation(
-						(*t).getDestination_Location_Id());
+						(*t)->getDestination_Location_Id());
 				//				std::cout<<"\nTest location insde = "<<current_destination.getName()<<"\n";
 				string locName = current_destination.getName();
 				cout << "\nNext Loc ID = " << current_destination.getLocId()
@@ -468,13 +466,13 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 						|| (locName.compare("UNSAFE") == 0))
 					continue; //do not push into the waitingList
 
-				gaurd_polytope = (*t).getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
-				current_assignment = (*t).getAssignT();
+				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
+				current_assignment = (*t)->getAssignT();
 
 				//	std::cout << "Before calling Templet_polys\n";
 				//cout<<reach_region.getMatrixSupportFunction().size2()<<"AmitJi\n";
 				//this intersected_polyhedra will have invariant direction added in it
-				string trans_name = (*t).getLabel(); //	cout<<"Trans Name = "<<trans_name<<endl;
+				string trans_name = (*t)->getLabel(); //	cout<<"Trans Name = "<<trans_name<<endl;
 				intersected_polyhedra = reach_region->polys_intersection(
 						gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 				// *** interesected_polyhedra included with invariant_directions also ******
@@ -484,7 +482,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 				//unsigned int iterations_before_intersection = intersection_start_point - 1;
 				//Templet_polys.resize_matrix_SupportFunction(dir_nums, iterations_before_intersection);
 //			std::cout << "Before calling getTemplate_approx\n";
-				int destination_locID = (*t).getDestination_Location_Id();
+				int destination_locID = (*t)->getDestination_Location_Id();
 				ds.insert_element(destination_locID);
 				std::cout
 						<< "\nNumber of intersection with Flowpipe and guard = "

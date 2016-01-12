@@ -10,7 +10,7 @@
 
 #include "core_system/HybridAutomata/DataStructureHybridAutomata.h"
 #include "core_system/continuous/Polytope/Polytope.h"
-
+#include <boost/shared_ptr.hpp>
 
 class transition {
 	int trans_id;
@@ -20,6 +20,7 @@ class transition {
 	polytope::ptr Gaurd;
 	Assign Assign_T;
 public:
+	typedef boost::shared_ptr<transition> ptr;
 	transition();
 	transition(int trans_id, string label, int source_id, int destination_id,
 			polytope::ptr Gaurd, Assign& Assign_T);

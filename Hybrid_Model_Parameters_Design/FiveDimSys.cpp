@@ -245,14 +245,14 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 //	Dynamics Initalised ---------------------
 
-	transition trans; //empty transition
+	transition::ptr trans = transition::ptr(new transition()); //empty transition
 	location source;
 	source.setLocId(1);
 	source.setName("Round_Figure");
 	source.setSystem_Dynamics(system_dynamics);
 	source.setInvariant(invariant);
 	source.setInvariantExists(false); //no invariant available
-	source.add_Out_Going_Transitions(trans);
+	source.add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
 
