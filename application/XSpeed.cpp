@@ -290,6 +290,7 @@ int main(int argc, char *argv[]) {
 
 	//cout<<"Started from here\n";
 	std::set<std::pair<int, polytope::ptr> > forbidden_set; //{(locID1,Polytope1)},{(locID2,Polytope2)}
+	abstractCE::ptr ce;	//object of class counter_example
 
 	double time_bound;
 	unsigned int iterations_size;
@@ -379,10 +380,12 @@ int main(int argc, char *argv[]) {
 	("output-variable,v", po::value<std::string>(),
 			"projecting variables's index(starts with 1) i.e., 'x,y' where x & y are integer constants") //better to be handled by hyst
 
-	("include-path,I", po::value<std::string>(), "include file path")
-	("model-file,m", po::value<std::string>(), "include model file")
-	("config-file,c", po::value<std::string>(),"include configuration file")
-	("output-file,o",po::value<std::string>(),"output file name for redirecting the outputs")
+	("include-path,I", po::value<std::string>(), "include file path")(
+			"model-file,m", po::value<std::string>(), "include model file")(
+			"config-file,c", po::value<std::string>(),
+			"include configuration file")("output-file,o",
+			po::value<std::string>(),
+			"output file name for redirecting the outputs")
 
 			;
 
@@ -693,7 +696,7 @@ int main(int argc, char *argv[]) {
 									colVector[col_index] = v[1];
 									col_index++;
 								}
-								std::cout << "coeff = " << coeff << std::endl;
+								//std::cout << "coeff = " << coeff << std::endl;
 								std::cout << "colVector = ";
 								for (int i = 0; i < colVector.size(); i++) {
 									std::cout << colVector[i] << "\t";
@@ -701,7 +704,7 @@ int main(int argc, char *argv[]) {
 								polytope::ptr forbidden_polytope;
 								forbidden_polytope = polytope::ptr(
 										new polytope(coeff, colVector, 1));
-								forbid_pair.second = forbidden_polytope;
+								forbid_pair.second = forbidden_polytope;	//todo currently unable to handle negative bounds
 
 								forbidden_set.insert(forbid_pair);
 
@@ -727,9 +730,8 @@ int main(int argc, char *argv[]) {
 						for (tokenizer::iterator tok_it = each_tokens.begin();
 								tok_it != each_tokens.end(); tok_it++) {
 							if (isNumber((std::string) *tok_it)) { //tokens
-								std::cout << "tok_it = " << *tok_it << "\n";
-								bounds[index_val] = boost::lexical_cast<double>(
-										(std::string) (*tok_it));
+								//std::cout << "tok_it = " << *tok_it << "\n";
+								bounds[index_val] = boost::lexical_cast<double>((std::string) (*tok_it));
 								index_val++;
 								//bounds.push_back(boost::lexical_cast<int>((*tok_it))); //forbid_pair.first = boost::lexical_cast<int>((*tok_it));
 							}
@@ -1001,13 +1003,13 @@ int main(int argc, char *argv[]) {
 			Symbolic_states_list = reach(Hybrid_Automata, init_state,
 					reach_parameters, transition_iterations, Algorithm_Type,
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
-					Solver_GLPK_Gurobi_GPU, forbidden_set);
+					Solver_GLPK_Gurobi_GPU, forbidden_set, ce);
 		} else { //Parallel Breadth First Search implemented for Discrete Jumps
 			std::cout << "\nRunning Parallel BFS\n";
 			Symbolic_states_list = reach_pbfs(Hybrid_Automata, init_state,
 					reach_parameters, transition_iterations, Algorithm_Type,
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
-					Solver_GLPK_Gurobi_GPU, forbidden_set);
+					Solver_GLPK_Gurobi_GPU, forbidden_set, ce);
 		}
 //cout<<"\nTesting 4\n";
 		tt1.stop();
@@ -1085,8 +1087,8 @@ int main(int argc, char *argv[]) {
 		if (vm.count("include-path")) {
 			fullPath = vm["include-path"].as<std::string>();
 			std::cout << "Include Path is: " << fullPath << "\n";
-		}else{
-			fullPath = "/home/amit/cuda-workspace/XSpeed/Debug/";	//default file path
+		} else {
+			fullPath = "/home/amit/cuda-workspace/XSpeed/Debug/";//default file path
 		}
 
 		fileWithPath.append(fullPath);
@@ -1094,7 +1096,7 @@ int main(int argc, char *argv[]) {
 		if (vm.count("output-file")) {
 			fileName = vm["output-file"].as<std::string>();
 			std::cout << "fileName is: " << fileName << "\n";
-		}else {
+		} else {
 			fileName = "out.txt";
 		}
 
@@ -1415,6 +1417,48 @@ int main(int argc, char *argv[]) {
 
 	} //endif of argc == 1
 
+	if (ce != NULL) {
+		cout << "******** Saftey Property Violated ********\n";
+		std::list<symbolic_states::ptr> list_sym_states;
+		std::list<transition::ptr> list_transition;
+		list_sym_states = ce->get_CE_sym_states();
+		list_transition = ce->get_CE_transitions();
+
+		std::list<symbolic_states::ptr>::iterator it_sym_state;
+		std::list<transition::ptr>::iterator it_trans;
+		discrete_set ds;
+		unsigned int locationID;
+		cout << "(Location ID, Transition ID)\n";
+		std::vector<int> transID(ce->get_length());	//making a vector of transition_ID so it can be printed
+		int index = 0;
+		//cout << "Length = " << ce->get_length() << "\n";
+		for (it_trans = list_transition.begin();
+				it_trans != list_transition.end(); it_trans++) {
+			transID[index] = (*it_trans)->getTransitionId();
+			index++;
+			//cout << "Trans_ID = " << (*it_trans)->getTransitionId() << "\n";
+		}
+		index = 0;
+		cout<<"  *****Starts***** \n";
+		for (it_sym_state = list_sym_states.begin();
+				it_sym_state != list_sym_states.end(); it_sym_state++) {
+
+			ds = (*it_sym_state)->getDiscreteSet();
+			for (std::set<int>::iterator it = ds.getDiscreteElements().begin();
+					it != ds.getDiscreteElements().end(); ++it)
+				locationID = (*it);
+
+			if (index == ce->get_length())
+				cout << "(" << locationID << " , --)\n";
+			else
+				cout << "(" << locationID << " , " << transID[index] << ")\n";
+			index++;
+		}
+		cout<<"  *****Ends*****\n";
+	} else {
+		cout << "******** Does NOT Violate Saftey Property ********\n";
+	}
+	cout << "\n******** Summary of XSpeed Reporting ********\n";
 	return 0; //returning only the Wall time taken to execute the Hybrid System
 }
 

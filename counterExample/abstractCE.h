@@ -12,6 +12,7 @@
 #include "core_system/symbolic_states/symbolic_states.h"
 #include "core_system/HybridAutomata/Transition.h"
 #include <list>
+#include <boost/shared_ptr.hpp>
 
 /**
  * This class is a data structure to store the abstract counter-example generated
@@ -25,24 +26,30 @@
 class abstractCE
 {
 public:
+	typedef boost::shared_ptr<abstractCE> ptr;
+
 	/**empty constructor */
-	abstractCE(){};
+	abstractCE() {
+	}
+	;
 	/* another constructor */
-	abstractCE(std::list<symbolic_states::ptr> s_states, std::list<transition::ptr> ts)
-	{
+	abstractCE(std::list<symbolic_states::ptr> s_states,
+			std::list<transition::ptr> ts) {
 		//Assertion to check that the length of the counter-example is one minus
 		// the number of sym states in the CE.
-		assert (sym_states.size() == trans.size() - 1);
+		assert(sym_states.size() == trans.size() - 1);
 		sym_states = s_states;
 		trans = ts;
 		length = trans.size();
 	}
 	/* destructor */
-	~abstractCE(){};
-	const std::list<symbolic_states::ptr> get_CE_sym_states() const{
+	~abstractCE() {
+	}
+	;
+	const std::list<symbolic_states::ptr> get_CE_sym_states() const {
 		return sym_states;
 	}
-	const std::list<transition::ptr> get_CE_transitions() const{
+	const std::list<transition::ptr> get_CE_transitions() const {
 		return trans;
 	}
 
@@ -54,9 +61,20 @@ public:
 	 */
 	const symbolic_states::ptr get_unsafe_symbolic_state() const;
 
-	const unsigned int get_length() const
-	{
+	const unsigned int get_length() const {
 		return length;
+	}
+
+	void set_length(unsigned int len) {
+		length = len;
+	}
+
+	void set_sym_states(std::list<symbolic_states::ptr> sym) {
+		sym_states = sym;
+	}
+
+	void set_transitions(std::list<transition::ptr> transitions) {
+		trans = transitions;
 	}
 
 private:

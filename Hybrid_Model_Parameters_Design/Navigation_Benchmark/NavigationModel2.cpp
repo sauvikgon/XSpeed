@@ -150,8 +150,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueI[1] = -1.5;
 	boundValueI[2] = 1.7;
 	boundValueI[3] = -1.5;
-	boundValueI[4] = -1;
-	boundValueI[5] = 1;
+	boundValueI[4] =0;// -1;
+	boundValueI[5] =0;// 1;
 	boundValueI[6] = 0.5;
 	boundValueI[7] = -0.5;
 
