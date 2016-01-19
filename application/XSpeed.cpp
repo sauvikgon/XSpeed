@@ -69,6 +69,8 @@
 // *********** User Selected Model ***************
 #include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 
+#include "InputOutput/io_utility.h"
+
 namespace po = boost::program_options;
 using namespace std;
 
@@ -1300,51 +1302,15 @@ int main(int argc, char *argv[]) {
 //	XXXX---------------------------------------------------------XXXXX
 
 //	XXXX---------------------------------------------------------XXXXX
+
 		typedef std::vector<std::pair<double, double> > Intervals;
-		Intervals Interval_Outputs(
-				init_state->getInitialSet()->getSystemDimension());
+
 		std::list<std::pair<int, Intervals> > location_interval_outputs;
-		double max_value;
-		std::list<symbolic_states::ptr>::iterator SS;
-		for (SS = Symbolic_states_list.begin();
-				SS != Symbolic_states_list.end(); SS++) {
-			//Each sysmbolic_state or each Location
-			int locID;
-			discrete_set ds;
-			ds = (*SS)->getDiscreteSet();
-			for (std::set<int>::iterator it = ds.getDiscreteElements().begin();
-					it != ds.getDiscreteElements().end(); ++it) {
-				locID = (*it); //Assuming only a single element exist in the discrete_set
-			}
-			std::pair<int, Intervals> loc_interval;
-			loc_interval.first = locID;
-			math::matrix<double> each_sfm;
-			each_sfm = (*SS)->getContinuousSetptr()->getMatrixSupportFunction();
-			for (int i = 0; i < Totaldirs; i++) { //i==row_number
-				for (unsigned int k = 0; k < each_sfm.size2(); k++) { //k==col_number
-					double sfm_value = each_sfm(i, k);
-					if (k == 0) {
-						max_value = sfm_value;
-					} else {
-						if (sfm_value > max_value) {
-							max_value = sfm_value;
-						}
-					}
-				}
-				int index = i / (int) 2; //getting the variable_index
-				if ((i % 2) == 0) { //even row is right_value of the interval(ie Max value)
-					Interval_Outputs[index].second = max_value;
-				} else { //left_value of the interval(ie Min value)
-					Interval_Outputs[index].first = -1 * max_value;
-				}
-			} //end of sfm returns vector of all variables[min,max] intervals
+		//cout<<"Printing TotalDirs = "<<Totaldirs<<"\n";
 
-			loc_interval.second = Interval_Outputs;
-			location_interval_outputs.push_back(loc_interval);
-		} // end-of-SS
+		Interval_Generator(Symbolic_states_list, location_interval_outputs, init_state);
 
-		std::cout
-				<< "\nOutputs for Each Location:: Output-Format is Interval \n";
+		std::cout << "\nOutputs for Each Location:: Output-Format is Interval \n";
 		for (std::list<std::pair<int, Intervals> >::iterator it =
 				location_interval_outputs.begin();
 				it != location_interval_outputs.end(); it++) {
@@ -1419,12 +1385,12 @@ int main(int argc, char *argv[]) {
 
 	if (ce != NULL) {
 		cout << "******** Saftey Property Violated ********\n";
-		std::list<symbolic_states::ptr> list_sym_states;
+		std::list<abstract_symbolic_state::ptr> list_sym_states;
 		std::list<transition::ptr> list_transition;
 		list_sym_states = ce->get_CE_sym_states();
 		list_transition = ce->get_CE_transitions();
 
-		std::list<symbolic_states::ptr>::iterator it_sym_state;
+		std::list<abstract_symbolic_state::ptr>::iterator it_sym_state;
 		std::list<transition::ptr>::iterator it_trans;
 		discrete_set ds;
 		unsigned int locationID;

@@ -8,15 +8,15 @@
 #include "counterExample/abstractCE.h"
 
 
-const symbolic_states::ptr abstractCE::get_first_symbolic_state() const
+const abstract_symbolic_state::ptr abstractCE::get_first_symbolic_state() const
 {
-	std::list<symbolic_states::ptr>::const_iterator it = sym_states.begin();
+	std::list<abstract_symbolic_state::ptr>::const_iterator it = sym_states.begin();
 	return *it;
 
 }
-const symbolic_states::ptr abstractCE::get_unsafe_symbolic_state() const
+const abstract_symbolic_state::ptr abstractCE::get_unsafe_symbolic_state() const
 {
-	std::list<symbolic_states::ptr>::const_iterator it = sym_states.end();
+	std::list<abstract_symbolic_state::ptr>::const_iterator it = sym_states.end();
 	return *it;
 }
 

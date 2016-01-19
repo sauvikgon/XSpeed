@@ -354,6 +354,11 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		}
 //  ******************************** Safety Verification section ********************************
 		std::list<symbolic_states::ptr> list_sym_states;
+
+		std::list<abstract_symbolic_state::ptr> list_abstract_sym_states;
+		polytope::ptr Conti_Set;	//bounding_box Polytope
+		//Conti_Set =polytope::ptr(new polytope());
+
 		std::list<transition::ptr> list_transitions;
 
 		if (reach_region->getTotalIterations() != 0) { //flowpipe exists
@@ -368,20 +373,35 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 					std::list<template_polyhedra> forbid_intersects;
 					forbid_intersects = reach_region->polys_intersection(
 							forbid_poly, lp_solver_type_choosen);
+
 					if (forbid_intersects.size() == 0) {
 						std::cout<< "\nThe model does NOT violates SAFETY property!!!\n";
 					} else {
 						std::cout<< "\nThe model violates SAFETY property!!!\n";
-						//todo:: need to print the entire reachability path
+
 						symbolic_states::ptr current_forbidden_state;
 						current_forbidden_state = S;
+						// Here create a new abstract_symbolic_state
+						abstract_symbolic_state::ptr curr_abs_sym_state;
+						curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
+
+
+
+
 						std::cout << "\nReverse Path Trace =>\n";
 						int cc = 0;
 						do {
 							int locationID, locationID2;
 							discrete_set ds, ds2;
 							ds = current_forbidden_state->getDiscreteSet();
+							//insert discrete_set in the abstract_symbolic_state
+							curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
 
+		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
+
+							Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+							curr_abs_sym_state->setContinuousSet(Conti_Set);
+		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 							for (std::set<int>::iterator it =
 									ds.getDiscreteElements().begin();
 									it != ds.getDiscreteElements().end(); ++it)
@@ -392,6 +412,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		//todo::create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
 			//1) ******************** list_of_symbolic_states ********************
 							list_sym_states.push_front(current_forbidden_state);//pushing the bad symbolic_state first(at the top)
+							list_abstract_sym_states.push_front(curr_abs_sym_state);
 			//2) list_of_transition
 				//a) current sym_state only have trans_ID but to retrieve this transition I have to
 				//b) get the parent to this sym_state using getParentPtrSymbolicState and then in
@@ -430,18 +451,25 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							discrete_set ds;
 							ds = current_forbidden_state->getDiscreteSet();
 
+							curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+							Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+							curr_abs_sym_state->setContinuousSet(Conti_Set);
+
 							for (std::set<int>::iterator it =ds.getDiscreteElements().begin();it != ds.getDiscreteElements().end(); ++it)
 								locationID = (*it); //Assuming only a single element exist in the discrete_set
 
 							int transID = current_forbidden_state->getTransitionId();
+
 							list_sym_states.push_front(current_forbidden_state);//1) pushing the initial/root bad symbolic_state at the top
+							list_abstract_sym_states.push_front(curr_abs_sym_state);
 							std::cout << " -->  (" << locationID << ", "<< transID << ")\n";
 						}
 						saftey_violated = true;
 
 						ce = abstractCE::ptr(new abstractCE());
 						ce->set_length(cc);
-						ce->set_sym_states(list_sym_states);
+						//ce->set_sym_states(list_sym_states);
+						ce->set_sym_states(list_abstract_sym_states);
 						ce->set_transitions(list_transitions);
 						break;
 					}

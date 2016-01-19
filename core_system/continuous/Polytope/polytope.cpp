@@ -8,13 +8,6 @@
  *      Author: amit
  */
 
-/*
- * polytope.cpp
- *
- *  Created on: 30-Jun-2014
- *      Author: amit
- */
-
 #include "core_system/continuous/Polytope/Polytope.h"
 //#include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 //#include "math/lp_gurobi_simplex.h"

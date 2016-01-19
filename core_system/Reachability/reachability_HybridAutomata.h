@@ -11,6 +11,9 @@
 
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "core_system/symbolic_states/symbolic_states.h"
+#include "counterExample/abstract_symbolic_state.h"
+#include "InputOutput/io_utility.h"
+
 //#include "core_system/PWL/pwl.h"
 #include "core_system/PWL/pwlist.h"
 #include "core_system/symbolic_states/initial_state.h"
