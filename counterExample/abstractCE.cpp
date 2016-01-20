@@ -20,4 +20,9 @@ const symbolic_states::ptr abstractCE::get_unsafe_symbolic_state() const
 	return *it;
 }
 
-
+concreteCE abstractCE::get_concrete_CE()
+{
+	// TODO: to be implemented
+	concreteCE ce;
+	return ce;
+}

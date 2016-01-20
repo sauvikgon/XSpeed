@@ -12,6 +12,7 @@
 #include "core_system/symbolic_states/symbolic_states.h"
 #include "core_system/HybridAutomata/Transition.h"
 #include <list>
+#include "counterExample/concreteCE.h"
 
 /**
  * This class is a data structure to store the abstract counter-example generated
@@ -25,6 +26,7 @@
 class abstractCE
 {
 public:
+
 	/**empty constructor */
 	abstractCE(){};
 	/* another constructor */
@@ -55,7 +57,11 @@ public:
 	{
 		return length;
 	}
-
+	/**
+	 * Returns an instance of a concrete counter example
+	 * from the abstract one by solving non-linear optimization problem
+	 */
+	concreteCE get_concrete_CE();
 private:
 	/**
 	 * The first symbolic state is the initial symbolic state and the last one

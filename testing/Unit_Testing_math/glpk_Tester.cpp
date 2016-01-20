@@ -23,6 +23,7 @@ struct Glpk_LPSolver {
 	}
 	~Glpk_LPSolver() { /* some teardown */
 	}
+
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	size_type row, col;
 	int boundSignI;
@@ -68,20 +69,20 @@ TEST_FIXTURE(Glpk_LPSolver, CPU_LP_Test) {
 
 	double res;
 
-/*	std::cout << "\n**Answer_Of_All_Simplex GLPK**\n";
-	for (int i = 0; i < N_S; i++) {
-		res = lp.Compute_LLP(direction);
-		cout << res << "\n";
-	}*/
+	/*	std::cout << "\n**Answer_Of_All_Simplex GLPK**\n";
+	 for (int i = 0; i < N_S; i++) {
+	 res = lp.Compute_LLP(direction);
+	 cout << res << "\n";
+	 }*/
 
 	res = lp.Compute_LLP(direction);
 
 	out << "";
 	out << res;
 	proper << "";
-	proper <<"10.2";
+	proper << "10.2";
 
-	CHECK_EQUAL(proper.str(),out.str());
+	CHECK_EQUAL(proper.str(), out.str());
 
 	/*
 	 math::matrix<double> A;
