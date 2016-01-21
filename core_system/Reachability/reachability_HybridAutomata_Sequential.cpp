@@ -65,7 +65,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
 		//	cout<<"\nTesting 2 a 3\n";
-		pw_list.PassedList_insert(U); //todo:: confirm from sir why do we need this (space issue)
+		pw_list.PassedList_insert(U); // confirm from sir why do we need this (space issue)
 
 		/*	We don't need this now
 		 for (std::set<int>::iterator it =
@@ -409,7 +409,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 
 							int transID = current_forbidden_state->getTransitionId();	//a)
 		//   **********************************************************
-		//todo::create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
+		//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
 			//1) ******************** list_of_symbolic_states ********************
 							list_sym_states.push_front(current_forbidden_state);//pushing the bad symbolic_state first(at the top)
 							list_abstract_sym_states.push_front(curr_abs_sym_state);

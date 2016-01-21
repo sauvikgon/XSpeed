@@ -292,6 +292,9 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 			loopIteration++; //for the next Omega-iteration or Time-bound
 		} //end of while for each vector
 	}
+
+	//todo:: Redundant invariant directional constraints to be removed
+
 	if (isInvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;
 		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constraints
@@ -593,6 +596,8 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 #pragma omp critical
 	{/*this critical is used when we call the module PAR_ITER as we are updating the variable ReachParameters
 	 and MatrixValue if this function is called from the module SEQ this #pragma will be ignored*/
+
+		//todo:: Redundant invariant directional constraints to be removed
 		if (isInvariantExist == true) { //if invariant exist. Computing
 			math::matrix<double> inv_sfm;
 			int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants

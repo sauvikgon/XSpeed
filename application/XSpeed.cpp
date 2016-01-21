@@ -230,6 +230,9 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 	dim = init_state->getInitialSet()->getSystemDimension();
 
 //Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
+//todo:: needs to decide that is this the right place to include Invariant direction
+	//and also Redundant invariant directional constraints to be removed
+
 	std::vector<std::vector<double> > newDirections;
 
 	if (Directions_Type == BOX) {

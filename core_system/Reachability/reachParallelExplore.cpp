@@ -353,6 +353,8 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 		} //end of while for each vector
 	} //end of pragma omp parallel for
 
+
+	//todo:: Redundant invariant directional constraints to be removed
 	if (isInvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;
 		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
@@ -380,6 +382,8 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 
 /*
  * Same Code as Above but Called from Nested OMP Parallel FOR
+ *
+ * todo needs to implement + C of the equation Ax + Bu + C
  */
 const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
@@ -463,6 +467,7 @@ const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(
 	 * Appending invariant directions and invariant constraints/bounds(alfa)
 	 * Goal : To truncate the reachable region within the Invariant region
 	 */
+	//todo:: Redundant invariant directional constraints to be removed
 	if (isInvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;
 		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants

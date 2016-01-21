@@ -56,14 +56,19 @@ void Interval_Generator(std::list<symbolic_states::ptr>& Symbolic_states_list,
 	} // end-of-SS
 }
 
+//Creating a bounding_box polytope with constraints as (template_directions + invariant_directions)
+// and bounds as maximum of (sfm + invariant_bounds)
 polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
 	polytope::ptr boundingPolytope;
 	boundingPolytope = polytope::ptr(new polytope());
 
-	math::matrix<double> directional_constraints;
+	math::matrix<double> directional_constraints, all_dirs;
 	math::matrix<double> each_sfm;
 
 	directional_constraints = sfm->getTemplateDirections();
+
+	directional_constraints.matrix_join(sfm->getInvariantDirections(), all_dirs);
+
 	each_sfm = sfm->getMatrixSupportFunction();
 	boundingPolytope->setCoeffMatrix(directional_constraints);
 
@@ -84,7 +89,16 @@ polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
 		}	//getting the max_value for each row
 		polytope_bounds[i] = max_value;
 	} //end of sfm returns vector of all variables[min,max] intervals
-	boundingPolytope->setColumnVector(polytope_bounds);
+
+	std::vector<double> inv_bounds(sfm->getMatrix_InvariantBound().size1());
+	for (unsigned int k = 0; k < sfm->getInvariantDirections().size1(); k++) { //k==rows or number of invariants
+		inv_bounds[k] = sfm->getMatrix_InvariantBound()(k,0);
+	}
+
+	std::vector<double> all_polytope_bounds;
+	all_polytope_bounds = vector_join(polytope_bounds, inv_bounds);
+
+	boundingPolytope->setColumnVector(all_polytope_bounds);
 	boundingPolytope->setInEqualitySign(1);//Indicating all <= sign
 
 	return boundingPolytope;
