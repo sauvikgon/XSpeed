@@ -150,8 +150,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	boundValueI[1] = -1.5;
 	boundValueI[2] = 1.7;
 	boundValueI[3] = -1.5;
-	boundValueI[4] = -1;
-	boundValueI[5] = 1;
+	boundValueI[4] = 0; // -1;
+	boundValueI[5] = 0; // 1;
 	boundValueI[6] = 0.5;
 	boundValueI[7] = -0.5;
 
@@ -311,7 +311,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t1(1, "1 to Bad", 1, 9, gaurd_polytope, assignment);
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "1 to Bad", 1, 9, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 1<=y<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -325,7 +326,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t2(2, "1 to 4", 1, 4, gaurd_polytope, assignment);
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "1 to 4", 1, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; //  0<=x<=1 and y==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = 0;
@@ -339,7 +341,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t3(3, "1 to 2", 1, 2, gaurd_polytope, assignment);
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "1 to 2", 1, 2, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; //  0<=x<=1 and y==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = 0;
@@ -353,7 +356,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t4(4, "2 to 1", 2, 1, gaurd_polytope, assignment);
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "2 to 1", 2, 1, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -367,7 +371,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t5(5, "2 to 3", 2, 3, gaurd_polytope, assignment);
+	transition::ptr t5 = transition::ptr(
+			new transition(5, "2 to 3", 2, 3, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // y==1 and 1<=x<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -381,7 +386,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t6(6, "3 to 4", 3, 4, gaurd_polytope, assignment);
+	transition::ptr t6 = transition::ptr(
+			new transition(6, "3 to 4", 3, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -395,7 +401,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t7(7, "3 to 2", 3, 2, gaurd_polytope, assignment);
+	transition::ptr t7 = transition::ptr(
+			new transition(7, "3 to 2", 3, 2, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 0<=y<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
@@ -409,7 +416,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t8(8, "3 to A", 3, 8, gaurd_polytope, assignment);
+	transition::ptr t8 = transition::ptr(
+			new transition(8, "3 to A", 3, 8, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 1<=y<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -423,7 +431,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t9(9, "4 to 1", 4, 1, gaurd_polytope, assignment);
+	transition::ptr t9 = transition::ptr(
+			new transition(9, "4 to 1", 4, 1, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // y==2 and 1<=x<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -437,7 +446,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t10(10, "4 to 5", 4, 5, gaurd_polytope, assignment);
+	transition::ptr t10 = transition::ptr(
+			new transition(10, "4 to 5", 4, 5, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 1<=y<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
@@ -451,7 +461,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t11(11, "4 to 6", 4, 6, gaurd_polytope, assignment);
+	transition::ptr t11 = transition::ptr(
+			new transition(11, "4 to 6", 4, 6, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // y==1 and 1<=x<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -465,7 +476,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t12(12, "4 to 3", 4, 3, gaurd_polytope, assignment);
+	transition::ptr t12 = transition::ptr(
+			new transition(12, "4 to 3", 4, 3, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // y==2 and 1<=x<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -479,7 +491,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t13(13, "5 to 4", 5, 4, gaurd_polytope, assignment);
+	transition::ptr t13 = transition::ptr(
+			new transition(13, "5 to 4", 5, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 2<=y<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
@@ -493,7 +506,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t14(14, "5 to 7", 5, 7, gaurd_polytope, assignment);
+	transition::ptr t14 = transition::ptr(
+			new transition(14, "5 to 7", 5, 7, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 2<=y<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -1;
@@ -507,7 +521,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t15(15, "5 to Bad", 5, 9, gaurd_polytope, assignment);
+	transition::ptr t15 = transition::ptr(
+			new transition(15, "5 to Bad", 5, 9, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 3; // y==2 and 2<=x<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
@@ -521,7 +536,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t16(16, "6 to 7", 6, 7, gaurd_polytope, assignment);
+	transition::ptr t16 = transition::ptr(
+			new transition(16, "6 to 7", 6, 7, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 1<=y<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
@@ -535,7 +551,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t17(17, "6 to 4", 6, 4, gaurd_polytope, assignment);
+	transition::ptr t17 = transition::ptr(
+			new transition(17, "6 to 4", 6, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 3; // y==1 and 2<=x<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
@@ -549,7 +566,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t18(18, "6 to A", 6, 8, gaurd_polytope, assignment);
+	transition::ptr t18 = transition::ptr(
+			new transition(18, "6 to A", 6, 8, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 3; // y==2 and 2<=x<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
@@ -563,7 +581,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t19(19, "7 to 6", 7, 6, gaurd_polytope, assignment);
+	transition::ptr t19 = transition::ptr(
+			new transition(19, "7 to 6", 7, 6, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 2<=y<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
 	gaurdBoundValue[1] = -2;
@@ -577,7 +596,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition t20(20, "7 to 5", 4, 5, gaurd_polytope, assignment);
+	transition::ptr t20 = transition::ptr(
+			new transition(20, "7 to 5", 4, 5, gaurd_polytope, assignment));
 
 // ******************* Transition initialized **************************
 
@@ -688,7 +708,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition> Out_Going_Trans_fromLoc1;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	Out_Going_Trans_fromLoc1.push_back(t1);
 	Out_Going_Trans_fromLoc1.push_back(t2);
 	Out_Going_Trans_fromLoc1.push_back(t3);
@@ -726,7 +746,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition> Out_Going_Trans_fromLoc2;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc2;
 	Out_Going_Trans_fromLoc2.push_back(t4);
 	Out_Going_Trans_fromLoc2.push_back(t5);
 
@@ -763,7 +783,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition> Out_Going_Trans_fromLoc3;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc3;
 	Out_Going_Trans_fromLoc3.push_back(t6);
 	Out_Going_Trans_fromLoc3.push_back(t7);
 	Out_Going_Trans_fromLoc3.push_back(t8);
@@ -801,7 +821,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition> Out_Going_Trans_fromLoc4;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc4;
 	Out_Going_Trans_fromLoc4.push_back(t9);
 	Out_Going_Trans_fromLoc4.push_back(t10);
 	Out_Going_Trans_fromLoc4.push_back(t11);
@@ -840,7 +860,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition> Out_Going_Trans_fromLoc5;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc5;
 	Out_Going_Trans_fromLoc5.push_back(t13);
 	Out_Going_Trans_fromLoc5.push_back(t14);
 	Out_Going_Trans_fromLoc5.push_back(t15);
@@ -878,7 +898,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition> Out_Going_Trans_fromLoc6;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc6;
 	Out_Going_Trans_fromLoc6.push_back(t16);
 	Out_Going_Trans_fromLoc6.push_back(t17);
 	Out_Going_Trans_fromLoc6.push_back(t18);
@@ -916,7 +936,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition> Out_Going_Trans_fromLoc7;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc7;
 	Out_Going_Trans_fromLoc7.push_back(t19);
 	Out_Going_Trans_fromLoc7.push_back(t20);
 
@@ -956,7 +976,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition> Out_Going_Trans_fromLoc8, Out_Going_Trans_fromLoc9;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc8,
+			Out_Going_Trans_fromLoc9;
 
 	location l8(8, "FINAL", system_dynamics, invariant, false,
 			Out_Going_Trans_fromLoc8);
@@ -983,7 +1004,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet
 	initial_state::ptr I;
-	I = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I, S,
+	I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
 
 	init_state = I;

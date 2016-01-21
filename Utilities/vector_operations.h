@@ -15,7 +15,6 @@
 
 #include "core_system/math/matrix.h"
 
-
 // converts the vector v into a unit vector
 std::vector<double> normalize_vector(std::vector<double> v);
 
@@ -24,10 +23,11 @@ std::vector<double> bisect_vector(std::vector<double> u, std::vector<double> v);
 
 bool isEqual_Vectors(std::vector<double> u, std::vector<double> v);
 
-math::matrix<double> matrix_vertices(std::set<std::pair<double, double> > set_vertices);
+math::matrix<double> matrix_vertices(
+		std::set<std::pair<double, double> > set_vertices);
 
 //sorting the 2d vertices
-math::matrix<double> sort_vertices(std::set<std::pair<double, double> > set_vertices);
-
+math::matrix<double> sort_vertices(
+		std::set<std::pair<double, double> > set_vertices);
 
 #endif /* VECTOR_OPERATIONS_H_ */

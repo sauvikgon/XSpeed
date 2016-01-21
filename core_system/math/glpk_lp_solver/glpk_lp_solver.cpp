@@ -18,7 +18,7 @@ unsigned int glpk_lp_solver::lp_count = 0;		//initialize the static variable
 glpk_lp_solver::~glpk_lp_solver() {
 	//cout<<"\nLP problem died Here \n";
 	lp_count--;
-		glp_delete_prob(mylp);
+	glp_delete_prob(mylp);
 	//	glp_free(mylp);
 	//	if (lp_count == 0) {
 	//		glp_free_env();
@@ -40,7 +40,7 @@ glpk_lp_solver::glpk_lp_solver() {
 	this->setDefalultObject();
 }
 
-void glpk_lp_solver::setDefalultObject() {		//if this is a virtual member functions, then we cannot call from constructor
+void glpk_lp_solver::setDefalultObject() {//if this is a virtual member functions, then we cannot call from constructor
 	mylp = glp_create_prob();
 //	cout<<"\nLP problem Created Here\n";
 	glp_init_smcp(&param);
@@ -200,7 +200,7 @@ double glpk_lp_solver::Compute_LLP(std::vector<double> coeff_function) {//Here a
 	return result;
 }
 
-std::vector<double> glpk_lp_solver::getMaximizing_Variables(){
+std::vector<double> glpk_lp_solver::getMaximizing_Variables() {
 	return this->sv;
 }
 

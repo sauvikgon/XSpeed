@@ -98,7 +98,7 @@ float Simplex(float *S_MAT, int S_row, int S_col) {
 			//S_MAT[temp_row_base] = col - 1;
 			S_MAT[row] = col - 1;			//now temp_row_base is not required
 			for (tid = 2; tid < S_col; tid++) {	//Data Parallel section 3
-				temp_index = row + (tid * S_row);//avoiding re-computation
+				temp_index = row + (tid * S_row);	//avoiding re-computation
 				S_MAT[temp_index] = S_MAT[temp_index] / col1[row];//S_MAT[row_base + S_row];
 				//S_MAT[temp_index] = S_MAT[temp_index] / S_MAT[row_base + S_row];
 			}		//Data Parallel section 3 done
@@ -254,7 +254,7 @@ float Simplex_CPU::ComputeLP_CPU(std::vector<double> &C) {
 	for (i = M - 1; i < M; i++) {
 		for (j = 2; j < N; j++) {
 			if (j < 2 + No_O) {
-				MAT[(int) (i + j * M)] = (float)-C[j - 2];
+				MAT[(int) (i + j * M)] = (float) -C[j - 2];
 			} else {
 				MAT[(int) (i + j * M)] = 0;
 			}
@@ -380,7 +380,7 @@ float Simplex_CPU::ComputeLP_CPU(std::vector<double> &C) {
 		//std::cout << "\nResult = " << res << "\n";
 	} else {
 		res = Simplex(MAT, M, N);
-	//	std::cout << "\nResult = " << res << "\n";
+		//	std::cout << "\nResult = " << res << "\n";
 	}
 	return res;
 }

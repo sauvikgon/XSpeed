@@ -175,14 +175,15 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 
-	transition trans(1, "hop", 1, 1, gaurd_polytope, assignment);
+	transition::ptr trans = transition::ptr(
+			new transition(1, "hop", 1, 1, gaurd_polytope, assignment));
 	location source;
 	source.setLocId(1);
 	source.setName("Always");
 	source.setSystem_Dynamics(system_dynamics);
 	source.setInvariant(invariant);
 	source.setInvariantExists(true);
-	source.add_Out_Going_Transitions(trans);
+	source.add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
 

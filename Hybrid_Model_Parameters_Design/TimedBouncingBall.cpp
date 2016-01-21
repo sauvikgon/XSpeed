@@ -271,10 +271,10 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 
-
-/*transitions t;
-t=NULL;*/
-transition trans(1,"hop",1,1,gaurd_polytope,assignment);
+	/*transitions t;
+	 t=NULL;*/
+	transition::ptr trans = transition::ptr(
+			new transition(1, "hop", 1, 1, gaurd_polytope, assignment));
 
 	location source;
 	source.setLocId(1);
@@ -282,7 +282,7 @@ transition trans(1,"hop",1,1,gaurd_polytope,assignment);
 	source.setSystem_Dynamics(system_dynamics);
 	source.setInvariant(invariant);
 	source.setInvariantExists(true);
-	source.add_Out_Going_Transitions(trans);
+	source.add_Out_Going_Transition(trans);
 
 //transitions &trans;
 //transitions trans("hop",source,destination,gaurd_polytope,assignment);
@@ -468,9 +468,10 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	transition t1(1, "hop", 1, 1, gaurd_polytope0, assignment0);
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "hop", 1, 1, gaurd_polytope0, assignment0));
 
-	std::list<transition> Out_Going_Trans_fromalways_running;
+	std::list<transition::ptr> Out_Going_Trans_fromalways_running;
 
 	Out_Going_Trans_fromalways_running.push_back(t1);
 	location l1(1, "always_running", system_dynamics0, invariant0, true,

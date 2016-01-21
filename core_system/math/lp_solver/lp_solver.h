@@ -8,7 +8,6 @@
 #ifndef LP_SOLVER_H_
 #define LP_SOLVER_H_
 
-
 #include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 #include "core_system/math/lp_solver/All_Solver_Definition.h"
 //#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"

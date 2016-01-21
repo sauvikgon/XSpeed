@@ -319,11 +319,12 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 		template_polyhedra::ptr& Tpoly) {
 
 	if (this->total_iterations == 0)	//if the calling polyhedra is empty
-		return template_polyhedra::ptr(new template_polyhedra(Tpoly->getMatrixSupportFunction(),
-				Tpoly->getTemplateDirections()));
+		return template_polyhedra::ptr(
+				new template_polyhedra(Tpoly->getMatrixSupportFunction(),
+						Tpoly->getTemplateDirections()));
 
 	//std::cout<<"\nEntered inside Union_templatePolytope\n";
-	size_type rows = Tpoly->getMatrixSupportFunction().size1();//rows will not change only column size will increase
+	size_type rows = Tpoly->getMatrixSupportFunction().size1();	//rows will not change only column size will increase
 	unsigned int k;
 	size_type cols = Matrix_SupportFunction.size2()
 			+ Tpoly->getMatrixSupportFunction().size2();
@@ -343,5 +344,6 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 		}
 		//std::cout<<endl;
 	}
-	return template_polyhedra::ptr(new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
+	return template_polyhedra::ptr(
+			new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
 }

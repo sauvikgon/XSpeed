@@ -37,9 +37,9 @@ using namespace boost::numeric::ublas;
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope& initial_polytope_I,
-		Dynamics& system_dynamics, polytope& invariant,
-		polytope& gaurd_polytope) {
+void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters,
+		polytope& initial_polytope_I, Dynamics& system_dynamics,
+		polytope& invariant, polytope& gaurd_polytope) {
 
 	std::cout << std::fixed;	//to assign precision on the std::output stream
 	std::cout.precision(12);			//cout << setprecision(17);
@@ -68,7 +68,7 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 				ConstraintsMatrixI(2 * i + 1, j) = 0;		//for -xi
 			}
 		}
-		if (i < 8){		//x1  to x8
+		if (i < 8) {		//x1  to x8
 			boundValueI[2 * i] = 0.1;
 			boundValueI[2 * i + 1] = 0;
 		}
@@ -76,7 +76,7 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 			boundValueI[2 * i] = 0;
 			boundValueI[2 * i + 1] = 0;
 		}
-		if (i >= 28 ) {		//u1 to u6 and t
+		if (i >= 28) {		//u1 to u6 and t
 			boundValueI[2 * i] = 0;
 			boundValueI[2 * i + 1] = 0;
 		}
@@ -84,8 +84,8 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 
 	boundSignI = 1;
 
-/*
-	cout<<"\nPrinting the Initial Polytope Set\n";
+	/*
+	 cout<<"\nPrinting the Initial Polytope Set\n";
 	 for (int i=0;i<row;i++){
 	 for (int j=0;j<col;j++){
 	 cout << ConstraintsMatrixI(i,j)<<"\t";
@@ -130,7 +130,7 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 			invariantConstraintsMatrix(i, j) = 0.0;			//for xi
 		}
 	}
-	invariantConstraintsMatrix(34,34) = 1;
+	invariantConstraintsMatrix(34, 34) = 1;
 
 	invariantBoundValue.resize(row);
 	for (int i = 0; i < 35 - 1; i++) {
@@ -143,7 +143,6 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 	//invariant.setIsUniverse(true);	//
 	// Invariant Initialised above
 
-
 	std::ofstream MatLabfile, MatLabfile2;
 	//file for making matrix 'A' for MatLab output function con2vert(A,b) to be executed from plotoutput.m
 	MatLabfile.open("/home/amit/matlabTest/ProjectOutput/MatrixA_file.txt");
@@ -153,7 +152,7 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 			MatLabfile << ConstraintsMatrixI(i, j) << " ";
 		}
 		MatLabfile << std::endl;
-		MatLabfile2 << boundValueI[i]<<std::endl;
+		MatLabfile2 << boundValueI[i] << std::endl;
 	}
 	MatLabfile.close();
 	MatLabfile2.close();
@@ -299,7 +298,7 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters, polytope
 
 	system_dynamics.MatrixB = Bmatrix;
 	system_dynamics.MatrixA = AUmatrix;
-	system_dynamics.U->setIsEmpty(true);	//set empty = true which is by default
+	system_dynamics.U->setIsEmpty(true);//set empty = true which is by default
 
 	//@Rajarshi: invariantExists should not be a reachability parameter. It should
 	//be a location parameter

@@ -17,5 +17,4 @@
  */
 double compute_theta(std::vector<double> l1, std::vector<double> l2);
 
-
 #endif /* UTILITY_FUNCTIONS_H_ */

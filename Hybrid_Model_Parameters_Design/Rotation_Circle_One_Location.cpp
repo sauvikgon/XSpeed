@@ -178,7 +178,7 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
 
-	std::list<transition> Out_Going_Trans_fromLoc1;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	//Out_Going_Trans_fromLoc1.push_back(t1);
 
 //NO INVARIANT EXITS

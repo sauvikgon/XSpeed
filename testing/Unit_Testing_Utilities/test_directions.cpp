@@ -1,8 +1,6 @@
 #include <sstream>
 #include <iostream>
-
 #include "UnitTest++/UnitTest++.h"
-
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
 #include "core_system/math/matrix.h"

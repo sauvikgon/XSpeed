@@ -1,7 +1,6 @@
 #include <sstream>
 #include <iostream>
 #include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-
 using namespace std;
 
 SUITE(continuous_reach_TestSuite) {

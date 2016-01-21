@@ -39,9 +39,10 @@ bool is_MEQ(const iterator_type1& ib, const iterator_type1& ie,
 
 /** Comparison for STL-like containers over scalar_type.
  *  Corresponds to x1==x2 in the exact case. */
-template<typename scalar_type, template<typename> class container_type >
-bool is_MEQ(const container_type<scalar_type>& v, const container_type<scalar_type>& w) {
-	return is_MEQ(v.begin(),v.end(),w.begin(),w.end());
+template<typename scalar_type, template<typename > class container_type>
+bool is_MEQ(const container_type<scalar_type>& v,
+		const container_type<scalar_type>& w) {
+	return is_MEQ(v.begin(), v.end(), w.begin(), w.end());
 }
 ;
 
@@ -91,9 +92,9 @@ template<typename scalar_type> bool is_MEQ(const vector<scalar_type>& vector1,
  **/
 template<typename scalar_type> bool is_MEQ(const matrix<scalar_type>& A,
 		const scalar_type& a) {
-	for (unsigned int i=0;i<A.size1();++i) {
-		for (unsigned int j=0;j<A.size2();++j) {
-			if (!is_MEQ(A(i,j),a))
+	for (unsigned int i = 0; i < A.size1(); ++i) {
+		for (unsigned int j = 0; j < A.size2(); ++j) {
+			if (!is_MEQ(A(i, j), a))
 				return false;
 		}
 	}
@@ -101,43 +102,46 @@ template<typename scalar_type> bool is_MEQ(const matrix<scalar_type>& A,
 }
 ;
 
-template <typename scalar_type>
+template<typename scalar_type>
 bool is_definitely_LT(const scalar_type& x, const scalar_type& y) {
-	return definitely(is_LT(x,y));
+	return definitely(is_LT(x, y));
 }
 
 /** Lexicographical vector comparison using numeric comparisons. */
-template <typename scalar_type, template<typename> class container_type >
-bool is_lex_LT (const container_type<scalar_type>& v1, const container_type<scalar_type>& v2) {
+template<typename scalar_type, template<typename > class container_type>
+bool is_lex_LT(const container_type<scalar_type>& v1,
+		const container_type<scalar_type>& v2) {
 	/*
-	const_iterator it1=v1.begin();
-	const_iterator it2=v2.begin();
-	while (it1 != v1.end() && it2 != v2.end()) {
-//std::cout << *it1 << " vs " << *it2 << std::endl;
-		if (bool(is_LT(*it1,*it2))) return true;
-		else if (bool(is_LT(*it2,*it1))) return false;
-		else {
-			++it1;
-			++it2;
-		}
-	}
-	if (it1 == v1.end() && it2 != v2.end())
-		return true;
-	else
-		return false;
-	*/
-	return std::lexicographical_compare(v1.begin(),v1.end(),v2.begin(),v2.end(),is_definitely_LT<scalar_type>);
+	 const_iterator it1=v1.begin();
+	 const_iterator it2=v2.begin();
+	 while (it1 != v1.end() && it2 != v2.end()) {
+	 //std::cout << *it1 << " vs " << *it2 << std::endl;
+	 if (bool(is_LT(*it1,*it2))) return true;
+	 else if (bool(is_LT(*it2,*it1))) return false;
+	 else {
+	 ++it1;
+	 ++it2;
+	 }
+	 }
+	 if (it1 == v1.end() && it2 != v2.end())
+	 return true;
+	 else
+	 return false;
+	 */
+	return std::lexicographical_compare(v1.begin(), v1.end(), v2.begin(),
+			v2.end(), is_definitely_LT<scalar_type>);
 }
 
 /** Lexicographical vector comparison using numeric comparisons.
  */
-template <typename scalar_type, template<typename> class container_type >
+template<typename scalar_type, template<typename > class container_type>
 class lex_comp_less {
 public:
 	typedef typename container_type<scalar_type>::const_iterator const_iterator;
 
-	bool operator() (const container_type<scalar_type>& v1, const container_type<scalar_type>& v2) const {
-		return is_lex_LT(v1,v2);
+	bool operator()(const container_type<scalar_type>& v1,
+			const container_type<scalar_type>& v2) const {
+		return is_lex_LT(v1, v2);
 	}
 };
 
@@ -146,39 +150,39 @@ public:
  * Specialization for vdom_vectors that includes checking for the domains.
  */
 /*
-template <typename scalar_type>
-class lex_comp_less<scalar_type,math::vdom_vector > {
-public:
-	typedef typename math::vdom_vector<scalar_type>::const_iterator const_iterator;
+ template <typename scalar_type>
+ class lex_comp_less<scalar_type,math::vdom_vector > {
+ public:
+ typedef typename math::vdom_vector<scalar_type>::const_iterator const_iterator;
 
-	bool operator() (const math::vdom_vector<scalar_type>& v1, const math::vdom_vector<scalar_type>& v2) const {
-		if (v1.domain()==v2.domain())
-			return is_lex_LT(v1,v2);
-		else {
-			math::vdom_vector<scalar_type> v1_dom2=v1;
-			v1_dom2.remap(v2.domain());
-			math::vdom_vector<scalar_type> v2_dom1=v2;
-			v2_dom1.remap(v1.domain());
+ bool operator() (const math::vdom_vector<scalar_type>& v1, const math::vdom_vector<scalar_type>& v2) const {
+ if (v1.domain()==v2.domain())
+ return is_lex_LT(v1,v2);
+ else {
+ math::vdom_vector<scalar_type> v1_dom2=v1;
+ v1_dom2.remap(v2.domain());
+ math::vdom_vector<scalar_type> v2_dom1=v2;
+ v2_dom1.remap(v1.domain());
 
-			return is_lex_LT(v1_dom2,v2) && is_lex_LT(v1,v2_dom1);
-		}
-	}
-};
-*/
+ return is_lex_LT(v1_dom2,v2) && is_lex_LT(v1,v2_dom1);
+ }
+ }
+ };
+ */
 
 /** Specialization of lex_comp_less for matrices */
-template <typename scalar_type>
-class lex_comp_less<scalar_type,matrix> {
+template<typename scalar_type>
+class lex_comp_less<scalar_type, matrix> {
 public:
 	//typedef typename matrix<scalar_type>::const_iterator const_iterator;
 
-	bool operator() (const matrix<scalar_type>& v1, const matrix<scalar_type>& v2) const {
-		return std::lexicographical_compare(
-				v1.get_matrix_impl().data().begin(),
+	bool operator()(const matrix<scalar_type>& v1,
+			const matrix<scalar_type>& v2) const {
+		return std::lexicographical_compare(v1.get_matrix_impl().data().begin(),
 				v1.get_matrix_impl().data().end(),
 				v2.get_matrix_impl().data().begin(),
 				v2.get_matrix_impl().data().end(),
-				is_definitely_LT<scalar_type> );
+				is_definitely_LT<scalar_type>);
 	}
 };
 

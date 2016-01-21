@@ -124,7 +124,6 @@ public:
 	 */
 	std::set<std::pair<double, double> > enumerate_2dVertices(int i, int j);
 
-
 	/*
 	 * Returns the list of vertices of the polytope in 2d with the given inputs as
 	 * i and j where i and j are the 1st and 2nd projecting variables

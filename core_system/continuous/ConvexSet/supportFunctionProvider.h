@@ -14,8 +14,7 @@
 #include "core_system/math/lp_solver/lp_solver.h"
 #include <boost/shared_ptr.hpp>
 
-class supportFunctionProvider
-{
+class supportFunctionProvider {
 
 public:
 	typedef boost::shared_ptr<supportFunctionProvider> ptr;

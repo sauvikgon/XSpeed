@@ -17,8 +17,7 @@
  * and ATRANS, BTRANS are transformation matrices, Beta is a constant and B is a unit ball over the specified norm
  */
 
-class transMinkPoly : public supportFunctionProvider
-{
+class transMinkPoly: public supportFunctionProvider {
 	polytope::ptr X0;
 	polytope::ptr U;
 	math::matrix<double> TRANS;
@@ -30,7 +29,9 @@ public:
 	typedef boost::shared_ptr<transMinkPoly> ptr;
 
 	/* most explicit constructor */
-	transMinkPoly(polytope::ptr myX0, polytope::ptr myU, math::matrix<double> myTRANS, math::matrix<double> myB_TRANS, double mytime, double mybeta);
+	transMinkPoly(polytope::ptr myX0, polytope::ptr myU,
+			math::matrix<double> myTRANS, math::matrix<double> myB_TRANS,
+			double mytime, double mybeta);
 
 	/** Constructor to represent convex sets which is a linear transformation of another convex set only: C' = Trans. C */
 	transMinkPoly(polytope::ptr myX0, math::matrix<double> myTRANS);

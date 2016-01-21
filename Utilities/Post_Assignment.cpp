@@ -15,8 +15,8 @@
  * Post_assign(newPolytope) = {x e Rn | Ap R^-1 x <= bp + Ap R^-1 w}   w e W
  *
  */
-polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> R,
-		std::vector<double> w) {
+polytope::ptr post_assign_exact(polytope::ptr newPolytope,
+		math::matrix<double> R, std::vector<double> w) {
 	math::matrix<double> AA, A_dash;
 	math::matrix<double> R_inverse(R.size1(), R.size2());
 	std::vector<double> b_p, b_dash, term2;
@@ -25,7 +25,7 @@ polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> 
 	b_p = newPolytope->getColumnVector();
 //	cout<<"bp size = "<<b_p.size()<<endl;
 //	cout<<"Testing 1\n";
-	invertible = R.inverse(R_inverse);//Size of R_inverse has to be assigned otherwise error
+	invertible = R.inverse(R_inverse); //Size of R_inverse has to be assigned otherwise error
 //	cout<<"R_inverse (rows,col) = ("<<R_inverse.size1()<<" , "<<R_inverse.size2()<<")"<<endl;
 	if (invertible) {
 		//cout<<"\nAmit check a\n";
@@ -81,18 +81,20 @@ polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> 
  *
  */
 
-polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double> R,
-		polytope W, math::matrix<double> Directions, int lp_solver_type) {
+polytope::ptr post_assign_approx(polytope::ptr newPolytope,
+		math::matrix<double> R, polytope W, math::matrix<double> Directions,
+		int lp_solver_type) {
 	math::matrix<double> R_transpose;
 	int max_or_min = 2;	//Maximizing
 	std::vector<double> b(Directions.size1()), each_direction(
 			Directions.size2()), direction_trans;
 	R.transpose(R_transpose);
 	//create glpk object to be used by the polytope
-	int type=lp_solver_type;
+	int type = lp_solver_type;
 	lp_solver lp(type);
 
-	lp.setConstraints(newPolytope->getCoeffMatrix(),newPolytope->getColumnVector(),newPolytope->getInEqualitySign());
+	lp.setConstraints(newPolytope->getCoeffMatrix(),
+			newPolytope->getColumnVector(), newPolytope->getInEqualitySign());
 
 	for (unsigned int i = 0; i < Directions.size1(); i++) {
 		for (unsigned int j = 0; j < Directions.size2(); j++)
@@ -105,6 +107,4 @@ polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double>
 
 	return polytope::ptr(new polytope(Directions, b, 1));
 }
-
-
 

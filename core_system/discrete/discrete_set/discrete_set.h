@@ -9,9 +9,7 @@
 #ifndef DISCRETE_SET_H_
 #define DISCRETE_SET_H_
 
-
-class discrete_set
-{
+class discrete_set {
 public:
 	void union_set(discrete_set d);
 	void intersection_set(discrete_set d);
@@ -24,7 +22,5 @@ public:
 private:
 	std::set<int> discrete_elements;
 };
-
-
 
 #endif /* DISCRETE_SET_H_ */
