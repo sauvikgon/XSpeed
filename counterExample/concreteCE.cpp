@@ -19,7 +19,7 @@ concreteCE::~concreteCE() {
 
 const concreteCE::traj_segment concreteCE::get_segment(unsigned int i) const {
 	assert(i < T.size());
-	std::list<traj_segment>::iterator it = T.begin();
+	std::list<traj_segment>::const_iterator it = T.begin();
 	for (unsigned int k = 0; k != i; k++) {
 		it++;
 	}
@@ -28,7 +28,7 @@ const concreteCE::traj_segment concreteCE::get_segment(unsigned int i) const {
 }
 const concreteCE::trans_id concreteCE::getTransitionId(unsigned int i) const {
 	assert(i < jumps.size());
-	std::list<trans_id>::iterator it = jumps.begin();
+	std::list<trans_id>::const_iterator it = jumps.begin();
 	for (unsigned int k = 0; k != i; k++) {
 		it++;
 	}
