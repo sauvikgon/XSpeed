@@ -15,7 +15,7 @@
 
 class bulk_lp_solver {
 private:
-	lp_solver::lp_solver_ptr lp_problem;
+	lp_solver::lp_solver_ptr  lp_problem;
 	std::vector<float> result;
 	int solver_type;
 	math::matrix<double> CoefficientMatrix;
@@ -35,8 +35,7 @@ public:
 	void ComputeLP(math::matrix<float>& List_of_ObjValue);
 
 	//Only needed for comparison
-	void ComputeLP_ListVector(
-			std::list<std::vector<double> >& List_of_ObjValue);
+	void ComputeLP_ListVector(std::list<std::vector<double> >& List_of_ObjValue);
 
 };
 

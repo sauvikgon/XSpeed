@@ -216,15 +216,16 @@ void SetHelicopter_Parameters2(ReachabilityParameters& reach_parameters,
 	for (int j = 0; j < col; j++)
 		Amatrix(28, j) = 0.000000000000;	//Last row for t==0
 	//Amatrix(28, col-1) = 0.0;	//Last row for t==0
-	/*
-	 cout << "\nPrinting The A matrix\n";
-	 for (int i = 0; i < row; i++) {
-	 for (int j = 0; j < col; j++) {
-	 cout << Amatrix(i, j) << "\t";
-	 }
-	 cout << endl << endl << endl;
-	 }
-	 */
+/*
+	cout << "\nPrinting The A matrix\n";
+	for (int i = 0; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			cout << Amatrix(i, j) << "\t";
+		}
+		cout << endl << endl << endl;
+	}
+*/
+
 
 	/*
 	 cout << "\nPrinting The AU matrix\n";
@@ -238,7 +239,7 @@ void SetHelicopter_Parameters2(ReachabilityParameters& reach_parameters,
 
 	system_dynamics.MatrixA = Amatrix;
 	system_dynamics.MatrixB = Bmatrix;
-	system_dynamics.U->setIsEmpty(true);//set empty = true which is by default
+	system_dynamics.U->setIsEmpty(true);	//set empty = true which is by default
 	reach_parameters.InvariantExists = false;
 //	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
 //	Dynamics Initalised ---------------------

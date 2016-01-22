@@ -31,10 +31,10 @@ result_type converter<result_type, scalar_type>::convert(const scalar_type& x) {
 template<>
 class converter<__float128, __float128> {
 public:
-static __float128 convert(const __float128& x) {
-	return x;
-}
-;
+	static __float128 convert(const __float128& x) {
+		return x;
+	}
+	;
 };
 
 /** Specialization for __float128 because typeinfo is missing (g++ bug).
@@ -44,14 +44,14 @@ static __float128 convert(const __float128& x) {
 template<typename result_type>
 class converter<result_type, __float128> {
 public:
-static result_type convert(const __float128& x) {
-	result_type rtmp;
-	std::string name2 = typeid(rtmp).name();
-	throw std::runtime_error(
-			"convert_element from __float128 to " + name2
-			+ " not implemented.");
-	return result_type(); // this is a dummy return to avoid compiler warnings
-}
+	static result_type convert(const __float128& x) {
+		result_type rtmp;
+		std::string name2 = typeid(rtmp).name();
+		throw std::runtime_error(
+				"convert_element from __float128 to " + name2
+						+ " not implemented.");
+		return result_type(); // this is a dummy return to avoid compiler warnings
+	}
 };
 
 /** Specialization for __float128 because typeinfo is missing (g++ bug).
@@ -66,8 +66,8 @@ public:
 		throw std::runtime_error(
 				"convert_element from " + name1
 						+ " to __float128 not implemented.");
-		return __float128(); // this is a dummy return to avoid compiler warnings
-	}
+	return __float128(); // this is a dummy return to avoid compiler warnings
+}
 };
 
 /** Convert double to long double */
@@ -107,11 +107,11 @@ public:
 template<>
 class converter<double, __float128> {
 public:
-static double convert(const __float128& x) {
-	double y(x);
-	return y;
-}
-;
+	static double convert(const __float128& x) {
+		double y(x);
+		return y;
+	}
+	;
 };
 
 /** Convert double to float */

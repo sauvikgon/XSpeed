@@ -48,8 +48,8 @@ double transMinkPoly::computeSupportFunction(std::vector<double> direction,
 	if (!X0->getIsEmpty()) {
 		res1 = X0->computeSupportFunction(dprime, lp);
 //		cout << "\nres1 = " << res1;
-
 	}
+
 	//cout << "\nres1 = " << res1;
 	double res2 = 0.0;
 	if (!U->getIsEmpty()) {
@@ -97,7 +97,7 @@ double transMinkPoly::max_norm(int lp_solver_type_choosen,
 		}
 		int type = lp_solver_type_choosen;
 		lp_solver lp(type), lp_U(type);
-		//	cout << "\nBefore Not Empty\n";
+	//	cout << "\nBefore Not Empty\n";
 		if (!X0->getIsEmpty()) {
 			lp.setMin_Or_Max(2); //Setting GLP_MAX
 			lp.setConstraints(X0->getCoeffMatrix(), X0->getColumnVector(),
@@ -111,16 +111,15 @@ double transMinkPoly::max_norm(int lp_solver_type_choosen,
 					U->getInEqualitySign());
 			//	cout << "\nU Not Empty\n";
 		}
-		//	cout << "\nAfter Not Empty\n";
+	//	cout << "\nAfter Not Empty\n";
 		//Finding the maximum of all Direction : Returns the max element
 		for (unsigned int i = 0; i < generator_directions.size(); i++) {
 			std::vector<double> each_generator;
 			each_generator = generator_directions[i];
-			//		cout << "Each Generator size = " << generator_directions[i].size()<< "\n";
-			//		cout << "Each Generator = (" << each_generator[0] << " , "<< each_generator[1] << ") " << endl;
-
+	//		cout << "Each Generator size = " << generator_directions[i].size()<< "\n";
+	//		cout << "Each Generator = (" << each_generator[0] << " , "<< each_generator[1] << ") " << endl;
 			sf = computeSupportFunction(each_generator, lp);
-			//		cout << "\nValue = " << sf << std::endl;
+	//		cout << "\nValue = " << sf << std::endl;
 			Max_A = (abs(sf));
 			if (Max_A > Max)
 				Max = Max_A;

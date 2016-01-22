@@ -27,12 +27,15 @@
 #include "core_system/Reachability/reachabilityParallel_Process.h"
 #include "core_system/Reachability/NewApproach/SameDirections_Avoid_SuppFunction.h"
 #include "Utilities/computeInitialPolytope.h"
-//#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
+#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
 #include "application/All_PP_Definition.h"
 //#include "core_system/Reachability/reachabilitySequential_GPU_MatrixVector_Multiply.cuh"
-//#include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
+#include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
 #include "boost/timer/timer.hpp"
 #include "counterExample/abstractCE.h"
+
+
+
 
 //Sequential Search for Discrete Jumps
 std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
@@ -40,16 +43,15 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		unsigned int Algorithm_Type, unsigned int Total_Partition,
 		int lp_solver_type_choosen, unsigned int number_of_streams,
 		int Solver_GLPK_Gurobi_GPU,
-		std::set<std::pair<int, polytope::ptr> > forbidden_set,
-		abstractCE::ptr& ce);
+		std::set<std::pair<int, polytope::ptr> > forbidden_set, abstractCE::ptr& ce);
+
 
 //Parallel Breadth First Search for Discrete Jumps
-std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
-		initial_state::ptr& I, ReachabilityParameters& reach_parameters,
-		int bound, unsigned int Algorithm_Type, unsigned int Total_Partition,
+std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H, initial_state::ptr& I,
+		ReachabilityParameters& reach_parameters, int bound,
+		unsigned int Algorithm_Type, unsigned int Total_Partition,
 		int lp_solver_type_choosen, unsigned int number_of_streams,
 		int Solver_GLPK_Gurobi_GPU,
-		std::set<std::pair<int, polytope::ptr> > forbidden_set,
-		abstractCE::ptr& ce);
+		std::set<std::pair<int, polytope::ptr> > forbidden_set, abstractCE::ptr& ce);
 
 #endif /* REACHABILITY_HYBRIDAUTOMATA_H_ */

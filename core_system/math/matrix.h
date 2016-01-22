@@ -27,8 +27,7 @@ public:
 	matrix(size_type r, size_type c);
 	//matrix(int row, int col);			will try later
 	matrix(size_type r, size_type c, array_type data);
-	void matrix_exponentiation(math::matrix<scalar_type>& res,
-			double time_tau) const;
+	void matrix_exponentiation(math::matrix<scalar_type>& res, double time_tau) const;
 	void matrix_exponentiation(math::matrix<scalar_type>& res) const;
 	void multiply(matrix& A, matrix& res);
 

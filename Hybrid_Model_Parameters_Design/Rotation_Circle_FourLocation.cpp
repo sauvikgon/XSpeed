@@ -224,7 +224,6 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc3;
 	Out_Going_Trans_fromLoc3.push_back(t3);
 
-
 	location l3(3, "Loc-3", system_dynamics, invariant3, true,
 			Out_Going_Trans_fromLoc3);
 	//Initialised Location 3	--------------------------
@@ -267,11 +266,9 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc4;
 	Out_Going_Trans_fromLoc4.push_back(t4);
 
-
 	location l4(4, "Loc-4", system_dynamics, invariant4, true,
 			Out_Going_Trans_fromLoc4);
 	//Initialised Location 4	--------------------------
-
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.setDimension(dim);
