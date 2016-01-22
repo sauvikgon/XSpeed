@@ -15,8 +15,7 @@
  * Creates a polytope from a specified Convex Set
  */
 polytope::ptr create_polytope_from_set(supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type_choosen);
-
-
+		ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics,
+		int lp_solver_type_choosen);
 
 #endif /* CREATE_POLYTOPE_FROM_CONVEXSET_H_ */

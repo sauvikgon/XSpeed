@@ -13,7 +13,9 @@
 #include "application/CopyArray.h"
 #include <omp.h>
 
-unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type_choosen);
+unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
+		supportFunctionProvider::ptr Initial,
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
+		int lp_solver_type_choosen);
 
 #endif /* INVARIANTCHECKWITHREACHABILITY_H_ */

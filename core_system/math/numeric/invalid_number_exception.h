@@ -18,13 +18,14 @@ namespace math {
 class invalid_number_exception: public basic_exception {
 public:
 	invalid_number_exception(const std::string& msg) :
-		basic_exception(msg) {
+			basic_exception(msg) {
 	}
 	;
 	/** Construct an exception with error message and attach another
 	 * exception as cause. */
-	invalid_number_exception(const std::string& msg, const basic_exception& cause) :
-		basic_exception(msg, cause) {
+	invalid_number_exception(const std::string& msg,
+			const basic_exception& cause) :
+			basic_exception(msg, cause) {
 	}
 	;
 };

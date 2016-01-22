@@ -12,8 +12,6 @@
 #include "core_system/math/matrix.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 
-
-
 /*
  * Assignment to a constraint polyhedron newPolytope
  * Post_assign(newPolytope) = R x newPolytope + W
@@ -22,9 +20,8 @@
  * Post_assign(newPolytope) = {x e Rn | Ap R^-1 x <= bp + Ap R^-1 w}   w e W
  *
  */
-polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> R,
-		std::vector<double> w);
-
+polytope::ptr post_assign_exact(polytope::ptr newPolytope,
+		math::matrix<double> R, std::vector<double> w);
 
 /*
  * Computing Transition Successors with Support Function
@@ -32,8 +29,7 @@ polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> 
  *
  */
 
-polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double> R,
-		polytope W, math::matrix<double> Directions);
-
+polytope::ptr post_assign_approx(polytope::ptr newPolytope,
+		math::matrix<double> R, polytope W, math::matrix<double> Directions);
 
 #endif /* POST_ASSIGNMENT_H_ */

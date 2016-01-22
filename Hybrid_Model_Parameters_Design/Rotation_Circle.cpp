@@ -132,7 +132,9 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope1 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t1 = transition::ptr(new transition(1, "T1", 1, 2, gaurd_polytope1, assignment));
+
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "T1", 1, 2, gaurd_polytope1, assignment));
 
 //Location 1:: Invariant constraint : y >=0
 	row = 1;
@@ -168,7 +170,8 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope2 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t2 = transition::ptr(new transition(2, "T2", 2, 1, gaurd_polytope2, assignment));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "T2", 2, 1, gaurd_polytope2, assignment));
 
 //Location 2:: Invariant constraint : y <=0
 	row = 1;
@@ -201,8 +204,7 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet
 	initial_state::ptr I = initial_state::ptr(
-			new initial_state(initial_location_id, initial_polytope_I, S,
-					transition_id));
+			new initial_state(initial_location_id, initial_polytope_I, S, transition_id));
 
 	init_state = I;
 

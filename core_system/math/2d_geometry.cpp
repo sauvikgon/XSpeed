@@ -46,7 +46,7 @@ double angle_uv(std::vector<double> u, std::vector<double> v) {
 	double magnitude_prod = vector_magitude_u * vector_magitude_v;
 	double param = dot_prod / magnitude_prod;
 
-	angle_res = acos (param) * 180.0 / PI;
+	angle_res = acos(param) * 180.0 / PI;
 
 	return angle_res;
 }

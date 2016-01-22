@@ -39,8 +39,8 @@ public:
 	glpk_lp_solver(math::matrix<double> coeff_constraints,
 			std::vector<double> bounds, std::vector<int> bound_signs);
 	void setConstraints(math::matrix<double> coeff_constraints,
-			std::vector<double> bounds, int bound_signs);	//Before calling setConstraints(), the member
-															//function setMin_or_Max() must be called.
+			std::vector<double> bounds, int bound_signs);//Before calling setConstraints(), the member
+														 //function setMin_or_Max() must be called.
 	void setMin_Or_Max(int Min_Or_Max);
 	int getMin_Or_Max();
 	void setIteration_Limit(int limits);
@@ -55,7 +55,7 @@ public:
 	 *
 	 * Executes the simplex method with the given function.
 	 */
-	double Compute_LLP(std::vector<double> coeff_function) ;
+	double Compute_LLP(std::vector<double> coeff_function);
 
 	//returns the vector/point that gives the maximum value
 	std::vector<double> getMaximizing_Variables();
@@ -89,7 +89,7 @@ private:
 
 	int dimension;				//dimension of the system
 	int number_of_constraints;	//rows in glpk or facets of a polytope
-	std::vector<double> sv;// values of the variable that maximizes the result
+	std::vector<double> sv;	// values of the variable that maximizes the result
 	double result;				//Maximize or Minimize value
 
 };

@@ -14,7 +14,9 @@ location::location() {
 	Name = "";
 }
 
-location::location(int Loc_ID, string name, Dynamics system_dynamics, polytope::ptr invariant, bool inv_exists, std::list<transition::ptr> Out_Going_Trans) {
+location::location(int Loc_ID, string name, Dynamics system_dynamics,
+		polytope::ptr invariant, bool inv_exists,
+		std::list<transition::ptr> Out_Going_Trans) {
 	loc_id = Loc_ID;
 	Name = name;
 	System_Dynamics = system_dynamics;
@@ -55,21 +57,22 @@ void location::setLocId(int locId) {
 	loc_id = locId;
 }
 
-std::list<transition::ptr>& location::getOut_Going_Transitions(){
+std::list<transition::ptr>& location::getOut_Going_Transitions() {
 	return Out_Going_Transitions;
 }
-void location::add_Out_Going_Transition(transition::ptr t){
+void location::add_Out_Going_Transition(transition::ptr t) {
 	this->Out_Going_Transitions.push_back(t);
-		//Adj_Transitions.max_size()		//returns the size of the adjacent transitions/locations
+	//Adj_Transitions.max_size()		//returns the size of the adjacent transitions/locations
 }
 
-transition::ptr location::getTransition(int trans_id){
+transition::ptr location::getTransition(int trans_id) {
 	transition::ptr temp;
 	std::list<transition::ptr>::iterator it;
-	for (it=Out_Going_Transitions.begin(); it != Out_Going_Transitions.end();it++){
+	for (it = Out_Going_Transitions.begin(); it != Out_Going_Transitions.end();
+			it++) {
 		//cout <<"(*it)->getTransitionId()= "<<(*it)->getTransitionId()<<endl;
 		int transID = (*it)->getTransitionId();
-		if (transID==trans_id){
+		if (transID == trans_id) {
 			temp = (*it);
 		}
 	}
@@ -83,5 +86,4 @@ bool location::isInvariantExists() const {
 void location::setInvariantExists(bool invariantExists) {
 	InvariantExists = invariantExists;
 }
-
 

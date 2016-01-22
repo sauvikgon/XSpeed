@@ -1,6 +1,7 @@
 /**
- * Base class to represent a convex set whose support function can be computed. This is an ABSTRACT class.
- * Any convex set whose support function can be computed should be derived from this base class
+ * Base class to represent a convex set whose support function can be computed by linear programming.
+ * This is an ABSTRACT class. Any convex set whose support function can be computed
+ * using an lp solver should be derived from this base class
  * @Rajarshi
  */
 
@@ -13,8 +14,7 @@
 #include "core_system/math/lp_solver/lp_solver.h"
 #include <boost/shared_ptr.hpp>
 
-class supportFunctionProvider
-{
+class supportFunctionProvider {
 
 public:
 	typedef boost::shared_ptr<supportFunctionProvider> ptr;

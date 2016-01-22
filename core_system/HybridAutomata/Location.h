@@ -14,8 +14,6 @@
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Transition.h"
 
-
-
 class location {
 private:
 	int loc_id;
@@ -27,7 +25,9 @@ private:
 public:
 
 	location();
-	location(int Loc_ID, string Name, Dynamics System_Dynamics, polytope::ptr Invariant,  bool inv_exists, std::list<transition::ptr> Out_Going_Trans);
+	location(int Loc_ID, string Name, Dynamics System_Dynamics,
+			polytope::ptr Invariant, bool inv_exists,
+			std::list<transition::ptr> Out_Going_Trans);
 	Dynamics& getSystem_Dynamics();
 	void setSystem_Dynamics(const Dynamics& d);
 	polytope::ptr getInvariant();
@@ -37,7 +37,7 @@ public:
 
 	void add_Out_Going_Transition(transition::ptr t);
 
-	transition::ptr getTransition(int trans_id);	//returns a specific transition for a given trans_id
+	transition::ptr getTransition(int trans_id);//returns a specific transition for a given trans_id
 
 	std::list<transition::ptr>& getOut_Going_Transitions();
 	int getLocId() const;

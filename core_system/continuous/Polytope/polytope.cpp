@@ -177,7 +177,8 @@ double polytope::computeSupportFunction(std::vector<double> direction,
 		throw("\n Cannot Compute Support Function of a Universe Polytope.\n");
 	else
 		sf = lp.Compute_LLP(direction); //since lp has already been created and set
-										//with constraints at the time of creation
+
+	//with constraints at the time of creation
 
 	return sf;
 }
@@ -209,7 +210,7 @@ double polytope::max_norm(int lp_solver_type_choosen,
 		throw("\nUniverse Unbounded Polytope!!!\n");
 	else {
 		//sf = lp.Compute_LLP(direction);	//since lp has already been created and set with constraints at the time of creation
-		std::vector < std::vector<double> > generator_directions; //this vector-vector is used only in this function not affecting the rest of the codes
+		std::vector<std::vector<double> > generator_directions; //this vector-vector is used only in this function not affecting the rest of the codes
 		//Generator for Positive Directions for example Right and Up
 		for (unsigned int i = 0; i < dimension_size; i++) {
 			std::vector<double> directions(dimension_size, 0.0);
@@ -391,7 +392,7 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 
 std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 		int j) {
-	std::set < std::pair<double, double> > All_vertices;
+	std::set<std::pair<double, double> > All_vertices;
 
 	//enumerate the vertices in the first quadrant
 	std::vector<double> u(getSystemDimension(), 0);
@@ -416,9 +417,9 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 	return All_vertices;
 }
 
-math::matrix<double> polytope::get_2dVertices(int i, int j){
+math::matrix<double> polytope::get_2dVertices(int i, int j) {
 	std::set<std::pair<double, double> > set_vertices;
-	set_vertices = enumerate_2dVertices(i,j);
+	set_vertices = enumerate_2dVertices(i, j);
 	math::matrix<double> my_vertices;
 	my_vertices = sort_vertices(set_vertices);
 	return my_vertices;

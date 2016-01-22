@@ -76,7 +76,8 @@ const template_polyhedra::ptr reachParallelExplore(Dynamics& SystemDynamics,
 		}
 #pragma omp critical
 		//	if (i != 0)
-		reachability_region = reachability_region->union_TemplatePolytope(Tpoly);
+		reachability_region = reachability_region->union_TemplatePolytope(
+				Tpoly);
 	} //end of pragma for loop
 
 	//this may not be required if Average_number_of_times = 1 otherwise must.
@@ -271,7 +272,8 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
-			term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
+			term1 = Initial->computeSupportFunction(phi_trans_dir,
+					s_per_thread_I);
 		}
 
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
@@ -279,7 +281,8 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
 			term2 = ReachParameters.time_step
-					* SystemDynamics.U->computeSupportFunction(Btrans_dir, s_per_thread_U);
+					* SystemDynamics.U->computeSupportFunction(Btrans_dir,
+							s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = support_unitball_infnorm(rVariable);
 		if (!SystemDynamics.isEmptyC) {
@@ -319,18 +322,18 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 			res1 = term1; //replacement--optimizing
 			double term3, term3a, res2;
 
-
 			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 				phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
-				term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
+				term1 = Initial->computeSupportFunction(phi_trans_dir,
+						s_per_thread_I);
 			}
 
 			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable, Btrans_dir);
 				term2 = ReachParameters.time_step
-						* SystemDynamics.U->computeSupportFunction(Btrans_dir, s_per_thread_U);
+						* SystemDynamics.U->computeSupportFunction(Btrans_dir,
+								s_per_thread_U);
 			}
-
 
 			term3a = ReachParameters.result_alfa;
 			term3b = support_unitball_infnorm(r1Variable);
@@ -479,13 +482,16 @@ const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(
 						invariant->getColumnVector()[eachInvDirection];
 			}
 		}
-		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix()));
+		return template_polyhedra::ptr(
+				new template_polyhedra(MatrixValue, inv_sfm,
+						ReachParameters.Directions,
+						invariant->getCoeffMatrix()));
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections,ReachParameters.Directions, invariant->getCoeffMatrix());
 		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
 	} else {
 		//MatrixValue.resize(numVectors, shm_NewTotalIteration, true);//but writing or resizing only upto the NewTotalIteration
-		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, ReachParameters.Directions));
+		return template_polyhedra::ptr(
+				new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 
 }

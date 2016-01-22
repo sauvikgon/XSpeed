@@ -2403,30 +2403,51 @@ void user_model(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	transition::ptr t1 = transition::ptr(new transition(1, "t13", 2, 5, gaurd_polytope0, assignment0));
-	transition::ptr t2 = transition::ptr( new transition(2, "t14", 2, 3, gaurd_polytope1, assignment1));
-	transition::ptr t3 = transition::ptr( new transition(3, "t15", 2, 1, gaurd_polytope2, assignment2));
-	transition::ptr t4 = transition::ptr( new transition(4, "t19", 3, 6, gaurd_polytope3, assignment3));
-	transition::ptr t5 = transition::ptr( new transition(5, "t20", 3, 2, gaurd_polytope4, assignment4));
-	transition::ptr t6 = transition::ptr( new transition(6, "t1", 4, 1, gaurd_polytope5, assignment5));
-	transition::ptr t7 = transition::ptr( new transition(7, "t2", 4, 5, gaurd_polytope6, assignment6));
-	transition::ptr t8 = transition::ptr( new transition(8, "t3", 4, 9, gaurd_polytope7, assignment7));
-	transition::ptr t9 = transition::ptr( new transition(9, "t9", 5, 4, gaurd_polytope8, assignment8));
-	transition::ptr t10 = transition::ptr( new transition(10, "t10", 5, 2, gaurd_polytope9, assignment9));
-	transition::ptr t11 = transition::ptr( new transition(11, "t11", 5, 6, gaurd_polytope10, assignment10));
-	transition::ptr t12 = transition::ptr( new transition(12, "t12", 5, 7, gaurd_polytope11, assignment11));
-	transition::ptr t13 = transition::ptr( new transition(13, "t16", 6, 3, gaurd_polytope12, assignment12));
-	transition::ptr t14 = transition::ptr( new transition(14, "t17", 6, 5, gaurd_polytope13, assignment13));
-	transition::ptr t15 = transition::ptr( new transition(15, "t18", 6, 8, gaurd_polytope14, assignment14));
-	transition::ptr t16 = transition::ptr( new transition(16, "t6", 7, 5, gaurd_polytope15, assignment15));
-	transition::ptr t17 = transition::ptr( new transition(17, "t7", 7, 9, gaurd_polytope16, assignment16));
-	transition::ptr t18 = transition::ptr( new transition(18, "t8", 7, 8, gaurd_polytope17, assignment17));
-	transition::ptr t19 = transition::ptr( new transition(19, "t5", 9, 7, gaurd_polytope18, assignment18));
-	transition::ptr t20 = transition::ptr( new transition(20, "t4", 9, 4, gaurd_polytope19, assignment19));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "t13", 2, 5, gaurd_polytope0, assignment0));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "t14", 2, 3, gaurd_polytope1, assignment1));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "t15", 2, 1, gaurd_polytope2, assignment2));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "t19", 3, 6, gaurd_polytope3, assignment3));
+	transition::ptr t5 = transition::ptr(
+			new transition(5, "t20", 3, 2, gaurd_polytope4, assignment4));
+	transition::ptr t6 = transition::ptr(
+			new transition(6, "t1", 4, 1, gaurd_polytope5, assignment5));
+	transition::ptr t7 = transition::ptr(
+			new transition(7, "t2", 4, 5, gaurd_polytope6, assignment6));
+	transition::ptr t8 = transition::ptr(
+			new transition(8, "t3", 4, 9, gaurd_polytope7, assignment7));
+	transition::ptr t9 = transition::ptr(
+			new transition(9, "t9", 5, 4, gaurd_polytope8, assignment8));
+	transition::ptr t10 = transition::ptr(
+			new transition(10, "t10", 5, 2, gaurd_polytope9, assignment9));
+	transition::ptr t11 = transition::ptr(
+			new transition(11, "t11", 5, 6, gaurd_polytope10, assignment10));
+	transition::ptr t12 = transition::ptr(
+			new transition(12, "t12", 5, 7, gaurd_polytope11, assignment11));
+	transition::ptr t13 = transition::ptr(
+			new transition(13, "t16", 6, 3, gaurd_polytope12, assignment12));
+	transition::ptr t14 = transition::ptr(
+			new transition(14, "t17", 6, 5, gaurd_polytope13, assignment13));
+	transition::ptr t15 = transition::ptr(
+			new transition(15, "t18", 6, 8, gaurd_polytope14, assignment14));
+	transition::ptr t16 = transition::ptr(
+			new transition(16, "t6", 7, 5, gaurd_polytope15, assignment15));
+	transition::ptr t17 = transition::ptr(
+			new transition(17, "t7", 7, 9, gaurd_polytope16, assignment16));
+	transition::ptr t18 = transition::ptr(
+			new transition(18, "t8", 7, 8, gaurd_polytope17, assignment17));
+	transition::ptr t19 = transition::ptr(
+			new transition(19, "t5", 9, 7, gaurd_polytope18, assignment18));
+	transition::ptr t20 = transition::ptr(
+			new transition(20, "t4", 9, 4, gaurd_polytope19, assignment19));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc9;
 
-	location l1(1, "loc9", system_dynamics0, invariant0, true, Out_Going_Trans_fromloc9);
+	location l1(1, "loc9", system_dynamics0, invariant0, true,
+			Out_Going_Trans_fromloc9);
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc5;
 
@@ -2482,7 +2503,6 @@ void user_model(hybrid_automata& Hybrid_Automata,
 			Out_Going_Trans_fromloc8);
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc2;
-
 
 	Out_Going_Trans_fromloc2.push_back(t19);
 	Out_Going_Trans_fromloc2.push_back(t20);

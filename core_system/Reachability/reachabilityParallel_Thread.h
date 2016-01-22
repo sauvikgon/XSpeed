@@ -8,13 +8,12 @@
 #ifndef REACHABILITYPARALLEL_THREAD_H_
 #define REACHABILITYPARALLEL_THREAD_H_
 
-
 /*
-#include "lp_solver.h"
-//#include "matrixOperation.h"
-#include <fstream>
+ #include "lp_solver.h"
+ //#include "matrixOperation.h"
+ #include <fstream>
 
-#include <pthread.h>
+ #include <pthread.h>
 
 
 

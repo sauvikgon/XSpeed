@@ -80,7 +80,7 @@ void reachFunction(unsigned int eachDirection, Dynamics& SystemDynamics,
 		loopIteration++; //for the next Omega-iteration or Time-bound
 
 	} //end of while for each vector
-	//	cout<<"\nChild Function has Ended\n"<<eachDirection<<endl<<loopIteration<<endl<<found;
+	  //	cout<<"\nChild Function has Ended\n"<<eachDirection<<endl<<loopIteration<<endl<<found;
 }
 
 //Implementation of reachability parallel using PROCESS FORKING approach

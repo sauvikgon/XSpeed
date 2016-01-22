@@ -9,11 +9,10 @@
 #define ABSTRACTCE_H_
 
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
-
 #include "core_system/HybridAutomata/Transition.h"
 #include <list>
 #include <boost/shared_ptr.hpp>
-
+#include "counterExample/concreteCE.h"
 //#include "core_system/symbolic_states/symbolic_states.h"
 #include "counterExample/abstract_symbolic_state.h"
 
@@ -26,8 +25,7 @@
  * @author: Rajarshi
  */
 
-class abstractCE
-{
+class abstractCE {
 public:
 	typedef boost::shared_ptr<abstractCE> ptr;
 
@@ -55,18 +53,25 @@ public:
 	const std::list<transition::ptr> get_CE_transitions() const {
 		return trans;
 	}
-
 	const abstract_symbolic_state::ptr get_first_symbolic_state() const;
 
 	/**
+	 * The semantics assumes that the last symbolic state in the list is the
+	 * unsafe symbolic state.
 	 * The semantics assumes that the last abstract_symbolic_state in the list is the
 	 * unsafe abstract_symbolic_state.
 	 */
 	const abstract_symbolic_state::ptr get_unsafe_symbolic_state() const;
 
 	const unsigned int get_length() const {
+
 		return length;
 	}
+	/**
+	 * Returns an instance of a concrete counter example
+	 * from the abstract one by solving non-linear optimization problem
+	 */
+	concreteCE get_concrete_CE();
 
 	void set_length(unsigned int len) {
 		length = len;
@@ -79,7 +84,6 @@ public:
 	void set_transitions(std::list<transition::ptr> transitions) {
 		trans = transitions;
 	}
-
 private:
 	/**
 	 * The first symbolic state is the initial symbolic state and the last one

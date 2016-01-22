@@ -31,9 +31,12 @@ void plot_output(std::list<symbolic_states::ptr>& Symbolic_states) {
 		math::matrix<double> SupportFunction_Values, All_Directions;
 
 		sfm = (*it)->getContinuousSetptr()->getMatrixSupportFunction();	//MatrixSupportFunction
-		template_direction = (*it)->getContinuousSetptr()->getTemplateDirections();	//Direction
-		invariant_direction = (*it)->getContinuousSetptr()->getInvariantDirections(); //invariant_directions
-		invariant_bound_values = (*it)->getContinuousSetptr()->getMatrix_InvariantBound(); //invariant_bound_matrix
+		template_direction =
+				(*it)->getContinuousSetptr()->getTemplateDirections();//Direction
+		invariant_direction =
+				(*it)->getContinuousSetptr()->getInvariantDirections(); //invariant_directions
+		invariant_bound_values =
+				(*it)->getContinuousSetptr()->getMatrix_InvariantBound(); //invariant_bound_matrix
 
 		sfm.matrix_join(invariant_bound_values, SupportFunction_Values);
 		template_direction.matrix_join(invariant_direction, All_Directions);
@@ -76,7 +79,7 @@ void plot_output(std::list<symbolic_states::ptr>& Symbolic_states) {
 								str_lin_constraints.append(
 										boost::lexical_cast<string>(num)); //x1, x2  etc
 							} else {
-								str_lin_constraints.append("x");	//x1, x2 etc have not been found yet. This is the 1st occurrence
+								str_lin_constraints.append("x");//x1, x2 etc have not been found yet. This is the 1st occurrence
 								int num = j + 1;
 								str_lin_constraints.append(
 										boost::lexical_cast<string>(num)); //x1, x2  etc
@@ -91,16 +94,16 @@ void plot_output(std::list<symbolic_states::ptr>& Symbolic_states) {
 						found_var_before = true;
 					} // == 0 do not add any constraint
 
-				}//end of one constraint
+				} //end of one constraint
 				str_lin_constraints.append("<=");
 				str_lin_constraints.append(boost::lexical_cast<string>(b[i]));
-			}//end of the polytope
-			std::cout<<"\nConstraint Representation  = "<<str_lin_constraints<<std::endl;
+			} //end of the polytope
+			std::cout << "\nConstraint Representation  = "
+					<< str_lin_constraints << std::endl;
 
 			//Now here i can call SpaceEx plotter
 
-
-		}//end of the list of polytope
+		} //end of the list of polytope
 
 	} //End of a single FlowPipe
 

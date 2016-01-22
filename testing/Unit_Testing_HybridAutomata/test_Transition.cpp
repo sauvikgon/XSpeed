@@ -9,7 +9,6 @@
 #include <sstream>
 #include <iostream>
 #include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "application/DataStructureDirections.h"
 #include "core_system/HybridAutomata/Transition.h"
 #include "core_system/HybridAutomata/Location.h"
@@ -32,7 +31,7 @@ SUITE(Transition_TestSuite) {
 		math::matrix<double> ConstraintsMatrixI;
 		int boundSignI;
 		std::vector<double> boundValueI;
-		std::list<transition::ptr> t;
+		std::list<transition> t;
 		stringstream out, proper;
 	};
 
@@ -50,8 +49,8 @@ SUITE(Transition_TestSuite) {
 		nn = "Welcome";
 		size_type row = 2;
 		size_type col = 2;
-
 		D.isEmptyMatrixA = false;
+
 
 		D.MatrixA.resize(row, col);
 		D.MatrixA(0, 0) = 1;
@@ -195,8 +194,6 @@ SUITE(Transition_TestSuite) {
 		 proper << "3";
 		 CHECK_EQUAL(proper.str(), out.str());
 		 */
-
 	}
-
 }
 

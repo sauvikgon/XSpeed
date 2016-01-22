@@ -54,11 +54,10 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 void reachFunction(unsigned int eachDirection, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		lp_solver &s_per_thread_I, lp_solver &s_per_thread_U,
-		double* sf_vals);
+		lp_solver &s_per_thread_I, lp_solver &s_per_thread_U, double* sf_vals);
 
-const template_polyhedra::ptr reachabilityParallel_Process(Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
+const template_polyhedra::ptr reachabilityParallel_Process(
+		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);
 

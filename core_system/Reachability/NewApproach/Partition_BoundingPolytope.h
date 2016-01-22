@@ -22,8 +22,7 @@
  * 		(eg 1 indicate variable x1, 2 indicate variable x1 and x2, 3 indicate variable x1, x2 and x3)
  * Returns : a list of polytopes after partitioning the polytope S.
  */
-std::list<polytope::ptr> Partition_BoundingPolytope(polytope::ptr S, unsigned int nVar, unsigned int p) ;
-
-
+std::list<polytope::ptr> Partition_BoundingPolytope(polytope::ptr S,
+		unsigned int nVar, unsigned int p);
 
 #endif /* PARTITION_BOUNDINGPOLYTOPE_H_ */

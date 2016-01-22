@@ -44,15 +44,13 @@ const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(
  * Implementation of reachability for each partitions can be made parallel using OMP approach
  */
 const template_polyhedra::ptr reachabilityPartitions(Dynamics& SystemDynamics,
-		polytope::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int lp_solver_type_choosen);
-
+		polytope::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::ptr invariant, bool isInvariantExist,
+		int lp_solver_type_choosen);
 
 const template_polyhedra::ptr reachabilityPartitions_par_iters(
 		Dynamics& SystemDynamics, polytope::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int partitions_size,
-		int lp_solver_type_choosen);
+		bool isInvariantExist, int partitions_size, int lp_solver_type_choosen);
 
 #endif /* REACHPARALLELEXPLORE_H_ */

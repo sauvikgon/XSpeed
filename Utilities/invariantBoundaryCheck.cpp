@@ -16,9 +16,9 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 	int dimension = Initial->getSystemDimension();
 	int Min_Or_Max = 2;
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
-	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
+	std::vector<int> boundaryIterations(numberOfInvariants,
+			shm_NewTotalIteration); // size(dimension_size,initial_value)
 	int foundStart = 0, intersection_start, intersection_end;
-
 
 // *************************** For Positive ************************************
 	double res1, term2 = 0.0, result1, term1 = 0.0, result;
@@ -70,11 +70,11 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 			lpSolver.setConstraints(invariant->getCoeffMatrix(),
 					invariant->getColumnVector(),
 					invariant->getInEqualitySign());
-			invariant_SupportFunction = invariant->computeSupportFunction(rVariable, lpSolver);
+			invariant_SupportFunction = invariant->computeSupportFunction(
+					rVariable, lpSolver);
 			//	std::cout << "\neachInvariantDirection = "<<eachInvariantDirection<<" Invariant SupportFunction = " << invariant_SupportFunction << endl;
 		}
 		// **********************XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX******************
-
 
 		lp_solver s_per_thread_I(type), s_per_thread_U(type);
 // ************************************************ For Positive Direction Starts ************************************************
@@ -90,8 +90,8 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 			std::cout << "InvariantBoundCheck: Input set U is empty\n";
 		} else {
 			s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
-			SystemDynamics.U->getColumnVector(),
-			SystemDynamics.U->getInEqualitySign());
+					SystemDynamics.U->getColumnVector(),
+					SystemDynamics.U->getInEqualitySign());
 		}
 // ************************************************   Positive Direction Ends *******************************************
 		lp_solver s_per_thread_I_minus(type), s_per_thread_U_minus(type);
@@ -117,7 +117,6 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 		sVariable = 0.0; //initialize s0
 		sVariable_min = 0.0;
 
-
 		// ************************************************  For Positive Direction Starts *******************************************
 		//zIInitial = Omega_Support(ReachParameters, rVariable, Initial,SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 		double term3, term3a, term3b, res2, term3c = 0.0;
@@ -125,13 +124,15 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
-			term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
+			term1 = Initial->computeSupportFunction(phi_trans_dir,
+					s_per_thread_I);
 		}
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 			B_trans.mult_vector(rVariable, Btrans_dir);
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
 			term2 = ReachParameters.time_step
-					* SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
+					* SystemDynamics.U->computeSupportFunction(Btrans_dir,
+							s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = (double) support_unitball_infnorm(rVariable);
 		if (!SystemDynamics.isEmptyC) {
@@ -147,16 +148,17 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 		//  **************  Omega Function Over  ********************
 		// ************************************************   Positive Direction Ends *******************************************
 
-
 		// ******************************************* For Negative Direction Starts *******************************************
 		//zIInitial = Omega_Support(ReachParameters, rVariable_minus, Initial,SystemDynamics, s_per_thread_I_minus, s_per_thread_U_minus, Min_Or_Max);
 		double term3_minus, term3a_minus, term3b_minus, res2_minus,
 				term3c_minus = 0.0;
 		//  **************    Omega Function   ********************
-		res1_minus = Initial->computeSupportFunction(rVariable_minus,s_per_thread_I_minus);
+		res1_minus = Initial->computeSupportFunction(rVariable_minus,
+				s_per_thread_I_minus);
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable_minus, phi_trans_dir_minus);
-			term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus,s_per_thread_I_minus);
+			term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus,
+					s_per_thread_I_minus);
 		}
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 			B_trans.mult_vector(rVariable_minus, Btrans_dir_minus);
@@ -179,7 +181,6 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 		//  **************  Omega Function Over  ********************
 		// ******************************************* Negative Direction Ends *******************************************
 
-
 		loopIteration++;
 		for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
 // ************************************************  For Positive Direction Starts *******************************************
@@ -199,12 +200,14 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 			res1 = term1;
 			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 				phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
-				term1 = Initial->computeSupportFunction(phi_trans_dir,s_per_thread_I);
+				term1 = Initial->computeSupportFunction(phi_trans_dir,
+						s_per_thread_I);
 			}
 			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable, Btrans_dir);
 				term2 = ReachParameters.time_step
-						* SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
+						* SystemDynamics.U->computeSupportFunction(Btrans_dir,
+								s_per_thread_U);
 			}
 			term3a = ReachParameters.result_alfa;
 			term3b = support_unitball_infnorm(r1Variable);
@@ -269,7 +272,6 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 			// ************************************************   Negative Direction Ends *******************************************
 
 			loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
-
 
 // ******************************************* Intersection Detection Section Starts *******************************************
 			if (((-1 * TempOmega_min) < invariant_SupportFunction)

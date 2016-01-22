@@ -20,7 +20,6 @@ public:
 
 	~pwlist();
 
-
 	//deletes an initial state from the front of the list and returns the deleted initial state
 	initial_state::ptr WaitingList_delete_front();
 
@@ -29,8 +28,6 @@ public:
 
 	//inserts an initial state at the end of the waiting_list
 	void WaitingList_insert(initial_state::ptr s);
-
-
 
 	unsigned int getWaitingListSize() const;
 	//return TRUE if the waiting_list is empty otherwise FALSE

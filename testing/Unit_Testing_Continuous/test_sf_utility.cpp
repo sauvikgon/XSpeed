@@ -7,8 +7,8 @@
 
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+
+#include "UnitTest++/UnitTest++.h"
 #include "application/sf_utility.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "application/DataStructureDirections.h"
@@ -82,6 +82,8 @@ struct ExampleSF_Utility {
 		V->setColumnVector(boundValueV);
 		V->setInEqualitySign(boundSignV);
 
+
+
 		system_dynamics.U = V;
 		system_dynamics.MatrixA = A;
 		system_dynamics.isEmptyMatrixA = false;
@@ -90,6 +92,7 @@ struct ExampleSF_Utility {
 
 	}
 	~ExampleSF_Utility() { /* some teardown */
+
 	}
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;

@@ -17,7 +17,7 @@ transition::transition(int transition_id, string label_name, int source_id,
 		int dest_id, polytope::ptr gaurd, Assign& assign_Trans) {
 	trans_id = transition_id;
 	label = label_name;
-	source_location_id =source_id;
+	source_location_id = source_id;
 	destination_location_id = dest_id;
 	Gaurd = gaurd;
 	Assign_T = assign_Trans;

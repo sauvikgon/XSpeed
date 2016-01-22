@@ -61,7 +61,7 @@ std::list<polytope::ptr> Partition_BoundingPolytope(polytope::ptr S,
 
 			boundvalue1 = (*it)->getColumnVector();	//copying same value
 			boundvalue2 = (*it)->getColumnVector();	//copying same value
-			coeff1 = (*it)->getCoeffMatrix();	//copying same value = Real_Directions
+			coeff1 = (*it)->getCoeffMatrix();//copying same value = Real_Directions
 			coeff2 = (*it)->getCoeffMatrix();	//copying same value
 
 			double dist_apart, h;

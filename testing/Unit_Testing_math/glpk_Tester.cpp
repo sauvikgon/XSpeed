@@ -6,8 +6,7 @@
  */
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++/UnitTest++.h"
 
 #include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 #include "core_system/math/matrix.h"
@@ -24,6 +23,7 @@ struct Glpk_LPSolver {
 	}
 	~Glpk_LPSolver() { /* some teardown */
 	}
+
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	size_type row, col;
 	int boundSignI;
@@ -35,10 +35,7 @@ TEST_FIXTURE(Glpk_LPSolver, CPU_LP_Test) {
 
 	std::vector<double> b;
 	std::vector<int> status_val;
-
-
 	int N_S = 3;
-
 	int N_C = 2;
 	int N_V = 2;
 
@@ -72,20 +69,20 @@ TEST_FIXTURE(Glpk_LPSolver, CPU_LP_Test) {
 
 	double res;
 
-/*	std::cout << "\n**Answer_Of_All_Simplex GLPK**\n";
-	for (int i = 0; i < N_S; i++) {
-		res = lp.Compute_LLP(direction);
-		cout << res << "\n";
-	}*/
+	/*	std::cout << "\n**Answer_Of_All_Simplex GLPK**\n";
+	 for (int i = 0; i < N_S; i++) {
+	 res = lp.Compute_LLP(direction);
+	 cout << res << "\n";
+	 }*/
 
 	res = lp.Compute_LLP(direction);
 
 	out << "";
 	out << res;
 	proper << "";
-	proper <<"10.2";
+	proper << "10.2";
 
-	CHECK_EQUAL(proper.str(),out.str());
+	CHECK_EQUAL(proper.str(), out.str());
 
 	/*
 	 math::matrix<double> A;
@@ -124,4 +121,3 @@ TEST_FIXTURE(Glpk_LPSolver, CPU_LP_Test) {
 }
 
 }
-

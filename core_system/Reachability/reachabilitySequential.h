@@ -42,8 +42,8 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);
 
-template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
+template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
+		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);
 

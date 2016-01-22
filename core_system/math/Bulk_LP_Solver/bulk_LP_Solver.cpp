@@ -1,7 +1,6 @@
 #include "core_system/math/Bulk_LP_Solver/bulk_LP_Solver.h"
 #include "application/CopyArray.h"
 
-
 bulk_lp_solver::bulk_lp_solver(int lp_solver_type) {
 
 	//lp_problem.lp_solver(lp_solver_type);

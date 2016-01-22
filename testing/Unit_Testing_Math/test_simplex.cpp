@@ -1,5 +1,5 @@
 /*
- * complete_simplex_tester_for_Gurobi.cpp
+ * complete_simplex_tester_glpk.cpp
  *
  *  Created on: 12-Feb-2015
  *      Author: amit
@@ -8,8 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "UnitTest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
-#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
+#include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 #include "core_system/math/matrix.h"
 #include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
 #include "boost/timer/timer.hpp"
@@ -17,9 +16,9 @@
 
 using namespace std;
 
-SUITE(gurobi_lp_solver_TestSuiteComplete) {
-struct Example_Gurobi_LPSolver {
-	Example_Gurobi_LPSolver() {
+SUITE(glpk_lp_solver_TestSuite) {
+struct Example_glpk_LPSolver {
+	Example_glpk_LPSolver() {
 
 		/*
 		 ConstraintsMatrixI.resize(row, col);
@@ -67,7 +66,7 @@ struct Example_Gurobi_LPSolver {
 		boundSignI = 1;
 
 	}
-	~Example_Gurobi_LPSolver() { /* some teardown */
+	~Example_glpk_LPSolver() { /* some teardown */
 	}
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	size_type row, col;
@@ -78,21 +77,21 @@ struct Example_Gurobi_LPSolver {
 	stringstream out, proper;
 };
 
-TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_TestConstraints_Test) {
+TEST_FIXTURE(Example_glpk_LPSolver, lp_solver_TestConstraints_Test) {
 
 	unsigned int status;
-	gurobi_lp_solver lp;
+	glpk_lp_solver lp;
 	lp.setMin_Or_Max(2);	//2 for GLP_MAX
 	//lp.setMin_Or_Max(1);	//1 for GLP_MIN
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
 	status = lp.TestConstraints();
 //	cout << "\n\n\nStatus = " << status << endl;
 	out << status;
-	proper << "2";
+	proper << "5";
 	CHECK_EQUAL(proper.str(), out.str());
 }
 
-TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
+TEST_FIXTURE(Example_glpk_LPSolver, lp_solver_1stQuadrant_Test1) {
 
 	row = 4;
 	col = 2;
@@ -120,15 +119,13 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 	direction[1] = 0.0;
 //	cout << "\nAmit 2\n";
 	double status;
-	gurobi_lp_solver lp;
+	glpk_lp_solver lp;
 	lp.setMin_Or_Max(2);	//2 for GLP_MAX
 
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
 //	cout << "\nAmit 3\n";
-	status = lp.Compute_LPP(direction);
-
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMaximum in Left direction= " << status << endl;
-
 	out << status;
 	//std::cout << res;
 	proper << "3";
@@ -136,9 +133,8 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 
 	lp.setMin_Or_Max(1);	//1 for GLP_MIN
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMinimum in Left direction(give right value)= " << status<< endl;
-
 	stringstream out1, proper1;
 	out1 << status;
 	proper1 << "-2";
@@ -150,7 +146,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 
 	lp.setMin_Or_Max(2);	//2 for GLP_MAX
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMaximum in Down direction= " << status << endl;
 	stringstream out2, proper2;
 	out2 << status;
@@ -159,7 +155,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 
 	lp.setMin_Or_Max(1);	//2 for GLP_MAX
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	double test = lp.Compute_LPP(direction);
+	double test = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMinimum in Down direction  AMIT SHOULD BE -2  IS IT? = "<< test << endl;
 	stringstream out7, proper7;
 	out7 << test;
@@ -171,7 +167,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 
 	lp.setMin_Or_Max(2);	//2 for GLP_MAX
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMaximum in Right direction= " << status << endl;
 	stringstream out3, proper3;
 	out3 << status;
@@ -181,7 +177,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 	lp.setMin_Or_Max(1);	//2 for GLP_Min
 	lp.setInitial_SimplexControlParameters();
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMinimum in Right direction= " << status << endl;
 	stringstream out5, proper5;
 	out5 << status;
@@ -189,7 +185,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 //lp1.setMin_Or_Max(2);
 //lp1.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
 
-//	status = lp1.Compute_LPP(direction);
+//	status = lp1.Compute_LLP(direction);
 //lp.setMin_Or_Max(1);	//1 for GLP_MIN
 	CHECK_EQUAL(proper5.str(), out5.str());
 
@@ -198,7 +194,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 
 	lp.setMin_Or_Max(2);	//2 for GLP_MAX
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMaximum in Up direction= " << status << endl;
 	stringstream out4, proper4;
 	out4 << status;
@@ -207,7 +203,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 
 	lp.setMin_Or_Max(1);	//2 for GLP_Min
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMinimum in Up direction= " << status << endl;
 	stringstream out6, proper6;
 	out6 << status;
@@ -216,7 +212,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test1) {
 
 }
 
-TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
+TEST_FIXTURE(Example_glpk_LPSolver, lp_solver_1stQuadrant_Test2) {
 	//Test region on the 1stQuadrant
 	row = 4;
 	col = 2;
@@ -228,7 +224,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
 //lp1.setMin_Or_Max(2);
 //lp1.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
 
-//	status = lp1.Compute_LPP(direction);
+//	status = lp1.Compute_LLP(direction);
 //lp.setMin_Or_Max(1);	//1 for GLP_MIN
 	ConstraintsMatrixI(1, 1) = 0;
 	ConstraintsMatrixI(2, 0) = 0;
@@ -249,10 +245,10 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
 	direction[1] = -1;
 
 	double status;
-	gurobi_lp_solver lp;
+	glpk_lp_solver lp;
 	lp.setMin_Or_Max(2);	//2 for GLP_MAX
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMaximum in Down direction= " << status << endl;
 	stringstream out1, proper1;
 	out1 << status;
@@ -261,7 +257,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
 
 	lp.setMin_Or_Max(1);	//2 for GLP_MAX
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMinimum in Down direction= " << status << endl;
 	stringstream out3, proper3;
 	out3 << status;
@@ -273,7 +269,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
 
 	lp.setMin_Or_Max(2);	//min
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMaximum in Left direction= " << status << endl;
 	stringstream out2, proper2;
 	out2 << status;
@@ -282,7 +278,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
 
 	lp.setMin_Or_Max(1);	//min
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMinimum in Left direction= " << status << endl;
 	stringstream out4, proper4;
 	out4 << status;
@@ -294,7 +290,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
 
 	lp.setMin_Or_Max(2);	//min
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMaximum in Right direction= " << status << endl;
 	stringstream out5, proper5;
 	out5 << status;
@@ -303,7 +299,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
 
 	lp.setMin_Or_Max(1);	//min
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	status = lp.Compute_LPP(direction);
+	status = lp.Compute_LLP(direction);
 //	cout << "\n\n\nMinimum in Right direction= " << status << endl;
 	stringstream out6, proper6;
 	out6 << status;
@@ -311,9 +307,9 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_1stQuadrant_Test2) {
 	CHECK_EQUAL(proper6.str(), out6.str());
 }
 
-TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing3) {
-	//Test region on the 1stQuadrant
+TEST_FIXTURE(Example_glpk_LPSolver, lp_solver_Testing3) {
 	/*
+	 //Test region on the 1stQuadrant
 	 row = 4;
 	 col = 2;
 
@@ -338,18 +334,18 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing3) {
 	 direction.resize(2);	//Down Direction
 	 direction[0] = 0;
 	 direction[1] = -1;
-	 //	std::cout << "Calling Sequential Testing for Gurobi" << endl;
-	 //	std::cout << "**************************************" << endl;
+	 std::cout << "Calling Sequential Testing for glpk" << endl;
+	 std::cout << "**************************************" << endl;
 	 long int number_of_times = 10000;
 	 double status, arr[number_of_times];
 
 	 boost::timer::cpu_timer tt1;
 	 tt1.start();
 	 for (int i = 0; i < number_of_times; i++) {	//Running in a loop of number_of_times to compute the average result
-	 gurobi_lp_solver lp;
+	 glpk_lp_solver lp;
 	 lp.setMin_Or_Max(2);	//2 for GLP_MAX
 	 lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	 status = lp.Compute_LPP(direction);
+	 status = lp.Compute_LLP(direction);
 	 arr[i] = status;
 	 }
 	 tt1.stop();
@@ -360,17 +356,23 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing3) {
 	 system_clock = tt1.elapsed().system / 1000000;
 
 	 std::cout << std::fixed;	//to assign precision on the std::output stream
-	 std::cout.precision(7);		//cout << setprecision(17);
-	 std::cout << "\nBoost Time taken:Wall  (in Seconds) = "<< wall_clock / (double) 1000 << std::endl;
-	 std::cout << "\nBoost Time taken:User  (in Seconds) = "<< user_clock / (double) 1000 << std::endl;
-	 std::cout << "\nBoost Time taken:System  (in Seconds) = "<< system_clock / (double) 1000 << std::endl;
-	 std::cout<< "\nGurobi TESTING USING Sequential CALLS :: Total Number of ITERATIONS = "<< number_of_times << endl;
+	 std::cout.precision(7);			//cout << setprecision(17);
+	 std::cout << "\nBoost Time taken:Wall  (in Seconds) = "
+	 << wall_clock / (double) 1000 << std::endl;
+	 std::cout << "\nBoost Time taken:User  (in Seconds) = "
+	 << user_clock / (double) 1000 << std::endl;
+	 std::cout << "\nBoost Time taken:System  (in Seconds) = "
+	 << system_clock / (double) 1000 << std::endl;
+
+	 std::cout
+	 << "\nglpk TESTING USING Sequential CALLS :: Total Number of ITERATIONS = "
+	 << number_of_times << endl;
 	 */
 
 }
 
 /*
- TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Test_OMP) {
+ TEST_FIXTURE(Example_glpk_LPSolver, lp_solver_Test_OMP) {
  //Test region on the 1stQuadrant
  row = 4;
  col = 2;
@@ -435,7 +437,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing3) {
 
  }*/
 
-TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing4) {
+TEST_FIXTURE(Example_glpk_LPSolver, lp_solver_Testing4) {
 	//Test region on the 1stQuadrant
 	row = 4;
 	col = 3;
@@ -469,26 +471,27 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing4) {
 
 	/*
 	 std::cout << endl << endl << endl;
-	 std::cout << "Testing for Gurobi with a Given Problem" << endl;
+	 std::cout << "Testing for glpk with a Given Problem" << endl;
 	 std::cout << "**************************************" << endl;
 	 */
 
-	gurobi_lp_solver lp;
+	glpk_lp_solver lp;
 	lp.setMin_Or_Max(2);	//2 for GLP_MAX
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	double result = lp.Compute_LPP(direction);
-	//std::cout << "\nResult of the Problem using Gurobi = " << result << endl;
+	double result = lp.Compute_LLP(direction);
+//	std::cout << "\nResult of the Problem using glpk = " << result << endl;
 	out << "";
 	out << result;
 	proper << "";
 	proper << "10.2";
 
 	CHECK_EQUAL(proper.str(), out.str());
+
 }
 
 /*
 
- TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Test_Sequential_ToCompareWithGurobi) {
+ TEST_FIXTURE(Example_glpk_LPSolver, lp_solver_Test_Sequential_ToCompareWithglpk) {
  //Test region on the 1stQuadrant
 
  row = 4;
@@ -571,7 +574,7 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing4) {
  }
  */
 
-TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing5) {
+TEST_FIXTURE(Example_glpk_LPSolver, lp_solver_Testing5) {
 
 	row = 4;
 	col = 3;
@@ -603,16 +606,16 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing5) {
 	direction[1] = 0;
 	direction[2] = 0;
 
-	std::cout << endl;
-	/*
-	 std::cout << "Testing for Gurobi with a Given Problem" << endl;
-	 std::cout << "**************************************" << endl;
-	 */
+/*
+	std::cout << endl << endl << endl;
+	std::cout << "Testing for glpk with a Given Problem" << endl;
+	std::cout << "**************************************" << endl;
+*/
 
-	gurobi_lp_solver lp;
+	glpk_lp_solver lp;
 	lp.setMin_Or_Max(1);	//2 for GLP_MAX
 	lp.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	double result = lp.Compute_LPP(direction);
+	double result = lp.Compute_LLP(direction);
 //	std::cout << "\nMaximize (l) = " << result << endl;
 
 	out << "";
@@ -621,16 +624,16 @@ TEST_FIXTURE(Example_Gurobi_LPSolver, lp_solver_Testing5) {
 	proper << "10";
 	CHECK_EQUAL(proper.str(), out.str());
 
-	gurobi_lp_solver lp2;
+
+	glpk_lp_solver lp2;
 	lp2.setMin_Or_Max(1);	//2 for GLP_MAX
 	direction[0] = -1;
 	direction[1] = 0;
 	direction[2] = 0;
 	lp2.setConstraints(ConstraintsMatrixI, boundValueI, boundSignI);
-	double result2 = lp.Compute_LPP(direction);
+	double result2 = lp.Compute_LLP(direction);
 //	std::cout << "\n  Maximize (-l) = " << result2 << endl;
-	//std::cout << "\n - Minimize (-l) = " << -1 * result2 << endl;
-
+//	std::cout << "\n - Minimize (-l) = " << -1 * result2 << endl;
 	out << "";
 	out << result2;
 	proper << "";

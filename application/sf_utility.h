@@ -41,7 +41,7 @@ template<typename scalar_type>
 scalar_type dot_product(std::vector<scalar_type> vector1,
 		std::vector<scalar_type> vector2) {
 	scalar_type res = 0;
-	assert(vector1.size()==vector2.size());
+	assert(vector1.size() == vector2.size());
 	for (int i = 0; i < vector1.size(); i++) {
 		res = res + vector1[i] * vector2[i];
 	}
@@ -77,7 +77,7 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 
 	if (!SysD.isEmptyMatrixB) { //if NOT Empty
 		SysD.MatrixB.transpose(Btrans);
-		dim_for_Max_norm = SysD.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
+		dim_for_Max_norm = SysD.MatrixB.size1();//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(SysD.U, Btrans));
 		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
@@ -111,14 +111,14 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 	math::matrix<scalar_type> Btrans;
 	if (!system_dynamics.isEmptyMatrixB) { //if NOT Empty
 		system_dynamics.MatrixB.transpose(Btrans);
-	//	cout <<"test11111\n";
+		//	cout <<"test11111\n";
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(system_dynamics.U, Btrans));
-	//	cout <<"test2222222\n";
+		//	cout <<"test2222222\n";
 		dim_for_Max_norm = system_dynamics.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
-	//	cout <<"dim_for_Max_norm = "<<dim_for_Max_norm<<"\n";
+		//	cout <<"dim_for_Max_norm = "<<dim_for_Max_norm<<"\n";
 		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
-	//	cout <<"test33333\n";
+		//	cout <<"test33333\n";
 	}
 
 	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U
