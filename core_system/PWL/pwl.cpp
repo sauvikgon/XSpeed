@@ -39,5 +39,6 @@ void pwl::WaitingList_insert(symbolic_states s) {
 }
 
 unsigned int pwl::get_waiting_list_size() {
+
 	return waiting_list.size();
 }

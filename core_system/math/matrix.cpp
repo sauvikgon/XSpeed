@@ -86,8 +86,8 @@ template<typename scalar_type> void math::matrix<scalar_type>::multiply(
 	res = math::matrix<scalar_type>(m1.size1(), m1.size2(), m1.data());
 }
 
-template<typename scalar_type> void math::matrix<scalar_type>::minus(matrix& B,
-		matrix& res) {
+template<typename scalar_type> void math::matrix<scalar_type>::minus(
+		matrix& B, matrix& res) {
 
 	ublas_matrix_impl m1(this->size1(), this->size2(), this->data());
 	ublas_matrix_impl m2(B.size1(), B.size2(), B.data());
@@ -95,6 +95,8 @@ template<typename scalar_type> void math::matrix<scalar_type>::minus(matrix& B,
 	m1 = m1 - m2;	//matrix subtraction
 	res = math::matrix<scalar_type>(m1.size1(), m1.size2(), m1.data());
 }
+
+
 
 /**
  * Matrix vector multiplication. The result is stored in the passed argument res
@@ -165,9 +167,9 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_copy(
 }
 
 /*template<typename scalar_type> void math::matrix<scalar_type>::matrix_Identity(
- math::matrix<scalar_type>& newIdentityMatrix) {
- ;
- }*/
+		math::matrix<scalar_type>& newIdentityMatrix) {
+	;
+}*/
 
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(
 		matrix mat2, matrix& joined_matrix) {

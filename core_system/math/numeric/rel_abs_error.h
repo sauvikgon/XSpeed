@@ -60,7 +60,7 @@ public:
 //					rel_below = rel_error(-my_abs/scalar_type(2) - x, x, -my_abs/scalar_type(2));
 //				rel_err = std::max(rel_above, rel_below);
 //			} else
-			rel_err = rel_error(e, x, y);
+				rel_err = rel_error(e, x, y);
 			if (rel_err < 0)
 				return abs_sat;
 			else
@@ -72,8 +72,7 @@ public:
 	/** Returns satisfaction by an interval itv.
 	 *
 	 * The interval class must provide the member functions lower() and upper(). */
-	template<class interval_type> tribool is_satisfied(
-			const interval_type& itv) const {
+	template<class interval_type> tribool is_satisfied(const interval_type& itv) const {
 		return is_satisfied(itv.lower(), itv.upper());
 	}
 
@@ -187,7 +186,7 @@ private:
 template<typename scalar_type>
 rel_abs_error<scalar_type> operator*(const scalar_type& x,
 		const rel_abs_error<scalar_type>& e) {
-	return rel_abs_error<scalar_type>(x * e.my_rel, x * e.my_abs);
+	return rel_abs_error<scalar_type> (x * e.my_rel, x * e.my_abs);
 }
 ;
 /** Division by a scalar */
@@ -200,8 +199,7 @@ rel_abs_error<scalar_type> operator/(const rel_abs_error<scalar_type>& e,
 
 /** Output to stream */
 template<typename scalar_type>
-std::ostream& operator<<(std::ostream& os,
-		const rel_abs_error<scalar_type>& e) {
+std::ostream& operator<<(std::ostream& os, const rel_abs_error<scalar_type>& e) {
 	os << "e_rel=" << e.rel() << ",e_abs=" << e.abs();
 	return os;
 }

@@ -8,6 +8,7 @@
 #ifndef TEMPLATE_POLYHEDRA_H_
 #define TEMPLATE_POLYHEDRA_H_
 
+
 #include "core_system/math/matrix.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 #include <list>
@@ -84,8 +85,7 @@ public:
 	 *		: Appending all the matrixSupportFunction of Tpoly with the matrixSupportFunction of the calling object
 	 *		: Appending should be done column by column from Tpoly onto the calling object
 	 */
-	template_polyhedra::ptr union_TemplatePolytope(
-			template_polyhedra::ptr& Tpoly);
+	template_polyhedra::ptr union_TemplatePolytope(template_polyhedra::ptr& Tpoly);
 
 	unsigned int getTotalIterations() const;
 	//unsigned int getTotalDirections() const;
@@ -115,5 +115,7 @@ private:
 	void setTotalInvariantDirections(unsigned int total_invariant_directions);
 
 };
+
+
 
 #endif /* TEMPLATE_POLYHEDRA_H_ */

@@ -396,7 +396,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 					simplex_for_U.ComputeLP(List_for_U, number_of_streams);
 					supp_func_U = simplex_for_U.getResultAll();
 				} //working
-				  //compute only X0 and supp_unitBall in one kernel
+				//compute only X0 and supp_unitBall in one kernel
 				int UnitBall = 1; //just to have different signature for the overloaded functions of class Simplex
 				Simplex solver(UnitBall, totalDirList1);
 				solver.setConstratint(ReachParameters.X0->getCoeffMatrix(),
@@ -626,13 +626,10 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 						invariant->getColumnVector()[eachInvDirection];
 			}
 		}
-		return template_polyhedra::ptr(
-				new template_polyhedra(MatrixValue, inv_sfm,
-						ReachParameters.Directions,
-						invariant->getCoeffMatrix()));
+		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, inv_sfm,
+				ReachParameters.Directions, invariant->getCoeffMatrix()));
 	} else {
-		return template_polyhedra::ptr(
-				new template_polyhedra(MatrixValue, ReachParameters.Directions));
+		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 }
 

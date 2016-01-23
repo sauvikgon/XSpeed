@@ -24,6 +24,7 @@ struct D {
 	unsigned int C;
 };
 
+
 /* Data Structure required for GPU_SF computation */
 struct AllDirection {
 	unsigned int dir_no;	//direction number
@@ -46,7 +47,7 @@ struct ReachabilityParameters {
 //	bool InvariantExists;		//True If invariant exists otherwise False
 	math::matrix<double> Directions;		//List of Template Directions
 	//math::matrix<double> InvariantDirections;	//List of Invariant's directions and its negative directions
-	math::matrix<double> TotalDirections;//Directions Template + Invariant Directions(excluding negative of invairants)
+	math::matrix<double> TotalDirections;		//Directions Template + Invariant Directions(excluding negative of invairants)
 //	std::vector<D> AdvanceTransposeDirection;	//All transposed directions
 	double TimeBound;
 	unsigned int Iterations;
@@ -58,7 +59,7 @@ struct ReachabilityParameters {
 	double result_alfa;		// placed here for the same above reason
 	double result_beta;		// placed here for the same above reason
 	polytope::ptr X0;  // The polytope representing the initial set
-	std::vector<int> Stop_locID;//List of Locations for which Flowpipe need not be computed
+	std::vector<int> Stop_locID;	//List of Locations for which Flowpipe need not be computed
 };
 
 struct Dynamics {
@@ -67,7 +68,7 @@ struct Dynamics {
 	bool isEmptyMatrixA;	//True if empty otherwise False
 	/** The transformation matrix of the input convex set U */
 	//std::vector<std::vector <double> > MatrixB;
-	math::matrix<double> MatrixB;//polytope U will determine if MatrixB is empty
+	math::matrix<double> MatrixB;	//polytope U will determine if MatrixB is empty
 	bool isEmptyMatrixB;	//True if empty otherwise False
 	polytope::ptr U;
 	std::vector<double> C;
@@ -79,7 +80,8 @@ struct TransitionDynamics {			//May not be used
 	std::vector<double> w;		//vector w belongs to W
 };
 
-struct Optimize_Omega_Support {
+
+struct Optimize_Omega_Support{
 	std::vector<double> dir1;
 	//std::vector<double> dir2;	//similar directions
 	double supp_X0;

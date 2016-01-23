@@ -7,14 +7,10 @@
 
 #include <sstream>
 #include <iostream>
-
-#include <list>
-#include "UnitTest++/UnitTest++.h"
+#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "application/DataStructureDirections.h"
 #include "core_system/HybridAutomata/Location.h"
-
-#include "core_system/HybridAutomata/Transition.h"
-
 #include "core_system/math/lp_solver/lp_solver.h"
 
 using namespace std;
@@ -103,7 +99,6 @@ SUITE(Location_TestSuite) {
 		polytope::ptr u;
 		std::list<transition::ptr> Out_Going_Trans;
 
-
 		u = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 		D.U = u;
 
@@ -161,5 +156,6 @@ SUITE(Location_TestSuite) {
 		proper << "3";
 		CHECK_EQUAL(proper.str(), out.str());
 	}
+
 }
 

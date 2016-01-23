@@ -27,8 +27,7 @@ public:
 	/** Corresponds to x1==x2 in the exact case.
 	 *
 	 * In an inexact comparison, the best result is indeterminate. */
-	static math::tribool is_equal(const scalar_type& x1,
-			const scalar_type& x2) {
+	static math::tribool is_equal(const scalar_type& x1, const scalar_type& x2) {
 		if (is_exact_scalar_type()) {
 			return x1 == x2;
 		} else {
@@ -39,7 +38,7 @@ public:
 
 	/** Corresponds to x1==x2 in the exact case. */
 	static bool is_maybe_equal(const scalar_type& x1, const scalar_type& x2) {
-		return maybe(is_equal(x1, x2));
+		return maybe(is_equal(x1,x2));
 	}
 	;
 
@@ -184,37 +183,39 @@ private:
 	static scalar_type sm_rel_error;
 };
 
-template<typename scalar_type> scalar_type approx_comparator<scalar_type>::pos_error_bound =
-		scalar_type(0);
-template<typename scalar_type> scalar_type approx_comparator<scalar_type>::neg_error_bound =
-		scalar_type(0);
-template<typename scalar_type> scalar_type approx_comparator<scalar_type>::lg_rel_error =
-		scalar_type(1);
-template<typename scalar_type> scalar_type approx_comparator<scalar_type>::sm_rel_error =
-		scalar_type(1);
+template<typename scalar_type> scalar_type
+		approx_comparator<scalar_type>::pos_error_bound = scalar_type(0);
+template<typename scalar_type> scalar_type
+		approx_comparator<scalar_type>::neg_error_bound = scalar_type(0);
+template<typename scalar_type> scalar_type
+		approx_comparator<scalar_type>::lg_rel_error = scalar_type(1);
+template<typename scalar_type> scalar_type
+		approx_comparator<scalar_type>::sm_rel_error = scalar_type(1);
 
-template<> float approx_comparator<float>::pos_error_bound;
-template<> float approx_comparator<float>::neg_error_bound;
-template<> float approx_comparator<float>::lg_rel_error;
-template<> float approx_comparator<float>::sm_rel_error;
 
-template<> double approx_comparator<double>::pos_error_bound;
-template<> double approx_comparator<double>::neg_error_bound;
-template<> double approx_comparator<double>::lg_rel_error;
-template<> double approx_comparator<double>::sm_rel_error;
+template <> float approx_comparator<float>::pos_error_bound;
+template <> float approx_comparator<float>::neg_error_bound;
+template <> float approx_comparator<float>::lg_rel_error;
+template <> float approx_comparator<float>::sm_rel_error;
 
-template<> long double approx_comparator<long double>::pos_error_bound;
-template<> long double approx_comparator<long double>::neg_error_bound;
-template<> long double approx_comparator<long double>::lg_rel_error;
-template<> long double approx_comparator<long double>::sm_rel_error;
+template <> double approx_comparator<double>::pos_error_bound;
+template <> double approx_comparator<double>::neg_error_bound;
+template <> double approx_comparator<double>::lg_rel_error;
+template <> double approx_comparator<double>::sm_rel_error;
+
+template <> long double approx_comparator<long double>::pos_error_bound;
+template <> long double approx_comparator<long double>::neg_error_bound;
+template <> long double approx_comparator<long double>::lg_rel_error;
+template <> long double approx_comparator<long double>::sm_rel_error;
+
 
 /* this templates has issue with the use of header <math.h>
  *
  *
  template <> __float128 approx_comparator<__float128>::pos_error_bound;
- template <> __float128 approx_comparator<__float128>::neg_error_bound;
- template <> __float128 approx_comparator<__float128>::lg_rel_error;
- template <> __float128 approx_comparator<__float128>::sm_rel_error;*/
+template <> __float128 approx_comparator<__float128>::neg_error_bound;
+template <> __float128 approx_comparator<__float128>::lg_rel_error;
+template <> __float128 approx_comparator<__float128>::sm_rel_error;*/
 
 }
 }

@@ -21,24 +21,25 @@ namespace numeric {
  * the exact comparison.
  */
 
+
 template<typename scalar_type> tribool is_LT(const scalar_type& x,
 		const scalar_type& y) {
-	return math::numeric::approx_comparator<scalar_type>::is_LT(x, y);
+	return math::numeric::approx_comparator<scalar_type>::is_LT(x,y);
 }
 
 template<typename scalar_type> tribool is_LE(const scalar_type& x,
 		const scalar_type& y) {
-	return math::numeric::approx_comparator<scalar_type>::is_LE(x, y);
+	return math::numeric::approx_comparator<scalar_type>::is_LE(x,y);
 }
 
 template<typename scalar_type> tribool is_GT(const scalar_type& x,
 		const scalar_type& y) {
-	return math::numeric::approx_comparator<scalar_type>::is_LT(y, x);
+	return math::numeric::approx_comparator<scalar_type>::is_LT(y,x);
 }
 
 template<typename scalar_type> tribool is_GE(const scalar_type& x,
 		const scalar_type& y) {
-	return math::numeric::approx_comparator<scalar_type>::is_LE(y, x);
+	return math::numeric::approx_comparator<scalar_type>::is_LE(y,x);
 }
 
 /** Returns if x==y.
@@ -47,7 +48,7 @@ template<typename scalar_type> tribool is_GE(const scalar_type& x,
  * In an exact comparison, the result is true or false. */
 template<typename scalar_type> tribool is_EQ(const scalar_type& x,
 		const scalar_type& y) {
-	return math::numeric::approx_comparator<scalar_type>::is_equal(x, y);
+	return math::numeric::approx_comparator<scalar_type>::is_equal(x,y);
 }
 
 /** Returns true if x could be equal to y and false otherwise.
@@ -56,15 +57,16 @@ template<typename scalar_type> tribool is_EQ(const scalar_type& x,
  * would at best return indeterminate. */
 template<typename scalar_type> bool is_MEQ(const scalar_type& x,
 		const scalar_type& y) {
-	return math::numeric::approx_comparator<scalar_type>::is_maybe_equal(x, y);
+	return math::numeric::approx_comparator<scalar_type>::is_maybe_equal(x,y);
 }
 
+
 /** Comparison using numeric comparisons. */
-template<typename scalar_type>
+template <typename scalar_type>
 class comp_less {
 public:
-	bool operator()(const scalar_type& x1, const scalar_type& x2) const {
-		return is_LT(x1, x2);
+	bool operator() (const scalar_type& x1, const scalar_type& x2) const {
+		return is_LT(x1,x2);
 	}
 };
 
@@ -76,6 +78,8 @@ struct more {
 	}
 	;
 };
+
+
 
 }
 }

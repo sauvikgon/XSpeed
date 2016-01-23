@@ -17,7 +17,7 @@ using namespace std;
 
 class hybrid_automata {
 	//std::list<location> list_locations;
-	std::map<int, location> list_locations;	//mapping a list of locations based on the key=loc_id
+	std::map<int, location> list_locations;		//mapping a list of locations based on the key=loc_id
 	location initial_loc;
 	int dimension;
 public:
@@ -31,10 +31,9 @@ public:
 	//returns the location from the list of locations with location_ID as the input parameter
 	location getLocation(int Loc_ID);
 
-	void addMapped_Locations_List(
-			std::map<int, location>& mapped_location_list);
+	void addMapped_Locations_List(std::map<int, location>& mapped_location_list);
 
-	void addLocation(location& loc);//inserts location into its correctly mapped key
+	void addLocation(location& loc);	//inserts location into its correctly mapped key
 	int getDimension() const;
 	void setDimension(int dimension);
 };

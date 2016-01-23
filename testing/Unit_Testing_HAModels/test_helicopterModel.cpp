@@ -9,6 +9,8 @@
 #include <iostream>
 #include <boost/tokenizer.hpp>
 #include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+
 //using namespace boost::numeric::ublas;
 using namespace std;
 using namespace boost;

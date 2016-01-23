@@ -18,4 +18,6 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
 
+
+
 #endif /* ROTATION_CIRCLE_H_ */

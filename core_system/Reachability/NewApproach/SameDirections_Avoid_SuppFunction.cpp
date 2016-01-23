@@ -50,14 +50,14 @@ template_polyhedra::ptr reachabilitySameDirection(Dynamics& SystemDynamics,
 				SystemDynamics.U->getColumnVector(),
 				SystemDynamics.U->getInEqualitySign());
 	}
-	unsigned int temp = 0;
+unsigned int temp=0;
 //cout<<"\nTESTing Parallel"<<endl;
 //#pragma omp parallel for
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 		// *************************
 		bool r_same_r1 = false;
 		Optimize_Omega_Support Optimize_Omega;
-		Optimize_Omega.input_epsilon = 0.01;//difference of angle between r and r1;	//can take inputs from USER
+		Optimize_Omega.input_epsilon = 0.01;	//difference of angle between r and r1;	//can take inputs from USER
 		// *************************
 		double zIInitial = 0.0, zI = 0.0, zV = 0.0;
 		double sVariable, s1Variable;
@@ -76,25 +76,23 @@ template_polyhedra::ptr reachabilitySameDirection(Dynamics& SystemDynamics,
 		sVariable = 0.0; 		//initialize s0
 		//cout<<"\nOmega_Support(EachDirection) = "<<eachDirection<<endl;
 		r_same_r1 = false;		//before entering inside the LOOP
-		zIInitial = Omega_Support_Similar_Direction(ReachParameters, rVariable,
-				Initial, SystemDynamics, s_per_thread_I, s_per_thread_U,
-				Min_Or_Max, r_same_r1, Optimize_Omega);
+		zIInitial = Omega_Support_Similar_Direction(ReachParameters, rVariable, Initial,
+				SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max, r_same_r1, Optimize_Omega);
 		MatrixValue(eachDirection, loopIteration) = zIInitial;
 		loopIteration++;
 		for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
 			double TempOmega;
-			//	std::cout<<"\tHello = "<<loopIteration;
-			ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);//r1 computed
+		//	std::cout<<"\tHello = "<<loopIteration;
+			ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);	//r1 computed
 			/*
 			 * now compare if r1 is similar to r  for computing Omega_Support (later can think of W_Support)
 			 */
-			double compute_epsilon = compute_theta(Optimize_Omega.dir1,
-					r1Variable);
-			if (compute_epsilon <= Optimize_Omega.input_epsilon) {
+			double compute_epsilon = compute_theta(Optimize_Omega.dir1, r1Variable);
+			if (compute_epsilon <= Optimize_Omega.input_epsilon){
 				Optimize_Omega.computed_epsilon = compute_epsilon;
 				r_same_r1 = true;
-				//	temp++;
-			} else {
+			//	temp++;
+			}else{
 				r_same_r1 = false;
 			}
 
@@ -103,9 +101,8 @@ template_polyhedra::ptr reachabilitySameDirection(Dynamics& SystemDynamics,
 					s_per_thread_U, Min_Or_Max);
 			//	cout<<"zV= "<<zV<<"\t";
 			s1Variable = sVariable + zV;
-			zI = Omega_Support_Similar_Direction(ReachParameters, r1Variable,
-					Initial, SystemDynamics, s_per_thread_I, s_per_thread_U,
-					Min_Or_Max, r_same_r1, Optimize_Omega);
+			zI = Omega_Support_Similar_Direction(ReachParameters, r1Variable, Initial,
+					SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max, r_same_r1, Optimize_Omega);
 			//		cout<<"zi= "<<zI<<"\t";
 			TempOmega = zI + s1Variable; 		//Y1
 			MatrixValue(eachDirection, loopIteration) = TempOmega; 		//Y1
@@ -124,16 +121,12 @@ template_polyhedra::ptr reachabilitySameDirection(Dynamics& SystemDynamics,
 		for (int eachInvDirection = 0; eachInvDirection < num_inv;
 				eachInvDirection++) {
 			for (unsigned int i = 0; i < shm_NewTotalIteration; i++) {
-				inv_sfm(eachInvDirection, i) =
-						invariant->getColumnVector()[eachInvDirection];
+				inv_sfm(eachInvDirection, i) = invariant->getColumnVector()[eachInvDirection];
 			}
 		}
-		return template_polyhedra::ptr(
-				new template_polyhedra(MatrixValue, inv_sfm,
-						ReachParameters.Directions,
-						invariant->getCoeffMatrix()));
+		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, inv_sfm,
+				ReachParameters.Directions, invariant->getCoeffMatrix()));
 	} else {
-		return template_polyhedra::ptr(
-				new template_polyhedra(MatrixValue, ReachParameters.Directions));
+		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
 }

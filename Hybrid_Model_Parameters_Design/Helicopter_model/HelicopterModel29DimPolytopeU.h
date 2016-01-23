@@ -85,28 +85,28 @@ void SetHelicopter_Parameters5(ReachabilityParameters& reach_parameters,
 	}
 
 	boundSignI = 1;
-	/*
-	 // Trying to give an universe invariant
-	 row = 29;
-	 col = 29;
-	 invariantConstraintsMatrix.resize(row, col);
-	 invariantBoundValue.resize(row);
-	 for (int i = 0; i < row; i++) {
-	 for (int j = 0; j < col; j++) {
-	 if (i == j)
-	 invariantConstraintsMatrix(i, j) = 1;
-	 else
-	 invariantConstraintsMatrix(i, j) = 0;
-	 }
-	 invariantBoundValue[i] = 0;
-	 }
-	 //invariantBoundValue[col-1] = reach_parameters.TimeBound;	//<= timebound	Setting Last direction as invariant's direction
-	 invariantBoundValue[0] = reach_parameters.TimeBound;//<= timebound	Setting First direction as invariant's direction
+/*
+// Trying to give an universe invariant
+	row = 29;
+	col = 29;
+	invariantConstraintsMatrix.resize(row, col);
+	invariantBoundValue.resize(row);
+	for (int i = 0; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			if (i == j)
+				invariantConstraintsMatrix(i, j) = 1;
+			else
+				invariantConstraintsMatrix(i, j) = 0;
+		}
+		invariantBoundValue[i] = 0;
+	}
+	//invariantBoundValue[col-1] = reach_parameters.TimeBound;	//<= timebound	Setting Last direction as invariant's direction
+	invariantBoundValue[0] = reach_parameters.TimeBound;//<= timebound	Setting First direction as invariant's direction
 
-	 invariantBoundSign = 1;
-	 invariant.setPolytope(invariantConstraintsMatrix, invariantBoundValue,
-	 invariantBoundSign);
-	 */
+	invariantBoundSign = 1;
+	invariant.setPolytope(invariantConstraintsMatrix, invariantBoundValue,
+			invariantBoundSign);
+*/
 
 //	invariant.setIsUniverse(true);
 	/*
@@ -115,26 +115,26 @@ void SetHelicopter_Parameters5(ReachabilityParameters& reach_parameters,
 	 */
 
 	/*cout << "\nPrinting The Invariant matrix A <= b\n";
-	 for (int i = 0; i < row; i++) {
-	 for (int j = 0; j < col; j++) {
-	 cout << invariantConstraintsMatrix(i, j) << "\t";
-	 }
-	 cout << invariantBoundValue[i] << endl << endl;
-	 }*/
+	for (int i = 0; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			cout << invariantConstraintsMatrix(i, j) << "\t";
+		}
+		cout << invariantBoundValue[i] << endl << endl;
+	}*/
 
-	/*
-	 cout << "\nPrinting The Invariant matrix\n";
-	 for (int i = 0; i < invariantConstraintsMatrix.size1(); i++) {
-	 for (int j = 0; j < invariantConstraintsMatrix.size2(); j++) {
-	 cout << invariantConstraintsMatrix(i, j) << "\t";
-	 }
-	 cout << endl << endl;
-	 }
-	 cout << "\nPrinting The Invariant Bounds\n";
-	 for (int i = 0; i < invariantBoundValue.size(); i++) {
-	 cout << invariantBoundValue[i] << "\n";
-	 }
-	 */
+/*
+	cout << "\nPrinting The Invariant matrix\n";
+	for (int i = 0; i < invariantConstraintsMatrix.size1(); i++) {
+		for (int j = 0; j < invariantConstraintsMatrix.size2(); j++) {
+			cout << invariantConstraintsMatrix(i, j) << "\t";
+		}
+		cout << endl << endl;
+	}
+	cout << "\nPrinting The Invariant Bounds\n";
+	for (int i = 0; i < invariantBoundValue.size(); i++) {
+		cout << invariantBoundValue[i] << "\n";
+	}
+*/
 
 	//invariant.setIsUniverse(true);	//
 	// Invariant Initialised above
@@ -191,6 +191,7 @@ void SetHelicopter_Parameters5(ReachabilityParameters& reach_parameters,
 	Bmatrix(28, col - 1) = 1;		//try = 0 also
 	//Bmatrix(28, col - 1) = 0;		//try = 0 also
 
+
 	cout << "\nPrinting The B matrix\n";
 	for (int i = 0; i < row; i++) {
 		for (int j = 0; j < col; j++) {
@@ -198,6 +199,7 @@ void SetHelicopter_Parameters5(ReachabilityParameters& reach_parameters,
 		}
 		cout << endl << endl << endl;
 	}
+
 
 	/*
 	 string matrix_au(
@@ -233,13 +235,15 @@ void SetHelicopter_Parameters5(ReachabilityParameters& reach_parameters,
 	for (int j = 0; j < col; j++)
 		Amatrix(28, j) = 0.000000000000;	//Last row for t==0
 
+
 	cout << "\nPrinting The A matrix\n";
-	for (int i = 0; i < row; i++) {
-		for (int j = 0; j < col; j++) {
-			cout << Amatrix(i, j) << "\t";
-		}
-		cout << endl;
-	}
+	 for (int i = 0; i < row; i++) {
+	 for (int j = 0; j < col; j++) {
+	 cout << Amatrix(i, j) << "\t";
+	 }
+	 cout << endl;
+	 }
+
 
 	// Polytope U with constriants as:  0 << u1 to u6 << 0 and 1<< t <<1
 	row = 14;
@@ -283,8 +287,8 @@ void SetHelicopter_Parameters5(ReachabilityParameters& reach_parameters,
 	system_dynamics.MatrixB = Bmatrix;
 	reach_parameters.InvariantExists = false;	//Invariant exists.
 //	system_dynamics.U.setIsEmpty(true);	//set empty = true which is by default
-	system_dynamics.U->setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);//set empty = true which is by default
-	std::cout << "\nPolytope U not Empty\n";
+	system_dynamics.U->setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
+	std::cout<<"\nPolytope U not Empty\n";
 //	Dynamics Initalised ---------------------
 
 }

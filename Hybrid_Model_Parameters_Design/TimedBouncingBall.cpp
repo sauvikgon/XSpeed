@@ -271,10 +271,10 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 
-	/*transitions t;
-	 t=NULL;*/
-	transition::ptr trans = transition::ptr(
-			new transition(1, "hop", 1, 1, gaurd_polytope, assignment));
+
+/*transitions t;
+t=NULL;*/
+	transition::ptr trans = transition::ptr(new transition(1,"hop",1,1,gaurd_polytope,assignment));
 
 	location source;
 	source.setLocId(1);
@@ -468,8 +468,7 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	transition::ptr t1 = transition::ptr(
-			new transition(1, "hop", 1, 1, gaurd_polytope0, assignment0));
+	transition::ptr t1 = transition::ptr(new transition(1, "hop", 1, 1, gaurd_polytope0, assignment0));
 
 	std::list<transition::ptr> Out_Going_Trans_fromalways_running;
 

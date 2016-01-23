@@ -1,4 +1,3 @@
-
 //============================================================================
 // Name        : MyProject_SF.cpp
 // Author      : Amit Gurung
@@ -12,7 +11,6 @@
 //#include <cstdlib>
 
 #include "boost/timer/timer.hpp"
-
 
 /*
  #include "core_system/Reachability/reachabilitySequential.h"
@@ -46,7 +44,6 @@
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_FourLocation.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
 
-
 //**************** Hybrid Automata Definition ***********************
 #include "core_system/Reachability/reachability_HybridAutomata.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
@@ -61,6 +58,7 @@
 
 // *********** Command Line Boost Program Options ********
 #include <boost/program_options/config.hpp>
+
 #include "boost/program_options.hpp"
 #include <boost/config.hpp>
 #include <boost/program_options/detail/config_file.hpp>
@@ -73,12 +71,8 @@
 
 #include "InputOutput/io_utility.h"
 
-
 namespace po = boost::program_options;
-
 using namespace std;
-
-
 
 //symbolic_states initial_symbolic_states;
 initial_state::ptr init_state;
@@ -236,6 +230,9 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 	dim = init_state->getInitialSet()->getSystemDimension();
 
 //Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
+//todo:: needs to decide that is this the right place to include Invariant direction
+	//and also Redundant invariant directional constraints to be removed
+
 	std::vector<std::vector<double> > newDirections;
 
 	if (Directions_Type == BOX) {
@@ -283,7 +280,6 @@ bool isNumber(const string& s) {
 	return 1;
 }
 
-
 int main(int argc, char *argv[]) {
 
 	char ch;
@@ -317,7 +313,6 @@ int main(int argc, char *argv[]) {
 	po::options_description desc("XSpeed options");
 	po::variables_map vm;
 
-
 	if (argc == 1) { //No argument:: When Running directly from the Eclipse Editor
 		//(1,2,3,4,5,6,7,8) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE,CIRCLE_FOUR_LOCATION, CIRCLE_ONE_LOC)
 		model_type = 4;
@@ -337,7 +332,6 @@ int main(int argc, char *argv[]) {
 		//	cout << "\nRunning Testing 1\n";
 		hey = 1;
 	}
-
 
 	desc.add_options()("help", "produce help message")("model",
 			po::value<int>()->default_value(1),
@@ -409,7 +403,6 @@ int main(int argc, char *argv[]) {
 	 po::value<std::vector<string> >()->composing(),
 	 "include configuration file");*/
 
-
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	/*po::positional_options_description p;
 	 p.add("input-files", -1);
@@ -422,14 +415,12 @@ int main(int argc, char *argv[]) {
 
 	 po::options_description visible("Allowed options");
 	 visible.add(desc).add(config);*/
-
 	po::notify(vm);
 
 	if (argc > 1) { // Boost Options to be filled-up
 		if (vm.count("help")) {
 			cout << desc << "\n";
 			return 1; //Just displaying the Help options and terminating the Project
-
 		}
 		std::string include_path = "", model_filename = "",
 				config_filename = ""; //default set to empty
@@ -439,7 +430,6 @@ int main(int argc, char *argv[]) {
 			//std::cout << "Include Path are: "<< vm["include-path"].as< std::vector<string> >() << "\n";
 			include_path = vm["include-path"].as<std::string>();
 			std::cout << "Include Path is: " << include_path << "\n";
-
 		}
 
 		if (vm.count("config-file")) {
@@ -455,7 +445,6 @@ int main(int argc, char *argv[]) {
 			model_filename = vm["model-file"].as<std::string>();
 			//std::cout << "Input files are: "<< vm["model-file"].as< std::vector<string> >() << "\n";
 			std::cout << "Model file is: " << model_filename << "\n";
-
 		}
 
 		if (vm.count("model-file") && vm.count("config-file")) {
@@ -1059,7 +1048,6 @@ int main(int argc, char *argv[]) {
 		Avg_wall_clock = Avg_wall_clock / number_of_times;
 		Avg_user_clock = Avg_user_clock / number_of_times;
 		Avg_system_clock = Avg_system_clock / number_of_times;
-
 	}
 
 	std::cout << std::fixed; //to assign precision on the std::output stream
@@ -1467,7 +1455,6 @@ int main(int argc, char *argv[]) {
  }
  */
 
-
 //	cout<<"\ncompute beta = " <<reach_parameters.result_beta<<endl;
 /*lp_gurobi_simplex problem;
  std::vector<double> direction;
@@ -1559,5 +1546,4 @@ int main(int argc, char *argv[]) {
 
 
  */
-
 

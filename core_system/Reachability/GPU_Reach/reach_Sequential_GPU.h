@@ -17,7 +17,7 @@
 template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int lp_solver_type_choosen,
-		unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU);
+		bool isInvariantExist, int lp_solver_type_choosen, unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU);
+
 
 #endif /* REACH_SEQUENTIAL_GPU_H_ */

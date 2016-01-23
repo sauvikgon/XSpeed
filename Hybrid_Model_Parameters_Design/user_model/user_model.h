@@ -8,6 +8,7 @@
 #ifndef USER_MODEL_H_
 #define USER_MODEL_H_
 
+
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "core_system/symbolic_states/symbolic_states.h"
@@ -22,5 +23,6 @@
 void user_model(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters, int& transition_iterations);
+
 
 #endif /* USER_MODEL_H_ */
