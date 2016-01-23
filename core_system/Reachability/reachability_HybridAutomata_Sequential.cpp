@@ -203,7 +203,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 			//	std::cout << "Parallel Done\n";
 			//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 		}
-
+/*
 		if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 			cout << "\nRunning GPU Sequential\n";
 			boost::timer::cpu_timer AllReachGPU_time;
@@ -223,7 +223,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 					<< return_Time1 << std::endl;
 
 		}
-
+*/
 		if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 			cout
 					<< "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
