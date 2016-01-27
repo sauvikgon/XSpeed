@@ -43,10 +43,11 @@ private:
 	math::matrix<float> C;
 	unsigned int number_of_Constraint;
 	bool single_bound_flag_result;
-	float *R_X, *R_U, *R_UnitBall; //return value from Device/Kernel
-	float *G_R_X, *G_R_U, *G_R_UnitBall;
+	float *R_X, *R_U, *R_UnitBall, *R_dotProduct; //return value from Device/Kernel
+	float *G_R_X, *G_R_U, *G_R_UnitBall, *G_R_dotProduct;
+
 	float *bound_result_for_X, *d_bound_result_for_X, *d_obj_coeff_for_X,
-			*obj_coeff_for_X;
+			*obj_coeff_for_X,*U_C, *d_U_C;
 
 public:
 	float *bound_result, *d_bound_result, *d_obj_coeff, *obj_coeff;
@@ -90,11 +91,16 @@ public:
 	__host__ void getResult_X(std::vector<float> &result); //New implementation
 	__host__ void getResult_U(std::vector<float> &result); //New implementation
 	__host__ void getResult_UnitBall(std::vector<float> &result); //New implementation
+	__host__ void getResult_dotProduct(std::vector<float> &result); //New implementation
 
 
 	//here obj_funs_for_X/U/UnitBall is the List of all the directions on which support function is to be computed
 	__host__ void ComputeLP(math::matrix<float> &obj_funs_for_X,
 			int UnitBall, unsigned int streams); //New implementation
+
+	//here obj_funs_for_X/dotProduct(U.C * directions)/UnitBall is the List of all the directions on which support function is to be computed
+	__host__ void ComputeLP(math::matrix<float> &obj_funs_for_X,
+			int UnitBall, unsigned int streams, std::vector<double> U_C); //New implementation
 
 
 	~Simplex() {

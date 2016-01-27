@@ -364,6 +364,7 @@ int main(int argc, char *argv[]) {
 					"2. Parallel Algorithm: Lazy evaluation of support function\n"
 					"3. Parallel Algorithm: Process-- Not in Use\n"
 					"4. Time-Slice Parallel Algorithm: Time Sliced Reachability selected\n"
+					"11. Flowpipe(PostC) Computation done using GPU\n"
 			/*"5. PAR_ITER_DIR Algorithm: Process-- Not in Use\n"
 			 "6. PAR_BY_PARTS Algorithm: Process-- Not in Use\n"
 			 "7. PAR_BY_PARTS_ITERS Algorithm: Process-- Not in Use\n"
@@ -709,7 +710,7 @@ int main(int argc, char *argv[]) {
 								polytope::ptr forbidden_polytope;
 								forbidden_polytope = polytope::ptr(
 										new polytope(coeff, colVector, 1));
-								forbid_pair.second = forbidden_polytope;	//todo currently unable to handle negative bounds
+								forbid_pair.second = forbidden_polytope; //todo currently unable to handle negative bounds
 
 								forbidden_set.insert(forbid_pair);
 
@@ -736,7 +737,8 @@ int main(int argc, char *argv[]) {
 								tok_it != each_tokens.end(); tok_it++) {
 							if (isNumber((std::string) *tok_it)) { //tokens
 								//std::cout << "tok_it = " << *tok_it << "\n";
-								bounds[index_val] = boost::lexical_cast<double>((std::string) (*tok_it));
+								bounds[index_val] = boost::lexical_cast<double>(
+										(std::string) (*tok_it));
 								index_val++;
 								//bounds.push_back(boost::lexical_cast<int>((*tok_it))); //forbid_pair.first = boost::lexical_cast<int>((*tok_it));
 							}
@@ -903,11 +905,14 @@ int main(int argc, char *argv[]) {
 				//std::cout << "Running Parallel Algorithm: NOT to be Used\n";
 			} else if (algorithm == 4) { //PAR_ITER
 				//std::cout<< "Running Time-Slice Algorithm using Multi-core acceleration\n";
+			} else if (algorithm == 11) { //PAR_ITER
+				//std::cout<< "Running Flowpipe(PostC operation) computation on GPU\n";
 			} else {
 				std::cout << "Invalid algorithm option specified\n";
 				return 0;
 			}
 			Algorithm_Type = algorithm;
+			cout << "algorithm =  11\n";
 		}
 		if (Algorithm_Type == 4) { //this argument will be set only if algorithm==time-slice or PAR_ITER
 			if (vm.count("time-slice")) { //Compulsory Options if algorithm-type==Time-Slice(4)
@@ -998,7 +1003,7 @@ int main(int argc, char *argv[]) {
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
 //	long total_mem_used=0;
 	boost::timer::cpu_timer tt1;
-
+	number_of_times = 2;
 	for (int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		tt1.start();
 //cout<<"\nTesting 3\n";
@@ -1023,6 +1028,7 @@ int main(int argc, char *argv[]) {
 		wall_clock = tt1.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		user_clock = tt1.elapsed().user / 1000000;
 		system_clock = tt1.elapsed().system / 1000000;
+
 		if (Algorithm_Type == 11) {
 			//11 is GPU:: First execution of GPU includes warm-up time, so this time should not be included for averaging
 			if (i == 1) { //first run for averaging
@@ -1036,10 +1042,12 @@ int main(int argc, char *argv[]) {
 			Avg_user_clock = Avg_user_clock + user_clock;
 			Avg_system_clock = Avg_system_clock + system_clock;
 		}
+
 	}
 //	total_mem_used = getCurrentProcess_PhysicalMemoryUsed();
 	/*std::cout<<"\nSize = "<<reachability_sfm.size()<<"\n";
 	 std::cout<<"\nSize max_size = "<<reachability_sfm.max_size()<<"\n";*/
+
 	if (Algorithm_Type == 11) {
 		Avg_wall_clock = Avg_wall_clock / (number_of_times - 1);
 		Avg_user_clock = Avg_user_clock / (number_of_times - 1);
@@ -1054,6 +1062,21 @@ int main(int argc, char *argv[]) {
 	std::cout.precision(7); //cout << setprecision(17);
 	double return_Time = Avg_wall_clock / (double) 1000;
 
+	if (argc > 1) { //running from command Line for output generation
+		//std::cout << return_Time; //running from command Line for output generation
+
+		//----Disabling the console Output to Generate the Data using Shell Script
+		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
+				<< std::endl;
+		std::cout << "\nBoost Time taken:User  (in Seconds) = "
+				<< Avg_user_clock / (double) 1000 << std::endl;
+		std::cout << "\nBoost Time taken:System  (in Seconds) = "
+				<< Avg_system_clock / (double) 1000 << std::endl;
+		cout << endl << "Number of Vectors = "
+				<< reach_parameters.Directions.size1();
+		cout << endl << "Number of Iteration = " << iterations_size << endl;
+
+	}
 	if (argc == 1) { //No argument or Running directly from the Eclipse Editor
 
 		//----Disabling the console Output to Generate the Data using Shell Script
@@ -1069,7 +1092,7 @@ int main(int argc, char *argv[]) {
 				<< reach_parameters.Directions.size1();
 		cout << endl << "Number of Iteration = " << iterations_size << endl;
 	} //endif of argc == 1
-
+	//cout << endl << "Working here 1\n";
 //	cout << endl << "Memory Usages = " << total_mem_used / number_of_times << " KB\n";
 
 	int ploter = 0;
@@ -1078,8 +1101,9 @@ int main(int argc, char *argv[]) {
 		//SpaceEx_plotter();
 	} else { //Plotting using MatLab with our temporary matlab code
 
+		//cout << endl << "Working here 11\n";
 		std::list<symbolic_states::ptr>::iterator it;
-
+		//cout << endl << "Working here 112\n";
 		/*
 		 * Generating Vertices as output which can be plotted using gnuplot utilites
 		 */
@@ -1088,14 +1112,14 @@ int main(int argc, char *argv[]) {
 		math::matrix<double> vertices_list;
 		std::string fileName, fullPath, fileWithPath;
 		const char *stFileNameWithPath;
-
+		//cout << endl << "Working here 2\n";
 		if (vm.count("include-path")) {
 			fullPath = vm["include-path"].as<std::string>();
 			std::cout << "Include Path is: " << fullPath << "\n";
 		} else {
-			fullPath = "/home/amit/cuda-workspace/XSpeed/Debug/";//default file path
+			fullPath = "/home/amit/cuda-workspace/XSpeed/Debug/"; //default file path
 		}
-
+		//cout << endl << "Working here 3\n";
 		fileWithPath.append(fullPath);
 
 		if (vm.count("output-file")) {
@@ -1311,22 +1335,23 @@ int main(int argc, char *argv[]) {
 		std::list<std::pair<int, Intervals> > location_interval_outputs;
 		//cout<<"Printing TotalDirs = "<<Totaldirs<<"\n";
 
-		Interval_Generator(Symbolic_states_list, location_interval_outputs, init_state);
+		Interval_Generator(Symbolic_states_list, location_interval_outputs,
+				init_state);
 
-		std::cout << "\nOutputs for Each Location:: Output-Format is Interval \n";
-		for (std::list<std::pair<int, Intervals> >::iterator it =
-				location_interval_outputs.begin();
-				it != location_interval_outputs.end(); it++) {
-			int locID = (*it).first;
-			Intervals interval_values = (*it).second;
-			cout << "\nLocation == " << locID << "\n";
-			for (int i = 0; i < interval_values.size(); i++) {
-				cout << "\t\tx" << i + 1 << " [" << interval_values[i].first
-						<< ", " << interval_values[i].second << "]\n";
-			}
-		}
+		/*std::cout << "\nOutputs for Each Location:: Output-Format is Interval \n";
+		 for (std::list<std::pair<int, Intervals> >::iterator it =
+		 location_interval_outputs.begin();
+		 it != location_interval_outputs.end(); it++) {
+		 int locID = (*it).first;
+		 Intervals interval_values = (*it).second;
+		 cout << "\nLocation == " << locID << "\n";
+		 for (int i = 0; i < interval_values.size(); i++) {
+		 cout << "\t\tx" << i + 1 << " [" << interval_values[i].first
+		 << ", " << interval_values[i].second << "]\n";
+		 }
+		 }*/
+
 //	XXXX---------------------------------------------------------XXXXX
-
 //	XXXX---------------------------------------------------------XXXXX
 //Now adding invariantBoundMatrix of Flowpipe into the file
 //ASSUMING SAME NUMBER OF INVARIANTS FOR ALL LOCATIONS
@@ -1370,22 +1395,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (argc > 1) { //running from command Line for output generation
-		//std::cout << return_Time; //running from command Line for output generation
-
-		//----Disabling the console Output to Generate the Data using Shell Script
-		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
-				<< std::endl;
-		std::cout << "\nBoost Time taken:User  (in Seconds) = "
-				<< Avg_user_clock / (double) 1000 << std::endl;
-		std::cout << "\nBoost Time taken:System  (in Seconds) = "
-				<< Avg_system_clock / (double) 1000 << std::endl;
-		cout << endl << "Number of Vectors = "
-				<< reach_parameters.Directions.size1();
-		cout << endl << "Number of Iteration = " << iterations_size << endl;
-
-	} //endif of argc == 1
-
 	if (ce != NULL) {
 		cout << "******** Saftey Property Violated ********\n";
 		std::list<abstract_symbolic_state::ptr> list_sym_states;
@@ -1408,7 +1417,7 @@ int main(int argc, char *argv[]) {
 			//cout << "Trans_ID = " << (*it_trans)->getTransitionId() << "\n";
 		}
 		index = 0;
-		cout<<"  *****Starts***** \n";
+		cout << "  *****Starts***** \n";
 		for (it_sym_state = list_sym_states.begin();
 				it_sym_state != list_sym_states.end(); it_sym_state++) {
 
@@ -1423,7 +1432,7 @@ int main(int argc, char *argv[]) {
 				cout << "(" << locationID << " , " << transID[index] << ")\n";
 			index++;
 		}
-		cout<<"  *****Ends*****\n";
+		cout << "  *****Ends*****\n";
 	} else {
 		cout << "******** Does NOT Violate Saftey Property ********\n";
 	}

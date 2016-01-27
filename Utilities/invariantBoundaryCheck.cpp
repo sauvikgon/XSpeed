@@ -18,6 +18,7 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
 	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
 	int foundStart = 0, intersection_start, intersection_end;
+	bool invariantCrossed = false;
 
 
 // *************************** For Positive ************************************
@@ -87,7 +88,7 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 		s_per_thread_U.setMin_Or_Max(2);
 		if (SystemDynamics.U->getIsEmpty()) { //empty polytope
 			//Polytope is empty so no glpk object constraints to be set
-			std::cout << "InvariantBoundCheck: Input set U is empty\n";
+			//std::cout << "InvariantBoundCheck: Input set U is empty\n";
 		} else {
 			s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
 			SystemDynamics.U->getColumnVector(),
@@ -283,6 +284,7 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 				intersection_end = loopIteration;
 				//cout << "\nIntersection_End = " << intersection_end << endl;
 				boundaryIterations[eachInvariantDirection] = loopIteration; //Made Changes here due to circle
+				invariantCrossed = true;//Omega is out of the invariant's boundary
 				break; //no need to compute reachable set anymore due to out of invariant boundary
 			}
 // ******************************************* Intersection Detection Section Ends *******************************************
@@ -292,6 +294,8 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 			sVariable_min = s1Variable_min;
 
 		} //end of iterations
+		if (invariantCrossed)
+			break;//boundary crossed so no need to check other invariant's directions
 	} //end of parallel for each Iterations or Time-Bound
 // At the end of the For-Loop or all invariant_Directions we have boundaryIterations vector with the different limit to stop iterations
 // The Minimum(boundaryIterations) will be the final Boundary Limit for the number of iterations

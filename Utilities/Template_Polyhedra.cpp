@@ -7,7 +7,7 @@
 
 #include "Utilities/Template_Polyhedra.h"
 #include "core_system/continuous/Polytope/Polytope.h"
-
+#include <omp.h>
 #include "Utilities/testPolytopePlotting.h"
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -140,44 +140,139 @@ polytope template_polyhedra::getPolytope(unsigned int Iterations_Number) {
  }
  */
 
-const std::list<template_polyhedra> template_polyhedra::polys_intersection(
+const std::list<template_polyhedra> template_polyhedra::polys_intersectionSequential(
 		polytope::ptr G, int lp_solver_type_choosen) { //need testing due to modification
 	size_type row = 0;
 	size_type col = 0;
 //	cout << "1 = Testing INSIDE \n";
 	math::matrix<double> mat_sf(row, col);
-//	cout<<"2 = Testing INSIDE \n";
-	polytope p;
 	bool is_intersected = false, intersection_started = false, immediate_false =
 			false, intersection_ended = false;
 	int foundIntersection = 0, intersection_start;
 	std::list<template_polyhedra> intersected_region;
-// cout<<"AAAAAAAAAAA = "<<this->Matrix_SupportFunction.size2();
 //	cout<<"3 INSIDE .....TotalIterations = "<< this->getTotalIterations() <<"\n";
-	//unsigned int i2;
+//#pragma omp parallel for
 	for (unsigned int i = 0; i < this->Matrix_SupportFunction.size2(); i++) {
 		//		cout<<"3 INSIDE .....LOOP no = "<<i<<endl;
+		polytope p;
 		p = this->getPolytope(i);
+
 		std::vector<double> constraint_bound_values(
 				this->getInvariantDirections().size1());
 		constraint_bound_values = this->getInvariantBoundValue(i);
-		/*
-		 * from the reach_region that is the calling template_polyhedra
-		 * add the invariant constraint and bound_value to p
-		 */
+		/* from the reach_region that is the calling template_polyhedra add the invariant constraint and bound_value to p*/
 		p.setMoreConstraints(this->getInvariantDirections(),
 				constraint_bound_values);
 		is_intersected = p.check_polytope_intersection(G,
 				lp_solver_type_choosen);	//result of intersection
-		//	cout<<"guard ="<<G->getCoeffMatrix()<<endl;
-		if (is_intersected == true)
+
+		if (is_intersected == true) {//if intersects create a new template_polyhedra subset
+//#pragma omp critical
+				//		{
 			intersection_started = true;
-		//	cout<<"4 4= AFTER CALLING CHECK POLYTOPE INTERSECTION\n";
-		if (is_intersected) { //if intersects create a new template_polyhedra subset
-			if (foundIntersection == 0) {	//Intersection start
-				intersection_start = i;	//Intersection started at this position of 'i'
-				foundIntersection++;
+			/*if (foundIntersection == 0) {	//Intersection start
+			 foundIntersection++;	//intersection_start = i;	//Intersection started at this position of 'i'
+			 }*/
+			col = col + 1;//		cout<<"5 ... INSIDE .... INTERSECTED .....\n";
+			mat_sf.resize(p.getCoeffMatrix().size1(), col, true);//resizing to append the polytope p of the flowpipe that intersects
+			//for (unsigned int j = 0; j < this->getTotalTemplateDirections();j++)
+			for (unsigned int j = 0; j < p.getCoeffMatrix().size1(); j++) {
+				mat_sf(j, col - 1) = p.getColumnVector()[j];//	mat_sf.addColumn(p.getColumnVector()); add column in matrix class
 			}
+			//		}
+			//	cout << "\nIntersection Found at = " << i << endl;
+		}
+
+		if (is_intersected == false && intersection_started == true) {
+//#pragma omp critical
+			//	{
+			intersection_ended = true;
+			//	}
+		}
+
+		if (intersection_started == true && intersection_ended == true) {
+//#pragma omp critical
+			//		{
+			intersected_region.push_back(
+					template_polyhedra(mat_sf, p.getCoeffMatrix()));
+			mat_sf.clear();	//reset all values to zero
+			mat_sf.resize(0, 0);
+			col = 0;
+			intersection_started = false;
+			intersection_ended = false;
+			//		} 		//cout << "\nIntersection Ended at = " << i << "\n";
+		}
+		//	i2 = i;
+	}	//end of parallel for-loop
+	if (intersection_started == true && intersection_ended == false) {
+		math::matrix<double> directions, templateDirs, invDirs;
+		templateDirs = this->getTemplateDirections();
+		invDirs = this->getInvariantDirections();
+		templateDirs.matrix_join(invDirs, directions);
+
+		intersected_region.push_back(template_polyhedra(mat_sf, directions));//intersected_region.push_back(template_polyhedra(mat_sf, p.getCoeffMatrix()));
+		//	cout << "\nIntersection did not End = " << i2 << "\n";
+	}
+
+	/*	if (foundIntersection == 0)
+	 cout << "\nSorry Intersection Not Found!!!!!!\n";
+	 else
+	 cout << "\nIntersection Found at = " << intersection_start << endl;
+	 */
+
+	/*
+	 * After checking all elements(Omegas) of the template_polyhedra of the reachable set
+	 * the function returns the point_of_intersection_started with the guard G.
+	 * And only returns the interescted region with the guard G as a new template_polyhedra:::with added invariant_directions
+	 */
+//	point_of_intersection = intersection_start;
+	return intersected_region;
+}
+
+const std::list<template_polyhedra> template_polyhedra::polys_intersectionParallel(
+		polytope::ptr G, int lp_solver_type_choosen) { //need testing due to modification
+
+	size_type row = 0;
+	size_type col = 0;
+	math::matrix<double> mat_sf(row, col);
+	bool is_intersected = false, intersection_started = false, immediate_false =false, intersection_ended = false;
+	int foundIntersection = 0, intersection_start;
+	std::list<template_polyhedra> intersected_region;
+
+	std::vector<bool> intersects(this->Matrix_SupportFunction.size2(), false);//all false initially
+//	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
+	//omp_set_nested(3);	//enable nested parallelism
+	//omp_set_num_threads(10);
+	//omp_set_max_active_levels(3);
+#pragma omp parallel for // num_threads(4)
+	for (unsigned int i = 0; i < this->Matrix_SupportFunction.size2(); i++) {
+		//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
+		polytope p;
+		p = this->getPolytope(i);
+		std::vector<double> constraint_bound_values(
+				this->getInvariantDirections().size1());
+		constraint_bound_values = this->getInvariantBoundValue(i);
+		p.setMoreConstraints(this->getInvariantDirections(),
+				constraint_bound_values);
+
+		intersects[i] = p.check_polytope_intersection(G, lp_solver_type_choosen);	//result of intersection
+	} //end of parallel-loop :: we have the list of intersected polys
+
+
+
+	polytope p;
+	for (unsigned int i = 0; i < this->Matrix_SupportFunction.size2(); i++) {//sequential reading of an boolean_array that tells intersected polys
+		is_intersected = intersects[i];
+		if (is_intersected == true) {//if intersects create a new template_polyhedra subset
+			intersection_started = true;
+			/*if (foundIntersection == 0) {	//Intersection start
+			 foundIntersection++;	//intersection_start = i;	//Intersection started at this position of 'i'
+			 }*/
+			p = this->getPolytope(i);
+			std::vector<double> constraint_bound_values(this->getInvariantDirections().size1());
+			constraint_bound_values = this->getInvariantBoundValue(i);
+			p.setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
+
 			col = col + 1;//		cout<<"5 ... INSIDE .... INTERSECTED .....\n";
 			mat_sf.resize(p.getCoeffMatrix().size1(), col, true);//resizing to append the polytope p of the flowpipe that intersects
 			//for (unsigned int j = 0; j < this->getTotalTemplateDirections();j++)
@@ -185,10 +280,6 @@ const std::list<template_polyhedra> template_polyhedra::polys_intersection(
 				mat_sf(j, col - 1) = p.getColumnVector()[j];//	mat_sf.addColumn(p.getColumnVector()); add column in matrix class
 			}
 			//	cout << "\nIntersection Found at = " << i << endl;
-			/*if (i = )
-			 polytope::ptr pp;
-			 pp = polytope::ptr(new polytope(p.getCoeffMatrix(),p.getColumnVector(),1));
-			 GeneratePolytopePlotter(pp);*/
 		}
 
 		if (is_intersected == false && intersection_started == true) {
@@ -196,9 +287,7 @@ const std::list<template_polyhedra> template_polyhedra::polys_intersection(
 		}
 
 		if (intersection_started == true && intersection_ended == true) {
-			intersected_region.push_back(
-					template_polyhedra(mat_sf, p.getCoeffMatrix()));
-			//	cout<<mat_sf<<"\n";
+			intersected_region.push_back(template_polyhedra(mat_sf, p.getCoeffMatrix()));
 			mat_sf.clear();	//reset all values to zero
 			mat_sf.resize(0, 0);
 			col = 0;
@@ -207,10 +296,14 @@ const std::list<template_polyhedra> template_polyhedra::polys_intersection(
 			//cout << "\nIntersection Ended at = " << i << "\n";
 		}
 		//	i2 = i;
-	}
+	}	//end of parallel for-loop
 	if (intersection_started == true && intersection_ended == false) {
-		intersected_region.push_back(
-				template_polyhedra(mat_sf, p.getCoeffMatrix()));
+		math::matrix<double> directions, templateDirs, invDirs;
+		templateDirs = this->getTemplateDirections();
+		invDirs = this->getInvariantDirections();
+		templateDirs.matrix_join(invDirs, directions);
+
+		intersected_region.push_back(template_polyhedra(mat_sf, directions));//intersected_region.push_back(template_polyhedra(mat_sf, p.getCoeffMatrix()));
 		//	cout << "\nIntersection did not End = " << i2 << "\n";
 	}
 
@@ -296,7 +389,9 @@ const math::matrix<double>& template_polyhedra::getMatrixSupportFunction() const
 
 void template_polyhedra::setMatrixSupportFunction(
 		math::matrix<double>& matrixSupportFunction) {
+//	cout<<"Called\n";
 	Matrix_SupportFunction = matrixSupportFunction;
+	//cout<<"Called 2\n";
 	this->setTotalIterations(matrixSupportFunction.size2());
 }
 
@@ -319,11 +414,12 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 		template_polyhedra::ptr& Tpoly) {
 
 	if (this->total_iterations == 0)	//if the calling polyhedra is empty
-		return template_polyhedra::ptr(new template_polyhedra(Tpoly->getMatrixSupportFunction(),
-				Tpoly->getTemplateDirections()));
+		return template_polyhedra::ptr(
+				new template_polyhedra(Tpoly->getMatrixSupportFunction(),
+						Tpoly->getTemplateDirections()));
 
 	//std::cout<<"\nEntered inside Union_templatePolytope\n";
-	size_type rows = Tpoly->getMatrixSupportFunction().size1();//rows will not change only column size will increase
+	size_type rows = Tpoly->getMatrixSupportFunction().size1();	//rows will not change only column size will increase
 	unsigned int k;
 	size_type cols = Matrix_SupportFunction.size2()
 			+ Tpoly->getMatrixSupportFunction().size2();
@@ -343,5 +439,6 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 		}
 		//std::cout<<endl;
 	}
-	return template_polyhedra::ptr(new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
+	return template_polyhedra::ptr(
+			new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
 }

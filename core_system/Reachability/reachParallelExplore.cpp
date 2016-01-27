@@ -233,11 +233,21 @@ const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
 	phi_tau_Transpose = ReachParameters.phi_trans;
 	B_trans = ReachParameters.B_trans;
 
-//omp_set_nested(1);
 	int type = lp_solver_type_choosen;
-#pragma omp parallel for
+//	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
+	//omp_set_nested(3);	//enable nested parallelism
+	//omp_set_num_threads(10);
+	//omp_set_max_active_levels(3);
+#pragma omp parallel for //num_threads(4)
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 
+		/*if (eachDirection==0){
+			std::cout<<"\nMax Thread in Inner Level = "<< omp_get_num_threads();
+			std::cout<<"\nMax Active Levels = "<<omp_get_max_active_levels();
+		}
+		//std::cout<<"\n eachDirection = "<<eachDirection<<"\n";
+		std::cout<<"\n Inner threadID = "<<omp_get_thread_num()<<"\n";*/
+		//std::cout<<"\n Inner thread omp_get_nested() = "<<omp_get_nested()<<"\n";
 		double res1, result, term2, result1, term1;
 		std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 
