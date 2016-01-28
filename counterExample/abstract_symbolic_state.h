@@ -14,6 +14,7 @@
 class abstract_symbolic_state {
 public:
 	typedef boost::shared_ptr<abstract_symbolic_state> ptr;
+	typedef boost::shared_ptr<const abstract_symbolic_state> const_ptr;
 
 	abstract_symbolic_state();
 	abstract_symbolic_state(discrete_set& discreteSet,

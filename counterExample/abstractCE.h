@@ -11,8 +11,10 @@
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
 
 #include "core_system/HybridAutomata/Transition.h"
+#include "concreteCE.h"
 #include <list>
 #include <boost/shared_ptr.hpp>
+#include <nlopt.h>
 
 //#include "core_system/symbolic_states/symbolic_states.h"
 #include "counterExample/abstract_symbolic_state.h"
@@ -49,22 +51,27 @@ public:
 	~abstractCE() {
 	}
 	;
-	const std::list<abstract_symbolic_state::ptr> get_CE_sym_states() const {
+	std::list<abstract_symbolic_state::ptr> get_CE_sym_states() const {
 		return sym_states;
 	}
-	const std::list<transition::ptr> get_CE_transitions() const {
+	std::list<transition::ptr> get_CE_transitions() const {
 		return trans;
 	}
 
-	const abstract_symbolic_state::ptr get_first_symbolic_state() const;
+	abstract_symbolic_state::const_ptr get_first_symbolic_state() const;
 
 	/**
 	 * The semantics assumes that the last abstract_symbolic_state in the list is the
 	 * unsafe abstract_symbolic_state.
 	 */
-	const abstract_symbolic_state::ptr get_unsafe_symbolic_state() const;
+	abstract_symbolic_state::const_ptr get_unsafe_symbolic_state() const;
 
-	const unsigned int get_length() const {
+	/**
+	 * Returns the i-th symbolic state from the CE
+	 */
+	abstract_symbolic_state::const_ptr get_symbolic_state(unsigned int i) const;
+
+	unsigned int get_length() const {
 		return length;
 	}
 
@@ -79,6 +86,7 @@ public:
 	void set_transitions(std::list<transition::ptr> transitions) {
 		trans = transitions;
 	}
+	concreteCE gen_concreteCE();
 
 private:
 	/**
@@ -97,6 +105,8 @@ private:
 	 * example.
 	 */
 	unsigned int length;
+	/** Defines the error tolerance when generating trajectory */
+	double tolerance;
 
 };
 
