@@ -26,7 +26,7 @@ using namespace std;
  * number_facets : Number of faces of the defined polytope.
  * dimension :  Number of variables of the system.
  * columnVector :	The values b for each facets.
- * InEqualitySign :	The in equalities sign of the bound values 'b'. Possible values are
+ * InEqualitySign :	The in-equalities sign of the bound values 'b'. Possible values are
  * 					0 :	for  Ax = b (b Equals to)
  * 					1 :	for  Ax <= b (b is Greater Than or Equals to)
  * 					2 :	for  Ax >= b (b is Less Than or Equals to)

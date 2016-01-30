@@ -13,8 +13,10 @@
 #include "core_system/HybridAutomata/Transition.h"
 #include "concreteCE.h"
 #include <list>
+#include <vector>
 #include <boost/shared_ptr.hpp>
-#include <nlopt.h>
+#include <nlopt.hpp>
+#include "core_system/math/lp_solver/lp_solver.h"
 
 //#include "core_system/symbolic_states/symbolic_states.h"
 #include "counterExample/abstract_symbolic_state.h"
@@ -38,7 +40,7 @@ public:
 	}
 	;
 	/* another constructor */
-	abstractCE(std::list<abstract_symbolic_state::ptr> s_states,
+	abstractCE(std::list<abstract_symbolic_state::const_ptr> s_states,
 			std::list<transition::ptr> ts) {
 		//Assertion to check that the length of the counter-example is one minus
 		// the number of sym states in the CE.
@@ -51,7 +53,7 @@ public:
 	~abstractCE() {
 	}
 	;
-	std::list<abstract_symbolic_state::ptr> get_CE_sym_states() const {
+	std::list<abstract_symbolic_state::const_ptr> get_CE_sym_states() const {
 		return sym_states;
 	}
 	std::list<transition::ptr> get_CE_transitions() const {
@@ -75,17 +77,31 @@ public:
 		return length;
 	}
 
+	/**
+	 * Get the dimension of the Real vector space on which the counter exampl
+	 * is defined.
+	 */
+	unsigned int get_dimension()
+	{
+		return get_first_symbolic_state()->getContinuousSet()->getSystemDimension();
+	}
+	/**
+	 * Sets the length of the CE, i.e., the number of transitions + 1.
+	 */
 	void set_length(unsigned int len) {
 		length = len;
 	}
 
-	void set_sym_states(std::list<abstract_symbolic_state::ptr> sym) {
+	void set_sym_states(std::list<abstract_symbolic_state::const_ptr> sym) {
 		sym_states = sym;
 	}
 
 	void set_transitions(std::list<transition::ptr> transitions) {
 		trans = transitions;
 	}
+	/**
+	 * Returns an instance of the concrete counter-example from the abstract.
+	 */
 	concreteCE gen_concreteCE();
 
 private:
@@ -93,7 +109,7 @@ private:
 	 * The first symbolic state is the initial symbolic state and the last one
 	 * is the unsafe symbolic state
 	 */
-	std::list<abstract_symbolic_state::ptr> sym_states;
+	std::list<abstract_symbolic_state::const_ptr> sym_states;
 
 	/**
 	 * The list of transitions taken from the initial abstract_symbolic_state to the
