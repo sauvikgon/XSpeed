@@ -9,6 +9,7 @@
 #define CONCRETECE_H_
 
 #include <list>
+#include <vector>
 
 class concreteCE {
 

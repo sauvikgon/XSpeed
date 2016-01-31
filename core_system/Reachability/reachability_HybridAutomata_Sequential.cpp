@@ -355,7 +355,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 //  ******************************** Safety Verification section ********************************
 		std::list<symbolic_states::ptr> list_sym_states;
 
-		std::list<abstract_symbolic_state::ptr> list_abstract_sym_states;
+		std::list<abstract_symbolic_state::const_ptr> list_abstract_sym_states;
 		polytope::ptr Conti_Set;	//bounding_box Polytope
 		//Conti_Set =polytope::ptr(new polytope());
 
@@ -412,7 +412,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
 			//1) ******************** list_of_symbolic_states ********************
 							list_sym_states.push_front(current_forbidden_state);//pushing the bad symbolic_state first(at the top)
-							list_abstract_sym_states.push_front(curr_abs_sym_state);
+							list_abstract_sym_states.push_front(abstract_symbolic_state::const_ptr(curr_abs_sym_state.get()));
 			//2) list_of_transition
 				//a) current sym_state only have trans_ID but to retrieve this transition I have to
 				//b) get the parent to this sym_state using getParentPtrSymbolicState and then in

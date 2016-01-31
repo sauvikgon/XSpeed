@@ -7,11 +7,12 @@
 
 #include "counterExample/abstractCE.h"
 
+unsigned int N=0;
+unsigned int dim=0;
+
 /** Defining some global data variables required for
  * nlopt
  */
-extern unsigned int N;
-extern unsigned int dim;
 
 abstract_symbolic_state::const_ptr abstractCE::get_first_symbolic_state() const
 {
