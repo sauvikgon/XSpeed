@@ -8,15 +8,7 @@
 
 #include <iostream>
 #include <fstream>
-//#include <cstdlib>
-
-#include "boost/timer/timer.hpp"
-
-/*
- #include "core_system/Reachability/reachabilitySequential.h"
- #include "core_system/Reachability/reachabilityParallel_Process.h"
- #include "core_system/Reachability/reachabilityParallel_Iterations.h"
- */
+#include <boost/timer/timer.hpp>
 #include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
 #include "application/sf_directions.h"
 #include "application/DataStructureDirections.h"
@@ -34,7 +26,7 @@
  #include "Hybrid_Model_Parameters_Design/Helicopter_model/Helicopter.h"
  #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel2.h"
  #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28PolytopeU.h"
- #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel29DimPolytopeU.h"
+ #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel29PolytopeU.h"
  */
 #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
 #include "Hybrid_Model_Parameters_Design/FiveDimSys.h"
@@ -57,12 +49,11 @@
 //#include <boost/tokenizer.hpp>
 
 // *********** Command Line Boost Program Options ********
-#include <boost/program_options/config.hpp>
+//#include <boost/program_options/config.hpp>
 
-#include "boost/program_options.hpp"
+#include "/usr/local/include/boost/program_options.hpp"
 #include <boost/config.hpp>
 #include <boost/program_options/detail/config_file.hpp>
-
 #include <boost/program_options/parsers.hpp>
 // *********** Command Line Boost Program Options ********
 #include "plotter_utility.h"
@@ -71,16 +62,15 @@
 
 #include "InputOutput/io_utility.h"
 
-namespace po = boost::program_options;
-using namespace std;
-
 //symbolic_states initial_symbolic_states;
 initial_state::ptr init_state;
 //**************** Hybrid Automata Definition ***********************
 
 ReachabilityParameters reach_parameters;
-int dir_nums, transition_iterations;
-int dim;
+unsigned int dir_nums, transition_iterations;
+
+unsigned int dims;
+
 std::vector<std::vector<double> > directions; //List of all directions
 
 math::matrix<double> Real_Directions; //List of all directions
@@ -88,7 +78,11 @@ math::matrix<double> Real_Directions; //List of all directions
 //**************** Hybrid Automata Definition ***********************
 hybrid_automata Hybrid_Automata;
 //**************** Hybrid Automata Definition ***********************
+
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
+
+namespace po = boost::program_options;
+
 
 polytope initial_polytope_I, invariant, gaurd_polytope(true);
 unsigned int HybridSystem_Model_Type;
@@ -98,7 +92,6 @@ unsigned int Uniform_Directions_Size;
 void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		unsigned int directions_type_or_size, unsigned int transition_size) {
 	size_type row, col;
-
 	transition_iterations = transition_size; //Number of iterations for transition of the Hybrid system
 
 	reach_parameters.TimeBound = time_bound; //Total Time Interval
@@ -227,7 +220,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 				reach_parameters);
 	}
 
-	dim = init_state->getInitialSet()->getSystemDimension();
+	dims = init_state->getInitialSet()->getSystemDimension();
 
 //Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
 //todo:: needs to decide that is this the right place to include Invariant direction
@@ -236,8 +229,8 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 	std::vector<std::vector<double> > newDirections;
 
 	if (Directions_Type == BOX) {
-		dir_nums = 2 * dim; //Axis Directions
-		newDirections = generate_axis_directions(dim);
+		dir_nums = 2 * dims; //Axis Directions
+		newDirections = generate_axis_directions(dims);
 		//repeated code:: to avoid outside if-block
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;
@@ -246,8 +239,8 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
 	if (Directions_Type == OCT) {
-		dir_nums = 2 * dim * dim; // Octagonal directions
-		newDirections = get_octagonal_directions(dim);
+		dir_nums = 2 * dims * dims; // Octagonal directions
+		newDirections = get_octagonal_directions(dims);
 		//repeated code:: to avoid outside if-block
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;
@@ -310,7 +303,9 @@ int main(int argc, char *argv[]) {
 	int hey = 0;
 	bool isConfigFileAssigned = false;
 	int output_var_X = 0, output_var_Y = 1;
-	po::options_description desc("XSpeed options");
+
+
+	boost::program_options::options_description desc("XSpeed options");
 	po::variables_map vm;
 
 	if (argc == 1) { //No argument:: When Running directly from the Eclipse Editor
@@ -334,7 +329,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	desc.add_options()("help", "produce help message")("model",
-			po::value<int>()->default_value(1),
+			boost::program_options::value<int>()->default_value(1),
 			"set model for reachability analysis\n"
 					"1.  Bouncing Ball Model (Set to default) \n"
 					"2.  Timed Bouncing Ball Model\n"
@@ -1093,7 +1088,7 @@ int main(int argc, char *argv[]) {
 			fullPath = vm["include-path"].as<std::string>();
 			std::cout << "Include Path is: " << fullPath << "\n";
 		} else {
-			fullPath = "/home/amit/cuda-workspace/XSpeed/Debug/";//default file path
+			fullPath = "./";//default file path
 		}
 
 		fileWithPath.append(fullPath);
@@ -1388,12 +1383,12 @@ int main(int argc, char *argv[]) {
 
 	if (ce != NULL) {
 		cout << "******** Saftey Property Violated ********\n";
-		std::list<abstract_symbolic_state::ptr> list_sym_states;
+		std::list<abstract_symbolic_state::const_ptr> list_sym_states;
 		std::list<transition::ptr> list_transition;
 		list_sym_states = ce->get_CE_sym_states();
 		list_transition = ce->get_CE_transitions();
 
-		std::list<abstract_symbolic_state::ptr>::iterator it_sym_state;
+		std::list<abstract_symbolic_state::const_ptr>::iterator it_sym_state;
 		std::list<transition::ptr>::iterator it_trans;
 		discrete_set ds;
 		unsigned int locationID;
@@ -1542,8 +1537,5 @@ int main(int argc, char *argv[]) {
  MatLabFileSupportFunctionMatrix << endl;
  }
  MatLabFileSupportFunctionMatrix.close();
-
-
-
  */
 

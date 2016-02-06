@@ -29,6 +29,8 @@
  *
  * @author: Rajarshi
  */
+extern unsigned int dim;
+extern unsigned int N;
 
 class abstractCE
 {

@@ -7,8 +7,8 @@
 
 #include "counterExample/abstractCE.h"
 
-unsigned int N=0;
-unsigned int dim=0;
+unsigned int dim;
+unsigned int N;
 
 /** Defining some global data variables required for
  * nlopt
