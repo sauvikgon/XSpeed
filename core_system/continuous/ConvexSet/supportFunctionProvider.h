@@ -12,8 +12,9 @@
 //#include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 #include "core_system/math/lp_solver/lp_solver.h"
 #include <boost/shared_ptr.hpp>
+#include "core_system/HybridAutomata/vartoindexmap.h"
 
-class supportFunctionProvider
+class supportFunctionProvider : public var_to_index_map
 {
 
 public:

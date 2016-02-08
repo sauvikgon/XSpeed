@@ -93,13 +93,11 @@ SUITE(HybridAutomata_TestSuite) {
 		math::matrix<double> ConstraintsMatrixI;
 		int boundSignI;
 		std::vector<double> boundValueI;
-
+		hybrid_automata ha;
 		stringstream out, proper;
 	};
 
 	TEST_FIXTURE(ClassHybridAutomata , constructor1_HybridAutomata_Test) {
-
-		hybrid_automata ha;
 		//	cout << "Just testing the Empty Hybrid Automata's Dimension = "<< ha.getDimension() << "\t" << endl;
 		out<<ha.getDimension();
 		proper<<"0";
@@ -136,8 +134,6 @@ SUITE(HybridAutomata_TestSuite) {
 		location loc(11, nn, D, Inv, true, all_trans),loc_src(12, "WelCome", D, Inv, true, all_trans),
 		loc_dest(13, "GoodBye", D, Inv, true, all_trans), outLoc;
 
-		hybrid_automata ha;
-
 		ha.addInitial_Location(loc);
 		ha.addLocation(loc);
 		ha.addLocation(loc_src);
@@ -157,6 +153,45 @@ SUITE(HybridAutomata_TestSuite) {
 		outLoc = ha.getLocation(13);
 		out << outLoc.getName();
 		proper << "GoodBye";
+		CHECK_EQUAL(proper.str(), out.str());
+
+	}
+	TEST_FIXTURE(ClassHybridAutomata , HybridAutomata_var_map_Test) {
+		std::map<std::string, unsigned int> var_map;
+		std::list<transition::ptr> all_trans;
+		var_map["x"] = 1;
+		var_map["y"] = 2;
+		ha.set_map(var_map);
+
+
+		unsigned int y_index = ha.get_index("y");
+		out << y_index;
+		proper<< "2";
+		out << ""; proper << "";
+		unsigned int x_index = ha.get_index("x");
+		out << x_index;
+		proper << "1";
+		CHECK_EQUAL(proper.str(), out.str());
+
+		location loc(11, nn, D, Inv, true, all_trans),loc_src(12, "WelCome", D, Inv, true, all_trans),
+		loc_dest(13, "GoodBye", D, Inv, true, all_trans);
+
+		ha.addInitial_Location(loc);
+		ha.addLocation(loc);
+		ha.addLocation(loc_src);
+		ha.addLocation(loc_dest);
+
+		location l = ha.getLocation(11);
+		polytope::ptr p = l.getInvariant();
+		x_index = p->get_index("x");
+		y_index = p->get_index("y");
+
+		out << x_index;
+		proper << "1";
+		CHECK_EQUAL(proper.str(), out.str());
+
+		out << y_index;
+		proper << "2";
 		CHECK_EQUAL(proper.str(), out.str());
 
 	}

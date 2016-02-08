@@ -32,11 +32,16 @@ void location::setSystem_Dynamics(const Dynamics& system_dynamics) {
 }
 
 polytope::ptr location::getInvariant() {
+	if(Invariant==NULL && isInvariantExists())
+		throw runtime_error("NULL Invariant in an automata location");
 	return Invariant;
 }
 
 void location::setInvariant(polytope::ptr invariant) {
-	Invariant = invariant;
+	if(isInvariantExists())
+		Invariant = invariant;
+	else
+		throw runtime_error("location does not have an invariant\n");
 }
 
 const string& location::getName() const {
