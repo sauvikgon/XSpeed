@@ -171,13 +171,36 @@ concreteCE abstractCE::gen_concreteCE(){
 			x[i*dim+j] = v[j];
 		}
 	}
+
 	/** Set initial value to the time variables
-	 *  We initialize each dwell time to 0
-	 *  \\ todo: Restrict dwell time within the projections of C_i in time variable
+	 *  Restrict dwell time within the projections of C_i in time variable
 	 **/
+
+	/**
+	 * We assume that the time variable is names as 't' in the model.
+	 * We find out the min,max components of the time variable
+	 */
+	unsigned int t_index = get_first_symbolic_state()->getContinuousSet()->get_index("t");
+	assert(t_index>=0 & t_index <dim);
+
+	std::vector<double> dmin(dim,0), dmax(dim,0);
+	dmax[t_index]=1;
+	dmin[t_index]=-1;
+
+	double min,max;
 	for(i=0;i<N;i++)
 	{
-		x[N*dim+i] = 0;
+		S = get_symbolic_state(i);
+		P = S->getContinuousSet();
+		/** To get a point from the polytope, we create a random obj function and
+		 * solve the lp. The solution point is taken as an initial value.
+		 */
+		lp_solver lp(GLPK_SOLVER);
+		lp.setConstraints(P->getCoeffMatrix(),P->getColumnVector(),P->getInEqualitySign());
+		max = lp.Compute_LLP(dmax);
+		min = lp.Compute_LLP(dmin);
+		// We may choose to take the minimum t as the initial dwell time
+		x[N*dim+i] = min;
 	}
 
 	/**
