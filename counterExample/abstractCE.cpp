@@ -6,6 +6,7 @@
  */
 
 #include "counterExample/abstractCE.h"
+#include <fstream>
 
 unsigned int dim;
 unsigned int N;
@@ -14,39 +15,61 @@ unsigned int N;
  * nlopt
  */
 
-abstract_symbolic_state::const_ptr abstractCE::get_first_symbolic_state() const
-{
-	std::list<abstract_symbolic_state::const_ptr>::const_iterator it = sym_states.begin();
+abstract_symbolic_state::const_ptr abstractCE::get_first_symbolic_state() const {
+	std::list<abstract_symbolic_state::const_ptr>::const_iterator it =
+			sym_states.begin();
 	return boost::shared_ptr<const abstract_symbolic_state>(*it);
 }
-abstract_symbolic_state::const_ptr abstractCE::get_unsafe_symbolic_state() const
-{
-	std::list<abstract_symbolic_state::const_ptr>::const_iterator it = sym_states.end();
+abstract_symbolic_state::const_ptr abstractCE::get_unsafe_symbolic_state() const {
+	std::list<abstract_symbolic_state::const_ptr>::const_iterator it =
+			sym_states.end();
 	return *it;
 }
 
-abstract_symbolic_state::const_ptr abstractCE::get_symbolic_state(unsigned int i) const
-{
-	assert(0<=i && i<get_length());
-	unsigned int j=0;
-	std::list<abstract_symbolic_state::const_ptr>::const_iterator it = sym_states.begin();
-	while(j<i)
+abstract_symbolic_state::const_ptr abstractCE::get_symbolic_state(
+		unsigned int i) const {
+	assert(0 <= i && i < get_length());
+	unsigned int j = 0;
+	std::list<abstract_symbolic_state::const_ptr>::const_iterator it =
+			sym_states.begin();
+	while (j < i)
 		it++;
 	return *it;
 }
 
-std::vector<double> simulate_trajectory(const std::vector<double>& x0, const double& time)
-{
+void abstractCE::plot(unsigned int i, unsigned int j) {
+	/** Plotting the abstract counter example in a tracefile */
+	std::ofstream tracefile;
+	tracefile.open("./ceTrace.o");
+	math::matrix<double> vertices_list;
+	std::list<abstract_symbolic_state::const_ptr>::iterator it;
+	for (it = sym_states.begin(); it != sym_states.end(); it++) {
+		vertices_list = (*it)->getContinuousSet()->get_2dVertices(i-1, j-1);
+		// ------------- Printing the vertices on the Output File -------------
+		for (unsigned int p = 0; p < vertices_list.size1(); p++) {
+			for (unsigned int q = 0; q < vertices_list.size2(); q++) {
+				tracefile << vertices_list(p, q) << " ";
+			}
+			tracefile << std::endl;
+		}
+		tracefile << std::endl; // 1 gap after each polytope plotted
+	}
+	tracefile.close();
+	/**end of tracefile generation */
+}
+std::vector<double> simulate_trajectory(const std::vector<double>& x0,
+		const double& time) {
 	/**
 	 * This function is to simulate trajectory from x0 for time units.
 	 * todo: current dummy implementation to be completed
 	 */
 
-	std::vector<double> y(x0.size(),0);
+	std::vector<double> y(x0.size(), 0);
 	return y;
 }
 
-double myobjfunc(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data) {
+double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
+		void *my_func_data) {
 	if (!grad.empty()) {
 		grad[0] = 0.0;
 		grad[1] = 0.5 / sqrt(x[1]);
@@ -59,56 +82,50 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad, void *
 	double sum = 0; // Stores the sum of all Euclidean distances of the end points.
 	std::vector<std::vector<double> > y(N);
 
-	for(unsigned int i=0;i<N;i++)
-	{
-		std::vector<double> v(dim,0);
-		for(unsigned int j=0;j<dim;j++)
-		{
-			v[j] = x[i*dim+j];
+	for (unsigned int i = 0; i < N; i++) {
+		std::vector<double> v(dim, 0);
+		for (unsigned int j = 0; j < dim; j++) {
+			v[j] = x[i * dim + j];
 		}
-		y[i] = simulate_trajectory(v, N*dim+i);
+		y[i] = simulate_trajectory(v, N * dim + i);
 	}
 	//Calculate Euclidean distances
-	for(unsigned int i=0;i<N-1;i++)
-	{
+	for (unsigned int i = 0; i < N - 1; i++) {
 		double sq_sum = 0;
-		for(unsigned int j=0;j<dim;j++)
-		{
-			sq_sum +=(y[i][j] - y[i+1][j]) * (y[i][j] - y[i+1][j]);
+		for (unsigned int j = 0; j < dim; j++) {
+			sq_sum += (y[i][j] - y[i + 1][j]) * (y[i][j] - y[i + 1][j]);
 		}
-		sum+=math::sqrt(sq_sum);
+		sum += math::sqrt(sq_sum);
 	}
 	return sum;
 }
 
 /** Function to define a constraint over the optimization problem */
 
-struct polyConstraints
-{
+struct polyConstraints {
 	math::matrix<double> A;
 	math::vector<double> b;
 	unsigned int sstate_index;
 	unsigned int row_index;
 };
 
-double myconstraint(const std::vector<double> &x, std::vector<double> &grad, void *data)
-{
+double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
+		void *data) {
 	polyConstraints *d = reinterpret_cast<polyConstraints *>(data);
-    unsigned int i = d->sstate_index;
-    unsigned int row_index = d->row_index;
+	unsigned int i = d->sstate_index;
+	unsigned int row_index = d->row_index;
 
-    if (!grad.empty()) {
-    	// todo: gradient to be added later
-    }
-    assert(d->A.size2() == dim);
+	if (!grad.empty()) {
+		// todo: gradient to be added later
+	}
+	assert(d->A.size2() == dim);
 
-    double sum=0;
-    for(unsigned int j=0;i<dim;j++)
-    {
-    	sum+= x[i*dim+j]* d->A(row_index,j);
-    }
-    sum-=d->b[row_index];
-    return sum;
+	double sum = 0;
+	for (unsigned int j = 0; i < dim; j++) {
+		sum += x[i * dim + j] * d->A(row_index, j);
+	}
+	sum -= d->b[row_index];
+	return sum;
 }
 
 /**
@@ -119,7 +136,7 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad, voi
  * @Rajarshi
  * 28th January 2016
  */
-concreteCE abstractCE::gen_concreteCE(){
+concreteCE abstractCE::gen_concreteCE() {
 
 	/* Generate an nlopt object with the constraints defined by the Abstract counter example
 	 */
@@ -138,7 +155,7 @@ concreteCE abstractCE::gen_concreteCE(){
 	 * each starting vector is of dimension dim. Therefore, the total number of
 	 * variables of the optimization problem are dim*N + N
 	 */
-	unsigned int optD = N*dim + N;
+	unsigned int optD = N * dim + N;
 	nlopt::opt myopt(nlopt::LN_COBYLA, optD);
 
 	myopt.set_min_objective(myobjfunc, NULL);
@@ -150,25 +167,26 @@ concreteCE abstractCE::gen_concreteCE(){
 
 	// A random objective function created for lp solving
 
-	std::vector<double> obj(dim,0);
+	std::vector<double> obj(dim, 0);
 	obj[0] = 1;
 	std::vector<double> v(dim);
 
-	for(i=0;i<N;i++) // iterate over the N counter-examples
-	{
+	for (i = 0; i < N; i++) // iterate over the N counter-examples
+			{
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
 		/** To get a point from the polytope, we create a random obj function and
 		 * solve the lp. The solution point is taken as an initial value.
 		 */
 		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(P->getCoeffMatrix(),P->getColumnVector(),P->getInEqualitySign());
+		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
+				P->getInEqualitySign());
 		lp.Compute_LLP(obj);
 		v = lp.get_sv();
 
-		for(j=0;j<dim;j++) // iterate over each component of the x_i start point vector
-		{
-			x[i*dim+j] = v[j];
+		for (j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
+				{
+			x[i * dim + j] = v[j];
 		}
 	}
 
@@ -180,27 +198,28 @@ concreteCE abstractCE::gen_concreteCE(){
 	 * We assume that the time variable is names as 't' in the model.
 	 * We find out the min,max components of the time variable
 	 */
-	unsigned int t_index = get_first_symbolic_state()->getContinuousSet()->get_index("t");
-	assert(t_index>=0 & t_index <dim);
+	unsigned int t_index =
+			get_first_symbolic_state()->getContinuousSet()->get_index("t");
+	assert(t_index >= 0 & t_index < dim);
 
-	std::vector<double> dmin(dim,0), dmax(dim,0);
-	dmax[t_index]=1;
-	dmin[t_index]=-1;
+	std::vector<double> dmin(dim, 0), dmax(dim, 0);
+	dmax[t_index] = 1;
+	dmin[t_index] = -1;
 
-	double min,max;
-	for(i=0;i<N;i++)
-	{
+	double min, max;
+	for (i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
 		/** To get a point from the polytope, we create a random obj function and
 		 * solve the lp. The solution point is taken as an initial value.
 		 */
 		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(P->getCoeffMatrix(),P->getColumnVector(),P->getInEqualitySign());
+		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
+				P->getInEqualitySign());
 		max = lp.Compute_LLP(dmax);
 		min = lp.Compute_LLP(dmin);
 		// We may choose to take the minimum t as the initial dwell time
-		x[N*dim+i] = min;
+		x[N * dim + i] = min;
 	}
 
 	/**
@@ -214,8 +233,7 @@ concreteCE abstractCE::gen_concreteCE(){
 	math::matrix<double> A;
 	math::vector<double> b;
 
-	for(unsigned int i=0;i<N;i++)
-	{
+	for (unsigned int i = 0; i < N; i++) {
 		polyConstraints data;
 		C = get_symbolic_state(i)->getContinuousSet();
 		data.A = C->getCoeffMatrix();
@@ -225,11 +243,10 @@ concreteCE abstractCE::gen_concreteCE(){
 
 		assert(C->getInEqualitySign() == 1);
 
-	    unsigned int num_rows = A.size1();
+		unsigned int num_rows = A.size1();
 
-	    data.sstate_index = i;
-		for(unsigned int j=0;j<num_rows;j++)
-		{
+		data.sstate_index = i;
+		for (unsigned int j = 0; j < num_rows; j++) {
 			data.row_index = j;
 			myopt.add_inequality_constraint(myconstraint, &data, 1e-8);
 		}
@@ -248,31 +265,30 @@ concreteCE abstractCE::gen_concreteCE(){
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
-	if(math::abs(minf) > tolerance){
+	if (math::abs(minf) > tolerance) {
 		concreteCE cexample;
 		return cexample;
-	}
-	else {
+	} else {
 		// create a concrete counter example object
 		concreteCE cexample;
 		// one trajectory per symbolic state to be added in the concreteCE
-		for(unsigned int i=0;i<N;i++)
-		{
+		for (unsigned int i = 0; i < N; i++) {
 			// create the sample
 			concreteCE::sample s;
-			std::set<int>::iterator dset_iter = get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
+			std::set<int>::iterator dset_iter =
+					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
 			unsigned int locId = *dset_iter;
 
 			std::vector<double> y(dim);
-			for(unsigned int j=0;j<dim;j++){
-				y[j] = x[i*dim + j];
+			for (unsigned int j = 0; j < dim; j++) {
+				y[j] = x[i * dim + j];
 			}
 
-			double time = x[N*dim+i];
+			double time = x[N * dim + i];
 			s.first = y;
 			s.second = time;
 			concreteCE::traj_segment traj;
-			traj.first =locId;
+			traj.first = locId;
 			traj.second = s;
 			cexample.push_back(traj);
 		}

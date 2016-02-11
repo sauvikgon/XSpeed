@@ -20,9 +20,8 @@ void Interval_Generator(std::list<symbolic_states::ptr>& Symbolic_states_list,
 			SS++) {
 		//Each sysmbolic_state or each Location
 		int locID;
-		discrete_set ds;
-		ds = (*SS)->getDiscreteSet();
-		for (std::set<int>::iterator it = ds.getDiscreteElements().begin();
+		const discrete_set& ds = (*SS)->getDiscreteSet();
+		for (std::set<int>::const_iterator it = ds.getDiscreteElements().begin();
 				it != ds.getDiscreteElements().end(); ++it) {
 			locID = (*it); //Assuming only a single element exist in the discrete_set
 		}

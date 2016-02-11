@@ -16,7 +16,13 @@ public:
 	typedef boost::shared_ptr<abstract_symbolic_state> ptr;
 	typedef boost::shared_ptr<const abstract_symbolic_state> const_ptr;
 
-	abstract_symbolic_state();
+	abstract_symbolic_state(){
+		DiscreteSet = discrete_set(); // Initialize object
+		ContinuousSet = polytope::ptr(new polytope());
+	}
+	~abstract_symbolic_state(){
+		ContinuousSet.reset();
+	};
 	abstract_symbolic_state(discrete_set& discreteSet,
 			polytope::ptr continuousSet);
 

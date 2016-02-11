@@ -1,8 +1,5 @@
 #include "abstract_symbolic_state.h"
 
-abstract_symbolic_state::abstract_symbolic_state() {
-	;
-}
 abstract_symbolic_state::abstract_symbolic_state(discrete_set& discreteSet,
 		polytope::ptr continuousSet) {
 	DiscreteSet = discreteSet;

@@ -4,15 +4,17 @@
  *  Created on: 12-Nov-2014
  *      Author: amit
  */
-
-#include <set>
 #ifndef DISCRETE_SET_H_
 #define DISCRETE_SET_H_
-
+#include <set>
 
 class discrete_set
 {
 public:
+	discrete_set(){
+		discrete_elements = std::set<int>();
+	}
+	~discrete_set(){};
 	void union_set(discrete_set d);
 	void intersection_set(discrete_set d);
 	bool contains(discrete_set d);

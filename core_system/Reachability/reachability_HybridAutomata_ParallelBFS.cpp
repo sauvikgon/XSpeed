@@ -337,7 +337,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 					polytope::ptr gaurd_polytope;
 					std::list<template_polyhedra> intersected_polyhedra;
 					polytope::ptr intersectedRegion; //created two objects here
-					discrete_set ds;
+					discrete_set ds = discrete_set();
 					current_destination = H.getLocation(
 							(*t)->getDestination_Location_Id());
 					string locName = current_destination.getName();
@@ -425,8 +425,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 				//so perform intersection with forbidden set provided locID matches
 
 				int locID;
-				discrete_set ds;
-				ds = S[index]->getDiscreteSet();
+				const discrete_set& ds = S[index]->getDiscreteSet();
 				for (std::set<int>::iterator it =
 						ds.getDiscreteElements().begin();
 						it != ds.getDiscreteElements().end(); ++it)
@@ -462,8 +461,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 							int cc = 0;
 							do {
 								int locationID, locationID2;
-								discrete_set ds, ds2;
-								ds = current_forbidden_state->getDiscreteSet();
+								const discrete_set& ds = current_forbidden_state->getDiscreteSet();
 
 		//insert discrete_set in the abstract_symbolic_state
 								curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
@@ -504,21 +502,19 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 												current_forbidden_state->getParentPtrSymbolicState()); //b)
 
 			//2) ******************* list_transitions ********************
-								ds2 = current_forbidden_state->getDiscreteSet();	//c)
-								for (std::set<int>::iterator it =ds2.getDiscreteElements().begin();it != ds2.getDiscreteElements().end(); ++it)
+								const discrete_set& ds2 = current_forbidden_state->getDiscreteSet();	//c)
+								for (std::set<int>::const_iterator it =ds2.getDiscreteElements().begin();it != ds2.getDiscreteElements().end(); ++it)
 									locationID2 = (*it); //c)
 								location object_location;
 								object_location = H.getLocation(locationID2);	//d)
 								transition::ptr temp = object_location.getTransition(transID);	//e)
 								list_transitions.push_front(temp);//pushing the transition in the stack
-			//2) ******************* list_transitions Ends ********************
-								cc++;
+			//2) ******************* list_transitions Ends *******************
 							} while (current_forbidden_state->getParentPtrSymbolicState() != NULL);
 
 							if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState() == NULL)) { //root is missed
 								int locationID;
-								discrete_set ds;
-								ds = current_forbidden_state->getDiscreteSet();
+								const discrete_set& ds = current_forbidden_state->getDiscreteSet();
 
 								curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
 								Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());

@@ -39,6 +39,8 @@ public:
 
 	/**empty constructor */
 	abstractCE() {
+		tolerance = 0;
+		length = 0;
 	}
 	;
 	/* another constructor */
@@ -50,9 +52,11 @@ public:
 		sym_states = s_states;
 		trans = ts;
 		length = trans.size();
+		tolerance = 0;
 	}
 	/* destructor */
 	~abstractCE() {
+
 	}
 	;
 	std::list<abstract_symbolic_state::const_ptr> get_CE_sym_states() const {
@@ -105,6 +109,11 @@ public:
 	 * Returns an instance of the concrete counter-example from the abstract.
 	 */
 	concreteCE gen_concreteCE();
+	/**
+	 * Plot the counter example projected along dimensions passed
+	 * as parameters
+	 */
+	void plot(unsigned int i, unsigned int j);
 
 private:
 	/**
