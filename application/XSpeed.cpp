@@ -1092,14 +1092,16 @@ int main(int argc, char *argv[]) {
 				<< reach_parameters.Directions.size1();
 		cout << endl << "Number of Iteration = " << iterations_size << endl;
 	} //endif of argc == 1
-	//cout << endl << "Working here 1\n";
+	  //cout << endl << "Working here 1\n";
 //	cout << endl << "Memory Usages = " << total_mem_used / number_of_times << " KB\n";
 
+/*
 	int ploter = 0;
 	if (ploter == 1) { //choosing SpaceEx ploter
 		plot_output(Symbolic_states_list);
 		//SpaceEx_plotter();
 	} else { //Plotting using MatLab with our temporary matlab code
+*/
 
 		//cout << endl << "Working here 11\n";
 		std::list<symbolic_states::ptr>::iterator it;
@@ -1335,7 +1337,7 @@ int main(int argc, char *argv[]) {
 		std::list<std::pair<int, Intervals> > location_interval_outputs;
 		//cout<<"Printing TotalDirs = "<<Totaldirs<<"\n";
 
-	//	Interval_Generator(Symbolic_states_list, location_interval_outputs, init_state);
+		//	Interval_Generator(Symbolic_states_list, location_interval_outputs, init_state);
 
 		/*std::cout << "\nOutputs for Each Location:: Output-Format is Interval \n";
 		 for (std::list<std::pair<int, Intervals> >::iterator it =
@@ -1392,7 +1394,7 @@ int main(int argc, char *argv[]) {
 			std::cout << "\nBoost Time taken:System  (in Seconds) = "
 					<< system_clock_file_operation / (double) 1000 << std::endl;
 		}
-	}
+//	}
 
 	if (ce != NULL) {
 		cout << "******** Saftey Property Violated ********\n";
@@ -1432,6 +1434,33 @@ int main(int argc, char *argv[]) {
 			index++;
 		}
 		cout << "  *****Ends*****\n";
+
+
+		std::ofstream tracefile;
+		tracefile.open("./ceTrace.o");
+		math::matrix<double> vertices_list;
+		std::list<abstract_symbolic_state::ptr>::iterator it;
+		for (it = list_sym_states.begin(); it != list_sym_states.end(); it++) {
+
+			/*std::cout <<(*it)->getContinuousSet()->getCoeffMatrix()<<std::endl;
+			std::vector<double> bb;
+			bb = (*it)->getContinuousSet()->getColumnVector();
+			for (int i=0;i<bb.size();i++){
+				cout<<bb[i]<< "\t";
+			}*/
+			vertices_list = (*it)->getContinuousSet()->get_2dVertices(x, y);
+			// ------------- Printing the vertices on the Output File -------------
+			for (unsigned int p = 0; p < vertices_list.size1(); p++) {
+				for (unsigned int q = 0; q < vertices_list.size2(); q++) {
+					tracefile << vertices_list(p, q) << " ";
+				}
+				tracefile << std::endl;
+			}
+			tracefile << std::endl; // 1 gap after each polytope plotted
+		}
+		tracefile.close();
+
+
 	} else {
 		cout << "******** Does NOT Violate Saftey Property ********\n";
 	}
@@ -1439,11 +1468,6 @@ int main(int argc, char *argv[]) {
 	cout << "\n******** Summary of XSpeed Reporting ********\n";
 	return 0; //returning only the Wall time taken to execute the Hybrid System
 }
-
-
-
-
-
 
 // ************************************************************************************************************
 

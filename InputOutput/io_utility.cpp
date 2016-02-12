@@ -70,7 +70,8 @@ polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
 	directional_constraints.matrix_join(sfm->getInvariantDirections(), all_dirs);
 
 	each_sfm = sfm->getMatrixSupportFunction();
-	boundingPolytope->setCoeffMatrix(directional_constraints);
+	//boundingPolytope->setCoeffMatrix(directional_constraints);
+	boundingPolytope->setCoeffMatrix(all_dirs);
 
 	double max_value;
 	int Totaldirs = each_sfm.size1();
