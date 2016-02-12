@@ -1335,8 +1335,7 @@ int main(int argc, char *argv[]) {
 		std::list<std::pair<int, Intervals> > location_interval_outputs;
 		//cout<<"Printing TotalDirs = "<<Totaldirs<<"\n";
 
-		Interval_Generator(Symbolic_states_list, location_interval_outputs,
-				init_state);
+	//	Interval_Generator(Symbolic_states_list, location_interval_outputs, init_state);
 
 		/*std::cout << "\nOutputs for Each Location:: Output-Format is Interval \n";
 		 for (std::list<std::pair<int, Intervals> >::iterator it =
@@ -1436,9 +1435,15 @@ int main(int argc, char *argv[]) {
 	} else {
 		cout << "******** Does NOT Violate Saftey Property ********\n";
 	}
+
 	cout << "\n******** Summary of XSpeed Reporting ********\n";
 	return 0; //returning only the Wall time taken to execute the Hybrid System
 }
+
+
+
+
+
 
 // ************************************************************************************************************
 
