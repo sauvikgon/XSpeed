@@ -1,23 +1,23 @@
 #include "abstract_symbolic_state.h"
 
-abstract_symbolic_state::abstract_symbolic_state(discrete_set& discreteSet,
+abstract_symbolic_state::abstract_symbolic_state(discrete_set::ptr discreteSet,
 		polytope::ptr continuousSet) {
-	DiscreteSet = discreteSet;
-	ContinuousSet = continuousSet;
+	discreteSet_ptr = discreteSet;
+	continuousSet_ptr = continuousSet;
 }
 
 polytope::ptr abstract_symbolic_state::getContinuousSet() const {
-	return ContinuousSet;
+	return continuousSet_ptr;
 }
 
 void abstract_symbolic_state::setContinuousSet(polytope::ptr continuousSet) {
-	ContinuousSet = continuousSet;
+	continuousSet_ptr = continuousSet;
 }
 
-const discrete_set& abstract_symbolic_state::getDiscreteSet() const {
-	return DiscreteSet;
+const discrete_set::ptr abstract_symbolic_state::getDiscreteSet() const {
+	return discreteSet_ptr;
 }
 
-void abstract_symbolic_state::setDiscreteSet(const discrete_set& discreteSet) {
-	DiscreteSet = discreteSet;
+void abstract_symbolic_state::setDiscreteSet(const discrete_set::ptr dset_ptr) {
+	discreteSet_ptr = dset_ptr;
 }

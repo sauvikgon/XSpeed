@@ -87,7 +87,16 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		for (unsigned int j = 0; j < dim; j++) {
 			v[j] = x[i * dim + j];
 		}
-		y[i] = simulate_trajectory(v, N * dim + i);
+		try{
+			y[i] = simulate_trajectory(v, N * dim + i);
+		}catch(std::exception& e)
+		{
+			// check if violation of invariant/abstract CE exception thrown
+			for(unsigned int j=0;j<dim;j++){
+				y[i][j] = std::numeric_limits<double>::max();
+				// Adds a high penalty to the objective function
+			}
+		}
 	}
 	//Calculate Euclidean distances
 	for (unsigned int i = 0; i < N - 1; i++) {
@@ -276,7 +285,7 @@ concreteCE abstractCE::gen_concreteCE() {
 			// create the sample
 			concreteCE::sample s;
 			std::set<int>::iterator dset_iter =
-					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
+					get_symbolic_state(i)->getDiscreteSet()->getDiscreteElements().begin();
 			unsigned int locId = *dset_iter;
 
 			std::vector<double> y(dim);

@@ -7,10 +7,12 @@
 #ifndef DISCRETE_SET_H_
 #define DISCRETE_SET_H_
 #include <set>
+#include <boost/shared_ptr.hpp>
 
 class discrete_set
 {
 public:
+	typedef boost::shared_ptr<discrete_set> ptr;
 	discrete_set(){
 		discrete_elements = std::set<int>();
 	}

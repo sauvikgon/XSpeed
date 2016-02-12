@@ -1355,7 +1355,6 @@ int main(int argc, char *argv[]) {
 		list_sym_states = ce->get_CE_sym_states();
 		list_transition = ce->get_CE_transitions();
 
-		std::list<abstract_symbolic_state::const_ptr>::iterator it_sym_state;
 		std::list<transition::ptr>::iterator it_trans;
 		unsigned int locationID;
 		cout << "(Location ID, Transition ID)\n";
@@ -1370,13 +1369,15 @@ int main(int argc, char *argv[]) {
 		}
 		index = 0;
 		cout << "  *****Starts***** \n";
-		for (it_sym_state = list_sym_states.begin();
+		std::cout << "The number of abstract symbolic states in the ce = " << list_sym_states.size() << std::endl;
+
+		for (std::list<abstract_symbolic_state::const_ptr>::iterator it_sym_state = list_sym_states.begin();
 				it_sym_state != list_sym_states.end(); it_sym_state++) {
 
-			const discrete_set& ds = (*it_sym_state)->getDiscreteSet();
-			for (std::set<int>::const_iterator it = ds.getDiscreteElements().begin();
-					it != ds.getDiscreteElements().end(); ++it)
-				locationID = (*it);
+			//assumming only one location in the discrete set
+			const discrete_set::ptr ds = (*it_sym_state)->getDiscreteSet();
+
+			locationID = *(ds->getDiscreteElements().begin());
 
 			if (index == ce->get_length())
 				cout << "(" << locationID << " , --)\n";

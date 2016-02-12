@@ -392,17 +392,18 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 						int cc = 0;
 						do {
 							int locationID, locationID2;
-							discrete_set ds, ds2;
-							ds = current_forbidden_state->getDiscreteSet();
+							const discrete_set& ds = current_forbidden_state->getDiscreteSet();
+
 							//insert discrete_set in the abstract_symbolic_state
-							curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+							discrete_set::ptr ds_ptr = discrete_set::ptr(new discrete_set(ds));
+							curr_abs_sym_state->setDiscreteSet(ds_ptr);
 
 		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
 							Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
 							curr_abs_sym_state->setContinuousSet(Conti_Set);
 		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
-							for (std::set<int>::iterator it =
+							for (std::set<int>::const_iterator it =
 									ds.getDiscreteElements().begin();
 									it != ds.getDiscreteElements().end(); ++it)
 								locationID = (*it); //Assuming only a single element exist in the discrete_set
@@ -431,8 +432,8 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 								current_forbidden_state = searchSymbolic_state(Reachability_Region,
 												current_forbidden_state->getParentPtrSymbolicState());	//b)
 			//2) ******************* list_transitions ********************
-								ds2 = current_forbidden_state->getDiscreteSet();	//c)
-								for (std::set<int>::iterator it =ds2.getDiscreteElements().begin();it != ds2.getDiscreteElements().end(); ++it)
+								const discrete_set& ds = current_forbidden_state->getDiscreteSet();	//c)
+								for (std::set<int>::const_iterator it =ds.getDiscreteElements().begin();it != ds.getDiscreteElements().end(); ++it)
 									locationID2 = (*it); //c)
 
 								location object_location;
@@ -448,20 +449,20 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 
 						if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState() == NULL)) { //root is missed
 							int locationID;
-							discrete_set ds;
-							ds = current_forbidden_state->getDiscreteSet();
+							const discrete_set& ds = current_forbidden_state->getDiscreteSet();
 
-							curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+							discrete_set::ptr ds_ptr = discrete_set::ptr(new discrete_set(ds));
+							curr_abs_sym_state->setDiscreteSet(ds_ptr);
 							Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
 							curr_abs_sym_state->setContinuousSet(Conti_Set);
 
-							for (std::set<int>::iterator it =ds.getDiscreteElements().begin();it != ds.getDiscreteElements().end(); ++it)
+							for (std::set<int>::const_iterator it =ds.getDiscreteElements().begin();it != ds.getDiscreteElements().end(); ++it)
 								locationID = (*it); //Assuming only a single element exist in the discrete_set
 
 							int transID = current_forbidden_state->getTransitionId();
 
 							list_sym_states.push_front(current_forbidden_state);//1) pushing the initial/root bad symbolic_state at the top
-							list_abstract_sym_states.push_front(curr_abs_sym_state);
+							list_abstract_sym_states.push_front(abstract_symbolic_state::const_ptr(curr_abs_sym_state.get()));
 							std::cout << " -->  (" << locationID << ", "<< transID << ")\n";
 						}
 						saftey_violated = true;

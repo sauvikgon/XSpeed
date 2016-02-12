@@ -462,9 +462,9 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 							do {
 								int locationID, locationID2;
 								const discrete_set& ds = current_forbidden_state->getDiscreteSet();
-
+								discrete_set::ptr dset_ptr = discrete_set::ptr(new discrete_set(ds));
 		//insert discrete_set in the abstract_symbolic_state
-								curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+								curr_abs_sym_state->setDiscreteSet(dset_ptr);
 
 			// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
@@ -509,14 +509,15 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 								object_location = H.getLocation(locationID2);	//d)
 								transition::ptr temp = object_location.getTransition(transID);	//e)
 								list_transitions.push_front(temp);//pushing the transition in the stack
+								cc++;
 			//2) ******************* list_transitions Ends *******************
 							} while (current_forbidden_state->getParentPtrSymbolicState() != NULL);
 
 							if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState() == NULL)) { //root is missed
 								int locationID;
-								const discrete_set& ds = current_forbidden_state->getDiscreteSet();
-
-								curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+								const discrete_set ds = current_forbidden_state->getDiscreteSet();
+								discrete_set::ptr dset_ptr = discrete_set::ptr(new discrete_set(ds));
+								curr_abs_sym_state->setDiscreteSet(dset_ptr);
 								Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
 								curr_abs_sym_state->setContinuousSet(Conti_Set);
 
