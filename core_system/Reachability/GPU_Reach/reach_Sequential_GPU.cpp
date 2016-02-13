@@ -262,25 +262,41 @@ void bulk_Solver_With_UnitBall(int UnitBall,
  * After optimising the duplicate Support Function computation
  */
 
-template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
+void reachabilitySequential_GPU(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen,
-		unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU) {
+		unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU,
+		template_polyhedra::ptr & reachableRegion) {
+	//template_polyhedra::ptr reachRegion;
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	unsigned int NewTotalIteration = ReachParameters.Iterations;
 	bool U_empty = false;
+	int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
+	std::vector<double> inv_bounds;
+	inv_bounds = invariant->getColumnVector();
+	math::matrix<double> inv_directions;
+	inv_directions = invariant->getCoeffMatrix();
+//	cout<<"Inv_directions are :: "<<inv_directions<<std::endl;
+//	cout<<"inv_bounds are :: ";
+//	for (int i=0;i<num_inv;i++){
+//		cout<<inv_bounds[i]<<"\t";
+//	}
+//	std::cout << "num_inv = "<<num_inv<<"\n";
 	if (isInvariantExist == true) { //if invariant exist. Computing
 		std::cout << "Yes Invariant Exist!!!";
 		NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
 				ReachParameters, invariant, lp_solver_type_choosen);
+		std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 	} //End of Invariant Directions
 	if (NewTotalIteration == 1) {
 		template_polyhedra::ptr poly_empty;
-		return poly_empty; //NO need to proceed Algorithm further
+		//return poly_empty; //NO need to proceed Algorithm further
+		reachableRegion = poly_empty;
 	}
-
+	//reachableRegion = template_polyhedra::ptr(new template_polyhedra());
+	//cout<<"reachableRegion->getTotalIterations() 1 = " <<reachableRegion->getTotalIterations()<<std::endl;
 	if (SystemDynamics.U->getIsEmpty()) { //polytope U can be empty set
 		U_empty = true;
 		//std::cout<<"U is Empty!!!!";
@@ -305,7 +321,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 
 	std::list<std::vector<double> > List_X0;
 	std::list<std::vector<double> > List_U;
-
+	//cout<<"reachableRegion->getTotalIterations() 2 = " <<reachableRegion->getTotalIterations()<<std::endl;
 	boost::timer::cpu_timer DirectionsGenerate_time;
 	DirectionsGenerate_time.start();
 	if (Solver == 3) {
@@ -331,8 +347,9 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 	size_type row = numVectors, col = NewTotalIteration;
 	math::matrix<double> MatrixValue(row, col);
 
-	std::vector<float> supp_func_X0, supp_func_U, supp_func_UnitBall;
-
+	std::vector<float> supp_func_X0, supp_func_U, supp_func_UnitBall,
+			result_dotProduct;
+	//cout<<"reachableRegion->getTotalIterations() 3  = " <<reachableRegion->getTotalIterations()<<std::endl;
 	int device;
 	cudaDeviceProp props;
 	cudaGetDevice(&device);
@@ -341,7 +358,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 //		std::cout << "\nMemorySize = " << MemorySize;
 //		std::cout << "Each LP Size (KiloBytes) = " << eachLP_Size << std::endl;
 	unsigned int no_lps_possible;
-
+	//cout<<"reachableRegion->getTotalIterations() 3b  = " <<reachableRegion->getTotalIterations()<<std::endl;
 	if (Solver == 3) { // ************ GRAPHIC PROCESSING UNIT Computations  ********
 		//result obtained from GPU interface // OMP can also be tried and compared
 
@@ -362,6 +379,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			no_lps_possible = (MemorySize - boundValueSize) / eachLP_Size; //Taking less by integer_casting NO PROBLEM
 			std::cout << "Number of LP per bulk Possible is " << no_lps_possible
 					<< std::endl;
+			//	cout<<"reachableRegion->getTotalIterations() 3c  = " <<reachableRegion->getTotalIterations()<<std::endl;
 		} else {
 			/*
 			 * lp_block_size can be computed from the Constraint_matrix Model
@@ -396,15 +414,30 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 					simplex_for_U.ComputeLP(List_for_U, number_of_streams);
 					supp_func_U = simplex_for_U.getResultAll();
 				} //working
-				//compute only X0 and supp_unitBall in one kernel
+				  //compute only X0 and supp_unitBall in one kernel
 				int UnitBall = 1; //just to have different signature for the overloaded functions of class Simplex
 				Simplex solver(UnitBall, totalDirList1);
 				solver.setConstratint(ReachParameters.X0->getCoeffMatrix(),
 						ReachParameters.X0->getColumnVector(), UnitBall);
-				solver.ComputeLP(List_for_X0, UnitBall, number_of_streams);
-				solver.getResult_X(supp_func_X0); //return the result as argument
-				//	solver.getResult_UnitBall(supp_func_UnitBall);
+				std::cout << "New imple with dotProduction:: Started\n";
+				//	cout<<"reachableRegion->getTotalIterations() 3d  = " <<reachableRegion->getTotalIterations()<<std::endl;
+				//solver.ComputeLP(List_for_X0, UnitBall, number_of_streams); OLD method
+				solver.ComputeLP(List_for_X0, UnitBall, number_of_streams,
+						SystemDynamics.C);
+				//todo:: some memory issue exist here
 
+				//	cout<<"reachableRegion->getTotalIterations() 3e  = " <<reachableRegion->getTotalIterations()<<std::endl;
+
+				solver.getResult_X(supp_func_X0); //return the result as argument
+				solver.getResult_UnitBall(supp_func_UnitBall);
+				//std::cout<<"supp_func_UnitBall.size = "<<supp_func_UnitBall.size();
+				solver.getResult_dotProduct(result_dotProduct);
+				//std::cout<<"result_dotProduct.size = "<<result_dotProduct.size();
+//				std::cout<<"result_dotProduct Values :: ";
+//				for (int i=0;i<result_dotProduct.size();i++){
+//						cout<<result_dotProduct[i]<<"\t";
+//					}
+				std::cout << "New imple with dotProduction:: Ended\n";
 			} else { //OLD implementation with single call of kernel for X0 and U
 					 //TODO::But now missing supp_fun_UnitBall_infinity_norm
 				Simplex simplex_for_X0(totalDirList1), simplex_for_U(
@@ -424,6 +457,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 					supp_func_U = simplex_for_U.getResultAll();
 				}
 			}
+			//	cout<<"reachableRegion->getTotalIterations() 4 = " <<reachableRegion->getTotalIterations()<<std::endl;
 			std::cout << "Single Bulk";
 		} else { //IF SOLVING BY DIVISION IS REQUIRED
 			if (IsBoundedLPSolver) {
@@ -460,6 +494,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 
 		// *********************** GPU computation Over  *********************
 	}
+//	cout<<"reachableRegion->getTotalIterations() 5 = " <<reachableRegion->getTotalIterations()<<std::endl;
 	if (Solver >= 1 && Solver < 3) { // ************ CPU Solver ****************
 
 	//Todo::Similarly i have to implement Solver for UnitBall_infinity_norm if i have to use Final loop for reachAlgorithm
@@ -498,6 +533,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 	} // ************ CPU Solver Over ****************
 
 //unsigned int index = 0, index_X0 = 0, index_U = 0;//indices upto totalDirList1 and totalDirList2
+	//cout<<"reachableRegion->getTotalIterations() 6 = " <<reachableRegion->getTotalIterations()<<std::endl;
 
 	std::cout << "\n Before Final Reach Algorithm ";
 	std::cout << std::endl;
@@ -522,26 +558,34 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			index_U = eachDirection * NewTotalIteration;
 		}
 		double res1;
-		double term1, term2, term3, term3a, term3b, res2;
+		double term1, term2, term3, term3a, term3b, res2, term3c = 0.0;
 		double zIInitial = 0.0, zI = 0.0, zV = 0.0;
 		double sVariable = 0.0, s1Variable; //initialize s0
 		std::vector<double> rVariable(dimension), r1Variable(dimension);
 		unsigned int loopIteration = 0;
+		//	std::cout<<"Testing 1\n";
 		//  ************** Omega Function   ********************
 		res1 = supp_func_X0[index_X0]; //X0->SF(direction)			//	0
+		//	std::cout<<"Testing 2\n";
 		//term3b = support_unitball_infnorm(Direction_List[index].direction);
 		term3b = (double) supp_func_UnitBall[index_X0]; //  needed  0
+		if (!SystemDynamics.isEmptyC) {
+			term3c = ReachParameters.time_step * result_dotProduct[index_X0];
+		}
+		//	std::cout<<"Testing 3\n";
 		index_X0++; //	made 1
 		term1 = supp_func_X0[index_X0]; //X0->SF(phi_trans_dir)		//  1
+		//	std::cout<<"Testing 4\n";
 		index_X0++; //	made 2
 		if (!U_empty) {
 			term2 = ReachParameters.time_step * supp_func_U[index_U]; //U->SF(Btrans_dir)
 			index_U++;
 		} else
 			term2 = 0;
+
 		term3a = ReachParameters.result_alfa; //compute_alfa(ReachParameters.time_step,system_dynamics,Initial_X0);
 		term3 = term3a * term3b;
-		res2 = term1 + term2 + term3;
+		res2 = term1 + term2 + term3 + term3c; //term3c Added
 		//zIInitial = (res1 > res2 ? res1:res2);
 		if (res1 > res2)
 			zIInitial = res1;
@@ -563,11 +607,13 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			//res_sup = (double) support_unitball_infnorm(Direction_List[index].direction);
 			//res_sup = (double) supp_func_UnitBall[d_index];  d_index++;	//Should replace from previous computation
 			//res_sup = term3b; //replaced from previous steps
-			if (loopIteration == 1) // needed  0 again here
-				res_sup = supp_func_UnitBall[index_X0 - 2]; //Should replace from previous computation
+			/*if (loopIteration == 1) // needed  0 again here
+				res_sup = supp_func_UnitBall[index_X0 - 2]; //Should replace from previous computation*/
 
-			double res_beta = beta * res_sup;
-			result = res1 + res_beta;
+			//double res_beta = beta * res_sup;
+			double res_beta = beta * term3b;
+
+			result = res1 + res_beta + term3c; //Added term3c
 			zV = result;
 			//  ************** W_Support Function   ********************
 			s1Variable = sVariable + zV;
@@ -586,12 +632,22 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			term3a = ReachParameters.result_alfa; //compute_alfa(ReachParameters.time_step,system_dynamics,Initial_X0);
 			//term3b = support_unitball_infnorm(Direction_List[index - 1].Phi_trans_dir);
 			//term3b = support_unitball_infnorm(Direction_List[index].direction1);
-			if (loopIteration == 1)
+			if (loopIteration == 1) {
 				term3b = (double) supp_func_UnitBall[index_X0 - 2]; //Compute here		//needed 1
-			else
+				if (!SystemDynamics.isEmptyC) {
+					term3c = ReachParameters.time_step
+							* result_dotProduct[index_X0 - 2];
+				}
+			} else {
 				term3b = (double) supp_func_UnitBall[index_X0 - 1];
+				if (!SystemDynamics.isEmptyC) {
+					term3c = ReachParameters.time_step
+							* result_dotProduct[index_X0 - 1];
+				}
+			}
+
 			term3 = term3a * term3b;
-			res2 = term1 + term2 + term3;
+			res2 = term1 + term2 + term3 + term3c;
 			//zIInitial = (res1 > res2 ? res1:res2);
 			if (res1 > res2)
 				zI = res1;
@@ -605,7 +661,7 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 			loopIteration++; //for the next Omega-iteration or Time-bound
 		} //end of all Iterations of each vector/direction
 	} //end of for each vector/directions
-
+	  //cout<<"reachableRegion->getTotalIterations() = 6" <<reachableRegion->getTotalIterations()<<std::endl;
 	reachLoop_time.stop();
 	double wall_clock;
 	wall_clock = reachLoop_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
@@ -615,21 +671,47 @@ template_polyhedra::ptr reachabilitySequential_GPU(Dynamics& SystemDynamics,
 
 	/** Appending invariant directions and invariant constraints/bounds(alfa)
 	 ** Goal : To truncate the reachable region within the Invariant region	 */
+	//int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
+	//std::cout<<"working 2ab"<<std::endl;
 	if (isInvariantExist == true) { //if invariant exist. Computing
+		//std::cout<<"Test inside 1a\n";
 		math::matrix<double> inv_sfm;
-		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
+//		std::cout<<"num_inv = "<<num_inv <<"\n";
+//		std::cout<<"working"<<std::endl;
 		inv_sfm.resize(num_inv, NewTotalIteration);
 		for (int eachInvDirection = 0; eachInvDirection < num_inv;
 				eachInvDirection++) {
+			//std::cout<<"working"<<std::endl;
 			for (unsigned int i = 0; i < NewTotalIteration; i++) {
-				inv_sfm(eachInvDirection, i) =
-						invariant->getColumnVector()[eachInvDirection];
+				//inv_sfm(eachInvDirection, i) = invariant->getColumnVector()[eachInvDirection];
+				inv_sfm(eachInvDirection, i) = inv_bounds[eachInvDirection];
 			}
 		}
-		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix()));
+		//	std::cout<<"MatrixValue is ::"<<MatrixValue<<std::endl;
+//		std::cout<<"inv_sfm is ::"<<inv_sfm<<std::endl;
+//		std::cout<<"inv_directions is ::"<<inv_directions<<std::endl;
+//		std::cout<<"ReachParameters.Directions is ::"<<ReachParameters.Directions<<std::endl;
+		//return template_polyhedra::ptr(new template_polyhedra(MatrixValue, inv_sfm, ReachParameters.Directions, invariant->getCoeffMatrix()));
+		//	std::cout<<"working a2"<<std::endl;
+
+		reachableRegion = template_polyhedra::ptr(new template_polyhedra());
+		//	std::cout<<"reachRegion size = "<<reachableRegion->getTotalIterations()<<std::endl;
+		//	std::cout<<"working 2b"<<std::endl;
+		reachableRegion->setTemplateDirections(ReachParameters.Directions);
+		//std::cout<<"working 2b"<<std::endl;
+		reachableRegion->setMatrix_InvariantBound(inv_sfm);
+		//std::cout<<"working 3"<<std::endl;
+		reachableRegion->setInvariantDirections(inv_directions);
+		//std::cout<<"working 4"<<std::endl;
+		reachableRegion->setMatrixSupportFunction(MatrixValue);
+		//return template_polyhedra::ptr( new template_polyhedra(MatrixValue, inv_sfm, ReachParameters.Directions, inv_directions));
 	} else {
-		return template_polyhedra::ptr( new template_polyhedra(MatrixValue, ReachParameters.Directions));
+		reachableRegion = template_polyhedra::ptr(new template_polyhedra());
+		reachableRegion->setMatrixSupportFunction(MatrixValue);
+		reachableRegion->setTemplateDirections(ReachParameters.Directions);
+		//	return template_polyhedra::ptr(	new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
+	//std::cout<<"working 5"<<std::endl;
+	//return reachRegion;
 }
 

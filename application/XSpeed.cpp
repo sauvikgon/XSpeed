@@ -668,7 +668,11 @@ int main(int argc, char *argv[]) {
 								polytope::ptr forbidden_polytope;
 								forbidden_polytope = polytope::ptr(
 										new polytope(coeff, colVector, 1));
+<<<<<<< local
+								forbid_pair.second = forbidden_polytope; //todo currently unable to handle negative bounds
+=======
 								forbid_pair.second = forbidden_polytope;//todo currently unable to handle negative bounds
+>>>>>>> other
 
 								forbidden_set.insert(forbid_pair);
 
@@ -1046,9 +1050,6 @@ int main(int argc, char *argv[]) {
 			}
 			outFile << std::endl; // 1 gap after each polytope plotted
 			// ------------- Printing the vertices on the Output File -------------
-
-		}
-	}
 	outFile.close();
 	/*
 	 * This part of code is for Plotting the Reachability Region in MatLab
@@ -1238,11 +1239,42 @@ int main(int argc, char *argv[]) {
 			//cout << "Trans_ID = " << (*it_trans)->getTransitionId() << "\n";
 		}
 		index = 0;
+<<<<<<< local
+=======
 		cout << "  *****Starts***** \n";
 		std::cout << "The number of abstract symbolic states in the ce = " << ce->get_length() << std::endl;
 //		ce->plot(x,y);
 		cout << "  *****Ends*****\n";
+>>>>>>> other
 
+<<<<<<< local
+		std::ofstream tracefile;
+		tracefile.open("./ceTrace.o");
+		math::matrix<double> vertices_list;
+		std::list<abstract_symbolic_state::const_ptr>::iterator it;
+		for (it = ce_sym_states.begin(); it != ce_sym_states.end(); it++) {
+
+			/*std::cout <<(*it)->getContinuousSet()->getCoeffMatrix()<<std::endl;
+			std::vector<double> bb;
+			bb = (*it)->getContinuousSet()->getColumnVector();
+			for (int i=0;i<bb.size();i++){
+				cout<<bb[i]<< "\t";
+			}*/
+			vertices_list = (*it)->getContinuousSet()->get_2dVertices(x, y);
+			// ------------- Printing the vertices on the Output File -------------
+			for (unsigned int p = 0; p < vertices_list.size1(); p++) {
+				for (unsigned int q = 0; q < vertices_list.size2(); q++) {
+					tracefile << vertices_list(p, q) << " ";
+				}
+				tracefile << std::endl;
+			}
+			tracefile << std::endl; // 1 gap after each polytope plotted
+		}
+		tracefile.close();
+
+
+=======
+>>>>>>> other
 	} else {
 		cout << "******** Does NOT Violate Safety Property ********\n";
 	}

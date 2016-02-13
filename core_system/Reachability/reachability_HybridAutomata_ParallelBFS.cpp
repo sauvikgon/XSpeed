@@ -495,9 +495,19 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 								current_forbidden_state = searchSymbolic_state(Reachability_Region,
 												current_forbidden_state->getParentPtrSymbolicState()); //b)
 
+<<<<<<< local
+								//2) ******************* list_transitions ********************
+
+								const discrete_set::ptr ds2 = current_forbidden_state->getDiscreteSet();//c)
+								for (std::set<int>::iterator it =
+										ds2->getDiscreteElements().begin();
+										it != ds2->getDiscreteElements().end();
+										++it)
+=======
 			//2) ******************* list_transitions ********************
 								const discrete_set::ptr ds2 = current_forbidden_state->getDiscreteSet();	//c)
 								for (std::set<int>::const_iterator it =ds2->getDiscreteElements().begin();it != ds2->getDiscreteElements().end(); ++it)
+>>>>>>> other
 									locationID2 = (*it); //c)
 								location object_location;
 								object_location = H.getLocation(locationID2);	//d)
@@ -509,13 +519,31 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 
 							if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState() == NULL)) { //root is missed
 								int locationID;
+<<<<<<< local
+
+								const discrete_set::ptr ds = current_forbidden_state->getDiscreteSet();
+
+								curr_abs_sym_state->setDiscreteSet(
+										current_forbidden_state->getDiscreteSet());
+								Conti_Set =
+										convertBounding_Box(
+												current_forbidden_state->getContinuousSetptr());
+=======
 								const discrete_set::ptr dset_ptr = current_forbidden_state->getDiscreteSet();
 								curr_abs_sym_state->setDiscreteSet(dset_ptr);
 								Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+>>>>>>> other
 								curr_abs_sym_state->setContinuousSet(Conti_Set);
 
 
+<<<<<<< local
+								for (std::set<int>::iterator it =
+										ds->getDiscreteElements().begin();
+										it != ds->getDiscreteElements().end();
+										++it)
+=======
 								for (std::set<int>::iterator it = dset_ptr->getDiscreteElements().begin(); it != dset_ptr->getDiscreteElements().end(); ++it)
+>>>>>>> other
 									locationID = (*it); //Assuming only a single element exist in the discrete_set
 
 								int transID =current_forbidden_state->getTransitionId();

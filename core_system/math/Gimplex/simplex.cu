@@ -29,7 +29,7 @@ __global__ void bound_simplex(float *bound_value, float *C, float *result,
 
 	if (index < N_S) {
 
-	//	int i = index * blockDim.x; //address of each LP(object_function) is (index x size of one LP)
+		//	int i = index * blockDim.x; //address of each LP(object_function) is (index x size of one LP)
 		if (threadIdx.x == 0) {
 			float sum = 0.0;
 			for (int j = 0; j < blockDim.x; j++) { //every column is obj_coeff
@@ -64,6 +64,7 @@ __global__ void bound_simplex(float *bound_value, float *C, float *result,
 			float obj_value_for_X;
 			for (int j = 0; j < blockDim.x; j++) { //every column is obj_coeff:: Here blockDim.x is the dimension
 				obj_value_for_X = C[index * blockDim.x + j];
+
 				//	printf("obj_value_for_X = %f  ",obj_value_for_X);
 				if (obj_value_for_X < 0) {
 					sum_for_X = sum_for_X
@@ -78,6 +79,53 @@ __global__ void bound_simplex(float *bound_value, float *C, float *result,
 			}
 			result_for_X[index] = sum_for_X;
 			result_for_UnitBall[index] = sum_for_UnitBall;
+			//printf("result_for_X = %f  result_for_UnitBall = %f\n",result_for_X[index], sum_for_UnitBall);
+		} //end of thread/block check for N_S_for_X
+	} //end of threadIdx.x==0
+}
+
+// New Implementation
+//Again modified to include the + C of the equation Ax + Bu + C
+/*
+ * N_S_for_X :: number of simplex for polytope X
+ * Kernel Launch::
+ * 	GridSize:: nos. of LPs to be solved: N_S_for_X
+ * 	BlockSize/threads:: is the dimension of the System/Model/direction.size()
+ *
+ *
+ */__global__ void bounded_Solver_for_X_UnitBall_dotProduct(
+		float *bound_value_for_X, float *C, float *U_C, float *result_for_X,
+		unsigned int N_S_for_X, float *result_for_UnitBall,
+		float *result_for_dotProduct, int offset) {
+	//Each block solves one LP with only one thread working in each block
+	int index = blockIdx.x + offset; //LP to be solved
+	if (threadIdx.x == 0) {
+		if (index < N_S_for_X) { //if index is greater(for UnitBall case) then it will not be evaluated
+			int i = index * blockDim.x; //address of each LP(object_function) is (index x size of one LP)
+			float sum_for_X = 0.0;
+			float sum_for_UnitBall = 0.0;
+			float prod_for_dotProd = 0.0;
+			float obj_value_for_X;
+			for (int j = 0; j < blockDim.x; j++) { //every column is obj_coeff:: Here blockDim.x is the dimension
+				obj_value_for_X = C[index * blockDim.x + j];//retrieves each element of the directions/vector
+
+				prod_for_dotProd = prod_for_dotProd + obj_value_for_X * U_C[j];
+
+				//	printf("obj_value_for_X = %f  ",obj_value_for_X);
+				if (obj_value_for_X < 0) {
+					sum_for_X = sum_for_X
+							+ -1 * obj_value_for_X
+									* bound_value_for_X[j * 2 + 1];
+					sum_for_UnitBall += (-1 * obj_value_for_X);	//making abs(UnitBall)
+				} else {
+					sum_for_X = sum_for_X
+							+ obj_value_for_X * bound_value_for_X[j * 2];
+					sum_for_UnitBall += obj_value_for_X;//making abs(UnitBall)
+				}
+			}
+			result_for_X[index] = sum_for_X;
+			result_for_UnitBall[index] = sum_for_UnitBall;
+			result_for_dotProduct[index] = prod_for_dotProd;
 			//printf("result_for_X = %f  result_for_UnitBall = %f\n",result_for_X[index], sum_for_UnitBall);
 		} //end of thread/block check for N_S_for_X
 	} //end of threadIdx.x==0
@@ -349,6 +397,12 @@ __host__ void Simplex::getResult_UnitBall(std::vector<float> &result) { //New im
 		result[i] = R_UnitBall[i];
 	}
 }
+__host__ void Simplex::getResult_dotProduct(std::vector<float> &result) {
+	result.resize(number_of_LPs_for_X);
+	for (int i = 0; i < number_of_LPs_for_X; i++) {
+		result[i] = R_dotProduct[i];
+	}
+}
 
 //get the result of all simplex
 
@@ -489,7 +543,7 @@ __host__ void Simplex::ComputeLP(math::matrix<float> &C1,
 	cudaMallocHost(&R, memSize); //PINNED Memory		//Doing here First Time
 
 	if (single_bound_flag_result) {
-	//	printf("\nOur New Optimizations Result %d\n", single_bound_flag_result);
+		//	printf("\nOur New Optimizations Result %d\n", single_bound_flag_result);
 		unsigned int mysize = N_S * sizeof(float);
 		//cudaMallocHost(&R, mysize);	//PINNED Memory		//Doing here First Time
 		err = cudaMalloc((void **) &G_R, mysize); //Doing here First Time
@@ -574,7 +628,8 @@ __host__ void Simplex::ComputeLP(math::matrix<float> &C1,
 		for (int i = 0; i < num_streams; i++) {
 			int offset = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
 			//bound_simplex<<<grid_size, threads_per_block>>>(d_bound_result, d_obj_coeff, G_R, dimension, C1.size1());
-			bound_simplex<<<num_LPs_perStream, threads_per_block, 0, stream[i]>>>(d_bound_result, d_obj_coeff, G_R, dimension, N_S, offset);
+			bound_simplex<<<num_LPs_perStream, threads_per_block, 0, stream[i]>>>(
+					d_bound_result, d_obj_coeff, G_R, dimension, N_S, offset);
 		}
 
 		//Stream -- memcopy Device to Host
@@ -714,7 +769,8 @@ __host__ void Simplex::ComputeLP(math::matrix<float> &C1,
 			//printf("CUDA malloc G_Sel: %s\n", cudaGetErrorString(err));
 			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, nc, G_R, N_S, G_Sel, R_data, R_index);
 			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, nc, G_R, N_S, R_data, R_index);
-			mykernel<<<N_S, threads_per_block>>>(G_MAT, M, nc, G_R, N_S, R_data, R_index, offset);
+			mykernel<<<N_S, threads_per_block>>>(G_MAT, M, nc, G_R, N_S, R_data,
+					R_index, offset);
 
 			cudaDeviceSynchronize();
 			cudaMemcpy(R, G_R, N_S * sizeof(float), cudaMemcpyDeviceToHost);
@@ -788,7 +844,8 @@ __host__ void Simplex::ComputeLP(math::matrix<float> &C1,
 
 			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, G_Sel, R_data, R_index);
 			//mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, R_data, R_index);
-			mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, R_data, R_index, offset);
+			mykernel<<<N_S, threads_per_block>>>(G_MAT, M, N, G_R, N_S, R_data,
+					R_index, offset);
 			cudaDeviceSynchronize();
 			cudaMemcpy(R, G_R, N_S * sizeof(float), cudaMemcpyDeviceToHost);
 
@@ -855,11 +912,15 @@ __host__ void Simplex::ComputeLP(math::matrix<float> &C1,
 				if (equal_stream == false && i == (num_streams - 1)) { //last stream
 					int offset_res = i * lastBlock_size; //for result here offset_res is a pointer to the LP number
 					//mykernel<<<num_LPs_perStream, 256, 0, stream[i]>>>(G_MAT, M, N, G_R, G_Sel, num_LPs_perStream, offset_res);
-					mykernel<<<lastBlock_size, threads_per_block, 0, stream[i]>>>(G_MAT, M, N, G_R, lastBlock_size, R_data, R_index, offset_res);
+					mykernel<<<lastBlock_size, threads_per_block, 0, stream[i]>>>(
+							G_MAT, M, N, G_R, lastBlock_size, R_data, R_index,
+							offset_res);
 				} else {
 					int offset_res = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
 					//mykernel<<<num_LPs_perStream, 256, 0, stream[i]>>>(G_MAT, M, N, G_R, G_Sel, num_LPs_perStream, offset_res);
-					mykernel<<<num_LPs_perStream, threads_per_block, 0, stream[i]>>>(G_MAT, M, N, G_R, num_LPs_perStream, R_data, R_index, offset_res);
+					mykernel<<<num_LPs_perStream, threads_per_block, 0,
+							stream[i]>>>(G_MAT, M, N, G_R, num_LPs_perStream,
+							R_data, R_index, offset_res);
 				}
 
 			}
@@ -993,7 +1054,9 @@ __host__ void Simplex::ComputeLP(math::matrix<float> &obj_funs_for_X,
 		for (int i = 0; i < num_streams; i++) {
 			int offset = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
 			//bound_simplex<<<grid_size, threads_per_block>>>(d_bound_result, d_obj_coeff, G_R, dimension, C1.size1());
-			bounded_Solver_for_X_UnitBall<<<num_LPs_perStream, threads_per_block, 0, stream[i]>>>(d_bound_result_for_X, d_obj_coeff_for_X, G_R_X, N_S, G_R_UnitBall, offset);
+			bounded_Solver_for_X_UnitBall<<<num_LPs_perStream,
+					threads_per_block, 0, stream[i]>>>(d_bound_result_for_X,
+					d_obj_coeff_for_X, G_R_X, N_S, G_R_UnitBall, offset);
 		}
 
 		//Stream -- memcopy Device to Host
@@ -1014,6 +1077,162 @@ __host__ void Simplex::ComputeLP(math::matrix<float> &obj_funs_for_X,
 		cudaFree(d_bound_result_for_X);
 		cudaFree(d_obj_coeff_for_X);
 		cudaFree(G_R_UnitBall);
+
+		cudaFreeHost(obj_coeff_for_X); //Newly Added but not tested
+		cudaFreeHost(bound_result_for_X); //Newly Added but not tested
+	} else { //otherwise normal simplex algorithm
+		std::cout << "\nModel does not has Bounded Variable!!!\n";
+		//TODO:: take care of this condition
+	}
+}
+
+//New implementation to replace the above implementation
+//here obj_funs_for_X/dotProduct(U.C * directions)/UnitBall is the List of all the directions on which support function is to be computed
+__host__ void Simplex::ComputeLP(math::matrix<float> &obj_funs_for_X,
+		int UnitBall, unsigned int number_of_streams,
+		std::vector<double> sysU_C) {
+	/*for (int i=0;i<sysU_C.size();i++){
+		cout<<sysU_C[i]<<"\t";
+	}
+	cout<<endl;*/
+
+	cudaError_t err;
+	unsigned int threads_per_block; //Maximum threads depends on CC 1.x =512 2.x and > = 1024
+	unsigned int number_of_blocks; //depends on our requirements (better to be much more than the number of SMs)
+	int N_S = this->number_of_LPs_for_X;
+	//std::cout<<"N_S = "<<N_S<<"\n";
+	//single_bound_flag_result = true;
+
+	unsigned int memSize = N_S * sizeof(float);
+	//R = (float*) malloc(memSize);
+	cudaMallocHost(&R_X, memSize); //PINNED Memory		//Doing here First Time
+	cudaMallocHost(&R_UnitBall, memSize); //PINNED Memory		//Doing here First Time
+	cudaMallocHost(&R_dotProduct, memSize); //PINNED Memory		//Doing here First Time
+
+	if (single_bound_flag_result) {
+		//printf("\nOur New Optimizations Result %d\n", single_bound_flag_result);
+		unsigned int mysize = N_S * sizeof(float);
+		//cudaMallocHost(&R, mysize);	//PINNED Memory		//Doing here First Time
+		err = cudaMalloc((void **) &G_R_X, mysize); //Doing here First Time
+		err = cudaMalloc((void **) &G_R_UnitBall, mysize); //Doing here First Time
+
+		err = cudaMalloc((void **) &G_R_dotProduct, mysize); //Doing here First Time
+		printf("CUDA malloc G_R_dotProduct: %s\n", cudaGetErrorString(err));
+		mysize = BoundValue_for_X.size() * sizeof(float);
+		err = cudaMalloc((void **) &d_bound_result_for_X, mysize); //C1.size1() * 96 being the maximum threads
+		//	printf("CUDA malloc d_bound_result: %s\n", cudaGetErrorString(err));
+		mysize = obj_funs_for_X.size1() * obj_funs_for_X.size2()
+				* sizeof(float);
+		err = cudaMalloc((void **) &d_obj_coeff_for_X, mysize); //C1.size1() * 96 being the maximum threads
+
+		err = cudaMalloc((void **) &d_U_C, sysU_C.size() * sizeof(float)); //C1.size1() * 96 being the maximum threads
+		printf("CUDA malloc d_U_C: %s\n", cudaGetErrorString(err));
+		//mysize = obj_funs_for_X.size1() * obj_funs_for_X.size2()* sizeof(float);
+		//obj_coeff = (float *) malloc(C1.size1() * C1.size2() * sizeof(float));//creating obj_coeff_values for kernel compute
+		cudaMallocHost(&obj_coeff_for_X, mysize); //Pinned memory Syntax:: cudaMallocHost(&h_ptr,bytes);
+		//printf("CUDA cudaMallocHost-- obj_coeff: %s\n", cudaGetErrorString(err));
+		int dimension = obj_funs_for_X.size2();
+
+		mysize = BoundValue_for_X.size() * sizeof(float);
+		//only single variable per constraints
+		//bound_result = (float *) malloc(BoundValue.size() * sizeof(float));	//creating bound_values for kernel compute
+		cudaMallocHost(&bound_result_for_X, mysize); //Pinned memory Syntax:: cudaMallocHost(&h_ptr,bytes);
+		//printf("CUDA cudaMallocHost-- bound_result: %s\n", cudaGetErrorString(err));
+		for (int i = 0; i < BoundValue_for_X.size(); i++) {
+			bound_result_for_X[i] = BoundValue_for_X[i];
+		}
+		cudaMallocHost(&U_C, sysU_C.size() * sizeof(float)); //Pinned memory Syntax:: cudaMallocHost(&h_ptr,bytes);
+		printf("CUDA cudaMallocHost-- U_C: %s\n", cudaGetErrorString(err));
+		std::cout<<"U_C[i]\n";
+		for (int i = 0; i < sysU_C.size(); i++) {
+			U_C[i] = sysU_C[i];
+			std::cout<<U_C[i]<<"\t";
+		}
+
+		threads_per_block = obj_funs_for_X.size2(); //dimension size is the number of threads per block
+		//threads_per_block = 512;	//1024;	//Maximum on CC 3.0
+
+		// **** Begin of Stream Processing *******	//Using Asynchronous Memory copy:: needs //MAT to be a PINNED memory
+		//100% Occupancy with 1024 threads using 4 registers shows 2 active thread blocks per Multiprocessor
+
+		int num_streams = number_of_streams; //number of streams desired to create ::Note check for odd numbers
+		int num_LPs_perStream;
+
+		if (N_S % num_streams == 0) { //Maximum nos. of LPs is of UnitBall_infinity_norm
+			num_LPs_perStream = (N_S / num_streams);
+		} else {
+			num_LPs_perStream = (N_S / num_streams); //last will not be the same will be less
+			num_streams = num_streams + 1; //one extra streams. though nos of LPs to be solved will be less in the extra stream;
+		}
+		//std::cout<<"num_LPs_perStream = " <<num_LPs_perStream<<"\n";
+		cudaStream_t stream[num_streams];
+		cudaError_t result;
+		//int Each_LP_size = M * N;	// * sizeof(float);
+
+		//Creation of Streams
+		for (int i = 0; i < num_streams; i++) {
+			result = cudaStreamCreate(&stream[i]);
+		}
+
+		cudaMemcpy(d_bound_result_for_X, bound_result_for_X,
+				(BoundValue_for_X.size() * sizeof(float)),
+				cudaMemcpyHostToDevice);	//this is in the default Stream
+
+		cudaMemcpy(d_U_C, U_C, (sysU_C.size() * sizeof(float)),
+				cudaMemcpyHostToDevice);	//this is in the default Stream
+
+		//cudaMemcpy(d_obj_coeff, obj_coeff,(C1.size1() * C1.size2() * sizeof(float)),cudaMemcpyHostToDevice);
+#pragma omp parallel for
+		for (unsigned int s = 0; s < obj_funs_for_X.size1(); s++) {
+			for (int i = 0; i < obj_funs_for_X.size2(); i++) {
+				obj_coeff_for_X[s * obj_funs_for_X.size2() + i] =
+						obj_funs_for_X(s, i); //Row major Copy
+				//std::cout<<" obj_coeff_for_X = "<<obj_coeff_for_X[s * obj_funs_for_X.size2() + i]<<"\t";
+			}
+		}
+		//cudaMemcpy(G_MAT, MAT, (N_S * M * N * sizeof(float)),	cudaMemcpyHostToDevice);
+		//Stream -- memcopy Host to Device
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream * obj_funs_for_X.size2();
+			cudaMemcpyAsync(&d_obj_coeff_for_X[offset],
+					&obj_coeff_for_X[offset],
+					(num_LPs_perStream * obj_funs_for_X.size2() * sizeof(float)),
+					cudaMemcpyHostToDevice, stream[i]);
+		}
+		//std::cout << "\nnum_LPs_perStream  = " << num_LPs_perStream << "\n";
+		//Stream -- Kernel		//streaming is easy if each block solves one LP
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
+			//bound_simplex<<<grid_size, threads_per_block>>>(d_bound_result, d_obj_coeff, G_R, dimension, C1.size1());
+			bounded_Solver_for_X_UnitBall_dotProduct<<<num_LPs_perStream,
+					threads_per_block, 0, stream[i]>>>(d_bound_result_for_X,
+					d_obj_coeff_for_X, d_U_C, G_R_X, N_S, G_R_UnitBall,
+					G_R_dotProduct, offset);
+		}
+
+		//Stream -- memcopy Device to Host
+		for (int i = 0; i < num_streams; i++) {
+			int offset = i * num_LPs_perStream; //for result here offset_res is a pointer to the LP number
+			cudaMemcpyAsync(&R_X[offset], &G_R_X[offset],
+					num_LPs_perStream * sizeof(float), cudaMemcpyDeviceToHost,
+					stream[i]);
+		}
+		mysize = N_S * sizeof(float); //dimension is same for UnitBall's direction also
+		cudaMemcpy(R_UnitBall, G_R_UnitBall, mysize, cudaMemcpyDeviceToHost); //TODO:: make this as Async memcopy this is Big Chunk
+		printf("CUDA cudaMemcpy-- R_UnitBall: %s\n", cudaGetErrorString(err));
+
+		cudaMemcpy(R_dotProduct, G_R_dotProduct, mysize,
+				cudaMemcpyDeviceToHost); //TODO:: make this as Async memcopy this is Big Chunk
+		printf("CUDA cudaMemcpy-- R_dotProduct: %s\n", cudaGetErrorString(err));
+
+		// **** End of Stream Processing *******
+		//cudaMemcpy(R, G_R, C1.size1() * sizeof(float), cudaMemcpyDeviceToHost);
+
+		cudaFree(G_R_X);
+		cudaFree(d_bound_result_for_X);
+		cudaFree(d_obj_coeff_for_X);
+		cudaFree(G_R_UnitBall);
+		cudaFree(G_R_dotProduct);
 
 		cudaFreeHost(obj_coeff_for_X); //Newly Added but not tested
 		cudaFreeHost(bound_result_for_X); //Newly Added but not tested

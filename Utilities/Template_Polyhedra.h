@@ -8,12 +8,12 @@
 #ifndef TEMPLATE_POLYHEDRA_H_
 #define TEMPLATE_POLYHEDRA_H_
 
-
 #include "core_system/math/matrix.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <omp.h>
 
 using namespace std;
 /*
@@ -65,8 +65,11 @@ public:
 	 * elements of the list is a intersected region.
 	 * Note::If the size of the returning list is 0 indicates that polytope-guard does not intersects with the calling template_polyhedra
 	 */
-	const std::list<template_polyhedra> polys_intersection(polytope::ptr guard,
-			int lp_solver_type_choosen);	//, int & point_of_intersection);
+	const std::list<template_polyhedra> polys_intersectionSequential(
+			polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
+	const std::list<template_polyhedra> polys_intersectionParallel(
+			polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
+
 	/*
 	 * Returns a new Polytope which is the common intersected Region between the templated_polyhedra and the guard_polytope
 	 * polytope getIntersectedRegion(polytope gaurd);
@@ -85,7 +88,8 @@ public:
 	 *		: Appending all the matrixSupportFunction of Tpoly with the matrixSupportFunction of the calling object
 	 *		: Appending should be done column by column from Tpoly onto the calling object
 	 */
-	template_polyhedra::ptr union_TemplatePolytope(template_polyhedra::ptr& Tpoly);
+	template_polyhedra::ptr union_TemplatePolytope(
+			template_polyhedra::ptr& Tpoly);
 
 	unsigned int getTotalIterations() const;
 	//unsigned int getTotalDirections() const;
@@ -115,7 +119,5 @@ private:
 	void setTotalInvariantDirections(unsigned int total_invariant_directions);
 
 };
-
-
 
 #endif /* TEMPLATE_POLYHEDRA_H_ */

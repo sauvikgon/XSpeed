@@ -335,7 +335,7 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
  */
 
 void polytope::enum_2dVert_restrict(std::vector<double> u,
-		std::vector<double> v, unsigned int i, unsigned int j,
+		std::vector<double> v, int i, int j,
 		std::set<std::pair<double, double> >& pts) {
 	std::vector<double> sv_u(getSystemDimension(), 0), sv_v(
 			getSystemDimension(), 0);
@@ -389,8 +389,8 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 	}
 }
 
-std::set<std::pair<double, double> > polytope::enumerate_2dVertices(unsigned int i,
-		unsigned int j) {
+std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
+		int j) {
 	std::set < std::pair<double, double> > All_vertices;
 
 	//enumerate the vertices in the first quadrant
@@ -416,7 +416,7 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(unsigned int
 	return All_vertices;
 }
 
-math::matrix<double> polytope::get_2dVertices(unsigned int i,unsigned  int j){
+math::matrix<double> polytope::get_2dVertices(int i, int j){
 	std::set<std::pair<double, double> > set_vertices;
 	set_vertices = enumerate_2dVertices(i,j);
 	math::matrix<double> my_vertices;

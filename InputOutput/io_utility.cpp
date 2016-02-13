@@ -20,9 +20,10 @@ void Interval_Generator(std::list<symbolic_states::ptr>& Symbolic_states_list,
 			SS++) {
 		//Each sysmbolic_state or each Location
 		int locID;
-		const discrete_set::ptr ds = (*SS)->getDiscreteSet();
-		for (std::set<int>::const_iterator it = ds->getDiscreteElements().begin();
-				it != ds->getDiscreteElements().end(); ++it) {
+		discrete_set ds;
+		ds = (*SS)->getDiscreteSet();
+		for (std::set<int>::iterator it = ds.getDiscreteElements().begin();
+				it != ds.getDiscreteElements().end(); ++it) {
 			locID = (*it); //Assuming only a single element exist in the discrete_set
 		}
 		std::pair<int, Intervals> loc_interval;
@@ -69,7 +70,8 @@ polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
 	directional_constraints.matrix_join(sfm->getInvariantDirections(), all_dirs);
 
 	each_sfm = sfm->getMatrixSupportFunction();
-	boundingPolytope->setCoeffMatrix(directional_constraints);
+	//boundingPolytope->setCoeffMatrix(directional_constraints);
+	boundingPolytope->setCoeffMatrix(all_dirs);
 
 	double max_value;
 	int Totaldirs = each_sfm.size1();
