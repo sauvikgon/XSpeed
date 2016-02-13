@@ -485,41 +485,7 @@ int main(int argc, char *argv[]) {
 
 				std::string cmdStr2, compile_CmdStr, outputFile_debug,
 						outputFile_release, dependenciesFile;
-				/*
-				 outputFile_debug =
-				 "XSpeed/Debug/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
-				 outputFile_release =
-				 "XSpeed/Release/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
-				 //	dependenciesFile ="XSpeed/src/Hybrid_Model_Parameters_Design/user_model/user_model.d";
-				 //todo :: generate and copy .d
-
-				 std::string cmdStr3, copy_CmdStr;
-
-				 compile_CmdStr = "g++";
-				 cmdStr2.append(compile_CmdStr);
-				 cmdStr2.append(SingleSpace);
-				 cmdStr2.append(projLocation);
-				 cmdStr2.append(replacingFile);
-				 cmdStr2.append(SingleSpace);
-				 cmdStr2.append("-o");
-				 cmdStr2.append(SingleSpace);
-				 cmdStr2.append(projLocation);
-				 cmdStr2.append(outputFile_debug);
-				 st2 = cmdStr2.c_str();
-				 system(st2);	//compiling with g++ XX.cpp -o XX.o file
-
-				 copy_CmdStr = "cp";
-				 cmdStr3.append(copy_CmdStr);
-				 cmdStr3.append(SingleSpace);
-				 cmdStr3.append(projLocation);
-				 cmdStr3.append(outputFile_debug);
-				 cmdStr3.append(SingleSpace);
-				 cmdStr3.append(projLocation);
-				 cmdStr3.append(outputFile_release);
-				 st3 = cmdStr3.c_str();
-				 system(st3);	//cp file.o release_location
-				 */
-				std::string cmdStr4, debug_loc, release_loc, cmd_option;
+								std::string cmdStr4, debug_loc, release_loc, cmd_option;
 
 				system("make clean");
 				//system("make clean > /tmp/MakeClean_output_file.txt");
@@ -542,7 +508,6 @@ int main(int argc, char *argv[]) {
 					cmdStr4.append(projLocation);
 					cmdStr4.append(release_loc);
 				}
-				//cmdStr4.append(" > /tmp/MakeBuild_output_file.txt");
 				st4 = cmdStr4.c_str();
 				system(st4);
 
@@ -723,8 +688,6 @@ int main(int argc, char *argv[]) {
 						std::string constraint_Str = eachStr;
 						boost::char_separator<char> sep_symbol("<="); //handles < or <= (or even error input =<
 						tokenizer each_tokens(constraint_Str, sep_symbol);
-						/*tmp++;
-						 bounds.resize(tmp);*/
 						int index_val = 0;
 						for (tokenizer::iterator tok_it = each_tokens.begin();
 								tok_it != each_tokens.end(); tok_it++) {
@@ -918,74 +881,15 @@ int main(int argc, char *argv[]) {
 				return 0;
 			}
 		}
-		/*if (vm.count("number-of-readings")) {
-		 int avg = vm["number-of-readings"].as<int>();	//by default 1
-		 if (avg >= 1) {
-		 number_of_times = avg;
-		 } else {	//for 0 or negative number-of-readings
-		 std::cout << "Invalid number-of-readings option specified\n";
-		 return 0;
-		 }
-		 }*/
 
 		if (vm.count("pbfs")) {
 			DiscreteAlgorithm = 12; //parallel Breadth First Search
-			//std::cout<< "Running Reachability Analysis with parallel Breadth First Search using Multi-core acceleration\n";
 		}
 
-		/*if (argc != 12) { //1(ApplicationName) + 10 (Input Arguments)
-		 std::cout << "\nInsufficient Number of Arguments!!!\n";
-		 std::cout << "Correct Usages/Syntax:\n";
-		 std::cout<< "./XspaceEx Model_Type Directions_Type_Size Iterations_Size Time_Bound Transition_Size Algorithm_Type Total_Partition Total_GPU_Streams Averaging Solver_GLPK_Gurobi_GPU Discrete_Algorithm\n";
-		 std::cout<< "\n1. Model_Type :(1,2,3,4,5,6) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE)\n";
-		 std::cout<< "\n2. Directions_Type_Size :(1,2,>2) = (BOX, OCT, UNIFORM)\n";
-		 std::cout<< "\n3. Iterations_Size :Number of iterations per Location of the Hybrid system\n";
-		 std::cout<< "\n4. Time_Bound :Total Time Bound for Computation\n";
-		 std::cout<< "\n5. Transition_Size :Number of jumps or transitions of the Hybrid system\n";
-		 std::cout<< "\n6. Algorithm_Type :(1,2,3,4) = (SEQ, PAR_OMP, PAR_PROCESS, PAR_ITER)\n";
-		 std::cout<< "\n7. Total_Partition :Total number of partitions required for Parallel_Iteration_Algorithm\n";
-		 std::cout<< "\n8. Total_GPU_Streams :Total number of GPU Streams or partitions\n";
-		 std::cout<< "\n9. Averaging :Total number of times you want to run the algorithm to average the readings\n";
-		 std::cout<< "\n10. Solver_GLPK_Gurobi_GPU :If Algorithm==11 then (Solver = 1 for GLPK; = 2 for Gurobi; = 3 for GPU)\n";
-		 std::cout<< "\n11. Discrete_Algorithm: 12 for Parallel BFS for Discrete Jumps, otherwise sequential\n";
-		 std::cout << endl;
-		 return 0;
-		 } else {
-		 unsigned int num;
-		 num = boost::lexical_cast<unsigned int>(argv[1]);
-		 model_type = num;
-		 directions_type_or_size = boost::lexical_cast<unsigned int>(
-		 argv[2]);
-		 iterations_size = boost::lexical_cast<unsigned int>(argv[3]);
-		 double val = boost::lexical_cast<double>(argv[4]);
-		 time_bound = val;
-		 transition_size = boost::lexical_cast<unsigned int>(argv[5]);
-		 Algorithm_Type = boost::lexical_cast<unsigned int>(argv[6]);
-		 Total_Partition = boost::lexical_cast<unsigned int>(argv[7]);
-		 number_of_streams = boost::lexical_cast<unsigned int>(argv[8]);
-		 number_of_times = boost::lexical_cast<unsigned int>(argv[9]);
-		 Solver_GLPK_Gurobi_GPU = boost::lexical_cast<unsigned int>(
-		 argv[10]);
-		 DiscreteAlgorithm = boost::lexical_cast<unsigned int>(argv[11]);
-		 }*/
-	} //ALL COMMAND-LINE OPTIONS are set completely
+			} //ALL COMMAND-LINE OPTIONS are set completely
 
-	/*	if (hey == 1) {
-	 user_model(Hybrid_Automata, initial_symbolic_states, reach_parameters,
-	 transition_iterations);
-	 // --------- Setting configuration parameters ---------
-	 time_bound = reach_parameters.TimeBound;
-	 iterations_size = reach_parameters.Iterations;
-	 //	model_type = 0; //set to default
-	 //	directions_type_or_size = 0;	//set to default
-	 transition_size = transition_iterations;
-	 // --------- Setting configuration parameters ---------
-	 }*/
 	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
 			transition_size); //Initialising the variables
-//	cout<<"Initialisation of reachability problem complete\n";
-
-	//std::list<template_polyhedra> reachability_sfm;
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 //List/Array of Reachability Region/FlowPipe of all transitions.
 //to be changed into a single variable instead of list.
@@ -996,8 +900,7 @@ int main(int argc, char *argv[]) {
 
 	for (int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		tt1.start();
-//cout<<"\nTesting 3\n";
-		//cout<<"\n Before reach call\n";
+
 		if (DiscreteAlgorithm != PBFS) { //Sequential Search implemented for Discrete Jumps
 			std::cout << "\nRunning Sequential BFS\n";
 			Symbolic_states_list = reach(Hybrid_Automata, init_state,
@@ -1164,39 +1067,6 @@ int main(int argc, char *argv[]) {
 	//1) Files for SupportFunctionMatrix(ie to obtain each column for vector b) with Configurations_details
 	//2) Files for Template_Directions and Invariant_directions with Configurations_details such as (state#,nos of invariants)
 
-	//  ***************** This was Commented  ****************************
-	/*
-	 if (reach_parameters.Directions.size1()
-	 < reach_parameters.TotalDirections.size1()) {//if invariant exist. Computing
-	 Totaldirs = reach_parameters.TotalDirections.size1();
-	 std::list<template_polyhedra>::iterator it;
-	 //for (it=reachability_sfm.begin();	it !=reachability_sfm.end();it++){
-	 it = reachability_sfm.begin();//first flowpipe
-	 math::matrix<double> reach_directions;
-	 reach_directions = (*it).getAllDirections();
-	 //	cout << "Total Dirs = " << reach_directions.size1() << endl;
-	 for (int i = 0; i < Totaldirs; i++) {
-	 for (int j = 0; j < dim; j++) {
-	 MatLabfile << reach_parameters.TotalDirections(i, j) << " ";
-	 }
-	 MatLabfile << std::endl;
-	 for (unsigned int i = 0; i < reach_directions.size1(); i++) {
-	 for (unsigned int j = 0; j < reach_directions.size2(); j++) {
-	 //	MatLabfile << reach_parameters.TotalDirections(i, j) << " ";
-	 MatLabfile << reach_directions(i, j) << " ";
-	 }
-	 MatLabfile << std::endl;
-	 }
-	 } else {
-	 Totaldirs = dir_nums;
-	 for (int i = 0; i < dir_nums; i++) {
-	 for (int j = 0; j < dim; j++) {
-	 MatLabfile << reach_parameters.Directions(i, j) << " ";
-	 }
-	 MatLabfile << std::endl;
-	 }
-	 }
-	 }*/
 //  ***************** This was Commented  ****************************
 	boost::timer::cpu_timer time_file_operation;
 	time_file_operation.start(); //Started recording the MatLab File Generation time
@@ -1350,10 +1220,10 @@ int main(int argc, char *argv[]) {
 
 	if (ce != NULL) {
 		cout << "******** Saftey Property Violated ********\n";
-		std::list<abstract_symbolic_state::const_ptr> list_sym_states;
-		std::list<transition::ptr> list_transition;
-		list_sym_states = ce->get_CE_sym_states();
-		list_transition = ce->get_CE_transitions();
+		std::list<abstract_symbolic_state::const_ptr> ce_sym_states;
+		std::list<transition::ptr> ce_transitions;
+		ce_sym_states = ce->get_CE_sym_states();
+		ce_transitions = ce->get_CE_transitions();
 
 		std::list<transition::ptr>::iterator it_trans;
 		unsigned int locationID;
@@ -1361,31 +1231,16 @@ int main(int argc, char *argv[]) {
 		std::vector<int> transID(ce->get_length());	//making a vector of transition_ID so it can be printed
 		unsigned int index = 0;
 		//cout << "Length = " << ce->get_length() << "\n";
-		for (it_trans = list_transition.begin();
-				it_trans != list_transition.end(); it_trans++) {
+		for (it_trans = ce_transitions.begin();
+				it_trans != ce_transitions.end(); it_trans++) {
 			transID[index] = (*it_trans)->getTransitionId();
 			index++;
 			//cout << "Trans_ID = " << (*it_trans)->getTransitionId() << "\n";
 		}
 		index = 0;
 		cout << "  *****Starts***** \n";
-		std::cout << "The number of abstract symbolic states in the ce = " << list_sym_states.size() << std::endl;
-
-		for (std::list<abstract_symbolic_state::const_ptr>::iterator it_sym_state = list_sym_states.begin();
-				it_sym_state != list_sym_states.end(); it_sym_state++) {
-
-			//assumming only one location in the discrete set
-			const discrete_set::ptr ds = (*it_sym_state)->getDiscreteSet();
-
-			locationID = *(ds->getDiscreteElements().begin());
-
-			if (index == ce->get_length())
-				cout << "(" << locationID << " , --)\n";
-			else
-				cout << "(" << locationID << " , " << transID[index] << ")\n";
-			index++;
-		}
-		//ce->plot(x,y);
+		std::cout << "The number of abstract symbolic states in the ce = " << ce->get_length() << std::endl;
+//		ce->plot(x,y);
 		cout << "  *****Ends*****\n";
 
 	} else {

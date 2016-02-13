@@ -27,7 +27,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 
 	int number_times = 0, BreadthLevel = 0, previous_level = -1;
 	std::list<int> queue; // data structure to keep track of the number of transitions
-	discrete_set discrete_state;
+	discrete_set::ptr d_set = discrete_set::ptr(new discrete_set());
 
 	pwlist pw_list; //list of initial_state
 	pw_list.WaitingList_insert(I);
@@ -54,13 +54,13 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 //		cout<<"\nTesting 2 a 2\n";
 		//discrete_state = U.getDiscreteSet();
 		location_id = U->getLocationId();
-		discrete_state.insert_element(location_id); //creating discrete_state
+		d_set->insert_element(location_id); //creating discrete_state
 
 		//continuous_initial_polytope = U.getInitial_ContinousSetptr();
 		continuous_initial_polytope = U->getInitialSet();
 		reach_parameters.X0 = continuous_initial_polytope;
 
-		S->setDiscreteSet(discrete_state);
+		S->setDiscreteSet(d_set);
 		S->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
@@ -392,10 +392,10 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 						int cc = 0;
 						do {
 							int locationID, locationID2;
-							const discrete_set& ds = current_forbidden_state->getDiscreteSet();
+							const discrete_set::ptr ds_ptr = current_forbidden_state->getDiscreteSet();
 
 							//insert discrete_set in the abstract_symbolic_state
-							discrete_set::ptr ds_ptr = discrete_set::ptr(new discrete_set(ds));
+
 							curr_abs_sym_state->setDiscreteSet(ds_ptr);
 
 		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
@@ -404,8 +404,8 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							curr_abs_sym_state->setContinuousSet(Conti_Set);
 		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 							for (std::set<int>::const_iterator it =
-									ds.getDiscreteElements().begin();
-									it != ds.getDiscreteElements().end(); ++it)
+									ds_ptr->getDiscreteElements().begin();
+									it != ds_ptr->getDiscreteElements().end(); ++it)
 								locationID = (*it); //Assuming only a single element exist in the discrete_set
 
 							int transID = current_forbidden_state->getTransitionId();	//a)
@@ -432,8 +432,8 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 								current_forbidden_state = searchSymbolic_state(Reachability_Region,
 												current_forbidden_state->getParentPtrSymbolicState());	//b)
 			//2) ******************* list_transitions ********************
-								const discrete_set& ds = current_forbidden_state->getDiscreteSet();	//c)
-								for (std::set<int>::const_iterator it =ds.getDiscreteElements().begin();it != ds.getDiscreteElements().end(); ++it)
+								const discrete_set::ptr ds = current_forbidden_state->getDiscreteSet();	//c)
+								for (std::set<int>::const_iterator it =ds->getDiscreteElements().begin();it != ds->getDiscreteElements().end(); ++it)
 									locationID2 = (*it); //c)
 
 								location object_location;
@@ -449,14 +449,13 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 
 						if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState() == NULL)) { //root is missed
 							int locationID;
-							const discrete_set& ds = current_forbidden_state->getDiscreteSet();
+							const discrete_set::ptr ds_ptr = current_forbidden_state->getDiscreteSet();
 
-							discrete_set::ptr ds_ptr = discrete_set::ptr(new discrete_set(ds));
 							curr_abs_sym_state->setDiscreteSet(ds_ptr);
 							Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
 							curr_abs_sym_state->setContinuousSet(Conti_Set);
 
-							for (std::set<int>::const_iterator it =ds.getDiscreteElements().begin();it != ds.getDiscreteElements().end(); ++it)
+							for (std::set<int>::const_iterator it =ds_ptr->getDiscreteElements().begin();it != ds_ptr->getDiscreteElements().end(); ++it)
 								locationID = (*it); //Assuming only a single element exist in the discrete_set
 
 							int transID = current_forbidden_state->getTransitionId();
