@@ -6,6 +6,7 @@
  */
 
 #include "Hybrid_Model_Parameters_Design/BouncingBall.h"
+#include "core_system/HybridAutomata/vartoindexmap.h"
 
 void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
@@ -190,6 +191,10 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 
+	Hybrid_Automata.insert_to_map("x",1);
+	Hybrid_Automata.insert_to_map("y",2);
+
+	//Hybrid_Automata.set_map(var_id_map);
 	/*discrete_set d_set;		//now not needed
 	 d_set.insert_element(1);*/
 

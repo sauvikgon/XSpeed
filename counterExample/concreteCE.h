@@ -9,16 +9,18 @@
 #define CONCRETECE_H_
 
 #include <list>
+#include <vector>
+
 class concreteCE {
 
 public:
 	/**
-	 * A sample stores the initial state and the dwell time of a trajectory
+	 * A sample stores the initial state as a vector and the dwell time of a trajectory
 	 * within a location
 	 */
 	typedef unsigned int loc_id;
 	typedef unsigned int trans_id;
-	typedef std::pair<double, double> sample;
+	typedef std::pair<std::vector<double>, double> sample;
 	/**
 	 * A sample and a location id defines a trajectory segment of a counter-example
 	 * within a location.
@@ -30,6 +32,9 @@ public:
 	 */
 	typedef std::list<traj_segment> trajectory;
 
+	void push_back(traj_segment t_segment){
+		T.push_back(t_segment);
+	}
 	/**
 	 * Returns the segment of the trajectory parameterized by
 	 * its position in the list.
@@ -43,6 +48,7 @@ public:
 
 	concreteCE();
 	virtual ~concreteCE();
+
 private:
 	trajectory T;
 	/**

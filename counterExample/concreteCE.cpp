@@ -24,7 +24,6 @@ const concreteCE::traj_segment concreteCE::get_segment(unsigned int i) const {
 		it++;
 	}
 	return *it;
-
 }
 const concreteCE::trans_id concreteCE::getTransitionId(unsigned int i) const {
 	assert(i < jumps.size());
