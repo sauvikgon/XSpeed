@@ -26,12 +26,12 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 	template_polyhedra::ptr reach_region;
 
 	if (Algorithm_Type == SEQ) { //Continuous Sequential Algorithm
-		cout << "\nRunning Sequntial\n";
+	//	cout << "\nRunning Sequntial\n";
 		//		std::cout<<"\nBefore entering reachability Sequential = " << gurobi_lp_solver::gurobi_lp_count;
 		//		std::cout<<"\nBefore entering reachability Sequential = " << lp_solver::lp_solver_count;
 //			int a;			std::cin>>a;
-		/*boost::timer::cpu_timer AllReach_time;
-		 AllReach_time.start();*/
+		boost::timer::cpu_timer AllReach_time;
+		AllReach_time.start();
 
 		reach_region = reachabilitySequential(
 				current_location.getSystem_Dynamics(),
@@ -40,37 +40,43 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 				current_location.isInvariantExists(), lp_solver_type_choosen);
 		S[id]->setContinuousSetptr(reach_region);
 
-		/*AllReach_time.stop();
-		 double wall_clock1;
-		 wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		 double return_Time1 = wall_clock1 / (double) 1000;
-		 std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "	<< return_Time1 << std::endl;*/
+		AllReach_time.stop();
+		double wall_clock1;
+		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return_Time1 = wall_clock1 / (double) 1000;
+		std::cout << "\nFlowPipe Time:Wall(Seconds) = "<< return_Time1 << std::endl;
 	}
 
 	if (Algorithm_Type == PAR_OMP) {
 		//Parallel implementation using OMP parallel			//	double wall_timer = omp_get_wtime();
-		cout << "\nRunning Parallel Using OMP Thread\n";
+		//cout << "\nRunning Parallel Using OMP Thread\n";
+		boost::timer::cpu_timer AllReach_time;
+		AllReach_time.start();
 
 		reach_region = reachabilityParallel(
 				current_location.getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location.getInvariant(),
 				current_location.isInvariantExists(), lp_solver_type_choosen);
+		AllReach_time.stop();
 		S[id]->setContinuousSetptr(reach_region);
-		//	std::cout << "Parallel Done\n";
+		double wall_clock1;
+		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return_Time1 = wall_clock1 / (double) 1000;
+		std::cout << "\nFlowpipe Time:Wall(Seconds) = "<< return_Time1 << std::endl;
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
-/*
+
 	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 		cout << "\nRunning GPU Sequential\n";
 		boost::timer::cpu_timer AllReachGPU_time;
 		AllReachGPU_time.start();
-		reach_region = reachabilitySequential_GPU(
+		reachabilitySequential_GPU(
 				current_location.getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location.getInvariant(),
 				current_location.isInvariantExists(), lp_solver_type_choosen,
-				number_of_streams, Solver_GLPK_Gurobi_GPU);
+				number_of_streams, Solver_GLPK_Gurobi_GPU, reach_region);
 		S[id]->setContinuousSetptr(reach_region);
 
 		AllReachGPU_time.stop();
@@ -81,7 +87,7 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 				<< return_Time1 << std::endl;
 
 	}
-*/
+
 	if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout
 				<< "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
@@ -178,18 +184,17 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		}
 	}
 
-
-/*	 if (Algorithm_Type == GPU_MULTI_SEQ) {
+	/*	 if (Algorithm_Type == GPU_MULTI_SEQ) {
 	 //Continuous Sequential Algorithm mixed with Cublas Multiplication
 	 cout << "\nRunning Mixed CPU - GPU Sequntial\n";
-	 	reach_region = reachabilitySequential_GPU_MatrixVector_Multiply(
+	 reach_region = reachabilitySequential_GPU_MatrixVector_Multiply(
 	 current_location.getSystem_Dynamics(),
 	 continuous_initial_polytope, reach_parameters,
 	 current_location.getInvariant(),
 	 current_location.isInvariantExists(),
 	 lp_solver_type_choosen);
-	} // Performance degraded
-	*/
+	 } // Performance degraded
+	 */
 	if (Algorithm_Type == PAR_PROCESS) { //Continuous Parallel Algorithm parallelizing the Directions
 		//Parallel implementation using Process Creation
 //			 cout << "\nRunning Parallel Using Process Creation\n";
@@ -209,7 +214,8 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 		int bound, unsigned int Algorithm_Type, unsigned int Total_Partition,
 		int lp_solver_type_choosen, unsigned int number_of_streams,
 		int Solver_GLPK_Gurobi_GPU,
-		std::set<std::pair<int, polytope::ptr> > forbidden_set, abstractCE::ptr& ce) {
+		std::set<std::pair<int, polytope::ptr> > forbidden_set,
+		abstractCE::ptr& ce) {
 
 	std::list<symbolic_states::ptr> Reachability_Region;
 //	template_polyhedra::ptr reach_region;
@@ -217,7 +223,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 	pwlist pw_list;
 	pw_list.WaitingList_insert(I);
 	int number_times = 0;
-	unsigned int iter_max=0;
+	unsigned int iter_max = 0;
 
 	bool stop_loop = false;
 
@@ -231,7 +237,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 
 		unsigned int count = pw_list.getWaitingListSize(); //get the size of PWList
 		iter_max = iter_max + count;
-		//	cout << "\nCount = " << count << "\n";
+		cout << "\nCount = " << count << "\n";
 		//vector<template_polyhedra::ptr> reach_region_list(count); //each thread write's flowpipe on separate index
 		std::vector<symbolic_states::ptr> S(count);
 
@@ -244,19 +250,30 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			pw_list.PassedList_insert(list_U[i]);
 		} //All initial_state have been deleted	//	cout<<"\nIdentifed pwList Done";
 // ********************************* BFS Starts **********************************************************
+
 //Threads or OMP can be used here
-#pragma omp parallel for
+
+		omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
+		omp_set_nested(2);	//enable nested parallelism
+		//omp_set_num_threads(10);
+		omp_set_max_active_levels(2);
+#pragma omp parallel for  num_threads(2)
 		for (unsigned int id = 0; id < count; id++) {
+			/*if (id==0){
+				std::cout<<"\nMax Thread in Outer Lavel = "<< omp_get_num_threads();
+				std::cout<<"\nMax Active Levels = "<<omp_get_max_active_levels();
+			}
+			std::cout<<"\n Outer threadID = "<<omp_get_thread_num()<<"\n";*/
 			//there will be different current_location, continuous_initial_polytope, reach_parameters
 			initial_state::ptr U; //local
 			//	symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states());
 			U = list_U[id]; //independent symbolic state to work with
-			discrete_set::ptr discrete_state = discrete_set::ptr(new discrete_set()); //local
+			discrete_set discrete_state; //local
 			polytope::ptr continuous_initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 
 			int location_id = U->getLocationId();
-			discrete_state->insert_element(location_id);
+			discrete_state.insert_element(location_id);
 			continuous_initial_polytope = U->getInitialSet();
 			reach_parameter_local = reach_parameters;
 			reach_parameter_local.X0 = continuous_initial_polytope; //	cout<<"\nInside for Loop";
@@ -267,7 +284,12 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			S[id]->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-
+			/*
+			 for (std::set<int>::iterator it =
+			 discrete_state.getDiscreteElements().begin();
+			 it != discrete_state.getDiscreteElements().end(); ++it)
+			 location_id = (*it); //have to modify later for multiple elements of the set:: Now assumed only one element
+			 */
 			location current_location;
 			current_location = H.getLocation(location_id);
 			string name = current_location.getName();
@@ -332,7 +354,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 					polytope::ptr gaurd_polytope;
 					std::list<template_polyhedra> intersected_polyhedra;
 					polytope::ptr intersectedRegion; //created two objects here
-					discrete_set ds = discrete_set();
+					discrete_set ds;
 					current_destination = H.getLocation(
 							(*t)->getDestination_Location_Id());
 					string locName = current_destination.getName();
@@ -346,11 +368,24 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 					gaurd_polytope = (*t)->getGaurd();
 					current_assignment = (*t)->getAssignT();
 
+
+					boost::timer::cpu_timer t100;
+					t100.start();
+
+
 					//this intersected_polyhedra will have invariant direction added in it
 					string trans_name = (*t)->getLabel();
-					intersected_polyhedra = t_poly->polys_intersection(
+					intersected_polyhedra = t_poly->polys_intersectionParallel(
 							gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 //			std::cout << "Before calling getTemplate_approx\n";
+					t100.stop();
+					double clock100;
+					clock100 = t100.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+					double return100 = clock100 / (double) 1000;
+					std::cout << "\nIntersection Time:Wall(Seconds) = "<< return100 << std::endl;
+
+
+
 
 					int destination_locID = (*t)->getDestination_Location_Id();
 					ds.insert_element(destination_locID);
@@ -397,6 +432,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 //:: Can be optimize if we can count number_times inside the parallel loop per breadth then we can avoid transaction and intersection
 //:: computation for next transition if number_times exceeds bound ....
 		number_times++; //One Level or one Breadth Search over
+		//cout << "\nnumber_times = " << number_times << "  Bound = " << bound << "\n";
 		// ************************* BFS Ends *************************************
 
 		//Creating a list of objects of "Reachability Set"/Symbolic_states
@@ -409,9 +445,8 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			//  ******************************** Safety Verification section ********************************
 			std::list<symbolic_states::ptr> list_sym_states;
 
-			std::list<abstract_symbolic_state::const_ptr> list_abstract_sym_states;
+			std::list<abstract_symbolic_state::ptr> list_abstract_sym_states;
 			polytope::ptr Conti_Set;	//bounding_box Polytope
-
 
 			std::list<transition::ptr> list_transitions;
 
@@ -419,10 +454,11 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 				//so perform intersection with forbidden set provided locID matches
 
 				int locID;
-				const discrete_set::ptr ds = S[index]->getDiscreteSet();
+				discrete_set ds;
+				ds = S[index]->getDiscreteSet();
 				for (std::set<int>::iterator it =
-						ds->getDiscreteElements().begin();
-						it != ds->getDiscreteElements().end(); ++it)
+						ds.getDiscreteElements().begin();
+						it != ds.getDiscreteElements().end(); ++it)
 					locID = (*it); //Assuming only a single element exist in the discrete_set
 				/*location current_location;
 				 current_location = H.getLocation(locID);*/
@@ -437,120 +473,122 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 						//check intersection with flowpipe/reach_region
 						//GeneratePolytopePlotter(forbid_poly);
 						std::list<template_polyhedra> forbid_intersects;
-						forbid_intersects = t_poly->polys_intersection(
+						forbid_intersects = t_poly->polys_intersectionParallel(
 								forbid_poly, lp_solver_type_choosen);
 						if (forbid_intersects.size() == 0) {
-							std::cout << "\nThe model does NOT violates SAFETY property!!!\n";
+							std::cout
+									<< "\nThe model does NOT violates SAFETY property!!!\n";
 						} else {
-							std::cout << "\nThe model violates SAFETY property!!!\n";
+							std::cout
+									<< "\nThe model violates SAFETY property!!!\n";
 							symbolic_states::ptr current_forbidden_state;
 							current_forbidden_state = S[index];
 
 							// Here create a new abstract_symbolic_state
 							abstract_symbolic_state::ptr curr_abs_sym_state;
-							curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
-
+							curr_abs_sym_state = abstract_symbolic_state::ptr(
+									new abstract_symbolic_state());
 
 							std::cout << "\nReverse Path Trace =>\n";
 							int cc = 0;
 							do {
 								int locationID, locationID2;
-								const discrete_set::ptr dset_ptr= current_forbidden_state->getDiscreteSet();
+								discrete_set ds, ds2;
+								ds = current_forbidden_state->getDiscreteSet();
 
-		//insert discrete_set in the abstract_symbolic_state
-								curr_abs_sym_state->setDiscreteSet(dset_ptr);
+								//insert discrete_set in the abstract_symbolic_state
+								curr_abs_sym_state->setDiscreteSet(
+										current_forbidden_state->getDiscreteSet());
 
-			// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
+								// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
-								Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+								Conti_Set =
+										convertBounding_Box(
+												current_forbidden_state->getContinuousSetptr());
 								curr_abs_sym_state->setContinuousSet(Conti_Set);
-			// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
+								// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
 								for (std::set<int>::iterator it =
-										dset_ptr->getDiscreteElements().begin();
-										it != dset_ptr->getDiscreteElements().end();
+										ds.getDiscreteElements().begin();
+										it != ds.getDiscreteElements().end();
 										++it)
 									locationID = (*it); //Assuming only a single element exist in the discrete_set
 
-								int transID = current_forbidden_state->getTransitionId();	//a)
-		//   **********************************************************
-			//todo::create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
-				//1) ******************** list_of_symbolic_states ********************
-								list_sym_states.push_front(current_forbidden_state);//pushing the bad symbolic_state first(at the top)
-								list_abstract_sym_states.push_front(abstract_symbolic_state::const_ptr(curr_abs_sym_state.get()));
-				//2) list_of_transition
-					//a) current sym_state only have trans_ID but to retrieve this transition I have to
-					//b) get the parent to this sym_state using getParentPtrSymbolicState and then in
-					//c) that sym_state get the discrete state and then get its loc_ID.
-					//d) Now from the class hybrid_automata get an object of the class location
-					//e) Now for this location's object get the transition with transID as transition_ID from
-					// the data member out_going_transitions.
-				//3) length: number of transitions
-			//   **********************************************************
+								int transID =
+										current_forbidden_state->getTransitionId();	//a)
+								//   **********************************************************
+								//todo::create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
+								//1) ******************** list_of_symbolic_states ********************
+								list_sym_states.push_front(
+										current_forbidden_state);//pushing the bad symbolic_state first(at the top)
+								list_abstract_sym_states.push_front(
+										curr_abs_sym_state);
+								//2) list_of_transition
+								//a) current sym_state only have trans_ID but to retrieve this transition I have to
+								//b) get the parent to this sym_state using getParentPtrSymbolicState and then in
+								//c) that sym_state get the discrete state and then get its loc_ID.
+								//d) Now from the class hybrid_automata get an object of the class location
+								//e) Now for this location's object get the transition with transID as transition_ID from
+								// the data member out_going_transitions.
+								//3) length: number of transitions
+								//   **********************************************************
 
 								if (cc != 0) {
 									std::cout << " --> ";
 								}
-								std::cout << "(" << locationID << ", "<< transID << ")";
-								current_forbidden_state = searchSymbolic_state(Reachability_Region,
+								std::cout << "(" << locationID << ", "
+										<< transID << ")";
+								current_forbidden_state =
+										searchSymbolic_state(
+												Reachability_Region,
 												current_forbidden_state->getParentPtrSymbolicState()); //b)
 
-<<<<<<< local
 								//2) ******************* list_transitions ********************
-
-								const discrete_set::ptr ds2 = current_forbidden_state->getDiscreteSet();//c)
+								ds2 = current_forbidden_state->getDiscreteSet();//c)
 								for (std::set<int>::iterator it =
-										ds2->getDiscreteElements().begin();
-										it != ds2->getDiscreteElements().end();
+										ds2.getDiscreteElements().begin();
+										it != ds2.getDiscreteElements().end();
 										++it)
-=======
-			//2) ******************* list_transitions ********************
-								const discrete_set::ptr ds2 = current_forbidden_state->getDiscreteSet();	//c)
-								for (std::set<int>::const_iterator it =ds2->getDiscreteElements().begin();it != ds2->getDiscreteElements().end(); ++it)
->>>>>>> other
 									locationID2 = (*it); //c)
 								location object_location;
-								object_location = H.getLocation(locationID2);	//d)
-								transition::ptr temp = object_location.getTransition(transID);	//e)
+								object_location = H.getLocation(locationID2);//d)
+								transition::ptr temp =
+										object_location.getTransition(transID);	//e)
 								list_transitions.push_front(temp);//pushing the transition in the stack
+								//2) ******************* list_transitions Ends ********************
 								cc++;
-			//2) ******************* list_transitions Ends *******************
-							} while (current_forbidden_state->getParentPtrSymbolicState() != NULL);
+							} while (current_forbidden_state->getParentPtrSymbolicState()
+									!= NULL);
 
-							if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState() == NULL)) { //root is missed
+							if ((cc >= 1)
+									&& (current_forbidden_state->getParentPtrSymbolicState()
+											== NULL)) { //root is missed
 								int locationID;
-<<<<<<< local
-
-								const discrete_set::ptr ds = current_forbidden_state->getDiscreteSet();
+								discrete_set ds;
+								ds = current_forbidden_state->getDiscreteSet();
 
 								curr_abs_sym_state->setDiscreteSet(
 										current_forbidden_state->getDiscreteSet());
 								Conti_Set =
 										convertBounding_Box(
 												current_forbidden_state->getContinuousSetptr());
-=======
-								const discrete_set::ptr dset_ptr = current_forbidden_state->getDiscreteSet();
-								curr_abs_sym_state->setDiscreteSet(dset_ptr);
-								Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
->>>>>>> other
 								curr_abs_sym_state->setContinuousSet(Conti_Set);
 
-
-<<<<<<< local
 								for (std::set<int>::iterator it =
-										ds->getDiscreteElements().begin();
-										it != ds->getDiscreteElements().end();
+										ds.getDiscreteElements().begin();
+										it != ds.getDiscreteElements().end();
 										++it)
-=======
-								for (std::set<int>::iterator it = dset_ptr->getDiscreteElements().begin(); it != dset_ptr->getDiscreteElements().end(); ++it)
->>>>>>> other
 									locationID = (*it); //Assuming only a single element exist in the discrete_set
 
-								int transID =current_forbidden_state->getTransitionId();
-								list_sym_states.push_front(current_forbidden_state);//1) pushing the initial/root bad symbolic_state at the top
-								list_abstract_sym_states.push_front(abstract_symbolic_state::const_ptr(curr_abs_sym_state.get()));
+								int transID =
+										current_forbidden_state->getTransitionId();
+								list_sym_states.push_front(
+										current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
+								list_abstract_sym_states.push_front(
+										curr_abs_sym_state);
 
-								std::cout << " -->  (" << locationID << ", "<< transID << ")\n";
+								std::cout << " -->  (" << locationID << ", "
+										<< transID << ")\n";
 
 							}
 							saftey_violated = true;
@@ -573,9 +611,11 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 		if (number_times > bound) //check to see how many jumps have been made(i.e., number of discrete transitions made)
 			break;
 	} //end of while loop checking waiting_list != empty
-	cout<<"\n ***************************************************************************\n";
-	cout<<"\nMaximum Iterations Completed = "<<iter_max<<"\n";
-	cout<<"\n ***************************************************************************\n";
+	cout
+			<< "\n ***************************************************************************\n";
+	cout << "\nMaximum Iterations Completed = " << iter_max << "\n";
+	cout
+			<< "\n ***************************************************************************\n";
 
 	return Reachability_Region;
 }
