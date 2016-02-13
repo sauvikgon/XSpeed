@@ -16,6 +16,8 @@
 
 //#include "core_system/symbolic_states/symbolic_states.h"
 #include "counterExample/abstract_symbolic_state.h"
+#include "counterExample/concreteCE.h"
+#include "nlopt.hpp"
 
 /**
  * This class is a data structure to store the abstract counter-example generated
@@ -25,6 +27,8 @@
  *
  * @author: Rajarshi
  */
+extern unsigned int N;
+extern unsigned int dim;
 
 class abstractCE
 {
@@ -64,6 +68,11 @@ public:
 	 */
 	const abstract_symbolic_state::ptr get_unsafe_symbolic_state() const;
 
+	/**
+	 * Returns the i-th symbolic state from the CE
+	 */
+	abstract_symbolic_state::ptr get_symbolic_state(unsigned int i) const;
+
 	const unsigned int get_length() const {
 		return length;
 	}
@@ -79,6 +88,15 @@ public:
 	void set_transitions(std::list<transition::ptr> transitions) {
 		trans = transitions;
 	}
+	/**
+	 * Returns an instance of the concrete counter-example from the abstract.
+	 */
+	concreteCE::ptr gen_concreteCE(unsigned int tolerance);
+	/**
+	 * Plot the counter example projected along dimensions passed
+	 * as parameters
+	 */
+	void plot(unsigned int i, unsigned int j);
 
 private:
 	/**

@@ -80,7 +80,7 @@ initial_state::ptr init_state;
 
 ReachabilityParameters reach_parameters;
 int dir_nums, transition_iterations;
-int dim;
+int dims;
 std::vector<std::vector<double> > directions; //List of all directions
 
 math::matrix<double> Real_Directions; //List of all directions
@@ -227,7 +227,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 				reach_parameters);
 	}
 
-	dim = init_state->getInitialSet()->getSystemDimension();
+	dims = init_state->getInitialSet()->getSystemDimension();
 
 //Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
 //todo:: needs to decide that is this the right place to include Invariant direction
@@ -236,32 +236,32 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 	std::vector<std::vector<double> > newDirections;
 
 	if (Directions_Type == BOX) {
-		dir_nums = 2 * dim; //Axis Directions
-		newDirections = generate_axis_directions(dim);
+		dir_nums = 2 * dims; //Axis Directions
+		newDirections = generate_axis_directions(dims);
 		//repeated code:: to avoid outside if-block
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;
-		col = dim;
+		col = dims;
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
 	if (Directions_Type == OCT) {
-		dir_nums = 2 * dim * dim; // Octagonal directions
-		newDirections = get_octagonal_directions(dim);
+		dir_nums = 2 * dims * dims; // Octagonal directions
+		newDirections = get_octagonal_directions(dims);
 		//repeated code:: to avoid outside if-block
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;
-		col = dim;
+		col = dims;
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
 	if (Directions_Type > 2) {
 		dir_nums = Uniform_Directions_Size; // ASSIGN HERE Number of Vectors/Directions for UNIform spear algorithm
-		newDirections = math::uni_sphere(dir_nums, dim, 100, 0.0005);
+		newDirections = math::uni_sphere(dir_nums, dims, 100, 0.0005);
 		//repeated code:: to avoid outside if-block
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;
-		col = dim;
+		col = dims;
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
@@ -1119,7 +1119,7 @@ int main(int argc, char *argv[]) {
 			fullPath = vm["include-path"].as<std::string>();
 			std::cout << "Include Path is: " << fullPath << "\n";
 		} else {
-			fullPath = "/home/amit/cuda-workspace/XSpeed/Debug/"; //default file path
+			fullPath = "./"; //default file path
 		}
 		//cout << endl << "Working here 3\n";
 		fileWithPath.append(fullPath);
