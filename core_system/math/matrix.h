@@ -24,7 +24,6 @@ public:
 	typedef typename boost::numeric::ublas::matrix<scalar_type>::array_type array_type;
 
 	matrix();
-	~matrix(){};
 	matrix(size_type r, size_type c);
 	//matrix(int row, int col);			will try later
 	matrix(size_type r, size_type c, array_type data);

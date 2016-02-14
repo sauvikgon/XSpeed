@@ -26,7 +26,7 @@ using namespace std;
  * number_facets : Number of faces of the defined polytope.
  * dimension :  Number of variables of the system.
  * columnVector :	The values b for each facets.
- * InEqualitySign :	The in-equalities sign of the bound values 'b'. Possible values are
+ * InEqualitySign :	The in equalities sign of the bound values 'b'. Possible values are
  * 					0 :	for  Ax = b (b Equals to)
  * 					1 :	for  Ax <= b (b is Greater Than or Equals to)
  * 					2 :	for  Ax >= b (b is Less Than or Equals to)
@@ -51,7 +51,6 @@ private:
 public:
 	typedef boost::shared_ptr<polytope> ptr;
 	polytope();
-	virtual ~polytope(){};
 	polytope(bool empty);
 	polytope(math::matrix<double> coeffMatrix, std::vector<double> columnVector,
 			int InEqualitySign);
@@ -115,7 +114,7 @@ public:
 	 * given as arguments
 	 */
 	void enum_2dVert_restrict(std::vector<double> u, std::vector<double> v,
-			unsigned int i,unsigned int j, std::set<std::pair<double, double> >&pts);
+			int i, int j, std::set<std::pair<double, double> >&pts);
 
 	/**
 	 * enumerate all vertices of the polytope
@@ -123,7 +122,7 @@ public:
 	 * 	   j is the second projecting variable
 	 * 	   the value/index of i and j begins with 0 to n-1
 	 */
-	std::set<std::pair<double, double> > enumerate_2dVertices(unsigned int i, unsigned int j);
+	std::set<std::pair<double, double> > enumerate_2dVertices(int i, int j);
 
 
 	/*
@@ -131,7 +130,7 @@ public:
 	 * i and j where i and j are the 1st and 2nd projecting variables
 	 */
 
-	math::matrix<double> get_2dVertices(unsigned int i, unsigned int j);
+	math::matrix<double> get_2dVertices(int i, int j);
 
 };
 

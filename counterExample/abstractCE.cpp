@@ -11,26 +11,22 @@
 unsigned int dim;
 unsigned int N;
 
-/** Defining some global data variables required for
- * nlopt
- */
+const abstract_symbolic_state::ptr abstractCE::get_first_symbolic_state() const
+{
+	std::list<abstract_symbolic_state::ptr>::const_iterator it = sym_states.begin();
+	return *it;
 
-abstract_symbolic_state::const_ptr abstractCE::get_first_symbolic_state() const {
-	std::list<abstract_symbolic_state::const_ptr>::const_iterator it =
-			sym_states.begin();
-	return boost::shared_ptr<const abstract_symbolic_state>(*it);
 }
-abstract_symbolic_state::const_ptr abstractCE::get_unsafe_symbolic_state() const {
-	std::list<abstract_symbolic_state::const_ptr>::const_iterator it =
-			sym_states.end();
+const abstract_symbolic_state::ptr abstractCE::get_unsafe_symbolic_state() const
+{
+	std::list<abstract_symbolic_state::ptr>::const_iterator it = sym_states.end();
 	return *it;
 }
-
-abstract_symbolic_state::const_ptr abstractCE::get_symbolic_state(
+abstract_symbolic_state::ptr abstractCE::get_symbolic_state(
 		unsigned int i) const {
 	assert(0 <= i && i < get_length());
 	unsigned int j = 0;
-	std::list<abstract_symbolic_state::const_ptr>::const_iterator it =
+	std::list<abstract_symbolic_state::ptr>::const_iterator it =
 			sym_states.begin();
 	while (j < i)
 		it++;
@@ -42,9 +38,9 @@ void abstractCE::plot(unsigned int i, unsigned int j) {
 	std::ofstream tracefile;
 	tracefile.open("./ceTrace.o");
 	math::matrix<double> vertices_list;
-	std::list<abstract_symbolic_state::const_ptr>::iterator it;
+	std::list<abstract_symbolic_state::ptr>::iterator it;
 	for (it = sym_states.begin(); it != sym_states.end(); it++) {
-		vertices_list = (*it)->getContinuousSet()->get_2dVertices(i-1, j-1);
+		vertices_list = (*it)->getContinuousSet()->get_2dVertices(i, j);
 		// ------------- Printing the vertices on the Output File -------------
 		for (unsigned int p = 0; p < vertices_list.size1(); p++) {
 			for (unsigned int q = 0; q < vertices_list.size2(); q++) {
@@ -145,16 +141,17 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
  * @Rajarshi
  * 28th January 2016
  */
-concreteCE abstractCE::gen_concreteCE() {
+concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 
-	/* Generate an nlopt object with the constraints defined by the Abstract counter example
+	/* Generate an nlopt object with the constraints defined by the Abstract
+	 * counter example
 	 */
 
 	/* 1. Get the dimensionality of the optimization problem by
 	 * getting the dimension of the continuous set of the abstract counter example
 	 */
 
-	abstract_symbolic_state::const_ptr S = get_first_symbolic_state();
+	abstract_symbolic_state::ptr S = get_first_symbolic_state();
 	dim = S->getContinuousSet()->getSystemDimension();
 	N = get_length(); // the length of the counter example
 
@@ -181,7 +178,7 @@ concreteCE abstractCE::gen_concreteCE() {
 	std::vector<double> v(dim);
 
 	for (i = 0; i < N; i++) // iterate over the N counter-examples
-			{
+	{
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
 		/** To get a point from the polytope, we create a random obj function and
@@ -207,8 +204,9 @@ concreteCE abstractCE::gen_concreteCE() {
 	 * We assume that the time variable is names as 't' in the model.
 	 * We find out the min,max components of the time variable
 	 */
-	unsigned int t_index =
-			get_first_symbolic_state()->getContinuousSet()->get_index("t");
+//	unsigned int t_index =
+//			get_first_symbolic_state()->getContinuousSet()->get_index("t");
+	unsigned int t_index=3; //manually assigned time dimension 3 for the time being
 	assert(t_index >= 0 & t_index < dim);
 
 	std::vector<double> dmin(dim, 0), dmax(dim, 0);
@@ -275,17 +273,17 @@ concreteCE abstractCE::gen_concreteCE() {
 		std::cout << e.what() << std::endl;
 	}
 	if (math::abs(minf) > tolerance) {
-		concreteCE cexample;
+		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 		return cexample;
 	} else {
 		// create a concrete counter example object
-		concreteCE cexample;
+		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 		// one trajectory per symbolic state to be added in the concreteCE
 		for (unsigned int i = 0; i < N; i++) {
 			// create the sample
 			concreteCE::sample s;
 			std::set<int>::iterator dset_iter =
-					get_symbolic_state(i)->getDiscreteSet()->getDiscreteElements().begin();
+					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
 			unsigned int locId = *dset_iter;
 
 			std::vector<double> y(dim);
@@ -299,8 +297,9 @@ concreteCE abstractCE::gen_concreteCE() {
 			concreteCE::traj_segment traj;
 			traj.first = locId;
 			traj.second = s;
-			cexample.push_back(traj);
+			cexample->push_back(traj);
 		}
 		return cexample;
 	}
 }
+

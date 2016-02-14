@@ -17,11 +17,6 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	polytope::ptr gaurd_polytope;
 	Dynamics system_dynamics;
 
-	// Add variable t index map for this model
-	Hybrid_Automata.insert_to_map("x",1);
-	Hybrid_Automata.insert_to_map("y",2);
-	Hybrid_Automata.insert_to_map("t",3);
-
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
 			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
 			Bmatrix;
@@ -30,7 +25,6 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
 
 	size_type row, col;
-
 
 	//Polytope I Declaration in the form of Ax<=b
 	//Input Polytope I as a line(bar) 10<=x(position)<=10.2 y(velocity)== 0 and t(time)==0.

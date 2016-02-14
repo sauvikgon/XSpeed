@@ -13,8 +13,8 @@
 #include "core_system/continuous/Polytope/Polytope.h"
 
 /*
- * Data Structure required for our Algorithm to improve using the
- * concept of checking glp_optimal
+ * Data Structure required for our Algorithm to improve using the concept of checking glp_optimal
+ *
  */
 struct D {
 	std::vector<double> v;		//the transposed directions
@@ -63,9 +63,11 @@ struct ReachabilityParameters {
 };
 
 struct Dynamics {
+	//std::vector<std::vector <double> > MatrixA;
 	math::matrix<double> MatrixA;
-	bool isEmptyMatrixA;	//True if empty, otherwise False
+	bool isEmptyMatrixA;	//True if empty otherwise False
 	/** The transformation matrix of the input convex set U */
+	//std::vector<std::vector <double> > MatrixB;
 	math::matrix<double> MatrixB;	//polytope U will determine if MatrixB is empty
 	bool isEmptyMatrixB;	//True if empty otherwise False
 	polytope::ptr U;

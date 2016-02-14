@@ -86,8 +86,8 @@ void ReachFunction(unsigned int Algorithm_Type, location current_location,
 		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
 				<< return_Time1 << std::endl;
 
-	}
-*/
+	} */
+
 	if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout
 				<< "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
@@ -268,22 +268,21 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			initial_state::ptr U; //local
 			//	symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states());
 			U = list_U[id]; //independent symbolic state to work with
-			discrete_set::ptr discrete_state = discrete_set::ptr(new discrete_set()); //local
+			discrete_set discrete_state; //local
 			polytope::ptr continuous_initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 
 			int location_id = U->getLocationId();
-			discrete_state->insert_element(location_id);
+			discrete_state.insert_element(location_id);
 			continuous_initial_polytope = U->getInitialSet();
 			reach_parameter_local = reach_parameters;
-			reach_parameter_local.X0 = continuous_initial_polytope; //	cout<<"\nInside for Loop";
+			reach_parameter_local.X0 = continuous_initial_polytope;
 //create an instance of Symbolic_states S
 			S[id] = symbolic_states::ptr(new symbolic_states());
 
 			S[id]->setDiscreteSet(discrete_state);
 			S[id]->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
-
 
 			location current_location;
 			current_location = H.getLocation(location_id);
@@ -349,7 +348,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 					polytope::ptr gaurd_polytope;
 					std::list<template_polyhedra> intersected_polyhedra;
 					polytope::ptr intersectedRegion; //created two objects here
-					discrete_set ds = discrete_set();
+					discrete_set ds;
 					current_destination = H.getLocation(
 							(*t)->getDestination_Location_Id());
 					string locName = current_destination.getName();
@@ -427,6 +426,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 //:: Can be optimize if we can count number_times inside the parallel loop per breadth then we can avoid transaction and intersection
 //:: computation for next transition if number_times exceeds bound ....
 		number_times++; //One Level or one Breadth Search over
+		//cout << "\nnumber_times = " << number_times << "  Bound = " << bound << "\n";
 		// ************************* BFS Ends *************************************
 
 		//Creating a list of objects of "Reachability Set"/Symbolic_states
@@ -439,7 +439,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			//  ******************************** Safety Verification section ********************************
 			std::list<symbolic_states::ptr> list_sym_states;
 
-			std::list<abstract_symbolic_state::const_ptr> list_abstract_sym_states;
+			std::list<abstract_symbolic_state::ptr> list_abstract_sym_states;
 			polytope::ptr Conti_Set;	//bounding_box Polytope
 
 			std::list<transition::ptr> list_transitions;
@@ -448,10 +448,11 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 				//so perform intersection with forbidden set provided locID matches
 
 				int locID;
-				const discrete_set::ptr ds = S[index]->getDiscreteSet();
+				discrete_set ds;
+				ds = S[index]->getDiscreteSet();
 				for (std::set<int>::iterator it =
-						ds->getDiscreteElements().begin();
-						it != ds->getDiscreteElements().end(); ++it)
+						ds.getDiscreteElements().begin();
+						it != ds.getDiscreteElements().end(); ++it)
 					locID = (*it); //Assuming only a single element exist in the discrete_set
 				/*location current_location;
 				 current_location = H.getLocation(locID);*/
@@ -486,14 +487,17 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 							int cc = 0;
 							do {
 								int locationID, locationID2;
-								const discrete_set::ptr dset_ptr= current_forbidden_state->getDiscreteSet();
-
+								discrete_set ds, ds2;
+								ds = current_forbidden_state->getDiscreteSet();
 
 								//insert discrete_set in the abstract_symbolic_state
 								curr_abs_sym_state->setDiscreteSet(
 										current_forbidden_state->getDiscreteSet());
 
+
 								// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
+
+
 
 								Conti_Set =
 										convertBounding_Box(
@@ -502,11 +506,10 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 								// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
 								for (std::set<int>::iterator it =
-										dset_ptr->getDiscreteElements().begin();
-										it != dset_ptr->getDiscreteElements().end();
+										ds.getDiscreteElements().begin();
+										it != ds.getDiscreteElements().end();
 										++it)
 									locationID = (*it); //Assuming only a single element exist in the discrete_set
-
 
 								int transID =
 										current_forbidden_state->getTransitionId();	//a)
@@ -551,7 +554,6 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 								list_transitions.push_front(temp);//pushing the transition in the stack
 								//2) ******************* list_transitions Ends ********************
 								cc++;
-
 							} while (current_forbidden_state->getParentPtrSymbolicState()
 									!= NULL);
 
@@ -559,7 +561,6 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 									&& (current_forbidden_state->getParentPtrSymbolicState()
 											== NULL)) { //root is missed
 								int locationID;
-
 								discrete_set ds;
 								ds = current_forbidden_state->getDiscreteSet();
 
@@ -570,13 +571,11 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 												current_forbidden_state->getContinuousSetptr());
 								curr_abs_sym_state->setContinuousSet(Conti_Set);
 
-
 								for (std::set<int>::iterator it =
 										ds.getDiscreteElements().begin();
 										it != ds.getDiscreteElements().end();
 										++it)
 									locationID = (*it); //Assuming only a single element exist in the discrete_set
-
 
 								int transID =
 										current_forbidden_state->getTransitionId();
@@ -584,7 +583,6 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 										current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
 								list_abstract_sym_states.push_front(
 										curr_abs_sym_state);
-
 								std::cout << " -->  (" << locationID << ", "
 										<< transID << ")\n";
 

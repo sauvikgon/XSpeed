@@ -18,15 +18,18 @@ public:
 	typedef boost::shared_ptr<symbolic_states> ptr;
 
 	symbolic_states();
-
-	symbolic_states(discrete_set::ptr DiscreteSet,
+	/*symbolic_states(discrete_set DiscreteSet, polytope::ptr ContinuousSet);
+	 polytope::ptr getContinuousSet();
+	 void setContinuousSet(const polytope::ptr continuousSet);
+	 */
+	symbolic_states(discrete_set DiscreteSet,
 			template_polyhedra::ptr ContinuousSet);
-	symbolic_states(discrete_set::ptr DiscreteSet,
+	symbolic_states(discrete_set DiscreteSet,
 			template_polyhedra::ptr ContinuousSet,
 			symbolic_states::ptr parentPtr_symbolic_state, int transition_id);
 
-	const discrete_set::ptr getDiscreteSet() const;
-	void setDiscreteSet(const discrete_set::ptr discreteSet);
+	const discrete_set& getDiscreteSet() const;
+	void setDiscreteSet(const discrete_set& discreteSet);
 	template_polyhedra::ptr getContinuousSetptr() const;
 	void setContinuousSetptr(template_polyhedra::ptr continuousSetptr);
 	symbolic_states::ptr getParentPtrSymbolicState() const;
@@ -40,7 +43,7 @@ public:
 	polytope::ptr getInitial_ContinousSetptr() const;
 
 private:
-	discrete_set::ptr DiscreteSetptr; //locationID
+	discrete_set DiscreteSet; //locationID
 	//polytope::ptr ContinuousSetptr;	//template_polyhedra
 	template_polyhedra::ptr ContinuousSetptr; //template_polyhedra::ptr
 

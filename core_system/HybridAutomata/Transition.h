@@ -22,7 +22,6 @@ class transition {
 public:
 	typedef boost::shared_ptr<transition> ptr;
 	transition();
-	~transition(){};
 	transition(int trans_id, string label, int source_id, int destination_id,
 			polytope::ptr Gaurd, Assign& Assign_T);
 	Assign& getAssignT();

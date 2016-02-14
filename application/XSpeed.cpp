@@ -8,7 +8,15 @@
 
 #include <iostream>
 #include <fstream>
-#include <boost/timer/timer.hpp>
+//#include <cstdlib>
+
+#include "boost/timer/timer.hpp"
+
+/*
+ #include "core_system/Reachability/reachabilitySequential.h"
+ #include "core_system/Reachability/reachabilityParallel_Process.h"
+ #include "core_system/Reachability/reachabilityParallel_Iterations.h"
+ */
 #include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
 #include "application/sf_directions.h"
 #include "application/DataStructureDirections.h"
@@ -18,7 +26,7 @@
 #include "Utilities/Template_Polyhedra.h"
 #include "Utilities/Post_Assignment.h"
 #include <list>
-#include <utility>	//for std::pair
+#include <utility>
 #include <iterator>
 #include "Hybrid_Model_Parameters_Design/BouncingBall.h"
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
@@ -26,7 +34,7 @@
  #include "Hybrid_Model_Parameters_Design/Helicopter_model/Helicopter.h"
  #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel2.h"
  #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28PolytopeU.h"
- #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel29PolytopeU.h"
+ #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel29DimPolytopeU.h"
  */
 #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
 #include "Hybrid_Model_Parameters_Design/FiveDimSys.h"
@@ -50,11 +58,11 @@
 
 // *********** Command Line Boost Program Options ********
 #include <boost/program_options/config.hpp>
-//#include <boost/program_options.hpp>
 
-#include "/usr/local/include/boost/program_options.hpp"
+#include "boost/program_options.hpp"
 #include <boost/config.hpp>
 #include <boost/program_options/detail/config_file.hpp>
+
 #include <boost/program_options/parsers.hpp>
 // *********** Command Line Boost Program Options ********
 #include "plotter_utility.h"
@@ -63,15 +71,16 @@
 
 #include "InputOutput/io_utility.h"
 
+namespace po = boost::program_options;
+using namespace std;
+
 //symbolic_states initial_symbolic_states;
 initial_state::ptr init_state;
 //**************** Hybrid Automata Definition ***********************
 
 ReachabilityParameters reach_parameters;
-unsigned int dir_nums, transition_iterations;
-
-unsigned int dims;
-
+int dir_nums, transition_iterations;
+int dims;
 std::vector<std::vector<double> > directions; //List of all directions
 
 math::matrix<double> Real_Directions; //List of all directions
@@ -79,10 +88,7 @@ math::matrix<double> Real_Directions; //List of all directions
 //**************** Hybrid Automata Definition ***********************
 hybrid_automata Hybrid_Automata;
 //**************** Hybrid Automata Definition ***********************
-
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
-
-namespace po = boost::program_options;
 
 polytope initial_polytope_I, invariant, gaurd_polytope(true);
 unsigned int HybridSystem_Model_Type;
@@ -92,6 +98,7 @@ unsigned int Uniform_Directions_Size;
 void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		unsigned int directions_type_or_size, unsigned int transition_size) {
 	size_type row, col;
+
 	transition_iterations = transition_size; //Number of iterations for transition of the Hybrid system
 
 	reach_parameters.TimeBound = time_bound; //Total Time Interval
@@ -234,7 +241,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//repeated code:: to avoid outside if-block
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;
-		col = dim;
+		col = dims;
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
@@ -244,17 +251,17 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//repeated code:: to avoid outside if-block
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;
-		col = dim;
+		col = dims;
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
 	if (Directions_Type > 2) {
 		dir_nums = Uniform_Directions_Size; // ASSIGN HERE Number of Vectors/Directions for UNIform spear algorithm
-		newDirections = math::uni_sphere(dir_nums, dim, 100, 0.0005);
+		newDirections = math::uni_sphere(dir_nums, dims, 100, 0.0005);
 		//repeated code:: to avoid outside if-block
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;
-		col = dim;
+		col = dims;
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
@@ -303,8 +310,7 @@ int main(int argc, char *argv[]) {
 	int hey = 0;
 	bool isConfigFileAssigned = false;
 	int output_var_X = 0, output_var_Y = 1;
-
-	boost::program_options::options_description desc("XSpeed options");
+	po::options_description desc("XSpeed options");
 	po::variables_map vm;
 
 	if (argc == 1) { //No argument:: When Running directly from the Eclipse Editor
@@ -328,7 +334,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	desc.add_options()("help", "produce help message")("model",
-			boost::program_options::value<int>()->default_value(1),
+			po::value<int>()->default_value(1),
 			"set model for reachability analysis\n"
 					"1.  Bouncing Ball Model (Set to default) \n"
 					"2.  Timed Bouncing Ball Model\n"
@@ -486,7 +492,41 @@ int main(int argc, char *argv[]) {
 
 				std::string cmdStr2, compile_CmdStr, outputFile_debug,
 						outputFile_release, dependenciesFile;
-								std::string cmdStr4, debug_loc, release_loc, cmd_option;
+				/*
+				 outputFile_debug =
+				 "XSpeed/Debug/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
+				 outputFile_release =
+				 "XSpeed/Release/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
+				 //	dependenciesFile ="XSpeed/src/Hybrid_Model_Parameters_Design/user_model/user_model.d";
+				 //todo :: generate and copy .d
+
+				 std::string cmdStr3, copy_CmdStr;
+
+				 compile_CmdStr = "g++";
+				 cmdStr2.append(compile_CmdStr);
+				 cmdStr2.append(SingleSpace);
+				 cmdStr2.append(projLocation);
+				 cmdStr2.append(replacingFile);
+				 cmdStr2.append(SingleSpace);
+				 cmdStr2.append("-o");
+				 cmdStr2.append(SingleSpace);
+				 cmdStr2.append(projLocation);
+				 cmdStr2.append(outputFile_debug);
+				 st2 = cmdStr2.c_str();
+				 system(st2);	//compiling with g++ XX.cpp -o XX.o file
+
+				 copy_CmdStr = "cp";
+				 cmdStr3.append(copy_CmdStr);
+				 cmdStr3.append(SingleSpace);
+				 cmdStr3.append(projLocation);
+				 cmdStr3.append(outputFile_debug);
+				 cmdStr3.append(SingleSpace);
+				 cmdStr3.append(projLocation);
+				 cmdStr3.append(outputFile_release);
+				 st3 = cmdStr3.c_str();
+				 system(st3);	//cp file.o release_location
+				 */
+				std::string cmdStr4, debug_loc, release_loc, cmd_option;
 
 				system("make clean");
 				//system("make clean > /tmp/MakeClean_output_file.txt");
@@ -509,6 +549,7 @@ int main(int argc, char *argv[]) {
 					cmdStr4.append(projLocation);
 					cmdStr4.append(release_loc);
 				}
+				//cmdStr4.append(" > /tmp/MakeBuild_output_file.txt");
 				st4 = cmdStr4.c_str();
 				system(st4);
 
@@ -669,12 +710,7 @@ int main(int argc, char *argv[]) {
 								polytope::ptr forbidden_polytope;
 								forbidden_polytope = polytope::ptr(
 										new polytope(coeff, colVector, 1));
-<<<<<<< local
-								forbid_pair.second = forbidden_polytope; //todo currently unable to handle negative bounds
-=======
 								forbid_pair.second = forbidden_polytope;//todo currently unable to handle negative bounds
->>>>>>> other
-
 								forbidden_set.insert(forbid_pair);
 
 								polytope_created = false; //store here the polytope
@@ -693,6 +729,8 @@ int main(int argc, char *argv[]) {
 						std::string constraint_Str = eachStr;
 						boost::char_separator<char> sep_symbol("<="); //handles < or <= (or even error input =<
 						tokenizer each_tokens(constraint_Str, sep_symbol);
+						/*tmp++;
+						 bounds.resize(tmp);*/
 						int index_val = 0;
 						for (tokenizer::iterator tok_it = each_tokens.begin();
 								tok_it != each_tokens.end(); tok_it++) {
@@ -892,23 +930,24 @@ int main(int argc, char *argv[]) {
 
 		if (vm.count("pbfs")) {
 			DiscreteAlgorithm = 12; //parallel Breadth First Search
+			//std::cout<< "Running Reachability Analysis with parallel Breadth First Search using Multi-core acceleration\n";
 		}
 
-			} //ALL COMMAND-LINE OPTIONS are set completely
+	} //ALL COMMAND-LINE OPTIONS are set completely
 
 	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
-			transition_size); //Initialising the variables
+			transition_size);
+
+	//std::list<template_polyhedra> reachability_sfm;
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 //List/Array of Reachability Region/FlowPipe of all transitions.
 //to be changed into a single variable instead of list.
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
-//	long total_mem_used=0;
 	boost::timer::cpu_timer tt1;
 	number_of_times = 2;
 	for (int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		tt1.start();
-
 		if (DiscreteAlgorithm != PBFS) { //Sequential Search implemented for Discrete Jumps
 			std::cout << "\nRunning Sequential BFS\n";
 			Symbolic_states_list = reach(Hybrid_Automata, init_state,
@@ -922,7 +961,6 @@ int main(int argc, char *argv[]) {
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
 					Solver_GLPK_Gurobi_GPU, forbidden_set, ce);
 		}
-//cout<<"\nTesting 4\n";
 		tt1.stop();
 
 		double wall_clock, user_clock, system_clock;
@@ -992,23 +1030,10 @@ int main(int argc, char *argv[]) {
 		cout << endl << "Number of Vectors = "
 				<< reach_parameters.Directions.size1();
 		cout << endl << "Number of Iteration = " << iterations_size << endl;
-	} //endif of argc == 1
-	  //cout << endl << "Working here 1\n";
-//	cout << endl << "Memory Usages = " << total_mem_used / number_of_times << " KB\n";
+	}
 
 
-/*
-	int ploter = 0;
-	if (ploter == 1) { //choosing SpaceEx ploter
-		plot_output(Symbolic_states_list);
-		//SpaceEx_plotter();
-	} else { //Plotting using MatLab with our temporary matlab code
-*/
-
-
-		//cout << endl << "Working here 11\n";
 		std::list<symbolic_states::ptr>::iterator it;
-		//cout << endl << "Working here 112\n";
 		/*
 		 * Generating Vertices as output which can be plotted using gnuplot utilites
 		 */
@@ -1022,142 +1047,220 @@ int main(int argc, char *argv[]) {
 			fullPath = vm["include-path"].as<std::string>();
 			std::cout << "Include Path is: " << fullPath << "\n";
 		} else {
-
-			fullPath = "/home/amit/cuda-workspace/XSpeed/Debug/"; //default file path
+			fullPath = "./"; //default file path
 		}
-
 		//cout << endl << "Working here 3\n";
 		fileWithPath.append(fullPath);
 
-			// ------------- Printing the vertices on the Output File -------------
-			for (int i = 0; i < vertices_list.size1(); i++) {
-				for (int j = 0; j < vertices_list.size2(); j++) {
-					outFile << vertices_list(i, j) << " ";
-				}
-				outFile << std::endl;
-			}
-			outFile << std::endl; // 1 gap after each polytope plotted
-			// ------------- Printing the vertices on the Output File -------------
-
+		if (vm.count("output-file")) {
+			fileName = vm["output-file"].as<std::string>();
+			std::cout << "fileName is: " << fileName << "\n";
+		} else {
+			fileName = "out.txt";
 		}
-	}
-	outFile.close();
-	/*
-	 * This part of code is for Plotting the Reachability Region in MatLab
-	 */
-	// ************************************************************************************************************
-	int Totaldirs;
-	std::ofstream MatLabFile_TemplateDirections,
-			MatLabFile_InvariantsDirections;
-	MatLabFile_TemplateDirections.open(
-			"/home/amit/matlabTest/ProjectOutput/DirectionsMatrix.txt");
-	MatLabFile_InvariantsDirections.open(
-			"/home/amit/matlabTest/ProjectOutput/InvariantDirectionsMatrix.txt");
 
-	//file for making matrix 'A' for MatLab output function con2vert(A,b) to be executed from plotoutput.m
-	//Need to create
-	//1) Files for SupportFunctionMatrix(ie to obtain each column for vector b) with Configurations_details
-	//2) Files for Template_Directions and Invariant_directions with Configurations_details such as (state#,nos of invariants)
+		fileWithPath.append(fileName);
 
+		std::cout << "fileWithPath is: " << fileWithPath << "\n";
+		stFileNameWithPath = fileWithPath.c_str();
+		outFile.open(stFileNameWithPath);
+		//outFile.open("/home/amit/cuda-workspace/XSpeed/Debug/outFile.txt");
+
+		//have to call the list of symbolic_states and compose polytope p(matrix A and vector b)
+		//and call the polytope->function get_2dVertices
+		for (it = Symbolic_states_list.begin();
+				it != Symbolic_states_list.end(); it++) {
+			template_polyhedra::ptr temp_polyhedra;
+			temp_polyhedra = (*it)->getContinuousSetptr();
+
+			math::matrix<double> A, template_directions, invariant_directions;
+			math::matrix<double> big_b, sfm, invariant_bound_values;
+
+			template_directions = temp_polyhedra->getTemplateDirections();
+			invariant_directions = temp_polyhedra->getInvariantDirections(); //invariant_directions
+
+			sfm = temp_polyhedra->getMatrixSupportFunction(); //total number of columns of SFM
+			invariant_bound_values = temp_polyhedra->getMatrix_InvariantBound(); //invariant_bound_matrix
+
+			if (invariant_directions.size1() == 0) { //indicate no invariants exists
+				A = template_directions;
+				big_b = sfm;
+			} else {
+				template_directions.matrix_join(invariant_directions, A); //creating matrix A
+				sfm.matrix_join(invariant_bound_values, big_b);
+			}
+			std::vector<double> b(big_b.size1()); //rows of big_b
+			for (int i = 0; i < big_b.size2(); i++) { //all the columns of new formed sfm
+				for (int j = 0; j < big_b.size1(); j++) { //value of all the rows
+					b[j] = big_b(j, i);
+				} //creating vector 'b'
+
+				polytope::ptr p = polytope::ptr(new polytope(A, b, 1));
+				vertices_list = p->get_2dVertices(x, y); //
+				//vertices_list = p->enumerate_2dVertices(x, y); //
+
+				// ------------- Printing the vertices on the Output File -------------
+				for (int i = 0; i < vertices_list.size1(); i++) {
+					for (int j = 0; j < vertices_list.size2(); j++) {
+						outFile << vertices_list(i, j) << " ";
+					}
+					outFile << std::endl;
+				}
+				outFile << std::endl; // 1 gap after each polytope plotted
+				// ------------- Printing the vertices on the Output File -------------
+
+			}
+		}
+		outFile.close();
+		/*
+		 * This part of code is for Plotting the Reachability Region in MatLab
+		 */
+		// ************************************************************************************************************
+		int Totaldirs;
+		std::ofstream MatLabFile_TemplateDirections,
+				MatLabFile_InvariantsDirections;
+		MatLabFile_TemplateDirections.open(
+				"/home/amit/matlabTest/ProjectOutput/DirectionsMatrix.txt");
+		MatLabFile_InvariantsDirections.open(
+				"/home/amit/matlabTest/ProjectOutput/InvariantDirectionsMatrix.txt");
+
+		//file for making matrix 'A' for MatLab output function con2vert(A,b) to be executed from plotoutput.m
+		//Need to create
+		//1) Files for SupportFunctionMatrix(ie to obtain each column for vector b) with Configurations_details
+		//2) Files for Template_Directions and Invariant_directions with Configurations_details such as (state#,nos of invariants)
+
+		//  ***************** This was Commented  ****************************
+		/*
+		 if (reach_parameters.Directions.size1()
+		 < reach_parameters.TotalDirections.size1()) {//if invariant exist. Computing
+		 Totaldirs = reach_parameters.TotalDirections.size1();
+		 std::list<template_polyhedra>::iterator it;
+		 //for (it=reachability_sfm.begin();	it !=reachability_sfm.end();it++){
+		 it = reachability_sfm.begin();//first flowpipe
+		 math::matrix<double> reach_directions;
+		 reach_directions = (*it).getAllDirections();
+		 //	cout << "Total Dirs = " << reach_directions.size1() << endl;
+		 for (int i = 0; i < Totaldirs; i++) {
+		 for (int j = 0; j < dim; j++) {
+		 MatLabfile << reach_parameters.TotalDirections(i, j) << " ";
+		 }
+		 MatLabfile << std::endl;
+		 for (unsigned int i = 0; i < reach_directions.size1(); i++) {
+		 for (unsigned int j = 0; j < reach_directions.size2(); j++) {
+		 //	MatLabfile << reach_parameters.TotalDirections(i, j) << " ";
+		 MatLabfile << reach_directions(i, j) << " ";
+		 }
+		 MatLabfile << std::endl;
+		 }
+		 } else {
+		 Totaldirs = dir_nums;
+		 for (int i = 0; i < dir_nums; i++) {
+		 for (int j = 0; j < dim; j++) {
+		 MatLabfile << reach_parameters.Directions(i, j) << " ";
+		 }
+		 MatLabfile << std::endl;
+		 }
+		 }
+		 }*/
 //  ***************** This was Commented  ****************************
-	boost::timer::cpu_timer time_file_operation;
-	time_file_operation.start(); //Started recording the MatLab File Generation time
+		boost::timer::cpu_timer time_file_operation;
+		time_file_operation.start(); //Started recording the MatLab File Generation time
 //	XXXX---------------------------------------------------------XXXXX
-	//Populating the Template_Directions :: simply copy from Template_Directions from reach_parameter structure
-	for (int i = 0; i < reach_parameters.Directions.size1(); i++) {
-		for (int j = 0; j < reach_parameters.Directions.size2(); j++) {
-			MatLabFile_TemplateDirections << reach_parameters.Directions(i, j)
-					<< " ";
+		//Populating the Template_Directions :: simply copy from Template_Directions from reach_parameter structure
+		for (int i = 0; i < reach_parameters.Directions.size1(); i++) {
+			for (int j = 0; j < reach_parameters.Directions.size2(); j++) {
+				MatLabFile_TemplateDirections
+						<< reach_parameters.Directions(i, j) << " ";
+			}
+			MatLabFile_TemplateDirections << std::endl;
 		}
-		MatLabFile_TemplateDirections << std::endl;
-	}
 //	XXXX---------------------------------------------------------XXXXX
-	//Populating the Invariants_Directions :: copying all invariants directions from the reachRegion or the reachability flow-pipe
-	//returned from the reach Algorithm in the form of template_polyhedra list.
-	//Traverse through each of the list and extract invariant_directions.
+		//Populating the Invariants_Directions :: copying all invariants directions from the reachRegion or the reachability flow-pipe
+		//returned from the reach Algorithm in the form of template_polyhedra list.
+		//Traverse through each of the list and extract invariant_directions.
 
-	std::ofstream MatLabFileConfiguration;
+		std::ofstream MatLabFileConfiguration;
 //	std::ofstream MatLabFileInvariantBoundValues;
-	MatLabFileConfiguration.open(
-			"/home/amit/matlabTest/ProjectOutput/State_Iterations_Invariants.txt");
+		MatLabFileConfiguration.open(
+				"/home/amit/matlabTest/ProjectOutput/State_Iterations_Invariants.txt");
 //	MatLabFileInvariantBoundValues.open("/home/amit/matlabTest/ProjectOutput/Invariants_BoundValue.txt");
-	int number_of_invariants = 0, inv_size = 0, state_number = 0,
-			state_iterations = 0;
+		int number_of_invariants = 0, inv_size = 0, state_number = 0,
+				state_iterations = 0;
 
 //	XXXX---------------------------------------------------------XXXXX
-	for (it = Symbolic_states_list.begin(); it != Symbolic_states_list.end();
-			it++) {
-		math::matrix<double> invariant_directions, invariant_bound_values;
-		invariant_directions =
-				(*it)->getContinuousSetptr()->getInvariantDirections(); //invariant_directions
-		invariant_bound_values =
-				(*it)->getContinuousSetptr()->getMatrix_InvariantBound(); //invariant_bound_matrix
+		for (it = Symbolic_states_list.begin();
+				it != Symbolic_states_list.end(); it++) {
+			math::matrix<double> invariant_directions, invariant_bound_values;
+			invariant_directions =
+					(*it)->getContinuousSetptr()->getInvariantDirections(); //invariant_directions
+			invariant_bound_values =
+					(*it)->getContinuousSetptr()->getMatrix_InvariantBound(); //invariant_bound_matrix
 
-		state_number++; //Each state has a Flow-pipe, (state_number begins from 1 to n)
-		state_iterations =
-				(*it)->getContinuousSetptr()->getMatrixSupportFunction().size2(); //total number of columns of SFM is iterations in each state
+			state_number++; //Each state has a Flow-pipe, (state_number begins from 1 to n)
+			state_iterations =
+					(*it)->getContinuousSetptr()->getMatrixSupportFunction().size2(); //total number of columns of SFM is iterations in each state
 
-		number_of_invariants = invariant_directions.size1(); //ASSUMING SAME NUMBER OF INVARIANTS FOR ALL LOCATIONS
+			number_of_invariants = invariant_directions.size1(); //ASSUMING SAME NUMBER OF INVARIANTS FOR ALL LOCATIONS
 
-		MatLabFileConfiguration << state_number << " " << state_iterations;
-		if (invariant_directions.size1() >= 1) { //or  invariant_directions.size1() != 0
-			/*inv_size = invariant_directions.size1(); //number of invariants of the state
-			 if (inv_size > number_of_invariants) {
-			 number_of_invariants = inv_size;
-			 }*/
-			for (unsigned int i = 0; i < invariant_directions.size1(); i++) {
-				for (unsigned int j = 0; j < invariant_directions.size2();
-						j++) {
-					MatLabFile_InvariantsDirections
-							<< invariant_directions(i, j) << " ";
-				}
-				/*for (unsigned int k = 0; k < invariant_bound_values.size2();
-				 k++) {
-				 MatLabFileInvariantBoundValues
-				 << invariant_bound_values(i, k) << " ";
+			MatLabFileConfiguration << state_number << " " << state_iterations;
+			if (invariant_directions.size1() >= 1) { //or  invariant_directions.size1() != 0
+				/*inv_size = invariant_directions.size1(); //number of invariants of the state
+				 if (inv_size > number_of_invariants) {
+				 number_of_invariants = inv_size;
 				 }*/
-				MatLabFile_InvariantsDirections << std::endl;
-				//	MatLabFileInvariantBoundValues << std::endl;
+				for (unsigned int i = 0; i < invariant_directions.size1();
+						i++) {
+					for (unsigned int j = 0; j < invariant_directions.size2();
+							j++) {
+						MatLabFile_InvariantsDirections
+								<< invariant_directions(i, j) << " ";
+					}
+					/*for (unsigned int k = 0; k < invariant_bound_values.size2();
+					 k++) {
+					 MatLabFileInvariantBoundValues
+					 << invariant_bound_values(i, k) << " ";
+					 }*/
+					MatLabFile_InvariantsDirections << std::endl;
+					//	MatLabFileInvariantBoundValues << std::endl;
+				}
 			}
+			MatLabFileConfiguration << " " << number_of_invariants << std::endl;
 		}
-		MatLabFileConfiguration << " " << number_of_invariants << std::endl;
-	}
 //	XXXX---------------------------------------------------------XXXXX
 
-	MatLabFileConfiguration.close();
-	MatLabFile_InvariantsDirections.close();
+		MatLabFileConfiguration.close();
+		MatLabFile_InvariantsDirections.close();
 //	MatLabFileInvariantBoundValues.close();
-	MatLabFile_TemplateDirections.close();
-	std::list<symbolic_states::ptr>::iterator i_sfm;
-	std::ofstream MatLabFileSupportFunctionMatrix;
-	Totaldirs = reach_parameters.Directions.size1(); // + number_of_invariants;	//if no invariants Totaldirs = dir_nums
-	MatLabFileSupportFunctionMatrix.open(
-			"/home/amit/matlabTest/ProjectOutput/SupportFunctionMatrix.txt");
+		MatLabFile_TemplateDirections.close();
+		std::list<symbolic_states::ptr>::iterator i_sfm;
+		std::ofstream MatLabFileSupportFunctionMatrix;
+		Totaldirs = reach_parameters.Directions.size1(); // + number_of_invariants;	//if no invariants Totaldirs = dir_nums
+		MatLabFileSupportFunctionMatrix.open(
+				"/home/amit/matlabTest/ProjectOutput/SupportFunctionMatrix.txt");
 
 //	XXXX---------------------------------------------------------XXXXX
-	//Only SupportFunctionMatrix of FlowPipe
+		//Only SupportFunctionMatrix of FlowPipe
 
-	for (int i = 0; i < Totaldirs; i++) { //i==row_number
-		for (i_sfm = Symbolic_states_list.begin();
-				i_sfm != Symbolic_states_list.end(); i_sfm++) {
-			//Each sysmbolic_state or each Location
-			for (unsigned int k = 0;
-					k
-							< (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction().size2();
-					k++) { //k==col_number
-				MatLabFileSupportFunctionMatrix
-						<< (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction()(
-								i, k) << " ";
+		for (int i = 0; i < Totaldirs; i++) { //i==row_number
+			for (i_sfm = Symbolic_states_list.begin();
+					i_sfm != Symbolic_states_list.end(); i_sfm++) {
+				//Each sysmbolic_state or each Location
+				for (unsigned int k = 0;
+						k
+								< (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction().size2();
+						k++) { //k==col_number
+					MatLabFileSupportFunctionMatrix
+							<< (*i_sfm)->getContinuousSetptr()->getMatrixSupportFunction()(
+									i, k) << " ";
+				}
 			}
+			MatLabFileSupportFunctionMatrix << endl;
 		}
-		MatLabFileSupportFunctionMatrix << endl;
-	}
 //	XXXX---------------------------------------------------------XXXXX
 
 //	XXXX---------------------------------------------------------XXXXX
 
-	typedef std::vector<std::pair<double, double> > Intervals;
-
+		typedef std::vector<std::pair<double, double> > Intervals;
 
 		std::list<std::pair<int, Intervals> > location_interval_outputs;
 		//cout<<"Printing TotalDirs = "<<Totaldirs<<"\n";
@@ -1178,7 +1281,6 @@ int main(int argc, char *argv[]) {
 		 }*/
 
 //	XXXX---------------------------------------------------------XXXXX
-
 //	XXXX---------------------------------------------------------XXXXX
 //Now adding invariantBoundMatrix of Flowpipe into the file
 //ASSUMING SAME NUMBER OF INVARIANTS FOR ALL LOCATIONS
@@ -1200,7 +1302,6 @@ int main(int argc, char *argv[]) {
 		MatLabFileSupportFunctionMatrix.close();
 
 //	cout<<"\nTesting 6c\n";
-
 
 		time_file_operation.stop();
 		double wall_clock_file_operation, user_clock_file_operation,
@@ -1225,26 +1326,27 @@ int main(int argc, char *argv[]) {
 
 	if (ce != NULL) {
 		cout << "******** Saftey Property Violated ********\n";
-		std::list<abstract_symbolic_state::const_ptr> ce_sym_states;
-		std::list<transition::ptr> ce_transitions;
-		ce_sym_states = ce->get_CE_sym_states();
-		ce_transitions = ce->get_CE_transitions();
+		std::list<abstract_symbolic_state::ptr> list_sym_states;
+		std::list<transition::ptr> list_transition;
+		list_sym_states = ce->get_CE_sym_states();
+		list_transition = ce->get_CE_transitions();
 
+		std::list<abstract_symbolic_state::ptr>::iterator it_sym_state;
 		std::list<transition::ptr>::iterator it_trans;
+		discrete_set ds;
 		unsigned int locationID;
 		cout << "(Location ID, Transition ID)\n";
 		std::vector<int> transID(ce->get_length());	//making a vector of transition_ID so it can be printed
-		unsigned int index = 0;
+		int index = 0;
 		//cout << "Length = " << ce->get_length() << "\n";
-		for (it_trans = ce_transitions.begin();
-				it_trans != ce_transitions.end(); it_trans++) {
+		for (it_trans = list_transition.begin();
+				it_trans != list_transition.end(); it_trans++) {
 			transID[index] = (*it_trans)->getTransitionId();
 			index++;
 			//cout << "Trans_ID = " << (*it_trans)->getTransitionId() << "\n";
 		}
 		index = 0;
 		cout << "  *****Starts***** \n";
-
 		for (it_sym_state = list_sym_states.begin();
 				it_sym_state != list_sym_states.end(); it_sym_state++) {
 
@@ -1260,6 +1362,7 @@ int main(int argc, char *argv[]) {
 			index++;
 		}
 		cout << "  *****Ends*****\n";
+		ce->plot(output_var_X,output_var_Y);
 
 
 		std::ofstream tracefile;
@@ -1291,6 +1394,10 @@ int main(int argc, char *argv[]) {
 		cout << "******** Does NOT Violate Safety Property ********\n";
 	}
 
-	cout << "\n******** Summary of XSpeed Reporting ********\n";
+	cout << "\n******** Summary of XSpeed ********\n";
+
 	return 0; //returning only the Wall time taken to execute the Hybrid System
 }
+
+// ************************************************************************************************************
+
