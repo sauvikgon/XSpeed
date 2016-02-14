@@ -135,41 +135,9 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 			reach_parameters.B_trans = B_trans;
 		}
 
-		//--------------------------
-
-		/*		// ***** ********************* ********************* ********************* ********************* *********************
-		 // *****   this part will be needed Only if we executed our new ImprovedReachSequentialwithDelete algorithm ***
-		 // ***** this part is also used to perform parallel algorithm for Iterations by partition
-		 // *****  this part should be done after 	reach_parameters.phi_trans is computed
-		 std::vector<D> NewDirections;//all directions for Improved Algorithm with Structure_variables : flag,Row and Col
-		 unsigned int total_Iterated_Direction;
-		 total_Iterated_Direction = reach_parameters.Directions.size1()
-		 * reach_parameters.Iterations;
-		 NewDirections.resize(total_Iterated_Direction);
-		 NewDirections = get_directions(reach_parameters);//requires only directions,iterations,matrix_A
-
-		 reach_parameters.AdvanceTransposeDirection = NewDirections;
-
-		 */
-//		std::cout<<"Invariant matrix \n"<<current_location.getInvariant()->getCoeffMatrix()<<"\n";
-		/*for (int i=0;i<reach_parameters.Directions.size1();i++)
-		 {
-		 for (int j=0;j<reach_parameters.Iterations;j++)
-		 {
-		 std::cout<<"Each Direction :";
-		 int pos = i * reach_parameters.Iterations + j;
-		 std::cout<<"(";
-		 for (int d=0;d<reach_parameters.Directions.size2();d++)
-		 std::cout<<reach_parameters.AdvanceTransposeDirection[pos].v[d]<<",";
-		 //std::cout<<NewDirections[pos].v[d]<<",";
-		 std::cout<<")";
-		 }
-		 std::cout<<"\n";
-		 }*/
 		// ***** ********************* ********************* ********************* ********************* *********************
 		// ******************* Computing Parameters *******************************
-		//	for (int number_times = 1; number_times <= bound; number_times++) {	//Bound for loop in Hybrid AutomataGeneratePolytopePlotter(continuous_initial_polytope);
-//GeneratePolytopePlotter(continuous_initial_polytope);
+
 		if (Algorithm_Type == SEQ) { //Continuous Sequential Algorithm
 			cout << "\nRunning Sequntial\n";
 			//		std::cout<<"\nBefore entering reachability Sequential = " << gurobi_lp_solver::gurobi_lp_count;
@@ -375,8 +343,8 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 			//so perform intersection with forbidden set provided locID matches
 			for (std::set<std::pair<int, polytope::ptr> >::iterator it =
 					forbidden_set.begin(); it != forbidden_set.end(); it++) {
-				int forbid_locID = current_location.getLocId();
-				if (forbid_locID == (*it).first) { //forbidden locID matches
+				int locID = current_location.getLocId();
+				if (locID == (*it).first) { //forbidden locID matches
 					polytope::ptr forbid_poly = (*it).second;
 					//check intersection with flowpipe/reach_region
 					//GeneratePolytopePlotter(forbid_poly);
@@ -385,27 +353,25 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							forbid_poly, lp_solver_type_choosen);
 
 					if (forbid_intersects.size() == 0) {
-						std::cout<< "\nThe model does NOT violates SAFETY property!!!\n";
+						std::cout<< "\nNo Violation of SAFETY in loc id:" << locID << std::endl;
 					} else {
-						std::cout<< "\nThe model violates SAFETY property!!!\n";
+						std::cout<< "\nViolation of SAFETY in loc id:" << locID << std::endl;
 
 						symbolic_states::ptr current_forbidden_state;
 						current_forbidden_state = S;
-						// Here create a new abstract_symbolic_state
-						abstract_symbolic_state::ptr curr_abs_sym_state;
-						curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
-
-
-
 
 						std::cout << "\nReverse Path Trace =>\n";
 						int cc = 0;
 						do {
+							// Here create a new abstract_symbolic_state
+							abstract_symbolic_state::ptr curr_abs_sym_state;
+							curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
+
 							int locationID, locationID2;
 							discrete_set ds, ds2;
 							ds = current_forbidden_state->getDiscreteSet();
 							//insert discrete_set in the abstract_symbolic_state
-							curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+							curr_abs_sym_state->setDiscreteSet(ds);
 
 		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
@@ -438,7 +404,8 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							std::cout << "(" << locationID << ", " << transID << ")";
 							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
 								//cout<<"check if parentPtr not NULL\n";
-								current_forbidden_state = searchSymbolic_state(Reachability_Region,
+								current_forbidden_state =
+										searchSymbolic_state(Reachability_Region,
 												current_forbidden_state->getParentPtrSymbolicState());	//b)
 			//2) ******************* list_transitions ********************
 								ds2 = current_forbidden_state->getDiscreteSet();	//c)
@@ -461,7 +428,9 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 							discrete_set ds;
 							ds = current_forbidden_state->getDiscreteSet();
 
-							curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+							abstract_symbolic_state::ptr curr_abs_sym_state =
+									abstract_symbolic_state::ptr(new abstract_symbolic_state());
+							curr_abs_sym_state->setDiscreteSet(ds);
 							Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
 							curr_abs_sym_state->setContinuousSet(Conti_Set);
 
@@ -493,10 +462,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 
 		//  ************** Check to see if Computed FlowPipe is Empty  **********
 		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) { //computed reach_region is empty && optimize transition BreadthLevel-wise
-		/*	polytope::ptr test = polytope::ptr(	new polytope(reach_region.getPolytope(61).getCoeffMatrix(),
-		 reach_region.getPolytope(61).getColumnVector(), 1));
-		 GeneratePolytopePlotter(test);	 */
-			//	cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
+
 			for (std::list<transition::ptr>::iterator t =
 					current_location.getOut_Going_Transitions().begin();
 					t != current_location.getOut_Going_Transitions().end();
@@ -527,8 +493,6 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 				current_assignment = (*t)->getAssignT();
 
-				//	std::cout << "Before calling Templet_polys\n";
-				//cout<<reach_region.getMatrixSupportFunction().size2()<<"AmitJi\n";
 				//this intersected_polyhedra will have invariant direction added in it
 				string trans_name = (*t)->getLabel(); //	cout<<"Trans Name = "<<trans_name<<endl;
 

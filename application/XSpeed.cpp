@@ -928,72 +928,16 @@ int main(int argc, char *argv[]) {
 				return 0;
 			}
 		}
-		/*if (vm.count("number-of-readings")) {
-		 int avg = vm["number-of-readings"].as<int>();	//by default 1
-		 if (avg >= 1) {
-		 number_of_times = avg;
-		 } else {	//for 0 or negative number-of-readings
-		 std::cout << "Invalid number-of-readings option specified\n";
-		 return 0;
-		 }
-		 }*/
 
 		if (vm.count("pbfs")) {
 			DiscreteAlgorithm = 12; //parallel Breadth First Search
 			//std::cout<< "Running Reachability Analysis with parallel Breadth First Search using Multi-core acceleration\n";
 		}
 
-		/*if (argc != 12) { //1(ApplicationName) + 10 (Input Arguments)
-		 std::cout << "\nInsufficient Number of Arguments!!!\n";
-		 std::cout << "Correct Usages/Syntax:\n";
-		 std::cout<< "./XspaceEx Model_Type Directions_Type_Size Iterations_Size Time_Bound Transition_Size Algorithm_Type Total_Partition Total_GPU_Streams Averaging Solver_GLPK_Gurobi_GPU Discrete_Algorithm\n";
-		 std::cout<< "\n1. Model_Type :(1,2,3,4,5,6) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE)\n";
-		 std::cout<< "\n2. Directions_Type_Size :(1,2,>2) = (BOX, OCT, UNIFORM)\n";
-		 std::cout<< "\n3. Iterations_Size :Number of iterations per Location of the Hybrid system\n";
-		 std::cout<< "\n4. Time_Bound :Total Time Bound for Computation\n";
-		 std::cout<< "\n5. Transition_Size :Number of jumps or transitions of the Hybrid system\n";
-		 std::cout<< "\n6. Algorithm_Type :(1,2,3,4) = (SEQ, PAR_OMP, PAR_PROCESS, PAR_ITER)\n";
-		 std::cout<< "\n7. Total_Partition :Total number of partitions required for Parallel_Iteration_Algorithm\n";
-		 std::cout<< "\n8. Total_GPU_Streams :Total number of GPU Streams or partitions\n";
-		 std::cout<< "\n9. Averaging :Total number of times you want to run the algorithm to average the readings\n";
-		 std::cout<< "\n10. Solver_GLPK_Gurobi_GPU :If Algorithm==11 then (Solver = 1 for GLPK; = 2 for Gurobi; = 3 for GPU)\n";
-		 std::cout<< "\n11. Discrete_Algorithm: 12 for Parallel BFS for Discrete Jumps, otherwise sequential\n";
-		 std::cout << endl;
-		 return 0;
-		 } else {
-		 unsigned int num;
-		 num = boost::lexical_cast<unsigned int>(argv[1]);
-		 model_type = num;
-		 directions_type_or_size = boost::lexical_cast<unsigned int>(
-		 argv[2]);
-		 iterations_size = boost::lexical_cast<unsigned int>(argv[3]);
-		 double val = boost::lexical_cast<double>(argv[4]);
-		 time_bound = val;
-		 transition_size = boost::lexical_cast<unsigned int>(argv[5]);
-		 Algorithm_Type = boost::lexical_cast<unsigned int>(argv[6]);
-		 Total_Partition = boost::lexical_cast<unsigned int>(argv[7]);
-		 number_of_streams = boost::lexical_cast<unsigned int>(argv[8]);
-		 number_of_times = boost::lexical_cast<unsigned int>(argv[9]);
-		 Solver_GLPK_Gurobi_GPU = boost::lexical_cast<unsigned int>(
-		 argv[10]);
-		 DiscreteAlgorithm = boost::lexical_cast<unsigned int>(argv[11]);
-		 }*/
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
-	/*	if (hey == 1) {
-	 user_model(Hybrid_Automata, initial_symbolic_states, reach_parameters,
-	 transition_iterations);
-	 // --------- Setting configuration parameters ---------
-	 time_bound = reach_parameters.TimeBound;
-	 iterations_size = reach_parameters.Iterations;
-	 //	model_type = 0; //set to default
-	 //	directions_type_or_size = 0;	//set to default
-	 transition_size = transition_iterations;
-	 // --------- Setting configuration parameters ---------
-	 }*/
 	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
-			transition_size); //Initialising the variables
-//	cout<<"Initialisation of reachability problem complete\n";
+			transition_size);
 
 	//std::list<template_polyhedra> reachability_sfm;
 	std::list<symbolic_states::ptr> Symbolic_states_list;
@@ -1001,13 +945,10 @@ int main(int argc, char *argv[]) {
 //to be changed into a single variable instead of list.
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
-//	long total_mem_used=0;
 	boost::timer::cpu_timer tt1;
 	number_of_times = 2;
 	for (int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		tt1.start();
-//cout<<"\nTesting 3\n";
-		//cout<<"\n Before reach call\n";
 		if (DiscreteAlgorithm != PBFS) { //Sequential Search implemented for Discrete Jumps
 			std::cout << "\nRunning Sequential BFS\n";
 			Symbolic_states_list = reach(Hybrid_Automata, init_state,
@@ -1021,7 +962,6 @@ int main(int argc, char *argv[]) {
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
 					Solver_GLPK_Gurobi_GPU, forbidden_set, ce);
 		}
-//cout<<"\nTesting 4\n";
 		tt1.stop();
 
 		double wall_clock, user_clock, system_clock;
@@ -1091,21 +1031,9 @@ int main(int argc, char *argv[]) {
 		cout << endl << "Number of Vectors = "
 				<< reach_parameters.Directions.size1();
 		cout << endl << "Number of Iteration = " << iterations_size << endl;
-	} //endif of argc == 1
-	  //cout << endl << "Working here 1\n";
-//	cout << endl << "Memory Usages = " << total_mem_used / number_of_times << " KB\n";
+	}
 
-/*
-	int ploter = 0;
-	if (ploter == 1) { //choosing SpaceEx ploter
-		plot_output(Symbolic_states_list);
-		//SpaceEx_plotter();
-	} else { //Plotting using MatLab with our temporary matlab code
-*/
-
-		//cout << endl << "Working here 11\n";
 		std::list<symbolic_states::ptr>::iterator it;
-		//cout << endl << "Working here 112\n";
 		/*
 		 * Generating Vertices as output which can be plotted using gnuplot utilites
 		 */
@@ -1434,38 +1362,13 @@ int main(int argc, char *argv[]) {
 			index++;
 		}
 		cout << "  *****Ends*****\n";
-
-
-		std::ofstream tracefile;
-		tracefile.open("./ceTrace.o");
-		math::matrix<double> vertices_list;
-		std::list<abstract_symbolic_state::ptr>::iterator it;
-		for (it = list_sym_states.begin(); it != list_sym_states.end(); it++) {
-
-			/*std::cout <<(*it)->getContinuousSet()->getCoeffMatrix()<<std::endl;
-			std::vector<double> bb;
-			bb = (*it)->getContinuousSet()->getColumnVector();
-			for (int i=0;i<bb.size();i++){
-				cout<<bb[i]<< "\t";
-			}*/
-			vertices_list = (*it)->getContinuousSet()->get_2dVertices(x, y);
-			// ------------- Printing the vertices on the Output File -------------
-			for (unsigned int p = 0; p < vertices_list.size1(); p++) {
-				for (unsigned int q = 0; q < vertices_list.size2(); q++) {
-					tracefile << vertices_list(p, q) << " ";
-				}
-				tracefile << std::endl;
-			}
-			tracefile << std::endl; // 1 gap after each polytope plotted
-		}
-		tracefile.close();
-
+		ce->plot(output_var_X,output_var_Y);
 
 	} else {
-		cout << "******** Does NOT Violate Saftey Property ********\n";
+		cout << "******** Does NOT Violate Safety Property ********\n";
 	}
 
-	cout << "\n******** Summary of XSpeed Reporting ********\n";
+	cout << "\n******** Summary of XSpeed ********\n";
 	return 0; //returning only the Wall time taken to execute the Hybrid System
 }
 

@@ -40,7 +40,7 @@ void abstractCE::plot(unsigned int i, unsigned int j) {
 	math::matrix<double> vertices_list;
 	std::list<abstract_symbolic_state::ptr>::iterator it;
 	for (it = sym_states.begin(); it != sym_states.end(); it++) {
-		vertices_list = (*it)->getContinuousSet()->get_2dVertices(i-1, j-1);
+		vertices_list = (*it)->getContinuousSet()->get_2dVertices(i, j);
 		// ------------- Printing the vertices on the Output File -------------
 		for (unsigned int p = 0; p < vertices_list.size1(); p++) {
 			for (unsigned int q = 0; q < vertices_list.size2(); q++) {
@@ -143,7 +143,8 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
  */
 concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 
-	/* Generate an nlopt object with the constraints defined by the Abstract counter example
+	/* Generate an nlopt object with the constraints defined by the Abstract
+	 * counter example
 	 */
 
 	/* 1. Get the dimensionality of the optimization problem by

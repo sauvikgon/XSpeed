@@ -276,7 +276,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			discrete_state.insert_element(location_id);
 			continuous_initial_polytope = U->getInitialSet();
 			reach_parameter_local = reach_parameters;
-			reach_parameter_local.X0 = continuous_initial_polytope; //	cout<<"\nInside for Loop";
+			reach_parameter_local.X0 = continuous_initial_polytope;
 //create an instance of Symbolic_states S
 			S[id] = symbolic_states::ptr(new symbolic_states());
 
@@ -284,12 +284,6 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			S[id]->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-			/*
-			 for (std::set<int>::iterator it =
-			 discrete_state.getDiscreteElements().begin();
-			 it != discrete_state.getDiscreteElements().end(); ++it)
-			 location_id = (*it); //have to modify later for multiple elements of the set:: Now assumed only one element
-			 */
 			location current_location;
 			current_location = H.getLocation(location_id);
 			string name = current_location.getName();
