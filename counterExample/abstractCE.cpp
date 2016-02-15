@@ -204,9 +204,9 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 	 * We assume that the time variable is names as 't' in the model.
 	 * We find out the min,max components of the time variable
 	 */
-//	unsigned int t_index =
-//			get_first_symbolic_state()->getContinuousSet()->get_index("t");
-	unsigned int t_index=3; //manually assigned time dimension 3 for the time being
+	unsigned int t_index =
+		get_first_symbolic_state()->getContinuousSet()->get_index("t");
+
 	assert(t_index >= 0 & t_index < dim);
 
 	std::vector<double> dmin(dim, 0), dmax(dim, 0);

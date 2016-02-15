@@ -132,6 +132,14 @@ public:
 
 	math::matrix<double> get_2dVertices(int i, int j);
 
+	/**
+	 * Computes the distance of a point from the polytope.
+	 * If the point is inside the polytope, a 0 distance
+	 * is returned. Otherwise, the signed distance from the
+	 * polytope is returned.
+	 */
+	double point_distance(std::vector<double> v);
+
 };
 
 #endif /* POLYTOPE_H_ */

@@ -15,7 +15,7 @@
 
 using namespace std;
 
-class hybrid_automata {
+class hybrid_automata : public var_to_index_map {
 	//std::list<location> list_locations;
 	std::map<int, location> list_locations;		//mapping a list of locations based on the key=loc_id
 	location initial_loc;

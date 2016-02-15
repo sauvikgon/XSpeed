@@ -424,4 +424,8 @@ math::matrix<double> polytope::get_2dVertices(int i, int j){
 	return my_vertices;
 }
 
+double polytope::point_distance(std::vector<double> v){
+	return 0;
+}
+
 #endif /* POLYTOPE_CPP_ */
