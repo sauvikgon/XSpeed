@@ -31,10 +31,11 @@ class simulation {
 	 */
 	unsigned int dimension;
 	Dynamics D;
-	realtype reltol;
-	realtype abstol;
+	double reltol;
+	double abstol;
 
 public:
+	typedef boost::shared_ptr<simulation> ptr;
 	simulation();
 	simulation(unsigned int dim, unsigned int samples, Dynamics Dyn, double rel_tol=1e-6, double abs_tol=1e-8){
 		dimension = dim;

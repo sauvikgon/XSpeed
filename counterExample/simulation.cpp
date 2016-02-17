@@ -5,8 +5,9 @@
  *      Author: rajarshi
  */
 
-#include <counterExample/simulation.h>
+#include "counterExample/simulation.h"
 #include "core_system/continuous/Polytope/Polytope.h"
+#include <fstream>
 
 simulation::simulation() {
 	// TODO Auto-generated constructor stub
@@ -24,35 +25,39 @@ static int check_flag(void *flagvalue, char *funcname, int opt);
 static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data)
 {
 	Dynamics* D = (Dynamics *)(f_data);
-	math::matrix<double> A = D->MatrixA;
-	math::vector<double> C = D->C;
+	math::matrix<double> A(D->MatrixA);
+	math::vector<double> C(A.size1());
 
 	assert(A.size1() == A.size2());
+	C = D->C;
 
-
+	double sum;
 	// Input set not included in the dynamics.
 
 	for(unsigned int i=0;i<A.size1();i++){
-		NV_Ith_S(ydot,i) = 0;
+		sum=0;
 		for(unsigned int j=0;j<A.size2();j++){
-			NV_Ith_S(ydot,i) += A(i,j)*NV_Ith_S(y,j);
+			sum += A(i,j)*NV_Ith_S(y,j);
 		}
-		NV_Ith_S(ydot,i) += C[i];
+		NV_Ith_S(ydot,i) = sum + C[i];
 	}
 	return 0;
 }
+
 std::vector<double> simulation::simulate(std::vector<double> x, double time)
 {
 	int flag;
 	realtype T0 = 0;
 	realtype Tfinal = time;
-	realtype t;
+	realtype t=0;
+	Dynamics *data = &D;
+
 
 	N_Vector y = NULL;
 	N_Vector u = NULL;
 
-	y = N_VNew_Serial(dimension);
 	u = N_VNew_Serial(dimension);
+
 	for(unsigned int i=0;i<dimension;i++)
 		NV_Ith_S(u,i) = x[i];
 
@@ -68,6 +73,8 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 		throw std::runtime_error("CVODE failed\n");
 	}
 
+	/** Input user data */
+	CVodeSetUserData(cvode_mem, (void *)data);
 	/* Call CVodeInit to initialize the integrator memory and specify the
 	* user's right hand side function in u'=f(t,u), the inital time T0, and
 	* the initial dependent variable vector u. */
@@ -75,6 +82,12 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	flag = CVodeInit(cvode_mem, f, T0, u);
 
 	if(check_flag(&flag, "CVodeInit", 1)){
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	flag = CVDense(cvode_mem, dimension);
+	if (check_flag(&flag, "CVDense", 1))
+	{
 		throw std::runtime_error("CVODE failed\n");
 	}
 
@@ -88,19 +101,26 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	/* In loop over output points: call CVode, print results, test for errors */
 
-//	double distance=0.0;
+	// double distance=0.0;
 
+	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
+
+//	std::ofstream myfile;
+//	myfile.open("./sim_trace.o");
 	for(unsigned int k=1;k<N;k++) {
 		double tout = k*(Tfinal/N);
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 		if(check_flag(&flag, "CVode", 1)) break;
+//		myfile << NV_Ith_S(u,0) << "  " << NV_Ith_S(u,4);
 	}
-	std::vector<double> res;
+//	myfile.close();
+
+	std::vector<double> res(dimension);
 	for(unsigned int i=0;i<dimension;i++)
 	{
-		res[i] = NV_Ith_S(y,i);
+		res[i] = NV_Ith_S(u,i);
 	}
-	N_VDestroy_Serial(y); /* Free y vector */
+	N_VDestroy_Serial(u); /* Free y vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
 
 	return res;
