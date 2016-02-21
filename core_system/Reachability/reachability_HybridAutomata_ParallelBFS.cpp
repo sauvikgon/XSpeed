@@ -394,7 +394,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 						newPolytope =
 								intersectedRegion->GetPolytope_Intersection(
 										gaurd_polytope); //Retuns only the intersected region as a single newpolytope. ****** with added directions
-						//std::cout << "Before calling post_assign_exact\n";
+
 						newShiftedPolytope = post_assign_exact(newPolytope,
 								current_assignment.Map, current_assignment.b); //initial_polytope_I = post_assign_exact(newPolytope, R, w);
 
@@ -440,7 +440,8 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 			std::list<symbolic_states::ptr> list_sym_states;
 
 			std::list<abstract_symbolic_state::ptr> list_abstract_sym_states;
-			polytope::ptr Conti_Set;	//bounding_box Polytope
+			polytope::ptr abs_flowpipe;	//bounding_box Polytope
+			polytope::ptr polyI; // initial polytope of the abstract flowpipe.
 
 			std::list<transition::ptr> list_transitions;
 
@@ -478,11 +479,6 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 							symbolic_states::ptr current_forbidden_state;
 							current_forbidden_state = S[index];
 
-							// Here create a new abstract_symbolic_state
-							abstract_symbolic_state::ptr curr_abs_sym_state;
-							curr_abs_sym_state = abstract_symbolic_state::ptr(
-									new abstract_symbolic_state());
-
 							std::cout << "\nReverse Path Trace =>\n";
 							int cc = 0;
 							do {
@@ -490,16 +486,14 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 								discrete_set ds, ds2;
 								ds = current_forbidden_state->getDiscreteSet();
 
-								//insert discrete_set in the abstract_symbolic_state
-								curr_abs_sym_state->setDiscreteSet(
-										current_forbidden_state->getDiscreteSet());
-
-								// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
-
-								Conti_Set =
+								abs_flowpipe =
 										convertBounding_Box(
 												current_forbidden_state->getContinuousSetptr());
-								curr_abs_sym_state->setContinuousSet(Conti_Set);
+								polyI = current_forbidden_state->getInitial_ContinousSetptr();
+								// Here create a new abstract_symbolic_state
+								abstract_symbolic_state::ptr curr_abs_sym_state = abstract_symbolic_state::ptr(
+																	new abstract_symbolic_state(ds,abs_flowpipe,polyI));
+
 								// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
 								for (std::set<int>::iterator it =
@@ -557,23 +551,25 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 							if ((cc >= 1)
 									&& (current_forbidden_state->getParentPtrSymbolicState()
 											== NULL)) { //root is missed
-								int locationID;
-								discrete_set ds;
+								int locationID, locationID2;
+								discrete_set ds, ds2;
 								ds = current_forbidden_state->getDiscreteSet();
 
-								curr_abs_sym_state->setDiscreteSet(
-										current_forbidden_state->getDiscreteSet());
-								Conti_Set =
+								abs_flowpipe =
 										convertBounding_Box(
 												current_forbidden_state->getContinuousSetptr());
-								curr_abs_sym_state->setContinuousSet(Conti_Set);
+								polyI = current_forbidden_state->getInitial_ContinousSetptr();
+								// Here create a new abstract_symbolic_state
+								abstract_symbolic_state::ptr curr_abs_sym_state = abstract_symbolic_state::ptr(
+																	new abstract_symbolic_state(ds,abs_flowpipe,polyI));
+
+								// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
 								for (std::set<int>::iterator it =
 										ds.getDiscreteElements().begin();
 										it != ds.getDiscreteElements().end();
 										++it)
-									locationID = (*it); //Assuming only a single element exist in the discrete_set
-
+								locationID = (*it); //Assuming only a single element exist in the discrete_set
 								int transID =
 										current_forbidden_state->getTransitionId();
 								list_sym_states.push_front(
@@ -585,6 +581,7 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 										<< transID << ")\n";
 
 							}
+							/*
 							saftey_violated = true;
 							ce = abstractCE::ptr(new abstractCE());
 							ce->set_length(cc);
@@ -592,6 +589,8 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 							ce->set_sym_states(list_abstract_sym_states);
 
 							ce->set_transitions(list_transitions);
+							hybrid_automata::ptr h = hybrid_automata::ptr(new hybrid_automata(H));
+							ce->set_automaton(h);*/
 							break;
 						}
 					}

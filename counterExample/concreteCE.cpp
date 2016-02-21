@@ -34,3 +34,25 @@ const concreteCE::trans_id concreteCE::getTransitionId(unsigned int i) const {
 	}
 	return *it;
 }
+void concreteCE::plot_ce(std::string filename)
+{
+	traj_segment seg;
+	unsigned int locId;
+	sample simulation_sample;
+	simulation::ptr sim;
+	std::cout << "Inside concrete trace plotter, no. of trajectory segs:" << T.size() << std::endl;
+	unsigned int num_samples = 1000;
+	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
+		seg = *it;
+		locId = seg.first;
+		simulation_sample = seg.second;
+		sim = simulation::ptr(new simulation(simulation_sample.first.size(),num_samples,ha->getLocation(locId).getSystem_Dynamics()));
+		sim->set_outfile(filename);
+		sim->set_out_dimension(2,0);
+		std::cout << "simulation: first:" << simulation_sample.second;
+		for(unsigned int i=0;i<sim->get_system_dimension();i++)
+			std::cout << simulation_sample.first[i] << " ";
+		std::cout << "simulation: second:" << simulation_sample.second;
+		sim->simulate(simulation_sample.first, simulation_sample.second);
+	}
+}

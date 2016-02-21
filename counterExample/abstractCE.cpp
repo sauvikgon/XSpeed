@@ -6,10 +6,14 @@
  */
 
 #include "counterExample/abstractCE.h"
+#include "counterExample/simulation.h"
+#include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include <fstream>
 
 unsigned int dim;
 unsigned int N;
+hybrid_automata::ptr HA;
+std::vector<int> locIdList;
 
 const abstract_symbolic_state::ptr abstractCE::get_first_symbolic_state() const
 {
@@ -28,8 +32,10 @@ abstract_symbolic_state::ptr abstractCE::get_symbolic_state(
 	unsigned int j = 0;
 	std::list<abstract_symbolic_state::ptr>::const_iterator it =
 			sym_states.begin();
-	while (j < i)
+	while (j < i){
 		it++;
+		j++;
+	}
 	return *it;
 }
 
@@ -54,21 +60,25 @@ void abstractCE::plot(unsigned int i, unsigned int j) {
 	/**end of tracefile generation */
 }
 std::vector<double> simulate_trajectory(const std::vector<double>& x0,
-		const double& time) {
+		Dynamics& D, const double& time) {
 	/**
 	 * This function is to simulate trajectory from x0 for time units.
 	 * todo: current dummy implementation to be completed
 	 */
 
+	simulation::ptr s = simulation::ptr(new simulation(x0.size(),1000,D));
 	std::vector<double> y(x0.size(), 0);
+	y = s->simulate(x0, time);
 	return y;
 }
 
 double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		void *my_func_data) {
 	if (!grad.empty()) {
-		grad[0] = 0.0;
-		grad[1] = 0.5 / sqrt(x[1]);
+	/*	for(unsigned int i=0;i<(N-1)*dim;i++)
+			grad[i] = 2 * (x[i] - x[i+dim]);
+		for(unsigned int i=N*dim;i<N;i++)
+			grad[i] = 0; */
 	}
 	/**
 	 * 1. Get the N start vectors and dwell times from x and call the simulation routine
@@ -76,32 +86,38 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	 * 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
 	 */
 	double sum = 0; // Stores the sum of all Euclidean distances of the end points.
-	std::vector<std::vector<double> > y(N);
+	std::vector<double> y(dim,0);
 
-	for (unsigned int i = 0; i < N; i++) {
+	for (unsigned int i = 0; i < N-1; i++) {
 		std::vector<double> v(dim, 0);
 		for (unsigned int j = 0; j < dim; j++) {
 			v[j] = x[i * dim + j];
 		}
 		try{
-			y[i] = simulate_trajectory(v, N * dim + i);
+			int loc_index = locIdList[i];
+			y = simulate_trajectory(v, HA->getLocation(loc_index).getSystem_Dynamics(), N * dim + i);
+			// todo: assignment mapping to be done later.
+
 		}catch(std::exception& e)
 		{
 			// check if violation of invariant/abstract CE exception thrown
-			for(unsigned int j=0;j<dim;j++){
-				y[i][j] = std::numeric_limits<double>::max();
+			//for(unsigned int j=0;j<dim;j++){
+			//	y = std::numeric_limits<double>::max();
 				// Adds a high penalty to the objective function
-			}
 		}
-	}
-	//Calculate Euclidean distances
-	for (unsigned int i = 0; i < N - 1; i++) {
+		std::vector<double> next_start(dim,0); // current jump start point
+		for(unsigned int j=0;j<dim;j++)
+			next_start[j]=x[(i+1)*dim + j];
+		//compute the euclidean distance between the next start point and the simulated end point
 		double sq_sum = 0;
-		for (unsigned int j = 0; j < dim; j++) {
-			sq_sum += (y[i][j] - y[i + 1][j]) * (y[i][j] - y[i + 1][j]);
+		for (unsigned int i = 0; i < dim; i++) {
+			sq_sum += (y[i] - next_start[i]) * (y[i] - next_start[i]);
 		}
 		sum += math::sqrt(sq_sum);
 	}
+	//Calculate Euclidean distances
+	// get the next point after jump in vector t;
+	std::cout << "current sum = " << sum << std::endl;
 	return sum;
 }
 
@@ -114,6 +130,11 @@ struct polyConstraints {
 	unsigned int row_index;
 };
 
+struct boundConstriant{
+	double bound;
+	unsigned int var_index;
+	bool is_ge; // to mark if bound is a >= constraint
+};
 double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 		void *data) {
 	polyConstraints *d = reinterpret_cast<polyConstraints *>(data);
@@ -122,6 +143,11 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 
 	if (!grad.empty()) {
 		// todo: gradient to be added later
+/*		for(unsigned int i=0;i<x.size();i++){
+			grad[i] = 0 ;
+		}
+		for(unsigned int j=0;j<dim;j++)
+			grad[i*dim+j] = d->A(row_index,j);*/
 	}
 	assert(d->A.size2() == dim);
 
@@ -132,7 +158,21 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 	sum -= d->b[row_index];
 	return sum;
 }
+/** Adds bound constraint on a variable, i.e. x<=b => x-b<=0*/
+double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad,
+		void *data){
 
+	boundConstriant *d = reinterpret_cast<boundConstriant *>(data);
+	if (!grad.empty()) {
+		// todo: gradient to be added later
+	//	grad[d->var_index] = 0;
+	}
+
+	if(d->is_ge)
+		return (-1*x[d->var_index] + d->bound);
+	else
+		return (x[d->var_index] - d->bound);
+}
 /**
  * Routine to compute concrete trajectory from given
  * abstract counter example using non-linear optimization
@@ -141,7 +181,7 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
  * @Rajarshi
  * 28th January 2016
  */
-concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
+concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 	/* Generate an nlopt object with the constraints defined by the Abstract
 	 * counter example
@@ -151,9 +191,22 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 	 * getting the dimension of the continuous set of the abstract counter example
 	 */
 
+	std::cout << "entered inside gen_concreteCE\n";
 	abstract_symbolic_state::ptr S = get_first_symbolic_state();
 	dim = S->getContinuousSet()->getSystemDimension();
 	N = get_length(); // the length of the counter example
+	HA = this->get_automaton();
+	std::cout << "gen_concreteCE: dimension N =" << dim <<", length of CE=" << N << std::endl;
+	// initialize the global locIdList
+	locIdList.resize(N);
+
+	std::set<int> d;
+	for(unsigned int i=0;i<N;i++){
+		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
+		locIdList[i] = *(d.begin());
+//		std::cout << "locIdList at "<< i << " = " << locIdList[i] << std::endl;
+	}
+
 
 	/**
 	 * 2. The dimensionality of the opt problem is N vectors, one starting point
@@ -162,7 +215,17 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 	 * variables of the optimization problem are dim*N + N
 	 */
 	unsigned int optD = N * dim + N;
-	nlopt::opt myopt(nlopt::LN_COBYLA, optD);
+	std::cout << "nlopt problem dimension = " << optD << std::endl;
+	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+//	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
+
+//	std::vector<double> lb(2);
+//	lb[0] = 0.1;
+//	lb[1] = 2;
+
+//	myopt.set_lower_bounds(lb);
+	myopt.set_stopval(0.3);
+//	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);
 
@@ -170,7 +233,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 	std::vector<double> x(optD);
 	unsigned int i, j;
 	polytope::ptr P;
-
 	// A random objective function created for lp solving
 
 	std::vector<double> obj(dim, 0);
@@ -180,7 +242,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 	for (i = 0; i < N; i++) // iterate over the N counter-examples
 	{
 		S = get_symbolic_state(i);
-		P = S->getContinuousSet();
+		P = S->getInitialSet();
 		/** To get a point from the polytope, we create a random obj function and
 		 * solve the lp. The solution point is taken as an initial value.
 		 */
@@ -191,11 +253,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 		v = lp.get_sv();
 
 		for (j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
-				{
+		{
 			x[i * dim + j] = v[j];
 		}
 	}
-
+	std::cout << "generated initial points\n";
 	/** Set initial value to the time variables
 	 *  Restrict dwell time within the projections of C_i in time variable
 	 **/
@@ -206,14 +268,15 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 	 */
 	unsigned int t_index =
 		get_first_symbolic_state()->getContinuousSet()->get_index("t");
-
-	assert(t_index >= 0 & t_index < dim);
+	std::cout << "Index of time variable:" << t_index << std::endl;
+	assert((t_index >= 0) && (t_index < dim));
 
 	std::vector<double> dmin(dim, 0), dmax(dim, 0);
 	dmax[t_index] = 1;
 	dmin[t_index] = -1;
 
-	double min, max;
+	boundConstriant B;
+	double max,min;
 	for (i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
@@ -225,10 +288,18 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 				P->getInEqualitySign());
 		max = lp.Compute_LLP(dmax);
 		min = lp.Compute_LLP(dmin);
-		// We may choose to take the minimum t as the initial dwell time
-		x[N * dim + i] = min;
+		// We may choose to take the max as the initial dwell time
+		x[N * dim + i] = max;
+		// we add the bounds as constriants in the nlopt
+		B.var_index = N*dim + i;
+		B.bound = max;
+		B.is_ge = false;
+		myopt.add_inequality_constraint(myBoundConstraint, &B, 1e-8);
+		B.is_ge=true;
+		B.bound = min;
+		myopt.add_inequality_constraint(myBoundConstraint, &B, 1e-8);
 	}
-
+std::cout << "Computed initial dwell times\n";
 	/**
 	 * todo: Constraints of the optimization problem is to be added
 	 * nlopt expects the constraints of the form constraint(x) <=0
@@ -242,7 +313,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 
 	for (unsigned int i = 0; i < N; i++) {
 		polyConstraints data;
-		C = get_symbolic_state(i)->getContinuousSet();
+		C = get_symbolic_state(i)->getInitialSet();
 		data.A = C->getCoeffMatrix();
 		data.b = C->getColumnVector();
 
@@ -258,7 +329,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 			myopt.add_inequality_constraint(myconstraint, &data, 1e-8);
 		}
 	}
-
+std::cout << "added constraints to the nlopt solver\n";
 	/* todo: Constraints over dwell time to be added */
 
 	/* Create object of concreteCE from the result of nlopt */
@@ -272,10 +343,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
-	if (math::abs(minf) > tolerance) {
-		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
-		return cexample;
-	} else {
+std::cout << "nlopt returned min : " << minf << "\n";
+//	if (math::abs(minf) > tolerance) {
+//		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
+//		return cexample;
+//	} else {
 		// create a concrete counter example object
 		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 		// one trajectory per symbolic state to be added in the concreteCE
@@ -300,6 +372,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(unsigned int tolerance) {
 			cexample->push_back(traj);
 		}
 		return cexample;
-	}
+//	}
 }
 

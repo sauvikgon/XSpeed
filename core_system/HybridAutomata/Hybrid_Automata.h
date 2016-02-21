@@ -10,6 +10,7 @@
 
 #include <list>
 #include <map>
+#include <boost/shared_ptr.hpp>
 //#include "Transition.h"
 #include "Location.h"
 
@@ -21,7 +22,7 @@ class hybrid_automata : public var_to_index_map {
 	location initial_loc;
 	int dimension;
 public:
-
+	typedef boost::shared_ptr<hybrid_automata> ptr;
 	hybrid_automata();
 	hybrid_automata(std::map<int, location>& list_locs, location init_loc,
 			int dim);

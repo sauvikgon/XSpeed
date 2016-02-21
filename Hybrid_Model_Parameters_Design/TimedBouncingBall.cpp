@@ -28,6 +28,7 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 
 	//Polytope I Declaration in the form of Ax<=b
 	//Input Polytope I as a line(bar) 10<=x(position)<=10.2 y(velocity)== 0 and t(time)==0.
+
 	row = 6;
 	col = 3;
 	ConstraintsMatrixI.resize(row, col);
@@ -303,6 +304,9 @@ t=NULL;*/
 	Hybrid_Automata.addInitial_Location(source);
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
+	Hybrid_Automata.insert_to_map("x",0);
+	Hybrid_Automata.insert_to_map("v",1);
+	Hybrid_Automata.insert_to_map("t",2);
 	/*
 	 Hybrid_Automata.addInitLoc(source);
 	 Hybrid_Automata.addTransition(trans_list);

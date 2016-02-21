@@ -70,6 +70,8 @@
 #include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 
 #include "InputOutput/io_utility.h"
+// *******counter example **************/
+#include "counterExample/concreteCE.h"
 
 namespace po = boost::program_options;
 using namespace std;
@@ -957,10 +959,14 @@ int main(int argc, char *argv[]) {
 					Solver_GLPK_Gurobi_GPU, forbidden_set, ce);
 		} else { //Parallel Breadth First Search implemented for Discrete Jumps
 			std::cout << "\nRunning Parallel BFS\n";
+
 			Symbolic_states_list = reach_pbfs(Hybrid_Automata, init_state,
 					reach_parameters, transition_iterations, Algorithm_Type,
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
 					Solver_GLPK_Gurobi_GPU, forbidden_set, ce);
+			// generate an abstract counter example
+//			concreteCE::ptr bad_trace = ce->gen_concreteCE(0.001);
+
 		}
 		tt1.stop();
 
@@ -1363,6 +1369,10 @@ int main(int argc, char *argv[]) {
 		}
 		cout << "  *****Ends*****\n";
 		ce->plot(output_var_X,output_var_Y);
+		concreteCE::ptr bad_trace = ce->gen_concreteCE(0.1);
+		bad_trace->set_automaton(ce->get_automaton());
+		std::string tracefile = "/home/rajarshi/bad_trace.o";
+		bad_trace->plot_ce(tracefile);
 
 	} else {
 		cout << "******** Does NOT Violate Safety Property ********\n";

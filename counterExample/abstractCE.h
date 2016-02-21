@@ -11,6 +11,7 @@
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
 
 #include "core_system/HybridAutomata/Transition.h"
+#include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include <list>
 #include <boost/shared_ptr.hpp>
 
@@ -29,6 +30,9 @@
  */
 extern unsigned int N;
 extern unsigned int dim;
+extern hybrid_automata::ptr HA;
+extern std::vector<int> locIdList;
+
 
 class abstractCE
 {
@@ -41,13 +45,14 @@ public:
 	;
 	/* another constructor */
 	abstractCE(std::list<abstract_symbolic_state::ptr> s_states,
-			std::list<transition::ptr> ts) {
+			std::list<transition::ptr> ts, hybrid_automata::ptr h) {
 		//Assertion to check that the length of the counter-example is one minus
 		// the number of sym states in the CE.
 		assert(sym_states.size() == trans.size() - 1);
 		sym_states = s_states;
 		trans = ts;
 		length = trans.size();
+		H = h;
 	}
 	/* destructor */
 	~abstractCE() {
@@ -89,9 +94,18 @@ public:
 		trans = transitions;
 	}
 	/**
+	 * Sets the reference to the hybrid automaton to which this CE refers.
+	 */
+	void set_automaton(hybrid_automata::ptr h){
+		H = h;
+	}
+	hybrid_automata::ptr get_automaton(){
+		return H;
+	}
+	/**
 	 * Returns an instance of the concrete counter-example from the abstract.
 	 */
-	concreteCE::ptr gen_concreteCE(unsigned int tolerance);
+	concreteCE::ptr gen_concreteCE(double tolerance);
 	/**
 	 * Plot the counter example projected along dimensions passed
 	 * as parameters
@@ -115,6 +129,11 @@ private:
 	 * example.
 	 */
 	unsigned int length;
+
+	/**
+	 * The reference to the automaton to which this is a counter example
+	 */
+	hybrid_automata::ptr H;
 
 };
 

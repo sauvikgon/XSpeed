@@ -12,6 +12,8 @@
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include "counterExample/simulation.h"
+#include "core_system/HybridAutomata/Hybrid_Automata.h"
 class concreteCE {
 
 public:
@@ -45,9 +47,27 @@ public:
 	 */
 	const trans_id getTransitionId(unsigned int i) const;
 
+	/**
+	 * Setter method to initialize the hybrid automaton
+	 */
+	void set_automaton(hybrid_automata::ptr h)
+	{
+		ha = h;
+	}
+	/**
+	 * Getter method to initialize the hybrid automaton
+	 */
+	hybrid_automata::ptr get_automaton(hybrid_automata::ptr h)
+	{
+		return ha;
+	}
 	void push_back(traj_segment t_seg){
 		T.push_back(t_seg);
 	}
+	/**
+	 * Plots the counter example trajectory to a file passed as parameter.
+	 */
+	void plot_ce(std::string filename);
 
 	concreteCE();
 	virtual ~concreteCE();
@@ -60,6 +80,10 @@ private:
 	 * i-th trajectory segment to the next segment.
 	 */
 	std::list<trans_id> jumps;
+	/**
+	 * pointer to the hybrid automaton to which this counter example refer
+	 */
+	hybrid_automata::ptr ha;
 
 };
 
