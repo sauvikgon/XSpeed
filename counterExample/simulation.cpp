@@ -117,7 +117,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
 			//myfile << NV_Ith_S(u,this->x) << "  " << NV_Ith_S(u,this->y);
-			myfile << t << "  " << NV_Ith_S(u,1);
+			myfile << t << "  " << NV_Ith_S(u,0);
 			myfile << "\n";
 		}
 		myfile << "\n";
