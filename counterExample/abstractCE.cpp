@@ -72,7 +72,7 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 	// debug purpose
 	std::string filename = "./test_sim.o";
 	s->set_outfile(filename);
-	s->set_out_dimension(2,1);
+	s->set_out_dimension(0);
 //	std::cout << "initial simulation point: " << x0[0] << ", " << x0[1] << ", " << x0[2] << std::endl;
 /*	std::cout << "Dynamics A:\n";
 	math::matrix<double> A = D.MatrixA;
@@ -83,9 +83,9 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 	}
 	std::cout << "Dynamics C: ";
 	for(unsigned int i=0;i<D.C.size(); i++)
-		std::cout << " " << D.C[i] << std::endl; */
+		std::cout << " " << D.C[i] << std::endl;*/
 
-//	std::cout << "sampled dwell time for simulation:" << time << std::endl;
+	std::cout << "sampled dwell time for simulation:" << time << std::endl;
 //debug purpose ends
 
 	y = s->simulate(x0, time);
@@ -149,6 +149,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	//Calculate Euclidean distances
 	// get the next point after jump in vector t;
 	std::cout << "current sum = " << sum << std::endl;
+	//exit(0);
 	return sum;
 }
 
@@ -260,7 +261,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	lb[1] = 2;
 
 //	myopt.set_lower_bounds(lb);
-	myopt.set_stopval(5);
+	myopt.set_stopval(2.3);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);
@@ -314,7 +315,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	boundConstriant B[N],B1[N];
 
 	double max,min;
-	for (i = 0; i < N; i++) {
+	for (i = 	0; i < N; i++) {
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
 		/** To get a point from the polytope, we create a random obj function and

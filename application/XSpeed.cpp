@@ -134,8 +134,9 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		/*	SetTimedBouncingBall_Parameters(reach_parameters, initial_polytope_I,
 		 system_dynamics, invariant, gaurd_polytope, AssignRw);*/
 
-		SetTimedBouncingBall_Parameters(Hybrid_Automata, init_state,
-				reach_parameters);
+		SetTimedBouncingBall_ParametersHystOutput(Hybrid_Automata, init_state,reach_parameters);
+		//SetTimedBouncingBall_Parameters(Hybrid_Automata, init_state,
+		//		reach_parameters);
 		//	cout<<"\nTesting 2 b\n";
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {

@@ -19,7 +19,7 @@
  * This class provides methods to simulate an ODE equation for a given
  * initial value.
  */
-class simulation {
+class simulation : public var_to_index_map {
 
 	/** The number of discrete samples to be computed
 	 * in solving the ODE, in order to get the simulation.
@@ -33,7 +33,7 @@ class simulation {
 	double reltol;
 	double abstol;
 	string filename;
-	unsigned int x,y; // the output dimensions for plotting.
+	unsigned int x; // the output dimension for plotting wrt time.
 
 public:
 	typedef boost::shared_ptr<simulation> ptr;
@@ -52,7 +52,6 @@ public:
 		filename=std::string();
 		// default printing dimensions
 		x = 0;
-		y = 1;
 	}
 	virtual ~simulation();
 	/**
@@ -75,10 +74,13 @@ public:
 	 * sets the projection dimensions to output the simulation points
 	 * in a file
 	 */
-	void set_out_dimension(unsigned int i, unsigned int j){
+	void set_out_dimension(unsigned int i){
 		x = i;
-		y = j;
 	}
+	/**
+	 * Generates a simulation trace for time duration, starting at start_time.
+	 * The initial state is given by the first parameter
+	 */
 	std::vector<double> simulate(std::vector<double>, double time);
 };
 

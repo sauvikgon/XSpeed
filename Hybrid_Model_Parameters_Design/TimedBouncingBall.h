@@ -30,5 +30,8 @@
 void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
+void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
+		ReachabilityParameters& reach_parameters);
 
 #endif /* TIMEDBOUNCINGBALL_H_ */

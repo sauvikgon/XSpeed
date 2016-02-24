@@ -105,19 +105,21 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
 
+	double time_offset = x[get_index("t")];
+
 	bool print_flag = false;
 	std::ofstream myfile;
 	if(!filename.empty()){
-		myfile.open(this->filename.c_str());
+		myfile.open(this->filename.c_str(),std::fstream::app);
 		print_flag = true;
 	}
 	if(print_flag){
 		for(unsigned int k=1;k<N;k++) {
-			double tout = k*(Tfinal/N);
+			double tout = (k*Tfinal)/N;
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
 			//myfile << NV_Ith_S(u,this->x) << "  " << NV_Ith_S(u,this->y);
-			myfile << t << "  " << NV_Ith_S(u,0);
+			myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
 			myfile << "\n";
 		}
 		myfile << "\n";
@@ -125,7 +127,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	}
 	else{ // no printing the simulation points to file
 		for(unsigned int k=1;k<N;k++) {
-			double tout = k*(Tfinal/N);
+			double tout = (k*Tfinal)/N;
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
 		}
