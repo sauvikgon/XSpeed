@@ -56,6 +56,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	N_Vector y = NULL;
 	N_Vector u = NULL;
 
+	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
 
 	for(unsigned int i=0;i<dimension;i++)
@@ -137,7 +138,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	{
 		res[i] = NV_Ith_S(u,i);
 	}
-	N_VDestroy_Serial(u); /* Free y vector */
+	N_VDestroy_Serial(u); /* Free u vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
 
 	return res;

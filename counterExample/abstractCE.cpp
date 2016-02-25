@@ -68,11 +68,11 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 	 */
 
 	simulation::ptr s = simulation::ptr(new simulation(x0.size(),1000,D));
-	std::vector<double> y(x0.size(), 0);
+	std::vector<double> y;
 	// debug purpose
-	std::string filename = "./test_sim.o";
-	s->set_outfile(filename);
-	s->set_out_dimension(0);
+//	std::string filename = "./test_sim.o";
+//	s->set_outfile(filename);
+//	s->set_out_dimension(0);
 //	std::cout << "initial simulation point: " << x0[0] << ", " << x0[1] << ", " << x0[2] << std::endl;
 /*	std::cout << "Dynamics A:\n";
 	math::matrix<double> A = D.MatrixA;
@@ -85,14 +85,11 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 	for(unsigned int i=0;i<D.C.size(); i++)
 		std::cout << " " << D.C[i] << std::endl;*/
 
-	std::cout << "sampled dwell time for simulation:" << time << std::endl;
+//	std::cout << "sampled dwell time for simulation:" << time << std::endl;
 //debug purpose ends
 
 	y = s->simulate(x0, time);
-
-/*	mycount++;
-	if(mycount>2)
-		exit(0); */
+	assert(y.size() == dim);
 	return y;
 }
 
@@ -132,10 +129,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 
 		}catch(std::exception& e)
 		{
-			// check if violation of invariant/abstract CE exception thrown
-			//for(unsigned int j=0;j<dim;j++){
-			//	y = std::numeric_limits<double>::max();
-				// Adds a high penalty to the objective function
+			// Adds a high penalty to the objective function
 		}
 		std::vector<double> next_start(dim,0); // current jump start point
 		for(unsigned int j=0;j<dim;j++)
@@ -149,17 +143,20 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	//Calculate Euclidean distances
 	// get the next point after jump in vector t;
 	std::cout << "current sum = " << sum << std::endl;
-	//exit(0);
+
+/*	mycount++;
+	if(mycount>=3)
+		exit(0); */
+
 	return sum;
 }
 
 /** Function to define a constraint over the optimization problem */
 
 struct polyConstraints {
-	math::matrix<double> A;
-	math::vector<double> b;
+	math::vector<double> a;
+	double b;
 	unsigned int sstate_index;
-	unsigned int row_index;
 };
 
 struct boundConstriant{
@@ -167,11 +164,25 @@ struct boundConstriant{
 	unsigned int var_index;
 	bool is_ge; // to mark if bound is a >= constraint
 };
+
+void aux_plot(math::matrix<double> C)
+{
+	std::ofstream myfile;
+	myfile.open("./init_test.o");
+	for(unsigned int i=0;i<C.size1();i++){
+		for(unsigned int j=0;j<C.size2();j++)
+			myfile << C(i,j) << " " ;
+		myfile << "\n";
+	}
+	myfile.close();
+	system("graph -TX -BC init_test.o");
+}
 double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 		void *data) {
 	polyConstraints *d = reinterpret_cast<polyConstraints *>(data);
 	unsigned int i = d->sstate_index;
-	unsigned int row_index = d->row_index;
+//	std::cout << "value of the symbolic state index in myconstraint :" << i << std::endl;
+//	unsigned int row_index = d->row_index;
 
 	if (!grad.empty()) {
 		// todo: gradient to be added later
@@ -181,13 +192,16 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 		for(unsigned int j=0;j<dim;j++)
 			grad[i*dim+j] = d->A(row_index,j);*/
 	}
-	assert(d->A.size2() == dim);
+
+	assert(d->a.size() == dim);
 
 	double sum = 0;
 	for (unsigned int j = 0; j < dim; j++) {
-		sum += x[i * dim + j] * d->A(row_index, j);
+	//	std::cout << "x at " << i*dim+j << " = " << x[i * dim + j] << std::endl;
+	//	std::cout << "a at  " << j << " = " << d->a[j] << std::endl;
+		sum += x[i * dim + j] * d->a[j];
 	}
-	sum -= d->b[row_index];
+	sum -= d->b;
 	return sum;
 }
 /** Adds bound constraint on a variable, i.e. x<=b => x-b<=0*/
@@ -210,6 +224,7 @@ double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad
 
 	}
 }
+
 /**
  * Routine to compute concrete trajectory from given
  * abstract counter example using non-linear optimization
@@ -227,8 +242,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	/* 1. Get the dimensionality of the optimization problem by
 	 * getting the dimension of the continuous set of the abstract counter example
 	 */
-
-	std::cout << "entered inside gen_concreteCE\n";
 	abstract_symbolic_state::ptr S = get_first_symbolic_state();
 	dim = S->getContinuousSet()->getSystemDimension();
 	N = get_length(); // the length of the counter example
@@ -261,7 +274,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	lb[1] = 2;
 
 //	myopt.set_lower_bounds(lb);
-	myopt.set_stopval(2.3);
+	myopt.set_stopval(27.0095);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);
@@ -315,7 +328,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	boundConstriant B[N],B1[N];
 
 	double max,min;
-	for (i = 	0; i < N; i++) {
+	for (i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
 		/** To get a point from the polytope, we create a random obj function and
@@ -330,7 +343,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 		B[i].var_index = N*dim + i;
 		B[i].bound = max - min;
-		std::cout << "max time val:" << max << ", min time val:" << min << std::endl;
 		B[i].is_ge = false;
 		myopt.add_inequality_constraint(myBoundConstraint, &B[i], 1e-8);
 		B1[i].var_index = B[i].var_index;
@@ -352,23 +364,32 @@ std::cout << "Computed initial dwell times and added constraints over them\n";
 	math::matrix<double> A;
 	math::vector<double> b;
 
-	polyConstraints data[N];
+	polyConstraints I[2*dim*N];
+	unsigned int index = 0;
 	for (unsigned int i = 0; i < N; i++) {
 		C = get_symbolic_state(i)->getInitialSet();
-		data[i].A = C->getCoeffMatrix();
-		data[i].b = C->getColumnVector();
+		A = C->getCoeffMatrix();
+		b = C->getColumnVector();
 
 		// We assume that the polytope is expressed as Ax<=b
 
 		assert(C->getInEqualitySign() == 1);
+		assert(A.size2() == dim);
+		assert(b.size() == A.size1());
+		assert(2*dim*N > index);
 
-		unsigned int num_rows = A.size1();
+		for (unsigned int j = 0; j < A.size1(); j++) {
+			I[index].sstate_index = i;
+			I[index].a.resize(A.size2());
 
-		data[i].sstate_index = i;
-		for (unsigned int j = 0; j < num_rows; j++) {
-			data[i].row_index = j;
-			myopt.add_inequality_constraint(myconstraint, &data[i], 1e-8);
+			for(unsigned int k=0;k<dim;k++){
+				I[index].a[k] = A(j,k);
+			}
+			I[index].b = b[j];
+			myopt.add_inequality_constraint(myconstraint, &I[index], 1e-8);
+			index++;
 		}
+
 	}
 std::cout << "added constraints to the nlopt solver\n";
 	/* todo: Constraints over dwell time to be added */
