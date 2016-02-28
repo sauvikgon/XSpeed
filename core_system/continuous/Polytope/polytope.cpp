@@ -20,6 +20,7 @@
 #include "core_system/math/2d_geometry.h"
 #include <set>
 #include <utility>
+#include <fstream>
 
 //#include "math/lp_solver_ourSimplex/simplex.h"
 
@@ -416,9 +417,9 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 	return All_vertices;
 }
 
-math::matrix<double> polytope::get_2dVertices(int i, int j){
+math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
 	std::set<std::pair<double, double> > set_vertices;
-	set_vertices = enumerate_2dVertices(i,j);
+	set_vertices = enumerate_2dVertices(dim1,dim2);
 	math::matrix<double> my_vertices;
 	my_vertices = sort_vertices(set_vertices);
 	return my_vertices;
@@ -428,4 +429,16 @@ double polytope::point_distance(std::vector<double> v){
 	return 0;
 }
 
+void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
+{
+	std::ofstream myfile;
+	myfile.open(fname.c_str());
+	math::matrix<double> C = get_2dVertices(dim1, dim2);
+	for(unsigned int i=0;i<C.size1();i++){
+		for(unsigned int j=0;j<C.size2();j++)
+			myfile << C(i,j) << " " ;
+		myfile << "\n";
+	}
+	myfile.close();
+}
 #endif /* POLYTOPE_CPP_ */

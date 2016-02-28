@@ -705,16 +705,11 @@ int main(int argc, char *argv[]) {
 									colVector[col_index] = v[1];
 									col_index++;
 								}
-								//std::cout << "coeff = " << coeff << std::endl;
-								std::cout << "colVector = ";
-								for (int i = 0; i < colVector.size(); i++) {
-									std::cout << colVector[i] << "\t";
-								}
+
 								polytope::ptr forbidden_polytope;
 								forbidden_polytope = polytope::ptr(
 										new polytope(coeff, colVector, 1));
 								forbid_pair.second = forbidden_polytope; //todo currently unable to handle negative bounds
-
 								forbidden_set.insert(forbid_pair);
 
 								polytope_created = false; //store here the polytope
@@ -788,8 +783,13 @@ int main(int argc, char *argv[]) {
 					std::cout << colVector[i] << "\t";
 				}
 				polytope::ptr forbidden_polytope;
+
 				forbidden_polytope = polytope::ptr(
 						new polytope(coeff, colVector, 1));
+				//debug purpose
+				std::string fname = "./forbidden_poly";
+				forbidden_polytope->print2file(fname,2,0);
+				//-----
 				forbid_pair.second = forbidden_polytope;
 				forbidden_set.insert(forbid_pair);
 				polytope_created = false;
@@ -1372,7 +1372,7 @@ int main(int argc, char *argv[]) {
 		ce->plot(output_var_X,output_var_Y);
 		concreteCE::ptr bad_trace = ce->gen_concreteCE(0.1);
 		bad_trace->set_automaton(ce->get_automaton());
-		std::string tracefile = "/home/rajarshi/bad_trace.o";
+		std::string tracefile = "./bad_trace.o";
 		bad_trace->plot_ce(tracefile);
 
 	} else {

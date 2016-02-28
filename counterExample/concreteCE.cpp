@@ -41,12 +41,12 @@ void concreteCE::plot_ce(std::string filename)
 	sample simulation_sample;
 	simulation::ptr sim;
 	std::cout << "Inside concrete trace plotter, no. of trajectory segs:" << T.size() << std::endl;
-	unsigned int num_samples = 1000;
+	double time_step = 0.1;
 	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
 		seg = *it;
 		locId = seg.first;
 		simulation_sample = seg.second;
-		sim = simulation::ptr(new simulation(simulation_sample.first.size(),num_samples,ha->getLocation(locId).getSystem_Dynamics()));
+		sim = simulation::ptr(new simulation(simulation_sample.first.size(),time_step,ha->getLocation(locId).getSystem_Dynamics()));
 		sim->set_outfile(filename);
 		sim->set_out_dimension(0);
 		std::cout << "simulation: first:" << simulation_sample.second;

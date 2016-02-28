@@ -67,7 +67,7 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 	 * todo: current dummy implementation to be completed
 	 */
 
-	simulation::ptr s = simulation::ptr(new simulation(x0.size(),1000,D));
+	simulation::ptr s = simulation::ptr(new simulation(x0.size(),0.1,D));
 	std::vector<double> y;
 	// debug purpose
 //	std::string filename = "./test_sim.o";
@@ -100,22 +100,17 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	for(unsigned int i=0;i<x.size();i++)
 		std::cout << x[i] << " ";
 	 std::cout << std::endl; */
-	//----
-	if (!grad.empty()) {
-	/*	for(unsigned int i=0;i<(N-1)*dim;i++)
-			grad[i] = 2 * (x[i] - x[i+dim]);
-		for(unsigned int i=N*dim;i<N;i++)
-			grad[i] = 0; */
-	}
+
 	/**
 	 * 1. Get the N start vectors and dwell times from x and call the simulation routine
 	 * 2. Get the N end points of the simulation trace, say, y[i].
 	 * 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
 	 */
 	double sum = 0; // Stores the sum of all Euclidean distances of the end points.
-	std::vector<double> y(dim,0);
+//	std::vector<double> y(dim,0);
 
-	// Computes the L2 norm or Eucilean distances between the trace end points.
+	// Computes the L2 norm or Euclidean distances between the trace end points.
+	std::vector<std::vector<double> > y(N-1);
 	double sq_sum = 0;
 	for (unsigned int i = 0; i < N-1; i++) {
 		std::vector<double> v(dim, 0);
@@ -124,7 +119,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		}
 		try{
 			int loc_index = locIdList[i];
-			y = simulate_trajectory(v, HA->getLocation(loc_index).getSystem_Dynamics(), x[N * dim + i]);
+			y[i] = simulate_trajectory(v, HA->getLocation(loc_index).getSystem_Dynamics(), x[N * dim + i]);
 			// todo: assignment mapping to be done later.
 
 		}catch(std::exception& e)
@@ -133,16 +128,27 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		}
 		std::vector<double> next_start(dim,0); // current jump start point
 		for(unsigned int j=0;j<dim;j++)
-			next_start[j]=x[(i+1)*dim + j];
-		//compute the euclidean distance between the next start point and the simulated end point
-		for (unsigned int i = 0; i < dim; i++) {
-			sq_sum += (y[i] - next_start[i]) * (y[i] - next_start[i]);
+			next_start[j] = x[(i+1)*dim + j];
+		//compute the Euclidean distance between the next start point and the simulated end point
+		for (unsigned int j = 0; j < dim; j++) {
+			sq_sum += (y[i][j] - next_start[j]) * (y[i][j] - next_start[j]);
 		}
-		sum += math::sqrt(sq_sum);
 	}
-	//Calculate Euclidean distances
-	// get the next point after jump in vector t;
-	std::cout << "current sum = " << sum << std::endl;
+	sum += math::sqrt(sq_sum);
+
+
+	if (!grad.empty()) {
+		for(unsigned int i=0;i<dim;i++)
+			grad[i] = 0;
+
+		for(unsigned int i=1;i<N;i++){
+			for(unsigned int j=0;j<N;j++){
+				grad[i*dim+j] = (0.5/sum) * 2 * (x[i*dim+j] - y[i-1][j]);
+			}
+		}
+
+	}
+std::cout << "current sum = " << sum << std::endl;
 
 /*	mycount++;
 	if(mycount>=3)
@@ -165,18 +171,6 @@ struct boundConstriant{
 	bool is_ge; // to mark if bound is a >= constraint
 };
 
-void aux_plot(math::matrix<double> C)
-{
-	std::ofstream myfile;
-	myfile.open("./init_test.o");
-	for(unsigned int i=0;i<C.size1();i++){
-		for(unsigned int j=0;j<C.size2();j++)
-			myfile << C(i,j) << " " ;
-		myfile << "\n";
-	}
-	myfile.close();
-	system("graph -TX -BC init_test.o");
-}
 double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 		void *data) {
 	polyConstraints *d = reinterpret_cast<polyConstraints *>(data);
@@ -186,11 +180,11 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 
 	if (!grad.empty()) {
 		// todo: gradient to be added later
-/*		for(unsigned int i=0;i<x.size();i++){
+		for(unsigned int i=0;i<x.size();i++){
 			grad[i] = 0 ;
 		}
 		for(unsigned int j=0;j<dim;j++)
-			grad[i*dim+j] = d->A(row_index,j);*/
+			grad[i*dim+j] = d->a[j];
 	}
 
 	assert(d->a.size() == dim);
@@ -211,15 +205,21 @@ double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad
 	boundConstriant *d = reinterpret_cast<boundConstriant *>(data);
 	if (!grad.empty()) {
 		// todo: gradient to be added later
-	//	grad[d->var_index] = 0;
+		for(unsigned int i=0;i<x.size();i++){
+			grad[i] = 0 ;
+		}
 	}
 
 	if(d->is_ge){
 //		std::cout << "lower bound constraint on time with bound = " << d->bound << std::endl;
+		if(!grad.empty())
+			grad[d->var_index] = -1;
 		return (-1*x[d->var_index] + d->bound);
 	}
 	else{
 //		std::cout << "upper bound constraint on time with bound = " << d->bound << std::endl;
+		if(!grad.empty())
+			grad[d->var_index] = 1;
 		return (x[d->var_index] - d->bound);
 
 	}
@@ -267,6 +267,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	unsigned int optD = N * dim + N;
 	std::cout << "nlopt problem dimension = " << optD << std::endl;
 	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+//	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 
 //	std::vector<double> lb(2);
@@ -274,10 +275,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	lb[1] = 2;
 
 //	myopt.set_lower_bounds(lb);
-	myopt.set_stopval(27.0095);
+	myopt.set_stopval(9.08);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);
+	myopt.set_initial_step(0.001);
 
 	/** Set Initial value to the optimization problem */
 	std::vector<double> x(optD);
@@ -350,7 +352,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 		B1[i].bound = 0;
 		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
 		// We may choose to take the max-min as the initial dwell time
-		x[N * dim + i] = max - min;
+		x[N * dim + i] = (max - min)/2;
 	}
 std::cout << "Computed initial dwell times and added constraints over them\n";
 	/**

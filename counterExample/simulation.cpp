@@ -2,7 +2,7 @@
  * simulation.cpp
  *
  *  Created on: 12-Feb-2016
- *      Author: rajarshi
+ *      Author: Rajarshi
  */
 
 #include "counterExample/simulation.h"
@@ -44,6 +44,14 @@ static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data)
 	return 0;
 }
 
+std::vector<double> lin_interpolate(std::vector<double> x_l2, std::vector<double> x_l1, double factor)
+{
+	assert(x_l1.size() == x_l2.size());
+	std::vector<double> res(x_l1.size());
+	for(unsigned int i=0;i<x_l1.size();i++)
+		res[i] = factor*x_l2[i] + x_l1[i]*(1-factor);
+	return res;
+}
 std::vector<double> simulation::simulate(std::vector<double> x, double time)
 {
 	int flag;
@@ -58,6 +66,10 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
+
+	// return the same initial point if the simulation time is smaller than the simulation time_step
+	if (time < this->time_step)
+		return x;
 
 	for(unsigned int i=0;i<dimension;i++)
 		NV_Ith_S(u,i) = x[i];
@@ -102,8 +114,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	/* In loop over output points: call CVode, print results, test for errors */
 
-	// double distance=0.0;
-
 	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
 
 	double time_offset = x[get_index("t")];
@@ -114,21 +124,34 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 		myfile.open(this->filename.c_str(),std::fstream::app);
 		print_flag = true;
 	}
+
+	unsigned int N = Tfinal/this->time_step;
+
+//	std::cout << "simulation : samples = " << N << std::endl;
+	std::vector<double> last(dimension);
+
 	if(print_flag){
-		for(unsigned int k=1;k<N;k++) {
-			double tout = (k*Tfinal)/N;
+		for(unsigned int k=1;k<=N;k++) {
+			double tout = k*time_step;
+			// remember this point in the last vector
+			for(unsigned int i=0;i<dimension;i++)
+				last[i] = NV_Ith_S(u,i);
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
 			//myfile << NV_Ith_S(u,this->x) << "  " << NV_Ith_S(u,this->y);
 			myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
 			myfile << "\n";
+
 		}
 		myfile << "\n";
 		myfile.close();
 	}
 	else{ // no printing the simulation points to file
-		for(unsigned int k=1;k<N;k++) {
+		for(unsigned int k=1;k<=N;k++) {
 			double tout = (k*Tfinal)/N;
+			// remember this point in the last vector
+			for(unsigned int i=0;i<dimension;i++)
+				last[i] = NV_Ith_S(u,i);
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
 		}
@@ -138,6 +161,10 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	{
 		res[i] = NV_Ith_S(u,i);
 	}
+	//linear interpolate the last two ODE solution points to get
+	// better estimate of the last solution point.
+	double lin_factor = (N*time_step - Tfinal)/time_step;
+	res = lin_interpolate(last, res ,lin_factor);
 	N_VDestroy_Serial(u); /* Free u vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
 

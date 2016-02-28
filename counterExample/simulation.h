@@ -23,8 +23,13 @@ class simulation : public var_to_index_map {
 
 	/** The number of discrete samples to be computed
 	 * in solving the ODE, in order to get the simulation.
+
+	int N;*/
+	/**
+	 * The simulation time_step. The number of samples is adjusted
+	 * based on the Tfinal and the time_step as N = Tfinal/time_step.
 	 */
-	int N;
+	double time_step;
 	/**
 	 * The dimension of the ODE system.
 	 */
@@ -43,15 +48,15 @@ public:
 //	typedef std::pair<std::vector<double>, double> simD;
 
 	simulation();
-	simulation(unsigned int dim, unsigned int samples, Dynamics Dyn, double rel_tol=1e-6, double abs_tol=1e-8){
+	simulation(unsigned int dim, double step_size, Dynamics Dyn, double rel_tol=1e-6, double abs_tol=1e-8){
 		dimension = dim;
-		N = 1000;
+		time_step = step_size;
 		reltol = rel_tol;
 		abstol = abs_tol;
 		D = Dyn;
 		filename=std::string();
-		// default printing dimensions
-		x = 0;
+		// default ploting dimension
+		x = 0; // The ploting of this dimension is w.r.t time
 	}
 	virtual ~simulation();
 	/**

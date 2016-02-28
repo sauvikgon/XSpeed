@@ -130,7 +130,7 @@ public:
 	 * i and j where i and j are the 1st and 2nd projecting variables
 	 */
 
-	math::matrix<double> get_2dVertices(int i, int j);
+	math::matrix<double> get_2dVertices(int dim1, int dim2);
 
 	/**
 	 * Computes the distance of a point from the polytope.
@@ -139,6 +139,13 @@ public:
 	 * polytope is returned.
 	 */
 	double point_distance(std::vector<double> v);
+
+	/*
+	 * Prints the vertices of the polytope to a file, passed as parameter.
+	 * The file could be called with any plotting utility.
+	 *
+	 */
+	void print2file(std::string fname, unsigned int dim1, unsigned int dim2);
 
 };
 
