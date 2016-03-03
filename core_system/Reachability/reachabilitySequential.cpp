@@ -168,13 +168,12 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 	size_type row = numVectors, col = shm_NewTotalIteration;
 //	cout << "\nBefore calling InvariantBoundaryCheck"<< "\n";
 	if (isInvariantExist == true) { //if invariant exist. Computing
-
-		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
-				ReachParameters, invariant, lp_solver_type_choosen);
-		shm_NewTotalIteration = shm_NewTotalIteration - 1;//because Omega_0 is computed in all cases which is 1 extra
+		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,ReachParameters, invariant, lp_solver_type_choosen);
+		//shm_NewTotalIteration = shm_NewTotalIteration - 1;//because Omega_0 is computed in all cases which is 1 extra
+	//	std::cout << "shm_NewTotalIteration = " << shm_NewTotalIteration << std::endl;
 	} //End of Invariant Directions
 	//cout << "\nNew shm_NewTotalIteration = " << shm_NewTotalIteration << "\n";
-	if (shm_NewTotalIteration < 1) {
+	if (shm_NewTotalIteration <= 1) {
 		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
@@ -229,9 +228,13 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 					* SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = (double) support_unitball_infnorm(rVariable);
+
+		//cout<<"term3b = "<<term3b<<"\n";
+
 		if (!SystemDynamics.isEmptyC) {
 			term3c = ReachParameters.time_step
 					* dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
+		//	cout<<"dot_product(SystemDynamics.C, rVariable) = "<<dot_product(SystemDynamics.C, rVariable)<<"\n";
 		}
 		term3 = term3a * term3b;
 		res2 = term1 + term2 + term3 + term3c; //term3c Added
@@ -241,6 +244,7 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 			zIInitial = res2;
 		//  **************  Omega Function Over  ********************
 		MatrixValue(eachDirection, loopIteration) = zIInitial;
+		//cout<<"zIInitial = "<< zIInitial<<std::endl;
 		loopIteration++;
 		for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
 			double TempOmega;
@@ -275,9 +279,11 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 
 			term3a = ReachParameters.result_alfa;
 			term3b = support_unitball_infnorm(r1Variable);
+			//cout<<"term3b = "<<term3b<<"\n";
 			if (!SystemDynamics.isEmptyC) {
 				term3c = ReachParameters.time_step
 						* dot_product(SystemDynamics.C, r1Variable); //Added +tau* sf_C(l) 8/11/2015
+			//	cout<<"dot_product(SystemDynamics.C, r1Variable) = "<<dot_product(SystemDynamics.C, r1Variable)<<"\n";
 			}
 			term3 = term3a * term3b;
 			res2 = term1 + term2 + term3 + term3c;
@@ -287,6 +293,7 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 				zI = res2;
 			//  **************  Omega Function Over  ********************
 			TempOmega = zI + s1Variable; //Y1
+		//	cout<<"TempOmega = "<< TempOmega<<std::endl;
 			MatrixValue(eachDirection, loopIteration) = TempOmega; //Y1
 			rVariable = CopyVector(r1Variable); //source to destination
 			sVariable = s1Variable;

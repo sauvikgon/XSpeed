@@ -246,13 +246,15 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 //	Dynamics Initalised ---------------------
 
 	transition::ptr trans = transition::ptr(new transition()); //empty transition
-	location source;
-	source.setLocId(1);
-	source.setName("Round_Figure");
-	source.setSystem_Dynamics(system_dynamics);
-	source.setInvariant(invariant);
-	source.setInvariantExists(false); //no invariant available
-	source.add_Out_Going_Transition(trans);
+
+	location::ptr source;
+	source = location::ptr(new location());
+	source->setLocId(1);
+	source->setName("Round_Figure");
+	source->setSystem_Dynamics(system_dynamics);
+	source->setInvariant(invariant);
+	source->setInvariantExists(false); //no invariant available
+	source->add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
 

@@ -9,20 +9,16 @@
 #define CONCRETECE_H_
 
 #include <list>
-#include <utility>
-#include <boost/shared_ptr.hpp>
-#include <vector>
 class concreteCE {
 
 public:
-	typedef boost::shared_ptr<concreteCE> ptr;
 	/**
-	 * A sample stores the initial vector and the dwell time of a trajectory
+	 * A sample stores the initial state and the dwell time of a trajectory
 	 * within a location
 	 */
 	typedef unsigned int loc_id;
 	typedef unsigned int trans_id;
-	typedef std::pair<std::vector<double>, double> sample;
+	typedef std::pair<double, double> sample;
 	/**
 	 * A sample and a location id defines a trajectory segment of a counter-example
 	 * within a location.
@@ -44,10 +40,6 @@ public:
 	 * its position in the counter example.
 	 */
 	const trans_id getTransitionId(unsigned int i) const;
-
-	void push_back(traj_segment t_seg){
-		T.push_back(t_seg);
-	}
 
 	concreteCE();
 	virtual ~concreteCE();

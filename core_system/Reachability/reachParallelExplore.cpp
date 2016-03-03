@@ -500,48 +500,6 @@ const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(
 
 }
 
-/*
- * Implementation of reachability for each partitions can be made parallel using OMP approach
- * Algorithm type = PAR_BY_PARTS
- */
-
-const template_polyhedra::ptr reachabilityPartitions(Dynamics& SystemDynamics,
-		polytope::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, bool isInvariantExist,
-		int lp_solver_type_choosen) {
-
-	std::list<polytope::ptr> polys;
-	template_polyhedra::ptr reachability_region;
-	unsigned int nVar = 4; //number of variables to partition
-	unsigned int p = 2; //number of partitions for each variables(eg 2 for 2 equal halfs or 3 equal halfs,etc
-	polys = Partition_BoundingPolytope(Initial, nVar, p);
-	cout << "Partitions size = " << polys.size() << endl;
-	polytope::ptr initial_set;
-	template_polyhedra::ptr Tpoly;
-//#pragma omp parallel for
-	for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end();
-			i++) {
-		initial_set = (*i);
-		ReachParameters.X0 = initial_set;
-
-		double result_alfa = compute_alfa(ReachParameters.time_step,
-				SystemDynamics, initial_set, lp_solver_type_choosen);
-		cout << "\ncompute alfa = " << result_alfa << endl;
-		ReachParameters.result_alfa = result_alfa;
-
-		Tpoly = reachabilitySequential(SystemDynamics, initial_set,
-				ReachParameters, invariant, isInvariantExist,
-				lp_solver_type_choosen);
-
-#pragma omp critical
-		{
-			reachability_region = reachability_region->union_TemplatePolytope(
-					Tpoly);
-		} //end of pragma for loop
-	}
-	return reachability_region;
-	//No IMPROVEMENT WHERE SEEN BY THIS APPROACH
-}
 
 /*
  * Implementation of reachability for each partitions of initial set executed in

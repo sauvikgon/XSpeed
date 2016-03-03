@@ -9,13 +9,17 @@
 #define PWLIST_H_
 
 #include "core_system/symbolic_states/initial_state.h"
+#include <boost/shared_ptr.hpp>
+
 /*
- * Passed-Waiting-List of initial_states. A class that handles Queue data_structure of initial_states to be
- * 			processed or that has already been processed
+ * Passed-Waiting-List of initial_states. A class that handles Queue data_structure of
+ *  initial_states to be processed or that has already been processed
  */
 
 class pwlist {
 public:
+	typedef boost::shared_ptr<pwlist> ptr;
+
 	pwlist();
 
 	~pwlist();

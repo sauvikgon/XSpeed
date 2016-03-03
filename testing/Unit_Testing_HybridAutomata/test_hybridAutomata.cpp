@@ -112,10 +112,8 @@ SUITE(HybridAutomata_TestSuite) {
 		Gaurd = polytope::ptr(new polytope(ConstraintsMatrixI,boundValueI,boundSignI));
 
 		int dimen = 2;
-
 		string label1 = "Transition1";
 		string label2 = "Transition2";
-
 		math::matrix<double> m(2, 2);
 		m(0, 0) = 7;
 		m(0, 1) = 7;
@@ -125,16 +123,16 @@ SUITE(HybridAutomata_TestSuite) {
 		Assign T, Tout;
 		T.Map = m;
 		T.b = b;
-
 		int srcLocID=1, destLocID=2;
-
 		transition::ptr trans1 = transition::ptr(new transition(1, label1, srcLocID, destLocID, Gaurd, T));//creating object of location as loc
 		transition::ptr trans2 = transition::ptr(new transition(2, label2, srcLocID, destLocID, Gaurd, T));//creating object of location as loc
 		all_trans.push_back(trans1);
 		all_trans.push_back(trans2);
 
-		location loc(11, nn, D, Inv, true, all_trans),loc_src(12, "WelCome", D, Inv, true, all_trans),
-		loc_dest(13, "GoodBye", D, Inv, true, all_trans), outLoc;
+		location::ptr loc = location::ptr(new location(11, nn, D, Inv, true, all_trans));
+		location::ptr loc_src = location::ptr(new location(12, "WelCome", D, Inv, true, all_trans));
+		location::ptr loc_dest = location::ptr(new location(13, "GoodBye", D, Inv, true, all_trans));
+		location::ptr outLoc;
 
 		hybrid_automata ha;
 
@@ -150,12 +148,12 @@ SUITE(HybridAutomata_TestSuite) {
 		CHECK_EQUAL(proper.str(), out.str());
 
 		outLoc = ha.getLocation(11);
-		out << outLoc.getName();
+		out << outLoc->getName();
 		proper << "Hello Welcome";
 		CHECK_EQUAL(proper.str(), out.str());
 
 		outLoc = ha.getLocation(13);
-		out << outLoc.getName();
+		out << outLoc->getName();
 		proper << "GoodBye";
 		CHECK_EQUAL(proper.str(), out.str());
 

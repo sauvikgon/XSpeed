@@ -11,7 +11,7 @@
 
 #include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 #include "core_system/math/lp_solver/All_Solver_Definition.h"
-//#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
+#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
 #include "core_system/math/Simplex_CPU/simplex_CPU.h"
 
 // have to include the path :: /opt/gurobi600/linux64/include
@@ -49,7 +49,7 @@ private:
 	int lp_solver_type;		//typename glpk_lp_solver::glpk_ptr glpk_lp_problem;
 
 	glpk_lp_solver::glpk_ptr glpk_lp_problem;
-//	gurobi_lp_solver::gurobi_ptr gurobi_lp_problem;
+	gurobi_lp_solver::gurobi_ptr gurobi_lp_problem;
 	Simplex_CPU::simplex_ptr simplex_cpu_lp_problem;
 
 	//   *********  More Definition of lp solvers can be added when required  ********

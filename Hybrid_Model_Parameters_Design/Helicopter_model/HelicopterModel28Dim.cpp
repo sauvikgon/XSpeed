@@ -6,6 +6,8 @@
  */
 
 #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
+
+
 //With empty polytope U
 
 void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
@@ -233,13 +235,15 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 //	Dynamics Initalised ---------------------
 
 	transition::ptr trans= transition::ptr(new transition()); //empty transition
-	location source;
-	source.setLocId(1);
-	source.setName("Flying");
-	source.setSystem_Dynamics(system_dynamics);
-	source.setInvariant(invariant);
-	source.setInvariantExists(false); //no invariant available
-	source.add_Out_Going_Transition(trans);
+
+	location::ptr source;
+	source = location::ptr(new location());
+	source->setLocId(1);
+	source->setName("Flying");
+	source->setSystem_Dynamics(system_dynamics);
+	source->setInvariant(invariant);
+	source->setInvariantExists(false); //no invariant available
+	source->add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
 
@@ -3198,8 +3202,8 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 
 	std::list<transition::ptr> Out_Going_Trans_fromticking_idle;
 
-	location l1(1, "ticking_idle", system_dynamics0, invariant0, false,
-			Out_Going_Trans_fromticking_idle);
+	location::ptr l1 = location::ptr(new location(1, "ticking_idle", system_dynamics0, invariant0, false,
+			Out_Going_Trans_fromticking_idle));
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.addInitial_Location(l1);
@@ -3214,5 +3218,5 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 					transition_id));
 
 	init_state = I;
-
 }
+

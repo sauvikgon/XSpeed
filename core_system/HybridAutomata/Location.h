@@ -13,7 +13,7 @@
 #include "application/DataStructureDirections.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Transition.h"
-
+#include <boost/shared_ptr.hpp>
 
 
 class location {
@@ -25,7 +25,7 @@ private:
 	bool InvariantExists;		//True If invariant exists otherwise False
 	std::list<transition::ptr> Out_Going_Transitions;
 public:
-
+	typedef boost::shared_ptr<location> ptr;
 	location();
 	location(int Loc_ID, string Name, Dynamics System_Dynamics, polytope::ptr Invariant,  bool inv_exists, std::list<transition::ptr> Out_Going_Trans);
 	Dynamics& getSystem_Dynamics();

@@ -7,7 +7,7 @@
 
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
 
-void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
+void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
@@ -276,13 +276,13 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 t=NULL;*/
 	transition::ptr trans = transition::ptr(new transition(1,"hop",1,1,gaurd_polytope,assignment));
 
-	location source;
-	source.setLocId(1);
-	source.setName("Always");
-	source.setSystem_Dynamics(system_dynamics);
-	source.setInvariant(invariant);
-	source.setInvariantExists(true);
-	source.add_Out_Going_Transition(trans);
+	location::ptr source = location::ptr(new location());
+	source->setLocId(1);
+	source->setName("Always");
+	source->setSystem_Dynamics(system_dynamics);
+	source->setInvariant(invariant);
+	source->setInvariantExists(true);
+	source->add_Out_Going_Transition(trans);
 
 //transitions &trans;
 //transitions trans("hop",source,destination,gaurd_polytope,assignment);
@@ -321,7 +321,7 @@ t=NULL;*/
 }
 
 //Hyst Generated output
-void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
+void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
@@ -473,8 +473,8 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromalways_running;
 
 	Out_Going_Trans_fromalways_running.push_back(t1);
-	location l1(1, "always_running", system_dynamics0, invariant0, true,
-			Out_Going_Trans_fromalways_running);
+	location::ptr l1 = location::ptr(new location(1, "always_running", system_dynamics0, invariant0, true,
+			Out_Going_Trans_fromalways_running));
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.addInitial_Location(l1);

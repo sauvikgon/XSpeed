@@ -140,8 +140,8 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	Out_Going_Trans_fromLoc1.push_back(t1);
 
-	location l1(1, "Loc-1", system_dynamics, invariant1, true,
-			Out_Going_Trans_fromLoc1);
+	location::ptr l1 = location::ptr(new location(1, "Loc-1", system_dynamics, invariant1, true,
+			Out_Going_Trans_fromLoc1));
 //	Initalised for Location 1	 ---------------------
 
 //Location 2::has transition t2::with guard is x<=0 & y<=0
@@ -182,8 +182,8 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc2;
 	Out_Going_Trans_fromLoc2.push_back(t2);
 
-	location l2(2, "Loc-2", system_dynamics, invariant2, true,
-			Out_Going_Trans_fromLoc2);
+	location::ptr l2 = location::ptr(new location(2, "Loc-2", system_dynamics, invariant2, true,
+			Out_Going_Trans_fromLoc2));
 //Initialised Location 2	--------------------------
 
 	//Location 3::has transition t3::with guard is x>=0 & y<=0
@@ -224,8 +224,8 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc3;
 	Out_Going_Trans_fromLoc3.push_back(t3);
 
-	location l3(3, "Loc-3", system_dynamics, invariant3, true,
-			Out_Going_Trans_fromLoc3);
+	location::ptr l3 = location::ptr(new location(3, "Loc-3", system_dynamics, invariant3, true,
+			Out_Going_Trans_fromLoc3));
 	//Initialised Location 3	--------------------------
 
 	//Location 4::has transition t4::with guard is x>=0 & y>=0
@@ -266,8 +266,8 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc4;
 	Out_Going_Trans_fromLoc4.push_back(t4);
 
-	location l4(4, "Loc-4", system_dynamics, invariant4, true,
-			Out_Going_Trans_fromLoc4);
+	location::ptr l4 = location::ptr(new location(4, "Loc-4", system_dynamics, invariant4, true,
+			Out_Going_Trans_fromLoc4));
 	//Initialised Location 4	--------------------------
 
 	int dim = initial_polytope_I->getSystemDimension();

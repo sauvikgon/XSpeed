@@ -7,8 +7,8 @@
 #include "symbolic_states_utility.h"
 
 symbolic_states::ptr searchSymbolic_state(
-	std::list<symbolic_states::ptr> symbolic_list,
-	symbolic_states::ptr symbolic) {
+		std::list<symbolic_states::ptr> symbolic_list,
+		symbolic_states::ptr symbolic) {
 	symbolic_states::ptr found_symbolic_state;
 	std::list<symbolic_states::ptr>::iterator it;
 	bool notFound=true;
@@ -20,7 +20,7 @@ symbolic_states::ptr searchSymbolic_state(
 		}
 	}
 	if (notFound){
-		std::cout<<"Symbolic state search:: Not Found!!! Issue with Memory_Address_Corruption!!!\n";
+		std::cout<<"Symbolic state search:: Not Found!!! Issue with Memory_Address_Corroption!!!\n";
 		return symbolic;	//should not return ACTUALLY this condition should not arise
 	}
 }
