@@ -262,8 +262,8 @@ unsigned int InvariantBoundaryCheck(Dynamics& SystemDynamics,
 			if ((-1 * TempOmega_min) > invariant_SupportFunction) { // Should have been correct
 				//if ( ((-1 * TempOmega_min) < invariant_SupportFunction) && (TempOmega < invariant_SupportFunction)) {
 				intersection_end = loopIteration;
-				cout << "\nIntersection_End = " << intersection_end << endl;
-				cout<<"TempOmega_min = "<<TempOmega_min<< " and TempOmega = "<<TempOmega<<"\t";
+				//cout << "\nIntersection_End = " << intersection_end << endl;
+				//cout<<"TempOmega_min = "<<TempOmega_min<< " and TempOmega = "<<TempOmega<<"\t";
 				boundaryIterations[eachInvariantDirection] = loopIteration; //Made Changes here due to circle
 				invariantCrossed = true;//Omega is out of the invariant's boundary
 				break; //no need to compute reachable set anymore due to out of invariant boundary

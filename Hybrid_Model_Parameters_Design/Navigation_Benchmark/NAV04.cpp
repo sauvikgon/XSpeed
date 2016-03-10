@@ -1632,23 +1632,23 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 
 	//0.2<=x1<=0.7 & 0.2<=x2<=0.7 & 0.8<=v1<=0.8 & 0<=v2<=0
 	boundValueI.resize(row);
-	/*boundValueI[0] = 0.7;
+	boundValueI[0] = 0.7;
 	boundValueI[1] = -0.2;
 	boundValueI[2] = 0.7;
 	boundValueI[3] = -0.2;
 	boundValueI[4] = 0.8;
 	boundValueI[5] = -0.8;
 	boundValueI[6] = 0;
-	boundValueI[7] = 0;*/
+	boundValueI[7] = 0;
 
-	boundValueI[0] = 0.5; //	(0.5<=x1<=0.5, 0.5<=x2<=0.5, v1==0,v2==0) ************************
+	/*boundValueI[0] = 0.5; //	(0.5<=x1<=0.5, 0.5<=x2<=0.5, v1==0,v2==0) ************************
 	boundValueI[1] = -0.5;	//This is good input for debugging
 	boundValueI[2] = 0.5;
 	boundValueI[3] = -0.5;
 	boundValueI[4] = 0;
 	boundValueI[5] = 0;
 	boundValueI[6] = 0;
-	boundValueI[7] = 0;
+	boundValueI[7] = 0;*/
 
 
 	boundSignI = 1;

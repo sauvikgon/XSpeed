@@ -11,9 +11,6 @@
 #include "core_system/HybridAutomata/Location.h"
 
 struct LoadBalanceData{
-	//unsigned int Nos_X0;//unsigned int Nos_U;
-	//unsigned int Nos_dotProduct;	//Number of "dot product" required in the reach algorithm
-	//unsigned int Nos_SF_UnitBall;	//Number of "Support Function on UnitBall" required in the reach algorithm
 
 	unsigned int symState_ID;	// ID of the symbolic_state or flowpipe whose details are stored. #Redundant actually
 	// As every symbolic_state will have different

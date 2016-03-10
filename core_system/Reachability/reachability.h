@@ -111,10 +111,21 @@ private:
 			math::matrix<float>& List_dir_U, unsigned int& newIteration);
 
 	/*Performs the task of computing support functions on the specified polytopes for the given directions
-	and returns the results of support function computation on the same data-structure as be symbolic-state basis*/
+	and returns the results of support function computation on the same data-structure as be symbolic-state basis
+	SEQUENTIAL*/
 	void computeBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS);
-
 	template_polyhedra::ptr substitute_in_ReachAlgorithm(LoadBalanceData& LoadBalanceDS);
+
+	/*
+	 * Performs the task of computing support functions in parallel using the approach of task_scheduling
+	 */
+	void computeBIG_Task_parallel(std::vector<LoadBalanceData>& LoadBalanceDS);//NOT FEASIBLE TO PARALLELIZE
+
+	void parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS);
+
+	double boxLPSolver(polytope::ptr poly, std::vector<double> dir);
+
+	double LPSolver(polytope::ptr poly, std::vector<double> dirs);
 };
 
 #endif /* REACHABILITY_H_ */
