@@ -45,7 +45,8 @@
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
 
 //**************** Hybrid Automata Definition ***********************
-#include "core_system/Reachability/reachability_HybridAutomata.h"
+#include "core_system/Reachability/reachability_HybridAutomata_Sequential.h"
+#include "core_system/Reachability/reachability_HybridAutomata_ParallelBFS.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "core_system/HybridAutomata/Transition.h"
 #include "core_system/HybridAutomata/Location.h"
@@ -53,8 +54,6 @@
 #include "core_system/symbolic_states/initial_state.h"
 //**************** Hybrid Automata Definition ***********************
 #include "application/All_PP_Definition.h"
-//#include "math/lp_gurobi_simplex.h"
-//#include <boost/tokenizer.hpp>
 
 // *********** Command Line Boost Program Options ********
 #include <boost/program_options/config.hpp>
@@ -98,7 +97,8 @@ unsigned int Directions_Type;
 unsigned int Uniform_Directions_Size;
 
 void initialize(int iterations_size, double time_bound, unsigned int model_type,
-		unsigned int directions_type_or_size, unsigned int transition_size) {
+		unsigned int directions_type_or_size, unsigned int transition_size, const std::string& bad_state,
+		std::pair<int, polytope::ptr>& forbidden_set) {
 	size_type row, col;
 
 	transition_iterations = transition_size; //Number of iterations for transition of the Hybrid system
@@ -268,7 +268,9 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
-
+	/* The variable to dimension id map it set at this point */
+	if(!bad_state.empty())
+		string_to_poly(bad_state,forbidden_set);
 }
 
 bool isNumber(const string& s) {
@@ -297,8 +299,10 @@ int main(int argc, char *argv[]) {
 	// -----------------
 
 	//cout<<"Started from here\n";
-	std::set<std::pair<int, polytope::ptr> > forbidden_set; //{(locID1,Polytope1)},{(locID2,Polytope2)}
+	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)}
+	std::string bad_state; // string to capture the bad state description given by the user
 	abstractCE::ptr ce;	//object of class counter_example
+
 
 	double time_bound;
 	unsigned int iterations_size;
@@ -394,31 +398,9 @@ int main(int argc, char *argv[]) {
 			"config-file,c", po::value<std::string>(),
 			"include configuration file")("output-file,o",
 			po::value<std::string>(),
-			"output file name for redirecting the outputs")
-
-			;
-
-	// Declare a group of options that will be allowed both on command line and in config file
-	/*po::options_description config("Configuration");
-	 config.add_options()("include-path,I",
-	 po::value<std::vector<string> >()->composing(), "include file path")(
-	 "model-file,m", po::value<std::vector<string> >()->composing(),
-	 "include model file")("config-file,c",
-	 po::value<std::vector<string> >()->composing(),
-	 "include configuration file");*/
+			"output file name for redirecting the outputs");
 
 	po::store(po::parse_command_line(argc, argv, desc), vm);
-	/*po::positional_options_description p;
-	 p.add("input-files", -1);
-
-	 po::options_description cmdline_options;
-	 cmdline_options.add(desc).add(config);
-
-	 po::options_description config_file_options;
-	 config_file_options.add(config);
-
-	 po::options_description visible("Allowed options");
-	 visible.add(desc).add(config);*/
 	po::notify(vm);
 
 	if (argc > 1) { // Boost Options to be filled-up
@@ -429,25 +411,16 @@ int main(int argc, char *argv[]) {
 		std::string include_path = "", model_filename = "",
 				config_filename = ""; //default set to empty
 		if (vm.count("include-path")) {
-			//std::vector<string> testfile;
-			//std::cout << "Include Path are: ";
-			//std::cout << "Include Path are: "<< vm["include-path"].as< std::vector<string> >() << "\n";
 			include_path = vm["include-path"].as<std::string>();
 			std::cout << "Include Path is: " << include_path << "\n";
 		}
 
 		if (vm.count("config-file")) {
-			//std::vector<string> testfile;
-			//std::cout << "Input files are: ";
 			config_filename = vm["config-file"].as<std::string>();
-			//std::cout << "Input files are: "<< vm["model-file"].as< std::vector<string> >() << "\n";
 			std::cout << "Configuration file is: " << config_filename << "\n";
 		}
 		if (vm.count("model-file")) {
-			//std::vector<string> testfile;
-			//std::cout << "Input files are: ";
 			model_filename = vm["model-file"].as<std::string>();
-			//std::cout << "Input files are: "<< vm["model-file"].as< std::vector<string> >() << "\n";
 			std::cout << "Model file is: " << model_filename << "\n";
 		}
 
@@ -501,34 +474,7 @@ int main(int argc, char *argv[]) {
 				 outputFile_release =
 				 "XSpeed/Release/src/Hybrid_Model_Parameters_Design/user_model/user_model.o";
 				 //	dependenciesFile ="XSpeed/src/Hybrid_Model_Parameters_Design/user_model/user_model.d";
-				 //todo :: generate and copy .d
-
-				 std::string cmdStr3, copy_CmdStr;
-
-				 compile_CmdStr = "g++";
-				 cmdStr2.append(compile_CmdStr);
-				 cmdStr2.append(SingleSpace);
-				 cmdStr2.append(projLocation);
-				 cmdStr2.append(replacingFile);
-				 cmdStr2.append(SingleSpace);
-				 cmdStr2.append("-o");
-				 cmdStr2.append(SingleSpace);
-				 cmdStr2.append(projLocation);
-				 cmdStr2.append(outputFile_debug);
-				 st2 = cmdStr2.c_str();
-				 system(st2);	//compiling with g++ XX.cpp -o XX.o file
-
-				 copy_CmdStr = "cp";
-				 cmdStr3.append(copy_CmdStr);
-				 cmdStr3.append(SingleSpace);
-				 cmdStr3.append(projLocation);
-				 cmdStr3.append(outputFile_debug);
-				 cmdStr3.append(SingleSpace);
-				 cmdStr3.append(projLocation);
-				 cmdStr3.append(outputFile_release);
-				 st3 = cmdStr3.c_str();
-				 system(st3);	//cp file.o release_location
-				 */
+				 //todo :: generate and copy .d */
 				std::string cmdStr4, debug_loc, release_loc, cmd_option;
 
 				system("make clean");
@@ -552,7 +498,6 @@ int main(int argc, char *argv[]) {
 					cmdStr4.append(projLocation);
 					cmdStr4.append(release_loc);
 				}
-				//cmdStr4.append(" > /tmp/MakeBuild_output_file.txt");
 				st4 = cmdStr4.c_str();
 				system(st4);
 
@@ -579,14 +524,12 @@ int main(int argc, char *argv[]) {
 					}
 					str_argv.append(argv[c]);
 				}
-
-				//std::cout << "\nstr_argv = " << str_argv << std::endl;
 				cmdStr5.append(str_argv);
 				std::cout << "\ncmdStr5 = " << cmdStr5 << std::endl;
 				st5 = cmdStr5.c_str();
 				system(st5); //re-run the project
 				std::cout << "This Main parent process to be stopped!!!\n";
-				return 0; //stop the 1st recursive executable
+				return 0;
 			}
 
 			//hyst generated code to be used
@@ -630,170 +573,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-			std::string allStr;
+			bad_state = vm["forbidden"].as<std::string>();
 
-			allStr = vm["forbidden"].as<std::string>();
-			std::cout << "\nAll forbidden arguments\n";
-
-			math::matrix<double> coeff;
-			std::vector<double> colVector;
-
-			std::list<std::string> all_args;
-
-			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-			boost::char_separator<char> sep("& ");
-			tokenizer tokens(allStr, sep);
-			for (tokenizer::iterator tok_iter = tokens.begin();
-					tok_iter != tokens.end(); ++tok_iter) {
-				//std::cout << "<" << *tok_iter << ">" << std::endl;
-				all_args.push_back((std::string) *tok_iter);
-			}
-
-			std::pair<int, polytope::ptr> forbid_pair;
-			int pair_started = -1;
-			bool polytope_created = false;
-			int constraints_count = 0;
-			std::list<std::vector<double> > list_of_bounds;
-			for (std::list<std::string>::iterator it = all_args.begin();
-					it != all_args.end(); it++) {
-				std::string eachStr = (*it);
-				//		std::cout << "eachStr = " << eachStr << std::endl;
-				boost::char_separator<char> sep_symbol("="); //handles = or ==
-				tokenizer each_tokens(eachStr, sep_symbol);
-				bool is_loc = false;
-
-				if (each_tokens.begin().current_token().compare("loc") == 0) { //check the 1st token if "loc"
-					//std::cout<<"each_tokens.begin().current_token() = "<<each_tokens.begin().current_token()<<"  amit\n";
-					pair_started = 1;
-					for (tokenizer::iterator tok_it = each_tokens.begin();
-							tok_it != each_tokens.end(); tok_it++) {
-						if (is_loc) { //2nd token
-							std::cout << "Loc=" << *tok_it << "\n";
-							forbid_pair.first = boost::lexical_cast<int>(
-									(std::string) (*tok_it));
-							pair_started = 0;
-						}
-						if (each_tokens.begin().current_token().compare("loc")
-								== 0) { //1st token
-							is_loc = true;
-							if (polytope_created) { //previous polytope created but not stored in pair
-								//forbid_pair.second = poly;
-								//first store the polytope
-								//false reset all previous coeff's values
-								coeff.resize(2 * list_of_bounds.size(),
-										list_of_bounds.size()); //assuming simple-case of bounded input
-								for (int i = 0; i < coeff.size2(); i++) { // both till col
-									for (int j = 0; j < coeff.size2(); j++) { // both till col
-										if (i == j) {
-											coeff(2 * i, j) = -1;
-											coeff(2 * i + 1, j) = 1;
-										} else {
-											coeff(2 * i, j) = 0;
-											coeff(2 * i + 1, j) = 0;
-										}
-									}
-								}
-								int res = 2 * list_of_bounds.size();
-								colVector.resize(res);
-								int col_index = 0;
-								for (std::list<std::vector<double> >::iterator it =
-										list_of_bounds.begin();
-										it != list_of_bounds.end(); it++) {
-									std::vector<double> v = (*it);
-									colVector[col_index] = v[0];
-									col_index++;
-									colVector[col_index] = v[1];
-									col_index++;
-								}
-
-								polytope::ptr forbidden_polytope;
-								forbidden_polytope = polytope::ptr(
-										new polytope(coeff, colVector, 1));
-								forbid_pair.second = forbidden_polytope; //todo currently unable to handle negative bounds
-								forbidden_set.insert(forbid_pair);
-
-								polytope_created = false; //store here the polytope
-								constraints_count = 0;
-								list_of_bounds.clear(); //removes all previous elements from the list
-
-							}
-						}
-					}
-				} else { //Always user's first input is loc=locID. So forbid_pair.first is populated 1st
-					pair_started = 0; //this token is a constraint string and not a loc=locID
-					//New Parser for parsing each constraints
-					std::vector<double> bounds(2); //every constraints will have left and right value
-					//int tmp=0;
-					while (pair_started != 1) { //parse and create Polytope p for forbid_pair.second
-						std::string constraint_Str = eachStr;
-						boost::char_separator<char> sep_symbol("<="); //handles < or <= (or even error input =<
-						tokenizer each_tokens(constraint_Str, sep_symbol);
-						/*tmp++;
-						 bounds.resize(tmp);*/
-						int index_val = 0;
-						for (tokenizer::iterator tok_it = each_tokens.begin();
-								tok_it != each_tokens.end(); tok_it++) {
-							if (isNumber((std::string) *tok_it)) { //tokens
-								//std::cout << "tok_it = " << *tok_it << "\n";
-								bounds[index_val] = boost::lexical_cast<double>(
-										(std::string) (*tok_it));
-								index_val++;
-								//bounds.push_back(boost::lexical_cast<int>((*tok_it))); //forbid_pair.first = boost::lexical_cast<int>((*tok_it));
-							}
-						}
-						bounds[0] = -1 * bounds[0]; //n<=x1 so n converted to -n
-						list_of_bounds.push_back(bounds);
-						polytope_created = true; //constraint(s) parsed
-						pair_started = 1; //end of a constraint to exit from while-loop
-					} //end of a constraint
-				}
-				constraints_count++; //number of constraints count
-			} //End of all forbidden string
-
-			if (polytope_created) {
-				//constraints count can be obtained from 'constraints_count' or list_of_bounds.size()
-
-				coeff.resize(2 * list_of_bounds.size(), list_of_bounds.size()); //assuming simple-case of bounded input
-				for (int i = 0; i < coeff.size2(); i++) { // both till col
-					for (int j = 0; j < coeff.size2(); j++) { // both till col
-						if (i == j) {
-							coeff(2 * i, j) = -1;
-							coeff(2 * i + 1, j) = 1;
-						} else {
-							coeff(2 * i, j) = 0;
-							coeff(2 * i + 1, j) = 0;
-						}
-					}
-				}
-				int res = 2 * list_of_bounds.size();
-				colVector.resize(res);
-				int col_index = 0;
-				for (std::list<std::vector<double> >::iterator it =
-						list_of_bounds.begin(); it != list_of_bounds.end();
-						it++) {
-					std::vector<double> v = (*it);
-					colVector[col_index] = v[0];
-					col_index++;
-					colVector[col_index] = v[1];
-					col_index++;
-				}
-				std::cout << "coeff = " << coeff << std::endl;
-				std::cout << "colVector = ";
-				for (int i = 0; i < colVector.size(); i++) {
-					std::cout << colVector[i] << "\t";
-				}
-				polytope::ptr forbidden_polytope;
-
-				forbidden_polytope = polytope::ptr(
-						new polytope(coeff, colVector, 1));
-				//debug purpose
-				std::string fname = "./forbidden_poly";
-				forbidden_polytope->print2file(fname,2,0);
-				//-----
-				forbid_pair.second = forbidden_polytope;
-				forbidden_set.insert(forbid_pair);
-				polytope_created = false;
-			}
 		}
 
 		if (vm.count("model") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
@@ -939,13 +720,11 @@ int main(int argc, char *argv[]) {
 
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
-	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
-			transition_size);
+	// Initialize the model with the parameters given by the user
 
-	//std::list<template_polyhedra> reachability_sfm;
+	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
+			transition_size, bad_state, forbidden_set);
 	std::list<symbolic_states::ptr> Symbolic_states_list;
-//List/Array of Reachability Region/FlowPipe of all transitions.
-//to be changed into a single variable instead of list.
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
 	boost::timer::cpu_timer tt1;

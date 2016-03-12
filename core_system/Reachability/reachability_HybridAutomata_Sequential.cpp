@@ -5,7 +5,7 @@
  *      Author: amit
  */
 
-#include "core_system/Reachability/reachability_HybridAutomata.h"
+#include "core_system/Reachability/reachability_HybridAutomata_Sequential.h"
 #include "counterExample/abstractCE.h"
 
 /**
@@ -28,7 +28,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		unsigned int Algorithm_Type, unsigned int Total_Partition,
 		int lp_solver_type_choosen, unsigned int number_of_streams,
 		int Solver_GLPK_Gurobi_GPU,
-		std::set<std::pair<int, polytope::ptr> > forbidden_set, abstractCE::ptr& ce) {
+		std::pair<int, polytope::ptr> forbidden_set, abstractCE::ptr& ce) {
 //	std::cout<<"Algorithm_Type = "<<Algorithm_Type<<std::endl;
 	//std::list<template_polyhedra> Reachability_Region;
 
@@ -351,132 +351,130 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 
 		if (reach_region->getTotalIterations() != 0) { //flowpipe exists
 			//so perform intersection with forbidden set provided locID matches
-			for (std::set<std::pair<int, polytope::ptr> >::iterator it =
-					forbidden_set.begin(); it != forbidden_set.end(); it++) {
-				int locID = current_location.getLocId();
-				if (locID == (*it).first) { //forbidden locID matches
-					polytope::ptr forbid_poly = (*it).second;
-					//check intersection with flowpipe/reach_region
-					//GeneratePolytopePlotter(forbid_poly);
-					std::list<template_polyhedra> forbid_intersects;
-					forbid_intersects = reach_region->polys_intersectionSequential(
-							forbid_poly, lp_solver_type_choosen);
+			int locID = current_location.getLocId();
+			if (locID == forbidden_set.first) { //forbidden locID matches
+				polytope::ptr forbid_poly = forbidden_set.second;
+				//forbid_poly->print2file("./forbid_poly",2,0);
+				//check intersection with flowpipe/reach_region
+				//GeneratePolytopePlotter(forbid_poly);
+				std::list<template_polyhedra> forbid_intersects;
+				forbid_intersects = reach_region->polys_intersectionSequential(
+						forbid_poly, lp_solver_type_choosen);
 
-					if (forbid_intersects.size() == 0) {
-						std::cout<< "\nNo Violation of SAFETY in loc id:" << locID << std::endl;
-					} else {
-						std::cout<< "\nViolation of SAFETY in loc id:" << locID << std::endl;
+				if (forbid_intersects.size() == 0) {
+					std::cout<< "\nNo Violation of SAFETY in loc id:" << locID << std::endl;
+				} else {
+					std::cout<< "\nViolation of SAFETY in loc id:" << locID << std::endl;
 
-						symbolic_states::ptr current_forbidden_state;
-						current_forbidden_state = S;
+					symbolic_states::ptr current_forbidden_state;
+					current_forbidden_state = S;
 
-						std::cout << "\nReverse Path Trace =>\n";
-						int cc = 0;
-						do {
-							int locationID, locationID2;
-							discrete_set ds, ds2;
-							ds = current_forbidden_state->getDiscreteSet();
-							//insert discrete_set in the abstract_symbolic_state
-							//curr_abs_sym_state->setDiscreteSet(ds);
+					std::cout << "\nReverse Path Trace =>\n";
+					int cc = 0;
+					do {
+						int locationID, locationID2;
+						discrete_set ds, ds2;
+						ds = current_forbidden_state->getDiscreteSet();
+						//insert discrete_set in the abstract_symbolic_state
+						//curr_abs_sym_state->setDiscreteSet(ds);
 
-		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
+	// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
-							abs_flowpipe = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
-							// The below gets the first polytope from the SFM. Could be made even better
-							// by taking the exact initial set X0.
+						abs_flowpipe = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+						// The below gets the first polytope from the SFM. Could be made even better
+						// by taking the exact initial set X0.
 
-							polyI = current_forbidden_state->getInitial_ContinousSetptr();
+						polyI = current_forbidden_state->getInitial_ContinousSetptr();
 
-							// Here create a new abstract_symbolic_state
-							abstract_symbolic_state::ptr curr_abs_sym_state;
-							curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state(ds,abs_flowpipe,polyI));
+						// Here create a new abstract_symbolic_state
+						abstract_symbolic_state::ptr curr_abs_sym_state;
+						curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state(ds,abs_flowpipe,polyI));
 
-		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
-							for (std::set<int>::iterator it =
-									ds.getDiscreteElements().begin();
-									it != ds.getDiscreteElements().end(); ++it)
-								locationID = (*it); //Assuming only a single element exist in the discrete_set
+	// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
+						for (std::set<int>::iterator it =
+								ds.getDiscreteElements().begin();
+								it != ds.getDiscreteElements().end(); ++it)
+							locationID = (*it); //Assuming only a single element exist in the discrete_set
 
-							int transID = current_forbidden_state->getTransitionId();	//a)
-		//   **********************************************************
-		//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
-			//1) ******************** list_of_symbolic_states ********************
-							list_sym_states.push_front(current_forbidden_state);//pushing the bad symbolic_state first(at the top)
-							list_abstract_sym_states.push_front(curr_abs_sym_state);
-			//2) list_of_transition
-				//a) current sym_state only have trans_ID but to retrieve this transition I have to
-				//b) get the parent to this sym_state using getParentPtrSymbolicState and then in
-				//c) that sym_state get the discrete state and then get its loc_ID.
-				//d) Now from the class hybrid_automata get an object of the class location
-				//e) Now for this location's object get the transition with transID as transition_ID from
-				// the data member out_going_transitions.
-			//3) length: number of transitions
-		//   **********************************************************
-							if (cc != 0) {
-								std::cout << " --> ";
-							}
-							std::cout << "(" << locationID << ", " << transID << ")";
-							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
-								//cout<<"check if parentPtr not NULL\n";
-								//@Amit: what is searchSymbolic_state?
-								current_forbidden_state =
-										searchSymbolic_state(Reachability_Region,
-												current_forbidden_state->getParentPtrSymbolicState());	//b)
-			//2) ******************* list_transitions ********************
-								ds2 = current_forbidden_state->getDiscreteSet();	//c)
-								for (std::set<int>::iterator it =ds2.getDiscreteElements().begin();it != ds2.getDiscreteElements().end(); ++it)
-									locationID2 = (*it); //c)
-
-								location object_location;
-								object_location = H.getLocation(locationID2);	//d)
-								/*std::list<transition::ptr> AllOutGoingTrans;
-								AllOutGoingTrans = object_location.getOut_Going_Transitions();*/
-								transition::ptr temp = object_location.getTransition(transID);	//e)
-								list_transitions.push_front(temp);//pushing the transition in the stack
-			//2) ******************* list_transitions Ends ********************
-							}
-							cc++;
-						} while (current_forbidden_state->getParentPtrSymbolicState() != NULL);
-
-						if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState() == NULL)) { //root is missed
-							int locationID;
-							discrete_set ds;
-							ds = current_forbidden_state->getDiscreteSet();
-
-							abs_flowpipe = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
-							// The below gets the first polytope from the SFM. Could be made even better
-							// by taking the exact initial set X0.
-
-							polyI = current_forbidden_state->getInitial_ContinousSetptr();
-
-							// Create a new abstract_symbolic_state
-							abstract_symbolic_state::ptr curr_abs_sym_state;
-
-							curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state(ds,abs_flowpipe,polyI));
-
-							for (std::set<int>::iterator it =
-									ds.getDiscreteElements().begin();
-									it != ds.getDiscreteElements().end(); ++it)
-								locationID = (*it); //Assuming only a single element exist in the discrete_set
-
-							int transID = current_forbidden_state->getTransitionId();	//a)
-
-							list_sym_states.push_front(current_forbidden_state);//1) pushing the initial/root bad symbolic_state at the top
-							list_abstract_sym_states.push_front(curr_abs_sym_state);
-							std::cout << " -->  (" << locationID << ", "<< transID << ")\n";
+						int transID = current_forbidden_state->getTransitionId();	//a)
+	//   **********************************************************
+	//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
+		//1) ******************** list_of_symbolic_states ********************
+						list_sym_states.push_front(current_forbidden_state);//pushing the bad symbolic_state first(at the top)
+						list_abstract_sym_states.push_front(curr_abs_sym_state);
+		//2) list_of_transition
+			//a) current sym_state only have trans_ID but to retrieve this transition I have to
+			//b) get the parent to this sym_state using getParentPtrSymbolicState and then in
+			//c) that sym_state get the discrete state and then get its loc_ID.
+			//d) Now from the class hybrid_automata get an object of the class location
+			//e) Now for this location's object get the transition with transID as transition_ID from
+			// the data member out_going_transitions.
+		//3) length: number of transitions
+	//   **********************************************************
+						if (cc != 0) {
+							std::cout << " --> ";
 						}
-						saftey_violated = true;
+						std::cout << "(" << locationID << ", " << transID << ")";
+						if (current_forbidden_state->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
+							//cout<<"check if parentPtr not NULL\n";
+							//@Amit: what is searchSymbolic_state?
+							current_forbidden_state =
+									searchSymbolic_state(Reachability_Region,
+											current_forbidden_state->getParentPtrSymbolicState());	//b)
+		//2) ******************* list_transitions ********************
+							ds2 = current_forbidden_state->getDiscreteSet();	//c)
+							for (std::set<int>::iterator it =ds2.getDiscreteElements().begin();it != ds2.getDiscreteElements().end(); ++it)
+								locationID2 = (*it); //c)
 
-						ce = abstractCE::ptr(new abstractCE());
-						ce->set_length(cc);
-						ce->set_sym_states(list_abstract_sym_states);
-						ce->set_transitions(list_transitions);
-						hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
-						ce->set_automaton(ha);
-						break;
-					} // end of condition when forbidden state intersects with the flowpipe set
-				} //end of condition when forbidden state loc id matches with flowpipe loc id
-			} //end of all forbidden_state check
+							location object_location;
+							object_location = H.getLocation(locationID2);	//d)
+							/*std::list<transition::ptr> AllOutGoingTrans;
+							AllOutGoingTrans = object_location.getOut_Going_Transitions();*/
+							transition::ptr temp = object_location.getTransition(transID);	//e)
+							list_transitions.push_front(temp);//pushing the transition in the stack
+		//2) ******************* list_transitions Ends ********************
+						}
+						cc++;
+					} while (current_forbidden_state->getParentPtrSymbolicState() != NULL);
+
+					if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState() == NULL)) { //root is missed
+						int locationID;
+						discrete_set ds;
+						ds = current_forbidden_state->getDiscreteSet();
+
+						abs_flowpipe = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+						// The below gets the first polytope from the SFM. Could be made even better
+						// by taking the exact initial set X0.
+
+						polyI = current_forbidden_state->getInitial_ContinousSetptr();
+
+						// Create a new abstract_symbolic_state
+						abstract_symbolic_state::ptr curr_abs_sym_state;
+
+						curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state(ds,abs_flowpipe,polyI));
+
+						for (std::set<int>::iterator it =
+								ds.getDiscreteElements().begin();
+								it != ds.getDiscreteElements().end(); ++it)
+							locationID = (*it); //Assuming only a single element exist in the discrete_set
+
+						int transID = current_forbidden_state->getTransitionId();	//a)
+
+						list_sym_states.push_front(current_forbidden_state);//1) pushing the initial/root bad symbolic_state at the top
+						list_abstract_sym_states.push_front(curr_abs_sym_state);
+						std::cout << " -->  (" << locationID << ", "<< transID << ")\n";
+					}
+					saftey_violated = true;
+
+					ce = abstractCE::ptr(new abstractCE());
+					ce->set_length(cc);
+					ce->set_sym_states(list_abstract_sym_states);
+					ce->set_transitions(list_transitions);
+					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
+					ce->set_automaton(ha);
+					break;
+				} // end of condition when forbidden state intersects with the flowpipe set
+			} //end of condition when forbidden state loc id matches with flowpipe loc id
 		} //computed flowpipe is not empty
 		if (saftey_violated) {
 			break; //no need to compute rest of the locations

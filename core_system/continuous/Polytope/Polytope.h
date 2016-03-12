@@ -16,6 +16,7 @@
 #include <boost/shared_ptr.hpp>
 #include<set>
 #include<utility>
+#include <boost/tokenizer.hpp>
 
 using namespace std;
 /*
@@ -148,5 +149,10 @@ public:
 	void print2file(std::string fname, unsigned int dim1, unsigned int dim2);
 
 };
+/**
+ * Creates a pair of <loc_id, poly> from the user given bad state string
+ */
+
+void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set);
 
 #endif /* POLYTOPE_H_ */

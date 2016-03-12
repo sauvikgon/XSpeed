@@ -274,12 +274,24 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	lb[0] = 0.1;
 //	lb[1] = 2;
 
-//	myopt.set_lower_bounds(lb);
+	std::vector<double> lb(optD);
+	std::vector<double> ub(optD);
+	for(unsigned int i=0;i<N*dim;i++){
+		lb[i] = -500;
+		ub[i] = 500;
+	}
+	for(unsigned int i=N*dim;i<optD;i++){
+		lb[i] = 0;
+		ub[i] = 500;
+	}
+
+	myopt.set_lower_bounds(lb);
+	myopt.set_upper_bounds(ub);
 	myopt.set_stopval(9.08);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);
-	myopt.set_initial_step(0.001);
+	//myopt.set_initial_step(0.001);
 
 	/** Set Initial value to the optimization problem */
 	std::vector<double> x(optD);

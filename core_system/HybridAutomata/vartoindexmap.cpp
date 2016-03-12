@@ -22,8 +22,17 @@ void var_to_index_map::print_var_index_map()
 {
 	unsigned int i = 0;
 	std::cout << "The variable to index map is:\n";
-//	while(i<var_index_map.size())
-//
-//		std::cout << "Variable = " << var_index_map << std::endl;
+	for(std::map<std::string, unsigned int>::iterator it = var_index_map_ptr->begin(); it!=var_index_map_ptr->end();it++){
+		std::cout << "Variable = " << (*it).first;
+		std::cout << " Value = " << (*it).second << std::endl;
+		i++;
+	}
+}
 
+/**
+ * Returns the size of the map, i.e., the number of variables of the map
+ */
+unsigned int var_to_index_map::map_size()
+{
+	return var_index_map_ptr->size();
 }

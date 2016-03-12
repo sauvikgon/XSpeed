@@ -25,7 +25,12 @@ public:
 	var_to_index_map();
 	virtual ~var_to_index_map();
 	unsigned int get_index(std::string var_name){
-		return var_index_map_ptr->at(var_name);
+		try{
+		unsigned int index = var_index_map_ptr->at(var_name);
+		}catch(std::exception& e){
+			std::cout << "Invalid variable name used in the forbidden string\n";
+			exit(0);
+		}
 	}
 	void insert_to_map(std::string name, unsigned int val)
 	{
@@ -36,6 +41,8 @@ public:
 	}
 	void print_var_index_map();
 
+	/** Return the size of the map */
+	unsigned int map_size();
 	static map_ptr var_index_map_ptr;
 };
 

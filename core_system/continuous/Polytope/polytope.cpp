@@ -125,6 +125,10 @@ void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 	unsigned int row_size, col_size;
 	row_size = this->getCoeffMatrix().size1();
 	col_size = this->getCoeffMatrix().size2(); //dimension of the polytope
+	if(col_size == 0) // The poly is currently empty
+		col_size = coeff_constraint.size();
+	else
+		assert(col_size == coeff_constraint.size());
 	this->coeffMatrix.resize(row_size + 1, col_size, true); //adding one more constraint
 	this->columnVector.resize(row_size + 1); //adding one more constraint's bound value
 	for (unsigned int i = 0; i < col_size; i++) {
@@ -431,6 +435,8 @@ double polytope::point_distance(std::vector<double> v){
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
 {
+	assert(dim1 < this->map_size() && dim2 < this->map_size());
+	assert(dim1 >= 0 && dim2 >= 0);
 	std::ofstream myfile;
 	myfile.open(fname.c_str());
 	math::matrix<double> C = get_2dVertices(dim1, dim2);
@@ -441,4 +447,66 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 	}
 	myfile.close();
 }
+void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
+{
+	std::list<std::string> all_args;
+	polytope::ptr p = polytope::ptr(new polytope());
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("& ");
+	tokenizer tokens(bad_state, sep);
+
+	for (tokenizer::iterator tok_iter = tokens.begin();
+			tok_iter != tokens.end(); ++tok_iter) {
+		all_args.push_back((std::string) *tok_iter);
+	}
+	/* get the location number from the first token */
+	std::string locString = *all_args.begin();
+	all_args.pop_front();
+	boost::char_separator<char> sep1("= ");
+	tokens = tokenizer(locString, sep1);
+
+	tokenizer::iterator tok_iter = tokens.begin();
+
+	std::string tokString = *tok_iter;
+	if(tokString.compare("loc")!=0 && tokString.compare("Loc")!=0 && tokString.compare("LOC")!=0 ){
+		throw std::runtime_error("forbidden state string improper: start with loc=id & ...\n");
+	}
+	tok_iter++;
+	f_set.first = std::atoi((*tok_iter).c_str());
+
+	std::string varname;
+	unsigned int i;
+	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
+		tokString = *iter;
+		if (tokString.find("<=")!=std::string::npos ){ // less than equal to constraint
+			sep = boost::char_separator<char>("<=");
+			tokens = tokenizer(tokString,sep);
+			tok_iter = tokens.begin();
+			varname = *tok_iter;
+			tok_iter++;
+			i = p->get_index(varname);
+			std::vector<double> cons(p->map_size(),0);
+			cons[i] = 1;
+			double bound = std::atof((*tok_iter).c_str());
+			p->setMoreConstraints(cons,bound);
+		}
+		else if(tokString.find(">=")!=std::string::npos){ // greater than equal to constraint
+			sep = boost::char_separator<char>(">=");
+			tokens = tokenizer(tokString,sep);
+			tok_iter = tokens.begin();
+			varname = *tok_iter;
+			tok_iter++;
+			i = p->get_index(varname);
+			std::vector<double> cons(p->map_size(),0);
+			cons[i] = -1;
+			double bound = std::atof((*tok_iter).c_str());
+			p->setMoreConstraints(cons,-bound);
+		}
+		else{
+			throw std::runtime_error("forbidden state string improper: <= or >= constraint expected\n");
+		}
+	}
+	f_set.second = p;
+};
+
 #endif /* POLYTOPE_CPP_ */
