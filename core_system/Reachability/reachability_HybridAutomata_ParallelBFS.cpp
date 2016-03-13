@@ -577,16 +577,17 @@ std::list<symbolic_states::ptr> reach_pbfs(hybrid_automata& H,
 									<< transID << ")\n";
 
 						}
-						/*
+
 						saftey_violated = true;
-						ce = abstractCE::ptr(new abstractCE());
+						/*ce = abstractCE::ptr(new abstractCE());
 						ce->set_length(cc);
 						//ce->set_sym_states(list_sym_states);
 						ce->set_sym_states(list_abstract_sym_states);
 
 						ce->set_transitions(list_transitions);
 						hybrid_automata::ptr h = hybrid_automata::ptr(new hybrid_automata(H));
-						ce->set_automaton(h);*/
+						ce->set_automaton(h);
+						ce->set_forbid_poly(forbid_poly); */
 						break;
 					}
 				}

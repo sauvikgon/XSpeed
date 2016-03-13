@@ -49,10 +49,10 @@ void concreteCE::plot_ce(std::string filename)
 		sim = simulation::ptr(new simulation(simulation_sample.first.size(),time_step,ha->getLocation(locId).getSystem_Dynamics()));
 		sim->set_outfile(filename);
 		sim->set_out_dimension(0);
-		std::cout << "simulation: first:" << simulation_sample.second;
+		std::cout << "simulation: start point:" << std::endl;
 		for(unsigned int i=0;i<sim->get_system_dimension();i++)
 			std::cout << simulation_sample.first[i] << " ";
-		std::cout << "simulation: second:" << simulation_sample.second;
+		std::cout << "simulation: dwell time:" << simulation_sample.second;
 		sim->simulate(simulation_sample.first, simulation_sample.second);
 	}
 }

@@ -29,8 +29,6 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		int lp_solver_type_choosen, unsigned int number_of_streams,
 		int Solver_GLPK_Gurobi_GPU,
 		std::pair<int, polytope::ptr> forbidden_set, abstractCE::ptr& ce) {
-//	std::cout<<"Algorithm_Type = "<<Algorithm_Type<<std::endl;
-	//std::list<template_polyhedra> Reachability_Region;
 
 	std::list<symbolic_states::ptr> Reachability_Region;
 	template_polyhedra::ptr reach_region;
@@ -104,32 +102,15 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 		if (foundSkippingLocation) //do not compute the continuous reachability algorithm
 			continue;
 
-		// ******************* Computing Parameters *******************************
-		//In this current_location the parameters will change for eg., alfa, beta and phi_trans  have to be re-computed
-		/*
-		 * Computing the parameters to avoid multiple computation in the child process
-		 * Items Required :: time_step, phi_trans , B_trans, compute_alfa,compute_beta
-		 */
-		//	GeneratePolytopePlotter(continuous_initial_polytope);
-		/*
-		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
-		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
-		 * */
-		//	cout<<"\nTesting 2 c\n";
 		double result_alfa = compute_alfa(reach_parameters.time_step,
 				current_location.getSystem_Dynamics(),
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
 
-		//	cout << "\nReach_Parameters.time_step = " << reach_parameters.time_step << endl;
-		//			cout << "\n1st Compute Alfa = " << result_alfa << endl;
-		//	cout<<"\nTesting 2 c\n";
 		double result_beta = compute_beta(current_location.getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
-		//	cout << "\n1st Compute Beta = " << result_beta << endl;
+
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
-		//	cout<<"\nTesting 2 d\n";
-		// Intialised the transformation and its transpose matrix
 		math::matrix<double> phi_matrix, phi_trans;
 
 		if (!current_location.getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
@@ -161,7 +142,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 					current_location.isInvariantExists(),
 					lp_solver_type_choosen);
 
-			AllReach_time.stop();
+			 AllReach_time.stop();
 			 double wall_clock1;
 			 wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 			 double return_Time1 = wall_clock1 / (double) 1000;
@@ -349,14 +330,11 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 
 		std::list<transition::ptr> list_transitions;
 
-		if (reach_region->getTotalIterations() != 0) { //flowpipe exists
+		if (reach_region->getTotalIterations() != 0 && forbidden_set.second!=NULL) { //flowpipe exists
 			//so perform intersection with forbidden set provided locID matches
 			int locID = current_location.getLocId();
 			if (locID == forbidden_set.first) { //forbidden locID matches
 				polytope::ptr forbid_poly = forbidden_set.second;
-				//forbid_poly->print2file("./forbid_poly",2,0);
-				//check intersection with flowpipe/reach_region
-				//GeneratePolytopePlotter(forbid_poly);
 				std::list<template_polyhedra> forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(
 						forbid_poly, lp_solver_type_choosen);
@@ -375,8 +353,6 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 						int locationID, locationID2;
 						discrete_set ds, ds2;
 						ds = current_forbidden_state->getDiscreteSet();
-						//insert discrete_set in the abstract_symbolic_state
-						//curr_abs_sym_state->setDiscreteSet(ds);
 
 	// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
@@ -472,6 +448,7 @@ std::list<symbolic_states::ptr> reach(hybrid_automata& H, initial_state::ptr& I,
 					ce->set_transitions(list_transitions);
 					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
 					ce->set_automaton(ha);
+					ce->set_forbid_poly(forbidden_set.second);
 					break;
 				} // end of condition when forbidden state intersects with the flowpipe set
 			} //end of condition when forbidden state loc id matches with flowpipe loc id

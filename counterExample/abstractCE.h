@@ -32,6 +32,7 @@ extern unsigned int N;
 extern unsigned int dim;
 extern hybrid_automata::ptr HA;
 extern std::vector<int> locIdList;
+extern polytope::ptr bad_poly;
 
 
 class abstractCE
@@ -45,15 +46,7 @@ public:
 	;
 	/* another constructor */
 	abstractCE(std::list<abstract_symbolic_state::ptr> s_states,
-			std::list<transition::ptr> ts, hybrid_automata::ptr h) {
-		//Assertion to check that the length of the counter-example is one minus
-		// the number of sym states in the CE.
-		assert(sym_states.size() == trans.size() - 1);
-		sym_states = s_states;
-		trans = ts;
-		length = trans.size();
-		H = h;
-	}
+			std::list<transition::ptr> ts, hybrid_automata::ptr h, polytope::ptr fpoly);
 	/* destructor */
 	~abstractCE() {
 	}
@@ -68,11 +61,17 @@ public:
 	const abstract_symbolic_state::ptr get_first_symbolic_state() const;
 
 	/**
-	 * The semantics assumes that the last abstract_symbolic_state in the list is the
-	 * unsafe abstract_symbolic_state.
+	 * The semantics assumes that the last abstract_symbolic_state in the list contains the
+	 * unsafe polytope
 	 */
-	const abstract_symbolic_state::ptr get_unsafe_symbolic_state() const;
+	const abstract_symbolic_state::ptr get_last_symbolic_state() const;
 
+	/**
+	 * Returns the forbidden polytope
+	 */
+	const polytope::ptr get_forbidden_poly(){
+		return forbid_poly;
+	}
 	/**
 	 * Returns the i-th symbolic state from the CE
 	 */
@@ -86,9 +85,7 @@ public:
 		length = len;
 	}
 
-	void set_sym_states(std::list<abstract_symbolic_state::ptr> sym) {
-		sym_states = sym;
-	}
+	void set_sym_states(std::list<abstract_symbolic_state::ptr> sym);
 
 	void set_transitions(std::list<transition::ptr> transitions) {
 		trans = transitions;
@@ -98,6 +95,12 @@ public:
 	 */
 	void set_automaton(hybrid_automata::ptr h){
 		H = h;
+	}
+	/**
+	 * Sets the forbidden polytope of this abstract counter example
+	 */
+	void set_forbid_poly(polytope::ptr fpoly){
+		forbid_poly = fpoly;
 	}
 	hybrid_automata::ptr get_automaton(){
 		return H;
@@ -134,7 +137,10 @@ private:
 	 * The reference to the automaton to which this is a counter example
 	 */
 	hybrid_automata::ptr H;
-
+	/**
+	 * The reference to the forbidden polytope given by the user
+	 */
+	polytope::ptr forbid_poly;
 };
 
 #endif /* ABSTRACTCE_H_ */

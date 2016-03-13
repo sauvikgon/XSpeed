@@ -154,6 +154,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 				last[i] = NV_Ith_S(u,i);
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
+//			std::cout << "time point:" << NV_Ith_S(u,2) << std::endl;
 		}
 	}
 	std::vector<double> res(dimension);
@@ -161,10 +162,14 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	{
 		res[i] = NV_Ith_S(u,i);
 	}
+	//debug
+//	std::cout << "last but final time end point" << last[2] << std::endl;
+//	std::cout << "final time end point" << res[2] << std::endl;
+	//--
 	//linear interpolate the last two ODE solution points to get
 	// better estimate of the last solution point.
 	double lin_factor = (N*time_step - Tfinal)/time_step;
-	res = lin_interpolate(last, res ,lin_factor);
+//	res = lin_interpolate(last, res ,lin_factor);
 	N_VDestroy_Serial(u); /* Free u vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
 
