@@ -23,8 +23,7 @@ void reachability::setReachParameter(hybrid_automata& h, initial_state::ptr& i,
 //bound is the maximum number of transitions or jumps permitted.
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
-std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
-		abstractCE::ptr& ce) {
+std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractCE::ptr& ce) {
 	//	std::cout<<"Algorithm_Type = "<<Algorithm_Type<<std::endl;
 	//std::list<template_polyhedra> Reachability_Region;
 
@@ -43,6 +42,9 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 	bool saftey_violated = false;
 	//	cout<<"\nTesting 2 a\n";
 	polytope::ptr continuous_initial_polytope;
+
+	boost::timer::cpu_timer t70;
+	t70.start();
 
 	while (!pw_list.isEmpty_WaitingList()) {
 		//symbolic_states U;
@@ -144,9 +146,14 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 		// ******************* Computing Parameters *******************************
 		//	for (int number_times = 1; number_times <= bound; number_times++) {	//Bound for loop in Hybrid AutomataGeneratePolytopePlotter(continuous_initial_polytope);
 		//GeneratePolytopePlotter(continuous_initial_polytope);
-
+		boost::timer::cpu_timer t76;
+		t76.start();
 		sequentialReachSelection(current_location, continuous_initial_polytope,reach_region);
-
+		t76.stop();
+		double clock76;
+		clock76 = t76.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return76 = clock76 / (double) 1000;
+		std::cout << "\nFlowpipe computed Sequentially Time:Wall(Seconds) = " << return76 << std::endl;
 		std::cout << "\nFlowpipe computed\n";
 
 		//	*********************************************** Reach or Flowpipe Computed **************************************************************************
@@ -155,18 +162,17 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 			BreadthLevel++;
 		}
 		if (reach_region->getTotalIterations() != 0) {
-
 			S->setContinuousSetptr(reach_region);
-
 			Reachability_Region.push_back(S);
 		}
+
+		boost::timer::cpu_timer t71;
+		t71.start();
 		//  ******************************** Safety Verification section ********************************
 		std::list<symbolic_states::ptr> list_sym_states;
-
 		std::list<abstract_symbolic_state::ptr> list_abstract_sym_states;
 		polytope::ptr Conti_Set; //bounding_box Polytope
 		std::list<transition::ptr> list_transitions;
-
 		if (reach_region->getTotalIterations() != 0) { //flowpipe exists
 			//so perform intersection with forbidden set provided locID matches
 			for (std::set<std::pair<int, polytope::ptr> >::iterator it =
@@ -175,23 +181,15 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 				if (forbid_locID == (*it).first) { //forbidden locID matches
 					polytope::ptr forbid_poly = (*it).second;
 					std::list<template_polyhedra> forbid_intersects;
-					forbid_intersects =
-							reach_region->polys_intersectionSequential(
-									forbid_poly, lp_solver_type_choosen);
-
+					forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
 					if (forbid_intersects.size() == 0) {
-						std::cout
-								<< "\nThe model does NOT violates SAFETY property!!!\n";
+						std::cout << "\nThe model does NOT violates SAFETY property!!!\n";
 					} else {
-						std::cout
-								<< "\nThe model violates SAFETY property!!!\n";
-
+						std::cout << "\nThe model violates SAFETY property!!!\n";
 						symbolic_states::ptr current_forbidden_state;
 						current_forbidden_state = S;
 						abstract_symbolic_state::ptr curr_abs_sym_state;
-						curr_abs_sym_state = abstract_symbolic_state::ptr(
-								new abstract_symbolic_state());
-
+						curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
 						std::cout << "\nReverse Path Trace =>\n";
 						int cc = 0;
 						do {
@@ -211,8 +209,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 									ds.getDiscreteElements().begin();
 									it != ds.getDiscreteElements().end(); ++it)
 								locationID = (*it); //Assuming only a single element exist in the discrete_set
-							int transID =
-									current_forbidden_state->getTransitionId(); //a)
+							int transID = current_forbidden_state->getTransitionId(); //a)
 							//   **********************************************************
 							//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
 							//1) ******************** list_of_symbolic_states ********************
@@ -231,20 +228,15 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 							if (cc != 0) {
 								std::cout << " --> ";
 							}
-							std::cout << "(" << locationID << ", " << transID
-									<< ")";
+							std::cout << "(" << locationID << ", " << transID << ")";
 							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
 							//cout<<"check if parentPtr not NULL\n";
-								current_forbidden_state =
-										searchSymbolic_state(
-												Reachability_Region,
+								current_forbidden_state = searchSymbolic_state(Reachability_Region,
 												current_forbidden_state->getParentPtrSymbolicState()); //b)
 								//2) ******************* list_transitions ********************
 								ds2 = current_forbidden_state->getDiscreteSet(); //c)
-								for (std::set<int>::iterator it =
-										ds2.getDiscreteElements().begin();
-										it != ds2.getDiscreteElements().end();
-										++it)
+								for (std::set<int>::iterator it = ds2.getDiscreteElements().begin();
+										it != ds2.getDiscreteElements().end(); ++it)
 									locationID2 = (*it); //c)
 
 								location::ptr object_location;
@@ -257,21 +249,15 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 								//2) ******************* list_transitions Ends ********************
 							}
 							cc++;
-						} while (current_forbidden_state->getParentPtrSymbolicState()
-								!= NULL);
+						} while (current_forbidden_state->getParentPtrSymbolicState() != NULL);
 
-						if ((cc >= 1)
-								&& (current_forbidden_state->getParentPtrSymbolicState()
-										== NULL)) { //root is missed
+						if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState()== NULL)) { //root is missed
 							int locationID;
 							discrete_set ds;
 							ds = current_forbidden_state->getDiscreteSet();
 
-							curr_abs_sym_state->setDiscreteSet(
-									current_forbidden_state->getDiscreteSet());
-							Conti_Set =
-									convertBounding_Box(
-											current_forbidden_state->getContinuousSetptr());
+							curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+							Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
 							curr_abs_sym_state->setContinuousSet(Conti_Set);
 
 							for (std::set<int>::iterator it =
@@ -279,17 +265,12 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 									it != ds.getDiscreteElements().end(); ++it)
 								locationID = (*it); //Assuming only a single element exist in the discrete_set
 
-							int transID =
-									current_forbidden_state->getTransitionId();
-
+							int transID = current_forbidden_state->getTransitionId();
 							list_sym_states.push_front(current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
-							list_abstract_sym_states.push_front(
-									curr_abs_sym_state);
-							std::cout << " -->  (" << locationID << ", "
-									<< transID << ")\n";
+							list_abstract_sym_states.push_front(curr_abs_sym_state);
+							std::cout << " -->  (" << locationID << ", " << transID << ")\n";
 						}
 						saftey_violated = true;
-
 						ce = abstractCE::ptr(new abstractCE());
 						ce->set_length(cc);
 						ce->set_sym_states(list_abstract_sym_states);
@@ -308,21 +289,30 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 				}
 			} //end of all forbidden_state check
 		} //computed flowpipe is not empty
+
+		t71.stop();
+		double clock71;
+		clock71 = t71.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return71 = clock71 / (double) 1000;
+		std::cout << "\nSafety Verification Time:Wall(Seconds) = " << return71 << std::endl;
+
+
 		if (saftey_violated) {
 			break; //no need to compute rest of the locations
 		}
 		//  ******************************** Safety Verification section Ends********************************
 
+		boost::timer::cpu_timer t72;
+		t72.start();
 		//  ************** Check to see if Computed FlowPipe is Empty  **********
 		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) { //computed reach_region is empty && optimize transition BreadthLevel-wise
 		/*	polytope::ptr test = polytope::ptr(	new polytope(reach_region.getPolytope(61).getCoeffMatrix(),
 		 reach_region.getPolytope(61).getColumnVector(), 1));
 		 GeneratePolytopePlotter(test);	 */
+			cout<<"reach_region->getTotalIterations() = "<<reach_region->getTotalIterations()<<"\n";
 			//	cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
-			for (std::list<transition::ptr>::iterator t =
-					current_location->getOut_Going_Transitions().begin();
-					t != current_location->getOut_Going_Transitions().end();
-					t++) { // get each destination_location_id and push into the pwl.waiting_list
+			for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
+					t != current_location->getOut_Going_Transitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
 				int transition_id = (*t)->getTransitionId();
 				if (transition_id == -1) //Indicates empty transition or no transition exists
 					break; //out from transition for-loop as there is no transition for this location
@@ -335,83 +325,84 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(
 
 				//	std::cout<<"\nOut_Going_Transition's Destination_Location_ID = "<< (*t).getDestination_Location_Id()<<"\n";
 				//	std::cout<<"\nOut_Going_Transition's Label = "<< (*t).getLabel()<<"\n";
-				current_destination = H.getLocation(
-						(*t)->getDestination_Location_Id());
-				//				std::cout<<"\nTest location insde = "<<current_destination.getName()<<"\n";
+				current_destination = H.getLocation((*t)->getDestination_Location_Id());
+				//	std::cout<<"\nTest location insde = "<<current_destination.getName()<<"\n";
 				string locName = current_destination->getName();
-				//cout << "\nNext Loc ID = " << current_destination.getLocId() << " Location Name = " << locName << "\n";
-				if ((locName.compare("BAD") == 0)
-						|| (locName.compare("GOOD") == 0)
-						|| (locName.compare("FINAL") == 0)
-						|| (locName.compare("UNSAFE") == 0))
-					continue; //do not push into the waitingList
+				//cout << "\nNext Loc ID = " << current_destination->getLocId() << " Location Name = " << locName << "\n";
 
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
-				current_assignment = (*t)->getAssignT();
-
 				//	std::cout << "Before calling Templet_polys\n";
 				//cout<<reach_region.getMatrixSupportFunction().size2()<<"AmitJi\n";
 				//this intersected_polyhedra will have invariant direction added in it
-				string trans_name = (*t)->getLabel(); //	cout<<"Trans Name = "<<trans_name<<endl;
-
+				//string trans_name = (*t)->getLabel(); //	cout<<"Trans Name = "<<trans_name<<endl;
 				boost::timer::cpu_timer t100;
 				t100.start();
 				//if (Algorithm_Type == 2) {
 				if (0) {
-					intersected_polyhedra =
-							reach_region->polys_intersectionParallel(
-									gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
+					intersected_polyhedra = reach_region->polys_intersectionParallel(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 				} else {
-					intersected_polyhedra =
-							reach_region->polys_intersectionSequential(
-									gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
+					intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 				}
 				t100.stop();
 				double clock100;
 				clock100 = t100.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 				double return100 = clock100 / (double) 1000;
-				std::cout << "\nIntersection Time:Wall(Seconds) = " << return100
-						<< std::endl;
+				std::cout << "\nIntersection Time:Wall(Seconds) = " << return100 << std::endl;
 
+				//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
+				if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
+						|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0))
+					continue; //do not push into the waitingList
+
+				current_assignment = (*t)->getAssignT();
 				// *** interesected_polyhedra included with invariant_directions also ******
-
 				//	cout<<"size = "<< intersected_polyhedra.getMatrixSupportFunction().size1();
 				//returns the list of polytopes that intersects with the gaurd_polytope
 				//unsigned int iterations_before_intersection = intersection_start_point - 1;
 				//Templet_polys.resize_matrix_SupportFunction(dir_nums, iterations_before_intersection);
-				//			std::cout << "Before calling getTemplate_approx\n";
+				//	std::cout << "Before calling getTemplate_approx\n";
 				int destination_locID = (*t)->getDestination_Location_Id();
 				ds.insert_element(destination_locID);
 				//std::cout<< "\nNumber of intersection with Flowpipe and guard = "<< intersected_polyhedra.size();
-				for (std::list<template_polyhedra>::iterator i =
-						intersected_polyhedra.begin();
-						i != intersected_polyhedra.end(); i++) {
-					intersectedRegion = (*i).getTemplate_approx(
-							lp_solver_type_choosen);
+
+				boost::timer::cpu_timer t74;
+				t74.start();
+				for (std::list<template_polyhedra>::iterator i =intersected_polyhedra.begin();i != intersected_polyhedra.end(); i++) {
+					intersectedRegion = (*i).getTemplate_approx(lp_solver_type_choosen);
 					//Returns a single over-approximated polytope from the list of intersected polytopes
 					//	GeneratePolytopePlotter(intersectedRegion);
 					polytope::ptr newShiftedPolytope, newPolytope; //created an object here
-					newPolytope = intersectedRegion->GetPolytope_Intersection(
-							gaurd_polytope); //Retuns the intersected region as a single newpolytope. **** with added directions
-					newShiftedPolytope = post_assign_exact(newPolytope,
-							current_assignment.Map, current_assignment.b); //initial_polytope_I = post_assign_exact(newPolytope, R, w);
+					newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope); //Retuns the intersected region as a single newpolytope. **** with added directions
+					newShiftedPolytope = post_assign_exact(newPolytope,current_assignment.Map, current_assignment.b); //initial_polytope_I = post_assign_exact(newPolytope, R, w);
 					//symbolic_states::ptr newState = symbolic_states::ptr( new symbolic_states(ds, newShiftedPolytope));
-
 					//symbolic_states newState(ds, newShiftedPolytope);
-					initial_state::ptr newState = initial_state::ptr(
-							new initial_state(destination_locID,
-									newShiftedPolytope));
+					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID,newShiftedPolytope));
 					newState->setTransitionId(transition_id); // keeps track of the transition_ID
 					newState->setParentPtrSymbolicState(S);
-
 					pw_list.WaitingList_insert(newState);
 					queue.push_back(BreadthLevel); //insert at REAR first Location
 				} //end of multiple intersected region with guard
+				t74.stop();
+				double clock74;
+				clock74 = t74.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+				double return74 = clock74 / (double) 1000;
+				std::cout << "\nQueue Push Time:Wall(Seconds) = "<< return74 << std::endl;
 				  //	cout<<"Size = "<< pwlist.getWaitingList().size()<<endl;
 			} //end of multiple transaction
 		} //end-if of flowpipe computation not empty
+		t72.stop();
+		double clock72;
+		clock72 = t72.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return72 = clock72 / (double) 1000;
+		std::cout << "\nDiscrete Post_D computation Time:Wall(Seconds) = " << return72 << std::endl;
 
 	} //end of while loop checking waiting_list != empty
+	t70.stop();
+	double clock70;
+	clock70 = t70.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+	double return70 = clock70 / (double) 1000;
+	std::cout << "\nCompleted Time:Wall(Seconds) = " << return70 << std::endl;
+
 	return Reachability_Region;
 }
 
@@ -436,8 +427,7 @@ void reachability::sequentialReachSelection(location::ptr current_location,
 		double wall_clock1;
 		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nFlowpipe:Time:Wall(Seconds) = " << return_Time1
-				<< std::endl;
+		std::cout << "\nFlowpipe:Time:Wall(Seconds) = " << return_Time1<< std::endl;
 	}
 
 	if (Algorithm_Type == PAR_OMP) {
@@ -1199,8 +1189,7 @@ void reachability::parallelReachSelection(location::ptr current_location,
 }
 
 //Aggregrate All Flowpipe computation work into one BIG task and will run that in parallel either by multi-core CPU or GPU
-std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
-		abstractCE::ptr& ce) {
+std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(abstractCE::ptr& ce) {
 
 	std::list<symbolic_states::ptr> Reachability_Region; //	template_polyhedra::ptr reach_region;
 	int t = 0; //0 for Read and 1 for Write
@@ -1211,9 +1200,18 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
 	pwlist::ptr allPassedList; //so we create a permanent pwlist for storing only the passedList;
 	allPassedList = pwlist::ptr(new pwlist()); //have to instantiate it
 	int number_times = 0;
+	bool levelcompleted = false;
 	unsigned int iter_max = 1;
-	bool saftey_violated = false; //cout << "Test 4\n";
+
+
+	boost::timer::cpu_timer t70;
+	t70.start();
+
 	while (!isEmpty_Qpw_list(Qpw_list[t])) { //	cout << "Test 5\n";
+
+
+		boost::timer::cpu_timer t73;
+		t73.start();
 		unsigned int count = getSize_Qpw_list(Qpw_list[t]); //get the size of PWList
 	//	cout << "\nCount = " << count << "\n";
 		std::vector<symbolic_states::ptr> S(count);
@@ -1224,10 +1222,17 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
 		for (int i = 0; i < count; i++) {
 			Qpw_list[1 - t][i] = pwlist::ptr(new pwlist()); //have to instantiate it
 		}
+		t73.stop();
+		double clock73;
+		clock73 = t73.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return73 = clock73 / (double) 1000;
+		std::cout << "\nHow Much queue delete  Time:Wall(Seconds) = "<< return73 << std::endl;
+
 		// ********************************* BFS Starts **********************************************************
 	//	cout << "Test 7\n";
 // ***************** DIRECTION and BIG_Task CREATION:: per breadth-level *****************
-
+		boost::timer::cpu_timer t705;
+		t705.start();
 		std::vector<LoadBalanceData> LoadBalanceDS(count);
 // ***************** DIRECTION and BIG_Task CREATION *****************
 #pragma omp parallel for
@@ -1250,8 +1255,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
 			current_location = H.getLocation(location_id);
 			string name = current_location->getName();
 		//	cout<<"Location Name = "<< name<<"\n";
-			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
-					|| (name.compare("UNSAFE") == 0)
+			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0) || (name.compare("UNSAFE") == 0)
 					|| (name.compare("FINAL") == 0))
 				continue; //do not compute the continuous reachability algorithm
 			// ******************* Computing Parameters ************************ //current_location:: parameters alfa, beta and phi_trans
@@ -1275,8 +1279,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
 			}
 			math::matrix<double> B_trans;
 			if (!current_location->getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
-				current_location->getSystem_Dynamics().MatrixB.transpose(
-						B_trans);
+				current_location->getSystem_Dynamics().MatrixB.transpose(B_trans);
 				reach_parameter_local.B_trans = B_trans;
 			}
 			// ******************* Computing Parameters Done *******************************
@@ -1329,20 +1332,68 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
 
 #pragma omp parallel for
 		for (unsigned int id = 0; id < count; id++) {
-			template_polyhedra::ptr reach_region;
+			/*template_polyhedra::ptr reach_region;
 			reach_region = substitute_in_ReachAlgorithm(LoadBalanceDS[id]);	// Step 3
-			S[id]->setContinuousSetptr(reach_region);
+			S[id]->setContinuousSetptr(reach_region);*/
+			S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id]));	// Step 3
 		}
 //  ********************* POST_C computation Done ********************
+		t705.stop();
+		double clock705;
+		clock705 = t705.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return705 = clock705 / (double) 1000;
+		std::cout << "\nFlow-pipe Computed Done Time:Wall(Seconds) = "<< return705 << std::endl;
 
-//#pragma omp parallel for
+
+		bool foundUnSafe = false;
+		boost::timer::cpu_timer t71;
+		t71.start();
+#pragma omp parallel for
+		for (unsigned int index = 0; index < count; index++) {
+			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0) { //computed reach_region is NOT empty
+#pragma omp critical
+				{
+					Reachability_Region.push_back(S[index]);
+				}
+			}
+			//  ************************* Safety Verification Begins *****************
+			bool saftey_violated = false; //local
+			saftey_violated = safetyVerify(S[index], Reachability_Region, ce);
+			if (saftey_violated) {
+#pragma omp critical
+				{
+					foundUnSafe = true; //have to insert all flowpipe of same breadth even if foundUnSafe=true for some flowpipe, So not breaking
+				}
+			} //  ************************* Safety Verification Ends *******************
+		} //end-for pushing all computed flowpipe
+
+		t71.stop();
+		double clock71;
+		clock71 = t71.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return71 = clock71 / (double) 1000;
+		std::cout << "\nSafety Verification Time:Wall(Seconds) = " << return71 << std::endl;
+
+		number_times++; //One Level or one Breadth Search over
+		//cout << "\nnumber_times = " << number_times << "  Bound = " << bound << "\n";
+		if(number_times > bound){
+			levelcompleted = true;	//check to see how many jumps have been made(i.e., number of discrete transitions made)
+		}
+
+		if (levelcompleted || foundUnSafe) { //any true
+			break;	//OUT FROM WHILE LOOP 	//no need to compute rest of the locations
+		}
+
+
+		boost::timer::cpu_timer t72;
+		t72.start();
+#pragma omp parallel for
 		for (unsigned int id = 0; id < count; id++) {
 //  ************************************** POST_D computation Begins **********************************************************
 			template_polyhedra::ptr t_poly = S[id]->getContinuousSetptr();
-			if (t_poly->getTotalIterations() != 0 && number_times < bound) { //computed reach_region is empty && optimize computation
+			cout<<"t_poly->getTotalIterations() = "<<t_poly->getTotalIterations()<<"\n";
+			if (t_poly->getTotalIterations() != 0) { //computed reach_region is empty && optimize computation
 			//cout << "\nLoc ID = " << current_location.getLocId() << " Location Name = " << name << "\n";
-				for (std::list<transition::ptr>::iterator trans =
-						LoadBalanceDS[id].current_location->getOut_Going_Transitions().begin();
+				for (std::list<transition::ptr>::iterator trans = LoadBalanceDS[id].current_location->getOut_Going_Transitions().begin();
 						trans != LoadBalanceDS[id].current_location->getOut_Going_Transitions().end();trans++) { // get each destination_location_id and push into the pwl.waiting_list
 					int transition_id = (*trans)->getTransitionId();
 					if (transition_id == -1) { //Indicates empty transition or no transition exists
@@ -1368,10 +1419,10 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
 					t100.stop();
 					if (intersected_polyhedra.size() > 0) { //there is intersection so new symbolic state will be inserted into the waitingList
 						//std::cout << "Intersected = " < intersected_polyhedra.size() << std::endl;
-//#pragma omp critical
-						//{
+#pragma omp critical
+						{
 						iter_max++;
-						//}
+						}
 					}
 					//todo Handle this later as In SpaceEx model we did not specified BAD or GOOD
 					if ((locName.compare("BAD") == 0)
@@ -1384,11 +1435,12 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
 					clock100 = t100.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 					double return100 = clock100 / (double) 1000;
 					std::cout << "\nIntersection Time:Wall(Seconds) = "<< return100 << std::endl;
-					int destination_locID =
-							(*trans)->getDestination_Location_Id();
+					int destination_locID = (*trans)->getDestination_Location_Id();
 					ds.insert_element(destination_locID);
-					for (std::list<template_polyhedra>::iterator it =
-							intersected_polyhedra.begin();
+
+					boost::timer::cpu_timer t74;
+					t74.start();
+					for (std::list<template_polyhedra>::iterator it = intersected_polyhedra.begin();
 							it != intersected_polyhedra.end(); it++) {
 						//cout << "\nNumber of Intersections #1\n";
 						intersectedRegion = (*it).getTemplate_approx(lp_solver_type_choosen);
@@ -1403,50 +1455,42 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(
 						newState->setParentPtrSymbolicState(S[id]);
 //#pragma omp critical
 	//					{
-							/*
-							 * Todo:: we insert all the symbolic_states into the pwlist for computing FlowPipe iff 1) and 2) holds
-							 * Step 1) the new current_destination.getLocID() is NOT in the Passed List and
-							 * Step 2) the "New Initial Polytope" or "the newShiftedPolytope" is NOT contained in the FlowPipe of LocationID of step 1
-							 *  as the FlowPipe in the same location will be same if the newShiftedPolytope is IN FlowPipe
-							 *  But if Step 1 holds and Step 2 does not then it will be inserted in pwlist even if the LocationID is in Passed List
-							 */
+			/*
+			 * Todo:: we insert all the symbolic_states into the pwlist for computing FlowPipe iff 1) and 2) holds
+			 * Step 1) the new current_destination.getLocID() is NOT in the Passed List and
+			 * Step 2) the "New Initial Polytope" or "the newShiftedPolytope" is NOT contained in the FlowPipe of LocationID of step 1
+			 *  as the FlowPipe in the same location will be same if the newShiftedPolytope is IN FlowPipe
+			 *  But if Step 1 holds and Step 2 does not then it will be inserted in pwlist even if the LocationID is in Passed List
+			 */
 							Qpw_list[1 - t][id]->WaitingList_insert(newState); //RACE CONDITION HERE
 	//					}
 					} //end of multiple intersected region with guard
+					t74.stop();
+					double clock74;
+					clock74 = t74.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+					double return74 = clock74 / (double) 1000;
+					std::cout << "\nQueue Push Time:Wall(Seconds) = "<< return74 << std::endl;
+
 					  //cout<<"Size = "<< pwlist.getWaitingList().size()<<endl;
 				} //end of multiple transaction
 				  //Here we have again populated the pwlist for next-round's parallel process
 			} // End-if
 //  ************************************** POST_D computation Ends **********************************************************
 		}	//parallel for-loop
-
+		t72.stop();
+		double clock72;
+		clock72 = t72.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return72 = clock72 / (double) 1000;
+		std::cout << "\nDiscrete Post_D computation Time:Wall(Seconds) = " << return72 << std::endl;
 		t = 1 - t; //Switching Read/Write options for Qpw_list[1-t]
-		number_times++; //One Level or one Breadth Search over
-		//cout << "\nnumber_times = " << number_times << "  Bound = " << bound << "\n";
 		// ************************* BFS Ends *************************************
-		bool foundUnSafe = false;
-#pragma omp parallel for
-		for (unsigned int index = 0; index < count; index++) {
-			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0){ //computed reach_region is NOT empty
-				#pragma omp critical
-				{
-					Reachability_Region.push_back(S[index]);
-				}
-
-			}
-			//  ************************* Safety Verification Begins *****************
-			saftey_violated = safetyVerify(S[index], Reachability_Region, ce);
-			if (saftey_violated) {
-				foundUnSafe = true; //have to insert all flowpipe of same breadth even if foundUnSafe=true for some flowpipe, So not breaking
-			}
-			//  ************************* Safety Verification Ends *******************
-		} //end-for pushing all computed flowpipe
-		if (foundUnSafe) {
-			break; //no need to compute rest of the locations
-		}
-		if (number_times > bound) //check to see how many jumps have been made(i.e., number of discrete transitions made)
-			break;
 	} //end of while loop checking waiting_list != empty
+	t70.stop();
+	double clock70;
+	clock70 = t70.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+	double return70 = clock70 / (double) 1000;
+	std::cout << "\n pbfs Completed Time:Wall(Seconds) = " << return70 << std::endl;
+
 	cout << "\n **********************************************************\n";
 	cout << "   *** Maximum Iterations Completed = " << iter_max << "  ***\n";
 	cout << "\n **********************************************************\n";
@@ -1810,8 +1854,8 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 		for (int ind = 0; ind < dimension; ind++) {
 			dirs[ind] = LoadBalanceDS[index].List_dir_X0(j, ind);
 		}
-		//LoadBalanceDS[index].sf_X0[j] = LPSolver(LoadBalanceDS[index].X0, dirs);
-		LoadBalanceDS[index].sf_X0[j] = boxLPSolver(LoadBalanceDS[index].X0, dirs);
+		LoadBalanceDS[index].sf_X0[j] = LPSolver(LoadBalanceDS[index].X0, dirs);
+		//LoadBalanceDS[index].sf_X0[j] = boxLPSolver(LoadBalanceDS[index].X0, dirs);
 
 		// ******DotProduction and Support Function of UnitBall  *******
 		if(!LoadBalanceDS[index].current_location->getSystem_Dynamics().isEmptyC){
@@ -1868,7 +1912,7 @@ double reachability::boxLPSolver(polytope::ptr poly, std::vector<double> dir){
 			//iterate over the ith component of each row of M
 			for(unsigned int row=0;row<M.size1();row++){
 				if(M(row,i) == -1){ // lower bound constraint
-					lb = -b[row];
+					lb = -1 * b[row];
 					break;
 				}
 			}

@@ -36,7 +36,7 @@ const discrete_set& symbolic_states::getDiscreteSet() const {
 	return DiscreteSet;
 }
 
-template_polyhedra::ptr symbolic_states::getContinuousSetptr() const {
+template_polyhedra::ptr symbolic_states::getContinuousSetptr() {
 	return ContinuousSetptr;
 }
 
