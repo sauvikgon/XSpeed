@@ -11,11 +11,14 @@
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
 
 #include "core_system/HybridAutomata/Transition.h"
+#include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include <list>
 #include <boost/shared_ptr.hpp>
 
 //#include "core_system/symbolic_states/symbolic_states.h"
 #include "counterExample/abstract_symbolic_state.h"
+#include "counterExample/concreteCE.h"
+#include "nlopt.hpp"
 
 /**
  * This class is a data structure to store the abstract counter-example generated
@@ -25,6 +28,12 @@
  *
  * @author: Rajarshi
  */
+extern unsigned int N;
+extern unsigned int dim;
+extern hybrid_automata::ptr HA;
+extern std::vector<int> locIdList;
+extern polytope::ptr bad_poly;
+
 
 class abstractCE
 {
@@ -37,19 +46,12 @@ public:
 	;
 	/* another constructor */
 	abstractCE(std::list<abstract_symbolic_state::ptr> s_states,
-			std::list<transition::ptr> ts) {
-		//Assertion to check that the length of the counter-example is one minus
-		// the number of sym states in the CE.
-		assert(sym_states.size() == trans.size() - 1);
-		sym_states = s_states;
-		trans = ts;
-		length = trans.size();
-	}
+			std::list<transition::ptr> ts, hybrid_automata::ptr h, polytope::ptr fpoly);
 	/* destructor */
 	~abstractCE() {
 	}
 	;
-	std::list<abstract_symbolic_state::ptr> get_CE_sym_states() {
+	const std::list<abstract_symbolic_state::ptr> get_CE_sym_states() const {
 		return sym_states;
 	}
 	const std::list<transition::ptr> get_CE_transitions() const {
@@ -59,10 +61,21 @@ public:
 	const abstract_symbolic_state::ptr get_first_symbolic_state() const;
 
 	/**
-	 * The semantics assumes that the last abstract_symbolic_state in the list is the
-	 * unsafe abstract_symbolic_state.
+	 * The semantics assumes that the last abstract_symbolic_state in the list contains the
+	 * unsafe polytope
 	 */
-	const abstract_symbolic_state::ptr get_unsafe_symbolic_state() const;
+	const abstract_symbolic_state::ptr get_last_symbolic_state() const;
+
+	/**
+	 * Returns the forbidden polytope
+	 */
+	const polytope::ptr get_forbidden_poly(){
+		return forbid_poly;
+	}
+	/**
+	 * Returns the i-th symbolic state from the CE
+	 */
+	abstract_symbolic_state::ptr get_symbolic_state(unsigned int i) const;
 
 	const unsigned int get_length() const {
 		return length;
@@ -72,13 +85,35 @@ public:
 		length = len;
 	}
 
-	void set_sym_states(std::list<abstract_symbolic_state::ptr> sym) {
-		sym_states = sym;
-	}
+	void set_sym_states(std::list<abstract_symbolic_state::ptr> sym);
 
 	void set_transitions(std::list<transition::ptr> transitions) {
 		trans = transitions;
 	}
+	/**
+	 * Sets the reference to the hybrid automaton to which this CE refers.
+	 */
+	void set_automaton(hybrid_automata::ptr h){
+		H = h;
+	}
+	/**
+	 * Sets the forbidden polytope of this abstract counter example
+	 */
+	void set_forbid_poly(polytope::ptr fpoly){
+		forbid_poly = fpoly;
+	}
+	hybrid_automata::ptr get_automaton(){
+		return H;
+	}
+	/**
+	 * Returns an instance of the concrete counter-example from the abstract.
+	 */
+	concreteCE::ptr gen_concreteCE(double tolerance);
+	/**
+	 * Plot the counter example projected along dimensions passed
+	 * as parameters
+	 */
+	void plot(unsigned int i, unsigned int j);
 
 private:
 	/**
@@ -98,6 +133,14 @@ private:
 	 */
 	unsigned int length;
 
+	/**
+	 * The reference to the automaton to which this is a counter example
+	 */
+	hybrid_automata::ptr H;
+	/**
+	 * The reference to the forbidden polytope given by the user
+	 */
+	polytope::ptr forbid_poly;
 };
 
 #endif /* ABSTRACTCE_H_ */

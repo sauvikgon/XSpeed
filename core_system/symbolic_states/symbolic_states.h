@@ -38,7 +38,7 @@ public:
 	void setTransitionId(int transitionId);
 
 	/*
-	 * Returns the first column ie the initial polytope from the sfm(template_polyhedra)
+	 * Returns the first column i.e. the initial polytope from the sfm(template_polyhedra)
 	 */
 	polytope::ptr getInitial_ContinousSetptr() const;
 

@@ -20,6 +20,7 @@
 #include "core_system/math/2d_geometry.h"
 #include <set>
 #include <utility>
+#include <fstream>
 
 //#include "math/lp_solver_ourSimplex/simplex.h"
 
@@ -124,6 +125,10 @@ void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 	unsigned int row_size, col_size;
 	row_size = this->getCoeffMatrix().size1();
 	col_size = this->getCoeffMatrix().size2(); //dimension of the polytope
+	if(col_size == 0) // The poly is currently empty
+		col_size = coeff_constraint.size();
+	else
+		assert(col_size == coeff_constraint.size());
 	this->coeffMatrix.resize(row_size + 1, col_size, true); //adding one more constraint
 	this->columnVector.resize(row_size + 1); //adding one more constraint's bound value
 	for (unsigned int i = 0; i < col_size; i++) {
@@ -169,8 +174,6 @@ std::vector<double> polytope::getColumnVector() {
 double polytope::computeSupportFunction(std::vector<double> direction,
 		lp_solver &lp) {
 	double sf;
-	// To Amit: Why is Min_or_Max passed when not used?
-
 	if (this->getIsEmpty())
 		sf = 0; //returns zero for empty polytope
 	else if (this->getIsUniverse())
@@ -416,12 +419,103 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 	return All_vertices;
 }
 
-math::matrix<double> polytope::get_2dVertices(int i, int j){
+math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
 	std::set<std::pair<double, double> > set_vertices;
-	set_vertices = enumerate_2dVertices(i,j);
+	set_vertices = enumerate_2dVertices(dim1,dim2);
 	math::matrix<double> my_vertices;
 	my_vertices = sort_vertices(set_vertices);
 	return my_vertices;
 }
+
+double polytope::point_distance(std::vector<double> v){
+	return 0;
+}
+
+void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
+{
+	assert(dim1 < this->map_size() && dim2 < this->map_size());
+	assert(dim1 >= 0 && dim2 >= 0);
+	std::ofstream myfile;
+	myfile.open(fname.c_str());
+	math::matrix<double> C = get_2dVertices(dim1, dim2);
+	for(unsigned int i=0;i<C.size1();i++){
+		for(unsigned int j=0;j<C.size2();j++)
+			myfile << C(i,j) << " " ;
+		myfile << "\n";
+	}
+	myfile.close();
+}
+void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
+{
+	std::list<std::string> all_args;
+	polytope::ptr p = polytope::ptr(new polytope());
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("& ");
+	tokenizer tokens(bad_state, sep);
+
+	for (tokenizer::iterator tok_iter = tokens.begin();
+			tok_iter != tokens.end(); ++tok_iter) {
+		all_args.push_back((std::string) *tok_iter);
+	}
+	/* get the location number from the first token */
+	std::string locString = *all_args.begin();
+	all_args.pop_front();
+	boost::char_separator<char> sep1("= ");
+	tokens = tokenizer(locString, sep1);
+
+	tokenizer::iterator tok_iter = tokens.begin();
+
+	std::string tokString = *tok_iter;
+	if(tokString.compare("loc")!=0 && tokString.compare("Loc")!=0 && tokString.compare("LOC")!=0 ){
+		throw std::runtime_error("forbidden state string improper: start with loc=id & ...\n");
+	}
+	tok_iter++;
+	f_set.first = std::atoi((*tok_iter).c_str());
+
+//	/**debug code*/
+//	std::cout << "size of index map=" <<p->map_size() << std::endl;
+//	 std::cout << "index of x=" <<p->get_index("x");
+//	 std::cout << "index of y=" <<p->get_index("v");
+//	 std::cout << "index of t=" <<p->get_index("t");
+//	 /*--*/
+	std::string varname;
+	unsigned int i;
+	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
+		tokString = *iter;
+		if (tokString.find("<=")!=std::string::npos ){ // less than equal to constraint
+			sep = boost::char_separator<char>("<=");
+			tokens = tokenizer(tokString,sep);
+			tok_iter = tokens.begin();
+			varname = *tok_iter;
+			tok_iter++;
+			i = p->get_index(varname);
+			cout<<"   i in <= = "<<i;
+			std::vector<double> cons(p->map_size(),0);
+			cons[i] = 1;
+			double bound = std::atof((*tok_iter).c_str());
+			p->setMoreConstraints(cons,bound);
+		}
+		else if(tokString.find(">=")!=std::string::npos){ // greater than equal to constraint
+			sep = boost::char_separator<char>(">=");
+			tokens = tokenizer(tokString,sep);
+			tok_iter = tokens.begin();
+			varname = *tok_iter;
+			tok_iter++;
+			i = p->get_index(varname);	//	cout<<"   i in >= = "<<i;
+			std::vector<double> cons(p->map_size(),0);
+			cons[i] = -1;
+			double bound = std::atof((*tok_iter).c_str());
+			p->setMoreConstraints(cons,-bound);
+		}
+		else{
+			throw std::runtime_error("forbidden state string improper: <= or >= constraint expected\n");
+		}
+	}
+	cout<<"constraints = "<<p->getCoeffMatrix()<<"\n";
+	for (int i=0;i<p->getColumnVector().size();i++)
+		cout<<p->getColumnVector()[i]<<"\t";
+	cout<<endl;
+	f_set.second = p;
+};
 
 #endif /* POLYTOPE_CPP_ */

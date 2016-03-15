@@ -4,9 +4,10 @@ abstract_symbolic_state::abstract_symbolic_state() {
 	;
 }
 abstract_symbolic_state::abstract_symbolic_state(discrete_set& discreteSet,
-		polytope::ptr continuousSet) {
+		polytope::ptr continuousSet, polytope::ptr polyI) {
 	DiscreteSet = discreteSet;
 	ContinuousSet = continuousSet;
+	I = polyI;
 }
 
 polytope::ptr abstract_symbolic_state::getContinuousSet() const {

@@ -112,8 +112,10 @@ SUITE(HybridAutomata_TestSuite) {
 		Gaurd = polytope::ptr(new polytope(ConstraintsMatrixI,boundValueI,boundSignI));
 
 		int dimen = 2;
+
 		string label1 = "Transition1";
 		string label2 = "Transition2";
+
 		math::matrix<double> m(2, 2);
 		m(0, 0) = 7;
 		m(0, 1) = 7;
@@ -123,7 +125,9 @@ SUITE(HybridAutomata_TestSuite) {
 		Assign T, Tout;
 		T.Map = m;
 		T.b = b;
+
 		int srcLocID=1, destLocID=2;
+
 		transition::ptr trans1 = transition::ptr(new transition(1, label1, srcLocID, destLocID, Gaurd, T));//creating object of location as loc
 		transition::ptr trans2 = transition::ptr(new transition(2, label2, srcLocID, destLocID, Gaurd, T));//creating object of location as loc
 		all_trans.push_back(trans1);

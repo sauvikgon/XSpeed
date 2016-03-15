@@ -16,6 +16,7 @@
 #include <boost/shared_ptr.hpp>
 #include<set>
 #include<utility>
+#include <boost/tokenizer.hpp>
 
 using namespace std;
 /*
@@ -130,8 +131,28 @@ public:
 	 * i and j where i and j are the 1st and 2nd projecting variables
 	 */
 
-	math::matrix<double> get_2dVertices(int i, int j);
+	math::matrix<double> get_2dVertices(int dim1, int dim2);
+
+	/**
+	 * Computes the distance of a point from the polytope.
+	 * If the point is inside the polytope, a 0 distance
+	 * is returned. Otherwise, the signed distance from the
+	 * polytope is returned.
+	 */
+	double point_distance(std::vector<double> v);
+
+	/*
+	 * Prints the vertices of the polytope to a file, passed as parameter.
+	 * The file could be called with any plotting utility.
+	 *
+	 */
+	void print2file(std::string fname, unsigned int dim1, unsigned int dim2);
 
 };
+/**
+ * Creates a pair of <loc_id, poly> from the user given bad state string
+ */
+
+void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set);
 
 #endif /* POLYTOPE_H_ */

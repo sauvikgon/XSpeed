@@ -21,13 +21,14 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
 			Bmatrix;
 	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
-			gaurdBoundValue;
+			gaurdBoundValue, C;
 	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
 
 	size_type row, col;
 
 	//Polytope I Declaration in the form of Ax<=b
 	//Input Polytope I as a line(bar) 10<=x(position)<=10.2 y(velocity)== 0 and t(time)==0.
+
 	row = 6;
 	col = 3;
 	ConstraintsMatrixI.resize(row, col);
@@ -65,33 +66,6 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	row = 6;
 	col = 3;
 	ConstraintsMatrixV.resize(row, col);
-	/*ConstraintsMatrixV(0, 0) = 0;
-	 ConstraintsMatrixV(0, 1) = -1;
-	 ConstraintsMatrixV(0, 2) = 0;
-	 ConstraintsMatrixV(1, 0) = 0;
-	 ConstraintsMatrixV(1, 1) = 1;
-	 ConstraintsMatrixV(1, 2) = 0;
-	 ConstraintsMatrixV(2, 0) = -1;
-	 ConstraintsMatrixV(2, 1) = 0;
-	 ConstraintsMatrixV(2, 2) = 0;
-	 ConstraintsMatrixV(3, 0) = 1;
-	 ConstraintsMatrixV(3, 1) = 0;
-	 ConstraintsMatrixV(3, 2) = 0;
-	 ConstraintsMatrixV(4, 0) = 0;
-	 ConstraintsMatrixV(4, 1) = 0;
-	 ConstraintsMatrixV(4, 2) = 1;
-	 ConstraintsMatrixV(5, 0) = 0;
-	 ConstraintsMatrixV(5, 1) = 0;
-	 ConstraintsMatrixV(5, 2) = -1;
-
-
-	 boundValueV.resize(row);
-	 boundValueV[0] =1; 			//10;  bound for g
-	 boundValueV[1] = -1;		//-10; bound for g
-	 boundValueV[2] = 0;
-	 boundValueV[3] = 0;
-	 boundValueV[4] = 1;	//1		bound for t
-	 boundValueV[5] = -1;		//-1	bound for t*/
 
 	ConstraintsMatrixV(0, 0) = -1;
 	ConstraintsMatrixV(0, 1) = 0;
@@ -150,6 +124,11 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	Bmatrix(2, 1) = 0;
 	Bmatrix(2, 2) = 1;
 
+	// Adding the C vector of the dynamics
+	C.resize(3);
+	C[0]=0;
+	C[1]=-1; // g = -1
+	C[2]=1; //  t = 1
 	// TO BE CHANGED LATER  WHEN DISCRETE JUMP WILL BE CHECKED
 	row = 3; //4;
 	col = 3;
@@ -238,7 +217,8 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyMatrixB = false;
 	system_dynamics.MatrixB = Bmatrix;
 
-	system_dynamics.isEmptyC = true;
+	system_dynamics.isEmptyC = false;
+	system_dynamics.C = C;
 
 	//system_dynamics.U->setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
@@ -303,6 +283,9 @@ t=NULL;*/
 	Hybrid_Automata.addInitial_Location(source);
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
+	Hybrid_Automata.insert_to_map("x",0);
+	Hybrid_Automata.insert_to_map("v",1);
+	Hybrid_Automata.insert_to_map("t",2);
 	/*
 	 Hybrid_Automata.addInitLoc(source);
 	 Hybrid_Automata.addTransition(trans_list);
@@ -321,7 +304,7 @@ t=NULL;*/
 }
 
 //Hyst Generated output
-void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
+void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
@@ -480,6 +463,9 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addInitial_Location(l1);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.setDimension(dim);
+	Hybrid_Automata.insert_to_map("x",0);
+	Hybrid_Automata.insert_to_map("v",1);
+	Hybrid_Automata.insert_to_map("t",2);
 
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation

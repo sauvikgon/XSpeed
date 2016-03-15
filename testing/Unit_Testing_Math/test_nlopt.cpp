@@ -19,7 +19,6 @@ double myvconstraint(const std::vector<double> &x, std::vector<double> &grad,
 	my_constraint_data *d = reinterpret_cast<my_constraint_data*>(data);
 	double a = d->a, b = d->b;
 	if (!grad.empty()) {
-
 		grad[0] = 3 * a * (a * x[0] + b) * (a * x[0] + b);
 		grad[1] = -1.0;
 	}
@@ -67,7 +66,7 @@ TEST_FIXTURE(ExampleOptProb, derivative_Test) {
 	lb[1] = 0;
 
 	myopt.set_lower_bounds(lb);
-	myopt.set_stopval(sqrt(8. / 27.) + 1e-3);
+	myopt.set_stopval(0.01);
 	myopt.set_xtol_rel(1e-4);
 
 	double minf;
@@ -80,7 +79,7 @@ TEST_FIXTURE(ExampleOptProb, derivative_Test) {
 		std::cout << e.what() << std::endl;
 	}
 	std::cout << "The min value returned from nlopt:" << minf << std::endl;
-	expected << "0.544911";
+	expected << "0.544242";
 	test << minf;
 	CHECK_EQUAL(expected.str(), test.str());
 }

@@ -15,6 +15,7 @@
 #include "core_system/Reachability/reachParallelExplore.h"
 #include "Utilities/Template_Polyhedra.h"
 #include "Utilities/testPolytopePlotting.h"
+#include "core_system/continuous/Polytope/Polytope.h"
 
 //#include "MySrc/Reachability/reachabilityParallel_Iterations.h"
 
@@ -38,7 +39,5 @@ template_polyhedra Reach_Parallel_Iteration(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr initial,
 		ReachabilityParameters& reach_parameters, polytope::ptr invariant,
 		bool isInvariantExist);
-
-
 
 #endif /* COMPUTEINITIALPOLYTOPE_H_ */

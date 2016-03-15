@@ -60,7 +60,7 @@ public:
 			unsigned int Algorithm_Type, unsigned int Total_Partition,
 			int lp_solver_type_choosen, unsigned int number_of_streams,
 			int Solver_GLPK_Gurobi_GPU,
-			std::set<std::pair<int, polytope::ptr> > forbidden_set);
+			std::pair<int, polytope::ptr> forbidden_set);
 
 	//Sequential Breadth First Search for Discrete Jumps
 	std::list<symbolic_states::ptr> computeSeqentialBFSReach(
@@ -94,7 +94,7 @@ private:
 	int lp_solver_type_choosen;
 	unsigned int number_of_streams;
 	int Solver_GLPK_Gurobi_GPU;
-	std::set<std::pair<int, polytope::ptr> > forbidden_set;
+	std::pair<int, polytope::ptr> forbidden_set;
 
 	void parallelReachSelection(location::ptr current_location, polytope::ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);

@@ -7,7 +7,7 @@ void reachability::setReachParameter(hybrid_automata& h, initial_state::ptr& i,
 		unsigned int algorithm_type, unsigned int total_partition,
 		int lp_solver_type, unsigned int streams_size,
 		int solver_GLPK_Gurobi_for_GPU,
-		std::set<std::pair<int, polytope::ptr> > forbidden) {
+		std::pair<int, polytope::ptr> forbidden) {
 	H = h;
 	I = i;
 	reach_parameters = reach_param;
@@ -171,15 +171,15 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 		//  ******************************** Safety Verification section ********************************
 		std::list<symbolic_states::ptr> list_sym_states;
 		std::list<abstract_symbolic_state::ptr> list_abstract_sym_states;
-		polytope::ptr Conti_Set; //bounding_box Polytope
+		polytope::ptr abs_flowpipe; //bounding_box Polytope
+		polytope::ptr polyI; //initial polytope of the abstract flowpipe
 		std::list<transition::ptr> list_transitions;
-		if (reach_region->getTotalIterations() != 0) { //flowpipe exists
+		if (reach_region->getTotalIterations() != 0 && forbidden_set.second!=NULL) { //flowpipe exists
 			//so perform intersection with forbidden set provided locID matches
-			for (std::set<std::pair<int, polytope::ptr> >::iterator it =
-					forbidden_set.begin(); it != forbidden_set.end(); it++) {
-				int forbid_locID = current_location->getLocId();
-				if (forbid_locID == (*it).first) { //forbidden locID matches
-					polytope::ptr forbid_poly = (*it).second;
+
+			int locID = current_location->getLocId();
+			if (locID == forbidden_set.first) { //forbidden locID matches
+					polytope::ptr forbid_poly = forbidden_set.second;
 					std::list<template_polyhedra> forbid_intersects;
 					forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
 					if (forbid_intersects.size() == 0) {
@@ -188,8 +188,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 						std::cout << "\nThe model violates SAFETY property!!!\n";
 						symbolic_states::ptr current_forbidden_state;
 						current_forbidden_state = S;
-						abstract_symbolic_state::ptr curr_abs_sym_state;
-						curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
+		//				abstract_symbolic_state::ptr curr_abs_sym_state;
+		//				curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
 						std::cout << "\nReverse Path Trace =>\n";
 						int cc = 0;
 						do {
@@ -197,13 +197,20 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 							discrete_set ds, ds2;
 							ds = current_forbidden_state->getDiscreteSet();
 							//insert discrete_set in the abstract_symbolic_state
-							curr_abs_sym_state->setDiscreteSet(
-									current_forbidden_state->getDiscreteSet());
+		//					curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
 							// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
-							Conti_Set =
-									convertBounding_Box(
-											current_forbidden_state->getContinuousSetptr());
-							curr_abs_sym_state->setContinuousSet(Conti_Set);
+							abs_flowpipe =convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+							// The below gets the first polytope from the SFM. Could be made even better
+							// by taking the exact initial set X0.
+
+							polyI = current_forbidden_state->getInitial_ContinousSetptr();
+
+							// Here create a new abstract_symbolic_state
+							abstract_symbolic_state::ptr curr_abs_sym_state;
+							curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state(ds,abs_flowpipe,polyI));
+
+		// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
+		//					curr_abs_sym_state->setContinuousSet(Conti_Set);
 							// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 							for (std::set<int>::iterator it =
 									ds.getDiscreteElements().begin();
@@ -255,10 +262,19 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 							int locationID;
 							discrete_set ds;
 							ds = current_forbidden_state->getDiscreteSet();
+							abs_flowpipe = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+							// The below gets the first polytope from the SFM. Could be made even better
+							// by taking the exact initial set X0.
 
-							curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
-							Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
-							curr_abs_sym_state->setContinuousSet(Conti_Set);
+							polyI = current_forbidden_state->getInitial_ContinousSetptr();
+
+							// Create a new abstract_symbolic_state
+							abstract_symbolic_state::ptr curr_abs_sym_state;
+
+							curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state(ds,abs_flowpipe,polyI));
+		//					curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
+		//					Conti_Set = convertBounding_Box(current_forbidden_state->getContinuousSetptr());
+		//					curr_abs_sym_state->setContinuousSet(Conti_Set);
 
 							for (std::set<int>::iterator it =
 									ds.getDiscreteElements().begin();
@@ -274,21 +290,14 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 						ce = abstractCE::ptr(new abstractCE());
 						ce->set_length(cc);
 						ce->set_sym_states(list_abstract_sym_states);
-						//todo :: detected issue here with  "list_abstract_sym_states"
-						/*for (std::list<abstract_symbolic_state::ptr>::iterator it = list_abstract_sym_states.begin();
-						 it != list_abstract_sym_states.end(); it++) {
-						 std::vector<double> bb;
-						 bb = (*it)->getContinuousSet()->getColumnVector();
-						 for (int i = 0; i < bb.size(); i++) {
-						 cout << bb[i] << "\t";
-						 }
-						 }*/
 						ce->set_transitions(list_transitions);
+						hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
+						ce->set_automaton(ha);
+						ce->set_forbid_poly(forbidden_set.second);
 						break;
-					}
-				}
-			} //end of all forbidden_state check
-		} //computed flowpipe is not empty
+					} // end of condition when forbidden state intersects with the flowpipe set
+				} //end of condition when forbidden state loc id matches with flowpipe loc id
+			} //computed flowpipe is not empty
 
 		t71.stop();
 		double clock71;
@@ -1208,8 +1217,6 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(ab
 	t70.start();
 
 	while (!isEmpty_Qpw_list(Qpw_list[t])) { //	cout << "Test 5\n";
-
-
 		boost::timer::cpu_timer t73;
 		t73.start();
 		unsigned int count = getSize_Qpw_list(Qpw_list[t]); //get the size of PWList
@@ -1342,8 +1349,8 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(ab
 		double clock705;
 		clock705 = t705.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return705 = clock705 / (double) 1000;
-		std::cout << "\nFlow-pipe Computed Done Time:Wall(Seconds) = "<< return705 << std::endl;
-
+		std::cout << "\nFlow-pipe Computation Done Time:Wall(Seconds) = "<< return705 << std::endl;
+		std::cout <<"***********************************************************************************\n";
 
 		bool foundUnSafe = false;
 		boost::timer::cpu_timer t71;
@@ -1386,7 +1393,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(ab
 
 		boost::timer::cpu_timer t72;
 		t72.start();
-#pragma omp parallel for
+//#pragma omp parallel for
 		for (unsigned int id = 0; id < count; id++) {
 //  ************************************** POST_D computation Begins **********************************************************
 			template_polyhedra::ptr t_poly = S[id]->getContinuousSetptr();
@@ -1419,10 +1426,10 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(ab
 					t100.stop();
 					if (intersected_polyhedra.size() > 0) { //there is intersection so new symbolic state will be inserted into the waitingList
 						//std::cout << "Intersected = " < intersected_polyhedra.size() << std::endl;
-#pragma omp critical
-						{
+//#pragma omp critical
+					//	{
 						iter_max++;
-						}
+					//	}
 					}
 					//todo Handle this later as In SpaceEx model we did not specified BAD or GOOD
 					if ((locName.compare("BAD") == 0)
@@ -1504,7 +1511,8 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 
 	std::list<symbolic_states::ptr> list_sym_states;
 	std::list<abstract_symbolic_state::ptr> list_abstract_sym_states;
-	polytope::ptr Conti_Set; //bounding_box Polytope
+	polytope::ptr abs_flowpipe;	//bounding_box Polytope
+	polytope::ptr polyI; // initial polytope of the abstract flowpipe.
 	bool saftey_violated = false;
 	std::list<transition::ptr> list_transitions;
 
@@ -1519,20 +1527,18 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 		/*location current_location;
 		 current_location = H.getLocation(locID);*/
 
-		for (std::set<std::pair<int, polytope::ptr> >::iterator it =
-				forbidden_set.begin(); it != forbidden_set.end(); it++) {
 			//int forbid_locID = current_location.getLocId();
-			int forbid_locID = locID;
-			if (forbid_locID == (*it).first) { //forbidden locID matches
-				polytope::ptr forbid_poly = (*it).second;
-				//check intersection with flowpipe/reach_region
-				//GeneratePolytopePlotter(forbid_poly);
-				std::list<template_polyhedra> forbid_intersects;
-				//forbid_intersects = computedSymStates->getContinuousSetptr()->polys_intersectionParallel(forbid_poly, lp_solver_type_choosen);
+		int forbid_locID = locID;
+		if (forbid_locID == forbidden_set.first) { //forbidden locID matches
+			polytope::ptr forbid_poly = forbidden_set.second;
+			//check intersection with flowpipe/reach_region
+			//GeneratePolytopePlotter(forbid_poly);
+			std::list<template_polyhedra> forbid_intersects;
+			//forbid_intersects = computedSymStates->getContinuousSetptr()->polys_intersectionParallel(forbid_poly, lp_solver_type_choosen);
 
-				forbid_intersects =
-						computedSymStates->getContinuousSetptr()->polys_intersectionSequential(
-								forbid_poly, lp_solver_type_choosen); //TODO:: CHECK RUNNING BOTH PARALLEL AND SEQUENTIAL
+			forbid_intersects =
+					computedSymStates->getContinuousSetptr()->polys_intersectionSequential(
+							forbid_poly, lp_solver_type_choosen); //TODO:: CHECK RUNNING BOTH PARALLEL AND SEQUENTIAL
 
 				if (forbid_intersects.size() == 0) {
 					std::cout
@@ -1542,10 +1548,8 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 					symbolic_states::ptr current_forbidden_state;
 					current_forbidden_state = computedSymStates;
 
-					// Here create a new abstract_symbolic_state
-					abstract_symbolic_state::ptr curr_abs_sym_state;
-					curr_abs_sym_state = abstract_symbolic_state::ptr(
-							new abstract_symbolic_state());
+	//				abstract_symbolic_state::ptr curr_abs_sym_state;
+	//				curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
 
 					std::cout << "\nReverse Path Trace =>\n";
 					int cc = 0;
@@ -1554,15 +1558,14 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 						discrete_set ds, ds2;
 						ds = current_forbidden_state->getDiscreteSet();
 
-						//insert discrete_set in the abstract_symbolic_state
-						curr_abs_sym_state->setDiscreteSet(
-								current_forbidden_state->getDiscreteSet());
+						abs_flowpipe =
+								convertBounding_Box(
+										current_forbidden_state->getContinuousSetptr());
+						polyI = current_forbidden_state->getInitial_ContinousSetptr();
+						// Here create a new abstract_symbolic_state
+						abstract_symbolic_state::ptr curr_abs_sym_state = abstract_symbolic_state::ptr(
+															new abstract_symbolic_state(ds,abs_flowpipe,polyI));
 
-						// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
-
-						Conti_Set = convertBounding_Box(
-								current_forbidden_state->getContinuousSetptr());
-						curr_abs_sym_state->setContinuousSet(Conti_Set);
 						// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
 						for (std::set<int>::iterator it =
@@ -1612,15 +1615,21 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 							!= NULL);
 
 					if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState()== NULL)) { //root is missed
-						int locationID;
-						discrete_set ds;
 						ds = current_forbidden_state->getDiscreteSet();
 
-						curr_abs_sym_state->setDiscreteSet(
-								current_forbidden_state->getDiscreteSet());
-						Conti_Set = convertBounding_Box(
-								current_forbidden_state->getContinuousSetptr());
-						curr_abs_sym_state->setContinuousSet(Conti_Set);
+						int locationID, locationID2;
+						discrete_set ds, ds2;
+						ds = current_forbidden_state->getDiscreteSet();
+
+						abs_flowpipe =
+								convertBounding_Box(
+										current_forbidden_state->getContinuousSetptr());
+						polyI = current_forbidden_state->getInitial_ContinousSetptr();
+						// Here create a new abstract_symbolic_state
+						abstract_symbolic_state::ptr curr_abs_sym_state = abstract_symbolic_state::ptr(
+															new abstract_symbolic_state(ds,abs_flowpipe,polyI));
+
+						// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
 						for (std::set<int>::iterator it =
 								ds.getDiscreteElements().begin();
@@ -1638,16 +1647,21 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 					saftey_violated = true;
 #pragma omp critical
 					{
+						/*ce = abstractCE::ptr(new abstractCE());
+						ce->set_length(cc);
+						ce->set_sym_states(list_abstract_sym_states);
+						ce->set_transitions(list_transitions);*/
 						ce = abstractCE::ptr(new abstractCE());
 						ce->set_length(cc);
 						ce->set_sym_states(list_abstract_sym_states);
 						ce->set_transitions(list_transitions);
+						hybrid_automata::ptr h = hybrid_automata::ptr(new hybrid_automata(H));
+						ce->set_automaton(h);
+						ce->set_forbid_poly(forbid_poly);
 					}
-					break;
-				}
-			}
-		} //end of all forbidden_state check
-	} //computed flowpipe is not empty
+				} // end of condition when forbidden state intersects with the flowpipe set
+			} //end of condition when forbidden state loc id matches with flowpipe loc id
+		} //computed flowpipe is not empty
 	return saftey_violated;
 }
 

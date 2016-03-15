@@ -6,6 +6,7 @@
  */
 
 #include "Utilities/computeInitialPolytope.h"
+
 /*
 
 polytope::ptr create_polytope_set(supportFunctionProvider::ptr Initial,
