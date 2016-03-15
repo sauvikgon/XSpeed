@@ -146,8 +146,13 @@ public:
 	 * The file could be called with any plotting utility.
 	 *
 	 */
+
 	void print2file(std::string fname, unsigned int dim1, unsigned int dim2);
 
+	/*
+	 * debug function
+	 */
+	void print2files();
 };
 /**
  * Creates a pair of <loc_id, poly> from the user given bad state string

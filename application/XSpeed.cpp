@@ -137,12 +137,6 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		 system_dynamics, invariant, gaurd_polytope, AssignRw);*/
 
 		SetTimedBouncingBall_ParametersHystOutput(Hybrid_Automata, init_state,reach_parameters);
-		/**debug code*/
-//		std::cout << "size of index map=" <<p->map_size() << std::endl;
-		 std::cout << "index of x=" <<Hybrid_Automata.get_index("x");
-		 std::cout << "index of y=" <<Hybrid_Automata.get_index("v");
-		 std::cout << "index of t=" <<Hybrid_Automata.get_index("t");
-		 /*--*/
 		//SetTimedBouncingBall_Parameters(Hybrid_Automata, init_state,
 		//		reach_parameters);
 		//	cout<<"\nTesting 2 b\n";
@@ -905,6 +899,19 @@ std::string allStr;
 	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
 			transition_size, bad_state, forbidden_set);
 	std::list<symbolic_states::ptr> Symbolic_states_list;
+
+	//debug
+
+	/*math::matrix<double> fm = forbidden_set.second->getCoeffMatrix();
+	math::vector<double> fb = forbidden_set.second->getColumnVector();
+	for(unsigned int i=0;i<fm.size1();i++){
+		for(unsigned int j=0;j<fm.size2();j++){
+			std::cout << " " << fm(i,j);
+		}
+		std::cout << "  " <<fb[i] <<  "\n";
+	}*/
+
+	forbidden_set.second->print2file("./forbidden_poly",2,0);
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
 	double Avg_cpu_use=0.0;
