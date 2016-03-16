@@ -900,19 +900,6 @@ std::string allStr;
 			transition_size, bad_state, forbidden_set);
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
-	//debug
-
-	/*math::matrix<double> fm = forbidden_set.second->getCoeffMatrix();
-	math::vector<double> fb = forbidden_set.second->getColumnVector();
-	for(unsigned int i=0;i<fm.size1();i++){
-		for(unsigned int j=0;j<fm.size2();j++){
-			std::cout << " " << fm(i,j);
-		}
-		std::cout << "  " <<fb[i] <<  "\n";
-	}*/
-
-	forbidden_set.second->print2file("./forbidden_poly",2,0);
-
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
 	double Avg_cpu_use=0.0;
 	long total_mem_used=0;

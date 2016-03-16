@@ -459,26 +459,26 @@ void reachability::sequentialReachSelection(location::ptr current_location,
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
 
-	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
-		cout << "\nRunning GPU Sequential\n";
-		boost::timer::cpu_timer AllReachGPU_time;
-		AllReachGPU_time.start();
-
-		reachabilitySequential_GPU(current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters,
-				current_location->getInvariant(),
-				current_location->isInvariantExists(), lp_solver_type_choosen,
-				number_of_streams, Solver_GLPK_Gurobi_GPU, reach_region);
-
-		std::cout << "Out from GPU_reach\n";
-		AllReachGPU_time.stop();
-		double wall_clock1;
-		wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
-				<< return_Time1 << std::endl;
-
-	}
+//	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
+//		cout << "\nRunning GPU Sequential\n";
+//		boost::timer::cpu_timer AllReachGPU_time;
+//		AllReachGPU_time.start();
+//
+//		reachabilitySequential_GPU(current_location->getSystem_Dynamics(),
+//				continuous_initial_polytope, reach_parameters,
+//				current_location->getInvariant(),
+//				current_location->isInvariantExists(), lp_solver_type_choosen,
+//				number_of_streams, Solver_GLPK_Gurobi_GPU, reach_region);
+//
+//		std::cout << "Out from GPU_reach\n";
+//		AllReachGPU_time.stop();
+//		double wall_clock1;
+//		wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+//		double return_Time1 = wall_clock1 / (double) 1000;
+//		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
+//				<< return_Time1 << std::endl;
+//
+//	}
 
 	if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout
@@ -1116,24 +1116,24 @@ void reachability::parallelReachSelection(location::ptr current_location,
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
 
-	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
-		cout << "\nRunning GPU Sequential\n";
-		boost::timer::cpu_timer AllReachGPU_time;
-		AllReachGPU_time.start();
-		reachabilitySequential_GPU(current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters,
-				current_location->getInvariant(),
-				current_location->isInvariantExists(), lp_solver_type_choosen,
-				number_of_streams, Solver_GLPK_Gurobi_GPU, reach_region);
-		S[id]->setContinuousSetptr(reach_region);
-
-		AllReachGPU_time.stop();
-		double wall_clock1;
-		wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
-				<< return_Time1 << std::endl;
-	}
+//	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
+//		cout << "\nRunning GPU Sequential\n";
+//		boost::timer::cpu_timer AllReachGPU_time;
+//		AllReachGPU_time.start();
+//		reachabilitySequential_GPU(current_location->getSystem_Dynamics(),
+//				continuous_initial_polytope, reach_parameters,
+//				current_location->getInvariant(),
+//				current_location->isInvariantExists(), lp_solver_type_choosen,
+//				number_of_streams, Solver_GLPK_Gurobi_GPU, reach_region);
+//		S[id]->setContinuousSetptr(reach_region);
+//
+//		AllReachGPU_time.stop();
+//		double wall_clock1;
+//		wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+//		double return_Time1 = wall_clock1 / (double) 1000;
+//		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
+//				<< return_Time1 << std::endl;
+//	}
 
 	if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout
