@@ -27,12 +27,14 @@
 #include "core_system/math/matrix.h"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <iostream>
-#include <boost/tokenizer.hpp>
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 #include "application/DataStructureDirections.h"
 #include <fstream>
 #include <string>
+
+#include <boost/tokenizer.hpp>
+#include <boost/foreach.hpp>
+#include <boost/config.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace std;
 using namespace boost::numeric::ublas;

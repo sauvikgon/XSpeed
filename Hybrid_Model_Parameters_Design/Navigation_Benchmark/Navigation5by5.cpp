@@ -1454,8 +1454,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc1.push_back(t1);
 	Out_Going_Trans_fromLoc1.push_back(t2);
 
-	location l1(1, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc1);
+	location::ptr l1 = location::ptr(new location(1, "2", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc1));
 //  ************ Location ID=1 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -1494,8 +1494,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc2.push_back(t4);
 	Out_Going_Trans_fromLoc2.push_back(t5);
 
-	location l2(2, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc2);
+	location::ptr l2 = location::ptr(new location(2, "2", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc2));
 //  ************ Location ID=2 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -1534,8 +1534,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc3.push_back(t7);
 	Out_Going_Trans_fromLoc3.push_back(t8);
 
-	location l3(3, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc3);
+	location::ptr l3 = location::ptr(new location(3, "2", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc3));
 //  ************ Location ID=3 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -1574,8 +1574,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc4.push_back(t10);
 	Out_Going_Trans_fromLoc4.push_back(t11);
 
-	location l4(4, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc4);
+	location::ptr l4 = location::ptr(new location(4, "2", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc4));
 //  ************ Location ID=4 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -1613,8 +1613,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc5.push_back(t12);
 	Out_Going_Trans_fromLoc5.push_back(t13);
 
-	location l5(5, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc5);
+	location::ptr l5 = location::ptr(new location(5, "2", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc5));
 //  ************ Location ID=5 completed  ************
 
 	//	************ No dynamics available for location=6/13    ************
@@ -1650,10 +1650,10 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 					invariantBoundSign));
 	std::list<transition::ptr> Out_Going_Trans_fromLoc6, Out_Going_Trans_fromLoc13;
 
-	location l6(6, "FINAL", system_dynamics, invariant, false,
-			Out_Going_Trans_fromLoc6);
-	location l13(13, "BAD", system_dynamics, invariant, false,
-			Out_Going_Trans_fromLoc13);
+	location::ptr l6 = location::ptr(new location(6, "FINAL", system_dynamics, invariant, false,
+			Out_Going_Trans_fromLoc6));
+	location::ptr l13 = location::ptr(new location(13, "BAD", system_dynamics, invariant, false,
+			Out_Going_Trans_fromLoc13));
 
 //  *********  Location ID=6 and ID=13 completed  *****************
 
@@ -1690,8 +1690,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc7.push_back(t15);
 	Out_Going_Trans_fromLoc7.push_back(t16);
 	Out_Going_Trans_fromLoc7.push_back(t17);
-	location l7(7, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc7);
+	location::ptr l7 = location::ptr(new location(7, "4", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc7));
 	//  ************ Location ID=7 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x1<=2 and 2<=x2<=3
@@ -1727,11 +1727,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc8.push_back(t19);
 	Out_Going_Trans_fromLoc8.push_back(t20);
 	Out_Going_Trans_fromLoc8.push_back(t21);
-	location l8(8, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc8);
+	location::ptr l8 = location::ptr(new location(8, "4", system_dynamics, invariant, true, Out_Going_Trans_fromLoc8));
 	//  ************ Location ID=8 completed  ************
-
-	invariantBoundValue[0] = 2; //1<=x1<=2 and 3<=x2<=4
+	invariantBoundValue[0] = 2;	//1<=x1<=2 and 3<=x2<=4
 	invariantBoundValue[1] = -1;
 	invariantBoundValue[2] = 4;
 	invariantBoundValue[3] = -3;
@@ -1764,8 +1762,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc9.push_back(t23);
 	Out_Going_Trans_fromLoc9.push_back(t24);
 	Out_Going_Trans_fromLoc9.push_back(t25);
-	location l9(9, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc9);
+	location::ptr l9 = location::ptr(new location(9, "4", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc9));
 	//  ************ Location ID=9 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x1<=2 and 4<=x2<=5
@@ -1800,8 +1798,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc10.push_back(t26);
 	Out_Going_Trans_fromLoc10.push_back(t27);
 	Out_Going_Trans_fromLoc10.push_back(t28);
-	location l10(10, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc10);
+	location::ptr l10 = location::ptr(new location(10, "4", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc10));
 	//  ************ Location ID=10 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x1<=3 and 0<=x2<=1
@@ -1836,8 +1834,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc11.push_back(t29);
 	Out_Going_Trans_fromLoc11.push_back(t30);
 	Out_Going_Trans_fromLoc11.push_back(t31);
-	location l11(11, "0", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc11);
+	location::ptr l11 = location::ptr(new location(11, "0", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc11));
 	//  ************ Location ID=11 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x1<=3 and 1<=x2<=2
@@ -1873,8 +1871,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc12.push_back(t33);
 	Out_Going_Trans_fromLoc12.push_back(t34);
 	Out_Going_Trans_fromLoc12.push_back(t35);
-	location l12(12, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc12);
+	location::ptr l12 = location::ptr(new location(12, "6", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc12));
 	//  ************ Location ID=12 completed  ************
 	//  ************ Location ID=13 Done above  ************
 
@@ -1911,8 +1909,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc14.push_back(t37);
 	Out_Going_Trans_fromLoc14.push_back(t38);
 	Out_Going_Trans_fromLoc14.push_back(t39);
-	location l14(14, "7", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc14);
+	location::ptr l14 = location::ptr(new location(14, "7", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc14));
 	//  ************ Location ID=14 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x1<=3 and 4<=x2<=5
@@ -1947,8 +1945,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc15.push_back(t40);
 	Out_Going_Trans_fromLoc15.push_back(t41);
 	Out_Going_Trans_fromLoc15.push_back(t42);
-	location l15(15, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc15);
+	location::ptr l15 = location::ptr(new location(15, "6", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc15));
 	//  ************ Location ID=15 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 0<=x2<=1
@@ -1983,8 +1981,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc16.push_back(t43);
 	Out_Going_Trans_fromLoc16.push_back(t44);
 	Out_Going_Trans_fromLoc16.push_back(t45);
-	location l16(16, "0", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc16);
+	location::ptr l16 = location::ptr(new location(16, "0", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc16));
 	//  ************ Location ID=16 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 1<=x2<=2
@@ -2020,8 +2018,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc17.push_back(t47);
 	Out_Going_Trans_fromLoc17.push_back(t48);
 	Out_Going_Trans_fromLoc17.push_back(t49);
-	location l17(17, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc17);
+	location::ptr l17 = location::ptr(new location(17, "6", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc17));
 	//  ************ Location ID=17 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 2<=x2<=3
@@ -2057,8 +2055,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc18.push_back(t51);
 	Out_Going_Trans_fromLoc18.push_back(t52);
 	Out_Going_Trans_fromLoc18.push_back(t53);
-	location l18(18, "3", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc18);
+	location::ptr l18 = location::ptr(new location(18, "3", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc18));
 	//  ************ Location ID=18 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 3<=x2<=4
@@ -2094,8 +2092,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc19.push_back(t55);
 	Out_Going_Trans_fromLoc19.push_back(t56);
 	Out_Going_Trans_fromLoc19.push_back(t57);
-	location l19(19, "7", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc19);
+	location::ptr l19 = location::ptr(new location(19, "7", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc19));
 	//  ************ Location ID=19 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 4<=x2<=5
@@ -2130,8 +2128,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc20.push_back(t58);
 	Out_Going_Trans_fromLoc20.push_back(t59);
 	Out_Going_Trans_fromLoc20.push_back(t60);
-	location l20(20, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc20);
+	location::ptr l20 = location::ptr(new location(20, "6", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc20));
 	//  ************ Location ID=20 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 0<=x2<=1
@@ -2165,8 +2163,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc21;
 	Out_Going_Trans_fromLoc21.push_back(t61);
 	Out_Going_Trans_fromLoc21.push_back(t62);
-	location l21(21, "0", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc21);
+	location::ptr l21 = location::ptr(new location(21, "0", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc21));
 	//  ************ Location ID=21 completed  ************
 
 	invariantBoundValue[0] = 5; //4<=x1<=5 and 1<=x2<=2
@@ -2201,8 +2199,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc22.push_back(t63);
 	Out_Going_Trans_fromLoc22.push_back(t64);
 	Out_Going_Trans_fromLoc22.push_back(t65);
-	location l22(22, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc22);
+	location::ptr l22 = location::ptr(new location(22, "6", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc22));
 	//  ************ Location ID=22 completed  ************
 
 	invariantBoundValue[0] = 5; //4<=x1<=5 and 2<=x2<=3
@@ -2237,8 +2235,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc23.push_back(t66);
 	Out_Going_Trans_fromLoc23.push_back(t67);
 	Out_Going_Trans_fromLoc23.push_back(t68);
-	location l23(23, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc23);
+	location::ptr l23 = location::ptr(new location(23, "4", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc23));
 	//  ************ Location ID=23 completed  ************
 
 	invariantBoundValue[0] = 5; //4<=x1<=5 and 3<=x2<=4
@@ -2274,8 +2272,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc24.push_back(t69);
 	Out_Going_Trans_fromLoc24.push_back(t70);
 	Out_Going_Trans_fromLoc24.push_back(t71);
-	location l24(24, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc24);
+	location::ptr l24 = location::ptr(new location(24, "4", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc24));
 	//  ************ Location ID=24 completed  ************
 
 	invariantBoundValue[0] = 5; //4<=x1<=5 and 4<=x2<=5
@@ -2310,8 +2308,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc25;
 	Out_Going_Trans_fromLoc25.push_back(t72);
 	Out_Going_Trans_fromLoc25.push_back(t73);
-	location l25(25, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc25);
+	location::ptr l25 = location::ptr(new location(25, "6", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc25));
 	//  ************ Location ID=25 completed  ************
 // ******************************************************************************************
 //	// ************************* Locations Created and Initialized **************************
@@ -10615,8 +10613,8 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc3.push_back(t1);
 	Out_Going_Trans_fromloc3.push_back(t2);
 	Out_Going_Trans_fromloc3.push_back(t3);
-	location l1(1, "loc3", system_dynamics0, invariant0, true,
-			Out_Going_Trans_fromloc3);
+	location::ptr l1 = location::ptr(new location(1, "loc3", system_dynamics0, invariant0, true,
+			Out_Going_Trans_fromloc3));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc8;
 
@@ -10624,21 +10622,21 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc8.push_back(t5);
 	Out_Going_Trans_fromloc8.push_back(t6);
 	Out_Going_Trans_fromloc8.push_back(t7);
-	location l2(2, "loc8", system_dynamics1, invariant1, true,
-			Out_Going_Trans_fromloc8);
+	location::ptr l2 = location::ptr(new location(2, "loc8", system_dynamics1, invariant1, true,
+			Out_Going_Trans_fromloc8));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc13;
 
-	location l3(3, "loc13", system_dynamics2, invariant2, true,
-			Out_Going_Trans_fromloc13);
+	location::ptr l3 = location::ptr(new location(3, "loc13", system_dynamics2, invariant2, true,
+			Out_Going_Trans_fromloc13));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc4;
 
 	Out_Going_Trans_fromloc4.push_back(t8);
 	Out_Going_Trans_fromloc4.push_back(t9);
 	Out_Going_Trans_fromloc4.push_back(t10);
-	location l4(4, "loc4", system_dynamics3, invariant3, true,
-			Out_Going_Trans_fromloc4);
+	location::ptr l4 = location::ptr(new location(4, "loc4", system_dynamics3, invariant3, true,
+			Out_Going_Trans_fromloc4));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc7;
 
@@ -10646,8 +10644,8 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc7.push_back(t12);
 	Out_Going_Trans_fromloc7.push_back(t13);
 	Out_Going_Trans_fromloc7.push_back(t14);
-	location l5(5, "loc7", system_dynamics4, invariant4, true,
-			Out_Going_Trans_fromloc7);
+	location::ptr l5 = location::ptr(new location(5, "loc7", system_dynamics4, invariant4, true,
+			Out_Going_Trans_fromloc7));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc12;
 
@@ -10655,51 +10653,51 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc12.push_back(t16);
 	Out_Going_Trans_fromloc12.push_back(t17);
 	Out_Going_Trans_fromloc12.push_back(t18);
-	location l6(6, "loc12", system_dynamics5, invariant5, true,
-			Out_Going_Trans_fromloc12);
+	location::ptr l6 = location::ptr(new location(6, "loc12", system_dynamics5, invariant5, true,
+			Out_Going_Trans_fromloc12));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc6;
 
-	location l7(7, "loc6", system_dynamics6, invariant6, true,
-			Out_Going_Trans_fromloc6);
+	location::ptr l7 = location::ptr(new location(7, "loc6", system_dynamics6, invariant6, true,
+			Out_Going_Trans_fromloc6));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc11;
 
 	Out_Going_Trans_fromloc11.push_back(t19);
 	Out_Going_Trans_fromloc11.push_back(t20);
 	Out_Going_Trans_fromloc11.push_back(t21);
-	location l8(8, "loc11", system_dynamics7, invariant7, true,
-			Out_Going_Trans_fromloc11);
+	location::ptr l8 = location::ptr(new location(8, "loc11", system_dynamics7, invariant7, true,
+			Out_Going_Trans_fromloc11));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc5;
 
 	Out_Going_Trans_fromloc5.push_back(t22);
 	Out_Going_Trans_fromloc5.push_back(t23);
-	location l9(9, "loc5", system_dynamics8, invariant8, true,
-			Out_Going_Trans_fromloc5);
+	location::ptr l9 = location::ptr(new location(9, "loc5", system_dynamics8, invariant8, true,
+			Out_Going_Trans_fromloc5));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc2;
 
 	Out_Going_Trans_fromloc2.push_back(t24);
 	Out_Going_Trans_fromloc2.push_back(t25);
 	Out_Going_Trans_fromloc2.push_back(t26);
-	location l10(10, "loc2", system_dynamics9, invariant9, true,
-			Out_Going_Trans_fromloc2);
+	location::ptr l10 = location::ptr(new location(10, "loc2", system_dynamics9, invariant9, true,
+			Out_Going_Trans_fromloc2));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc1;
 
 	Out_Going_Trans_fromloc1.push_back(t27);
 	Out_Going_Trans_fromloc1.push_back(t28);
-	location l11(11, "loc1", system_dynamics10, invariant10, true,
-			Out_Going_Trans_fromloc1);
+	location::ptr l11 = location::ptr(new location(11, "loc1", system_dynamics10, invariant10, true,
+			Out_Going_Trans_fromloc1));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc10;
 
 	Out_Going_Trans_fromloc10.push_back(t29);
 	Out_Going_Trans_fromloc10.push_back(t30);
 	Out_Going_Trans_fromloc10.push_back(t31);
-	location l12(12, "loc10", system_dynamics11, invariant11, true,
-			Out_Going_Trans_fromloc10);
+	location::ptr l12 = location::ptr(new location(12, "loc10", system_dynamics11, invariant11, true,
+			Out_Going_Trans_fromloc10));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc9;
 
@@ -10707,16 +10705,16 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc9.push_back(t33);
 	Out_Going_Trans_fromloc9.push_back(t34);
 	Out_Going_Trans_fromloc9.push_back(t35);
-	location l13(13, "loc9", system_dynamics12, invariant12, true,
-			Out_Going_Trans_fromloc9);
+	location::ptr l13 = location::ptr(new location(13, "loc9", system_dynamics12, invariant12, true,
+			Out_Going_Trans_fromloc9));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc15;
 
 	Out_Going_Trans_fromloc15.push_back(t36);
 	Out_Going_Trans_fromloc15.push_back(t37);
 	Out_Going_Trans_fromloc15.push_back(t38);
-	location l14(14, "loc15", system_dynamics13, invariant13, true,
-			Out_Going_Trans_fromloc15);
+	location::ptr l14 = location::ptr(new location(14, "loc15", system_dynamics13, invariant13, true,
+			Out_Going_Trans_fromloc15));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc14;
 
@@ -10724,16 +10722,16 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc14.push_back(t40);
 	Out_Going_Trans_fromloc14.push_back(t41);
 	Out_Going_Trans_fromloc14.push_back(t42);
-	location l15(15, "loc14", system_dynamics14, invariant14, true,
-			Out_Going_Trans_fromloc14);
+	location::ptr l15 = location::ptr(new location(15, "loc14", system_dynamics14, invariant14, true,
+			Out_Going_Trans_fromloc14));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc20;
 
 	Out_Going_Trans_fromloc20.push_back(t43);
 	Out_Going_Trans_fromloc20.push_back(t44);
 	Out_Going_Trans_fromloc20.push_back(t45);
-	location l16(16, "loc20", system_dynamics15, invariant15, true,
-			Out_Going_Trans_fromloc20);
+	location::ptr l16 = location::ptr(new location(16, "loc20", system_dynamics15, invariant15, true,
+			Out_Going_Trans_fromloc20));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc19;
 
@@ -10741,8 +10739,8 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc19.push_back(t47);
 	Out_Going_Trans_fromloc19.push_back(t48);
 	Out_Going_Trans_fromloc19.push_back(t49);
-	location l17(17, "loc19", system_dynamics16, invariant16, true,
-			Out_Going_Trans_fromloc19);
+	location::ptr l17 = location::ptr(new location(17, "loc19", system_dynamics16, invariant16, true,
+			Out_Going_Trans_fromloc19));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc17;
 
@@ -10750,8 +10748,8 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc17.push_back(t51);
 	Out_Going_Trans_fromloc17.push_back(t52);
 	Out_Going_Trans_fromloc17.push_back(t53);
-	location l18(18, "loc17", system_dynamics17, invariant17, true,
-			Out_Going_Trans_fromloc17);
+	location::ptr l18 = location::ptr(new location(18, "loc17", system_dynamics17, invariant17, true,
+			Out_Going_Trans_fromloc17));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc18;
 
@@ -10759,54 +10757,54 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc18.push_back(t55);
 	Out_Going_Trans_fromloc18.push_back(t56);
 	Out_Going_Trans_fromloc18.push_back(t57);
-	location l19(19, "loc18", system_dynamics18, invariant18, true,
-			Out_Going_Trans_fromloc18);
+	location::ptr l19 = location::ptr(new location(19, "loc18", system_dynamics18, invariant18, true,
+			Out_Going_Trans_fromloc18));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc16;
 
 	Out_Going_Trans_fromloc16.push_back(t58);
 	Out_Going_Trans_fromloc16.push_back(t59);
 	Out_Going_Trans_fromloc16.push_back(t60);
-	location l20(20, "loc16", system_dynamics19, invariant19, true,
-			Out_Going_Trans_fromloc16);
+	location::ptr l20 = location::ptr(new location(20, "loc16", system_dynamics19, invariant19, true,
+			Out_Going_Trans_fromloc16));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc25;
 
 	Out_Going_Trans_fromloc25.push_back(t61);
 	Out_Going_Trans_fromloc25.push_back(t62);
-	location l21(21, "loc25", system_dynamics20, invariant20, true,
-			Out_Going_Trans_fromloc25);
+	location::ptr l21 = location::ptr(new location(21, "loc25", system_dynamics20, invariant20, true,
+			Out_Going_Trans_fromloc25));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc24;
 
 	Out_Going_Trans_fromloc24.push_back(t63);
 	Out_Going_Trans_fromloc24.push_back(t64);
 	Out_Going_Trans_fromloc24.push_back(t65);
-	location l22(22, "loc24", system_dynamics21, invariant21, true,
-			Out_Going_Trans_fromloc24);
+	location::ptr l22 = location::ptr(new location(22, "loc24", system_dynamics21, invariant21, true,
+			Out_Going_Trans_fromloc24));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc23;
 
 	Out_Going_Trans_fromloc23.push_back(t66);
 	Out_Going_Trans_fromloc23.push_back(t67);
 	Out_Going_Trans_fromloc23.push_back(t68);
-	location l23(23, "loc23", system_dynamics22, invariant22, true,
-			Out_Going_Trans_fromloc23);
+	location::ptr l23 = location::ptr(new location(23, "loc23", system_dynamics22, invariant22, true,
+			Out_Going_Trans_fromloc23));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc22;
 
 	Out_Going_Trans_fromloc22.push_back(t69);
 	Out_Going_Trans_fromloc22.push_back(t70);
 	Out_Going_Trans_fromloc22.push_back(t71);
-	location l24(24, "loc22", system_dynamics23, invariant23, true,
-			Out_Going_Trans_fromloc22);
+	location::ptr l24 = location::ptr(new location(24, "loc22", system_dynamics23, invariant23, true,
+			Out_Going_Trans_fromloc22));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc21;
 
 	Out_Going_Trans_fromloc21.push_back(t72);
 	Out_Going_Trans_fromloc21.push_back(t73);
-	location l25(25, "loc21", system_dynamics24, invariant24, true,
-			Out_Going_Trans_fromloc21);
+	location::ptr l25 = location::ptr(new location(25, "loc21", system_dynamics24, invariant24, true,
+			Out_Going_Trans_fromloc21));
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.addInitial_Location(l1);

@@ -11,7 +11,7 @@
 
 
 #include <iostream>
-//#include <gurobi_c++.h>
+#include <gurobi_c++.h>
 #include "core_system/math/matrix.h"
 #include <boost/shared_ptr.hpp>
 

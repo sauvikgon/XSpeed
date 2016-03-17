@@ -30,7 +30,7 @@ public:
 
 	const discrete_set& getDiscreteSet() const;
 	void setDiscreteSet(const discrete_set& discreteSet);
-	template_polyhedra::ptr getContinuousSetptr() const;
+	template_polyhedra::ptr getContinuousSetptr();
 	void setContinuousSetptr(template_polyhedra::ptr continuousSetptr);
 	symbolic_states::ptr getParentPtrSymbolicState() const;
 	void setParentPtrSymbolicState(symbolic_states::ptr parentPtrSymbolicState);

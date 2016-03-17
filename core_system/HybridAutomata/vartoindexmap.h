@@ -24,17 +24,30 @@ public:
 
 	var_to_index_map();
 	virtual ~var_to_index_map();
+	/**
+	 * Returns the index of the parameter var_name
+	 * in the varname to dimension index map
+	 */
 	unsigned int get_index(std::string var_name){
 		unsigned int index = var_index_map_ptr->at(var_name);
 		return index;
 	}
+	/**
+	 * Inserts a varname, dimension index into the map.
+	 */
 	void insert_to_map(std::string name, unsigned int val)
 	{
 		var_index_map_ptr->insert(std::pair<std::string, unsigned int>(name,val));
 	}
+	/**
+	 * Sets this-> map to the new map passed as parameter
+	 */
 	void set_map(map_ptr m){
 		var_index_map_ptr = m;
 	}
+	/**
+	 * Prints the var_to_index map in the console
+	 */
 	void print_var_index_map();
 
 	/** Return the size of the map */

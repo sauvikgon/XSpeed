@@ -78,7 +78,7 @@ TEST_FIXTURE(ExampleOptProb, derivative_Test) {
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
-	std::cout << "The min value returned from nlopt:" << minf << std::endl;
+//	std::cout << "The min value returned from nlopt:" << minf << std::endl;
 	expected << "0.544242";
 	test << minf;
 	CHECK_EQUAL(expected.str(), test.str());

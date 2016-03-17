@@ -134,10 +134,10 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		}
 		try{
 			int loc_index = locIdList[i];
-			y[i] = simulate_trajectory(v, HA->getLocation(loc_index).getSystem_Dynamics(), x[N * dim + i]);
+			y[i] = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + i]);
 			// todo: assignment mapping to be done later.
 			// todo: temporary implementation of assign map. To be generalized later
-			std::list<transition::ptr>& trans = HA->getLocation(loc_index).getOut_Going_Transitions();
+			std::list<transition::ptr>& trans = HA->getLocation(loc_index)->getOut_Going_Transitions();
 			transition::ptr T = *(trans.begin());
 			Assign R = T->getAssignT();
 			assert(y[i].size() == R.Map.size2());
@@ -169,11 +169,11 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		v[j] = x[ (N-1) * dim + j];
 	}
 
-
 //	int loc_index = locIdList[N-1];
 //	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index).getSystem_Dynamics(), x[N * dim + N-1]);
 //	// compute the distance of this endpoint with the forbidden polytope
 //	sum+= bad_poly->point_distance(trace_end_pt);
+
 
 	if (!grad.empty()) {
 		for(unsigned int i=0;i<dim;i++)

@@ -46,7 +46,7 @@ void concreteCE::plot_ce(std::string filename)
 		seg = *it;
 		locId = seg.first;
 		simulation_sample = seg.second;
-		sim = simulation::ptr(new simulation(simulation_sample.first.size(),time_step,ha->getLocation(locId).getSystem_Dynamics()));
+		sim = simulation::ptr(new simulation(simulation_sample.first.size(),time_step,ha->getLocation(locId)->getSystem_Dynamics()));
 		sim->set_outfile(filename);
 		sim->set_out_dimension(0);
 		std::cout << "simulation: start point:" << std::endl;

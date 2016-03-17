@@ -7,7 +7,7 @@
 
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
 
-void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
+void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
@@ -176,17 +176,6 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
 
-	/*	math::matrix<double> inv_directions;	// * Invariant's Directions
-	 row=2; col=3;
-	 inv_directions.resize(row,col);
-	 inv_directions(0,0) = -1;			// +L directions
-	 inv_directions(0,1) = 0;
-	 inv_directions(0,2) = 0;
-	 inv_directions(1,0) = 1;			// -L directions
-	 inv_directions(1,1) = 0;
-	 inv_directions(1,2) = 0;
-
-	 reach_parameters.InvariantDirections = inv_directions;*/
 //	reach_parameters.InvariantExists = true;	//false;	//Invariant exists.
 	//Invariant's Directions and  Invariant polytope Initialised above
 	/*
@@ -256,13 +245,13 @@ void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 t=NULL;*/
 	transition::ptr trans = transition::ptr(new transition(1,"hop",1,1,gaurd_polytope,assignment));
 
-	location source;
-	source.setLocId(1);
-	source.setName("Always");
-	source.setSystem_Dynamics(system_dynamics);
-	source.setInvariant(invariant);
-	source.setInvariantExists(true);
-	source.add_Out_Going_Transition(trans);
+	location::ptr source = location::ptr(new location());
+	source->setLocId(1);
+	source->setName("Always");
+	source->setSystem_Dynamics(system_dynamics);
+	source->setInvariant(invariant);
+	source->setInvariantExists(true);
+	source->add_Out_Going_Transition(trans);
 
 //transitions &trans;
 //transitions trans("hop",source,destination,gaurd_polytope,assignment);
@@ -456,8 +445,8 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromalways_running;
 
 	Out_Going_Trans_fromalways_running.push_back(t1);
-	location l1(1, "always_running", system_dynamics0, invariant0, true,
-			Out_Going_Trans_fromalways_running);
+	location::ptr l1 = location::ptr(new location(1, "always_running", system_dynamics0, invariant0, true,
+			Out_Going_Trans_fromalways_running));
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.addInitial_Location(l1);

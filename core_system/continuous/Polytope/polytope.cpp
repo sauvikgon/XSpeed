@@ -122,6 +122,9 @@ void polytope::setCoeffMatrix(const math::matrix<double> coeffMatrix) {
 }
 void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 		double bound_value) {
+	this->setSystemDimension(coeff_constraint.size());	//or can be obtained from the map_size()
+	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
+
 	unsigned int row_size, col_size;
 	row_size = this->getCoeffMatrix().size1();
 	col_size = this->getCoeffMatrix().size2(); //dimension of the polytope
@@ -139,6 +142,9 @@ void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 
 void polytope::setMoreConstraints(math::matrix<double> coeff_constraints,
 		std::vector<double> bound_values) {
+	this->setSystemDimension(coeff_constraints.size2());
+	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
+
 	unsigned int row_size, dim_size, rows_new;
 	row_size = this->getCoeffMatrix().size1();
 	dim_size = this->getCoeffMatrix().size2(); //dimension of the polytope
@@ -174,15 +180,15 @@ std::vector<double> polytope::getColumnVector() {
 double polytope::computeSupportFunction(std::vector<double> direction,
 		lp_solver &lp) {
 	double sf;
-	// To Amit: Why is Min_or_Max passed when not used?
-
+//	std::cout<<"Entered inside ComputeSupportFunction 1 !!\n";
 	if (this->getIsEmpty())
 		sf = 0; //returns zero for empty polytope
 	else if (this->getIsUniverse())
 		throw("\n Cannot Compute Support Function of a Universe Polytope.\n");
-	else
+	else{
+//		std::cout<<"Before Compute_LLP !!\n";
 		sf = lp.Compute_LLP(direction); //since lp has already been created and set
-										//with constraints at the time of creation
+	}								//with constraints at the time of creation
 
 	return sf;
 }
@@ -342,17 +348,22 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 void polytope::enum_2dVert_restrict(std::vector<double> u,
 		std::vector<double> v, int i, int j,
 		std::set<std::pair<double, double> >& pts) {
+
+//	std::cout<<"Entered inside enumerateVertices_restrict()!!\n";
 	std::vector<double> sv_u(getSystemDimension(), 0), sv_v(
 			getSystemDimension(), 0);
+//	std::cout<<"Entered inside enumerateVertices_restrict() 2 !!\n";
 	std::vector<double> sv_bisect;
 	lp_solver solver(1); // to choose glpk
 	solver.setConstraints(getCoeffMatrix(), getColumnVector(),
 			getInEqualitySign());
-
+//	std::cout<<"Entered inside enumerateVertices_restrict() 3 !!\n";
 	// get the support
+	//solver.setMin_Or_Max(2);
 	computeSupportFunction(u, solver);
+//	std::cout<<"Entered inside enumerateVertices_restrict() 4 !!\n";
 	sv_u = solver.get_sv();
-
+//	std::cout<<"Entered inside enumerateVertices_restrict() 5 !!\n";
 	computeSupportFunction(v, solver);
 	sv_v = solver.get_sv();
 	// add the sv's to the set of points
@@ -392,12 +403,13 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 		enum_2dVert_restrict(u, bisector, i, j, pts);
 		enum_2dVert_restrict(bisector, v, i, j, pts);
 	}
+//	std::cout<<"Finished inside enumerateVertices_restrict()!!\n";
 }
 
 std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 		int j) {
 	std::set < std::pair<double, double> > All_vertices;
-
+//	std::cout<<"Called enumerateVertices()!!\n";
 	//enumerate the vertices in the first quadrant
 	std::vector<double> u(getSystemDimension(), 0);
 	u[i] = 1;
@@ -417,7 +429,7 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 	//enumerate vertices in the fourth quadrant
 	u[i] = 1;
 	enum_2dVert_restrict(u, v, i, j, All_vertices);
-
+//	std::cout<<"Finished enumerateVertices()!!\n";
 	return All_vertices;
 }
 
@@ -430,7 +442,27 @@ math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
 }
 
 double polytope::point_distance(std::vector<double> v){
-	return 0;
+	math::matrix<double> C = getCoeffMatrix();
+	math::vector<double> b = getColumnVector();
+
+	assert(v.size() == C.size2());
+
+	double distance = 0;
+	double facet_distance = 0;
+	double coef_sq_sum = 0;
+	for(unsigned int i=0;i<C.size1();i++){
+		for(unsigned int j=0;j<C.size2();j++){
+			facet_distance += v[j]*C(i,j);
+			coef_sq_sum += C(i,j)*C(i,j);
+		}
+		facet_distance -=b[i];
+		if(facet_distance > 0){
+			distance += facet_distance/math::sqrt(coef_sq_sum);
+		}
+		coef_sq_sum = 0;
+		facet_distance = 0;
+	}
+	return distance;
 }
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
@@ -440,6 +472,7 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 	std::ofstream myfile;
 	myfile.open(fname.c_str());
 	math::matrix<double> C = get_2dVertices(dim1, dim2);
+
 	for(unsigned int i=0;i<C.size1();i++){
 		for(unsigned int j=0;j<C.size2();j++)
 			myfile << C(i,j) << " " ;
@@ -447,10 +480,12 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 	}
 	myfile.close();
 }
+
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
 {
 	std::list<std::string> all_args;
 	polytope::ptr p = polytope::ptr(new polytope());
+	//p->setIsUniverse(false); //Not a universe Polytope
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("& ");
 	tokenizer tokens(bad_state, sep);
@@ -485,6 +520,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			varname = *tok_iter;
 			tok_iter++;
 			i = p->get_index(varname);
+		//	cout<<"   i in <= = "<<i;
 			std::vector<double> cons(p->map_size(),0);
 			cons[i] = 1;
 			double bound = std::atof((*tok_iter).c_str());
@@ -496,7 +532,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			tok_iter = tokens.begin();
 			varname = *tok_iter;
 			tok_iter++;
-			i = p->get_index(varname);
+			i = p->get_index(varname);	//	cout<<"   i in >= = "<<i;
 			std::vector<double> cons(p->map_size(),0);
 			cons[i] = -1;
 			double bound = std::atof((*tok_iter).c_str());
@@ -506,6 +542,10 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			throw std::runtime_error("forbidden state string improper: <= or >= constraint expected\n");
 		}
 	}
+	cout<<"constraints = "<<p->getCoeffMatrix()<<"\n";
+	for (int i=0;i<p->getColumnVector().size();i++)
+		cout<<p->getColumnVector()[i]<<"\t";
+	cout<<endl;
 	f_set.second = p;
 };
 

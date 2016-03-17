@@ -693,8 +693,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc1.push_back(t2);
 	Out_Going_Trans_fromLoc1.push_back(t3);
 
-	location l1(1, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc1);
+	location::ptr l1 = location::ptr(new location(1, "4", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc1));
 //  ************ Location ID=1 completed  ************
 
 	invariantBoundValue[0] = 1; //0<=x<=1 and 0<=y<=1
@@ -730,8 +730,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc2.push_back(t4);
 	Out_Going_Trans_fromLoc2.push_back(t5);
 
-	location l2(2, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc2);
+	location::ptr l2 = location::ptr(new location(2, "2", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc2));
 	//  ************ Location ID=2 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x<=2 and 0<=y<=1
@@ -768,8 +768,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc3.push_back(t7);
 	Out_Going_Trans_fromLoc3.push_back(t8);
 
-	location l3(3, "1", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc3);
+	location::ptr l3 = location::ptr(new location(3, "1", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc3));
 	//  ************ Location ID=3 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x<=2 and 1<=y<=2
@@ -807,8 +807,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc4.push_back(t11);
 	Out_Going_Trans_fromLoc4.push_back(t12);
 
-	location l4(4, "7", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc4);
+	location::ptr l4 = location::ptr(new location(4, "7", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc4));
 	//  ************ Location ID=4 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x<=2 and 2<=y<=3
@@ -845,8 +845,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc5.push_back(t14);
 	Out_Going_Trans_fromLoc5.push_back(t15);
 
-	location l5(5, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc5);
+	location::ptr l5 = location::ptr(new location(5, "2", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc5));
 	//  ************ Location ID=5 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x<=3 and 1<=y<=2
@@ -883,8 +883,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc6.push_back(t17);
 	Out_Going_Trans_fromLoc6.push_back(t18);
 
-	location l6(6, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc6);
+	location::ptr l6 = location::ptr(new location(6, "4", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc6));
 	//  ************ Location ID=6 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x<=3 and 2<=y<=3
@@ -920,8 +920,8 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc7.push_back(t19);
 	Out_Going_Trans_fromLoc7.push_back(t20);
 
-	location l7(7, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc7);
+	location::ptr l7 = location::ptr(new location(7, "4", system_dynamics, invariant, true,
+			Out_Going_Trans_fromLoc7));
 	//  ************ Location ID=7 completed  ************
 
 //	************ No dynamics available for location=8/9    ************
@@ -958,10 +958,10 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 					invariantBoundSign));
 	std::list<transition::ptr> Out_Going_Trans_fromLoc8, Out_Going_Trans_fromLoc9;
 
-	location l8(8, "FINAL", system_dynamics, invariant, false,
-			Out_Going_Trans_fromLoc8);
-	location l9(9, "BAD", system_dynamics, invariant, false,
-			Out_Going_Trans_fromLoc9);
+	location::ptr l8 = location::ptr(new location(8, "FINAL", system_dynamics, invariant, false,
+			Out_Going_Trans_fromLoc8));
+	location::ptr l9 = location::ptr(new location(9, "BAD", system_dynamics, invariant, false,
+			Out_Going_Trans_fromLoc9));
 //Location ID=8 and ID=9 completed ************
 
 	//	*************** Locations Initialized *******************

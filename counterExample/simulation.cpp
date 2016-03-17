@@ -131,6 +131,10 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	std::vector<double> last(dimension);
 
 	if(print_flag){
+		// We plot the initial point also
+		myfile << time_offset << "  " << x[this->x];
+		myfile << "\n";
+
 		for(unsigned int k=1;k<=N;k++) {
 			double tout = k*time_step;
 			// remember this point in the last vector

@@ -181,46 +181,20 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(
 		matrix mat1;
 		mat1 = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
 		row = row + mat2.size1(); //only row will increase as the col is the system_dimension, so will not change
-		matrix mat2_temp(row, col);
-		//cout << "This is the new Rows = " << mat2_temp.size1() << "AmitJI" << endl;
+		matrix mat2_temp(row, col); //cout << "This is the new Rows = " << mat2_temp.size1();
 		mat1.matrix_copy(mat2_temp);
-		mat2_temp.resize(row, col, true);
-		//cout << "This is the new Rows after matrix_copy and resize = " << mat2_temp.size1() << "AmitJI" << endl;
-		//joined_matrix.resize(row, col);
-		//mat1.matrix_copy(joined_matrix);		//not working here
-		for (size_type i = mat1.size1(), index_i = 0; i < mat2_temp.size1();
-				i++, index_i++) {
+		mat2_temp.resize(row, col, true); //cout << "This is the new Rows after matrix_copy and resize = " << mat2_temp.size1();
+		//joined_matrix.resize(row, col);		//mat1.matrix_copy(joined_matrix);		//not working here
+		for (size_type i = mat1.size1(), index_i = 0; i < mat2_temp.size1();i++, index_i++) {
 			for (size_type j = 0; j < mat2_temp.size2(); j++) {
 				mat2_temp(i, j) = mat2(index_i, j);
 			}
-			//cout<<endl;
 		}
-		/*
-		 cout << "\n\n\nBEFORE JOINING"<<endl;
-		 for (unsigned int i=0;i<mat2_temp.size1();i++){
-		 for (unsigned int j=0;j<mat2_temp.size2();j++)
-		 std::cout << mat2_temp(i,j)<<"\t";
-		 cout<<endl;
-		 cout<<"Check it out Ra\t";
-		 }
-		 */
 		joined_matrix = math::matrix<scalar_type>(mat2_temp.size1(),
 				mat2_temp.size2(), mat2_temp.data());
-
-		/*
-		 cout << "\n\n\nAFTER JOINING"<<endl;
-		 for (unsigned int i=0;i<joined_matrix.size1();i++){
-		 for (unsigned int j=0;j<joined_matrix.size2();j++)
-		 std::cout << joined_matrix(i,j)<<"\t";
-		 cout<<endl;
-		 }
-		 */
-
 	} else {
-		cout
-				<< "Matices are not of the same dimension:: number of columns do not match!!!";
+		cout << "Matices are not of the same dimension:: number of columns do not match!!!";
 	}
-
 }
 
 /**

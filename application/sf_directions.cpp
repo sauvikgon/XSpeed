@@ -82,7 +82,7 @@ void getDirectionList_X0_and_U(ReachabilityParameters &ReachParameters,
 	unsigned int total_list_X0 = list_X0.size1(); //total number of directions for X0 is [ numDirs * (iters + 1) ]
 	unsigned int total_list_U = list_U.size1(); //total number of directions for U is [ numDirs * iters ]
 
-#pragma omp parallel for
+//#pragma omp parallel for
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 		unsigned int index_X, indexU; //making the index suitable for parallelizing
 		if (!U_empty) {
@@ -105,13 +105,13 @@ void getDirectionList_X0_and_U(ReachabilityParameters &ReachParameters,
 		if (!SystemDynamics.isEmptyMatrixA) //if Matrix A is not Empty
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
 
-		if (!U_empty) { //if not only than will be required to multiply
+		if (!SystemDynamics.isEmptyMatrixB) { //if not only than will be required to multiply
 			B_trans.mult_vector(rVariable, B_trans_dir);
 		}
 		//std::cout << index_X0 << " ";
 		for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
 			list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
-			if (!U_empty) { //if not only than will be required to multiply
+			if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty()) { //if not only than will be required to multiply
 				list_U(indexU, x) = (float) B_trans_dir[x]; //optimizing in a single loop
 			}
 		}

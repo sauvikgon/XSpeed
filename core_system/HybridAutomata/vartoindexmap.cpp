@@ -18,6 +18,7 @@ var_to_index_map::var_to_index_map() {
 var_to_index_map::~var_to_index_map() {
 	// TODO Auto-generated destructor stub
 }
+
 void var_to_index_map::print_var_index_map()
 {
 	unsigned int i = 0;

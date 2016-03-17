@@ -133,8 +133,10 @@ SUITE(HybridAutomata_TestSuite) {
 		all_trans.push_back(trans1);
 		all_trans.push_back(trans2);
 
-		location loc(11, nn, D, Inv, true, all_trans),loc_src(12, "WelCome", D, Inv, true, all_trans),
-		loc_dest(13, "GoodBye", D, Inv, true, all_trans), outLoc;
+		location::ptr loc = location::ptr(new location(11, nn, D, Inv, true, all_trans));
+		location::ptr loc_src = location::ptr(new location(12, "WelCome", D, Inv, true, all_trans));
+		location::ptr loc_dest = location::ptr(new location(13, "GoodBye", D, Inv, true, all_trans));
+		location::ptr outLoc;
 
 		hybrid_automata ha;
 
@@ -150,12 +152,12 @@ SUITE(HybridAutomata_TestSuite) {
 		CHECK_EQUAL(proper.str(), out.str());
 
 		outLoc = ha.getLocation(11);
-		out << outLoc.getName();
+		out << outLoc->getName();
 		proper << "Hello Welcome";
 		CHECK_EQUAL(proper.str(), out.str());
 
 		outLoc = ha.getLocation(13);
-		out << outLoc.getName();
+		out << outLoc->getName();
 		proper << "GoodBye";
 		CHECK_EQUAL(proper.str(), out.str());
 

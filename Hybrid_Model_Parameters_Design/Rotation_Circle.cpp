@@ -151,8 +151,8 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	Out_Going_Trans_fromLoc1.push_back(t1);
 
-	location l1(1, "Loc-1", system_dynamics, invariant1, true,
-			Out_Going_Trans_fromLoc1);
+	location::ptr l1 = location::ptr(new location(1, "Loc-1", system_dynamics, invariant1, true,
+			Out_Going_Trans_fromLoc1));
 //	Initalised for Location 1	 ---------------------
 
 //Location 2:: gaurd is y>=0 and No Assignment so its identity i.e., x'=x and y'=y
@@ -187,8 +187,8 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc2;
 	Out_Going_Trans_fromLoc2.push_back(t2);
 
-	location l2(2, "Loc-2", system_dynamics, invariant2, true,
-			Out_Going_Trans_fromLoc2);
+	location::ptr l2 = location::ptr(new location(2, "Loc-2", system_dynamics, invariant2, true,
+			Out_Going_Trans_fromLoc2));
 //Initialised Location 2	--------------------------
 
 	int dim = initial_polytope_I->getSystemDimension();

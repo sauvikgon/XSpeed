@@ -182,8 +182,8 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	//Out_Going_Trans_fromLoc1.push_back(t1);
 
 //NO INVARIANT EXITS
-	location l1(1, "Loc-1", system_dynamics, invariant1, false,
-			Out_Going_Trans_fromLoc1);
+	location::ptr l1 = location::ptr(new location(1, "Loc-1", system_dynamics, invariant1, false,
+			Out_Going_Trans_fromLoc1));
 //	Initalised for Location 1	 ---------------------
 
 	int dim = initial_polytope_I->getSystemDimension();
