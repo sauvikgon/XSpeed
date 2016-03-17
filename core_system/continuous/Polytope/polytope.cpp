@@ -35,20 +35,20 @@ using namespace std;
  */
 
 polytope::polytope() {
-	//lp_init = false;
-	InEqualitySign = 0;
+	// The default polytope inequality sign is <=
+	InEqualitySign = 1;
 	number_facets = 0;
 	system_dimension = 0;
 	this->IsUniverse = true; //It is a Universe polytope
 	this->IsEmpty = false;
 }
 polytope::polytope(bool empty) {
-	//lp_init = false;
-	InEqualitySign = 0;
+	// The default polytope inequality sign is <=
+	InEqualitySign = 1;
 	number_facets = 0;
 	system_dimension = 0;
 	this->IsEmpty = true;
-	this->IsUniverse = true; //It is empty so neither 'bounded' not 'unbounded'
+	this->IsUniverse = false; //It is empty so neither 'bounded' not 'unbounded'
 }
 
 polytope::polytope(math::matrix<double> coeffMatrix,
@@ -520,7 +520,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			varname = *tok_iter;
 			tok_iter++;
 			i = p->get_index(varname);
-		//	cout<<"   i in <= = "<<i;
+			cout<<"   i in <= = "<<i;
 			std::vector<double> cons(p->map_size(),0);
 			cons[i] = 1;
 			double bound = std::atof((*tok_iter).c_str());
@@ -532,7 +532,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			tok_iter = tokens.begin();
 			varname = *tok_iter;
 			tok_iter++;
-			i = p->get_index(varname);	//	cout<<"   i in >= = "<<i;
+			i = p->get_index(varname);		cout<<"   i in >= = "<<i;
 			std::vector<double> cons(p->map_size(),0);
 			cons[i] = -1;
 			double bound = std::atof((*tok_iter).c_str());

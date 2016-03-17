@@ -185,7 +185,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 			}
 		}
 	}
-std::cout << "current sum = " << sum << std::endl;
+//std::cout << "current sum = " << sum << std::endl;
 
 //	mycount++;
 //	if(mycount>=3)
@@ -216,7 +216,6 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 //	unsigned int row_index = d->row_index;
 
 	if (!grad.empty()) {
-		// todo: gradient to be added later
 		for(unsigned int i=0;i<x.size();i++){
 			grad[i] = 0 ;
 		}
@@ -242,7 +241,6 @@ double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad
 
 	boundConstriant *d = reinterpret_cast<boundConstriant *>(data);
 	if (!grad.empty()) {
-		// todo: gradient to be added later
 		for(unsigned int i=0;i<x.size();i++){
 			grad[i] = 0 ;
 		}
@@ -326,7 +324,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 //	myopt.set_lower_bounds(lb);
 //	myopt.set_upper_bounds(ub);
-	myopt.set_stopval(0.00001);
+	myopt.set_stopval(0.1);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);

@@ -898,6 +898,7 @@ std::string allStr;
 
 	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
 			transition_size, bad_state, forbidden_set);
+	forbidden_set.second->print2file("./f_poly",2,0);
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
