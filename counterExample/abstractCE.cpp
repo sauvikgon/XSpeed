@@ -168,10 +168,12 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	for (unsigned int j = 0; j < dim; j++) {
 		v[j] = x[ (N-1) * dim + j];
 	}
-	int loc_index = locIdList[N-1];
-	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + N-1]);
-	// compute the distance of this endpoint with the forbidden polytope
-	sum+= bad_poly->point_distance(trace_end_pt);
+
+//	int loc_index = locIdList[N-1];
+//	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index).getSystem_Dynamics(), x[N * dim + N-1]);
+//	// compute the distance of this endpoint with the forbidden polytope
+//	sum+= bad_poly->point_distance(trace_end_pt);
+
 
 	if (!grad.empty()) {
 		for(unsigned int i=0;i<dim;i++)
