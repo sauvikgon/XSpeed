@@ -105,11 +105,13 @@ template<typename scalar_type> void math::matrix<scalar_type>::mult_vector(
 		std::vector<scalar_type> v, std::vector<scalar_type> &res) {
 	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 	ublas_vector_impl uv(v.size());
+#pragma omp parallel for
 	for (unsigned int i = 0; i < v.size(); i++)
 		uv(i) = v[i];
 	uv = prod(m, uv);
 	res.resize(uv.size());
 	//cout<<"\n"<<v.size()<<endl;
+#pragma omp parallel for
 	for (unsigned int i = 0; i < m.size1(); i++)	//m.size1()  or uv.size()
 		res[i] = uv(i);
 	//cout<<"\n"<<uv.size()<<endl;

@@ -169,9 +169,13 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		v[j] = x[ (N-1) * dim + j];
 	}
 
-//	int loc_index = locIdList[N-1];
-//	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index).getSystem_Dynamics(), x[N * dim + N-1]);
-//	// compute the distance of this endpoint with the forbidden polytope
+	int loc_index = locIdList[N-1];
+	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + N-1]);
+	// compute the distance of this endpoint with the forbidden polytope
+	double d = bad_poly->point_distance(trace_end_pt);
+	std::cout << "sim end point:" <<  trace_end_pt[0] << ", " << trace_end_pt[1] << ", " << trace_end_pt[2] <<std::endl;
+	std::cout << "returned poly point distance:" << d << std::endl;
+	sum+=d;
 //	sum+= bad_poly->point_distance(trace_end_pt);
 
 
@@ -185,7 +189,8 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 			}
 		}
 	}
-//std::cout << "current sum = " << sum << std::endl;
+std::cout << "current sum = " << sum << std::endl;
+
 
 //	mycount++;
 //	if(mycount>=3)
@@ -324,7 +329,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 //	myopt.set_lower_bounds(lb);
 //	myopt.set_upper_bounds(ub);
-	myopt.set_stopval(0.1);
+	myopt.set_stopval(0.001);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);
