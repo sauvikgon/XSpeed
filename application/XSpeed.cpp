@@ -271,8 +271,9 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
 	/* The variable to dimension id map it set at this point */
-	if(!bad_state.empty())
+	if(!bad_state.empty()){
 		string_to_poly(bad_state,forbidden_set);
+	}
 }
 
 bool isNumber(const string& s) {
@@ -901,17 +902,20 @@ std::string allStr;
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
 	//debug
+/*
 
-	/*math::matrix<double> fm = forbidden_set.second->getCoeffMatrix();
+	math::matrix<double> fm = forbidden_set.second->getCoeffMatrix();
 	math::vector<double> fb = forbidden_set.second->getColumnVector();
+	std::cout << " sign of ineq:" << forbidden_set.second->getInEqualitySign() << std::endl;
 	for(unsigned int i=0;i<fm.size1();i++){
 		for(unsigned int j=0;j<fm.size2();j++){
 			std::cout << " " << fm(i,j);
 		}
 		std::cout << "  " <<fb[i] <<  "\n";
-	}*/
+	}
 
-	forbidden_set.second->print2file("./forbidden_poly",2,0);
+	forbidden_set.second->print2file("./forbidden_poly",0,1);
+*/
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
 	double Avg_cpu_use=0.0;

@@ -39,6 +39,8 @@ polytope::polytope() {
 	InEqualitySign = 0;
 	number_facets = 0;
 	system_dimension = 0;
+	// The default polytope inequality sign is <=
+	InEqualitySign = 1;
 	this->IsUniverse = true; //It is a Universe polytope
 	this->IsEmpty = false;
 }
@@ -47,8 +49,10 @@ polytope::polytope(bool empty) {
 	InEqualitySign = 0;
 	number_facets = 0;
 	system_dimension = 0;
+	// The default polytope inequality sign is <=
+	InEqualitySign = 1;
 	this->IsEmpty = true;
-	this->IsUniverse = true; //It is empty so neither 'bounded' not 'unbounded'
+	this->IsUniverse = false; //It is empty so neither 'bounded' not 'unbounded'
 }
 
 polytope::polytope(math::matrix<double> coeffMatrix,
@@ -124,6 +128,9 @@ void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 		double bound_value) {
 	this->setSystemDimension(coeff_constraint.size());	//or can be obtained from the map_size()
 	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
+	this->InEqualitySign = 1; // assuming that always less than ineq cons is added.
+	// todo: make the impl to accept ineq sign as param or
+	// change the func name to add_lt_inequalityCons().
 
 	unsigned int row_size, col_size;
 	row_size = this->getCoeffMatrix().size1();
@@ -181,10 +188,12 @@ double polytope::computeSupportFunction(std::vector<double> direction,
 		lp_solver &lp) {
 	double sf;
 //	std::cout<<"Entered inside ComputeSupportFunction 1 !!\n";
-	if (this->getIsEmpty())
+	if (this->getIsEmpty()){
+	//	throw std::runtime_error("\nCompute Support Function called for an Empty Polytope.\n");
 		sf = 0; //returns zero for empty polytope
+	}
 	else if (this->getIsUniverse())
-		throw("\n Cannot Compute Support Function of a Universe Polytope.\n");
+		throw std::runtime_error("\n Cannot Compute Support Function of a Universe Polytope.\n");
 	else{
 //		std::cout<<"Before Compute_LLP !!\n";
 		sf = lp.Compute_LLP(direction); //since lp has already been created and set
@@ -359,7 +368,7 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 			getInEqualitySign());
 //	std::cout<<"Entered inside enumerateVertices_restrict() 3 !!\n";
 	// get the support
-	//solver.setMin_Or_Max(2);
+	solver.setMin_Or_Max(2);
 	computeSupportFunction(u, solver);
 //	std::cout<<"Entered inside enumerateVertices_restrict() 4 !!\n";
 	sv_u = solver.get_sv();
@@ -475,7 +484,11 @@ void polytope::print2files(){
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
 {
 	std::list<std::string> all_args;
+	//polytope::ptr p = polytope::ptr(new polytope());
 	polytope::ptr p = polytope::ptr(new polytope());
+	p->setIsEmpty(false);
+	p->setIsUniverse(true);
+
 	//p->setIsUniverse(false); //Not a universe Polytope
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("& ");

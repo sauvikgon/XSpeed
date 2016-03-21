@@ -123,9 +123,13 @@ private:
 
 	void parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS);
 
+	void parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS);
+
 	double boxLPSolver(polytope::ptr poly, std::vector<double> dir);
 
 	double LPSolver(polytope::ptr poly, std::vector<double> dirs);
+
+	int compute_chunk_size(unsigned int countTotal_X);
 };
 
 #endif /* REACHABILITY_H_ */

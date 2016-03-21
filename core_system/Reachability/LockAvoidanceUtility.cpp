@@ -68,15 +68,17 @@ void search_SymState_dirsX0Index(unsigned int i,
 	unsigned int tot = 0;
 	for (int id = 0; id < LoadBalanceDS.size(); id++) {
 		unsigned int siz = LoadBalanceDS[id].List_dir_X0.size1(); //returns the number
+	//	cout<<"siz = "<<siz<<"\t";
 		tot = tot + siz;
 		if (i < tot) { //Note <= is incorrect as ==tot will fall in the next symbolic_state, due to 0-indexing
 			SymStateIndex = id;
 			unsigned int term =(i - (tot - siz)); //(i - tot - siz - 1);
 			//cout<<"i  = "<<i <<"  tot = " << tot<<"  siz = "<<siz <<"  term = "<<term<<"\n";
-			if (term == 0)
+			dirsIndex = term;
+			/*if (term == 0)
 				dirsIndex = 0;
 			else
-				dirsIndex = term - 1;	//-1 due to 0-indexing
+				dirsIndex = term - 1;	//-1 due to 0-indexing*/
 			//cout<<"i  = "<<i <<"  tot = " << tot<<"  siz = "<<siz <<"  term = "<<term<<"   dirsIndex = "<<dirsIndex<<"\n";
 			break; //when found stop searching the rest of the symbolic state
 		}
