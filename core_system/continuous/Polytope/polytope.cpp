@@ -35,6 +35,7 @@ using namespace std;
  */
 
 polytope::polytope() {
+
 	// The default polytope inequality sign is <=
 	InEqualitySign = 1;
 	number_facets = 0;
@@ -43,6 +44,7 @@ polytope::polytope() {
 	this->IsEmpty = false;
 }
 polytope::polytope(bool empty) {
+
 	// The default polytope inequality sign is <=
 	InEqualitySign = 1;
 	number_facets = 0;
