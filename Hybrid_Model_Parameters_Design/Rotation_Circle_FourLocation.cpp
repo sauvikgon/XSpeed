@@ -287,4 +287,3 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 
 	init_state = I;
 }
-

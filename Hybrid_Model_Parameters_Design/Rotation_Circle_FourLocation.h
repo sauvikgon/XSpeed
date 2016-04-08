@@ -20,6 +20,4 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 
 
 
-
-
 #endif /* ROTATION_CIRCLE_FOURLOCATION_H_ */

@@ -8,7 +8,7 @@
  * There exists only one Location with no invariant and transition.
  */
 
-#include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
+#include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
 
 void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,

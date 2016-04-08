@@ -174,6 +174,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 		polytope::ptr abs_flowpipe; //bounding_box Polytope
 		polytope::ptr polyI; //initial polytope of the abstract flowpipe
 		std::list<transition::ptr> list_transitions;
+
 		if (reach_region->getTotalIterations() != 0 && forbidden_set.second!=NULL) { //flowpipe exists
 			//so perform intersection with forbidden set provided locID matches
 

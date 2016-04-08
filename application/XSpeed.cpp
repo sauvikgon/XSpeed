@@ -221,7 +221,7 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		//dim = 2;
 		std::cout
 				<< "\nRunning :: Model of A CIRCLE with TWO Locations 2-Dimensional Systems\n";
-		SetRotationCircle_Parameters(Hybrid_Automata, init_state,
+		SetRotationTimedCircle_Parameters(Hybrid_Automata, init_state,
 				reach_parameters);
 	}
 	if (HybridSystem_Model_Type == CIRCLE_FOUR_LOC) {
@@ -270,9 +270,16 @@ void initialize(int iterations_size, double time_bound, unsigned int model_type,
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
-	/* The variable to dimension id map it set at this point */
-	if(!bad_state.empty())
+	/* The variable to dimension id map is set at this point */
+	if(!bad_state.empty()){
 		string_to_poly(bad_state,forbidden_set);
+		//debug;
+		//forbidden_set.second->print2file("./bad_poly",0,1);
+		//----
+	}
+	else{
+		std::cout << "No Forbidden States Description Provided\n";
+	}
 }
 
 bool isNumber(const string& s) {
@@ -576,170 +583,6 @@ int main(int argc, char *argv[]) {
 
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			bad_state = vm["forbidden"].as<std::string>();
-/*
-std::string allStr;
-			allStr = vm["forbidden"].as<std::string>();
-			std::cout << "\nAll forbidden arguments\n";
-
-			math::matrix<double> coeff;
-			std::vector<double> colVector;
-
-			std::list<std::string> all_args;
-
-			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-			boost::char_separator<char> sep("& ");
-			tokenizer tokens(allStr, sep);
-			for (tokenizer::iterator tok_iter = tokens.begin();
-					tok_iter != tokens.end(); ++tok_iter) {
-				//std::cout << "<" << *tok_iter << ">" << std::endl;
-				all_args.push_back((std::string) *tok_iter);
-			}
-
-			std::pair<int, polytope::ptr> forbid_pair;
-			int pair_started = -1;
-			bool polytope_created = false;
-			int constraints_count = 0;
-			std::list<std::vector<double> > list_of_bounds;
-			for (std::list<std::string>::iterator it = all_args.begin();
-					it != all_args.end(); it++) {
-				std::string eachStr = (*it);
-				//		std::cout << "eachStr = " << eachStr << std::endl;
-				boost::char_separator<char> sep_symbol("="); //handles = or ==
-				tokenizer each_tokens(eachStr, sep_symbol);
-				bool is_loc = false;
-
-				if (each_tokens.begin().current_token().compare("loc") == 0) { //check the 1st token if "loc"
-					//std::cout<<"each_tokens.begin().current_token() = "<<each_tokens.begin().current_token()<<"  amit\n";
-					pair_started = 1;
-					for (tokenizer::iterator tok_it = each_tokens.begin();
-							tok_it != each_tokens.end(); tok_it++) {
-						if (is_loc) { //2nd token
-							std::cout << "Loc=" << *tok_it << "\n";
-							forbid_pair.first = boost::lexical_cast<int>(
-									(std::string) (*tok_it));
-							pair_started = 0;
-						}
-						if (each_tokens.begin().current_token().compare("loc")
-								== 0) { //1st token
-							is_loc = true;
-							if (polytope_created) { //previous polytope created but not stored in pair
-								//forbid_pair.second = poly;
-								//first store the polytope
-								//false reset all previous coeff's values
-								coeff.resize(2 * list_of_bounds.size(),
-										list_of_bounds.size()); //assuming simple-case of bounded input
-								for (int i = 0; i < coeff.size2(); i++) { // both till col
-									for (int j = 0; j < coeff.size2(); j++) { // both till col
-										if (i == j) {
-											coeff(2 * i, j) = -1;
-											coeff(2 * i + 1, j) = 1;
-										} else {
-											coeff(2 * i, j) = 0;
-											coeff(2 * i + 1, j) = 0;
-										}
-									}
-								}
-								int res = 2 * list_of_bounds.size();
-								colVector.resize(res);
-								int col_index = 0;
-								for (std::list<std::vector<double> >::iterator it =
-										list_of_bounds.begin();
-										it != list_of_bounds.end(); it++) {
-									std::vector<double> v = (*it);
-									colVector[col_index] = v[0];
-									col_index++;
-									colVector[col_index] = v[1];
-									col_index++;
-								}
-								//std::cout << "coeff = " << coeff << std::endl;
-								std::cout << "colVector = ";
-								for (int i = 0; i < colVector.size(); i++) {
-									std::cout << colVector[i] << "\t";
-								}
-								polytope::ptr forbidden_polytope;
-								forbidden_polytope = polytope::ptr(
-										new polytope(coeff, colVector, 1));
-								forbid_pair.second = forbidden_polytope; //todo currently unable to handle negative bounds
-
-								forbidden_set.insert(forbid_pair);
-
-								polytope_created = false; //store here the polytope
-								constraints_count = 0;
-								list_of_bounds.clear(); //removes all previous elements from the list
-
-							}
-						}
-					}
-				} else { //Always user's first input is loc=locID. So forbid_pair.first is populated 1st
-					pair_started = 0; //this token is a constraint string and not a loc=locID
-					//New Parser for parsing each constraints
-					std::vector<double> bounds(2); //every constraints will have left and right value
-					//int tmp=0;
-					while (pair_started != 1) { //parse and create Polytope p for forbid_pair.second
-						std::string constraint_Str = eachStr;
-						boost::char_separator<char> sep_symbol("<="); //handles < or <= (or even error input =<
-						tokenizer each_tokens(constraint_Str, sep_symbol);
-						//tmp++;
-						// bounds.resize(tmp);
-						int index_val = 0;
-						for (tokenizer::iterator tok_it = each_tokens.begin();
-								tok_it != each_tokens.end(); tok_it++) {
-							if (isNumber((std::string) *tok_it)) { //tokens
-								//std::cout << "tok_it = " << *tok_it << "\n";
-								bounds[index_val] = boost::lexical_cast<double>(
-										(std::string) (*tok_it));
-								index_val++;
-								//bounds.push_back(boost::lexical_cast<int>((*tok_it))); //forbid_pair.first = boost::lexical_cast<int>((*tok_it));
-							}
-						}
-						bounds[0] = -1 * bounds[0]; //n<=x1 so n converted to -n
-						list_of_bounds.push_back(bounds);
-						polytope_created = true; //constraint(s) parsed
-						pair_started = 1; //end of a constraint to exit from while-loop
-					} //end of a constraint
-				}
-				constraints_count++; //number of constraints count
-			} //End of all forbidden string
-
-			if (polytope_created) {
-				//constraints count can be obtained from 'constraints_count' or list_of_bounds.size()
-
-				coeff.resize(2 * list_of_bounds.size(), list_of_bounds.size()); //assuming simple-case of bounded input
-				for (int i = 0; i < coeff.size2(); i++) { // both till col
-					for (int j = 0; j < coeff.size2(); j++) { // both till col
-						if (i == j) {
-							coeff(2 * i, j) = -1;
-							coeff(2 * i + 1, j) = 1;
-						} else {
-							coeff(2 * i, j) = 0;
-							coeff(2 * i + 1, j) = 0;
-						}
-					}
-				}
-				int res = 2 * list_of_bounds.size();
-				colVector.resize(res);
-				int col_index = 0;
-				for (std::list<std::vector<double> >::iterator it =
-						list_of_bounds.begin(); it != list_of_bounds.end();
-						it++) {
-					std::vector<double> v = (*it);
-					colVector[col_index] = v[0];
-					col_index++;
-					colVector[col_index] = v[1];
-					col_index++;
-				}
-				std::cout << "coeff = " << coeff << std::endl;
-				std::cout << "colVector = ";
-				for (int i = 0; i < colVector.size(); i++) {
-					std::cout << colVector[i] << "\t";
-				}
-				polytope::ptr forbidden_polytope;
-				forbidden_polytope = polytope::ptr(
-						new polytope(coeff, colVector, 1));
-				forbid_pair.second = forbidden_polytope;
-				forbidden_set.insert(forbid_pair);
-				polytope_created = false;
-			}*/
 		}
 
 		if (vm.count("model") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
@@ -898,7 +741,7 @@ std::string allStr;
 
 	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
 			transition_size, bad_state, forbidden_set);
-	forbidden_set.second->print2file("./f_poly",2,0);
+
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
