@@ -56,7 +56,7 @@ public:
 		D = Dyn;
 		filename=std::string();
 		// default ploting dimension
-		x = 0; // The ploting of this dimension is w.r.t time
+		x = 0; // The plotting of this dimension is w.r.t time
 	}
 	virtual ~simulation();
 	/**
@@ -87,6 +87,14 @@ public:
 	 * The initial state is given by the first parameter
 	 */
 	std::vector<double> simulate(std::vector<double>, double time);
+
+	/**
+	 * Generates a simulation trace for time duration, starting at start_time.
+	 * The time instant, within the simulation time, when the polytope I is
+	 * violated by the trace is returned.
+	 */
+	double bounded_simulation(std::vector<double>, double time, polytope::ptr I);
+
 };
 
 #endif /* SIMULATION_H_ */

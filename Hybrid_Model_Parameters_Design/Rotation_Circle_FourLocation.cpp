@@ -277,6 +277,9 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l2);
 	Hybrid_Automata.addLocation(l3);
 	Hybrid_Automata.addLocation(l4);
+	Hybrid_Automata.insert_to_map("x",1);
+	Hybrid_Automata.insert_to_map("y",2);
+
 
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation

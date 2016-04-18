@@ -26,7 +26,7 @@ static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data)
 {
 	Dynamics* D = (Dynamics *)(f_data);
 	math::matrix<double> A(D->MatrixA);
-	math::vector<double> C(A.size1());
+	std::vector<double> C(A.size1());
 
 	assert(A.size1() == A.size2());
 	C = D->C;
@@ -180,6 +180,117 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	return res;
 }
 
+/**
+ * Bounded simulation. Simulation within a polytope accepted
+ */
+double simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I)
+{
+	int flag;
+	realtype T0 = 0;
+	realtype Tfinal = time;
+	realtype t=0;
+	Dynamics *data = &D;
+	double time_offset = 0;
+
+	N_Vector y = NULL;
+	N_Vector u = NULL;
+
+	assert(x.size() == dimension);
+	u = N_VNew_Serial(dimension);
+
+	for(unsigned int i=0;i<dimension;i++)
+		NV_Ith_S(u,i) = x[i];
+
+	void *cvode_mem;
+	cvode_mem = NULL;
+	/* Call CVodeCreate to create the solver memory and specify the
+	 * Backward Differentiation Formula and the use of a Newton iteration */
+
+	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+
+	if( check_flag((void *)cvode_mem, "CVodeCreate", 0))
+	{
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	/** Input user data */
+	CVodeSetUserData(cvode_mem, (void *)data);
+	/* Call CVodeInit to initialize the integrator memory and specify the
+	* user's right hand side function in u'=f(t,u), the inital time T0, and
+	* the initial dependent variable vector u. */
+
+	flag = CVodeInit(cvode_mem, f, T0, u);
+
+	if(check_flag(&flag, "CVodeInit", 1)){
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	flag = CVDense(cvode_mem, dimension);
+	if (check_flag(&flag, "CVDense", 1))
+	{
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	 /* Call CVodeSStolerances to specify the scalar relative tolerance
+	  * and scalar absolute tolerance */
+	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
+	if (check_flag(&flag, "CVodeSStolerances", 1))
+	{
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	/* In loop over output points: call CVode, print results, test for errors */
+
+	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
+
+
+	bool print_flag = false;
+	std::ofstream myfile;
+	if(!filename.empty()){
+		myfile.open(this->filename.c_str(),std::fstream::app);
+		print_flag = true;
+	}
+
+	unsigned int N = Tfinal/this->time_step;
+
+	std::vector<double> v(dimension);
+	double violating_time = time;
+
+	if(print_flag){
+		// We plot the initial point also
+		myfile << time_offset << "  " << x[this->x];
+		myfile << "\n";
+
+		for(unsigned int k=1;k<=N;k++) {
+			double tout = k*time_step;
+			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
+			if(check_flag(&flag, "CVode", 1)) break;
+			myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
+			myfile << "\n";
+
+		}
+		myfile << "\n";
+		myfile.close();
+	}
+	else{ // no printing the simulation points to file
+		for(unsigned int k=1;k<=N;k++) {
+			double tout = (k*Tfinal)/N;
+			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
+			if(check_flag(&flag, "CVode", 1)) break;
+			// check polytope satisfaction
+			for(unsigned int i=0;i<dimension;i++)
+				v[i] = NV_Ith_S(u,i);
+			if(!I->point_is_inside(v)){
+				violating_time = t;
+				break;
+			}
+		}
+	}
+	N_VDestroy_Serial(u); /* Free u vector */
+	CVodeFree(&cvode_mem); /* Free integrator memory */
+
+	return violating_time;
+}
 /* Check function return value...
      opt == 0 means SUNDIALS function allocates memory so check if
               returned NULL pointer
@@ -213,16 +324,8 @@ static int check_flag(void *flagvalue, char *funcname, int opt)
   else if (opt == 2 && flagvalue == NULL) {
     fprintf(stderr, "\nMEMORY_ERROR: %s() failed - returned NULL pointer\n\n",
             funcname);
-    return(1); }
+    return(1);
+  }
 
   return(0);
 }
-/**
- * Returns the distance of the simulation trace from the
- * polytope passed as P. The distance computed is the sum of
- * the pointwise distances of simulation points.
- */
-/*double simulation::trace_distance(polytope::ptr P)
-{
-
-}*/

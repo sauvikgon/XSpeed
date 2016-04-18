@@ -1,4 +1,8 @@
 #include "reachability.h"
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <utility>
 
 using namespace std;
 
@@ -30,7 +34,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 	std::list<symbolic_states::ptr> Reachability_Region;
 	template_polyhedra::ptr reach_region;
 
-	int number_times = 0, BreadthLevel = 0, previous_level = -1;
+	int BreadthLevel = 0, previous_level = -1;
 	std::list<int> queue; // data structure to keep track of the number of transitions
 	discrete_set discrete_state;
 
@@ -46,14 +50,21 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 	boost::timer::cpu_timer t70;
 	t70.start();
 
+	//debug @Rajarshi
+		unsigned int count = 0;
+	//----
+
+
 	while (!pw_list.isEmpty_WaitingList()) {
-		//symbolic_states U;
+
 		symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states()); //required to be pushed into the Reachability_Region
 		initial_state::ptr U;
 
 		//		cout<<"\nTesting 2 a 1\n";
 		U = pw_list.WaitingList_delete_front();
 		int levelDeleted = queue.front(); //get FRONT element
+//		std::cout << "Printing BreadthLevel" << levelDeleted << std::endl;
+
 		queue.pop_front(); //delete from FRONT
 		if (levelDeleted > bound)
 			break; //stopping due to number of transitions exceeds
@@ -376,6 +387,9 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 
 				boost::timer::cpu_timer t74;
 				t74.start();
+				//@Rajarshi: debug
+				//----
+
 				for (std::list<template_polyhedra>::iterator i =intersected_polyhedra.begin();i != intersected_polyhedra.end(); i++) {
 					intersectedRegion = (*i).getTemplate_approx(lp_solver_type_choosen);
 					//Returns a single over-approximated polytope from the list of intersected polytopes
@@ -383,6 +397,16 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 					polytope::ptr newShiftedPolytope, newPolytope; //created an object here
 					newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope); //Retuns the intersected region as a single newpolytope. **** with added directions
 					newShiftedPolytope = post_assign_exact(newPolytope,current_assignment.Map, current_assignment.b); //initial_polytope_I = post_assign_exact(newPolytope, R, w);
+//					//@Rajarshi: debug---
+//					if(BreadthLevel == 2){
+//						std::string fname = "./next_poly";
+//						char *buf=(char *)malloc(20);
+//						snprintf(buf, sizeof(buf), "%d", count);
+//						fname = fname + buf;
+//						newShiftedPolytope->print2file(fname,0,1);
+//						count++;
+//					}
+					//---
 					//symbolic_states::ptr newState = symbolic_states::ptr( new symbolic_states(ds, newShiftedPolytope));
 					//symbolic_states newState(ds, newShiftedPolytope);
 					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID,newShiftedPolytope));
