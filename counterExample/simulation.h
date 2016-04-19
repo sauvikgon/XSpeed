@@ -15,6 +15,16 @@
 #include <sundials/sundials_types.h>
 #include "application/DataStructureDirections.h"
 
+/*
+ * A structure to return the last point in Invariant and the
+ * time of crossing the invariant
+ */
+struct bound_sim
+{
+	std::vector<double> v;
+	double cross_over_time;
+};
+
 /**
  * This class provides methods to simulate an ODE equation for a given
  * initial value.
@@ -91,9 +101,10 @@ public:
 	/**
 	 * Generates a simulation trace for time duration, starting at start_time.
 	 * The time instant, within the simulation time, when the polytope I is
-	 * violated by the trace is returned.
+	 * violated by the trace is returned and with the last simulation point
+	 * that satisfied I, as a struct object
 	 */
-	double bounded_simulation(std::vector<double>, double time, polytope::ptr I);
+	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I);
 
 };
 

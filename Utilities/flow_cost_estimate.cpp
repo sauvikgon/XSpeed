@@ -28,7 +28,12 @@ double flow_cost_estimate(polytope::ptr X0, polytope::ptr I, Dynamics d, double 
 	lp.Compute_LLP(obj);
 	x0 = lp.get_sv();
 
-	double t = sim.bounded_simulation(x0,time_horizon,I);
+	bound_sim simv;
+	simv = sim.bounded_simulation(x0,time_horizon,I);
+
+	// re-simulate with a fine time-step for accuracy
+	simv = sim.bounded_simulation(simv.v, time_step, I);
+	return simv.cross_over_time;
 }
 
 

@@ -183,7 +183,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 /**
  * Bounded simulation. Simulation within a polytope accepted
  */
-double simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I)
+bound_sim simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I)
 {
 	int flag;
 	realtype T0 = 0;
@@ -253,8 +253,10 @@ double simulation::bounded_simulation(std::vector<double> x, double time, polyto
 
 	unsigned int N = Tfinal/this->time_step;
 
-	std::vector<double> v(dimension);
-	double violating_time = time;
+	std::vector<double> v(dimension),prev_v(dimension);
+	bound_sim simv;
+	simv.cross_over_time = time;
+	prev_v = x;
 
 	if(print_flag){
 		// We plot the initial point also
@@ -281,15 +283,18 @@ double simulation::bounded_simulation(std::vector<double> x, double time, polyto
 			for(unsigned int i=0;i<dimension;i++)
 				v[i] = NV_Ith_S(u,i);
 			if(!I->point_is_inside(v)){
-				violating_time = t;
+				simv.cross_over_time = t;
+				simv.v = prev_v;
 				break;
 			}
+			else
+				prev_v = v;
 		}
 	}
 	N_VDestroy_Serial(u); /* Free u vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
 
-	return violating_time;
+	return simv;
 }
 /* Check function return value...
      opt == 0 means SUNDIALS function allocates memory so check if
