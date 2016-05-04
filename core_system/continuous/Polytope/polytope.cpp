@@ -71,34 +71,18 @@ polytope::polytope(math::matrix<double> coeffMatrix,
 
 void polytope::setPolytope(math::matrix<double> coeffMatrix,
 		std::vector<double> columnVector, int inEqualitySign) {
-	//this->setCoeffMatrix(coeffMatrix);
 	this->setNumberFacets(coeffMatrix.size1());
 	this->setSystemDimension(coeffMatrix.size2());
 	this->coeffMatrix = coeffMatrix;
-
-	//this->setColumnVector(columnVector);
 	this->columnVector.resize(this->number_facets);
 	this->columnVector = columnVector;
-	//this->setNumberFacets(columnVector.size());
 
-	//this->setInEqualitySign(inEqualitySign);
 	this->InEqualitySign = inEqualitySign;
 
 	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
 
-	//call to lp.set_Min_Or_Max() must be call before setConstraints()
-	//lp.setConstraints(coeffMatrix, columnVector,inEqualitySign);
 }
 
-/*
- void polytope::set_Default_lp_init(){
- lp_init = false;
- }
- */
-//void polytope::set_lp_object(glpk_lp_solver* newObject){
-//	lp = *newObject;
-//	lp_init = false;
-//}
 void polytope::setIsEmpty(bool empty) {
 	this->IsEmpty = empty;
 }

@@ -10,6 +10,7 @@
 
 #include <list>
 #include <utility>
+#include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include "counterExample/simulation.h"
