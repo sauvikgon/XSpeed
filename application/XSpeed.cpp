@@ -1,14 +1,6 @@
-//============================================================================
-// Name        : MyProject_SF.cpp
-// Author      : Amit Gurung
-// Version     :
-// Copyright   : (C) 2014
-// Description : Trying to implement Support Function
-//============================================================================
 
 #include <iostream>
 #include <fstream>
-//#include <cstdlib>
 
 #include "boost/timer/timer.hpp"
 
@@ -16,7 +8,7 @@
 #include "InputOutput/cpu_utilities/cpu_utilities.h"	//cpu usage functions
 #include "InputOutput/memory_utilities/memory_usages.h" //memory usage functions
 
-#include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
+#include "core_system/math/uni_sphere.h"
 #include "application/sf_directions.h"
 #include "application/DataStructureDirections.h"
 #include "core_system/continuous/Polytope/Polytope.h"
@@ -25,7 +17,7 @@
 #include "Utilities/Template_Polyhedra.h"
 #include "Utilities/Post_Assignment.h"
 #include <list>
-#include <utility>	//for std::pair
+#include <utility>
 #include <iterator>
 #include "Hybrid_Model_Parameters_Design/BouncingBall.h"
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
@@ -35,7 +27,7 @@
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_FourLocation.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
-
+#include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 
 //**************** Hybrid Automata Definition ***********************
 #include "core_system/Reachability/reachability.h"
@@ -59,6 +51,7 @@
 // *********** Command Line Boost Program Options ********
 #include "plotter_utility.h"
 // *********** User Selected Model ***************
+#include "Hybrid_Model_Parameters_Design/load_model.h"
 #include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 
 #include "InputOutput/io_utility.h"
@@ -66,144 +59,17 @@
 #include "counterExample/concreteCE.h"
 
 namespace po = boost::program_options;
-using namespace std;
 
 initial_state::ptr init_state;
 //**************** Hybrid Automata Definition ***********************
 
 ReachabilityParameters reach_parameters;
-int dir_nums, transition_iterations;
-int dims;
-std::vector<std::vector<double> > directions; //List of all directions
-
-math::matrix<double> Real_Directions; //List of all directions
 
 //**************** Hybrid Automata Definition ***********************
 hybrid_automata Hybrid_Automata;
 //**************** Hybrid Automata Definition ***********************
-typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
 polytope initial_polytope_I, invariant, gaurd_polytope(true);
-unsigned int HybridSystem_Model_Type;
-unsigned int Directions_Type;
-unsigned int Uniform_Directions_Size;
-
-void initialize(int iterations_size, double time_bound, unsigned int model_type,
-		unsigned int directions_type_or_size, unsigned int transition_size, const std::string& bad_state,
-		std::pair<int, polytope::ptr>& forbidden_set) {
-	size_type row, col;
-
-	transition_iterations = transition_size; //Number of iterations for transition of the Hybrid system
-
-	reach_parameters.TimeBound = time_bound; //Total Time Interval
-	reach_parameters.Iterations = iterations_size; // number of iterations
-	reach_parameters.time_step = reach_parameters.TimeBound
-			/ reach_parameters.Iterations;
-
-//Assigning the Model of the Hybrid System
-//	(1,2,3,4,5,6,7) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE, CIRCLE_FOUR_LOC)
-	HybridSystem_Model_Type = model_type;
-
-//Assigning the Type of Directions
-	Directions_Type = directions_type_or_size; //(1,2,>2) = (BOX, OCT, UNIFORM)
-	Uniform_Directions_Size = directions_type_or_size; //total number of UNIFORM directions
-
-//Assigning the Model of the Hybrid System and the Dimension of the System as it is needed for setting the Number of Directions
-	if (HybridSystem_Model_Type == BBALL) {
-
-		SetBouncingBall_Parameters(Hybrid_Automata, init_state,
-				reach_parameters);
-	}
-	if (HybridSystem_Model_Type == TBBALL) {
-
-		SetTimedBouncingBall_ParametersHystOutput(Hybrid_Automata, init_state,reach_parameters);
-
-	}
-	if (HybridSystem_Model_Type == HELICOPTER) {
-
-		SetHelicopter_Parameters3(Hybrid_Automata, init_state,
-				reach_parameters);
-	}
-	if (HybridSystem_Model_Type == FIVEDIMSYS) {
-
-		setSysParams(Hybrid_Automata, init_state, reach_parameters);
-
-	}
-
-	if (HybridSystem_Model_Type == NAVIGATION_1) {
-
-		SetNavigationBenchMark4Var(Hybrid_Automata, init_state,
-				reach_parameters); //Paper's Model
-
-	}
-
-	if (HybridSystem_Model_Type == NAVIGATION_2) {
-
-		SetNavigationModel2(Hybrid_Automata, init_state, reach_parameters); //My own testing Model NAV2
-	}
-
-	if (HybridSystem_Model_Type == NAVIGATION_3) {
-
-		SetNavigationModel4(Hybrid_Automata, init_state, reach_parameters); //Model NAV04
-
-	}
-	if (HybridSystem_Model_Type == NAVIGATION_4) {
-
-		SetNavigationModel5by5(Hybrid_Automata, init_state, reach_parameters); //My own testing Model NAV_5by5
-
-	}
-
-	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
-		SetRotationCircleOneLocation_Parameters(Hybrid_Automata, init_state,
-				reach_parameters);
-	}
-	if (HybridSystem_Model_Type == CIRCLE_TWO_LOC) {
-
-		SetRotationTimedCircle_Parameters(Hybrid_Automata, init_state,
-				reach_parameters);
-	}
-	if (HybridSystem_Model_Type == CIRCLE_FOUR_LOC) {
-
-		SetRotation_Navtimed_Parameters(Hybrid_Automata, init_state,reach_parameters);
-	}
-
-	dims = init_state->getInitialSet()->getSystemDimension();
-
-//Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
-//todo:: needs to decide that is this the right place to include Invariant direction
-	//and also Redundant invariant directional constraints to be removed
-
-	std::vector<std::vector<double> > newDirections;
-
-	if (Directions_Type == BOX) {
-		dir_nums = 2 * dims; //Axis Directions
-		newDirections = generate_axis_directions(dims);
-		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
-		row = dir_nums;
-		col = dims;
-		reach_parameters.Directions.resize(row, col);
-		reach_parameters.Directions = Real_Directions; //Direct Assignment
-	}
-	if (Directions_Type == OCT) {
-		dir_nums = 2 * dims * dims; // Octagonal directions
-		newDirections = get_octagonal_directions(dims);
-		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
-		row = dir_nums;
-		col = dims;
-		reach_parameters.Directions.resize(row, col);
-		reach_parameters.Directions = Real_Directions; //Direct Assignment
-	}
-	if (Directions_Type > 2) {
-		dir_nums = Uniform_Directions_Size; // ASSIGN HERE Number of Vectors/Directions for UNIform spear algorithm
-		newDirections = math::uni_sphere(dir_nums, dims, 100, 0.0005);
-
-		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
-		row = dir_nums;
-		col = dims;
-		reach_parameters.Directions.resize(row, col);
-		reach_parameters.Directions = Real_Directions; //Direct Assignment
-	}
-}
 
 bool isNumber(const string& s) {
 	bool hitDecimal = 0;
@@ -219,55 +85,25 @@ bool isNumber(const string& s) {
 
 int main(int argc, char *argv[]) {
 
-	char ch;
-
-	std::ifstream infile(
-			"/home/amit/cuda-workspace/XSpeed/src/sys_files/system_var.txt");
-	while (!infile.eof()) {
-		infile.get(ch); //reading only a single character from the file
-		break;
-	}
-	infile.close();
-	// -----------------
-
-	//cout<<"Started from here\n";
 	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)}
 	std::string bad_state; // string to capture the bad state description given by the user
 	abstractCE::ptr ce;	//object of class counter_example
+	userOptions user_options;
 
-	double time_bound;
-	unsigned int iterations_size;
-	unsigned int model_type = 0, directions_type_or_size = 0; //set to default
-	int transition_size;
-	int Algorithm_Type, DiscreteAlgorithm = 0;
-	int number_of_times = 1; //Make this 1 for Memory Profiling
+	//int number_of_times = 1; //Make this 1 for Memory Profiling
 	unsigned int number_of_streams = 1;
 	int lp_solver_type_choosen = 1; //	1 for GLPK and 2 for Gurobi
 	int Solver_GLPK_Gurobi_GPU = 3; //if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
 	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
-	int hey = 0;
-	bool isConfigFileAssigned = false;
-	int output_var_X = 0, output_var_Y = 1;
+	bool isConfigFileAssigned = false, isModelParsed = false;
+
 	po::options_description desc("XSpeed options");
 	po::variables_map vm;
 
 	if (argc == 1) { //No argument:: When Running directly from the Eclipse Editor
-		//(1,2,3,4,5,6,7,8) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE,CIRCLE_FOUR_LOCATION, CIRCLE_ONE_LOC)
-		model_type = 4;
-		directions_type_or_size = 1; //(1,2,>2) = (BOX, OCT, UNIFORM)
-		iterations_size = 100; //number of iterationsi
-		time_bound = 10; //This is Local Time Horizon
-		transition_size = 3; //Number of iterations for transition of the Hybrid system
-		//Algorithms-Value(1,2,3,4,5,6,7,8,9,10,11)
-		//(SEQ,PAR_OMP,PAR_PROCESS,PAR_ITER,PAR_ITER_DIR,PAR_BY_PARTS,PAR_BY_PARTS_ITERS,SAME_DIRS, GPU_MULTI_SEQ,GPU_SF)
-		Algorithm_Type = 1;
-		DiscreteAlgorithm = 1; // 12 for PBFS or any other values for sequential discrete jump
-		Total_Partition = 16; //maximum value = iterations_size (so that each partition will have at least 1 omega to be computed)
-		number_of_streams = 1; //Number of streams in GPU(division)
-		lp_solver_type_choosen = 1; //For the entire Tool
-		number_of_times = 1; //Make this 1 for Memory Profiling
-		Solver_GLPK_Gurobi_GPU = 3; //if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
-		hey = 1;
+		std::cout << "Missing arguments!\n";
+		std::cout << "Try XSpeed --help to see the command-line options\n";
+		exit(0);
 	}
 
 	desc.add_options()("help", "produce help message")("model",
@@ -312,16 +148,17 @@ int main(int argc, char *argv[]) {
 			"Enable GPU Acceleration. GPU acceleration is OFF by default.")(
 			"number-of-streams", po::value<int>()->default_value(1),
 			"Set the maximum number of GPU-streams (Set to 1 by default).")
-	//("number-of-readings", po::value<int>()->default_value(1),"Total number of times to run the algorithm to average the readings.")
-	//("mc","Enable Multi-core Acceleration. Multi-core acceleration is OFF by default.")
+
 	("time-slice", po::value<int>(),
-			"Set the maximum number of Time Sliced(or partitions)")("pbfs",
-			"Enable Parallel Breadth First Exploration of Hybrid Automata Locations. PBFS is OFF by default")
+			"Set the maximum number of Time Sliced(or partitions)")
+	("pbfs", "Enable Parallel Breadth First Exploration of Hybrid Automata Locations. PBFS is OFF by default")
+
+	("internal", "called internally when running hyst-xspeed model")
 
 	("forbidden,F", po::value<std::string>(),
-			"forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst
+			"forbidden location_ID and forbidden set/region within that location")
 	("output-variable,v", po::value<std::string>(),
-			"projecting variables's index(starts with 1) i.e., 'x,y' where x & y are integer constants") //better to be handled by hyst
+			"projecting variables's index(starts with 1) i.e., 'x,y' where x & y are integer constants")
 
 	("include-path,I", po::value<std::string>(), "include file path")(
 			"model-file,m", po::value<std::string>(), "include model file")(
@@ -346,135 +183,60 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (vm.count("config-file")) {
-			config_filename = vm["config-file"].as<std::string>();
-			std::cout << "Configuration file is: " << config_filename << "\n";
+			user_options.set_configFile(vm["config-file"].as<std::string>());
+			std::cout << "Configuration file is: " << user_options.get_configFile() << "\n";
 		}
 		if (vm.count("model-file")) {
-			model_filename = vm["model-file"].as<std::string>();
-			std::cout << "Model file is: " << model_filename << "\n";
+			user_options.set_modelFile(vm["model-file"].as<std::string>());
+			std::cout << "Model file is: " << user_options.get_modelFile() << "\n";
 		}
 
 		if (vm.count("model-file") && vm.count("config-file")) {
-			//std::cout << "\nI will entere!!\n";
-			isConfigFileAssigned = true;
-			if (ch == '0') { //encountered for the 1st time so need to generate .ccp file
-				std::string cmdStr, replacingFile, SingleSpace = " ",
-						projLocation, java_exeFile;
-				projLocation = "/home/amit/cuda-workspace/";
-				//todo:: proper path to be handled from the relative/current installed location of the software
-				replacingFile =
-						"XSpeed/src/Hybrid_Model_Parameters_Design/user_model/user_model.cpp";
+			std::cout << "Translating user model with Hyst\n";
 
-				java_exeFile = "/usr/bin/java -jar";
+			std::string cmdStr, replacingFile, SingleSpace = " ",
+					projLocation, java_exeFile;
 
-				cmdStr.append(java_exeFile);
-				cmdStr.append(SingleSpace);
-				cmdStr.append(projLocation);
-				cmdStr.append("XSpeed/src/sys_files/hyst.jar -xspeed -o");
-				//cmdStr.append("");
-				cmdStr.append(SingleSpace);
-				cmdStr.append(projLocation);
-				cmdStr.append(replacingFile);
-				cmdStr.append(SingleSpace);
-				cmdStr.append(include_path);
-				cmdStr.append(model_filename);
-				cmdStr.append(SingleSpace);
-				cmdStr.append(include_path);
-				cmdStr.append(config_filename);
+			//todo:: proper path to be handled from the relative/current installed location of the software
+			replacingFile =
+					"./user_model.cpp";
 
-				const char *st, *st2, *st3, *st4, *st5;
-				st = cmdStr.c_str();
-				system(st); //calling hyst interface to generate the file
+			java_exeFile = "java -jar";
 
-				std::cout
-						<< "\n\nGenerating Hybrid Automata Model for XSpeed!!! ....\n";
-				std::cout << "This may take some time please wait!!! ....\n\n";
+			cmdStr.append(java_exeFile);
+			cmdStr.append(SingleSpace);
+			cmdStr.append(projLocation);
+			cmdStr.append("./bin/Hyst-XSpeed.jar -xspeed -o");
+			//cmdStr.append("");
+			cmdStr.append(SingleSpace);
+			cmdStr.append(replacingFile);
+			cmdStr.append(SingleSpace);
+			cmdStr.append(include_path);
+			cmdStr.append(model_filename);
+			cmdStr.append(SingleSpace);
+			cmdStr.append(include_path);
+			cmdStr.append(config_filename);
 
-				std::string cmdStr2, compile_CmdStr, outputFile_debug,
-						outputFile_release, dependenciesFile;
+			const char *st, *st2, *st3, *st4, *st5;
+			st = cmdStr.c_str();
+			system(st); //calling hyst interface to generate the XSpeed model file
 
-				std::string cmdStr4, debug_loc, release_loc, cmd_option;
-
-				system("make clean");
-				//system("make clean > /tmp/MakeClean_output_file.txt");
-
-				debug_loc = "XSpeed/Debug/";
-				release_loc = "XSpeed/Release/";
-				cmd_option = "make -C";
-				//cmdStr4.append(projLocation);
-				int debug_or_release = 1;
-				if (debug_or_release) { //1 for Debug selected
-					//cmdStr4.append(debug_loc);
-					cmdStr4.append(cmd_option);
-					cmdStr4.append(SingleSpace);
-					cmdStr4.append(projLocation);
-					cmdStr4.append(debug_loc);
-				} else { //1 for Debug selected
-					//cmdStr4.append(release_loc);
-					cmdStr4.append(cmd_option);
-					cmdStr4.append(SingleSpace);
-					cmdStr4.append(projLocation);
-					cmdStr4.append(release_loc);
-				}
-				//cmdStr4.append(" > /tmp/MakeBuild_output_file.txt");
-				st4 = cmdStr4.c_str();
-				system(st4);
-
-				std::ofstream outfile;
-				outfile.open(
-						"/home/amit/cuda-workspace/XSpeed/src/sys_files/system_var.txt");
-				outfile << 1;
-				outfile.close();
-
-				std::string cmdStr5;
-				cmdStr5.append(projLocation);
-				if (debug_or_release) { //1 for Debug selected
-					cmdStr5.append(debug_loc);
-				} else { //1 for Debug selected
-					cmdStr5.append(release_loc);
-				}
-				cmdStr5.append("./XSpeed"); //project executable file
-				cmdStr5.append(SingleSpace);
-
-				std::string str_argv = "";
-				for (int c = 1; c < argc; c++) {
-					if (c != 1) {
-						str_argv.append(SingleSpace);
-					}
-					str_argv.append(argv[c]);
-				}
-				cmdStr5.append(str_argv);
-				std::cout << "\ncmdStr5 = " << cmdStr5 << std::endl;
-				st5 = cmdStr5.c_str();
-				system(st5); //re-run the project
-				std::cout << "This Main parent process to be stopped!!!\n";
-				return 0; //stop the 1st recursive executable
-			}
-
-			//hyst generated code to be used
-			user_model(Hybrid_Automata, init_state, reach_parameters,
-					transition_iterations);
-
-			// --------- Setting configuration parameters ---------
-			time_bound = reach_parameters.TimeBound;
-			iterations_size = reach_parameters.Iterations;
-			//	model_type = 0; //set to default
-			//	directions_type_or_size = 0;	//set to default
-			transition_size = transition_iterations;
-			// --------- Setting configuration parameters ---------
-
-			std::ofstream outfile;
-			outfile.open(
-					"/home/amit/cuda-workspace/XSpeed/src/sys_files/system_var.txt");
-			outfile << 0;
-			outfile.close();
+			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
+			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
+			system("./XSpeed.o --internal");
+			exit(0);
 		}
-
+		if(vm.count("internal")){
+			// calls the hyst-xspeed generated model
+			int iters = (int) user_options.get_timeHorizon()/ user_options.get_timeStep();
+			user_model(Hybrid_Automata, init_state, reach_parameters, iters);
+			isConfigFileAssigned = true;
+			isModelParsed = true;
+		}
 		if (vm.count("output-variable")) {
 			std::string VarStr;
 			std::vector<int> all_args(2);//always 2 variable as plotting variables
 			VarStr = vm["output-variable"].as<std::string>();
-		//	std::cout << "\nAll output variables = " << VarStr << std::endl;
 
 			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 			boost::char_separator<char> sep(", ");
@@ -482,73 +244,36 @@ int main(int argc, char *argv[]) {
 			int index = 0;
 			for (tokenizer::iterator tok_iter = tokens.begin();
 					tok_iter != tokens.end(); ++tok_iter) {
-			//	std::cout << "<" << (*tok_iter) << ">" << "\n";
 				all_args[index] = boost::lexical_cast<int>(
 						(std::string) (*tok_iter));
 				index++;
 			}
-			output_var_X = all_args[0] - 1;	//Assuming user's input start with index 1
-			output_var_Y = all_args[1] - 1;	//Assuming user's input start with index 1
+			user_options.set_first_plot_dimension(all_args[0] - 1);	//Assuming user's input start with index 1
+			user_options.set_second_plot_dimension(all_args[1] - 1);	//Assuming user's input start with index 1
 		}
 
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-			bad_state = vm["forbidden"].as<std::string>();
+			user_options.set_forbidden_state(vm["forbidden"].as<std::string>());
 		}
 
 		if (vm.count("model") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-			int model = vm["model"].as<int>();
-			if (model == 1) {
-				//std::cout<< "Running Reachability Analysis on Bouncing Ball model\n";
-			} else if (model == 2) {
-				//std::cout<< "Running Reachability Analysis on Timed-Bouncing Ball model\n";
-			} else if (model == 3) {
-				//std::cout<< "Running Reachability Analysis on Helicopter Controller model\n";
-			} else if (model == 4) {
-				//std::cout<< "Running Reachability Analysis on Five-Dimensional Benchmark model\n";
-			} else if (model == 5) {
-				//std::cout<< "Running Reachability Analysis on Navigation Benchmark- Nav01 (3 X 3)\n";
-			} else if (model == 6) {
-				//std::cout << "Running Reachability Analysis on Navigation Benchmark- Nav02 (3 X 3)\n";
-			} else if (model == 7) {
-				//std::cout << "Running Reachability Analysis on Navigation Benchmark- Nav03 (3 X 3)\n";
-			} else if (model == 8) {
-				//std::cout << "Running Reachability Analysis on Navigation Benchmark- Nav04 (5 X 5)\n";
-			} else if (model == 9) {
-				//std::cout << "Running Reachability Analysis on Circle with only ONE location \n";
-			} else if (model == 10) {
-				//std::cout << "Running Reachability Analysis on Circle with TWO locations\n";
-			} else if (model == 11) {
-				//std::cout << "Running Reachability Analysis on Circle with FOUR locations\n";
-			} else {
+			user_options.set_model(vm["model"].as<int>());
+			if (user_options.get_model() < 1 || user_options.get_model() > 11) {
 				std::cout << "Invalid Model option specified\n";
 				return 0;
 			}
-			model_type = model;
 		}
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-			int d = vm["directions"].as<int>();
-			if (d == 1) {
-				//directions_type_or_size = d;
-				//std::cout << "\nDirection = " << directions_type_or_size;
-			} else if (d == 2) {
-				//directions_type_or_size = d;
-				//std::cout << "\nDirection = " << directions_type_or_size;
-			} else if (d > 2) {
-				//directions_type_or_size = d;
-				//std::cout << "\nDirection = " << directions_type_or_size;
-			} else { //for 0 or negative directions
+			user_options.set_directionTemplate(vm["directions"].as<int>());
+			if(user_options.get_directionTemplate()<=0){
 				std::cout << "Invalid Directions option specified\n";
 				return 0;
 			}
-			directions_type_or_size = d;
 		}
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
-			double time_horizon = vm["time-horizon"].as<double>();
-			if (time_horizon > 0) {
-				time_bound = time_horizon;
-				//std::cout << "\ntime_bound = " << time_bound;
-			} else { //for 0 or negative time-bound
-				std::cout << "Invalid time-horizon option specified\n";
+			user_options.set_timeHorizon(vm["time-horizon"].as<double>());
+			if(user_options.get_timeHorizon()<=0){ //for 0 or negative time-bound
+				std::cout << "Invalid time-horizon option specified, A positive non zero bound expected\n";
 				return 0;
 			}
 		} else if (isConfigFileAssigned == false) {
@@ -556,9 +281,9 @@ int main(int argc, char *argv[]) {
 			return 0;
 		}
 		if (vm.count("time-step") && isConfigFileAssigned == false) { //Compulsory Options
-			double sampling_time = vm["time-step"].as<double>();
-			if (sampling_time > 0) {
-				iterations_size = (unsigned int) time_bound / sampling_time; //return Integer Value
+			user_options.set_timeStep(vm["time-step"].as<double>());
+			if (user_options.get_timeStep() > 0) {
+				unsigned int iterations_size = (unsigned int) user_options.get_timeHorizon() / user_options.get_timeStep(); //return Integer Value
 				//std::cout << "\niterations_size = " << iterations_size;
 			} else { //for 0 or negative sampling-time
 				std::cout << "Invalid time-step option specified\n";
@@ -569,12 +294,9 @@ int main(int argc, char *argv[]) {
 			return 0;
 		}
 		if (vm.count("transition-size") && isConfigFileAssigned == false) { //Compulsory Options
-			int jump_size = vm["transition-size"].as<int>();
-			if (jump_size >= 0) {
-				transition_size = jump_size;
-				//	std::cout << "\ntransition_size = " << transition_size;
-			} else { //for negative jump-size
-				std::cout << "Invalid transition-size option specified\n";
+			user_options.set_bfs_level(vm["transition-size"].as<int>());
+			if (user_options.get_bfs_level() < 0){
+				std::cout << "Invalid bfs level specified, a positive number expected\n";
 				return 0;
 			}
 		} else if (isConfigFileAssigned == false) {
@@ -583,7 +305,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (vm.count("gpu")) {
-			Algorithm_Type = 11; //GPU_SF algorithm is selected
+			user_options.set_flow_algorithm(11); //GPU_SF algorithm is selected
 		}
 		if (vm.count("gpu")) { //if gpu enabled then
 			if (vm.count("number-of-streams")) { //Compulsory Options but set 1 by default
@@ -598,25 +320,13 @@ int main(int argc, char *argv[]) {
 		}
 		//Algorithm Preference is given to 1 to 4 even if gpu is enabled i.e., overwrite Algorithm_Type==gpu
 		if (vm.count("algorithm")) {
-			int algorithm = vm["algorithm"].as<int>();
-			if (algorithm == 1) {
-				//std::cout << "Running Sequential Algorithm\n";
-			} else if (algorithm == 2) {
-				//std::cout<< "Running Parallel Algorithm using Multi-core acceleration\n";
-			} else if (algorithm == 3) {
-				//std::cout << "Running Parallel Algorithm: NOT to be Used\n";
-			} else if (algorithm == 4) { //PAR_ITER
-				//std::cout<< "Running Time-Slice Algorithm using Multi-core acceleration\n";
-			} else if (algorithm == 11) { //PAR_ITER
-				//std::cout<< "Running Flowpipe(PostC operation) computation on GPU\n";
-			} else {
+			user_options.set_flow_algorithm(vm["algorithm"].as<int>());
+			if(user_options.get_flow_algorithm()<0 || user_options.get_flow_algorithm()>11){
 				std::cout << "Invalid algorithm option specified\n";
 				return 0;
 			}
-			Algorithm_Type = algorithm;
-			//cout << "algorithm =  "<<Algorithm_Type;
 		}
-		if (Algorithm_Type == 4) { //this argument will be set only if algorithm==time-slice or PAR_ITER
+		if (user_options.get_flow_algorithm() == 4) { //this argument will be set only if algorithm==time-slice or PAR_ITER
 			if (vm.count("time-slice")) { //Compulsory Options if algorithm-type==Time-Slice(4)
 				int partition_size = vm["time-slice"].as<int>();
 				if (partition_size > 0) {
@@ -630,36 +340,20 @@ int main(int argc, char *argv[]) {
 				return 0;
 			}
 		}
-		/*if (vm.count("number-of-readings")) {
-		 int avg = vm["number-of-readings"].as<int>();	//by default 1
-		 if (avg >= 1) {
-		 number_of_times = avg;
-		 } else {	//for 0 or negative number-of-readings
-		 std::cout << "Invalid number-of-readings option specified\n";
-		 return 0;
-		 }
-		 }*/
 
 		if (vm.count("pbfs")) {
-			DiscreteAlgorithm = 12; //parallel Breadth First Search
-			//std::cout<< "Running Reachability Analysis with parallel Breadth First Search using Multi-core acceleration\n";
+			user_options.set_automata_exploration_algorithm(12); //parallel Breadth First Search
 		}
-
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
 	// Initialize the model with the parameters given by the user
-
-	initialize(iterations_size, time_bound, model_type, directions_type_or_size,
-			transition_size, bad_state, forbidden_set);
-	/* The variable to dimension id map is set at this point */
-	if(!bad_state.empty()){
-		string_to_poly(bad_state,forbidden_set);
-		forbidden_set.second->print2file("./bad_poly",output_var_X,output_var_Y);
+	if(!isModelParsed){
+		load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
 	}
+	/* The variable to dimension id map is set at this point */
 	else{
 		std::cout << "No Forbidden States Description Provided\n";
 	}
-
 
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
@@ -668,18 +362,17 @@ int main(int argc, char *argv[]) {
 	long total_mem_used=0;
 	double cpu_usage;
 	boost::timer::cpu_timer tt1;
-	number_of_times = 1;	//Taking Average of 5 readings
+	unsigned int number_of_times = 1;	//Taking Average of 5 readings
 	for (int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		init_cpu_usage();	//initializing the CPU Usage utility to start recording usages
 		tt1.start();
 		reachability reach;
+		unsigned int transition_iters = user_options.get_bfs_level();
 		reach.setReachParameter(Hybrid_Automata, init_state,
-				reach_parameters, transition_iterations, Algorithm_Type,
+				reach_parameters, transition_iters, user_options.get_flow_algorithm(),
 				Total_Partition, lp_solver_type_choosen, number_of_streams,
 				Solver_GLPK_Gurobi_GPU, forbidden_set);
-//cout<<"\nTesting 3\n";
-		//cout<<"\n Before reach call\n";
-		if (DiscreteAlgorithm != PBFS) { //Sequential Search implemented for Discrete Jumps
+		if (user_options.get_automata_exploration_algorithm() != PBFS) { //Sequential Search implemented for Discrete Jumps
 			std::cout << "\nRunning Sequential BFS\n";
 			Symbolic_states_list = reach.computeSeqentialBFSReach(ce);
 			/*Symbolic_states_list = reach(Hybrid_Automata, init_state,
@@ -707,7 +400,7 @@ int main(int argc, char *argv[]) {
 		user_clock = tt1.elapsed().user / 1000000;
 		system_clock = tt1.elapsed().system / 1000000;
 
-		if (Algorithm_Type == 11) {
+		if (user_options.get_flow_algorithm() == 11) {
 			//11 is GPU:: First execution of GPU includes warm-up time, so this time should not be included for averaging
 			if (i == 1) { //first run for averaging
 				continue; //do not include time here
@@ -726,7 +419,7 @@ int main(int argc, char *argv[]) {
 	total_mem_used = getCurrentProcess_PhysicalMemoryUsed();
 
 
-	if (Algorithm_Type == 11) {
+	if (user_options.get_flow_algorithm() == 11) {
 		Avg_wall_clock = Avg_wall_clock / (number_of_times - 1);
 		Avg_user_clock = Avg_user_clock / (number_of_times - 1);
 		Avg_system_clock = Avg_system_clock / (number_of_times - 1);
@@ -752,7 +445,6 @@ int main(int argc, char *argv[]) {
 				<< Avg_system_clock / (double) 1000 << std::endl;
 		cout << endl << "Number of Vectors = "
 				<< reach_parameters.Directions.size1();
-		cout << endl << "Number of Iteration = " << iterations_size << endl;
 
 	}
 	if (argc == 1) { //No argument or Running directly from the Eclipse Editor
@@ -769,16 +461,14 @@ int main(int argc, char *argv[]) {
 
 		cout << endl << "Number of Vectors = "
 				<< reach_parameters.Directions.size1();
-		cout << endl << "Number of Iteration = " << iterations_size << endl;
 	} 
-cout << endl << "Memory Usages = " << (double)(total_mem_used / 1024.0) / number_of_times << " MB\n";
+	cout << endl << "Memory Usages = " << (double)(total_mem_used / 1024.0) / number_of_times << " MB\n";
 
 		std::list<symbolic_states::ptr>::iterator it;
 		/*
 		 * Generating Vertices as output which can be plotted using gnuplot utilites
 		 */
 		std::ofstream outFile;
-		int x = output_var_X, y = output_var_Y; // todo::take user's input for the plotting variables
 		math::matrix<double> vertices_list;
 		std::string fileName, fullPath, fileWithPath;
 		const char *stFileNameWithPath;
@@ -832,7 +522,7 @@ cout << endl << "Memory Usages = " << (double)(total_mem_used / 1024.0) / number
 				} //creating vector 'b'
 
 				polytope::ptr p = polytope::ptr(new polytope(A, b, 1));
-				vertices_list = p->get_2dVertices(x, y); //
+				vertices_list = p->get_2dVertices(user_options.get_first_plot_dimension(), user_options.get_second_plot_dimension()); //
 				//vertices_list = p->enumerate_2dVertices(x, y); //
 
 				// ------------- Printing the vertices on the Output File -------------
@@ -864,7 +554,7 @@ cout << endl << "Memory Usages = " << (double)(total_mem_used / 1024.0) / number
 			cout << "(Location ID, Transition ID)\n";
 			std::vector<int> transID(ce->get_length());	//making a vector of transition_ID so it can be printed
 			int index = 0;
-			ce->plot(output_var_X,output_var_Y);
+			ce->plot(user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
 			concreteCE::ptr bad_trace = ce->gen_concreteCE(0.1);
 			bad_trace->set_automaton(ce->get_automaton());
 			std::string tracefile = "./bad_trace.o";

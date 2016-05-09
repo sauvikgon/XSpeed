@@ -18,7 +18,6 @@
 #include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
-//#include <boost/numeric/ublas/matrix.hpp>
 
 void user_model(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
