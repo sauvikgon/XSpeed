@@ -175,6 +175,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	sum+= bad_poly->point_distance(trace_end_pt);
 
 
+
 	if (!grad.empty()) {
 		for(unsigned int i=0;i<dim;i++)
 			grad[i] = 0;
@@ -186,6 +187,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		}
 	}
 	std::cout << "current sum = " << sum << std::endl;
+
 
 //	mycount++;
 //	if(mycount>=3)
@@ -324,6 +326,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 //	myopt.set_lower_bounds(lb);
 //	myopt.set_upper_bounds(ub);
+
 	myopt.set_stopval(0.03);
 //	myopt.set_xtol_rel(1e-4);
 

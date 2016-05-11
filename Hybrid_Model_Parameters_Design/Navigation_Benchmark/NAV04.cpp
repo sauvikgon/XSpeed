@@ -1634,8 +1634,8 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	boundValueI.resize(row);
 	boundValueI[0] = 0.7;
 	boundValueI[1] = -0.2;
-	boundValueI[2] = 0.7;
-	boundValueI[3] = -0.2;
+	boundValueI[2] = 0.9;
+	boundValueI[3] = -0.5;
 	boundValueI[4] = 0.8;
 	boundValueI[5] = -0.8;
 	boundValueI[6] = 0;
@@ -3494,6 +3494,12 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l8);
 	Hybrid_Automata.addLocation(l9);
 	Hybrid_Automata.setDimension(dim);
+
+
+	Hybrid_Automata.insert_to_map("x1",0);
+	Hybrid_Automata.insert_to_map("v1",1);
+	Hybrid_Automata.insert_to_map("x2",2);
+	Hybrid_Automata.insert_to_map("v2",3);
 
 	int initial_location_id=9;
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
