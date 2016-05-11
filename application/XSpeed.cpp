@@ -205,24 +205,23 @@ int main(int argc, char *argv[]) {
 
 			cmdStr.append(java_exeFile);
 			cmdStr.append(SingleSpace);
-			cmdStr.append(projLocation);
 			cmdStr.append("./bin/Hyst-XSpeed.jar -xspeed -o");
 			//cmdStr.append("");
 			cmdStr.append(SingleSpace);
 			cmdStr.append(replacingFile);
 			cmdStr.append(SingleSpace);
 			cmdStr.append(include_path);
-			cmdStr.append(model_filename);
+			cmdStr.append(user_options.get_modelFile());
 			cmdStr.append(SingleSpace);
 			cmdStr.append(include_path);
-			cmdStr.append(config_filename);
+			cmdStr.append(user_options.get_configFile());
 
 			const char *st, *st2, *st3, *st4, *st5;
 			st = cmdStr.c_str();
-			system(st); //calling hyst interface to generate the XSpeed model file
+			//system(st); //calling hyst interface to generate the XSpeed model file
 
 			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
-			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
+			system("g++ -L/usr/local/lib user_model.o -lXSpeed -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
 			system("./XSpeed.o --internal");
 			exit(0);
 		}
