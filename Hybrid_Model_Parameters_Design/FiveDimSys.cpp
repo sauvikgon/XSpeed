@@ -262,6 +262,13 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 
+	Hybrid_Automata.insert_to_map("x1",0);
+	Hybrid_Automata.insert_to_map("x2",1);
+	Hybrid_Automata.insert_to_map("x3",2);
+	Hybrid_Automata.insert_to_map("x4",3);
+	Hybrid_Automata.insert_to_map("x5",4);
+
+
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet

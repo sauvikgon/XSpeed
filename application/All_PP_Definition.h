@@ -20,7 +20,9 @@
 #define ALL_DIRS		9	//compute all the list of transpose directions
 #define GPU_MULTI_SEQ	10	//Matrix-Vector GPU multiplication
 #define GPU_SF			11	//reachability algorithm using GPU for computing Support Function
-#define PBFS			12	//Parallel Breadth First Search Algorithm for Discrete Jumps
+#define BFS				12	//Sequential Breadth First Search Algorithm
+#define PBFS_GJH		13	//Parallel Breadth First Search Algorithm using Gerard J. Holzmann Algorithm
+#define PBFS_LB			14	//Parallel Breadth First Search Algorithm using Load Balancing Algorithm
 // *********** Various Algorithms ******************
 
 // *********** Various Hybrid System Model ******************
@@ -32,9 +34,11 @@
 #define NAVIGATION_2		6		//NAVIGATION Benchmark model - NAV02 (3 x 3)
 #define NAVIGATION_3		7		//NAVIGATION Benchmark model - NAV03 (3 x 3)
 #define NAVIGATION_4		8		//NAVIGATION Benchmark model - NAV04 (5 x 5)
-#define CIRCLE_ONE_LOC		9		//CIRCLE model with one location
-#define CIRCLE_TWO_LOC		10		//CIRCLE model with two locations
-#define CIRCLE_FOUR_LOC		11		//CIRCLE model with four locations
+#define NAVIGATION_5		9		//NAVIGATION Benchmark model - NAV05 (9 x 9)
+#define CIRCLE_ONE_LOC		10		//CIRCLE model with one location
+#define CIRCLE_TWO_LOC		11		//CIRCLE model with two locations
+#define CIRCLE_FOUR_LOC		12		//CIRCLE model with four locations
+#define OSCILLATOR			13		//OSCILLATOR model without any Filter
 //**************** Hybrid Automata Definition ***********************
 
 // *********** Different Template Directions ******************

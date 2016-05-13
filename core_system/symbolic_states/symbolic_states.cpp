@@ -68,12 +68,8 @@ void symbolic_states::setTransitionId(int transitionId) {
 
 polytope::ptr symbolic_states::getInitial_ContinousSetptr() const {
 
-	polytope p;
-	p = this->ContinuousSetptr->getPolytope(0); //gets the 1st polytope from the sfm
 	polytope::ptr initial_polytope_I;
+	initial_polytope_I = this->ContinuousSetptr->getPolytope(0); //gets the 1st polytope from the sfm
 
-	initial_polytope_I = polytope::ptr(
-			new polytope(p.getCoeffMatrix(), p.getColumnVector(),
-					p.getInEqualitySign()));
 	return initial_polytope_I;
 }

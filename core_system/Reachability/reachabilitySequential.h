@@ -37,12 +37,12 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
  */
 
 // Called By pure Sequential Algorithm with no critical section in this Algorithm
-template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
+template_polyhedra::ptr reachabilitySequential(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);
 
-template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(Dynamics& SystemDynamics,
+template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);

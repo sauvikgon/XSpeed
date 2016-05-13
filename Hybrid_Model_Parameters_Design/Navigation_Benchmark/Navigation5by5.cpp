@@ -10627,7 +10627,7 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc13;
 
-	location::ptr l3 = location::ptr(new location(3, "loc13", system_dynamics2, invariant2, true,
+	location::ptr l3 = location::ptr(new location(3, "BAD", system_dynamics2, invariant2, true,
 			Out_Going_Trans_fromloc13));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc4;
@@ -10658,7 +10658,7 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc6;
 
-	location::ptr l7 = location::ptr(new location(7, "loc6", system_dynamics6, invariant6, true,
+	location::ptr l7 = location::ptr(new location(7, "GOOD", system_dynamics6, invariant6, true,
 			Out_Going_Trans_fromloc6));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc11;
@@ -10834,6 +10834,11 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l24);
 	Hybrid_Automata.addLocation(l25);
 	Hybrid_Automata.setDimension(dim);
+
+	Hybrid_Automata.insert_to_map("x1",0);
+	Hybrid_Automata.insert_to_map("x2",1);
+	Hybrid_Automata.insert_to_map("v1",2);
+	Hybrid_Automata.insert_to_map("v2",3);
 
 	unsigned int initial_location_id = 17; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation

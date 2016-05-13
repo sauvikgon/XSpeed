@@ -166,13 +166,22 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_copy(
 	destination = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
 }
 
-/*template<typename scalar_type> void math::matrix<scalar_type>::matrix_Identity(
+template<typename scalar_type> void math::matrix<scalar_type>::matrix_Identity(int dimension,
 		math::matrix<scalar_type>& newIdentityMatrix) {
-	;
-}*/
+	//boost::numeric::ublas::identity_matrix<scalar_type> iden(dimension);
+	ublas_matrix_impl m(this->size1(), this->size2());
+	for (int i=0;i<dimension;i++){
+		for (int j=0;j<dimension;j++){
+			if (i==j)
+				m(i,j) = 1;
+			else
+				m(i,j) = 0;
+		}
+	}
+	newIdentityMatrix = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
+}
 
-template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(
-		matrix mat2, matrix& joined_matrix) {
+template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matrix mat2, matrix& joined_matrix) {
 	size_type row, col, index_i;
 	row = this->size1();
 	col = this->size2();

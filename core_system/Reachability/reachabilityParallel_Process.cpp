@@ -118,8 +118,10 @@ const template_polyhedra::ptr reachabilityParallel_Process(
 		 * to determine the iteration's number at which the polytope is completely outside the invariant's region
 		 * and setting the newIteration number as the value obtained here.
 		 */
-		*shm_number = InvariantBoundaryCheck(SystemDynamics, Initial,
-				ReachParameters, invariant, lp_solver_type_choosen);
+		unsigned int newIter;
+		InvariantBoundaryCheck(SystemDynamics, Initial,
+				ReachParameters, invariant, lp_solver_type_choosen, newIter);
+		*shm_number = newIter;
 		//	cout <<"\nInvariant Exists!!!\n";
 	} //End of Invariant Directions
 	else {

@@ -251,6 +251,35 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 
+	Hybrid_Automata.insert_to_map("x1",0);
+	Hybrid_Automata.insert_to_map("x2",1);
+	Hybrid_Automata.insert_to_map("x3",2);
+	Hybrid_Automata.insert_to_map("x4",3);
+	Hybrid_Automata.insert_to_map("x5",4);
+	Hybrid_Automata.insert_to_map("x6",5);
+	Hybrid_Automata.insert_to_map("x7",6);
+	Hybrid_Automata.insert_to_map("x8",7);
+	Hybrid_Automata.insert_to_map("x9",8);
+	Hybrid_Automata.insert_to_map("x10",10);
+	Hybrid_Automata.insert_to_map("x11",10);
+	Hybrid_Automata.insert_to_map("x12",11);
+	Hybrid_Automata.insert_to_map("x13",12);
+	Hybrid_Automata.insert_to_map("x14",13);
+	Hybrid_Automata.insert_to_map("x15",14);
+	Hybrid_Automata.insert_to_map("x16",15);
+	Hybrid_Automata.insert_to_map("x17",16);
+	Hybrid_Automata.insert_to_map("x18",17);
+	Hybrid_Automata.insert_to_map("x19",18);
+	Hybrid_Automata.insert_to_map("x20",19);
+	Hybrid_Automata.insert_to_map("x21",20);
+	Hybrid_Automata.insert_to_map("x22",21);
+	Hybrid_Automata.insert_to_map("x23",22);
+	Hybrid_Automata.insert_to_map("x24",23);
+	Hybrid_Automata.insert_to_map("x25",24);
+	Hybrid_Automata.insert_to_map("x26",25);
+	Hybrid_Automata.insert_to_map("x27",26);
+	Hybrid_Automata.insert_to_map("x28",27);
+
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet
@@ -261,9 +290,10 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 
 }
 
-//Hyst Generated output
 
-void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
+
+//Hyst Generated output
+void SetHelicopter_Parameters3InCorrect(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
@@ -3209,6 +3239,35 @@ void SetHelicopter_Parameters3OurFile(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addInitial_Location(l1);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.setDimension(dim);
+
+	Hybrid_Automata.insert_to_map("x1",0);
+	Hybrid_Automata.insert_to_map("x2",1);
+	Hybrid_Automata.insert_to_map("x3",2);
+	Hybrid_Automata.insert_to_map("x4",3);
+	Hybrid_Automata.insert_to_map("x5",4);
+	Hybrid_Automata.insert_to_map("x6",5);
+	Hybrid_Automata.insert_to_map("x7",6);
+	Hybrid_Automata.insert_to_map("x8",7);
+	Hybrid_Automata.insert_to_map("x9",8);
+	Hybrid_Automata.insert_to_map("x10",10);
+	Hybrid_Automata.insert_to_map("x11",10);
+	Hybrid_Automata.insert_to_map("x12",11);
+	Hybrid_Automata.insert_to_map("x13",12);
+	Hybrid_Automata.insert_to_map("x14",13);
+	Hybrid_Automata.insert_to_map("x15",14);
+	Hybrid_Automata.insert_to_map("x16",15);
+	Hybrid_Automata.insert_to_map("x17",16);
+	Hybrid_Automata.insert_to_map("x18",17);
+	Hybrid_Automata.insert_to_map("x19",18);
+	Hybrid_Automata.insert_to_map("x20",19);
+	Hybrid_Automata.insert_to_map("x21",20);
+	Hybrid_Automata.insert_to_map("x22",21);
+	Hybrid_Automata.insert_to_map("x23",22);
+	Hybrid_Automata.insert_to_map("x24",23);
+	Hybrid_Automata.insert_to_map("x25",24);
+	Hybrid_Automata.insert_to_map("x26",25);
+	Hybrid_Automata.insert_to_map("x27",26);
+	Hybrid_Automata.insert_to_map("x28",27);
 
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation

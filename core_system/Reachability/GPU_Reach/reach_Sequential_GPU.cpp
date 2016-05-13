@@ -262,7 +262,7 @@ void bulk_Solver_With_UnitBall(int UnitBall,
  * After optimising the duplicate Support Function computation
  */
 
-void reachabilitySequential_GPU(Dynamics& SystemDynamics,
+void reachabilitySequential_GPU(unsigned int boundedTotIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen,
@@ -286,11 +286,10 @@ void reachabilitySequential_GPU(Dynamics& SystemDynamics,
 //	std::cout << "num_inv = "<<num_inv<<"\n";
 	if (isInvariantExist == true) { //if invariant exist. Computing
 		std::cout << "Yes Invariant Exist!!!";
-		NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
-				ReachParameters, invariant, lp_solver_type_choosen);
+		NewTotalIteration = boundedTotIteration;
 		std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 	} //End of Invariant Directions
-	if (NewTotalIteration == 1) {
+	if (NewTotalIteration <= 1) {
 		template_polyhedra::ptr poly_empty;
 		//return poly_empty; //NO need to proceed Algorithm further
 		reachableRegion = poly_empty;
@@ -326,7 +325,8 @@ void reachabilitySequential_GPU(Dynamics& SystemDynamics,
 	DirectionsGenerate_time.start();
 	if (Solver == 3) {
 		//for OMP --cuda not supporting OMP-- so added library "lgomp"; build-stage -Xcompiler -fopenmp
-		getDirectionList_X0_and_U(ReachParameters, NewTotalIteration,
+		int numCoresAvail = omp_get_num_procs(); //get the number of cores
+		getDirectionList_X0_and_U(numCoresAvail, ReachParameters, NewTotalIteration,
 				List_for_X0, List_for_U, U_empty, SystemDynamics); //Optimized into a single function the 2 Tasks
 	} else {
 		//Only for profiling GLPK solver Time for comparison with boundary value implementation

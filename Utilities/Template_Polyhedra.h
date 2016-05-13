@@ -55,7 +55,7 @@ public:
 	 * Returns a single polytope set Omega(i) where i represent the Iteration number or the Column number of the Matrix_SupportFunction.
 	 * Note:: the Index of i begins from 0 to i-1 just like the concept of Array.
 	 */
-	polytope getPolytope(unsigned int Iterations_Number);
+	polytope::ptr getPolytope(unsigned int Iterations_Number);
 
 	/*
 	 * From the calling template_polyhedra or the entire reachable set of a single trajectory of a continuous system,
@@ -65,20 +65,28 @@ public:
 	 * elements of the list is a intersected region.
 	 * Note::If the size of the returning list is 0 indicates that polytope-guard does not intersects with the calling template_polyhedra
 	 */
-	const std::list<template_polyhedra> polys_intersectionSequential(
-			polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
-	const std::list<template_polyhedra> polys_intersectionParallel(
-			polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
+	const std::list<template_polyhedra::ptr> polys_intersectionSequential(polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
+	const std::list<template_polyhedra::ptr> polys_intersectionParallel(polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
 
 	/*
-	 * Returns a new Polytope which is the common intersected Region between the templated_polyhedra and the guard_polytope
-	 * polytope getIntersectedRegion(polytope gaurd);
+	 * Less Expensive function
+	 * Returns a list of pairs with each pair of element as (start,end) where start and end are index at which intersection start and end.
 	 */
+	std::list<std::pair<unsigned int, unsigned int> > polys_intersectionSequential_optimize(polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
+
+	/*
+	 * Less Expensive function
+	 * Returns the list of polytopes with each polytope as the template_approximation of the intersected region
+	 * the intersected region is computed as range of indices of SFM using the function polys_intersectionSequential_optimize()
+	 */
+	std::list<polytope::ptr> flowpipe_intersectionSequential(polytope::ptr guard, int lp_solver_type_choosen);
+
 
 	/*
 	 * From the calling TEMPLATE_POLYHEDRA a SINGLE POLYTOPE is returned.
 	 * Thus, it is a BIGGER approximation (Bigger Convex Set of a set of Convex Sets) region of the calling
 	 * TEMPLATE_POLYHEDRA and returning a SINGLE POLYTOPE.
+	 * This an Expensive operation for an optimization see function flowpipe_intersectionSequential()
 	 */
 	const polytope::ptr getTemplate_approx(int lp_solver_type_choosen);
 

@@ -8,6 +8,7 @@
  *      	B 2 4
  *      	4 3 4
  *   		2 2 A
+*   	With matrix A=[-1.2 0.1; 0.1 -1.2]
  */
 
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
@@ -3375,6 +3376,11 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l8);
 	Hybrid_Automata.addLocation(l9);
 	Hybrid_Automata.setDimension(dim);
+
+	Hybrid_Automata.insert_to_map("x1",0);
+	Hybrid_Automata.insert_to_map("x2",1);
+	Hybrid_Automata.insert_to_map("v1",2);
+	Hybrid_Automata.insert_to_map("v2",3);
 
 	int initial_location_id = 4;
 	symbolic_states::ptr S; //null_pointer as there is no instantiation

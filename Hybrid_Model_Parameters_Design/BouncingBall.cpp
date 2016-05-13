@@ -191,6 +191,9 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 
+	Hybrid_Automata.insert_to_map("x",0);
+	Hybrid_Automata.insert_to_map("v",1);
+
 	/*discrete_set d_set;		//now not needed
 	 d_set.insert_element(1);*/
 

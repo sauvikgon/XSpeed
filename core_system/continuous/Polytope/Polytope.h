@@ -153,11 +153,20 @@ public:
 	 * debug function
 	 */
 	void print2files();
+
+	/**
+	 * Return true if the parameter point is inside the polytope.
+	 * returns false otherwise.
+	 */
+	bool point_is_inside(std::vector<double> v);
+
 };
+
+
 /**
  * Creates a pair of <loc_id, poly> from the user given bad state string
  */
-
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set);
+
 
 #endif /* POLYTOPE_H_ */

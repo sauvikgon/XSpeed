@@ -21,8 +21,8 @@ template_polyhedra::ptr reachabilitySameDirection(Dynamics& SystemDynamics,
 	size_type row = numVectors, col = shm_NewTotalIteration;
 	if (isInvariantExist == true) {	//if invariant exist. Computing
 
-		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
-				ReachParameters, invariant, lp_solver_type_choosen);
+		InvariantBoundaryCheck(SystemDynamics, Initial,
+				ReachParameters, invariant, lp_solver_type_choosen, shm_NewTotalIteration);
 	}	//End of Invariant Directions
 
 	if (shm_NewTotalIteration == 1) {

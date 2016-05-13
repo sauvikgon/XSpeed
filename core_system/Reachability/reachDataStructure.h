@@ -10,6 +10,7 @@
 
 #include "core_system/HybridAutomata/Location.h"
 
+//Data structure used for POST_C computation in Load Balancing Algorithm
 struct LoadBalanceData{
 
 	unsigned int symState_ID;	// ID of the symbolic_state or flowpipe whose details are stored. #Redundant actually
@@ -30,6 +31,26 @@ struct LoadBalanceData{
 	ReachabilityParameters reach_param;	//placed here as it is comfortable here
 };
 
+
+//Data structure used for POST_D computation in Load Balancing Algorithm
+struct LoadBalanceData_PostD{
+	template_polyhedra::ptr sfm;
+	unsigned int trans_size;
+	std::vector<polytope::ptr> guard_list;	//std::vector may be better for implementation
+	std::vector<Assign> assign_list;
+	std::vector<int> dest_locID;	//Destination_locationID
+	std::vector<int> trans_ID;	//transition_ID
+
+	//std::vector<std::vector<bool> > bool_arr; //Race Condition Occurred
+
+	math::matrix<bool> bool_arr; //each row is the guard and elements are booleans indicating intersected or not
+
+	std::vector<std::list<std::pair<unsigned int, unsigned int> > > range_list;	//each guard can generate
+			//more than One intersected region. Vector of guards. with each guard generating list of intersected range
+
+	std::vector<std::list<polytope::ptr> > polys_list;	//for each guards list of tempalate_Approximation as polytope
+	//Each transition will have destination_loc, guard and assignments
+};
 
 
 #endif /* REACHDATASTRUCTURE_H_ */

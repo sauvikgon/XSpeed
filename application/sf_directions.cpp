@@ -66,7 +66,7 @@ std::vector<std::vector<double> > get_octagonal_directions(unsigned int dim) {
  *
  * Now making the index suitable for parallelizing using #pragma OMP parallel for each numVectors
  */
-void getDirectionList_X0_and_U(ReachabilityParameters &ReachParameters,
+void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachParameters,
 		unsigned int newiters, math::matrix<float> &list_X0,
 		math::matrix<float> &list_U, bool U_empty, Dynamics& SystemDynamics) {
 
@@ -82,7 +82,14 @@ void getDirectionList_X0_and_U(ReachabilityParameters &ReachParameters,
 	unsigned int total_list_X0 = list_X0.size1(); //total number of directions for X0 is [ numDirs * (iters + 1) ]
 	unsigned int total_list_U = list_U.size1(); //total number of directions for U is [ numDirs * iters ]
 
-//#pragma omp parallel for
+	int cores;
+	if (numVectors >= numCoresAvail)
+		cores = numVectors;
+	else
+		cores = numCoresAvail;
+
+//	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
+//#pragma omp parallel for num_threads(cores)
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 		unsigned int index_X, indexU; //making the index suitable for parallelizing
 		if (!U_empty) {
@@ -119,13 +126,11 @@ void getDirectionList_X0_and_U(ReachabilityParameters &ReachParameters,
 		if (!U_empty) { //if not only than will be required to multiply
 			indexU++; //for next entry
 		}
-
 		// ********** Omega's Directions End **********************
 		loopIteration++;
 		for (; loopIteration < newiters;) { //Now stopping condition is only "shm_NewTotalIteration"
 			//		ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);	//replacement from previous step
 			r1Variable = phi_trans_dir; //direct replacement from previous computation
-
 			// ********** W_Support's Directions  **********************
 			//		std::vector<double> Btrans_dir;
 			//		B_trans.mult_vector(rVariable, Btrans_dir);	//replacement from previous step

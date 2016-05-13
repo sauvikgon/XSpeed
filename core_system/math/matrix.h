@@ -31,6 +31,9 @@ public:
 	void matrix_exponentiation(math::matrix<scalar_type>& res) const;
 	void multiply(matrix& A, matrix& res);
 
+	//any matrix object can call this function to create another identity matrix
+	void matrix_Identity(int dimension, math::matrix<scalar_type>& newIdentityMatrix);
+
 	//calling matrix as minuend, passed as subtrahend and result as difference (minuend − subtrahend =	difference)
 	void minus(matrix& B, matrix& res);
 	void mult_vector(std::vector<scalar_type> v, std::vector<scalar_type> &res);
@@ -42,7 +45,7 @@ public:
 //	void addColumn(std::vector <scalar_type> columnVector, math::matrix<scalar_type>& resized_matrix);
 	scalar_type norm_inf();
 	void matrix_copy(math::matrix<scalar_type>& destination);
-	void matrix_join(const math::matrix<scalar_type> mat2,
+	void matrix_join(math::matrix<scalar_type> mat2,
 			math::matrix<scalar_type>& joined_matrix);
 	//void matrix_Identity(math::matrix<scalar_type>& newIdentityMatrix);
 	/*

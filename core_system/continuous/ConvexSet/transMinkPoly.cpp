@@ -16,6 +16,18 @@ transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU,
 	B_TRANS = myB_TRANS;
 	time = mytime;
 	beta = mybeta;
+	Cempty = true;	//C is empty here as not supplied
+}
+transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU, std::vector<double> c,
+			math::matrix<double> myTRANS, math::matrix<double> myB_TRANS, double mytime, double mybeta){
+	X0 = myX0;
+	U = myU;
+	TRANS = myTRANS;
+	B_TRANS = myB_TRANS;
+	time = mytime;
+	beta = mybeta;
+	Cempty = false;	//C is NOT empty here as it is supplied
+	C = c;
 }
 transMinkPoly::transMinkPoly(polytope::ptr myX0, math::matrix<double> myTRANS) {
 	//cout<<"\nDim of myX0 which is U = "<<myX0->getSystemDimension()<<"\n";
@@ -25,6 +37,7 @@ transMinkPoly::transMinkPoly(polytope::ptr myX0, math::matrix<double> myTRANS) {
 	TRANS = myTRANS;
 	time = 0;
 	beta = 0;
+	Cempty = true;	//C is empty here as not supplied
 }
 unsigned int transMinkPoly::getSystemDimension() const {
 	return X0->getSystemDimension();
@@ -37,30 +50,34 @@ bool transMinkPoly::getIsEmpty() const {
 		return false;
 }
 
-double transMinkPoly::computeSupportFunction(std::vector<double> direction,
-		lp_solver &lp) {
+double transMinkPoly::computeSupportFunction(std::vector<double> direction, lp_solver &lp) {
 //this function is also called from compute_beta, compute_alfa, etc
 	std::vector<double> dprime;
 //	cout << "\nCalling transMinkPoly ComputerSupportFunction\n";
 	TRANS.mult_vector(direction, dprime);
-//	cout << "\nIncase correct res1 = ";
 	double res1 = 0;
 	if (!X0->getIsEmpty()) {
 		res1 = X0->computeSupportFunction(dprime, lp);
-//		cout << "\nres1 = " << res1;
 	}
-
-	//cout << "\nres1 = " << res1;
+//	cout << "\t res1 = " << res1;
 	double res2 = 0.0;
 	if (!U->getIsEmpty()) {
-		lp_solver lp_U(1);
-		lp_U.setConstraints(U->getCoeffMatrix(), U->getColumnVector(),
-				U->getInEqualitySign());
+		lp_solver lp_U(GLPK_SOLVER);
+		lp_U.setMin_Or_Max(2);//Maximizing
+		lp_U.setConstraints(U->getCoeffMatrix(), U->getColumnVector(), U->getInEqualitySign());
 
 		B_TRANS.mult_vector(direction, dprime);
 		res2 = U->computeSupportFunction(dprime, lp_U);
 	}
-	double res = res1 + time * res2;
+//	cout << "\t  res2 = " << res2;
+	double res3 = 0.0;	//for C
+	if (!Cempty){
+		//cout<<"B_Trans = "<<B_TRANS<<std::endl;
+		B_TRANS.mult_vector(direction,dprime);
+		res3 = dot_product(dprime, C);
+	}
+//cout<<"\t res3 = "<<res3<<std::endl;
+	double res = res1 + time * res2 + time * res3;
 	if (beta != 0) {
 		double dir_norm = support_unitball_infnorm(direction);
 		return res + beta * dir_norm;

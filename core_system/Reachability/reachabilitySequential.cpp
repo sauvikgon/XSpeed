@@ -154,10 +154,8 @@
  */
 
 //Reachability Algorithm after optimization of the duplicate support function computation
-template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int lp_solver_type_choosen) {
+template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool isInvariantExist, int lp_solver_type_choosen) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
@@ -168,12 +166,11 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
 	size_type row = numVectors, col = shm_NewTotalIteration;
 //	cout << "\nBefore calling InvariantBoundaryCheck"<< "\n";
 	if (isInvariantExist == true) { //if invariant exist. Computing
-		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,ReachParameters, invariant, lp_solver_type_choosen);
-		//shm_NewTotalIteration = shm_NewTotalIteration - 1;//because Omega_0 is computed in all cases which is 1 extra
-	//	std::cout << "shm_NewTotalIteration = " << shm_NewTotalIteration << std::endl;
+		shm_NewTotalIteration = boundedTotIteration;
+
 	} //End of Invariant Directions
 	//cout << "\nNew shm_NewTotalIteration = " << shm_NewTotalIteration << "\n";
-	if (shm_NewTotalIteration <= 1) {
+	if (shm_NewTotalIteration < 1) {
 		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
@@ -452,10 +449,9 @@ template_polyhedra::ptr reachabilitySequential(Dynamics& SystemDynamics,
  * Code AFTER optimising the support function computation
  * Same Code as above but with critical region in InvariantExist block
  */
-template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
-		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int lp_solver_type_choosen) {
+template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned int boundedTotIteration,
+		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::ptr invariant, bool isInvariantExist, int lp_solver_type_choosen) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
@@ -467,14 +463,15 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 	MatrixValue.resize(row, col);
 
 	if (isInvariantExist == true) { //if invariant exist. Computing
-		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
-				ReachParameters, invariant, lp_solver_type_choosen);
+		//shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial, ReachParameters, invariant, lp_solver_type_choosen);
+		shm_NewTotalIteration = boundedTotIteration;
 	} //End of Invariant Directions
 	if (shm_NewTotalIteration == 1) {
 		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
-
+//cout<<"shm_NewTotalIteration = " <<shm_NewTotalIteration<<std::endl;
+	//	cout<<"OK 1 \n";
 	int solver_type = lp_solver_type_choosen;
 
 	lp_solver s_per_thread_I(solver_type), s_per_thread_U(solver_type),
@@ -482,18 +479,16 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 	s_per_thread_I.setMin_Or_Max(2);
 	if (!ReachParameters.X0->getIsEmpty()) //set glpk constraints If not an empty polytope
 		s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
-				ReachParameters.X0->getColumnVector(),
-				ReachParameters.X0->getInEqualitySign());
+				ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
 
 	s_per_thread_U.setMin_Or_Max(2);
 	if (SystemDynamics.U->getIsEmpty()) { //empty polytope
 		//Polytope is empty so no glpk object constraints to be set
 	} else {
 		s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
-				SystemDynamics.U->getColumnVector(),
-				SystemDynamics.U->getInEqualitySign());
+				SystemDynamics.U->getColumnVector(), SystemDynamics.U->getInEqualitySign());
 	}
-
+//	cout<<"OK 2 \n";
 	double res1, result, term2, result1, term1;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 	math::matrix<double> B_trans, phi_tau_Transpose;
@@ -511,9 +506,10 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 		unsigned int loopIteration = 0;
 		double term3, term3a, term3b, res2, term3c = 0.0;
 		sVariable = 0.0; //initialize s0
+//		cout<<"OK 3 \n";
 		//  **************    Omega Function   ********************
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
-
+//		cout<<"OK 4 \n";
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
 			term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
@@ -522,14 +518,12 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 			B_trans.mult_vector(rVariable, Btrans_dir);
 
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
-			term2 = ReachParameters.time_step
-					* SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
+			term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 
 		term3a = ReachParameters.result_alfa;
 		term3b = support_unitball_infnorm(rVariable);
 		if (!SystemDynamics.isEmptyC) {
-			term3c = ReachParameters.time_step
-					* dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
+			term3c = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
 		}
 		term3 = term3a * term3b;
 		res2 = term1 + term2 + term3 + term3c;
@@ -566,7 +560,6 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 
 			double term3, term3a, res2;
 
-
 			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 				phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
 				term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
@@ -574,15 +567,13 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 
 			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable, Btrans_dir);
-				term2 = ReachParameters.time_step
-						* SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
+				term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 			}
 
 			term3a = ReachParameters.result_alfa;
 			term3b = support_unitball_infnorm(r1Variable);
 			if (!SystemDynamics.isEmptyC) {
-				term3c = ReachParameters.time_step
-						* dot_product(SystemDynamics.C, r1Variable); //Added +tau* sf_C(l) 8/11/2015
+				term3c = ReachParameters.time_step * dot_product(SystemDynamics.C, r1Variable); //Added +tau* sf_C(l) 8/11/2015
 			}
 			term3 = term3a * term3b;
 			res2 = term1 + term2 + term3 + term3c;
@@ -599,23 +590,20 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 			loopIteration++; //for the next Omega-iteration or Time-bound
 		} //end of for each iteration
 	} //end of for all directions
-
+	//cout<<"OK 3 \n";
 	template_polyhedra::ptr tpolys;
+	tpolys = template_polyhedra::ptr(new template_polyhedra());
 #pragma omp critical
-	{/*this critical is used when we call the module PAR_ITER as we are updating the variable ReachParameters
-	 and MatrixValue if this function is called from the module SEQ this #pragma will be ignored*/
-
-		//todo:: Redundant invariant directional constraints to be removed
+	{	/* This critical is used when we call the module PAR_ITER as we are updating the variable ReachParameters
+	 and MatrixValue if this function is called from the module SEQ this #pragma will be ignored */
+		//Todo:: Redundant invariant directional constraints to be removed
 		if (isInvariantExist == true) { //if invariant exist. Computing
 			math::matrix<double> inv_sfm;
 			int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
 			inv_sfm.resize(num_inv, shm_NewTotalIteration);
-			for (int eachInvDirection = 0; eachInvDirection < num_inv;
-					eachInvDirection++) {
-				for (unsigned int i = 0; i < shm_NewTotalIteration; i++) {
-					inv_sfm(eachInvDirection, i) =
-							invariant->getColumnVector()[eachInvDirection];
-				}
+			for (int eachInvDirection = 0; eachInvDirection < num_inv; eachInvDirection++) {
+				for (unsigned int i = 0; i < shm_NewTotalIteration; i++)
+					inv_sfm(eachInvDirection, i) = invariant->getColumnVector()[eachInvDirection];
 			}
 			tpolys->setTemplateDirections(ReachParameters.Directions);
 			tpolys->setMatrixSupportFunction(MatrixValue);
@@ -624,8 +612,11 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(
 			//return template_polyhedra(MatrixValue, inv_sfm,ReachParameters.Directions, invariant->getCoeffMatrix());
 			//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
 		} else {
+		//	cout<<"OK 4 \n";
 			tpolys->setTemplateDirections(ReachParameters.Directions);
+		//	cout<<"OK 5 \n";
 			tpolys->setMatrixSupportFunction(MatrixValue);
+		//	cout<<"OK 6 \n";
 			//return template_polyhedra(MatrixValue, ReachParameters.Directions);
 		}
 	} //end of the Critical Section

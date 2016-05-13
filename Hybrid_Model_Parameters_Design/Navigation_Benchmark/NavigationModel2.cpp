@@ -8,6 +8,7 @@
  *      	B 2 4
  *      	4 7 4
  *   		2 1 A
+ *   	With matrix A=[-1.2 0.1; 0.1 -1.2]
  */
 
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
@@ -86,19 +87,34 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	discrete_set d_set;
 
 	boundValueI.resize(row);
-	// ********************* start_location=2:: (0.2 <=x1<=0.6,0.1<=x2<=0.5,v1==0,v2==0) ************************
-	/*
-	 initial_location_id = 2; //the initial Location ID = 2
+	// ********************* start_location=2:: (0.2<=x1<=0.8 & 0.2<=x2<=0.8 & 0<=v1<=0 & 0<=v2<=0) ************************
+/*	 initial_location_id = 2; //the initial Location ID = 2
 
-	 boundValueI[0] = 0.6;
+	 boundValueI[0] = 0.8;
 	 boundValueI[1] = -0.2;
-	 boundValueI[2] = 0.5;
-	 boundValueI[3] = -0.1;
+	 boundValueI[2] = 0.8;
+	 boundValueI[3] = -0.2;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;*/
+
+	// ********************* start_location=3:: (1.2<=x1<=1.8 & 0.2<=x2<=0.8 & 0<=v1<=0 & 0<=v2<=0) ************************
+	 initial_location_id = 3; //the initial Location ID = 3
+
+	 boundValueI[0] = 1.8;
+	 boundValueI[1] = -1.2;
+	 boundValueI[2] = 0.8;
+	 boundValueI[3] = -0.2;
 	 boundValueI[4] = 0;
 	 boundValueI[5] = 0;
 	 boundValueI[6] = 0;
 	 boundValueI[7] = 0;
-	 */
+
+
+
+
+
 	// ********************* start_location=1:: (0.5 <=x1<=0.8, 1.5<=x2<=1.8,v1==0,v2==0) ************************
 	/*
 	 initial_location_id = 1; //the initial Location ID = 1
@@ -135,9 +151,9 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	 boundValueI[7] = 0;
 	 */
 	// ********************* start_location=4:: (1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==-1,v2==0) ************************
-	initial_location_id = 4; //the initial Location ID = 4
+	/*initial_location_id = 4; //the initial Location ID = 4
 
-	/* boundValueI[0] = 1.7; //(1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==-1,v2==0)
+	 boundValueI[0] = 1.7; //(1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==-1,v2==0)
 	 boundValueI[1] = -1.5;
 	 boundValueI[2] = 1.7;
 	 boundValueI[3] = -1.5;
@@ -146,14 +162,14 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	 boundValueI[6] = 0;
 	 boundValueI[7] = 0;*/
 
-	boundValueI[0] = 1.7; //(1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==-1,v2==0.5)
+/*	boundValueI[0] = 1.7; //(1.5 <=x1<=1.7, 1.5<=x2<=1.7,v1==-1,v2==0.5)
 	boundValueI[1] = -1.5;
 	boundValueI[2] = 1.7;
 	boundValueI[3] = -1.5;
 	boundValueI[4] =0;// -1;
 	boundValueI[5] =0;// 1;
 	boundValueI[6] = 0.5;
-	boundValueI[7] = -0.5;
+	boundValueI[7] = -0.5;*/
 
 	boundSignI = 1;
 	initial_polytope_I = polytope::ptr(
@@ -979,6 +995,12 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l7);
 	Hybrid_Automata.addLocation(l8);
 	Hybrid_Automata.addLocation(l9);
+
+	Hybrid_Automata.insert_to_map("x1",0);
+	Hybrid_Automata.insert_to_map("x2",1);
+	Hybrid_Automata.insert_to_map("v1",2);
+	Hybrid_Automata.insert_to_map("v2",3);
+
 
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet

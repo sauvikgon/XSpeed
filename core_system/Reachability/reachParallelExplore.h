@@ -22,20 +22,20 @@
  *
  * CORES: Its the number of parallel compute cores available in the hardware architecture.
  */
-const template_polyhedra::ptr reachParallelExplore(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, const polytope::ptr invariant,
 		bool isInvariantExist, int CORES, unsigned int Algorithm_Type,
 		int lp_solver_type_choosen);
 
-const template_polyhedra::ptr reachabilityParallel(Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachabilityParallel(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);
 /*
  * Called from Parallel Algorithm for combining parallelizing over Iterations and Directions
  */
-const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(
+const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(unsigned int NewTotalIteration,
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen);

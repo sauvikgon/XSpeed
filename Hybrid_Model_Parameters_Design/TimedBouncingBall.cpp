@@ -463,6 +463,7 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addInitial_Location(l1);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.setDimension(dim);
+
 	Hybrid_Automata.insert_to_map("x",0);
 	Hybrid_Automata.insert_to_map("v",1);
 	Hybrid_Automata.insert_to_map("t",2);

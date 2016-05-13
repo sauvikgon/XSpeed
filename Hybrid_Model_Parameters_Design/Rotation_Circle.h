@@ -1,6 +1,8 @@
 /*
  * Rotation_Circle.h
  *
+ *	Model with Two Locations First the Upper-Half and Second the Lower-Half
+ *
  *  Created on: 17-Sep-2014
  *      Author: amit
  */
@@ -18,6 +20,10 @@ void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
 
+
+void SetRotationTimedCircle_Parameters(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
+		ReachabilityParameters& reach_parameters);
 
 
 #endif /* ROTATION_CIRCLE_H_ */
