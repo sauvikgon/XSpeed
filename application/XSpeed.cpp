@@ -178,12 +178,19 @@ int main(int argc, char *argv[]) {
 	("include-path,I", po::value<std::string>(), "include file path")
 	("model-file,m", po::value<std::string>(), "include model file")
 	("config-file,c", po::value<std::string>(), "include configuration file")
+	("internal", "called internally when running hyst-xspeed model")
 	("output-file,o", po::value<std::string>(), "output file name for redirecting the outputs");
+
 
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
 
 	std::vector<std::string> output_vars(2);	//stores the output/plotting variables
+
+	std::ofstream outFile;
+	math::matrix<double> vertices_list;
+	const char *stFileNameWithPath;
+
 
 	if (argc > 1) { // Boost Options to be filled-up
 		if (vm.count("help")) {
@@ -194,17 +201,41 @@ int main(int argc, char *argv[]) {
 				config_filename = ""; //default set to empty
 		if (vm.count("include-path")) {
 			include_path = vm["include-path"].as<std::string>();
-			std::cout << "Include Path is: " << include_path << "\n";
+			//std::cout << "Include Path is: " << include_path << "\n";
 		}
 
 		if (vm.count("config-file")) {
 			user_options.set_configFile(vm["config-file"].as<std::string>());
-			std::cout << "Configuration file is: " << user_options.get_configFile() << "\n";
+			//std::cout << "Configuration file is: " << user_options.get_configFile() << "\n";
 		}
 		if (vm.count("model-file")) {
 			user_options.set_modelFile(vm["model-file"].as<std::string>());
-			std::cout << "Model file is: " << user_options.get_modelFile() << "\n";
+			//std::cout << "Model file is: " << user_options.get_modelFile() << "\n";
 		}
+// ********************** Setting for Output file **********************************
+		std::string fileName, fullPath, fileWithPath;
+
+		//cout << endl << "Working here 2\n";
+		if (vm.count("include-path")) {
+			fullPath = vm["include-path"].as<std::string>();
+			//std::cout << "Include Path is: " << fullPath << "\n";
+		} else {
+			fullPath = "./"; //default file path
+		}
+		fileWithPath.append(fullPath);
+		if (vm.count("output-file")) {
+			fileName = vm["output-file"].as<std::string>();
+			//std::cout << "fileName is: " << fileName << "\n";
+		} else {
+			fileName = "out.txt";
+		}
+		fileWithPath.append(fileName);
+		//std::cout << "fileWithPath is: " << fileWithPath << "\n";
+		stFileNameWithPath = fileWithPath.c_str();
+		//std::cout << "fileWithPath is: " << fileWithPath << "\n";
+		//std::cout << "stFileNameWithPath = " << stFileNameWithPath << "\n";
+// ********************** Setting for Output file Done **********************************
+
 		if (vm.count("model-file") && vm.count("config-file")) {
 			std::cout << "Translating user model with Hyst\n";
 
@@ -231,12 +262,18 @@ int main(int argc, char *argv[]) {
 
 			const char *st, *st2, *st3, *st4, *st5;
 			st = cmdStr.c_str();
-			std::cout <<"st = "<<st<<std::endl;
+			//std::cout <<"st = "<<st<<std::endl;
 			system(st); //calling hyst interface to generate the XSpeed model file
-
 			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
-			system("g++ -L/usr/local/lib user_model.o -lXSpeed -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
-			system("./XSpeed.o --internal");
+			system("g++ -L./lib/ user_model.o -lXSpeed -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
+			//std::cout<<"file with path =" <<stFileNameWithPath<<std::endl;
+			string cmdStr1;
+			cmdStr1.append("./XSpeed.o --internal -o");
+			cmdStr1.append(SingleSpace);
+			cmdStr1.append(stFileNameWithPath);
+			//std::cout<<"Command = "<<cmdStr1.c_str()<<"\n";
+			//system("./XSpeed.o --internal");
+			system(cmdStr1.c_str());
 			exit(0);
 		}
 
@@ -258,22 +295,6 @@ int main(int argc, char *argv[]) {
 		if (vm.count("output-variable")) {
 			std::string VarStr;
 			VarStr = vm["output-variable"].as<std::string>();
-
-			/*
-			std::vector<int> all_args(2);//always 2 variable as plotting variables
-			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-			boost::char_separator<char> sep(", ");
-			tokenizer tokens(VarStr, sep);
-			int index = 0;
-			for (tokenizer::iterator tok_iter = tokens.begin();
-					tok_iter != tokens.end(); ++tok_iter) {
-				all_args[index] = boost::lexical_cast<int>(
-						(std::string) (*tok_iter));
-				index++;
-			}
-			user_options.set_first_plot_dimension(all_args[0] - 1);	//Assuming user's input start with index 1
-			user_options.set_second_plot_dimension(all_args[1] - 1);	//Assuming user's input start with index 1*/
-
 
 			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 			boost::char_separator<char> sep(", ");
@@ -404,9 +425,9 @@ int main(int argc, char *argv[]) {
 		user_options.set_second_plot_dimension(Hybrid_Automata.get_index(output_vars[1]));
 
 	}	/* The variable to dimension id map is set at this point */
-	else{
+	/*else{
 		std::cout << "No Forbidden States Description Provided\n";
-	}
+	}*/
 
 
 	std::list<symbolic_states::ptr> Symbolic_states_list;
@@ -531,30 +552,34 @@ std::list<symbolic_states::ptr>::iterator it;
 	/*
 	 * Generating Vertices as output which can be plotted using gnuplot utilites
 	 */
-	std::ofstream outFile;
-	math::matrix<double> vertices_list;
-	std::string fileName, fullPath, fileWithPath;
-	const char *stFileNameWithPath;
-	//cout << endl << "Working here 2\n";
-	if (vm.count("include-path")) {
-		fullPath = vm["include-path"].as<std::string>();
-		std::cout << "Include Path is: " << fullPath << "\n";
-	} else {
-		fullPath = "./"; //default file path
-	}
-	fileWithPath.append(fullPath);
+//std::cout<<"File name = "<<stFileNameWithPath<<std::endl;	//Not reflecting here
 
-	if (vm.count("output-file")) {
-		fileName = vm["output-file"].as<std::string>();
-		std::cout << "fileName is: " << fileName << "\n";
-	} else {
-		fileName = "out.txt";
-	}
+//Debugging ------ redundant
 
-	fileWithPath.append(fileName);
+// ********************** Setting for Output file **********************************
+		std::string fileName1, fullPath1, fileWithPath1;
+		fullPath1 = "./"; //default file path
+		fileWithPath1.append(fullPath1);
+		if (vm.count("output-file")) {
+			fileName1 = vm["output-file"].as<std::string>();
+			//std::cout << "fileName is: " << fileName1 << "\n";
+		} else {
+			fileName1 = "out.txt";
+		}
+		fileWithPath1.append(fileName1);
+		//std::cout << "fileWithPath is: " << fileWithPath << "\n";
+		stFileNameWithPath = fileWithPath1.c_str();
+		//std::cout << "fileWithPath is: " << fileWithPath1 << "\n";
+		std::cout << "FileName with Path = " << stFileNameWithPath << "\n";
+// ********************** Setting for Output file Done **********************************
 
-	std::cout << "fileWithPath is: " << fileWithPath << "\n";
-	stFileNameWithPath = fileWithPath.c_str();
+
+// ----------------
+
+
+
+
+
 	outFile.open(stFileNameWithPath);
 
 	for (it = Symbolic_states_list.begin(); it != Symbolic_states_list.end();
