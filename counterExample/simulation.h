@@ -48,7 +48,8 @@ class simulation : public var_to_index_map {
 	double reltol;
 	double abstol;
 	string filename;
-	unsigned int x; // the output dimension for plotting wrt time.
+	unsigned int x1; // the first output dimension for plotting.
+	unsigned int x2; // the second output dimension for plotting.
 
 public:
 	typedef boost::shared_ptr<simulation> ptr;
@@ -66,7 +67,8 @@ public:
 		D = Dyn;
 		filename=std::string();
 		// default ploting dimension
-		x = 0; // The plotting of this dimension is w.r.t time
+		x1 = 0; // The default plotting of this dimension
+		x2 = 1; // The default plotting of this dimension
 	}
 	virtual ~simulation();
 	/**
@@ -89,8 +91,9 @@ public:
 	 * sets the projection dimensions to output the simulation points
 	 * in a file
 	 */
-	void set_out_dimension(unsigned int i){
-		x = i;
+	void set_out_dimension(unsigned int i, unsigned int j){
+		x1 = i;
+		x2 = j;
 	}
 	/**
 	 * Generates a simulation trace for time duration, starting at start_time.

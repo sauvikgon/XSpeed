@@ -119,7 +119,8 @@ int main(int argc, char *argv[]) {
 					"8.  Navigation Benchmark Model-NAV04 (5 X 5)\n"
 					"9.  Circle with only ONE location model \n"
 					"10. Circle with TWO locations model \n"
-					"11. Circle with FOUR locations model \n")("directions",
+					"11. Circle with FOUR locations model \n"
+					"12. Navigation Benchmark TIMED Model (3 X 3) \n")("directions",
 			po::value<int>()->default_value(1),
 			"Set the directions for template polyhedra:\n"
 					"1. Box Directions (Set to default)\n"
@@ -218,7 +219,7 @@ int main(int argc, char *argv[]) {
 
 			const char *st, *st2, *st3, *st4, *st5;
 			st = cmdStr.c_str();
-			//system(st); //calling hyst interface to generate the XSpeed model file
+			system(st); //calling hyst interface to generate the XSpeed model file
 
 			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
 			system("g++ -L/usr/local/lib user_model.o -lXSpeed -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
@@ -257,7 +258,7 @@ int main(int argc, char *argv[]) {
 
 		if (vm.count("model") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_model(vm["model"].as<int>());
-			if (user_options.get_model() < 1 || user_options.get_model() > 11) {
+			if (user_options.get_model() < 1 || user_options.get_model() > 12) {
 				std::cout << "Invalid Model option specified\n";
 				return 0;
 			}
@@ -557,7 +558,7 @@ int main(int argc, char *argv[]) {
 			concreteCE::ptr bad_trace = ce->gen_concreteCE(0.1);
 			bad_trace->set_automaton(ce->get_automaton());
 			std::string tracefile = "./bad_trace.o";
-			bad_trace->plot_ce(tracefile);
+			bad_trace->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
 
 		} else {
 			cout << "******** Does NOT Violate Safety Property ********\n";

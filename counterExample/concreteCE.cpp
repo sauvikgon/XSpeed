@@ -34,7 +34,7 @@ const concreteCE::trans_id concreteCE::getTransitionId(unsigned int i) const {
 	}
 	return *it;
 }
-void concreteCE::plot_ce(std::string filename)
+void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 {
 	traj_segment seg;
 	unsigned int locId;
@@ -53,7 +53,7 @@ void concreteCE::plot_ce(std::string filename)
 		simulation_sample = seg.second;
 		sim = simulation::ptr(new simulation(simulation_sample.first.size(),time_step,ha->getLocation(locId)->getSystem_Dynamics()));
 		sim->set_outfile(filename);
-		sim->set_out_dimension(0);
+		sim->set_out_dimension(x1, x2);
 		std::cout << "simulation: start point:" << std::endl;
 	//	for(unsigned int i=0;i<sim->get_system_dimension();i++)
 		myfile << simulation_sample.first[2] << " " << simulation_sample.first[0];

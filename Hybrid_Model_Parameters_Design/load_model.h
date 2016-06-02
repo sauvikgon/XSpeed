@@ -17,6 +17,7 @@
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_FourLocation.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
+#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed3by3.h"
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
 #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"

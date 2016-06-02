@@ -58,11 +58,11 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 		SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
 
 	}
+	/*
 	if (HybridSystem_Model_Type == NAVIGATION_4) {
 
 		SetNavigationModel5by5(ha, init_state, reach_parameters); //My own testing Model NAV_5by5
-
-	}
+	}*/
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
 		SetRotationCircleOneLocation_Parameters(ha, init_state, reach_parameters);
@@ -72,8 +72,11 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 		SetRotationTimedCircle_Parameters(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == CIRCLE_FOUR_LOC) {
+		SetRotationCircleOneLocation_Parameters(ha, init_state, reach_parameters);
+	}
+	if (HybridSystem_Model_Type == NAVIGATION_TIMED) {
 
-		SetRotation_Navtimed_Parameters(ha, init_state,reach_parameters);
+		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 	}
 
 	unsigned int dims = init_state->getInitialSet()->getSystemDimension();

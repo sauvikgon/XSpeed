@@ -132,7 +132,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	if(print_flag){
 		// We plot the initial point also
-		myfile << time_offset << "  " << x[this->x];
+		myfile << x[this->x1] << "  " << x[this->x2];
 		myfile << "\n";
 
 		for(unsigned int k=1;k<=N;k++) {
@@ -143,9 +143,9 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
 			//myfile << NV_Ith_S(u,this->x) << "  " << NV_Ith_S(u,this->y);
-			myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
+			//myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
+			myfile << NV_Ith_S(u,this->x1) << "  " << NV_Ith_S(u,this->x2);
 			myfile << "\n";
-
 		}
 		myfile << "\n";
 		myfile.close();
@@ -260,14 +260,14 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 	if(print_flag){
 		// We plot the initial point also
-		myfile << time_offset << "  " << x[this->x];
+		myfile << x[this->x1] << "  " << x[this->x2];
 		myfile << "\n";
 
 		for(unsigned int k=1;k<=N;k++) {
 			double tout = k*time_step;
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
-			myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
+			myfile << NV_Ith_S(u,this->x1) << "  " << NV_Ith_S(u,this->x2);
 			myfile << "\n";
 
 		}

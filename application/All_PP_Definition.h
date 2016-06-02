@@ -35,6 +35,7 @@
 #define CIRCLE_ONE_LOC		9		//CIRCLE model with one location
 #define CIRCLE_TWO_LOC		10		//CIRCLE model with two locations
 #define CIRCLE_FOUR_LOC		11		//CIRCLE model with four locations
+#define NAVIGATION_TIMED    12      //NAVIGATION TIMED MODEL (3 x 3)
 //**************** Hybrid Automata Definition ***********************
 
 // *********** Different Template Directions ******************
