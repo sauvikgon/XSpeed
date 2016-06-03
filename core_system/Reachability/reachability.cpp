@@ -36,7 +36,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 
 	int number_times = 0, BreadthLevel = 0, previous_level = -1;
 	std::list<int> queue; // data structure to keep track of the number of transitions
-	discrete_set discrete_state;
+	//discrete_set discrete_state;
 
 	pwlist pw_list; //list of initial_state
 	pw_list.WaitingList_insert(I);
@@ -69,6 +69,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 		//		cout<<"\nTesting 2 a 2\n";
 		//discrete_state = U.getDiscreteSet();
 		location_id = U->getLocationId();
+		//std::cout<<"location_id from U = "<<location_id<<std::endl;
+		discrete_set discrete_state;
 		discrete_state.insert_element(location_id); //creating discrete_state
 
 		//continuous_initial_polytope = U.getInitial_ContinousSetptr();
@@ -80,14 +82,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
 		//	cout<<"\nTesting 2 a 3\n";
-		pw_list.PassedList_insert(U); // confirm from sir why do we need this (space issue)
-
-		/*	We don't need this now
-		 for (std::set<int>::iterator it =
-		 discrete_state.getDiscreteElements().begin();
-		 it != discrete_state.getDiscreteElements().end(); ++it)
-		 location_id = (*it); //have to modify later for multiple elements of the set:: Now assumed only one element
-		 */
+		pw_list.PassedList_insert(U);
 
 		location::ptr current_location;
 
@@ -113,9 +108,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 		/*
 		 * Computing the parameters to avoid multiple computation in the child process
 		 * Items Required :: time_step, phi_trans , B_trans, compute_alfa,compute_beta
-		 */
-		//	GeneratePolytopePlotter(continuous_initial_polytope);
-		/*
 		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
 		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
 		 * */
@@ -252,8 +244,9 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 		std::list < transition::ptr > list_transitions;
 		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe exists
 				//so perform intersection with forbidden set provided locID matches
-			cout<<"Running Safety Check\n";
 			int locID = current_location->getLocId();
+			cout<<"Running Safety Check for Loc = "<<locID<<std::endl;
+
 			if (locID == forbidden_set.first) { //forbidden locID matches
 				polytope::ptr forbid_poly = forbidden_set.second;
 				std::list < template_polyhedra::ptr > forbid_intersects;

@@ -457,7 +457,7 @@ int main(int argc, char *argv[]) {
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
 					Solver_GLPK_Gurobi_GPU, forbidden_set, ce);*/
 		} else if (user_options.get_automata_exploration_algorithm() == PBFS_GJH) { //Parallel Breadth First Search implemented for Discrete Jumps
-			std::cout << "\nRunning Parallel BFS using Gerard J. Holzmann's Algorithm.\n";
+			std::cout << "\nRunning Parallel BFS using Adapted Gerard J. Holzmann's Algorithm.\n";
 			//Symbolic_states_list = reach.computeParallelBFSReach(ce);
 			//Symbolic_states_list = reach.computeParallelBFSReachLockAvoid(ce);	//without LOAD Balance Approach
 
