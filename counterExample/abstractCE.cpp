@@ -323,7 +323,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	myopt.set_lower_bounds(lb);
 //	myopt.set_upper_bounds(ub);
 
-	myopt.set_stopval(0.00000001);
+	myopt.set_stopval(0.000001);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);
