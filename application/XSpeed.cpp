@@ -551,7 +551,6 @@ int main(int argc, char *argv[]) {
 			std::list<transition::ptr>::iterator it_trans;
 			discrete_set ds;
 			unsigned int locationID;
-			cout << "(Location ID, Transition ID)\n";
 			std::vector<int> transID(ce->get_length());	//making a vector of transition_ID so it can be printed
 			int index = 0;
 			ce->plot(user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());

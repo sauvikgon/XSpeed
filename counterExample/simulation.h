@@ -32,14 +32,10 @@ struct bound_sim
 class simulation : public var_to_index_map {
 
 	/** The number of discrete samples to be computed
-	 * in solving the ODE, in order to get the simulation.
+	 * in solving the ODE, in order to get the simulation. */
 
-	int N;*/
-	/**
-	 * The simulation time_step. The number of samples is adjusted
-	 * based on the Tfinal and the time_step as N = Tfinal/time_step.
-	 */
-	double time_step;
+	unsigned int N;
+
 	/**
 	 * The dimension of the ODE system.
 	 */
@@ -59,9 +55,9 @@ public:
 //	typedef std::pair<std::vector<double>, double> simD;
 
 	simulation();
-	simulation(unsigned int dim, double step_size, Dynamics Dyn, double rel_tol=1e-6, double abs_tol=1e-8){
+	simulation(unsigned int dim, unsigned int steps, Dynamics Dyn, double rel_tol=1e-6, double abs_tol=1e-8){
 		dimension = dim;
-		time_step = step_size;
+		N = steps;
 		reltol = rel_tol;
 		abstol = abs_tol;
 		D = Dyn;

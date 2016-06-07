@@ -87,7 +87,7 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 	 * todo: current dummy implementation to be completed
 	 */
 
-	simulation::ptr s = simulation::ptr(new simulation(x0.size(),0.1,D));
+	simulation::ptr s = simulation::ptr(new simulation(x0.size(),1000,D));
 	std::vector<double> y;
 	// debug purpose
 //	std::string filename = "./test_sim.o";
@@ -135,10 +135,10 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		try{
 			int loc_index = locIdList[i];
 			y[i] = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + i]);
-			// todo: assignment mapping to be done later.
-			// todo: temporary implementation of assign map. To be generalized later
+
 			std::list<transition::ptr>& trans = HA->getLocation(loc_index)->getOut_Going_Transitions();
 			transition::ptr T = *(trans.begin());
+			// assignment of the form: Ax + b
 			Assign R = T->getAssignT();
 			assert(y[i].size() == R.Map.size2());
 			std::vector<double> res(y[i].size());
@@ -164,15 +164,15 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 
 	// Add the distance of the last trace end point to the forbidden polytope
 
-	std::vector<double> v(dim, 0);
-	for (unsigned int j = 0; j < dim; j++) {
-		v[j] = x[ (N-1) * dim + j];
-	}
+//	std::vector<double> v(dim, 0);
+//	for (unsigned int j = 0; j < dim; j++) {
+//		v[j] = x[ (N-1) * dim + j];
+//	}
 
-	int loc_index = locIdList[N-1];
-	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + N-1]);
+//	int loc_index = locIdList[N-1];
+//	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + N-1]);
 	// compute the distance of this endpoint with the forbidden polytope
-	sum+= bad_poly->point_distance(trace_end_pt);
+//	sum+= bad_poly->point_distance(trace_end_pt);
 
 
 
@@ -187,11 +187,6 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		}
 	}
 	std::cout << "current sum = " << sum << std::endl;
-
-
-//	mycount++;
-//	if(mycount>=3)
-//		exit(0);
 
 	return sum;
 }
@@ -281,6 +276,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	 1. Get the dimensionality of the optimization problem by
 //	 getting the dimension of the continuous set of the abstract counter example
 
+
 	abstract_symbolic_state::ptr S = get_first_symbolic_state();
 	dim = S->getContinuousSet()->getSystemDimension();
 	N = get_length(); // the length of the counter example
@@ -294,8 +290,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	for(unsigned int i=0;i<N;i++){
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		locIdList[i] = *(d.begin());
+//		std::cout << "printing loc ids:" << locIdList[i] << " " << std::endl;
 	}
-
 
 
 //	 2. The dimensionality of the opt problem is N vectors, one starting point
@@ -327,7 +323,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	myopt.set_lower_bounds(lb);
 //	myopt.set_upper_bounds(ub);
 
-	myopt.set_stopval(0.03);
+	myopt.set_stopval(0.00000001);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);

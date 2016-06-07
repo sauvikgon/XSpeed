@@ -54,7 +54,7 @@ public:
 
 private:
 	discrete_set DiscreteSet; //locationID
-	polytope::ptr ContinuousSet;	// flowpipe abstractraction as a polytope
+	polytope::ptr ContinuousSet;	// flowpipe abstraction as a polytope
 	polytope::ptr I; // The class ptr with the exact initial set of the flow-pipe
 };
 

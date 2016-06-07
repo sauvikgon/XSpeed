@@ -204,10 +204,19 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 		//				curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
 						std::cout << "\nReverse Path Trace =>\n";
 						int cc = 0;
+						//debug
+						discrete_set d;
+						d.insert_element(locID);
+						current_forbidden_state->setDiscreteSet(d);
+						//---
 						do {
 							int locationID, locationID2;
 							discrete_set ds, ds2;
 							ds = current_forbidden_state->getDiscreteSet();
+							//debug
+							for (std::set<int>::iterator it = ds.getDiscreteElements().begin();
+									it != ds.getDiscreteElements().end(); ++it)
+										std::cout << "reach: locid =" << (*it) << std::endl;
 							//insert discrete_set in the abstract_symbolic_state
 		//					curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
 							// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
@@ -398,16 +407,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 					polytope::ptr newShiftedPolytope, newPolytope; //created an object here
 					newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope); //Retuns the intersected region as a single newpolytope. **** with added directions
 					newShiftedPolytope = post_assign_exact(newPolytope,current_assignment.Map, current_assignment.b); //initial_polytope_I = post_assign_exact(newPolytope, R, w);
-//					//@Rajarshi: debug---
-//					if(BreadthLevel == 2){
-//						std::string fname = "./next_poly";
-//						char *buf=(char *)malloc(20);
-//						snprintf(buf, sizeof(buf), "%d", count);
-//						fname = fname + buf;
-//						newShiftedPolytope->print2file(fname,0,1);
-//						count++;
-//					}
-					//---
 					//symbolic_states::ptr newState = symbolic_states::ptr( new symbolic_states(ds, newShiftedPolytope));
 					//symbolic_states newState(ds, newShiftedPolytope);
 					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID,newShiftedPolytope));
