@@ -365,9 +365,7 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	invariantBoundValue0.resize(row);
 	invariantBoundValue0[0] = -0.0;
 	invariantBoundSign = 1;
-	invariant0 = polytope::ptr(
-			new polytope(invariantConstraintsMatrix0, invariantBoundValue0,
-					invariantBoundSign));
+	invariant0 = polytope::ptr(new polytope(invariantConstraintsMatrix0, invariantBoundValue0, invariantBoundSign));
 
 	system_dynamics0.U = polytope::ptr(new polytope(true));
 
@@ -420,9 +418,7 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	gaurdBoundValue0[0] = 0.1;
 	gaurdBoundValue0[1] = 0.0;
 	gaurdBoundSign = 1;
-	gaurd_polytope0 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix0, gaurdBoundValue0,
-					gaurdBoundSign));
+	gaurd_polytope0 = polytope::ptr( new polytope(gaurdConstraintsMatrix0, gaurdBoundValue0, gaurdBoundSign));
 
 // The transition label is   hop
 
@@ -433,9 +429,11 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	R0(0, 0) = 1.0;
 	R0(0, 1) = 0.0;
 	R0(0, 2) = 0.0;
+
 	R0(1, 0) = 0.0;
 	R0(1, 1) = -0.75;
 	R0(1, 2) = 0.0;
+
 	R0(2, 0) = 0.0;
 	R0(2, 1) = 0.0;
 	R0(2, 2) = 1.0;

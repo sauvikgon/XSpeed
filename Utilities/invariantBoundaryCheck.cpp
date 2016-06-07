@@ -78,12 +78,6 @@ int type = lp_solver_type_choosen;
 			term1_minus = Initial->computeSupportFunction(rVariable_minus, s_per_thread_I_minus);
 		}//handling constant dynamics
 
-
-
-
-
-
-
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 			B_trans.mult_vector(rVariable_minus, Btrans_dir_minus);
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
@@ -139,7 +133,7 @@ int type = lp_solver_type_choosen;
 				phi_tau_Transpose.mult_vector(r1Variable_minus, phi_trans_dir_minus);
 				term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus, s_per_thread_I_minus);
 			}
-			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable_minus, Btrans_dir_minus);
 				term2_minus = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir_minus, s_per_thread_U_minus);
 			}
@@ -408,7 +402,7 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 				term1 = Initial->computeSupportFunction(phi_trans_dir,
 						s_per_thread_I);
 			}
-			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable, Btrans_dir);
 				term2 = ReachParameters.time_step
 						* SystemDynamics.U->computeSupportFunction(Btrans_dir,
@@ -455,7 +449,7 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 				term1_minus = Initial->computeSupportFunction(
 						phi_trans_dir_minus, s_per_thread_I_minus);
 			}
-			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable_minus, Btrans_dir_minus);
 				term2_minus = ReachParameters.time_step
 						* SystemDynamics.U->computeSupportFunction(
@@ -872,7 +866,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 				term1 = Initial->computeSupportFunction(phi_trans_dir,
 						s_per_thread_I);
 			}
-			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable, Btrans_dir);
 				term2 = ReachParameters.time_step
 						* SystemDynamics.U->computeSupportFunction(Btrans_dir,
@@ -917,7 +911,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 				term1_minus = Initial->computeSupportFunction(
 						phi_trans_dir_minus, s_per_thread_I_minus);
 			}
-			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable_minus, Btrans_dir_minus);
 				term2_minus = ReachParameters.time_step
 						* SystemDynamics.U->computeSupportFunction(

@@ -117,11 +117,11 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
 
 		//	cout << "\nReach_Parameters.time_step = " << reach_parameters.time_step << endl;
-			//cout << "\n1st Compute Alfa = " << result_alfa << endl;
+		cout << "\n1st Compute Alfa = " << result_alfa << endl;
 		//	cout<<"\nTesting 2 c\n";
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
-			//cout << "\n1st Compute Beta = " << result_beta << endl;
+		cout << "\n1st Compute Beta = " << result_beta << endl;
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
 		//	cout<<"\nTesting 2 d\n";
@@ -1891,14 +1891,21 @@ std::list<symbolic_states::ptr> reachability::LoadBalanceAll(abstractCE::ptr& ce
 			//cout<<"id = "<<id<<"\n";
 			if (LoadBalanceDS[id].current_location->isInvariantExists()) {
 				//cout<<"Invariant Exists!!!\n";
-				if (LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixB==true && LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyC==true){
+				if (LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixB == true
+						&& LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyC == true) {
 					//Approach of Coarse-time-step and Fine-time-step
-					jumpInvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(), LoadBalanceDS[id].X0,
-						LoadBalanceDS[id].reach_param, LoadBalanceDS[id].current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
-				}else{
+					jumpInvariantBoundaryCheck(
+							LoadBalanceDS[id].current_location->getSystem_Dynamics(),
+							LoadBalanceDS[id].X0, LoadBalanceDS[id].reach_param,
+							LoadBalanceDS[id].current_location->getInvariant(),
+							lp_solver_type_choosen, NewTotalIteration);
+				} else {
 					//Approach of Sequential invariant check will work for all case
-					InvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(), LoadBalanceDS[id].X0,
-						LoadBalanceDS[id].reach_param, LoadBalanceDS[id].current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+					InvariantBoundaryCheck(
+							LoadBalanceDS[id].current_location->getSystem_Dynamics(),
+							LoadBalanceDS[id].X0, LoadBalanceDS[id].reach_param,
+							LoadBalanceDS[id].current_location->getInvariant(),
+							lp_solver_type_choosen, NewTotalIteration);
 				}
 				LoadBalanceDS[id].newIteration = NewTotalIteration; //Important to take care
 				//cout<<"Invariant setting Done\n";
@@ -2975,8 +2982,7 @@ template_polyhedra::ptr reachability::substitute_in_ReachAlgorithm(
 		term3b = (double) LoadBalanceDS.sf_UnitBall[index_X0]; //  needed  0
 		//cout<<"term3b = "<<term3b<<"\n";
 		if (!LoadBalanceDS.current_location->getSystem_Dynamics().isEmptyC) {
-			term3c = LoadBalanceDS.reach_param.time_step
-					* LoadBalanceDS.sf_dotProduct[index_X0];
+			term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_dotProduct[index_X0];
 			//	cout<<"dot_product(SystemDynamics.C, rVariable) = "<<LoadBalanceDS.sf_dotProduct[index_X0]<<"\n";
 		}
 		//	std::cout<<"Testing 3\n";
@@ -2985,8 +2991,7 @@ template_polyhedra::ptr reachability::substitute_in_ReachAlgorithm(
 		//	std::cout<<"Testing 4\n";
 		index_X0++; //	made 2
 		if (!U_empty) {
-			term2 = LoadBalanceDS.reach_param.time_step
-					* LoadBalanceDS.sf_U[index_U]; //U->SF(Btrans_dir)
+			term2 = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_U[index_U]; //U->SF(Btrans_dir)
 			index_U++;
 		} else
 			term2 = 0;

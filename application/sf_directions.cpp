@@ -67,8 +67,7 @@ std::vector<std::vector<double> > get_octagonal_directions(unsigned int dim) {
  * Now making the index suitable for parallelizing using #pragma OMP parallel for each numVectors
  */
 void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachParameters,
-		unsigned int newiters, math::matrix<float> &list_X0,
-		math::matrix<float> &list_U, bool U_empty, Dynamics& SystemDynamics) {
+		unsigned int newiters, math::matrix<float> &list_X0, math::matrix<float> &list_U, bool U_empty, Dynamics& SystemDynamics) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = ReachParameters.Directions.size2();
@@ -109,15 +108,23 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 		unsigned int loopIteration = 0;
 		// ********** Omega's Directions  **********************
 		std::vector<double> phi_trans_dir, B_trans_dir;
-		if (!SystemDynamics.isEmptyMatrixA) //if Matrix A is not Empty
+		if (!SystemDynamics.isEmptyMatrixA){ //if Matrix A is not Empty
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
+		}
 
 		if (!SystemDynamics.isEmptyMatrixB) { //if not only than will be required to multiply
 			B_trans.mult_vector(rVariable, B_trans_dir);
 		}
 		//std::cout << index_X0 << " ";
 		for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-			list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
+			if (!SystemDynamics.isEmptyMatrixA){ //if Matrix A is not Empty
+				list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
+			}else {
+				list_X0(index_X, x) = (float) rVariable[x]; //Since A is empty :: {tau.A}' reduces to zero so, e^{tau.A}' reduces to 1
+				// so, 1 * rVariable give only rVariable
+			}//handling Constant Dynamics
+			//list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
+
 			if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty()) { //if not only than will be required to multiply
 				list_U(indexU, x) = (float) B_trans_dir[x]; //optimizing in a single loop
 			}
@@ -130,7 +137,13 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 		loopIteration++;
 		for (; loopIteration < newiters;) { //Now stopping condition is only "shm_NewTotalIteration"
 			//		ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);	//replacement from previous step
-			r1Variable = phi_trans_dir; //direct replacement from previous computation
+			//r1Variable = phi_trans_dir; //direct replacement from previous computation
+			if (!SystemDynamics.isEmptyMatrixA){ //if Matrix A is not Empty
+				r1Variable = phi_trans_dir; //direct replacement from previous computation
+			} else { //if Matrix A is Empty in case of constant dynamics
+				r1Variable = rVariable;
+			}//handling Constant Dynamics
+
 			// ********** W_Support's Directions  **********************
 			//		std::vector<double> Btrans_dir;
 			//		B_trans.mult_vector(rVariable, Btrans_dir);	//replacement from previous step
@@ -144,7 +157,14 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 				B_trans.mult_vector(r1Variable, B_trans_dir1);
 			}
 			for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
-				list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
+				//list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
+				if (!SystemDynamics.isEmptyMatrixA){ //if Matrix A is not Empty
+					list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
+				}else {
+					list_X0(index_X, x) = (float) r1Variable[x]; //Since A is empty :: {tau.A}' reduces to zero so, e^{tau.A}' reduces to 1
+					// so, 1 * r1Variable give only r1Variable
+				}//handling Constant Dynamics
+
 				if (!U_empty) { //if not only than will be required to multiply
 					list_U(indexU, x) = (float) B_trans_dir1[x]; //optimizing in a single loop
 				}
