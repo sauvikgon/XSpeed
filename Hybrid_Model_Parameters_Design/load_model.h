@@ -22,6 +22,7 @@
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
 
 #include "Hybrid_Model_Parameters_Design/oscillator_model/Oscillator.h"
+#include "Hybrid_Model_Parameters_Design/ConstantMotion/ConstantMotion.h"
 
 /**
  * Creates the pre-defined hybrid automata models in memory with config parameters.

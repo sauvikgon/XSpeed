@@ -3434,20 +3434,23 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc5.push_back(t1);
 	Out_Going_Trans_fromloc5.push_back(t2);
 	Out_Going_Trans_fromloc5.push_back(t3);
-	location::ptr l2 = location::ptr(new location(2, "loc5", system_dynamics1, invariant1, true, Out_Going_Trans_fromloc5));
+	location::ptr l2 = location::ptr(new location(2, "loc5", system_dynamics1, invariant1, true,
+			Out_Going_Trans_fromloc5));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc7;
 
 	Out_Going_Trans_fromloc7.push_back(t4);
 	Out_Going_Trans_fromloc7.push_back(t5);
-	location::ptr l3 = location::ptr(new location(3, "loc7", system_dynamics2, invariant2, true, Out_Going_Trans_fromloc7));
+	location::ptr l3 = location::ptr(new location(3, "loc7", system_dynamics2, invariant2, true,
+			Out_Going_Trans_fromloc7));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc1;
 
 	Out_Going_Trans_fromloc1.push_back(t6);
 	Out_Going_Trans_fromloc1.push_back(t7);
 	Out_Going_Trans_fromloc1.push_back(t8);
-	location::ptr l4 = location::ptr(new location(4, "loc1", system_dynamics3, invariant3, true, Out_Going_Trans_fromloc1));
+	location::ptr l4 = location::ptr(new location(4, "loc1", system_dynamics3, invariant3, true,
+			Out_Going_Trans_fromloc1));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc4;
 
@@ -3455,21 +3458,24 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc4.push_back(t10);
 	Out_Going_Trans_fromloc4.push_back(t11);
 	Out_Going_Trans_fromloc4.push_back(t12);
-	location::ptr l5 = location::ptr(new location(5, "loc4", system_dynamics4, invariant4, true, Out_Going_Trans_fromloc4));
+	location::ptr l5 = location::ptr(new location(5, "loc4", system_dynamics4, invariant4, true,
+			Out_Going_Trans_fromloc4));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc6;
 
 	Out_Going_Trans_fromloc6.push_back(t13);
 	Out_Going_Trans_fromloc6.push_back(t14);
 	Out_Going_Trans_fromloc6.push_back(t15);
-	location::ptr l6 = location::ptr(new location(6, "loc6", system_dynamics5, invariant5, true, Out_Going_Trans_fromloc6));
+	location::ptr l6 = location::ptr(new location(6, "loc6", system_dynamics5, invariant5, true,
+			Out_Going_Trans_fromloc6));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc3;
 
 	Out_Going_Trans_fromloc3.push_back(t16);
 	Out_Going_Trans_fromloc3.push_back(t17);
 	Out_Going_Trans_fromloc3.push_back(t18);
-	location::ptr l7 = location::ptr(new location(7, "loc3", system_dynamics6, invariant6, true, Out_Going_Trans_fromloc3));
+	location::ptr l7 = location::ptr(new location(7, "loc3", system_dynamics6, invariant6, true,
+			Out_Going_Trans_fromloc3));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc8;
 
@@ -3480,7 +3486,8 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 
 	Out_Going_Trans_fromloc2.push_back(t19);
 	Out_Going_Trans_fromloc2.push_back(t20);
-	location::ptr l9 = location::ptr(new location(9, "loc2", system_dynamics8, invariant8, true, Out_Going_Trans_fromloc2));
+	location::ptr l9 = location::ptr(new location(9, "loc2", system_dynamics8, invariant8, true,
+			Out_Going_Trans_fromloc2));
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.addInitial_Location(l1);
@@ -3503,7 +3510,9 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 	int initial_location_id=9;
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet
-	initial_state::ptr I = initial_state::ptr( new initial_state(initial_location_id, initial_polytope_I, S, transition_id));
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
 
 	init_state = I;
 }

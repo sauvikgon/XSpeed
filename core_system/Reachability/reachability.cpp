@@ -117,11 +117,11 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
 
 		//	cout << "\nReach_Parameters.time_step = " << reach_parameters.time_step << endl;
-		//	cout << "\n1st Compute Alfa = " << result_alfa << endl;
+			//cout << "\n1st Compute Alfa = " << result_alfa << endl;
 		//	cout<<"\nTesting 2 c\n";
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
-		//	cout << "\n1st Compute Beta = " << result_beta << endl;
+			//cout << "\n1st Compute Beta = " << result_beta << endl;
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
 		//	cout<<"\nTesting 2 d\n";

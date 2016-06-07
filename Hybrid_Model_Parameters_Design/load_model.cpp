@@ -82,6 +82,10 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 		SetParametersOscillator(ha, init_state,reach_parameters);
 	}
 
+	if (HybridSystem_Model_Type == 14) {
+		SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
+	}
+
 	unsigned int dims = init_state->getInitialSet()->getSystemDimension();
 
 //Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model

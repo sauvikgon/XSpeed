@@ -50,3 +50,10 @@ double angle_uv(std::vector<double> u, std::vector<double> v) {
 
 	return angle_res;
 }
+
+std::pair<double,double> angle_to_vector(double angle){
+	std::pair<double,double> u;
+	u.first = cos(angle * PI /180);
+	u.second = sin(angle * PI /180);
+	return u;
+}

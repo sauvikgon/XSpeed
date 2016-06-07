@@ -138,7 +138,9 @@ int main(int argc, char *argv[]) {
 					"10. Circle with only ONE location model: Variables{x,y} \n"
 					"11. Circle with TWO locations model: Variables{x,y} \n"
 					"12. Circle with FOUR locations model: Variables{x,y} \n"
-					"13. Oscillator model without any filters: Variables{x,y}\n")
+					"13. Oscillator model without any filters: Variables{x,y}\n"
+					"14. Testing Model: Variables{x1,x2,t}\n"
+					)
 			("directions", po::value<int>()->default_value(1),
 			"Set the directions for template polyhedra:\n"
 					"1. Box Directions (Set to default)\n"
@@ -314,7 +316,9 @@ int main(int argc, char *argv[]) {
 
 		if (vm.count("model") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_model(vm["model"].as<int>());
-			if (user_options.get_model() < 1 || user_options.get_model() > 13) {
+			//if (user_options.get_model() < 1 || user_options.get_model() > 13) {
+			//For testing model==14
+			if (user_options.get_model() < 1 || user_options.get_model() > 14) {
 				std::cout << "Invalid Model option specified\n";
 				return 0;
 			}

@@ -27,6 +27,7 @@ void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::p
 		B_trans = ReachParameters.B_trans;
 	// *******************************************************************************************************************
 	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
+	//cout<<"Test 1.1 \n";
 int type = lp_solver_type_choosen;
 //#pragma omp parallel for //num_threads(numberOfInvariants)
 	for (int eachInvariantDirection = 0; eachInvariantDirection < numberOfInvariants; eachInvariantDirection++) {
@@ -66,22 +67,33 @@ int type = lp_solver_type_choosen;
 
 		// ******************************************* For Negative Direction Starts *******************************************
 		//zIInitial = Omega_Support(ReachParameters, rVariable_minus, Initial,SystemDynamics, s_per_thread_I_minus, s_per_thread_U_minus, Min_Or_Max);
-		double term3_minus, term3a_minus, term3b_minus, res2_minus,
-				term3c_minus = 0.0;
+		double term3_minus, term3a_minus, term3b_minus, res2_minus, term3c_minus = 0.0;
 		//  **************    Omega Function   ********************
 		res1_minus = Initial->computeSupportFunction(rVariable_minus, s_per_thread_I_minus);
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable_minus, phi_trans_dir_minus);
 			term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus, s_per_thread_I_minus);
-		}
+		}else if (SystemDynamics.isEmptyMatrixA) { //if A is empty :: {tau.A}' reduces to zero so, e^{tau.A}' reduces to 1
+			// so, 1 * rVariable give only rVariable
+			term1_minus = Initial->computeSupportFunction(rVariable_minus, s_per_thread_I_minus);
+		}//handling constant dynamics
+
+
+
+
+
+
+
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 			B_trans.mult_vector(rVariable_minus, Btrans_dir_minus);
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
 			term2_minus = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir_minus, s_per_thread_U_minus);
 		term3a_minus = ReachParameters.result_alfa;
 		term3b_minus = (double) support_unitball_infnorm(rVariable_minus);
+		//cout<<"Test Before dot_product \n";
 		if (!SystemDynamics.isEmptyC) {
 			term3c_minus = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable_minus); //Added +tau* sf_C(l) 8/11/2015
+			//std::cout<<"No Error here "<<std::endl;
 		}
 		term3_minus = term3a_minus * term3b_minus;
 		res2_minus = term1_minus + term2_minus + term3_minus + term3c_minus;
@@ -114,7 +126,12 @@ int type = lp_solver_type_choosen;
 			zV_min = result_minus;
 			//  **************  W_Support Function Over  ********************
 			s1Variable_min = sVariable_min + zV_min;
-			r1Variable_minus = phi_trans_dir_minus;
+			if (SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
+				r1Variable_minus = rVariable_minus;
+			}else{
+				r1Variable_minus = phi_trans_dir_minus;
+			}
+
 			//zI = Omega_Support(ReachParameters, r1Variable, Initial,SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 			//  **************    Omega Function   ********************
 			res1_minus = term1_minus;
@@ -128,7 +145,10 @@ int type = lp_solver_type_choosen;
 			}
 			term3a_minus = ReachParameters.result_alfa;
 			term3b_minus = support_unitball_infnorm(r1Variable_minus);
+			//std::cout<<"No Error here "<<loopIteration<<std::endl;
 			if (!SystemDynamics.isEmptyC) {
+				//std::cout<<"SystemDynamics.C.size() = "<<SystemDynamics.C.size()<<std::endl;
+				//std::cout<<"rVariable_minus.size() = "<<rVariable_minus.size()<<std::endl;
 				term3c_minus = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable_minus); //Added +tau* sf_C(l) 8/11/2015
 			}
 			term3_minus = term3a_minus * term3b_minus;
