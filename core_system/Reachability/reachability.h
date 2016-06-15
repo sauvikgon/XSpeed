@@ -160,7 +160,6 @@ private:
 	/*
 	 * Performs the task of computing support functions in parallel using the approach of task_scheduling
 	 */
-	void computeBIG_Task_parallel(std::vector<LoadBalanceData>& LoadBalanceDS);//NOT FEASIBLE TO PARALLELIZE
 
 	void parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS);
 
@@ -170,7 +169,6 @@ private:
 
 	double LPSolver(polytope::ptr poly, std::vector<double> dirs);
 
-	int compute_chunk_size(unsigned int countTotal_X);
 };
 
 #endif /* REACHABILITY_H_ */

@@ -210,7 +210,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 		sVariable = 0.0; //initialize s0
 		//  **************    Omega Function   ********************
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
-		cout<<"res1 = "<<res1 <<"\n";
+	//	cout<<"res1 = "<<res1 <<"\n";
 
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
@@ -227,16 +227,16 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 			term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = (double) support_unitball_infnorm(rVariable);
-		cout<<"term3b = "<<term3b<<"\n";
+	//	cout<<"term3b = "<<term3b<<"\n";
 
 		if (!SystemDynamics.isEmptyC) {
 			term3c = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
-			cout<<"term3c = "<<term3c<<"\n";
+		//	cout<<"term3c = "<<term3c<<"\n";
 		//	cout<<"dot_product(SystemDynamics.C, rVariable) = "<<dot_product(SystemDynamics.C, rVariable)<<"\n";
 		}
 		term3 = term3a * term3b;
 		res2 = term1 + term2 + term3 + term3c; //term3c Added
-		cout<<"res2 = "<<res2<<"\n";
+		//cout<<"res2 = "<<res2<<"\n";
 		/*if (res1<0 && res2 < 0){	//if both negative
 			if (res1 < res2)
 				zIInitial = res1;

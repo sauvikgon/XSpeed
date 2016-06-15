@@ -83,8 +83,8 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 	}
 
 	if (HybridSystem_Model_Type == 14) {
-		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
-		Set_NavTimed_Parameters(ha, init_state,reach_parameters);
+		SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
+		//Set_NavTimed_Parameters(ha, init_state,reach_parameters);
 	}
 
 	unsigned int dims = init_state->getInitialSet()->getSystemDimension();
