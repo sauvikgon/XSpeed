@@ -10,6 +10,7 @@
 
 #include <list>
 #include <utility>
+#include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include "counterExample/simulation.h"
@@ -24,6 +25,7 @@ public:
 	 */
 	typedef unsigned int loc_id;
 	typedef unsigned int trans_id;
+
 	typedef std::pair<std::vector<double>, double> sample;
 	/**
 	 * A sample and a location id defines a trajectory segment of a counter-example
@@ -67,7 +69,7 @@ public:
 	/**
 	 * Plots the counter example trajectory to a file passed as parameter.
 	 */
-	void plot_ce(std::string filename);
+	void plot_ce(std::string filename, unsigned int x1, unsigned int x2);
 
 	concreteCE();
 	virtual ~concreteCE();

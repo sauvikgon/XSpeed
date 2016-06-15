@@ -39,6 +39,7 @@
 #define CIRCLE_TWO_LOC		11		//CIRCLE model with two locations
 #define CIRCLE_FOUR_LOC		12		//CIRCLE model with four locations
 #define OSCILLATOR			13		//OSCILLATOR model without any Filter
+
 //**************** Hybrid Automata Definition ***********************
 
 // *********** Different Template Directions ******************

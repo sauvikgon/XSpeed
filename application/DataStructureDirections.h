@@ -46,9 +46,8 @@ struct AllDirection {
 struct ReachabilityParameters {
 //	bool InvariantExists;		//True If invariant exists otherwise False
 	math::matrix<double> Directions;		//List of Template Directions
-	//math::matrix<double> InvariantDirections;	//List of Invariant's directions and its negative directions
 	math::matrix<double> TotalDirections;		//Directions Template + Invariant Directions(excluding negative of invairants)
-//	std::vector<D> AdvanceTransposeDirection;	//All transposed directions
+
 	double TimeBound;
 	unsigned int Iterations;
 	double time_step; // TimeBound/Iterations

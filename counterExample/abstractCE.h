@@ -32,6 +32,7 @@ extern unsigned int N;
 extern unsigned int dim;
 extern hybrid_automata::ptr HA;
 extern std::vector<int> locIdList;
+extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
 
 

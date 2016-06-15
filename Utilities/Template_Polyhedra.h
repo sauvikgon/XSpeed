@@ -120,7 +120,7 @@ private:
 	//unsigned int total_Directions;	//Number of rows or the number of faces/constraints of the Convex Set/Polytoe Omega's
 	unsigned int total_template_Directions;	//total number of template directions
 	unsigned int total_invariant_Directions;//total number of invariant directions
-	unsigned int total_iterations;//Number of Columns or the number of Convex Set/Polytoe Omega's
+	unsigned int total_iterations;//Number of Columns or the number of Convex Set/Polytope Omega's
 	void setTotalIterations(unsigned int totalIterations);
 	//void setTotalDirections(unsigned int totalDirections);
 	void setTotalTemplateDirections(unsigned int total_template_directions);

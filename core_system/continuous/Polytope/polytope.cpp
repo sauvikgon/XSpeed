@@ -34,8 +34,9 @@ using namespace std;
  */
 
 polytope::polytope() {
-	//lp_init = false;
-	InEqualitySign = 0;
+
+	// The default polytope inequality sign is <=
+	InEqualitySign = 1;
 	number_facets = 0;
 	system_dimension = 0;
 	// The default polytope inequality sign is <=
@@ -44,8 +45,9 @@ polytope::polytope() {
 	this->IsEmpty = false;
 }
 polytope::polytope(bool empty) {
-	//lp_init = false;
-	InEqualitySign = 0;
+
+	// The default polytope inequality sign is <=
+	InEqualitySign = 1;
 	number_facets = 0;
 	system_dimension = 0;
 	// The default polytope inequality sign is <=
@@ -72,34 +74,18 @@ polytope::polytope(math::matrix<double> coeffMatrix,
 
 void polytope::setPolytope(math::matrix<double> coeffMatrix,
 		std::vector<double> columnVector, int inEqualitySign) {
-	//this->setCoeffMatrix(coeffMatrix);
 	this->setNumberFacets(coeffMatrix.size1());
 	this->setSystemDimension(coeffMatrix.size2());
 	this->coeffMatrix = coeffMatrix;
-
-	//this->setColumnVector(columnVector);
 	this->columnVector.resize(this->number_facets);
 	this->columnVector = columnVector;
-	//this->setNumberFacets(columnVector.size());
 
-	//this->setInEqualitySign(inEqualitySign);
 	this->InEqualitySign = inEqualitySign;
 
 	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
 
-	//call to lp.set_Min_Or_Max() must be call before setConstraints()
-	//lp.setConstraints(coeffMatrix, columnVector,inEqualitySign);
 }
 
-/*
- void polytope::set_Default_lp_init(){
- lp_init = false;
- }
- */
-//void polytope::set_lp_object(glpk_lp_solver* newObject){
-//	lp = *newObject;
-//	lp_init = false;
-//}
 void polytope::setIsEmpty(bool empty) {
 	this->IsEmpty = empty;
 }
@@ -465,12 +451,32 @@ double polytope::point_distance(std::vector<double> v){
 		}
 		facet_distance -=b[i];
 		if(facet_distance > 0){
-			distance += facet_distance/math::sqrt(coef_sq_sum);
+			//distance += facet_distance/math::sqrt(coef_sq_sum);
+			distance += facet_distance;
 		}
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
 	return distance;
+}
+
+bool polytope::point_is_inside(std::vector<double> v)
+{
+	math::matrix<double> M = getCoeffMatrix();
+	std::vector<double> C = getColumnVector();
+	double sum;
+	assert(getInEqualitySign() == 1);
+
+	for(unsigned int i=0;i<M.size1();i++)
+	{
+		sum = 0;
+		for(unsigned int j=0;j<M.size2();j++){
+			sum+= M(i,j)*v[j];
+		}
+		if(sum > C[i])
+			return false;
+	}
+	return true;
 }
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
@@ -556,7 +562,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			varname = *tok_iter;
 			tok_iter++;
 			i = p->get_index(varname);
-		//	cout<<"   i in <= = "<<i;
+			cout<<"   i in <= = "<<i;
 			std::vector<double> cons(p->map_size(),0);
 			cons[i] = 1;
 			double bound = std::atof((*tok_iter).c_str());
@@ -568,7 +574,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			tok_iter = tokens.begin();
 			varname = *tok_iter;
 			tok_iter++;
-			i = p->get_index(varname);	//	cout<<"   i in >= = "<<i;
+			i = p->get_index(varname);		cout<<"   i in >= = "<<i;
 			std::vector<double> cons(p->map_size(),0);
 			cons[i] = -1;
 			double bound = std::atof((*tok_iter).c_str());
@@ -579,9 +585,10 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 		}
 	}
 	cout<<"constraints = "<<p->getCoeffMatrix()<<"\n";
+	cout << "forbidden location id: " << f_set.first << std::endl;
 	for (int i=0;i<p->getColumnVector().size();i++)
 		cout<<p->getColumnVector()[i]<<"\t";
 	cout<<endl;
-	f_set.second = p;
+	f_set.second=p;
 };
 

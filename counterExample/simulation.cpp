@@ -68,7 +68,9 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	u = N_VNew_Serial(dimension);
 
 	// return the same initial point if the simulation time is smaller than the simulation time_step
-	if (time < this->time_step)
+	double time_step = Tfinal/N;
+
+	if (time < time_step)
 		return x;
 
 	for(unsigned int i=0;i<dimension;i++)
@@ -125,14 +127,13 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 		print_flag = true;
 	}
 
-	unsigned int N = Tfinal/this->time_step;
 
 //	std::cout << "simulation : samples = " << N << std::endl;
 	std::vector<double> last(dimension);
 
 	if(print_flag){
 		// We plot the initial point also
-		myfile << time_offset << "  " << x[this->x];
+		myfile << x[this->x1] << "  " << x[this->x2];
 		myfile << "\n";
 
 		for(unsigned int k=1;k<=N;k++) {
@@ -143,14 +144,14 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
 			//myfile << NV_Ith_S(u,this->x) << "  " << NV_Ith_S(u,this->y);
-			myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
+			//myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
+			myfile << NV_Ith_S(u,this->x1) << "  " << NV_Ith_S(u,this->x2);
 			myfile << "\n";
-
 		}
 		myfile << "\n";
 		myfile.close();
 	}
-	else{ // no printing the simulation points to file
+	else { // no printing the simulation points to file
 		for(unsigned int k=1;k<=N;k++) {
 			double tout = (k*Tfinal)/N;
 			// remember this point in the last vector
@@ -161,6 +162,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 //			std::cout << "time point:" << NV_Ith_S(u,2) << std::endl;
 		}
 	}
+
 	std::vector<double> res(dimension);
 	for(unsigned int i=0;i<dimension;i++)
 	{
@@ -172,7 +174,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	//--
 	//linear interpolate the last two ODE solution points to get
 	// better estimate of the last solution point.
-	double lin_factor = (N*time_step - Tfinal)/time_step;
+//	double lin_factor = (N*time_step - Tfinal)/time_step;
 //	res = lin_interpolate(last, res ,lin_factor);
 	N_VDestroy_Serial(u); /* Free u vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
@@ -251,7 +253,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 		print_flag = true;
 	}
 
-	unsigned int N = Tfinal/this->time_step;
+	double time_step = Tfinal/N;
 
 	std::vector<double> v(dimension),prev_v(dimension);
 	bound_sim simv;
@@ -260,14 +262,14 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 	if(print_flag){
 		// We plot the initial point also
-		myfile << time_offset << "  " << x[this->x];
+		myfile << x[this->x1] << "  " << x[this->x2];
 		myfile << "\n";
 
 		for(unsigned int k=1;k<=N;k++) {
 			double tout = k*time_step;
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
-			myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
+			myfile << NV_Ith_S(u,this->x1) << "  " << NV_Ith_S(u,this->x2);
 			myfile << "\n";
 
 		}

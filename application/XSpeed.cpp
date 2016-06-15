@@ -24,6 +24,7 @@
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_FourLocation.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
+#include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 
 //**************** Hybrid Automata Definition ***********************
 #include "core_system/Reachability/reachability.h"
@@ -35,6 +36,7 @@
 #include "core_system/symbolic_states/initial_state.h"
 //**************** Hybrid Automata Definition ***********************
 #include "application/All_PP_Definition.h"
+
 // *********** Command Line Boost Program Options ********
 #include <boost/program_options/config.hpp>
 
@@ -54,32 +56,27 @@
 #include "counterExample/concreteCE.h"
 
 namespace po = boost::program_options;
-//using namespace std;
 
-//symbolic_states initial_symbolic_states;
 initial_state::ptr init_state;
 //**************** Hybrid Automata Definition ***********************
 ReachabilityParameters reach_parameters;
 //**************** Hybrid Automata Definition ***********************
 hybrid_automata Hybrid_Automata;
 //**************** Hybrid Automata Definition ***********************
-
 int dir_nums, transition_iterations;
 int dims;
 std::vector<std::vector<double> > directions; //List of all directions
 math::matrix<double> Real_Directions; //List of all directions
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
+
+
 polytope initial_polytope_I, invariant, gaurd_polytope(true);
 unsigned int HybridSystem_Model_Type;
 unsigned int Directions_Type;
 unsigned int Uniform_Directions_Size;
 
 
-
 int main(int argc, char *argv[]) {
-
-	//std::cout << std::fixed; //to assign precision on the std::output stream
-	//std::cout.precision(10); //cout << setprecision(17);
 
 	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)}
 	std::string bad_state; // string to capture the bad state description given by the user
@@ -91,8 +88,8 @@ int main(int argc, char *argv[]) {
 	int lp_solver_type_choosen = 1; //	1 for GLPK and 2 for Gurobi
 	int Solver_GLPK_Gurobi_GPU = 3; //if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
 	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
+
 	bool isConfigFileAssigned = false, isModelParsed = false;
-	unsigned int transition_iters;	//breadth level
 
 	po::options_description desc("XSpeed options");
 	po::variables_map vm;
@@ -122,6 +119,7 @@ int main(int argc, char *argv[]) {
 					"14. Testing Model: Variables{x1,x2,t}\n"
 					)
 			("directions", po::value<int>()->default_value(1),
+
 			"Set the directions for template polyhedra:\n"
 					"1. Box Directions (Set to default)\n"
 					"2. Octagonal Directions \n"
@@ -144,12 +142,16 @@ int main(int argc, char *argv[]) {
 			 "8. SAME_DIRS Algorithm: Process-- Not in Use\n"
 			 "9. ALL_DIRS Algorithm: Process-- Not in Use\n"
 			 "10. GPU_MULTI_SEQ Algorithm: Process-- Not in Use\n"
-			 "11. GPU_SF Algorithm: Process-- GPU Acceleration\n" */)
-			 ("gpu", "Enable GPU Acceleration. GPU acceleration is OFF by default.")
-			("number-of-streams", po::value<int>()->default_value(1), "Set the maximum number of GPU-streams (Set to 1 by default).")
-	//("number-of-readings", po::value<int>()->default_value(1),"Total number of times to run the algorithm to average the readings.")
-	//("mc","Enable Multi-core Acceleration. Multi-core acceleration is OFF by default.")
-	("time-slice", po::value<int>(), "Set the maximum number of Time Sliced(or partitions)")
+			 "11. GPU_SF Algorithm: Process-- GPU Acceleration\n" */)("gpu",
+			"Enable GPU Acceleration. GPU acceleration is OFF by default.")(
+			"number-of-streams", po::value<int>()->default_value(1),
+			"Set the maximum number of GPU-streams (Set to 1 by default).")
+
+	("time-slice", po::value<int>(),
+			"Set the maximum number of Time Sliced(or partitions)")
+	("pbfs", "Enable Parallel Breadth First Exploration of Hybrid Automata Locations. PBFS is OFF by default")
+
+	("internal", "called internally when running hyst-xspeed model")
 
 	("jumps", po::value<int>()->default_value(1), "set an algorithm for Discrete Jumps\n"
 						"1. Sequential Breadth First Exploration of Locations. (Set to default)\n"
@@ -162,6 +164,7 @@ int main(int argc, char *argv[]) {
 	("config-file,c", po::value<std::string>(), "include configuration file")
 	("internal", "called internally when running hyst-xspeed model")
 	("output-file,o", po::value<std::string>(), "output file name for redirecting the outputs");
+
 
 
 	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -187,10 +190,12 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (vm.count("config-file")) {
+
 			user_options.set_configFile(vm["config-file"].as<std::string>());
 			//std::cout << "Configuration file is: " << user_options.get_configFile() << "\n";
 		}
 		if (vm.count("model-file")) {
+
 			user_options.set_modelFile(vm["model-file"].as<std::string>());
 			//std::cout << "Model file is: " << user_options.get_modelFile() << "\n";
 		}
@@ -259,7 +264,6 @@ int main(int argc, char *argv[]) {
 			exit(0);
 		}
 
-
 		if(vm.count("internal")){
 			// calls the hyst-xspeed generated model
 			//int iters = (int) user_options.get_timeHorizon()/ user_options.get_timeStep();
@@ -273,7 +277,6 @@ int main(int argc, char *argv[]) {
 			isConfigFileAssigned = true;
 			isModelParsed = true;
 		}
-
 		if (vm.count("output-variable")) {
 			std::string VarStr;
 			VarStr = vm["output-variable"].as<std::string>();
@@ -286,6 +289,7 @@ int main(int argc, char *argv[]) {
 					tok_iter != tokens.end(); ++tok_iter) {
 				output_vars[index] = (std::string) (*tok_iter);
 				//std::cout<<"Variables = "<<output_vars[index]<<"\n";
+
 				index++;
 			}
 		}
@@ -395,6 +399,7 @@ int main(int argc, char *argv[]) {
 				std::cout << "Invalid 'jumps' option specified!!!\n";
 				return 0;
 			}
+
 		}
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
@@ -402,14 +407,14 @@ int main(int argc, char *argv[]) {
 	//initialize(iterations_size, time_bound, model_type, directions_type_or_size,transition_size, bad_state, forbidden_set);
 
 	// Initialize the model with the parameters given by the user
+
 	if(!isModelParsed){
 		load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
 
 		user_options.set_first_plot_dimension(Hybrid_Automata.get_index(output_vars[0]));
 		user_options.set_second_plot_dimension(Hybrid_Automata.get_index(output_vars[1]));
-
-
 	}
+
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
@@ -423,13 +428,14 @@ int main(int argc, char *argv[]) {
 		tt1.start();
 		reachability reach;
 		transition_iters = user_options.get_bfs_level();
+
 		reach.setReachParameter(Hybrid_Automata, init_state,
 				reach_parameters, transition_iters, user_options.get_flow_algorithm(),
 				Total_Partition, lp_solver_type_choosen, number_of_streams,
 				Solver_GLPK_Gurobi_GPU, forbidden_set);
-//cout<<"\nTesting 3\n";
-		//cout<<"\n Before reach call\n";
+
 		if (user_options.get_automata_exploration_algorithm() == BFS) { //Sequential Search implemented for Discrete Jumps
+
 			std::cout << "\nRunning Sequential BFS\n";
 			Symbolic_states_list = reach.computeSeqentialBFSReach(ce);
 			/*Symbolic_states_list = reach(Hybrid_Automata, init_state,
@@ -452,7 +458,6 @@ int main(int argc, char *argv[]) {
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
 					Solver_GLPK_Gurobi_GPU, forbidden_set, ce);*/
 		}
-//cout<<"\nTesting 4\n";
 		tt1.stop();
 		cpu_usage = getCurrent_ProcessCPU_usage();
 		Avg_cpu_use = Avg_cpu_use  + cpu_usage;
@@ -494,12 +499,14 @@ int main(int argc, char *argv[]) {
 
 
 	std::cout << std::fixed; //to assign precision on the std::output stream
-	std::cout.precision(7); //cout << setprecision(17);
+	std::cout.precision(7);
+
 	double return_Time = Avg_wall_clock / (double) 1000;
 
 	if (argc > 1) { //running from command Line for output generation
 		//std::cout << return_Time; //running from command Line for output generation
 		//----Disabling the console Output to Generate the Data using Shell Script
+
 		std::cout << "\nCPU Usage:(%) = " << Avg_cpu_use<< std::endl;
 
 		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
@@ -509,6 +516,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "\nBoost Time taken:System  (in Seconds) = "
 				<< Avg_system_clock / (double) 1000 << std::endl;
 		cout << endl << "Number of Vectors = " << reach_parameters.Directions.size1();
+
 
 	}
 	if (argc == 1) { //No argument or Running directly from the Eclipse Editor
@@ -526,15 +534,12 @@ int main(int argc, char *argv[]) {
 		cout << endl << "Number of Vectors = "
 				<< reach_parameters.Directions.size1();
 	} 
-cout << endl << "Memory Usages = " << (double)(total_mem_used / 1024.0) / number_of_times << " MB\n";
+	cout << endl << "Memory Usages = " << (double)(total_mem_used / 1024.0) / number_of_times << " MB\n";
 
 std::list<symbolic_states::ptr>::iterator it;
 	/*
 	 * Generating Vertices as output which can be plotted using gnuplot utilites
 	 */
-//std::cout<<"File name = "<<stFileNameWithPath<<std::endl;	//Not reflecting here
-
-//Debugging ------ redundant
 
 // ********************** Setting for Output file **********************************
 		std::string fileName1, fullPath1, fileWithPath1;
@@ -543,6 +548,7 @@ std::list<symbolic_states::ptr>::iterator it;
 		if (vm.count("output-file")) {
 			fileName1 = vm["output-file"].as<std::string>();
 			//std::cout << "fileName is: " << fileName1 << "\n";
+
 		} else {
 			fileName1 = "out.txt";
 		}
@@ -552,6 +558,7 @@ std::list<symbolic_states::ptr>::iterator it;
 		//std::cout << "fileWithPath is: " << fileWithPath1 << "\n";
 		std::cout << "FileName with Path = " << stFileNameWithPath << "\n";
 // ********************** Setting for Output file Done **********************************
+
 
 
 	outFile.open(stFileNameWithPath);

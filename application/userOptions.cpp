@@ -115,4 +115,3 @@ void userOptions::set_forbidden_state(std::string forbid_s){
 userOptions::~userOptions() {
 	// TODO Auto-generated destructor stub
 }
-

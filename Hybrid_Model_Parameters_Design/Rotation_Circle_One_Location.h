@@ -19,7 +19,4 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 		ReachabilityParameters& reach_parameters);
 
 
-
-
-
 #endif /* ROTATION_CIRCLE_ONE_LOCATION_H_ */

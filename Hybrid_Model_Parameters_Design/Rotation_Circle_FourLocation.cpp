@@ -9,8 +9,8 @@
 
 void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
-		ReachabilityParameters& reach_parameters) {
-
+		ReachabilityParameters& reach_parameters)
+{
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	polytope::ptr initial_polytope_I;
 	polytope::ptr invariant1, invariant2, invariant3, invariant4;
@@ -277,6 +277,9 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l2);
 	Hybrid_Automata.addLocation(l3);
 	Hybrid_Automata.addLocation(l4);
+	Hybrid_Automata.insert_to_map("x",1);
+	Hybrid_Automata.insert_to_map("y",2);
+
 
 	Hybrid_Automata.insert_to_map("x",0);
 	Hybrid_Automata.insert_to_map("y",1);
@@ -290,4 +293,3 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 
 	init_state = I;
 }
-

@@ -1,3 +1,4 @@
+
 /*
  * flow_cost_estimate.cpp
  *
@@ -95,5 +96,3 @@ double flow_cost_estimate_invFace(polytope::ptr X0, polytope::ptr I, Dynamics d,
 	//return coarse_cross_time - time_step + simv.cross_over_time;
 	return coarse_cross_time;
 }
-
-

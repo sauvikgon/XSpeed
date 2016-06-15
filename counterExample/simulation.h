@@ -32,14 +32,10 @@ struct bound_sim
 class simulation : public var_to_index_map {
 
 	/** The number of discrete samples to be computed
-	 * in solving the ODE, in order to get the simulation.
+	 * in solving the ODE, in order to get the simulation. */
 
-	int N;*/
-	/**
-	 * The simulation time_step. The number of samples is adjusted
-	 * based on the Tfinal and the time_step as N = Tfinal/time_step.
-	 */
-	double time_step;
+	unsigned int N;
+
 	/**
 	 * The dimension of the ODE system.
 	 */
@@ -48,7 +44,8 @@ class simulation : public var_to_index_map {
 	double reltol;
 	double abstol;
 	string filename;
-	unsigned int x; // the output dimension for plotting wrt time.
+	unsigned int x1; // the first output dimension for plotting.
+	unsigned int x2; // the second output dimension for plotting.
 
 public:
 	typedef boost::shared_ptr<simulation> ptr;
@@ -58,15 +55,18 @@ public:
 //	typedef std::pair<std::vector<double>, double> simD;
 
 	simulation();
-	simulation(unsigned int dim, double step_size, Dynamics Dyn, double rel_tol=1e-6, double abs_tol=1e-8){
+	simulation(unsigned int dim, unsigned int steps, Dynamics Dyn, double rel_tol=1e-6, double abs_tol=1e-8){
 		dimension = dim;
-		time_step = step_size;
+		N = steps;
 		reltol = rel_tol;
 		abstol = abs_tol;
 		D = Dyn;
 		filename=std::string();
 		// default ploting dimension
-		x = 0; // The plotting of this dimension is w.r.t time
+
+		x1 = 0; // The default plotting of this dimension
+		x2 = 1; // The default plotting of this dimension
+
 	}
 	virtual ~simulation();
 	/**
@@ -89,8 +89,9 @@ public:
 	 * sets the projection dimensions to output the simulation points
 	 * in a file
 	 */
-	void set_out_dimension(unsigned int i){
-		x = i;
+	void set_out_dimension(unsigned int i, unsigned int j){
+		x1 = i;
+		x2 = j;
 	}
 	/*
 	 * Set the simulation time_step

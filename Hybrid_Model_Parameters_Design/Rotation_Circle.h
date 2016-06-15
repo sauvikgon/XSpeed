@@ -7,8 +7,9 @@
  *      Author: amit
  */
 
-#ifndef ROTATION_CIRCLE_H_
-#define ROTATION_CIRCLE_H_
+
+#ifndef ROTATION_TIMED_CIRCLE_H_
+#define ROTATION_TIMED_CIRCLE_H_
 
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
@@ -16,7 +17,9 @@
 #include "core_system/symbolic_states/initial_state.h"
 #include "core_system/math/matrix.h"
 
-void SetRotationCircle_Parameters(hybrid_automata& Hybrid_Automata,
+
+
+void SetRotationTimedCircle_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
 
@@ -26,4 +29,4 @@ void SetRotationTimedCircle_Parameters(hybrid_automata& Hybrid_Automata,
 		ReachabilityParameters& reach_parameters);
 
 
-#endif /* ROTATION_CIRCLE_H_ */
+#endif /* ROTATION_TIMED_CIRCLE_H_ */
