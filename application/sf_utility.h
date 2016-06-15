@@ -110,10 +110,10 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 	if (!system_dynamics.isEmptyMatrixA){ //if Not Empty
 		norm_A = system_dynamics.MatrixA.norm_inf();
 	}
-	cout<<"\nInside Testing Matrix A's infinity norm = "<<norm_A<<endl;
+	//cout<<"\nInside Testing Matrix A's infinity norm = "<<norm_A<<endl;
 	dim_for_Max_norm = I->getSystemDimension();	//I is initial polytope
 	I_max_norm = I->max_norm(lp_solver_type_choosen, dim_for_Max_norm); //R_X_o ie max_norm of the Initial polytope
-	cout << "\nInside Testing I.max_norm = " << I_max_norm << endl;
+	//cout << "\nInside Testing I.max_norm = " << I_max_norm << endl;
 
 	math::matrix<scalar_type> Btrans;
 	if (!system_dynamics.isEmptyMatrixB) { //if NOT Empty
@@ -129,11 +129,11 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 	}
 
 	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U
-	cout<<"\nInside Testing V_max_norm = "<<V_max_norm <<endl;
+//	cout<<"\nInside Testing V_max_norm = "<<V_max_norm <<endl;
 	if (system_dynamics.isEmptyMatrixA){ //if A is Empty
 		result = 0;	//norm_A will be zero and which is common term
 	}else {
-		cout<<"exp(tau * norm_A) = " << exp(tau * norm_A)<<"\n";
+//		cout<<"exp(tau * norm_A) = " << exp(tau * norm_A)<<"\n";
 		result = (exp(tau * norm_A) - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
 	}
 //	cout<<"\nAlfa = "<<(double)result<<endl;

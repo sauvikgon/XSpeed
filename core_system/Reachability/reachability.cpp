@@ -117,11 +117,11 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
 
 		//	cout << "\nReach_Parameters.time_step = " << reach_parameters.time_step << endl;
-		cout << "\n1st Compute Alfa = " << result_alfa << endl;
+		//cout << "\n1st Compute Alfa = " << result_alfa << endl;
 		//	cout<<"\nTesting 2 c\n";
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
-		cout << "\n1st Compute Beta = " << result_beta << endl;
+		//cout << "\n1st Compute Beta = " << result_beta << endl;
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
 		//	cout<<"\nTesting 2 d\n";
@@ -1759,7 +1759,6 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(ab
 
 
 
-
 /*
  * Aggregrate All Flowpipe computation work into one BIG task and will run that in parallel either by multi-core CPU or GPU
  * Also the Post_D is done in the same manner
@@ -1947,7 +1946,6 @@ std::list<symbolic_states::ptr> reachability::LoadBalanceAll(abstractCE::ptr& ce
 		//cout << "Test 10\n";
 		//	cout<<"LoadBalanceDS size = "<<LoadBalanceDS.size()<<"\n";
 		//	computeBIG_Task(LoadBalanceDS);	// Step 2	---- SEQUENTIAL method
-		//	computeBIG_Task_parallel(LoadBalanceDS);	// Step 2	---- task-PARALLEL method
 		/*boost::timer::cpu_timer t3;
 		t3.start();*/
 		//parallelBIG_Task(LoadBalanceDS);		//One single GLPK object was not efficient due to GLPK solver
@@ -2566,100 +2564,6 @@ void reachability::computeBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS) 
 	} //end-for each symbolic-states
 }
 
-//Not Feasible to parallelize easily
-void reachability::computeBIG_Task_parallel(
-		std::vector<LoadBalanceData>& LoadBalanceDS) {
-	unsigned int countTotal_X, countTotal_U, size;
-	getCountTotal(LoadBalanceDS, countTotal_X, countTotal_U);
-	int index = 0, j = 0;
-	int dimension = LoadBalanceDS[index].List_dir_X0.size2();
-	LoadBalanceDS[0].sf_X0.resize(LoadBalanceDS[index].List_dir_X0.size1()); //1st resize
-	LoadBalanceDS[0].sf_UnitBall.resize(
-			LoadBalanceDS[index].List_dir_X0.size1()); //1st resize
-	if (!LoadBalanceDS[0].current_location->getSystem_Dynamics().isEmptyC) {
-		LoadBalanceDS[0].sf_dotProduct.resize(
-				LoadBalanceDS[index].List_dir_X0.size1()); //1st resize
-	}
-
-	for (int i = 0; i < countTotal_X; i++) { //for all task related to polytope X0
-		size = LoadBalanceDS[index].List_dir_X0.size1(); //size of X0_directions per symbolic states
-		if (j < size) {
-			std::vector<double> dirs(dimension);
-			for (int ind = 0; ind < dimension; ind++) {
-				dirs[ind] = LoadBalanceDS[index].List_dir_X0(j, ind);
-			}
-			LoadBalanceDS[index].sf_X0[j] = LPSolver(LoadBalanceDS[index].X0,
-					dirs);
-			// ******DotProduction and Support Function of UnitBall  *******
-			if (!LoadBalanceDS[index].current_location->getSystem_Dynamics().isEmptyC)
-				LoadBalanceDS[index].sf_dotProduct[j] =
-						dot_product(
-								LoadBalanceDS[index].current_location->getSystem_Dynamics().C,
-								dirs);
-			LoadBalanceDS[index].sf_UnitBall[j] = support_unitball_infnorm(
-					dirs);
-		} else { //will be called 1st time for every symbolic states
-			index++;
-			j = 0;
-			std::vector<double> dirs(dimension);
-			for (int ind = 0; ind < dimension; ind++) {
-				dirs[ind] = LoadBalanceDS[index].List_dir_X0(j, ind);
-			}
-			LoadBalanceDS[index].sf_X0.resize(
-					LoadBalanceDS[index].List_dir_X0.size1()); //1st resize
-			LoadBalanceDS[index].sf_X0[j] = LPSolver(LoadBalanceDS[index].X0,
-					dirs);
-			// ******DotProduction and Support Function of UnitBall  *******
-			LoadBalanceDS[index].sf_UnitBall.resize(
-					LoadBalanceDS[index].List_dir_X0.size1()); //1st resize
-			if (!LoadBalanceDS[index].current_location->getSystem_Dynamics().isEmptyC) {
-				LoadBalanceDS[index].sf_dotProduct.resize(
-						LoadBalanceDS[index].List_dir_X0.size1()); //1st resize
-				LoadBalanceDS[index].sf_dotProduct[j] =
-						dot_product(
-								LoadBalanceDS[index].current_location->getSystem_Dynamics().C,
-								dirs);
-			}
-			LoadBalanceDS[index].sf_UnitBall[j] = support_unitball_infnorm(
-					dirs);
-		}
-		j++;
-	} //end of pragma omp parallel for
-
-	bool U_empty;
-	U_empty =
-			LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();
-	//todo:: assuming all symbolic states has same setup for polytope U
-	if (!U_empty) {
-		int index = 0, j = 0;
-		unsigned int size;
-		LoadBalanceDS[0].sf_U.resize(LoadBalanceDS[index].List_dir_U.size1()); //1st resize
-		for (int i = 0; i < countTotal_U; i++) { //for all task related to polytope U
-			size = LoadBalanceDS[index].List_dir_U.size1(); //size of U_directions per symbolic states
-			if (j < size) {
-				std::vector<double> dirs(dimension);
-				for (int ind = 0; ind < dimension; ind++) {
-					dirs[ind] = LoadBalanceDS[index].List_dir_U(j, ind);
-				}
-				LoadBalanceDS[index].sf_U[j] = LPSolver(LoadBalanceDS[index].U,
-						dirs);
-			} else {
-				index++;
-				j = 0;
-				std::vector<double> dirs(dimension);
-				for (int ind = 0; ind < dimension; ind++) {
-					dirs[ind] = LoadBalanceDS[index].List_dir_U(j, ind);
-				}
-				LoadBalanceDS[index].sf_U.resize(
-						LoadBalanceDS[index].List_dir_U.size1()); //1st resize
-				LoadBalanceDS[index].sf_U[j] = LPSolver(LoadBalanceDS[index].U,
-						dirs);
-			}
-			j++;
-		} //end of pragma omp parallel for
-	}
-}
-
 //can be parallelized to task-based approach
 void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS) {
 
@@ -2850,27 +2754,6 @@ void reachability::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBa
 	} //end-if of empty check
 }
 
-//TODO:: Though it returns a value for deciding the number of glpk objects to be created based on the
-//size of the total number of LPs but this is not the best approach. Require and appropriate method to decide
-int reachability::compute_chunk_size(unsigned int countTotal_X) {
-
-	if (countTotal_X < 999)
-		return 10;
-	if (countTotal_X < 5555)
-		return 50;
-	if (countTotal_X < 9999)
-		return 100;
-	if (countTotal_X < 55555)
-		return 500;
-	if (countTotal_X < 99999)
-		return 700;
-	if (countTotal_X < 555555)
-		return 800;
-	if (countTotal_X < 999999)
-		return 1000;
-	if (countTotal_X >= 999999)
-		return 1500;
-}
 
 double reachability::LPSolver(polytope::ptr poly, std::vector<double> dirs) {
 	double res;
