@@ -71,8 +71,8 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 	}
 	if (HybridSystem_Model_Type == CIRCLE_TWO_LOC) {
 
-		SetRotationCircle_Parameters(ha, init_state, reach_parameters);
-		//SetRotationTimedCircle_Parameters(ha, init_state, reach_parameters);
+		//SetRotationCircle_Parameters(ha, init_state, reach_parameters);
+		SetRotationTimedCircle_Parameters(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == CIRCLE_FOUR_LOC) {
 		SetRotationCircle4Location_Parameters(ha, init_state, reach_parameters);
@@ -83,7 +83,8 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 	}
 
 	if (HybridSystem_Model_Type == 14) {
-		SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
+		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
+		Set_NavTimed_Parameters(ha, init_state,reach_parameters);
 	}
 
 	unsigned int dims = init_state->getInitialSet()->getSystemDimension();

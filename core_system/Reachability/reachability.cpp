@@ -555,7 +555,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
 
-	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
+/*	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 		cout << "\nRunning GPU Sequential\n";
 		boost::timer::cpu_timer AllReachGPU_time;
 		AllReachGPU_time.start();
@@ -569,7 +569,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		double return_Time1 = wall_clock1 / (double) 1000;
 		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = " << return_Time1 << std::endl;
 
-	}
+	}*/
 
 	if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout << "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
@@ -1290,7 +1290,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
 
-	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
+/*	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 		cout << "\nRunning GPU Sequential\n";
 		boost::timer::cpu_timer AllReachGPU_time;
 		AllReachGPU_time.start();
@@ -1307,7 +1307,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 		double return_Time1 = wall_clock1 / (double) 1000;
 		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
 				<< return_Time1 << std::endl;
-	}
+	}*/
 
 	if (Algorithm_Type == PAR_ITER) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout

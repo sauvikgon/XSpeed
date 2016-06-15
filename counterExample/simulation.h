@@ -94,11 +94,11 @@ public:
 		x2 = j;
 	}
 	/*
-	 * Set the simulation time_step
+	 * Set the number of simulation samplings or steps
 	 */
-	void set_time_step(double t)
+	void set_steps(unsigned int n)
 	{
-		time_step = t;
+		N = n;
 	}
 	/**
 	 * Generates a simulation trace for time duration, starting at start_time.

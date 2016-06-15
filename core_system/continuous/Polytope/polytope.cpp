@@ -499,26 +499,6 @@ void polytope::print2files(){
 	cout<<"\nJust printing a test Line\n";
 }
 
-
-bool polytope::point_is_inside(std::vector<double> v)
-{
-	math::matrix<double> M = getCoeffMatrix();
-	std::vector<double> C = getColumnVector();
-	double sum;
-	assert(getInEqualitySign() == 1);
-
-	for(unsigned int i=0;i<M.size1();i++)
-	{
-		sum = 0;
-		for(unsigned int j=0;j<M.size2();j++){
-			sum+= M(i,j)*v[j];
-		}
-		if(sum > C[i])
-			return false;
-	}
-	return true;
-}
-
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
 {
 	std::list<std::string> all_args;

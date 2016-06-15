@@ -108,6 +108,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	std::vector<std::vector<double> > y(N-1);
 	std::vector<double> trace_end_pt(dim,0);
 	double sq_sum = 0;
+
 //	std::list<transition::ptr>::iterator T_iter = transList.begin();
 
 	for (unsigned int i = 0; i < N-1; i++) {
@@ -126,8 +127,8 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 			//guard as a polytope
 			polytope::ptr g = T->getGaurd();
 			// If traj end point inside guard, then apply map.
-	//		if(g->point_is_inside(y[i]))
-	//		{
+//			if(g->point_is_inside(y[i]))
+//			{
 				assert(y[i].size() == R.Map.size2());
 				std::vector<double> res(y[i].size());
 				R.Map.mult_vector(y[i],res);
@@ -135,7 +136,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 				assert(y[i].size() == R.b.size());
 				for(unsigned int j=0;j<res.size();j++)
 					y[i][j] = res[j] + R.b[j];
-	//		}
+//			}
 	//		if(T_iter!=transList.end())
 	//			T_iter.operator ++();
 

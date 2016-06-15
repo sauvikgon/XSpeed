@@ -272,7 +272,7 @@ int main(int argc, char *argv[]) {
 			//		time-slice, user_options.get_automata_exploration_algorithm()==jumps
 			//     all related inputs for gpu such as number-of-streams
 
-			user_model(Hybrid_Automata, init_state, reach_parameters, forbidden_set, user_options);
+			//user_model(Hybrid_Automata, init_state, reach_parameters, forbidden_set, user_options);
 
 			isConfigFileAssigned = true;
 			isModelParsed = true;
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
 			for (tokenizer::iterator tok_iter = tokens.begin();
 					tok_iter != tokens.end(); ++tok_iter) {
 				output_vars[index] = (std::string) (*tok_iter);
-				//std::cout<<"Variables = "<<output_vars[index]<<"\n";
+				std::cout<<"Out-put Variable = "<<output_vars[index]<<"\n";
 
 				index++;
 			}
@@ -427,7 +427,7 @@ int main(int argc, char *argv[]) {
 		init_cpu_usage();	//initializing the CPU Usage utility to start recording usages
 		tt1.start();
 		reachability reach;
-		transition_iters = user_options.get_bfs_level();
+		unsigned int transition_iters = user_options.get_bfs_level();
 
 		reach.setReachParameter(Hybrid_Automata, init_state,
 				reach_parameters, transition_iters, user_options.get_flow_algorithm(),
@@ -517,7 +517,6 @@ int main(int argc, char *argv[]) {
 				<< Avg_system_clock / (double) 1000 << std::endl;
 		cout << endl << "Number of Vectors = " << reach_parameters.Directions.size1();
 
-
 	}
 	if (argc == 1) { //No argument or Running directly from the Eclipse Editor
 
@@ -558,8 +557,6 @@ std::list<symbolic_states::ptr>::iterator it;
 		//std::cout << "fileWithPath is: " << fileWithPath1 << "\n";
 		std::cout << "FileName with Path = " << stFileNameWithPath << "\n";
 // ********************** Setting for Output file Done **********************************
-
-
 
 	outFile.open(stFileNameWithPath);
 
@@ -622,7 +619,6 @@ std::list<symbolic_states::ptr>::iterator it;
 		std::list<transition::ptr>::iterator it_trans;
 		discrete_set ds;
 		unsigned int locationID;
-		cout << "(Location ID, Transition ID)\n";
 		std::vector<int> transID(ce->get_length());	//making a vector of transition_ID so it can be printed
 		int index = 0;
 		ce->plot(user_options.get_first_plot_dimension(),
@@ -630,7 +626,7 @@ std::list<symbolic_states::ptr>::iterator it;
 		concreteCE::ptr bad_trace = ce->gen_concreteCE(0.1);
 		bad_trace->set_automaton(ce->get_automaton());
 		std::string tracefile = "./bad_trace.o";
-		bad_trace->plot_ce(tracefile);
+		bad_trace->plot_ce(tracefile,user_options.get_first_plot_dimension(), user_options.get_second_plot_dimension());
 
 	} else {
 

@@ -160,12 +160,6 @@ public:
 	 */
 	void print2files();
 
-	/**
-	 * Return true if the parameter point is inside the polytope.
-	 * returns false otherwise.
-	 */
-	bool point_is_inside(std::vector<double> v);
-
 };
 
 

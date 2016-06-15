@@ -52,8 +52,8 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 		ReachabilityParameters& reach_parameters);
 
 //Model (5 x 5) containing 81-Locations with 280 transitions
-void SetNavigationModel9by9(hybrid_automata& Hybrid_Automata,
+/*void SetNavigationModel9by9(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
-		ReachabilityParameters& reach_parameters);
+		ReachabilityParameters& reach_parameters); */
 
 #endif /* NAVIGATIONBENCHMARK4Var_H_ */
