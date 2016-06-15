@@ -564,11 +564,11 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			throw std::runtime_error("forbidden state string improper: <= or >= constraint expected\n");
 		}
 	}
-	cout<<"constraints = "<<p->getCoeffMatrix()<<"\n";
-	cout << "forbidden location id: " << f_set.first << std::endl;
-	for (int i=0;i<p->getColumnVector().size();i++)
-		cout<<p->getColumnVector()[i]<<"\t";
-	cout<<endl;
+//	cout<<"constraints = "<<p->getCoeffMatrix()<<"\n";
+//	cout << "forbidden location id: " << f_set.first << std::endl;
+//	for (int i=0;i<p->getColumnVector().size();i++)
+//		cout<<p->getColumnVector()[i]<<"\t";
+//	cout<<endl;
 	f_set.second=p;
 };
 

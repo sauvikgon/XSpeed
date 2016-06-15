@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
 			for (tokenizer::iterator tok_iter = tokens.begin();
 					tok_iter != tokens.end(); ++tok_iter) {
 				output_vars[index] = (std::string) (*tok_iter);
-				std::cout<<"Out-put Variable = "<<output_vars[index]<<"\n";
+				std::cout<<"Output Variable = "<<output_vars[index]<<"\n";
 
 				index++;
 			}
@@ -411,8 +411,13 @@ int main(int argc, char *argv[]) {
 	if(!isModelParsed){
 		load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
 
-		user_options.set_first_plot_dimension(Hybrid_Automata.get_index(output_vars[0]));
-		user_options.set_second_plot_dimension(Hybrid_Automata.get_index(output_vars[1]));
+		unsigned int x1 = Hybrid_Automata.get_index(output_vars[0]);
+		unsigned int x2 = Hybrid_Automata.get_index(output_vars[1]);
+
+		user_options.set_first_plot_dimension(x1);
+		user_options.set_second_plot_dimension(x2);
+		forbidden_set.second->print2file("./bad_poly",x1,x2);
+
 	}
 
 	std::list<symbolic_states::ptr> Symbolic_states_list;

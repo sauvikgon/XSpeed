@@ -127,7 +127,6 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 
 	if(!op.get_forbidden_state().empty()){
 		string_to_poly(op.get_forbidden_state(),forbidden_set);
-		forbidden_set.second->print2file("./bad_poly",op.get_first_plot_dimension(),op.get_second_plot_dimension());
 	}
 
 }
