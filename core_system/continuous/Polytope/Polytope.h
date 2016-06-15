@@ -136,8 +136,8 @@ public:
 	/**
 	 * Computes the distance of a point from the polytope.
 	 * If the point is inside the polytope, a 0 distance
-	 * is returned. Otherwise, the signed distance from the
-	 * polytope is returned.
+	 * is returned. Otherwise, the distance is the sum of
+	 * the all point to facet distances.
 	 */
 	double point_distance(std::vector<double> v);
 

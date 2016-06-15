@@ -443,27 +443,44 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 
 math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
 	std::set<std::pair<double, double> > set_vertices;
-//	std::cout<<"Called get_2dVertices()!!\n";
 	set_vertices = enumerate_2dVertices(dim1,dim2);
-//	std::cout<<"Finished get_2dVertices()!!\n";
 	math::matrix<double> my_vertices;
 	my_vertices = sort_vertices(set_vertices);
-//	std::cout<<"Finished Sorting Vertices()!!\n";
 	return my_vertices;
 }
 
 double polytope::point_distance(std::vector<double> v){
-	return 0;
+	math::matrix<double> C = getCoeffMatrix();
+	math::vector<double> b = getColumnVector();
+
+	assert(v.size() == C.size2());
+
+	double distance = 0;
+	double facet_distance = 0;
+	double coef_sq_sum = 0;
+	for(unsigned int i=0;i<C.size1();i++){
+		for(unsigned int j=0;j<C.size2();j++){
+			facet_distance += v[j]*C(i,j);
+			coef_sq_sum += C(i,j)*C(i,j);
+		}
+		facet_distance -=b[i];
+		if(facet_distance > 0){
+			distance += facet_distance/math::sqrt(coef_sq_sum);
+		}
+		coef_sq_sum = 0;
+		facet_distance = 0;
+	}
+	return distance;
 }
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
 {
-//	std::cout<<"no error here1 fname = "<<fname<<"\n";
 	assert(dim1 < this->map_size() && dim2 < this->map_size());
 	assert(dim1 >= 0 && dim2 >= 0);
 	std::ofstream myfile;
 	myfile.open(fname.c_str());
 	math::matrix<double> C = get_2dVertices(dim1, dim2);
+
 	for(unsigned int i=0;i<C.size1();i++){
 		for(unsigned int j=0;j<C.size2();j++)
 			myfile << C(i,j) << " " ;
@@ -495,7 +512,7 @@ bool polytope::point_is_inside(std::vector<double> v)
 	}
 	return true;
 }
-;
+
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
 {
 	std::list<std::string> all_args;

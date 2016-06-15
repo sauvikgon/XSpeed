@@ -176,17 +176,6 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
 
-	/*	math::matrix<double> inv_directions;	// * Invariant's Directions
-	 row=2; col=3;
-	 inv_directions.resize(row,col);
-	 inv_directions(0,0) = -1;			// +L directions
-	 inv_directions(0,1) = 0;
-	 inv_directions(0,2) = 0;
-	 inv_directions(1,0) = 1;			// -L directions
-	 inv_directions(1,1) = 0;
-	 inv_directions(1,2) = 0;
-
-	 reach_parameters.InvariantDirections = inv_directions;*/
 //	reach_parameters.InvariantExists = true;	//false;	//Invariant exists.
 	//Invariant's Directions and  Invariant polytope Initialised above
 	/*

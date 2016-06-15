@@ -1,10 +1,3 @@
-//============================================================================
-// Name        : XSpeed.cpp
-// Author      : Amit Gurung
-// Version     :
-// Copyright   : (C) 2014
-// Description : Implementing Support Function Algorithm
-//============================================================================
 
 #include <iostream>
 #include <fstream>
@@ -82,19 +75,6 @@ unsigned int Directions_Type;
 unsigned int Uniform_Directions_Size;
 
 
-/*
-bool isNumber(const string& s) {
-	bool hitDecimal = 0;
-	for (int i = 0; i < s.length(); i++) {
-		char c = s[i];
-		if (c == '.' && !hitDecimal) // 2 '.' in string mean invalid
-			hitDecimal = 1; // first hit here, we forgive and skip
-		else if (!isdigit(c))
-			return 0; // not ., not
-	}
-	return 1;
-}
-*/
 
 int main(int argc, char *argv[]) {
 
@@ -343,7 +323,7 @@ int main(int argc, char *argv[]) {
 		if (vm.count("time-step") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeStep(vm["time-step"].as<double>());
 			if (user_options.get_timeStep() > 0) {
-				unsigned int iterations_size = (unsigned int) user_options.get_timeHorizon() / user_options.get_timeStep(); //return Integer Value
+				unsigned int iterations_size = (unsigned int) user_options.get_timeHorizon() / user_options.get_timeStep();
 				//std::cout << "\niterations_size = " << iterations_size;
 			} else { //for 0 or negative sampling-time
 				std::cout << "Invalid time-step option specified\n";
@@ -428,12 +408,8 @@ int main(int argc, char *argv[]) {
 		user_options.set_first_plot_dimension(Hybrid_Automata.get_index(output_vars[0]));
 		user_options.set_second_plot_dimension(Hybrid_Automata.get_index(output_vars[1]));
 
-	}	/* The variable to dimension id map is set at this point */
-	/*else{
-		std::cout << "No Forbidden States Description Provided\n";
-	}*/
 
-
+	}
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
@@ -576,12 +552,6 @@ std::list<symbolic_states::ptr>::iterator it;
 		//std::cout << "fileWithPath is: " << fileWithPath1 << "\n";
 		std::cout << "FileName with Path = " << stFileNameWithPath << "\n";
 // ********************** Setting for Output file Done **********************************
-
-
-// ----------------
-
-
-
 
 
 	outFile.open(stFileNameWithPath);

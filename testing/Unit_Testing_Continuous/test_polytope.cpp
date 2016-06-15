@@ -127,8 +127,7 @@ SUITE(sf_utility_TestSuite) {
 
 		k = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 
-		val = k->max_norm(1, k->getSystemDimension());//temp solu
-//	cout << endl << "Raj Gurung Over" << val << endl;
+		val = k->max_norm(1, k->getSystemDimension());
 		out<< "";
 		out << val;
 		proper << "";
@@ -144,7 +143,6 @@ SUITE(sf_utility_TestSuite) {
 		lp.setConstraints(I->getCoeffMatrix(), I->getColumnVector(), I->getInEqualitySign());
 
 		sf = I->computeSupportFunction(direction, lp);
-		//std::cout << sf;
 		out<< "";
 		out << sf;
 		proper << "";
@@ -154,7 +152,6 @@ SUITE(sf_utility_TestSuite) {
 		direction[0] = 1;
 		direction[1] = 0;
 		sf = I->computeSupportFunction(direction, lp);
-		//std::cout << sf;
 		out<< "";
 		out << sf;
 		proper << "";
@@ -303,6 +300,51 @@ SUITE(sf_utility_TestSuite) {
 	//	cout << "Result should be false ie Not intersection = " <<flag<< endl;
 		out << flag;
 		proper << "0";
+		CHECK_EQUAL(proper.str(), out.str());
+	}
+
+	TEST_FIXTURE(ExamplePolytope, pointDistaceTest) {
+		bool flag;
+
+		row = 4;
+		col = 2;
+		ConstraintsMatrixP.resize(row, col);
+		ConstraintsMatrixP(0, 0) = -1;
+		ConstraintsMatrixP(0, 1) = 0;
+		ConstraintsMatrixP(1, 0) = 1;
+		ConstraintsMatrixP(1, 1) = 0;
+		ConstraintsMatrixP(2, 0) = 0;
+		ConstraintsMatrixP(2, 1) = 1;
+		ConstraintsMatrixP(3, 0) = 0;
+		ConstraintsMatrixP(3, 1) = -1;
+
+		boundValueP.resize(4);
+
+		boundValueP[0] = -10;
+		boundValueP[1] = 12;
+		boundValueP[2] = 18;
+		boundValueP[3] = -15;
+
+		boundSignP = 1;
+
+		P2 = polytope::ptr(new polytope(ConstraintsMatrixP, boundValueP, boundSignP));
+
+		std::vector<double> v(2,0);
+		v[0] = 11; v[1] = 16;
+
+		double distance = P2->point_distance(v);
+//		std::cout << "distance of point to polytope:" << distance << std::endl;
+		out << distance;
+		proper << "0";
+
+		v[0] = 13;
+		v[1] = 16;
+		distance = P2->point_distance(v);
+//		std::cout << "distance of point to polytope:" << distance << std::endl;
+		out << "";proper << "";
+
+		out << distance;
+		proper << "1";
 		CHECK_EQUAL(proper.str(), out.str());
 	}
 }
