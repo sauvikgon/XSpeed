@@ -45,8 +45,12 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 	//debug
 	//printing the trace start point in a different file for plotting with distinguishible symbol
 	std::ofstream myfile;
+	// truncate the contents of the bad_trace.o file
+	myfile.open(filename.c_str(),ofstream::trunc);
+	myfile.close();
+
 	myfile.open("./start_pts");
-	//--
+
 	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
 		seg = *it;
 		locId = seg.first;

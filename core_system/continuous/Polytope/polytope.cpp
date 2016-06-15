@@ -443,7 +443,8 @@ double polytope::point_distance(std::vector<double> v){
 		}
 		facet_distance -=b[i];
 		if(facet_distance > 0){
-			distance += facet_distance/math::sqrt(coef_sq_sum);
+			//distance += facet_distance/math::sqrt(coef_sq_sum);
+			distance += facet_distance;
 		}
 		coef_sq_sum = 0;
 		facet_distance = 0;

@@ -17,7 +17,7 @@
  * Class to represent the abstract flowpipe. An abstract flowpipe
  * is a polyhedral approximation of the computed flowpipe from the
  * postC operator. The postC generates an over-approximate flowpipe
- * and this class stores a polyhedral abstraction of the flowpipe.
+ * and this class stores a polyhedral(hyperbox) abstraction of the flowpipe.
  */
 
 class abstract_symbolic_state {

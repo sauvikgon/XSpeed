@@ -45,15 +45,10 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 	bool starting_location = true;
 	bool saftey_violated = false;
 	//	cout<<"\nTesting 2 a\n";
-	polytope::ptr continuous_initial_polytope;
+	polytope::ptr initial_polytope;
 
 	boost::timer::cpu_timer t70;
 	t70.start();
-
-	//debug @Rajarshi
-		unsigned int count = 0;
-	//----
-
 
 	while (!pw_list.isEmpty_WaitingList()) {
 
@@ -76,22 +71,15 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 		discrete_state.insert_element(location_id); //creating discrete_state
 
 		//continuous_initial_polytope = U.getInitial_ContinousSetptr();
-		continuous_initial_polytope = U->getInitialSet();
-		reach_parameters.X0 = continuous_initial_polytope;
+		initial_polytope = U->getInitialSet();
+		reach_parameters.X0 = initial_polytope;
 
 		S->setDiscreteSet(discrete_state);
 		S->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-		//	cout<<"\nTesting 2 a 3\n";
-		pw_list.PassedList_insert(U); // confirm from sir why do we need this (space issue)
 
-		/*	We don't need this now
-		 for (std::set<int>::iterator it =
-		 discrete_state.getDiscreteElements().begin();
-		 it != discrete_state.getDiscreteElements().end(); ++it)
-		 location_id = (*it); //have to modify later for multiple elements of the set:: Now assumed only one element
-		 */
+		pw_list.PassedList_insert(U); // confirm from sir why do we need this (space issue)
 
 		location::ptr current_location;
 
@@ -114,58 +102,39 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 			continue;
 
 		// ******************* Computing Parameters *******************************
-		//In this current_location the parameters will change for eg., alfa, beta and phi_trans  have to be re-computed
-		/*
-		 * Computing the parameters to avoid multiple computation in the child process
-		 * Items Required :: time_step, phi_trans , B_trans, compute_alfa,compute_beta
-		 */
-		//	GeneratePolytopePlotter(continuous_initial_polytope);
-		/*
-		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
-		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
-		 * */
-		//	cout<<"\nTesting 2 c\n";
-		double result_alfa = compute_alfa(reach_parameters.time_step,
-				current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
 
-		//	cout << "\nReach_Parameters.time_step = " << reach_parameters.time_step << endl;
-	//	cout << "\n1st Compute Alfa = " << result_alfa << endl;
-		//	cout<<"\nTesting 2 c\n";
+		double result_alfa = compute_alfa(reach_parameters.time_step,
+				current_location->getSystem_Dynamics(),initial_polytope, lp_solver_type_choosen);
+
+
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
-				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
-	//	cout << "\n1st Compute Beta = " << result_beta << endl;
+				reach_parameters.time_step, lp_solver_type_choosen);
+
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
-		//	cout<<"\nTesting 2 d\n";
-		// Intialised the transformation and its transpose matrix
+
 		math::matrix<double> phi_matrix, phi_trans;
 
-		if (!current_location->getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
+		if (!current_location->getSystem_Dynamics().isEmptyMatrixA) {
 			current_location->getSystem_Dynamics().MatrixA.matrix_exponentiation(
 					phi_matrix, reach_parameters.time_step);
 			phi_matrix.transpose(phi_trans);
 			reach_parameters.phi_trans = phi_trans;
 		}
 		math::matrix<double> B_trans;
-		// transpose to be done once and stored in the structure of parameters
 		if (!current_location->getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
 			current_location->getSystem_Dynamics().MatrixB.transpose(B_trans);
 			reach_parameters.B_trans = B_trans;
 		}
 
-		// ******************* Computing Parameters *******************************
-		//	for (int number_times = 1; number_times <= bound; number_times++) {	//Bound for loop in Hybrid AutomataGeneratePolytopePlotter(continuous_initial_polytope);
-		//GeneratePolytopePlotter(continuous_initial_polytope);
 		boost::timer::cpu_timer t76;
 		t76.start();
-		sequentialReachSelection(current_location, continuous_initial_polytope,reach_region);
+		sequentialReachSelection(current_location, initial_polytope,reach_region);
 		t76.stop();
 		double clock76;
 		clock76 = t76.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return76 = clock76 / (double) 1000;
 		std::cout << "\nFlowpipe computed Sequentially Time:Wall(Seconds) = " << return76 << std::endl;
-		std::cout << "\nFlowpipe computed\n";
 
 		//	*********************************************** Reach or Flowpipe Computed **************************************************************************
 		if (previous_level != levelDeleted) {
@@ -200,23 +169,12 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 						std::cout << "\nThe model violates SAFETY property!!!\n";
 						symbolic_states::ptr current_forbidden_state;
 						current_forbidden_state = S;
-		//				abstract_symbolic_state::ptr curr_abs_sym_state;
-		//				curr_abs_sym_state = abstract_symbolic_state::ptr(new abstract_symbolic_state());
-						std::cout << "\nReverse Path Trace =>\n";
 						int cc = 0;
-						//debug
-						discrete_set d;
-						d.insert_element(locID);
-						current_forbidden_state->setDiscreteSet(d);
-						//---
 						do {
 							int locationID, locationID2;
 							discrete_set ds, ds2;
 							ds = current_forbidden_state->getDiscreteSet();
-							//debug
-							for (std::set<int>::iterator it = ds.getDiscreteElements().begin();
-									it != ds.getDiscreteElements().end(); ++it)
-										std::cout << "reach: locid =" << (*it) << std::endl;
+
 							//insert discrete_set in the abstract_symbolic_state
 		//					curr_abs_sym_state->setDiscreteSet(current_forbidden_state->getDiscreteSet());
 							// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
@@ -237,13 +195,12 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 									ds.getDiscreteElements().begin();
 									it != ds.getDiscreteElements().end(); ++it)
 								locationID = (*it); //Assuming only a single element exist in the discrete_set
-							int transID = current_forbidden_state->getTransitionId(); //a)
+							int transID = current_forbidden_state->getTransitionId();
 							//   **********************************************************
 							//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
 							//1) ******************** list_of_symbolic_states ********************
 							list_sym_states.push_front(current_forbidden_state); //pushing the bad symbolic_state first(at the top)
-							list_abstract_sym_states.push_front(
-									curr_abs_sym_state);
+							list_abstract_sym_states.push_front(curr_abs_sym_state);
 							//2) list_of_transition
 							//a) current sym_state only have trans_ID but to retrieve this transition I have to
 							//b) get the parent to this sym_state using getParentPtrSymbolicState and then in
@@ -253,10 +210,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 							// the data member out_going_transitions.
 							//3) length: number of transitions
 							//   **********************************************************
-							if (cc != 0) {
-								std::cout << " --> ";
-							}
-							std::cout << "(" << locationID << ", " << transID << ")";
 							if (current_forbidden_state->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
 							//cout<<"check if parentPtr not NULL\n";
 								current_forbidden_state = searchSymbolic_state(Reachability_Region,
@@ -273,6 +226,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 								 AllOutGoingTrans = object_location.getOut_Going_Transitions();*/
 								transition::ptr temp =
 										object_location->getTransition(transID); //e)
+
+
 								list_transitions.push_front(temp); //pushing the transition in the stack
 								//2) ******************* list_transitions Ends ********************
 							}
@@ -305,7 +260,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(abstractC
 							int transID = current_forbidden_state->getTransitionId();
 							list_sym_states.push_front(current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
 							list_abstract_sym_states.push_front(curr_abs_sym_state);
-							std::cout << " -->  (" << locationID << ", " << transID << ")\n";
 						}
 						saftey_violated = true;
 						ce = abstractCE::ptr(new abstractCE());

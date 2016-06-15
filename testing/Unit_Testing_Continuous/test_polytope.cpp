@@ -12,6 +12,7 @@
 #include "core_system/math/matrix.h"
 
 #include "Utilities/StandardVector.h"
+#include "fstream"
 
 using namespace std;
 
@@ -346,5 +347,15 @@ SUITE(sf_utility_TestSuite) {
 		out << distance;
 		proper << "1";
 		CHECK_EQUAL(proper.str(), out.str());
+
+		// check monotonocity of distance from polytope
+		std::ofstream myfile;
+		myfile.open("./monotoneDistance");
+		for(unsigned int i=0;i<50;i++)
+		{
+			v[0] = i;
+			myfile << v[0] << "  " << P2->point_distance(v) << std::endl;
+		}
+		myfile.close();
 	}
 }

@@ -14,6 +14,7 @@ unsigned int dim;
 unsigned int N;
 hybrid_automata::ptr HA;
 std::vector<int> locIdList;
+std::list<transition::ptr> transList;
 polytope::ptr bad_poly;
 
 //constructor method
@@ -46,8 +47,7 @@ void abstractCE::set_sym_states(std::list<abstract_symbolic_state::ptr> sym) {
 	length = sym_states.size();
 }
 
-abstract_symbolic_state::ptr abstractCE::get_symbolic_state(
-		unsigned int i) const {
+abstract_symbolic_state::ptr abstractCE::get_symbolic_state(unsigned int i) const {
 	assert(0 <= i && i < get_length());
 	unsigned int j = 0;
 	std::list<abstract_symbolic_state::ptr>::const_iterator it =
@@ -89,25 +89,6 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 
 	simulation::ptr s = simulation::ptr(new simulation(x0.size(),1000,D));
 	std::vector<double> y;
-	// debug purpose
-//	std::string filename = "./test_sim.o";
-//	s->set_outfile(filename);
-//	s->set_out_dimension(0);
-//	std::cout << "initial simulation point: " << x0[0] << ", " << x0[1] << ", " << x0[2] << std::endl;
-/*	std::cout << "Dynamics A:\n";
-	math::matrix<double> A = D.MatrixA;
-	for(unsigned int i=0;i<D.MatrixA.size1(); i++){
-		for(unsigned int j=0;j<D.MatrixA.size2(); j++)
-			std::cout << " " << A(i,j);
-		std::cout << "\n";
-	}
-	std::cout << "Dynamics C: ";
-	for(unsigned int i=0;i<D.C.size(); i++)
-		std::cout << " " << D.C[i] << std::endl;*/
-
-//	std::cout << "sampled dwell time for simulation:" << time << std::endl;
-//debug purpose ends
-
 	y = s->simulate(x0, time);
 	assert(y.size() == dim);
 	return y;
@@ -127,6 +108,8 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	std::vector<std::vector<double> > y(N-1);
 	std::vector<double> trace_end_pt(dim,0);
 	double sq_sum = 0;
+//	std::list<transition::ptr>::iterator T_iter = transList.begin();
+
 	for (unsigned int i = 0; i < N-1; i++) {
 		std::vector<double> v(dim, 0);
 		for (unsigned int j = 0; j < dim; j++) {
@@ -135,18 +118,26 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		try{
 			int loc_index = locIdList[i];
 			y[i] = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + i]);
-
+//			transition::ptr T = *(T_iter);
 			std::list<transition::ptr>& trans = HA->getLocation(loc_index)->getOut_Going_Transitions();
 			transition::ptr T = *(trans.begin());
 			// assignment of the form: Ax + b
 			Assign R = T->getAssignT();
-			assert(y[i].size() == R.Map.size2());
-			std::vector<double> res(y[i].size());
-			R.Map.mult_vector(y[i],res);
-			// add vectors
-			assert(y[i].size() == R.b.size());
-			for(unsigned int j=0;j<res.size();j++)
-				y[i][j] = res[j] + R.b[j];
+			//guard as a polytope
+			polytope::ptr g = T->getGaurd();
+			// If traj end point inside guard, then apply map.
+	//		if(g->point_is_inside(y[i]))
+	//		{
+				assert(y[i].size() == R.Map.size2());
+				std::vector<double> res(y[i].size());
+				R.Map.mult_vector(y[i],res);
+				// add vectors
+				assert(y[i].size() == R.b.size());
+				for(unsigned int j=0;j<res.size();j++)
+					y[i][j] = res[j] + R.b[j];
+	//		}
+	//		if(T_iter!=transList.end())
+	//			T_iter.operator ++();
 
 		}catch(std::exception& e)
 		{
@@ -164,30 +155,30 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 
 	// Add the distance of the last trace end point to the forbidden polytope
 
-//	std::vector<double> v(dim, 0);
-//	for (unsigned int j = 0; j < dim; j++) {
-//		v[j] = x[ (N-1) * dim + j];
-//	}
-
-//	int loc_index = locIdList[N-1];
-//	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + N-1]);
-	// compute the distance of this endpoint with the forbidden polytope
-//	sum+= bad_poly->point_distance(trace_end_pt);
-
-
-
-	if (!grad.empty()) {
-		for(unsigned int i=0;i<dim;i++)
-			grad[i] = 0;
-
-		for(unsigned int i=1;i<N;i++){
-			for(unsigned int j=0;j<N;j++){
-				grad[i*dim+j] = (0.5/sum) * 2 * (x[i*dim+j] - y[i-1][j]);
-			}
-		}
+	std::vector<double> v(dim, 0);
+	for (unsigned int j = 0; j < dim; j++) {
+		v[j] = x[ (N-1) * dim + j];
 	}
-	std::cout << "current sum = " << sum << std::endl;
 
+	int loc_index = locIdList[N-1];
+	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + N-1]);
+	// compute the distance of this endpoint with the forbidden polytope
+//	std::cout << "returned poly distance=" << bad_poly->point_distance(trace_end_pt) << std::endl;
+	sum+= bad_poly->point_distance(trace_end_pt);
+
+
+//
+//	if (!grad.empty()) {
+//		for(unsigned int i=0;i<dim;i++)
+//			grad[i] = 0;
+//
+//		for(unsigned int i=1;i<N;i++){
+//			for(unsigned int j=0;j<N;j++){
+//				grad[i*dim+j] = (0.5/sum) * 2 * (x[i*dim+j] - y[i-1][j]);
+//			}
+//		}
+//	}
+	std::cout << "current sum = " << sum << std::endl;
 	return sum;
 }
 
@@ -281,6 +272,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	dim = S->getContinuousSet()->getSystemDimension();
 	N = get_length(); // the length of the counter example
 	HA = this->get_automaton();
+	transList = this->get_CE_transitions();
 	bad_poly = this->forbid_poly;
 	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
 	// initialize the global locIdList
@@ -323,7 +315,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	myopt.set_lower_bounds(lb);
 //	myopt.set_upper_bounds(ub);
 
-	myopt.set_stopval(0.000001);
+	myopt.set_stopval(0.0001);
 //	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc, NULL);
@@ -400,7 +392,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 		B1[i].bound = 0;
 		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
 		// We may choose to take the max-min as the initial dwell time
-		x[N * dim + i] = (max + min)/2;
+		x[N * dim + i] = (max - min)/2;
 	}
 std::cout << "Computed initial dwell times and added constraints over them\n";
 
