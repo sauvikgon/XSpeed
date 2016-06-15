@@ -372,10 +372,21 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 	boundConstriant B[N],B1[N];
 
+	std::list<transition::ptr>::iterator it = transList.begin();
+	transition::ptr T;
 	double max,min;
 	for (i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
+		if(i==N-1){
+			/* If last abst sym state, then take time projection of flowpipe \cap bad_poly */
+			P=P->GetPolytope_Intersection(bad_poly);
+		}
+		else{
+			/* Take time projection of flowpipe \cap transition guard */
+			T = *(it);
+			P=P->GetPolytope_Intersection(T->getGaurd());
+		}
 //		To get a point from the polytope, we create a random obj function and
 //		solve the lp. The solution point is taken as an initial value.
 
@@ -396,6 +407,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
 		// We may choose to take the max-min as the initial dwell time
 		x[N * dim + i] = (max - min)/2;
+		if(it!=transList.end())
+			it++;
 	}
 std::cout << "Computed initial dwell times and added constraints over them\n";
 
