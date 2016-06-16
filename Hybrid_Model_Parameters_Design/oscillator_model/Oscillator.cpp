@@ -13,7 +13,7 @@
  * Reference for model is https://ths.rwth-aachen.de/research/projects/hypro/filtered-oscillator/
  *
  */
-void SetParametersOscillator(hybrid_automata& Hybrid_Automata, initial_state::ptr& init_state,
+void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;

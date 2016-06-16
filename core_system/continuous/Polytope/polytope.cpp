@@ -542,7 +542,6 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			varname = *tok_iter;
 			tok_iter++;
 			i = p->get_index(varname);
-			cout<<"   i in <= = "<<i;
 			std::vector<double> cons(p->map_size(),0);
 			cons[i] = 1;
 			double bound = std::atof((*tok_iter).c_str());
@@ -554,7 +553,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			tok_iter = tokens.begin();
 			varname = *tok_iter;
 			tok_iter++;
-			i = p->get_index(varname);		cout<<"   i in >= = "<<i;
+			i = p->get_index(varname);
 			std::vector<double> cons(p->map_size(),0);
 			cons[i] = -1;
 			double bound = std::atof((*tok_iter).c_str());

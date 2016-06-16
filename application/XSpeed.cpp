@@ -416,7 +416,8 @@ int main(int argc, char *argv[]) {
 
 		user_options.set_first_plot_dimension(x1);
 		user_options.set_second_plot_dimension(x2);
-		forbidden_set.second->print2file("./bad_poly",x1,x2);
+		if(!user_options.get_forbidden_state().empty())
+			forbidden_set.second->print2file("./bad_poly",x1,x2);
 
 	}
 

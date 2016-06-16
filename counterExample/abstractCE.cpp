@@ -120,8 +120,6 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 			int loc_index = locIdList[i];
 			y[i] = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + i]);
 			transition::ptr T = *(T_iter);
-//			std::list<transition::ptr>& trans = HA->getLocation(loc_index)->getOut_Going_Transitions();
-//			transition::ptr T = *(trans.begin());
 			// assignment of the form: Ax + b
 			Assign R = T->getAssignT();
 			//guard as a polytope
@@ -265,7 +263,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	 counter example
 
 
-//	 1. Get the dimensionality of the optimization problem by
+//	 1. Get the dimension of the optimization problem by
 //	 getting the dimension of the continuous set of the abstract counter example
 
 
@@ -294,8 +292,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 	unsigned int optD = N * dim + N;
 	std::cout << "nlopt problem dimension = " << optD << std::endl;
-	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
-//	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
+//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 
 //	std::vector<double> lb(2);

@@ -79,7 +79,7 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 		//SetRotation_Navtimed_Parameters(ha, init_state,reach_parameters);
 	}
 	if (HybridSystem_Model_Type == OSCILLATOR) {		
-		SetParametersOscillator(ha, init_state,reach_parameters);
+		SetOscillatorParameters(ha,init_state,reach_parameters);
 	}
 
 	if (HybridSystem_Model_Type == 14) {
