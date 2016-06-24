@@ -93,20 +93,15 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 	assert(y.size() == dim);
 	return y;
 }
+/*
+ * Computes the cost of the objective function on the sample x
+ */
+double compute_cost(const std::vector<double> &x){
 
-double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
-		void *my_func_data) {
-
-	 // 1. Get the N start vectors and dwell times from x and call the simulation routine
-	 // 2. Get the N end points of the simulation trace, say, y[i].
-	 // 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
-	 //
-	double sum = 0; // Stores the sum of all Euclidean distances of the end points.
-//	std::vector<double> y(dim,0);
-
-	// Computes the L2 norm or Euclidean distances between the trace end points.
 	std::vector<std::vector<double> > y(N-1);
-	std::vector<double> trace_end_pt(dim,0);
+	for(unsigned int j=0;j<N-1;j++)
+		y[j] = std::vector<double>(dim,0);
+
 	double sq_sum = 0;
 
 	std::list<transition::ptr>::iterator T_iter = transList.begin();
@@ -116,32 +111,31 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		for (unsigned int j = 0; j < dim; j++) {
 			v[j] = x[i * dim + j];
 		}
-		try{
-			int loc_index = locIdList[i];
-			y[i] = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + i]);
-			transition::ptr T = *(T_iter);
-			// assignment of the form: Ax + b
-			Assign R = T->getAssignT();
-			//guard as a polytope
-			polytope::ptr g = T->getGaurd();
-			// If traj end point inside guard, then apply map.
-			if(g->point_is_inside(y[i]))
-			{
-				assert(y[i].size() == R.Map.size2());
-				std::vector<double> res(y[i].size());
-				R.Map.mult_vector(y[i],res);
-				// add vectors
-				assert(y[i].size() == R.b.size());
-				for(unsigned int j=0;j<res.size();j++)
-					y[i][j] = res[j] + R.b[j];
-			}
-			if(T_iter!=transList.end())
-				T_iter.operator ++();
 
-		}catch(std::exception& e)
+		int loc_index = locIdList[i];
+		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+		assert(d.C.size() == dim);
+
+		y[i] = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + i]);
+		transition::ptr T = *(T_iter);
+		// assignment of the form: Ax + b
+		Assign R = T->getAssignT();
+		//guard as a polytope
+		polytope::ptr g = T->getGaurd();
+		// If traj end point inside guard, then apply map.
+		if(g->point_is_inside(y[i]))
 		{
-			// Adds a high penalty to the objective function
+			assert(y[i].size() == R.Map.size2());
+			std::vector<double> res(y[i].size());
+			R.Map.mult_vector(y[i],res);
+			// add vectors
+			assert(y[i].size() == R.b.size());
+			for(unsigned int j=0;j<res.size();j++)
+				y[i][j] = res[j] + R.b[j];
 		}
+		if(T_iter!=transList.end())
+			T_iter.operator ++();
+
 		std::vector<double> next_start(dim,0); // current jump start point
 		for(unsigned int j=0;j<dim;j++)
 			next_start[j] = x[(i+1)*dim + j];
@@ -150,36 +144,83 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 			sq_sum += (y[i][j] - next_start[j]) * (y[i][j] - next_start[j]);
 		}
 	}
-	sum = math::sqrt(sq_sum);
-
-	// Add the distance of the last trace end point to the forbidden polytope
-
 	std::vector<double> v(dim, 0);
 	for (unsigned int j = 0; j < dim; j++) {
 		v[j] = x[ (N-1) * dim + j];
 	}
-
+	std::vector<double> trace_end_pt(dim,0);
 	int loc_index = locIdList[N-1];
 	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index)->getSystem_Dynamics(), x[N * dim + N-1]);
 	// compute the distance of this endpoint with the forbidden polytope
-//	std::cout << "returned poly distance=" << bad_poly->point_distance(trace_end_pt) << std::endl;
-	sum+= bad_poly->point_distance(trace_end_pt);
+	sq_sum+= bad_poly->point_distance(trace_end_pt);
 
+	return sq_sum;
 
-//
-//	if (!grad.empty()) {
-//		for(unsigned int i=0;i<dim;i++)
-//			grad[i] = 0;
-//
-//		for(unsigned int i=1;i<N;i++){
-//			for(unsigned int j=0;j<N;j++){
-//				grad[i*dim+j] = (0.5/sum) * 2 * (x[i*dim+j] - y[i-1][j]);
-//			}
-//		}
-//	}
-	std::cout << "current sum = " << sum << std::endl;
-	return sum;
 }
+double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
+		void *my_func_data) {
+
+	// 1. Get the N start vectors and dwell times from x and call the simulation routine
+	// 2. Get the N end points of the simulation trace, say, y[i].
+	// 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
+	// Computes the L2 norm or Euclidean distances between the trace end points.
+/*
+	if (!grad.empty()) {
+		for(unsigned int i=0;i<dim;i++)
+			grad[i] = 0;
+
+		for(unsigned int i=0;i<N;i++){
+			for(unsigned int j=0;j<dim;j++){
+				if(i==0){
+					grad[i*dim+j] = 2 * (y[i][j] - x[(i+1)*dim+j]);
+				}
+				else if(i>0 && i<N-1){
+					Dynamics d = HA->getLocation(locIdList[i])->getSystem_Dynamics();
+					Dynamics d1 = HA->getLocation(locIdList[i-1])->getSystem_Dynamics();
+					grad[i*dim+j] = 4*x[i*dim+j] - 2*x[(i-1)*dim+j] -2*d1.C[j]*x[N*dim+i-1] +2*d.C[j]*x[N*dim+i] -2*x[(i+1)*dim+j];
+				}
+				else{
+					Dynamics d = HA->getLocation(locIdList[i-1])->getSystem_Dynamics();
+					grad[i*dim+j] = 2*x[i*dim+j] - 2*y[i-1][j];
+				}
+			}
+			if(i!=N-1){
+				Dynamics d = HA->getLocation(locIdList[i])->getSystem_Dynamics();
+				double k1=0,k2=0,k3=0;
+				for(unsigned int j=0;j<N;j++){
+					k1 += d.C[j]* d.C[j];
+					k2 += x[i*dim+j] * d.C[j];
+					k3 += x[(i+1)*dim+j] * d.C[j];
+				}
+				grad[N*dim + i] = 2*x[N*dim+i]*k1 + 2*k2 - 2*k3;
+			}
+			else{
+				grad[N*dim+i] = 0;
+			}
+		}
+	} */
+
+	double cost = compute_cost(x);
+
+	// This is an alternate version of computing gradient numerically
+	if (!grad.empty()) {
+
+		std::vector<double> xh(x.size(),0);
+		xh = x;
+		double h = 0.0001;
+		double cost_h;
+		for(unsigned int i=0;i<x.size();i++){
+			xh[i] = x[i] + h;
+			cost_h = compute_cost(xh);
+			grad[i] = (cost_h - cost)/h;
+			xh = x;
+		}
+	}
+
+	std::cout << "current cost = " << cost << std::endl;
+	return cost;
+}
+
 
 /** Function to define a constraint over the optimization problem */
 
@@ -202,6 +243,7 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 //	std::cout << "value of the symbolic state index in myconstraint :" << i << std::endl;
 //	unsigned int row_index = d->row_index;
 
+	assert(id>=0 && id<N);
 	if (!grad.empty()) {
 		for(unsigned int i=0;i<x.size();i++){
 			grad[i] = 0 ;
@@ -232,6 +274,8 @@ double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad
 			grad[i] = 0 ;
 		}
 	}
+
+	assert(d->var_index>=N*dim && d->var_index<N*dim+N);
 
 	if(d->is_ge){
 //		std::cout << "lower bound constraint on time with bound = " << d->bound << std::endl;
@@ -292,14 +336,13 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 	unsigned int optD = N * dim + N;
 	std::cout << "nlopt problem dimension = " << optD << std::endl;
-//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
-	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
+	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+//	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 
 //	std::vector<double> lb(2);
 //	lb[0] = 0.1;
 //	lb[1] = 2;
-
 //	std::vector<double> lb(optD);
 //	std::vector<double> ub(optD);
 //	for(unsigned int i=0;i<N*dim;i++){
@@ -356,7 +399,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 
 
-//	We assume that the time variable is names as 't' in the model.
+//	We assume that the time variable is named as 't' in the model.
 //	We find out the min,max components of the time variable
 
 	unsigned int t_index =
@@ -377,11 +420,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
 		if(i==N-1){
-			/* If last abst sym state, then take time projection of flowpipe \cap bad_poly */
+			// If last abst sym state, then take time projection of flowpipe \cap bad_poly
 			P=P->GetPolytope_Intersection(bad_poly);
 		}
 		else{
-			/* Take time projection of flowpipe \cap transition guard */
+			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
 			P=P->GetPolytope_Intersection(T->getGaurd());
 		}
@@ -408,7 +451,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 		if(it!=transList.end())
 			it++;
 	}
-std::cout << "Computed initial dwell times and added constraints over them\n";
+	std::cout << "Computed initial dwell times and added constraints over them\n";
 
 //	 todo: Constraints of the optimization problem is to be added
 //	 nlopt expects the constraints of the form constraint(x) <=0
@@ -420,7 +463,12 @@ std::cout << "Computed initial dwell times and added constraints over them\n";
 	math::matrix<double> A;
 	math::vector<double> b;
 
-	polyConstraints I[2*dim*N];
+
+	unsigned int size=0;
+	for(unsigned int i=0;i<N;i++){
+		size += get_symbolic_state(i)->getInitialSet()->getCoeffMatrix().size1();
+	}
+	polyConstraints I[size];
 	unsigned int index = 0;
 	for (unsigned int i = 0; i < N; i++) {
 		C = get_symbolic_state(i)->getInitialSet();
@@ -433,7 +481,7 @@ std::cout << "Computed initial dwell times and added constraints over them\n";
 		assert(C->getInEqualitySign() == 1);
 		assert(A.size2() == dim);
 		assert(b.size() == A.size1());
-		assert(2*dim*N > index);
+		assert(size > index);
 
 		for (unsigned int j = 0; j < A.size1(); j++) {
 			I[index].sstate_index = i;
@@ -449,7 +497,7 @@ std::cout << "Computed initial dwell times and added constraints over them\n";
 
 	}
 	std::cout << "added constraints to the nlopt solver\n";
-// 		todo: Constraints over dwell time to be added
+// 	todo: Constraints over dwell time to be added
 
 //	Create object of concreteCE from the result of nlopt
 
