@@ -629,7 +629,11 @@ std::list<symbolic_states::ptr>::iterator it;
 		int index = 0;
 		ce->plot(user_options.get_first_plot_dimension(),
 				user_options.get_second_plot_dimension());
-		concreteCE::ptr bad_trace = ce->gen_concreteCE(0.1);
+		concreteCE::ptr bad_trace = ce->get_validated_CE(0.001);
+		if(bad_trace->is_empty()){
+			std::cout << "No real counter example found\n";
+			return 0;
+		}
 		bad_trace->set_automaton(ce->get_automaton());
 		std::string tracefile = "./bad_trace.o";
 		bad_trace->plot_ce(tracefile,user_options.get_first_plot_dimension(), user_options.get_second_plot_dimension());

@@ -15,6 +15,10 @@
 #include <vector>
 #include "counterExample/simulation.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
+
+
+struct violating_CE;
+
 class concreteCE {
 
 public:
@@ -66,10 +70,23 @@ public:
 	void push_back(traj_segment t_seg){
 		T.push_back(t_seg);
 	}
+	bool is_empty(){
+		if(T.size() == 0)
+			return true;
+		else
+			return false;
+	}
 	/**
 	 * Plots the counter example trajectory to a file passed as parameter.
 	 */
 	void plot_ce(std::string filename, unsigned int x1, unsigned int x2);
+
+	/*
+	 * Validates the trajectory for invariant satisfaction.
+	 * Returns the violating CE if non-valid, otherwise returns the
+	 * violating_CE with the flag element of the object as true.
+	 */
+	violating_CE validate();
 
 	concreteCE();
 	virtual ~concreteCE();
@@ -89,4 +106,13 @@ private:
 
 };
 
+/*
+ * Structure to hold the information about the violating concreteCE
+ */
+
+struct violating_CE
+{
+	bool flag;
+	concreteCE::traj_segment t;
+};
 #endif /* CONCRETECE_H_ */

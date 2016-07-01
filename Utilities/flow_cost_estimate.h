@@ -15,14 +15,14 @@
 
 /**
  * Returns an estimated time after which the flow dynamics
- * taken the flow outside the invariant, starting from the
+ * takes the flow outside the invariant, starting from the
  * initial states X0
  */
 double flow_cost_estimate(polytope::ptr X0, polytope::ptr I, Dynamics d, double time_horizon, double fine_time_step);
 
 /*
  * Returns an estimated time after which the flow dynamics
- * taken the flow outside the invariant, starting from the
+ * takes the flow outside the invariant, starting from the
  * initial states X0.
  * It is more expensive than flow_cost_estimate(...) as more simulations are generated one for each
  * invariant face.

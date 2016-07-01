@@ -16,6 +16,7 @@ hybrid_automata::ptr HA;
 std::vector<int> locIdList;
 std::list<transition::ptr> transList;
 polytope::ptr bad_poly;
+concreteCE::trajectory refinements;
 
 //constructor method
 abstractCE::abstractCE(std::list<abstract_symbolic_state::ptr> s_states,
@@ -154,6 +155,21 @@ double compute_cost(const std::vector<double> &x){
 	// compute the distance of this endpoint with the forbidden polytope
 	sq_sum+= bad_poly->point_distance(trace_end_pt);
 
+	// add the refinements to the cost function
+	for(concreteCE::trajectory::iterator it = refinements.begin(); it!=refinements.end(); it++){
+		concreteCE::traj_segment t = *it;
+		unsigned int i=0;
+		for(i=0;i<N;i++){ // get the index of the location
+			if(locIdList[i] == t.first)
+				break;
+		}
+		for (unsigned int j = 0; j < dim; j++) {
+			v[j] = x[ i * dim + j];
+		}
+		trace_end_pt = simulate_trajectory(v, HA->getLocation(t.first)->getSystem_Dynamics(),t.second.second);
+		sq_sum += HA->getLocation(t.first)->getInvariant()->point_distance(trace_end_pt);
+	}
+
 	return sq_sum;
 
 }
@@ -207,7 +223,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 
 		std::vector<double> xh(x.size(),0);
 		xh = x;
-		double h = 0.0001;
+		double h = 1e-12;
 		double cost_h;
 		for(unsigned int i=0;i<x.size();i++){
 			xh[i] = x[i] + h;
@@ -217,7 +233,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		}
 	}
 
-	std::cout << "current cost = " << cost << std::endl;
+//	std::cout << "current cost = " << cost << std::endl;
 	return cost;
 }
 
@@ -230,7 +246,7 @@ struct polyConstraints {
 	unsigned int sstate_index;
 };
 
-struct boundConstriant{
+struct boundConstriant {
 	double bound;
 	unsigned int var_index;
 	bool is_ge; // to mark if bound is a >= constraint
@@ -358,7 +374,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	myopt.set_upper_bounds(ub);
 
 
-	myopt.set_stopval(0.0001);
+	myopt.set_stopval(1e-12);
 
 //	myopt.set_xtol_rel(1e-4);
 
@@ -366,15 +382,14 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	//myopt.set_initial_step(0.001);
 
 	//Set Initial value to the optimization problem
-	std::vector<double> x(optD);
-	unsigned int i, j;
+	std::vector<double> x(optD, 0);
 	polytope::ptr P;
 	// A random objective function created for lp solving
 
 	std::vector<double> obj(dim, 0);
 	obj[0] = 1;
 	std::vector<double> v(dim);
-
+/*
 	for (i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
 		S = get_symbolic_state(i);
@@ -396,7 +411,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	std::cout << "generated initial points\n";
 //	Set initial value to the time variables
 //	Restrict dwell time within the projections of C_i in time variable
-
+*/
 
 
 //	We assume that the time variable is named as 't' in the model.
@@ -416,7 +431,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
 	double max,min;
-	for (i = 0; i < N; i++) {
+	for (unsigned int i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		P = S->getContinuousSet();
 		if(i==N-1){
@@ -503,12 +518,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 	double minf;
 	try {
-		//debug print
-		std::cout << "Printing x before calling nlopt optimize\n" << std::endl;
-		for(unsigned int i=0;i<optD;i++)
-			std::cout << x[i] << " ";
-		 std::cout << std::endl;
-		 nlopt::result result = myopt.optimize(x, minf);
+
+		nlopt::result result = myopt.optimize(x, minf);
 
 		if (result < 0)
 			throw "abstractCE: gen_concreteCE: NLOpt failed\n";
@@ -516,13 +527,14 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
-std::cout << "nlopt returned min : " << minf << "\n";
-//	if (math::abs(minf) > tolerance) {
-//		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
-//		return cexample;
-//	} else {
-		// create a concrete counter example object
-		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
+	std::cout << "nlopt returned min : " << minf << "\n";
+	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
+	cexample->set_automaton(HA);
+	if (math::abs(minf) > tolerance) {
+		std::cout << "Obtained minimum less than " << tolerance << std::endl;
+		return cexample;
+	} else {
+
 		// one trajectory per symbolic state to be added in the concreteCE
 		for (unsigned int i = 0; i < N; i++) {
 			// create the sample
@@ -544,261 +556,25 @@ std::cout << "nlopt returned min : " << minf << "\n";
 			traj.second = s;
 			cexample->push_back(traj);
 		}
-		return cexample;
-//	}
+	}
+
+	return cexample;
 }
 
-// This constraint function s for debugging only
-double myDbgBoundConstraint(const std::vector<double> &x, std::vector<double> &grad,
-		void *data){
+concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
+{
+	refinements = concreteCE::trajectory();
+	// call to genCE func with no refining trajectory
+	concreteCE::ptr cexample = gen_concreteCE(tolerance);
+	concreteCE::traj_segment t;
+	violating_CE v;
+	v = cexample->validate();
 
-	boundConstriant *d = reinterpret_cast<boundConstriant *>(data);
-	if (!grad.empty()) {
-		// todo: gradient to be added later
-		for(unsigned int i=0;i<x.size();i++){
-			grad[i] = 0 ;
-		}
+	while(!v.flag){
+		std::cout << "Trajectory validation failed\n";
+		refinements.push_back(v.t); // refining trajectory added
+		cexample = gen_concreteCE(tolerance);
+		v = cexample->validate();
 	}
-
-	if(d->is_ge){
-//		std::cout << "lower bound constraint on time with bound = " << d->bound << std::endl;
-		if(!grad.empty())
-			grad[0] = -1;
-		return (-1*x[0] + d->bound);
-	}
-	else{
-//		std::cout << "upper bound constraint on time with bound = " << d->bound << std::endl;
-		if(!grad.empty())
-			grad[d->var_index] = 1;
-		return (x[0] - d->bound);
-	}
+	return cexample;
 }
-/*
-// This function is for debugging
-double myDbgobjfunc(const std::vector<double> &x, std::vector<double> &grad,
-		void *my_func_data) {
-	double sum = 0; // Stores the sum of all Euclidean distances of the end points.
-	std::vector<double> trace_end_pt(dim,0);
-	std::vector<double> v(dim, 0);
-	v[0] = x[0];
-	v[1] = x[1];
-	v[2] = 0.0;
-
-
-	int loc_index = locIdList[0];
-	trace_end_pt = simulate_trajectory(v, HA->getLocation(loc_index).getSystem_Dynamics(), x[3]);
-	//compute the Euclidean distance between the next start point and the simulated end point
-	std::vector<double> exp_endpt(dim,0);
-	exp_endpt[0] = 0;
-	exp_endpt[1] = -4.54;
-	exp_endpt[2] = 4.54;
-
-	double comp_sum;
-	for (unsigned int j = 0; j < dim; j++) {
-			comp_sum = 0;
-//			std::cout << "trace end point of component " << j << " = " << trace_end_pt[j] << std::endl;
-			comp_sum = (trace_end_pt[j] - exp_endpt[j]) * (trace_end_pt[j] - exp_endpt[j]);
-//			std::cout << "Squared sum of component " << j << " = " << comp_sum << std::endl;
-			sum += comp_sum;
-	}
-	sum = math::sqrt(sum);
-
-	std::cout << "current sum = " << sum << std::endl;
-
-	return sum;
-}
-// this gen concrete ce is for debug purpose only
-concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
-
-//	 Generate an nlopt object with the constraints defined by the Abstract
-//	 counter example
-
-
-//	 1. Get the dimensionality of the optimization problem by
-//	 getting the dimension of the continuous set of the abstract counter example
-
-	abstract_symbolic_state::ptr S = get_first_symbolic_state();
-	dim = S->getContinuousSet()->getSystemDimension();
-	N = sym_states.size(); // the length of the counter example
-	HA = this->get_automaton();
-	bad_poly = this->forbid_poly;
-//	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
-	// initialize the global locIdList
-	locIdList.resize(N);
-
-	std::set<int> d;
-	for(unsigned int i=0;i<N;i++){
-		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
-		locIdList[i] = *(d.begin());
-	}
-	unsigned int optD = N*dim+N;
-	std::vector<double> x(optD);
-
-
-//	 2. The dimensionality of the opt problem is N vectors, one starting point
-//	 for each of the abstract sym state of the CE + N dwell times. Moreover,
-//	 each starting vector is of dimension dim. Therefore, the total number of
-//	 variables of the optimization problem are dim*N + N
-
-	std::cout << "nlopt problem dimension = " << optD << std::endl;
-	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
-
-	myopt.set_min_objective(myDbgobjfunc, NULL);
-
-	//Set Initial value to the optimization problem
-	unsigned int i, j;
-	polytope::ptr P;
-	// A random objective function created for lp solving
-
-	std::vector<double> obj(dim, 0);
-	obj[0] = 1;
-	std::vector<double> v(dim);
-
-	for (i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
-	{
-		S = get_symbolic_state(i);
-		P = S->getInitialSet();
-//		To get a point from the polytope, we create a random obj function and
-//		solve the lp. The solution point is taken as an initial value.
-
-		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-				P->getInEqualitySign());
-		lp.Compute_LLP(obj);
-		v = lp.get_sv();
-
-		for (j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
-		{
-			x[i * dim + j] = v[j];
-		}
-	}
-	x[2] = 0; // set the initial time point to 0.
-
-	std::cout << "generated initial points\n";
-
-
-//	We assume that the time variable is names as 't' in the model.
-//	We find out the min,max components of the time variable
-
-	unsigned int t_index =
-		get_first_symbolic_state()->getContinuousSet()->get_index("t");
-	std::cout << "Index of time variable:" << t_index << std::endl;
-	assert((t_index >= 0) && (t_index < dim));
-
-	std::vector<double> dmin(dim, 0), dmax(dim, 0);
-	dmax[t_index] = 1;
-	dmin[t_index] = -1;
-
-	boundConstriant B[N],B1[N];
-
-	double max,min;
-	for (i = 0; i < N; i++) {
-		S = get_symbolic_state(i);
-		P = S->getContinuousSet();
-//		To get a point from the polytope, we create a random obj function and
-//		solve the lp. The solution point is taken as an initial value.
-
-		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-				P->getInEqualitySign());
-		max = lp.Compute_LLP(dmax);
-		min = -1 * lp.Compute_LLP(dmin);
-		// we add the bounds as constraints in the nlopt
-
-		B[i].var_index = N*dim + i;
-		B[i].bound = max - min;
-		B[i].is_ge = false;
-		myopt.add_inequality_constraint(myBoundConstraint, &B[i], 1e-8);
-		B1[i].var_index = B[i].var_index;
-		B1[i].is_ge=true;
-		B1[i].bound = 0;
-		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
-		// We may choose to take the max-min as the initial dwell time
-		x[N*dim + i] = (max + min)/2;
-	}
-	std::cout << "Max dwell time = " << max << ", Min dwell time=" << min << ", initial dwell time=" << x[3] << std::endl;
-
-//	Constraints over C_i added to the optimization problem
-
-	polytope::ptr C;
-	math::matrix<double> A;
-	math::vector<double> b;
-
-	polyConstraints I[2*dim*N];
-	unsigned int index = 0;
-	for (unsigned int i = 0; i < N; i++) {
-		C = get_symbolic_state(i)->getInitialSet();
-		C->print2file("./InitPoly",2,0);
-		A = C->getCoeffMatrix();
-		b = C->getColumnVector();
-
-// 		We assume that the polytope is expressed as Ax<=b
-
-		assert(C->getInEqualitySign() == 1);
-		assert(A.size2() == dim);
-		assert(b.size() == A.size1());
-
-		for (unsigned int j = 0; j < A.size1(); j++) {
-			assert(index < 2*dim*N);
-			I[index].sstate_index = i;
-			I[index].a.resize(A.size2());
-
-	//		std::cout << "cons vector of initpoly:\n";
-			for(unsigned int k=0;k<dim;k++){
-				I[index].a[k] = A(j,k);
-	//			std::cout << " "<< I[index].a[k] << std::endl;
-			}
-			I[index].b = b[j];
-	//		std::cout << "\ncons bound of initpoly:\n";
-	//		std::cout << " " << I[index].b << std::endl;
-			myopt.add_inequality_constraint(myconstraint, &I[index], 1e-8);
-			index++;
-		}
-	}
-	std::cout << "added constraints to the nlopt solver\n";
-
-	double minf;
-	try {
-		//debug print
-		std::cout << "Printing x before calling nlopt optimize\n" << std::endl;
-		for(unsigned int i=0;i<optD;i++)
-			std::cout << x[i] << " ";
-		 std::cout << std::endl;
-		 nlopt::result result = myopt.optimize(x, minf);
-
-		if (result < 0)
-			throw "abstractCE: gen_concreteCE: NLOpt failed\n";
-
-	} catch (std::exception& e) {
-		std::cout << e.what() << std::endl;
-	}
-std::cout << "nlopt returned min : " << minf << "\n";
-//	if (math::abs(minf) > tolerance) {
-//		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
-//		return cexample;
-//	} else {
-		// create a concrete counter example object
-		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
-		// one trajectory per symbolic state to be added in the concreteCE
-		for (unsigned int i = 0; i < N; i++) {
-			// create the sample
-			concreteCE::sample s;
-			std::set<int>::iterator dset_iter =
-					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
-			unsigned int locId = *dset_iter;
-
-			std::vector<double> y(dim);
-			y[0]=x[0];
-			y[1]=x[1];
-			y[2] =x[2];
-			double time = x[3];
-			s.first = y;
-			s.second = time;
-			concreteCE::traj_segment traj;
-			traj.first = locId;
-			traj.second = s;
-			cexample->push_back(traj);
-		}
-		return cexample;
-}
-*/

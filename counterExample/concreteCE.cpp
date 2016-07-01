@@ -66,4 +66,41 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 		sim->simulate(simulation_sample.first, simulation_sample.second);
 	}
 	myfile.close();
+
+	//debug code
+	std::string invfile = "./invfile";
+	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
+		locId = seg.first;
+		ha->getLocation(locId)->getInvariant()->print2file(invfile,x1,x2);
+	}
+	// end of debug code
+}
+violating_CE concreteCE::validate()
+{
+	traj_segment seg;
+	unsigned int locId;
+	sample simulation_sample;
+	simulation::ptr sim;
+	bound_sim b;
+
+	violating_CE v;
+	v.flag = true;
+
+	double steps = 100; // defines the precision of validation
+	bool flag;
+	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
+		seg = *it;
+		locId = seg.first;
+		simulation_sample = seg.second;
+		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
+		b = sim->bounded_simulation(simulation_sample.first, simulation_sample.second, ha->getLocation(locId)->getInvariant());
+		if(b.cross_over_time!=-1){ // meaning there is a violation of invariant
+			v.flag = false;
+			v.t.first = locId;
+			v.t.second = seg.second;
+			v.t.second.second = b.cross_over_time;
+			return v;
+		}
+	}
+	return v;
 }

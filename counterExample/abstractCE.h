@@ -34,6 +34,7 @@ extern hybrid_automata::ptr HA;
 extern std::vector<int> locIdList;
 extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
+extern concreteCE::trajectory refinements; // a list of trajectories to refine the search and obtained a validated trajectory
 
 
 class abstractCE
@@ -106,6 +107,10 @@ public:
 	hybrid_automata::ptr get_automaton(){
 		return H;
 	}
+	/**
+	 * returns a validated trace, a trace that satisfies the invariant
+	 */
+	concreteCE::ptr get_validated_CE(double tolerance);
 	/**
 	 * Returns an instance of the concrete counter-example from the abstract.
 	 */

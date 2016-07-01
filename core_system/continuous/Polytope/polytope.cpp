@@ -467,14 +467,19 @@ bool polytope::point_is_inside(std::vector<double> v)
 	double sum;
 	assert(getInEqualitySign() == 1);
 
+
 	for(unsigned int i=0;i<M.size1();i++)
 	{
 		sum = 0;
 		for(unsigned int j=0;j<M.size2();j++){
 			sum+= M(i,j)*v[j];
 		}
-		if(sum > C[i])
+		if( (sum - C[i]) > 1e-4){
+	//			std::cout << "sum=" << sum  << "and b =" << C[i] <<  std::endl;
+	//			std::cout << "Difference between sum and b =" << sum - C[i] << std::endl;
+	//			std::cout << "0 comparison = " << 1e-6 << std::endl;
 			return false;
+		}
 	}
 	return true;
 }
@@ -484,7 +489,7 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 	assert(dim1 < this->map_size() && dim2 < this->map_size());
 	assert(dim1 >= 0 && dim2 >= 0);
 	std::ofstream myfile;
-	myfile.open(fname.c_str());
+	myfile.open(fname.c_str(), ofstream::app);
 	math::matrix<double> C = get_2dVertices(dim1, dim2);
 
 	for(unsigned int i=0;i<C.size1();i++){

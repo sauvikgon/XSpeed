@@ -185,6 +185,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 /**
  * Bounded simulation. Simulation within a polytope accepted
  */
+
 bound_sim simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I)
 {
 	int flag;
@@ -205,8 +206,8 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 	void *cvode_mem;
 	cvode_mem = NULL;
-	/* Call CVodeCreate to create the solver memory and specify the
-	 * Backward Differentiation Formula and the use of a Newton iteration */
+	// Call CVodeCreate to create the solver memory and specify the
+	// Backward Differentiation Formula and the use of a Newton iteration
 
 	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
 
@@ -215,11 +216,12 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-	/** Input user data */
+	// Input user data
 	CVodeSetUserData(cvode_mem, (void *)data);
-	/* Call CVodeInit to initialize the integrator memory and specify the
-	* user's right hand side function in u'=f(t,u), the inital time T0, and
-	* the initial dependent variable vector u. */
+
+	// Call CVodeInit to initialize the integrator memory and specify the
+	//ser's right hand side function in u'=f(t,u), the inital time T0, and
+	// the initial dependent variable vector u.
 
 	flag = CVodeInit(cvode_mem, f, T0, u);
 
@@ -233,15 +235,11 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-	 /* Call CVodeSStolerances to specify the scalar relative tolerance
-	  * and scalar absolute tolerance */
 	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
 	if (check_flag(&flag, "CVodeSStolerances", 1))
 	{
 		throw std::runtime_error("CVODE failed\n");
 	}
-
-	/* In loop over output points: call CVode, print results, test for errors */
 
 	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
 
@@ -257,7 +255,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 	std::vector<double> v(dimension),prev_v(dimension);
 	bound_sim simv;
-	simv.cross_over_time = time;
+	simv.cross_over_time = -1;
 	prev_v = x;
 
 	if(print_flag){
@@ -293,11 +291,11 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 				prev_v = v;
 		}
 	}
-	N_VDestroy_Serial(u); /* Free u vector */
-	CVodeFree(&cvode_mem); /* Free integrator memory */
-
+	N_VDestroy_Serial(u);
+	CVodeFree(&cvode_mem);
 	return simv;
 }
+
 /* Check function return value...
      opt == 0 means SUNDIALS function allocates memory so check if
               returned NULL pointer

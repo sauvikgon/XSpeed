@@ -59,7 +59,7 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 
 	}
 	if (HybridSystem_Model_Type == NAVIGATION_4) {
-	//	SetNavigationModel5by5(ha, init_state, reach_parameters); //My own testing Model NAV_5by5
+		SetNavigationModel5by5(ha, init_state, reach_parameters); //My own testing Model NAV_5by5
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) {
