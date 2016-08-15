@@ -73,6 +73,11 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	if (time < time_step)
 		return x;
 
+//	while(time_step < 1e-6){
+//		N/=10;
+//		time_step = Tfinal/N;
+//	}
+
 	for(unsigned int i=0;i<dimension;i++)
 		NV_Ith_S(u,i) = x[i];
 
@@ -127,8 +132,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 		print_flag = true;
 	}
 
-
-//	std::cout << "simulation : samples = " << N << std::endl;
 	std::vector<double> last(dimension);
 
 	if(print_flag){
@@ -159,7 +162,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 				last[i] = NV_Ith_S(u,i);
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 			if(check_flag(&flag, "CVode", 1)) break;
-//			std::cout << "time point:" << NV_Ith_S(u,2) << std::endl;
 		}
 	}
 
@@ -193,9 +195,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	realtype Tfinal = time;
 	realtype t=0;
 	Dynamics *data = &D;
-	double time_offset = 0;
 
-	N_Vector y = NULL;
 	N_Vector u = NULL;
 
 	assert(x.size() == dimension);
@@ -251,12 +251,12 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 		print_flag = true;
 	}
 
+	std::vector<double> v(dimension),prev_v(dimension);
+	prev_v = x;
+
 	double time_step = Tfinal/N;
 
-	std::vector<double> v(dimension),prev_v(dimension);
-	bound_sim simv;
-	simv.cross_over_time = -1;
-	prev_v = x;
+	bound_sim b;
 
 	if(print_flag){
 		// We plot the initial point also
@@ -283,17 +283,94 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 			for(unsigned int i=0;i<dimension;i++)
 				v[i] = NV_Ith_S(u,i);
 			if(!I->point_is_inside(v)){
-				simv.cross_over_time = t;
-				simv.v = prev_v;
 				break;
 			}
 			else
 				prev_v = v;
 		}
 	}
+	b.v = prev_v;
+	b.cross_over_time = v[dimension-1];
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);
-	return simv;
+	return b;
+}
+
+std::vector<double> simulation::metric_simulate(std::vector<double> x, double time, double& distance, polytope::ptr I)
+{
+	int flag;
+	realtype T0 = 0;
+	realtype Tfinal = time;
+	realtype t=0;
+	Dynamics *data = &D;
+
+	N_Vector u = NULL;
+
+	assert(x.size() == dimension);
+	u = N_VNew_Serial(dimension);
+
+	for(unsigned int i=0;i<dimension;i++)
+		NV_Ith_S(u,i) = x[i];
+
+	void *cvode_mem;
+	cvode_mem = NULL;
+	// Call CVodeCreate to create the solver memory and specify the
+	// Backward Differentiation Formula and the use of a Newton iteration
+
+	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+
+	if( check_flag((void *)cvode_mem, "CVodeCreate", 0))
+	{
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	// Input user data
+	CVodeSetUserData(cvode_mem, (void *)data);
+
+	// Call CVodeInit to initialize the integrator memory and specify the
+	//ser's right hand side function in u'=f(t,u), the inital time T0, and
+	// the initial dependent variable vector u.
+
+	flag = CVodeInit(cvode_mem, f, T0, u);
+
+	if(check_flag(&flag, "CVodeInit", 1)){
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	flag = CVDense(cvode_mem, dimension);
+	if (check_flag(&flag, "CVDense", 1))
+	{
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
+	if (check_flag(&flag, "CVodeSStolerances", 1))
+	{
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
+
+	std::vector<double> v(dimension);
+//	double time_step = Tfinal/N;
+//	if(time_step < 1e-12){
+//		N = N/10;
+//		time_step = Tfinal/N;
+//	}
+
+	for(unsigned int k=1;k<=N;k++) {
+		double tout = (k*Tfinal)/N;
+		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
+		if(check_flag(&flag, "CVode", 1)) break;
+		// check polytope satisfaction
+		for(unsigned int i=0;i<dimension;i++)
+			v[i] = NV_Ith_S(u,i);
+		distance += I->point_distance(v);
+		
+	}
+	N_VDestroy_Serial(u);
+	CVodeFree(&cvode_mem);
+	return v;
 }
 
 /* Check function return value...
@@ -322,7 +399,8 @@ static int check_flag(void *flagvalue, char *funcname, int opt)
     if (*errflag < 0) {
       fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n",
               funcname, *errflag);
-      return(1); }}
+      return(1); }
+  }
 
   /* Check if function returned NULL pointer - no memory allocated */
 

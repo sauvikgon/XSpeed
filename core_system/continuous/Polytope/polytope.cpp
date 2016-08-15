@@ -440,7 +440,7 @@ double polytope::point_distance(std::vector<double> v){
 	math::vector<double> b = getColumnVector();
 
 	assert(v.size() == C.size2());
-
+	assert(getInEqualitySign()==1);
 	double distance = 0;
 	double facet_distance = 0;
 	double coef_sq_sum = 0;
@@ -451,8 +451,7 @@ double polytope::point_distance(std::vector<double> v){
 		}
 		facet_distance -=b[i];
 		if(facet_distance > 0){
-			//distance += facet_distance/math::sqrt(coef_sq_sum);
-			distance += facet_distance;
+			distance += facet_distance/math::sqrt(coef_sq_sum);
 		}
 		coef_sq_sum = 0;
 		facet_distance = 0;
@@ -471,13 +470,13 @@ bool polytope::point_is_inside(std::vector<double> v)
 	for(unsigned int i=0;i<M.size1();i++)
 	{
 		sum = 0;
+		assert(v.size()==M.size2());
 		for(unsigned int j=0;j<M.size2();j++){
 			sum+= M(i,j)*v[j];
 		}
-		if( (sum - C[i]) > 1e-4){
-	//			std::cout << "sum=" << sum  << "and b =" << C[i] <<  std::endl;
-	//			std::cout << "Difference between sum and b =" << sum - C[i] << std::endl;
-	//			std::cout << "0 comparison = " << 1e-6 << std::endl;
+		if( (sum - C[i]) > 1e-3){
+//			std::cout << "\nsum=" << sum  << "and b =" << C[i] <<  std::endl;
+//			std::cout << "Difference between sum and b =" << sum - C[i] << std::endl;
 			return false;
 		}
 	}
@@ -489,7 +488,7 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 	assert(dim1 < this->map_size() && dim2 < this->map_size());
 	assert(dim1 >= 0 && dim2 >= 0);
 	std::ofstream myfile;
-	myfile.open(fname.c_str(), ofstream::app);
+	myfile.open(fname.c_str());
 	math::matrix<double> C = get_2dVertices(dim1, dim2);
 
 	for(unsigned int i=0;i<C.size1();i++){

@@ -95,7 +95,8 @@ int type = lp_solver_type_choosen;
 			TempOmega_min = res1_minus;	//zIInitial_minus = res1_minus;
 		else
 			TempOmega_min = res2_minus;	//zIInitial_minus = res2_minus;
-		//	cout<<"res2_minus = "<<res2_minus<<"\n";
+
+
 //  **************  Omega Function Over  ********************
 // ******************************************* Negative Direction Ends *******************************************
 		loopIteration++;	//needed for returning 1 for Omega_0

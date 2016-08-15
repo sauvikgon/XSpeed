@@ -86,7 +86,7 @@ public:
 	 * Returns the violating CE if non-valid, otherwise returns the
 	 * violating_CE with the flag element of the object as true.
 	 */
-	violating_CE validate();
+	bool validate();
 
 	concreteCE();
 	virtual ~concreteCE();
@@ -113,6 +113,7 @@ private:
 struct violating_CE
 {
 	bool flag;
+	unsigned int sq_no;
 	concreteCE::traj_segment t;
 };
 #endif /* CONCRETECE_H_ */

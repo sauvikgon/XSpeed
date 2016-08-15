@@ -8,6 +8,7 @@
 #ifndef ABSTRACTCE_H_
 #define ABSTRACTCE_H_
 
+
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
 
 #include "core_system/HybridAutomata/Transition.h"
@@ -15,10 +16,15 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 
-//#include "core_system/symbolic_states/symbolic_states.h"
 #include "counterExample/abstract_symbolic_state.h"
 #include "counterExample/concreteCE.h"
 #include "nlopt.hpp"
+#include <NLF.h>
+#include <OptQNewton.h>
+#include <fstream>
+#include <string>
+
+
 
 /**
  * This class is a data structure to store the abstract counter-example generated
@@ -28,14 +34,15 @@
  *
  * @author: Rajarshi
  */
+using NEWMAT::ColumnVector;
 extern unsigned int N;
 extern unsigned int dim;
 extern hybrid_automata::ptr HA;
 extern std::vector<int> locIdList;
 extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
-extern concreteCE::trajectory refinements; // a list of trajectories to refine the search and obtained a validated trajectory
-
+extern std::list<violating_CE> refinements; // a list of trajectories to refine the search and obtained a validated trajectory
+extern ColumnVector x0;
 
 class abstractCE
 {
@@ -148,5 +155,9 @@ private:
 	 */
 	polytope::ptr forbid_poly;
 };
+
+
+std::vector<double> simulate_trajectory(const std::vector<double>& x0,
+		Dynamics& D, const double& time, double& distance, polytope::ptr I);
 
 #endif /* ABSTRACTCE_H_ */

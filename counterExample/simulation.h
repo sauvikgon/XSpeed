@@ -55,7 +55,7 @@ public:
 //	typedef std::pair<std::vector<double>, double> simD;
 
 	simulation();
-	simulation(unsigned int dim, unsigned int steps, Dynamics Dyn, double rel_tol=1e-6, double abs_tol=1e-8){
+	simulation(unsigned int dim, unsigned int steps, Dynamics Dyn, double rel_tol=1e-8, double abs_tol=1e-8){
 		dimension = dim;
 		N = steps;
 		reltol = rel_tol;
@@ -113,6 +113,12 @@ public:
 	 * that satisfied I, as a struct object
 	 */
 	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I);
+
+	/**
+	 * Simulate and also compute the distance of the trajectory with a polytope
+	 * invariant passed as argument.
+	 */
+	std::vector<double> metric_simulate(std::vector<double>, double time, double& distance, polytope::ptr Inv);
 
 };
 

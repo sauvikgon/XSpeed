@@ -629,7 +629,7 @@ std::list<symbolic_states::ptr>::iterator it;
 		int index = 0;
 		ce->plot(user_options.get_first_plot_dimension(),
 				user_options.get_second_plot_dimension());
-		concreteCE::ptr bad_trace = ce->get_validated_CE(0.001);
+		concreteCE::ptr bad_trace = ce->get_validated_CE(1.5);
 		if(bad_trace->is_empty()){
 			std::cout << "No real counter example found\n";
 			return 0;

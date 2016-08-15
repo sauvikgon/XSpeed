@@ -6,6 +6,7 @@
  */
 
 #include <counterExample/concreteCE.h>
+#include <counterExample/abstractCE.h>
 #include <cassert>
 
 concreteCE::concreteCE() {
@@ -67,14 +68,8 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 	}
 	myfile.close();
 
-	//debug code
-	std::string invfile = "./invfile";
-	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
-		locId = seg.first;
-		ha->getLocation(locId)->getInvariant()->print2file(invfile,x1,x2);
-	}
-	// end of debug code
 }
+/*
 violating_CE concreteCE::validate()
 {
 	traj_segment seg;
@@ -87,20 +82,66 @@ violating_CE concreteCE::validate()
 	v.flag = true;
 
 	double steps = 100; // defines the precision of validation
-	bool flag;
+
+	unsigned int seq_no=0;
+
 	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
 		seg = *it;
 		locId = seg.first;
 		simulation_sample = seg.second;
-		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
-		b = sim->bounded_simulation(simulation_sample.first, simulation_sample.second, ha->getLocation(locId)->getInvariant());
-		if(b.cross_over_time!=-1){ // meaning there is a violation of invariant
-			v.flag = false;
-			v.t.first = locId;
-			v.t.second = seg.second;
-			v.t.second.second = b.cross_over_time;
-			return v;
+		std::cout << "locId=" << locId << std::endl;
+		std::cout << "sample start point:" << std::endl;
+		for(unsigned int i=0;i<simulation_sample.first.size();i++){
+			std::cout << simulation_sample.first[i] << " ";
 		}
+		std:cout << "\nsample end point:" << std::endl;
+		double distance=0;
+		polytope::ptr Inv;
+		Inv = ha->getLocation(locId)->getInvariant();
+		std::vector<double> endpt = simulate_trajectory(simulation_sample.first,ha->getLocation(locId)->getSystem_Dynamics(),simulation_sample.second,distance, Inv);
+		for(unsigned int i=0;i<simulation_sample.first.size();i++){
+			std::cout << endpt[i] << " ";
+		}
+
+//		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
+//		b = sim->bounded_simulation(simulation_sample.first, simulation_sample.second, ha->getLocation(locId)->getInvariant());
+//		if(b.cross_over_time!=-1){ // meaning there is a violation of invariant
+//			v.flag = false;
+//			v.sq_no = seq_no;
+//			v.t.first = locId;
+//			v.t.second = seg.second;
+//			v.t.second.second = b.cross_over_time;
+//			std::cout << "trace seq violated=" << v.sq_no << std::endl;
+//			std::cout << "trace violated in locid=" << v.t.first << std::endl;
+//			std::cout << "invariant cross over time=" << v.t.second.second << std::endl;
+//			return v;
+//		}
+//		seq_no++;
 	}
 	return v;
+}
+*/
+bool concreteCE::validate()
+{
+	traj_segment seg;
+	unsigned int locId;
+	sample simulation_sample;
+	simulation::ptr sim;
+
+	double steps = 100; // defines the precision of validation
+	double distance;
+
+	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
+		seg = *it;
+		locId = seg.first;
+		simulation_sample = seg.second;
+
+		distance = 0;
+		polytope::ptr Inv;
+		Inv = ha->getLocation(locId)->getInvariant();
+		std::vector<double> endpt = simulate_trajectory(simulation_sample.first,ha->getLocation(locId)->getSystem_Dynamics(),simulation_sample.second,distance, Inv);
+		if(distance!=0)
+			return false;
+	}
+	return true;
 }
