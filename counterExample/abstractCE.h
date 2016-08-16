@@ -15,12 +15,10 @@
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include <list>
 #include <boost/shared_ptr.hpp>
-
+#include "nlopt.hpp"
 #include "counterExample/abstract_symbolic_state.h"
 #include "counterExample/concreteCE.h"
-#include "nlopt.hpp"
-#include <NLF.h>
-#include <OptQNewton.h>
+
 #include <fstream>
 #include <string>
 
@@ -34,7 +32,7 @@
  *
  * @author: Rajarshi
  */
-using NEWMAT::ColumnVector;
+//using NEWMAT::ColumnVector;
 extern unsigned int N;
 extern unsigned int dim;
 extern hybrid_automata::ptr HA;
@@ -42,7 +40,7 @@ extern std::vector<int> locIdList;
 extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
 extern std::list<violating_CE> refinements; // a list of trajectories to refine the search and obtained a validated trajectory
-extern ColumnVector x0;
+//extern ColumnVector x0;
 
 class abstractCE
 {

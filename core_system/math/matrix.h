@@ -36,10 +36,10 @@ public:
 
 	//calling matrix as minuend, passed as subtrahend and result as difference (minuend − subtrahend =	difference)
 	void minus(matrix& B, matrix& res);
-	void mult_vector(std::vector<scalar_type> v, std::vector<scalar_type> &res);
+	void mult_vector(std::vector<scalar_type> v, std::vector<scalar_type> &res) const;
 	// multiplies each entry of the matrix by c
 	void scalar_multiply(double c);
-	void transpose(matrix& res);
+	void transpose(matrix& re ) const;
 	/*
 	 * Appends a column vector to the end of the calling matrix and returns the new resized matrix
 	 */

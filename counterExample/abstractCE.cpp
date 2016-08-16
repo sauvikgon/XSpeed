@@ -630,11 +630,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 	unsigned int optD = N * dim + N;
 	std::cout << "nlopt problem dimension = " << optD << std::endl;
-	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
-//	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative bases
+	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative bases
 //	std::vector<double> lb(2);
 //	lb[0] = 0.1;
 //	lb[1] = 2;
@@ -795,13 +795,13 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	unsigned int index = 0;
 	for (unsigned int i = 0; i < N; i++) {
 		C = get_symbolic_state(i)->getInitialSet();
-		//debug
-		std::ofstream myfile;
-		string fname = "initpoly";
-		myfile.open(fname.c_str());
-		C->print2file(fname, 0, 1);
-		system("graph -TX -BC initpoly");
-		myfile.close();
+//		//debug
+//		std::ofstream myfile;
+//		string fname = "initpoly";
+//		myfile.open(fname.c_str());
+//		C->print2file(fname, 0, 1);
+//		system("graph -TX -BC initpoly");
+//		myfile.close();
 		//---
 		A = C->getCoeffMatrix();
 		b = C->getColumnVector();

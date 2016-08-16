@@ -102,7 +102,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::minus(
  * Matrix vector multiplication. The result is stored in the passed argument res
  */
 template<typename scalar_type> void math::matrix<scalar_type>::mult_vector(
-		std::vector<scalar_type> v, std::vector<scalar_type> &res) {
+		std::vector<scalar_type> v, std::vector<scalar_type> &res) const {
 	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 	ublas_vector_impl uv(v.size());
 //#pragma omp parallel for
@@ -158,7 +158,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::scalar_multiply(d
  * Implements the transpose and assings the result to the caller matrix.
  */
 template<typename scalar_type> void math::matrix<scalar_type>::transpose(
-		matrix& res) {
+		matrix& res) const {
 
 	size_type r = this->size2();
 	size_type c = this->size1();
