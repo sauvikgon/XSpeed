@@ -142,10 +142,10 @@ double compute_cost(double arg, void * params){
 		y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I);
 		/** Add the distance of the end point to the invariant. This is for validation testing */
 //		cost+=I->point_distance(y[i]);
-		if(trace_distance!=0){
-			//std::cout << "trace distance = " << trace_distance << std::endl;
-			cost+=trace_distance;
-		}
+//		if(trace_distance!=0){
+//			//std::cout << "trace distance = " << trace_distance << std::endl;
+//			cost+=trace_distance;
+//		}
 
 		transition::ptr Tptr= *(T_iter);
 		// assignment of the form: Ax + b
@@ -187,181 +187,13 @@ double compute_cost(double arg, void * params){
 	trace_distance = 0;
 	trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I);
 	// compute the distance of this endpoint with the forbidden polytope
-	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
-	cost+= bad_poly->point_distance(trace_end_pt);
+//	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
+//	cost+= bad_poly->point_distance(trace_end_pt);
 
 	return cost;
 
 }
-/** obj function for automatic differentiation 
-double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
-		void *my_func_data) {
 
-	// 1. Get the N start vectors and dwell times from x and call the simulation routine
-	// 2. Get the N end points of the simulation trace, say, y[i].
-	// 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
-	// Computes the L2 norm or Euclidean distances between the trace end points.
-
-	//-----------------------------------------
-
-	std::vector<std::vector<double> > y(N-1);
-	for(unsigned int j=0;j<N-1;j++)
-		y[j] = std::vector<double>(dim,0);
-
-	stan::math::var params[x.size()];
-	for(unsigned int i=0;i<x.size();i++)
-		params[i] = stan::math::var(x[i]);
-	
-	stan::math::var cost = 0;
-
-	std::list<transition::ptr>::iterator T_iter = transList.begin();
-	double trace_distance;
-	for (unsigned int i = 0; i < N-1; i++) {
-		std::vector<double> v(dim, 0);
-		for (unsigned int j = 0; j < dim; j++) {
-			v[j] = params[i * dim + j].val();
-		}
-
-		int loc_index = locIdList[i];
-		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
-		polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
-		assert(d.C.size() == dim);
-
-		trace_distance = 0;
-		y[i] = simulate_trajectory(v, d, params[N * dim + i].val(), trace_distance, I);
-		
-		// Add the distance of the end point to the invariant. This is for validation testing 
-//		sq_sum+=I->point_distance(y[i]);
-//		if(trace_distance!=0){
-			//std::cout << "trace distance = " << trace_distance << std::endl;
-//			cost+=trace_distance;
-//		}
-
-		transition::ptr Tptr= *(T_iter);
-		// assignment of the form: Ax + b
-		Assign R = Tptr->getAssignT();
-		//guard as a polytope
-		polytope::ptr g = Tptr->getGaurd();
-		// If traj end point inside guard, then apply map.
-		if(g->point_is_inside(y[i]))
-		{
-			assert(y[i].size() == R.Map.size2());
-			std::vector<double> res(y[i].size(),0);
-			R.Map.mult_vector(y[i],res);
-			// add vectors
-			assert(y[i].size() == R.b.size());
-			for(unsigned int j=0;j<res.size();j++)
-				y[i][j] = res[j] + R.b[j];
-		}
-		if(T_iter!=transList.end())
-			T_iter.operator ++();
-
-		std::vector<stan::math::var> next_start(dim); // current jump start point
-		for(unsigned int j=0;j<dim;j++)
-			next_start[j] = params[(i+1)*dim + j];
-		//compute the Euclidean distance between the next start point and the simulated end point
-		for (unsigned int j = 0; j < dim; j++) {
-			cost += (y[i][j] - next_start[j]) * (y[i][j] - next_start[j]);
-		}
-
-	}
-	std::vector<double> v(dim, 0);
-	for (unsigned int j = 0; j < dim; j++) {
-		v[j] = params[ (N-1) * dim + j].val();
-	}
-	std::vector<double> trace_end_pt(dim,0);
-	int loc_index = locIdList[N-1];
-	Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
-	polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
-	//trace_distance = 0;
-	trace_end_pt = simulate_trajectory(v, d, params[N * dim + N-1].val(), trace_distance, I);
-	
-//	sq_sum+= I->point_distance(trace_end_pt);
-	// compute the distance of this endpoint with the forbidden polytope
-//	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
-//	cost+= bad_poly->point_distance(trace_end_pt);
-
-	//-------------------------------
-
-
-// Use the following gradient in case of constant dynamics (x'=k)
-
-//	if (!grad.empty()) {
-//		for(unsigned int i=0;i<dim;i++)
-//			grad[i] = 0;
-//
-//		for(unsigned int i=0;i<N;i++){
-//			for(unsigned int j=0;j<dim;j++){
-//				if(i==0){
-//					grad[i*dim+j] = 2 * (y[i][j] - x[(i+1)*dim+j]);
-//				}
-//				else if(i>0 && i<N-1){
-//					Dynamics d = HA->getLocation(locIdList[i])->getSystem_Dynamics();
-//					Dynamics d1 = HA->getLocation(locIdList[i-1])->getSystem_Dynamics();
-//					grad[i*dim+j] = 4*x[i*dim+j] - 2*x[(i-1)*dim+j] -2*d1.C[j]*x[N*dim+i-1] +2*d.C[j]*x[N*dim+i] -2*x[(i+1)*dim+j];
-//				}
-//				else{
-//					Dynamics d = HA->getLocation(locIdList[i-1])->getSystem_Dynamics();
-//					grad[i*dim+j] = 2*x[i*dim+j] - 2*y[i-1][j];
-//				}
-//			}
-//			if(i!=N-1){
-//				Dynamics d = HA->getLocation(locIdList[i])->getSystem_Dynamics();
-//				double k1=0,k2=0,k3=0;
-//				for(unsigned int j=0;j<N;j++){
-//					k1 += d.C[j]* d.C[j];
-//					k2 += x[i*dim+j] * d.C[j];
-//					k3 += x[(i+1)*dim+j] * d.C[j];
-//				}
-//				grad[N*dim + i] = 2*x[N*dim+i]*k1 + 2*k2 - 2*k3;
-//			}
-//			else{
-//				grad[N*dim+i] = 0;
-//			}
-//		}
-//	}
-
-//	double cost = compute_cost(x);
-
-	// This is an alternate version of computing gradient numerically using symmetric difference method
-//	if (!grad.empty()) {
-		std::vector<double> xh(x.size(),0);
-		xh = x;
-		long double h = 1e-6;
-		long double cost_h_r, cost_h_l;
-		for(unsigned int i=0;i<x.size();i++){
-			xh[i] = x[i] + h;
-			cost_h_r = compute_cost(xh);
-			xh[i] = x[i] - h;
-			cost_h_l = compute_cost(xh);
-			grad[i] = (cost_h_r - cost_h_l)/(2*h);
-//			std::cout << "Computed Gradient x of wrt "<< i << " = " << grad[i] << std::endl;
-			xh[i] = x[i];
-		}
-//	}
-	// automatic differentiation 
-	
-//	std::vector<stan::math::var> theta;
-//	for(unsigned int i=0;i<x.size();i++)
-//	    theta.push_back(params[i]);
-
-//	std::vector<double> g;
-//	cost.grad(theta,g);
-	
-//	if (!grad.empty()) {
-//	  for(unsigned int i=0;i<x.size();i++){
-//	      grad[i] = g[i];
-	      
-//	      std::cout << "gradient of param " << i << "= " << grad[i] << std::endl;
-	      
-//	  }
-//	  exit(0); // debug statement
-//	}
-	std::cout << "current cost = " << cost.val() << std::endl;
-//	samples++;
-	return cost.val();
-}
-*/ //end of objective function with auto differentiation
 
 /* objective function without auto differentiation */
 double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
@@ -374,11 +206,15 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 
 	//-----------------------------------------
 
+	math::matrix<double> expAt(dim,dim);
+
 	std::vector<std::vector<double> > y(N-1);
 	for(unsigned int j=0;j<N-1;j++)
 		y[j] = std::vector<double>(dim,0);
 
 	double cost = 0;
+	double deriv[x.size()];// contains the gradient
+
 	std::list<transition::ptr>::iterator T_iter = transList.begin();
 	double trace_distance;
 	for (unsigned int i = 0; i < N-1; i++) {
@@ -389,18 +225,24 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 
 		int loc_index = locIdList[i];
 		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+
+		d.MatrixA.matrix_exponentiation(expAt,x[N*dim+i]);
+		assert(expAt.size1() == dim);
+		assert(expAt.size2() == dim);
+
 		polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
 		assert(d.C.size() == dim);
 
 		trace_distance = 0;
 		y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I);
 		
+
 		/** Add the distance of the end point to the invariant. This is for validation testing */
 //		cost+=I->point_distance(y[i]);
-		if(trace_distance!=0){
-			//std::cout << "trace distance = " << trace_distance << std::endl;
-			cost+=trace_distance;
-		}
+//		if(trace_distance!=0){
+//			//std::cout << "trace distance = " << trace_distance << std::endl;
+//			cost+=trace_distance;
+//		}
 
 		transition::ptr Tptr= *(T_iter);
 		// assignment of the form: Ax + b
@@ -427,6 +269,11 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		//compute the Euclidean distance between the next start point and the simulated end point
 		for (unsigned int j = 0; j < dim; j++) {
 			cost += (y[i][j] - next_start[j]) * (y[i][j] - next_start[j]);
+			if(i==0)
+				deriv[i*dim+j] = 2*(y[i][j]-next_start[j])* expAt(j,j);
+			else{
+				deriv[i*dim+j] =( 2*(y[i][j]-next_start[j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]);
+			}
 		}
 
 	}
@@ -440,80 +287,65 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
 	trace_distance = 0;
 	trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I);
-	
+
+	// analytical grad computation
+	for(unsigned int j=0;j<dim;j++){
+		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]);
+	}
+	// analytical grad wrt dwell times
+	for(unsigned int i=0;i<N-1;i++){
+		for (unsigned int j = 0; j < dim; j++) {
+			v[j] = x[ i * dim + j];
+		}
+		int loc_index=locIdList[i];
+		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+		std::vector<double> res(dim);
+		d.MatrixA.mult_vector(v,res);
+		assert(d.C.size() == res.size());
+		for (unsigned int j = 0; j < dim; j++) {
+			res[j] = res[j] + d.C[j];
+		}
+		double sum=0;
+		for (unsigned int j = 0; j < dim; j++) {
+			sum+= 2*(y[i][j] - x[(i+1)*dim+j]) * res[j];
+		}
+		deriv[N*dim+i] = sum;
+	}
+	deriv[N*dim+N-1]=0;
 	// compute the distance of this endpoint with the forbidden polytope
-	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
-	cost+= bad_poly->point_distance(trace_end_pt);
+//	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
+//	cost+= bad_poly->point_distance(trace_end_pt);
 
-	//-------gsl derivative
-	if(!grad.empty()){
-		gsl_function F;
-		F.function = &compute_cost;
-		double x_params[x.size()+1];
-		for(unsigned int i=0;i<x.size();i++)
-			x_params[i] = x[i];
-
-		double abserr;
+// Analytic Solution
+	if(!grad.empty())
+	{
 		for(unsigned int i=0;i<x.size();i++){
-			x_params[x.size()] = i;
-			F.params = &x_params;
-			gsl_deriv_central(&F,x[i],1e-10,&grad[i],&abserr);
+			grad[i] = deriv[i];
 		}
 	}
+	//-------gsl derivative
+//	if(!grad.empty()){
+//		gsl_function F;
+//		F.function = &compute_cost;
+//		double x_params[x.size()+1];
+//		for(unsigned int i=0;i<x.size();i++)
+//			x_params[i] = x[i];
+//
+//		double abserr;
+//		for(unsigned int i=0;i<x.size();i++){
+//			x_params[x.size()] = i;
+//			F.params = &x_params;
+//			gsl_deriv_central(&F,x[i],1e-10,&grad[i],&abserr);
+////			std::cout << "Numerical Gradient=" << grad[i] << ": ";
+////			std::cout << "Analytic Gradient=" << deriv[i] << std::endl;
+//		}
+//	}
 	//------
 
-	// This is an alternate version of computing gradient numerically using symmetric difference method
-//	if (!grad.empty()) {
-//		std::vector<double> xh(x.size(),0);
-//		xh = x;
-//		long double h = 1e-6;
-//		long double cost_h_r, cost_h_l;
-//		for(unsigned int i=0;i<x.size();i++){
-//			xh[i] = x[i] + h;
-//			cost_h_r = compute_cost(xh);
-//			xh[i] = x[i] - h;
-//			cost_h_l = compute_cost(xh);
-//			grad[i] = (cost_h_r - cost_h_l)/(2*h);
-////			std::cout << "Computed Gradient x of wrt "<< i << " = " << grad[i] << std::endl;
-//			xh[i] = x[i];
-//		}
-//	}
 	std::cout << "current cost=" << cost << std::endl;
+//	exit(0);
 	return cost;
 }
-
-//double grad_descent(std::vector<double>& x)
-//{
-//	int it = 0;
-//	double grad[x.size()], delta = 1e-6;
-//	std::vector<double> x_prime(x), x_new(x.size(),0);
-//	double h = 1e-8, min;
-//	double iters = 200;
-//
-//	min = compute_cost(x);
-//	std::cout << "cost before beginning descent: " << min << std::endl;
-//	while(min> 0.01)
-//	{
-//		double f = compute_cost(x);
-//		for(unsigned int i=0;i<x.size();i++)
-//		{
-//			x_prime[i] = x[i] + h;
-//			double fh = compute_cost(x_prime);
-////			std::cout << "fh=" << fh << std::endl;
-////			std::cout << "f=" << f << std::endl;
-//			grad[i] = (fh - f)/h;
-////			std::cout << "grad[i]=" << fh << std::endl;
-//			x_prime = x;
-//			x_new[i] = x[i] - delta * grad[i];
-//		}
-//		min = compute_cost(x_new);
-//		std::cout << "updated function value: " << min << std::endl;
-//		it++;
-//		x = x_new;
-//		x_prime=x;
-//	}
-//	return min;
-//}
 
 /** Function to define a constraint over the optimization problem */
 
@@ -635,25 +467,9 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative bases
-//	std::vector<double> lb(2);
-//	lb[0] = 0.1;
-//	lb[1] = 2;
-//	std::vector<double> lb(optD);
-//	std::vector<double> ub(optD);
-//	for(unsigned int i=0;i<N*dim;i++){
-//		lb[i] = -500;
-//		ub[i] = 500;
-//	}
-//	for(unsigned int i=N*dim;i<optD;i++){
-//		lb[i] = 0;
-//		ub[i] = 500;
-//	}
-
-//	myopt.set_lower_bounds(lb);
-//	myopt.set_upper_bounds(ub);
 
 //	myopt.set_maxeval(500);
-	myopt.set_stopval(0.00001);
+	myopt.set_stopval(0.0000001);
 
 //	myopt.set_xtol_rel(1e-4);
 
@@ -664,23 +480,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
 
-	// Check satisfiability
-//	std::list<transition::ptr>::iterator it = transList.begin();
-//	polytope::ptr g;
-//	for(unsigned int i=0;i<N-1;i++){
-//
-//		P = get_symbolic_state(i+1)->getInitialSet();
-//		g = (*it)->getGaurd();
-//		g = g->GetPolytope_Intersection(get_symbolic_state(i)->getContinuousSet());
-//		g = g->GetPolytope_Intersection(P);
-//		if(g->getIsEmpty()){
-//			std::cout << "Not Satisfiable\n";
-//			exit(0);
-//		}
-//		it++;
-//	}
-	//end of sat scheck
-	// A random objective function created for lp solving
+// A random objective function created for lp solving
 
 	std::vector<double> obj(dim, 0);
 	obj[0] = 1;
