@@ -193,8 +193,35 @@ double compute_cost(double arg, void * params){
 	return cost;
 
 }
+/*
+ * Computes derivative of point_to_poly_dist(x(time),I) w.r.t the starting point x_s
+ */
+double dist_grad(unsigned int k, std::vector<double>trace_end_pt, polytope::ptr I, double chain_mult)
+{
+	math::matrix<double> C = I->getCoeffMatrix();
+	std::vector<double> b = I->getColumnVector();
 
+	assert(trace_end_pt.size() == C.size2());
+	assert(I->getInEqualitySign() == 1);
 
+	double grad = 0;
+	double facet_distance = 0;
+	double coef_sq_sum = 0;
+	for(unsigned int i=0;i<C.size1();i++){
+		for(unsigned int j=0;j<C.size2();j++){
+			facet_distance += trace_end_pt[j]*C(i,j);
+			coef_sq_sum += C(i,j)*C(i,j);
+		}
+		facet_distance -=b[i];
+		if(facet_distance > 0){
+			grad += C(i,k)/math::sqrt(coef_sq_sum);
+		}
+		coef_sq_sum = 0;
+		facet_distance = 0;
+	}
+	grad = grad*chain_mult;
+	return grad;
+}
 /* objective function without auto differentiation */
 double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		void *my_func_data) {
@@ -289,18 +316,18 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I);
 
 	// analytical grad computation
+	math::matrix<double> Aexp(d.MatrixA.size1(),d.MatrixA.size2());
+	d.MatrixA.matrix_exponentiation(Aexp,x[N*dim+N-1]);
+
 	for(unsigned int j=0;j<dim;j++){
-		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]);
+		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + dist_grad(j,trace_end_pt,bad_poly,Aexp(j,j));
 	}
 	// analytical grad wrt dwell times
 	for(unsigned int i=0;i<N-1;i++){
-		for (unsigned int j = 0; j < dim; j++) {
-			v[j] = x[ i * dim + j];
-		}
 		int loc_index=locIdList[i];
 		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
 		std::vector<double> res(dim);
-		d.MatrixA.mult_vector(v,res);
+		d.MatrixA.mult_vector(y[i],res);
 		assert(d.C.size() == res.size());
 		for (unsigned int j = 0; j < dim; j++) {
 			res[j] = res[j] + d.C[j];
@@ -311,10 +338,22 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		}
 		deriv[N*dim+i] = sum;
 	}
-	deriv[N*dim+N-1]=0;
+	//deriv of cost function w.r.t dwell time of last trajectory going to bad set
+
+	loc_index=locIdList[N-1];
+	d = HA->getLocation(loc_index)->getSystem_Dynamics();
+	std::vector<double> res(dim);
+	d.MatrixA.mult_vector(trace_end_pt,res);
+	assert(d.C.size() == res.size());
+	for (unsigned int j = 0; j < dim; j++) {
+		res[j] = res[j] + d.C[j];
+	}
+	deriv[N*dim + N - 1] = 0;
+	for(unsigned int j=0;j<dim;j++)
+		deriv[N*dim+N-1]+=dist_grad(j,trace_end_pt,bad_poly,res[j]);
 	// compute the distance of this endpoint with the forbidden polytope
 //	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
-//	cost+= bad_poly->point_distance(trace_end_pt);
+	cost+= bad_poly->point_distance(trace_end_pt);
 
 // Analytic Solution
 	if(!grad.empty())
