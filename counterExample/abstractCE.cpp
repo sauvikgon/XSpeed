@@ -196,15 +196,17 @@ double compute_cost(double arg, void * params){
 /*
  * Computes derivative of point_to_poly_dist(x(time),I) w.r.t the starting point x_s
  */
-double dist_grad(unsigned int k, std::vector<double>trace_end_pt, polytope::ptr I, double chain_mult)
+std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::ptr I, std::vector<double> chain_mult)
 {
+	assert(chain_mult.size() == trace_end_pt.size());
+	std::vector<double> grad(trace_end_pt.size(),0 );
+
 	math::matrix<double> C = I->getCoeffMatrix();
 	std::vector<double> b = I->getColumnVector();
 
 	assert(trace_end_pt.size() == C.size2());
 	assert(I->getInEqualitySign() == 1);
 
-	double grad = 0;
 	double facet_distance = 0;
 	double coef_sq_sum = 0;
 	for(unsigned int i=0;i<C.size1();i++){
@@ -214,12 +216,15 @@ double dist_grad(unsigned int k, std::vector<double>trace_end_pt, polytope::ptr 
 		}
 		facet_distance -=b[i];
 		if(facet_distance > 0){
-			grad += C(i,k)/math::sqrt(coef_sq_sum);
+			for(unsigned int k=0;k<grad.size();k++){
+				grad[k] += C(i,k)/math::sqrt(coef_sq_sum);
+			}
 		}
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
-	grad = grad*chain_mult;
+	for(unsigned int k=0;k<trace_end_pt.size();k++)
+		grad[k] = grad[k]*chain_mult[k];
 	return grad;
 }
 /* objective function without auto differentiation */
@@ -318,9 +323,12 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	// analytical grad computation
 	math::matrix<double> Aexp(d.MatrixA.size1(),d.MatrixA.size2());
 	d.MatrixA.matrix_exponentiation(Aexp,x[N*dim+N-1]);
-
+	std::vector<double> chain_mult(dim);
+	for(unsigned int k=0;k<dim;k++)
+		chain_mult[k] = Aexp(k,k);
+	std::vector<double> d_dist_dx = dist_grad(trace_end_pt,bad_poly,chain_mult);
 	for(unsigned int j=0;j<dim;j++){
-		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + dist_grad(j,trace_end_pt,bad_poly,Aexp(j,j));
+		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + d_dist_dx[j];
 	}
 	// analytical grad wrt dwell times
 	for(unsigned int i=0;i<N-1;i++){
@@ -349,8 +357,9 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		res[j] = res[j] + d.C[j];
 	}
 	deriv[N*dim + N - 1] = 0;
+	d_dist_dx = dist_grad(trace_end_pt,bad_poly,res);
 	for(unsigned int j=0;j<dim;j++)
-		deriv[N*dim+N-1]+=dist_grad(j,trace_end_pt,bad_poly,res[j]);
+		deriv[N*dim+N-1]+=d_dist_dx[j];
 	// compute the distance of this endpoint with the forbidden polytope
 //	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
 	cost+= bad_poly->point_distance(trace_end_pt);
