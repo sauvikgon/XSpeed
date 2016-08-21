@@ -30,8 +30,8 @@ double flow_cost_estimate(polytope::ptr X0, polytope::ptr I, Dynamics d, double 
 	lp.Compute_LLP(obj);
 	x0 = lp.get_sv();
 
-	bound_sim simv;
-	simv = sim.bounded_simulation(x0,time_horizon,I);
+	bound_sim simv; bool status;
+	simv = sim.bounded_simulation(x0,time_horizon,I,status);
 	double coarse_cross_time = simv.cross_over_time;
 
 	//debug
@@ -83,8 +83,8 @@ double flow_cost_estimate_invFace(polytope::ptr X0, polytope::ptr I, Dynamics d,
 	simulation sim(dim,time_step,d);
 
 
-	bound_sim simv;
-	simv = sim.bounded_simulation(x0,time_horizon,I);
+	bound_sim simv;bool status;
+	simv = sim.bounded_simulation(x0,time_horizon,I,status);
 	double coarse_cross_time = simv.cross_over_time;
 //}
 	//debug

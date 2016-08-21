@@ -141,12 +141,6 @@ public:
 	 */
 	double point_distance(std::vector<double> v);
 
-	/**
-	 * Return true if the parameter point is inside the polytope.
-	 * returns false otherwise.
-	 */
-	bool point_is_inside(std::vector<double> v);
-
 	/*
 	 * Prints the vertices of the polytope to a file, passed as parameter.
 	 * The file could be called with any plotting utility.

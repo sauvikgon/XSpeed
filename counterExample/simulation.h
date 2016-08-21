@@ -110,10 +110,11 @@ public:
 	/**
 	 * Generates a simulation trace for time duration, starting at start_time.
 	 * The time instant, within the simulation time, when the polytope I is
-	 * violated by the trace is returned and with the last simulation point
-	 * that satisfied I, as a struct object
+	 * violated by the trace is returned and with the first lsimulation point
+	 * that violated I, as a struct object. status is set to false if invariant
+	 * is violated.
 	 */
-	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I);
+	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I, bool &status);
 
 	/**
 	 * Simulate and also compute the distance of the trajectory with a polytope,

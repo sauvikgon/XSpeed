@@ -185,10 +185,13 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 }
 
 /**
- * Bounded simulation. Simulation within a polytope accepted
+ * Bounded simulation. Simulation bounded within a polytope.
+ * Sets status to false if invariant violated. Otherwise,
+ * status is set to true.
+ *
  */
 
-bound_sim simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I)
+bound_sim simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I, bool& status)
 {
 	int flag;
 	realtype T0 = 0;
@@ -257,7 +260,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	double time_step = Tfinal/N;
 
 	bound_sim b;
-
+	status = true;
 	if(print_flag){
 		// We plot the initial point also
 		myfile << x[this->x1] << "  " << x[this->x2];
@@ -282,15 +285,16 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 			// check polytope satisfaction
 			for(unsigned int i=0;i<dimension;i++)
 				v[i] = NV_Ith_S(u,i);
-			if(!I->point_is_inside(v)){
+			if(I->point_distance(v)!=0){
+				status = false;
 				break;
 			}
 			else
 				prev_v = v;
 		}
 	}
-	b.v = prev_v;
-	b.cross_over_time = v[dimension-1];
+	b.v = v;
+	b.cross_over_time = t;
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);
 	return b;

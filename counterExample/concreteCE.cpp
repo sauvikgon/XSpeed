@@ -70,7 +70,7 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 
 }
 
-bool concreteCE::validate()
+bool concreteCE::valid(struct refinement_point& ref_pt)
 {
 	traj_segment seg;
 	unsigned int locId;
@@ -79,20 +79,26 @@ bool concreteCE::validate()
 
 	double steps = 100; // defines the precision of validation
 	double distance;
-
+	unsigned int seq_no = 0;
 	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
 		seg = *it;
 		locId = seg.first;
 		simulation_sample = seg.second;
 
-		distance = 0;
-		std::vector<double> grad(dim,0);
 		polytope::ptr Inv;
 		Inv = ha->getLocation(locId)->getInvariant();
-		std::vector<double> endpt = simulate_trajectory(simulation_sample.first,ha->getLocation(locId)->getSystem_Dynamics(),
-				simulation_sample.second,distance, Inv, grad);
-		if(distance!=0)
+
+		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
+		bound_sim b; bool status=true;
+		b =  sim->bounded_simulation(simulation_sample.first,simulation_sample.second,Inv, status);
+
+		if(!status){
+			ref_pt.seq_no = seq_no;
+			ref_pt.violating_pt = b.v;
+			ref_pt.time = b.cross_over_time;
 			return false;
+		}
+		seq_no++;
 	}
 	return true;
 }

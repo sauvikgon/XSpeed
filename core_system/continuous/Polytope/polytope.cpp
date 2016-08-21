@@ -459,30 +459,6 @@ double polytope::point_distance(std::vector<double> v){
 	return distance;
 }
 
-bool polytope::point_is_inside(std::vector<double> v)
-{
-	math::matrix<double> M = getCoeffMatrix();
-	std::vector<double> C = getColumnVector();
-	double sum;
-	assert(getInEqualitySign() == 1);
-
-
-	for(unsigned int i=0;i<M.size1();i++)
-	{
-		sum = 0;
-		assert(v.size()==M.size2());
-		for(unsigned int j=0;j<M.size2();j++){
-			sum+= M(i,j)*v[j];
-		}
-		if( (sum - C[i]) > 1e-3){
-//			std::cout << "\nsum=" << sum  << "and b =" << C[i] <<  std::endl;
-//			std::cout << "Difference between sum and b =" << sum - C[i] << std::endl;
-			return false;
-		}
-	}
-	return true;
-}
-
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
 {
 	assert(dim1 < this->map_size() && dim2 < this->map_size());

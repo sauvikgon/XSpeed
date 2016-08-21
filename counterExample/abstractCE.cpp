@@ -21,7 +21,7 @@ hybrid_automata::ptr HA;
 std::vector<int> locIdList;
 std::list<transition::ptr> transList;
 polytope::ptr bad_poly;
-std::list<violating_CE> refinements;
+std::list<refinement_point> ref_pts;
 
 
 unsigned int samples = 0;
@@ -182,7 +182,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		//guard as a polytope
 		polytope::ptr g = Tptr->getGaurd();
 		// If traj end point inside guard, then apply map.
-		if(g->point_is_inside(y[i]))
+		if(g->point_distance(y[i])==0)
 		{
 			assert(y[i].size() == R.Map.size2());
 			std::vector<double> res(y[i].size(),0);
@@ -274,6 +274,28 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		deriv[N*dim+N-1]+=bad_dist_gradt[j] + Inv_dist_grad_t[j];
 	// compute the distance of this endpoint with the forbidden polytope
 	cost+= bad_poly->point_distance(trace_end_pt);
+
+#ifdef VALIDATION
+	// add to cost the distance of refinement points. Modify the derivatives.
+	for(std::list<refinement_point>::iterator it = ref_pts.begin();it!=ref_pts.end();it++)
+	{
+		refinement_point p = *it;
+		unsigned int locID = locIdList[p.seq_no];
+		std::vector<double> v = p.violating_pt;
+		polytope::ptr I = HA->getLocation(locID)->getInvariant();
+		cost+=I->point_distance(v);
+		Dynamics d = HA->getLocation(locID)->getSystem_Dynamics();
+		math::matrix<double> expA;
+		d.MatrixA.matrix_exponentiation(expA,p.time);
+		std::vector<double> diag_expAt(dim,0);
+		for(unsigned int j=0;j<dim;j++)
+			diag_expAt[j] = expAt(j,j);
+
+		std::vector<double> grad_dist_x = dist_grad(v,I,diag_expAt);
+		for(unsigned int j=0;j<dim;j++)
+			deriv[p.seq_no*dim+j] += grad_dist_x[j];
+	}
+#endif
 
 // Analytic Solution
 	if(!grad.empty())
@@ -367,7 +389,7 @@ double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad
  * 28th January 2016
  */
 
-concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
+concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<refinement_point>& refinements) {
 
 //	 Generate an nlopt object with the constraints defined by the Abstract
 //	 counter example
@@ -383,6 +405,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	HA = this->get_automaton();
 	transList = this->get_CE_transitions();
 	bad_poly = this->forbid_poly;
+	ref_pts = refinements;
+
 	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
 	// initialize the global locIdList
 	locIdList.resize(N);
@@ -409,8 +433,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative bases
 
-//	myopt.set_maxeval(500);
-	myopt.set_stopval(0.0000001);
+	myopt.set_maxeval(500);
+	myopt.set_stopval(0.000001);
 
 //	myopt.set_xtol_rel(1e-4);
 
@@ -613,17 +637,32 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 
 concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 {
-	refinements = std::list<violating_CE>();
 	// call to genCE func with no refining trajectory
-	concreteCE::ptr cexample = gen_concreteCE(tolerance);
-//	return cexample;
-	if(cexample->validate())
-	{
-		std::cout << "Generated Trace Validated\n";
+	std::list<struct refinement_point> refinements;
+	refinements.clear(); // No refinement point initially
+
+	concreteCE::ptr cexample;
+	bool val_res;
+	unsigned int max_refinements = 100, ref_count = 0; // maximum limit to refinement points to be added.
+	do{
+		struct refinement_point pt;
+		cexample = gen_concreteCE(tolerance,refinements);
+		val_res = cexample->valid(pt);
+		if(!val_res){
+			refinements.push_back(pt);
+			ref_count++;
+		}
+	}while(!val_res && ref_count< max_refinements);
+
+	if(ref_count < max_refinements){
+		std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
 		return cexample;
 	}
-	else
-		throw std::runtime_error("Validation of counter example FAILED\n");
+	else{
+		throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
+		return concreteCE::ptr(new concreteCE());
+	}
+
 /*
 	violating_CE v;
 	v = cexample->validate();

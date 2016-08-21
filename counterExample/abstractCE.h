@@ -39,8 +39,7 @@ extern hybrid_automata::ptr HA;
 extern std::vector<int> locIdList;
 extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
-extern std::list<violating_CE> refinements; // a list of trajectories to refine the search and obtained a validated trajectory
-//extern ColumnVector x0;
+extern std::list<refinement_point> ref_pts; // a list of invariant violating points to refine the search and obtained a validated trajectory
 
 class abstractCE
 {
@@ -113,13 +112,10 @@ public:
 		return H;
 	}
 	/**
-	 * returns a validated trace, a trace that satisfies the invariant
+	 * returns a validated counterexample trace, a trace that satisfies the invariant
 	 */
 	concreteCE::ptr get_validated_CE(double tolerance);
-	/**
-	 * Returns an instance of the concrete counter-example from the abstract.
-	 */
-	concreteCE::ptr gen_concreteCE(double tolerance);
+
 	/**
 	 * Plot the counter example projected along dimensions passed
 	 * as parameters
@@ -152,6 +148,11 @@ private:
 	 * The reference to the forbidden polytope given by the user
 	 */
 	polytope::ptr forbid_poly;
+
+	/**
+	 * Returns an instance of the concrete counter-example from the abstract.
+	 */
+	concreteCE::ptr gen_concreteCE(double tolerance, const std::list<refinement_point>& refinements);
 };
 
 

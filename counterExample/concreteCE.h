@@ -18,7 +18,9 @@
 
 
 struct violating_CE;
-
+/*
+ * Class to contain a concrete counterexample (trajectory) to safety.
+ */
 class concreteCE {
 
 public:
@@ -86,7 +88,7 @@ public:
 	 * Returns the violating CE if non-valid, otherwise returns the
 	 * violating_CE with the flag element of the object as true.
 	 */
-	bool validate();
+	bool valid(struct refinement_point&);
 
 	concreteCE();
 	virtual ~concreteCE();
@@ -110,10 +112,10 @@ private:
  * Structure to hold the information about the violating concreteCE
  */
 
-struct violating_CE
+struct refinement_point
 {
-	bool flag;
-	unsigned int sq_no;
-	concreteCE::traj_segment t;
+	unsigned int seq_no; // the seq no of the loc in the abstract counter example trace
+	std::vector<double> violating_pt;
+	double time; // time point when the point violated the invariant
 };
 #endif /* CONCRETECE_H_ */
