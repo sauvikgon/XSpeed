@@ -158,7 +158,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::scalar_multiply(d
  * Implements the transpose and assings the result to the caller matrix.
  */
 template<typename scalar_type> void math::matrix<scalar_type>::transpose(
-		matrix& res) const {
+		matrix& res) {
 
 	size_type r = this->size2();
 	size_type c = this->size1();

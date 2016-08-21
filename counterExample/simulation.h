@@ -14,6 +14,7 @@
 #include <sundials/sundials_dense.h>
 #include <sundials/sundials_types.h>
 #include "application/DataStructureDirections.h"
+#include "Utilities/gradient.h"
 
 /*
  * A structure to return the last point in Invariant and the
@@ -115,10 +116,13 @@ public:
 	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I);
 
 	/**
-	 * Simulate and also compute the distance of the trajectory with a polytope
-	 * invariant passed as argument.
+	 * Simulate and also compute the distance of the trajectory with a polytope,
+	 * gradient of the distance of the trace to the given polytope invariant I w.r.t
+	 * the trace end point and the gradient of the distance of the trace
+	 * to the invariant w.r.t time.
 	 */
-	std::vector<double> metric_simulate(std::vector<double>, double time, double& distance, polytope::ptr Inv);
+	std::vector<double> metric_simulate(std::vector<double> x, double time, double& distance, polytope::ptr Inv,
+			std::vector<double>& grad);
 
 };
 

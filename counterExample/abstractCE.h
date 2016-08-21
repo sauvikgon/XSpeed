@@ -156,6 +156,6 @@ private:
 
 
 std::vector<double> simulate_trajectory(const std::vector<double>& x0,
-		Dynamics& D, const double& time, double& distance, polytope::ptr I);
+		Dynamics& D, const double& time, double& distance, polytope::ptr I, std::vector<double>&);
 
 #endif /* ABSTRACTCE_H_ */

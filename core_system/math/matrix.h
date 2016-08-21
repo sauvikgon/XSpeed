@@ -39,7 +39,7 @@ public:
 	void mult_vector(std::vector<scalar_type> v, std::vector<scalar_type> &res) const;
 	// multiplies each entry of the matrix by c
 	void scalar_multiply(double c);
-	void transpose(matrix& re ) const;
+	void transpose(matrix& re );
 	/*
 	 * Appends a column vector to the end of the calling matrix and returns the new resized matrix
 	 */

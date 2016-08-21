@@ -296,7 +296,8 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	return b;
 }
 
-std::vector<double> simulation::metric_simulate(std::vector<double> x, double time, double& distance, polytope::ptr I)
+std::vector<double> simulation::metric_simulate(std::vector<double> x, double time,
+		double& distance, polytope::ptr I, std::vector<double>& grad)
 {
 	int flag;
 	realtype T0 = 0;
@@ -309,9 +310,13 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
 
-	for(unsigned int i=0;i<dimension;i++)
-		NV_Ith_S(u,i) = x[i];
+	assert(grad.size() == dimension);
+	// initialize
 
+	for(unsigned int i=0;i<dimension;i++){
+		NV_Ith_S(u,i) = x[i];
+		grad[i] = 0;
+	}
 	void *cvode_mem;
 	cvode_mem = NULL;
 	// Call CVodeCreate to create the solver memory and specify the
@@ -358,6 +363,9 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 //		time_step = Tfinal/N;
 //	}
 
+	math::matrix<double> expAt;
+	std::vector<double> g(dimension);
+	distance=0;
 	for(unsigned int k=1;k<=N;k++) {
 		double tout = (k*Tfinal)/N;
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
@@ -366,7 +374,18 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 		for(unsigned int i=0;i<dimension;i++)
 			v[i] = NV_Ith_S(u,i);
 		distance += I->point_distance(v);
-		
+//		D.MatrixA.matrix_exponentiation(expAt,t);
+
+		//chain multiplicant vector
+//		std::vector<double> res(dimension,0);
+//		for(unsigned int j=0;j<expAt.size1();j++){
+//			res[j] = expAt(j,j);
+//		}
+//		g = dist_grad(v,I,res);
+
+//		for(unsigned int j=0;j<expAt.size1();j++){
+//			grad[j] += g[j];
+//		}
 	}
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);

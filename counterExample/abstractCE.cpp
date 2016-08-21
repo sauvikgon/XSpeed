@@ -9,8 +9,11 @@
 #include "counterExample/simulation.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "gsl/gsl_deriv.h"
+#include "Utilities/gradient.h"
 #include <fstream>
 #include <string>
+
+#define VALIDATION
 
 unsigned int dim;
 unsigned int N;
@@ -87,11 +90,13 @@ void abstractCE::plot(unsigned int i, unsigned int j) {
 int mycount = 0;
 
 /*
- * Computes the distance of the trajectory to the invariant and
- * returns the end point of the simulation.
+ * Computes the distance of the trajectory to the invariant, gradient of the distance of the trace
+ * to the given invariant polytope w.r.t the trace start point. It returns the end point of the
+ * simulation.
  */
 std::vector<double> simulate_trajectory(const std::vector<double>& x0,
-		Dynamics& D, const double& time, double& distance, polytope::ptr Inv) {
+		Dynamics& D, const double& time, double& distance, polytope::ptr Inv,
+		std::vector<double>& grad) {
 	/**
 	 * This function is to simulate trajectory from x0 for time units.
 	 * todo: current dummy implementation to be completed
@@ -102,132 +107,18 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 //	If trace validation is enabled.
 //	y = s->bounded_simulation(x0, time, Inv); // validated trace generation
 	distance = 0;
-	y = s->metric_simulate(x0,time,distance,Inv);
+	for(unsigned int i=0;i<grad.size();i++){
+		grad[i] = 0;
+	}
+
+	y = s->metric_simulate(x0,time,distance,Inv,grad);
 // 	if trace validation is not enabled, call the following simulate function
 //	y = s->simulate(x0, time); // no trace validation
 	assert(y.size() == dim);
 	return y;
 }
 
-/*
- * Computes the cost of the objective function on the sample x
- */
-
-double compute_cost(double arg, void * params){
-
-	std::vector<std::vector<double> > y(N-1);
-	for(unsigned int j=0;j<N-1;j++)
-		y[j] = std::vector<double>(dim,0);
-
-	double cost = 0;
-	//typecast from void* to double *
-	double *x = (double *) (params);
-	unsigned int arg_index = (unsigned int)(x[N*dim+N]);
-	x[arg_index] = arg;
-
-	std::list<transition::ptr>::iterator T_iter = transList.begin();
-	double trace_distance;
-	for (unsigned int i = 0; i < N-1; i++) {
-		std::vector<double> v(dim, 0);
-		for (unsigned int j = 0; j < dim; j++) {
-			v[j] = x[i * dim + j];
-		}
-
-		int loc_index = locIdList[i];
-		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
-		polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
-		assert(d.C.size() == dim);
-
-		trace_distance = 0;
-		y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I);
-		/** Add the distance of the end point to the invariant. This is for validation testing */
-//		cost+=I->point_distance(y[i]);
-//		if(trace_distance!=0){
-//			//std::cout << "trace distance = " << trace_distance << std::endl;
-//			cost+=trace_distance;
-//		}
-
-		transition::ptr Tptr= *(T_iter);
-		// assignment of the form: Ax + b
-		Assign R = Tptr->getAssignT();
-		//guard as a polytope
-		polytope::ptr g = Tptr->getGaurd();
-		// If traj end point inside guard, then apply map.
-		if(g->point_is_inside(y[i]))
-		{
-			assert(y[i].size() == R.Map.size2());
-			std::vector<double> res(y[i].size(),0);
-			R.Map.mult_vector(y[i],res);
-			// add vectors
-			assert(y[i].size() == R.b.size());
-			for(unsigned int j=0;j<res.size();j++)
-				y[i][j] = res[j] + R.b[j];
-		}
-		if(T_iter!=transList.end())
-			T_iter.operator ++();
-
-		std::vector<double> next_start(dim,0); // current jump start point
-		for(unsigned int j=0;j<dim;j++)
-			next_start[j] = x[(i+1)*dim + j];
-		//compute the Euclidean distance between the next start point and the simulated end point
-		double pt_distance = 0;
-		for (unsigned int j = 0; j < dim; j++) {
-			pt_distance += (y[i][j] - next_start[j]) * (y[i][j] - next_start[j]);
-		}
-		cost += pt_distance;
-	}
-	std::vector<double> v(dim, 0);
-	for (unsigned int j = 0; j < dim; j++) {
-		v[j] = x[ (N-1) * dim + j];
-	}
-	std::vector<double> trace_end_pt(dim,0);
-	int loc_index = locIdList[N-1];
-	Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
-	polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
-	trace_distance = 0;
-	trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I);
-	// compute the distance of this endpoint with the forbidden polytope
-//	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
-//	cost+= bad_poly->point_distance(trace_end_pt);
-
-	return cost;
-
-}
-/*
- * Computes derivative of point_to_poly_dist(x(time),I) w.r.t the starting point x_s
- */
-std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::ptr I, std::vector<double> chain_mult)
-{
-	assert(chain_mult.size() == trace_end_pt.size());
-	std::vector<double> grad(trace_end_pt.size(),0 );
-
-	math::matrix<double> C = I->getCoeffMatrix();
-	std::vector<double> b = I->getColumnVector();
-
-	assert(trace_end_pt.size() == C.size2());
-	assert(I->getInEqualitySign() == 1);
-
-	double facet_distance = 0;
-	double coef_sq_sum = 0;
-	for(unsigned int i=0;i<C.size1();i++){
-		for(unsigned int j=0;j<C.size2();j++){
-			facet_distance += trace_end_pt[j]*C(i,j);
-			coef_sq_sum += C(i,j)*C(i,j);
-		}
-		facet_distance -=b[i];
-		if(facet_distance > 0){
-			for(unsigned int k=0;k<grad.size();k++){
-				grad[k] += C(i,k)/math::sqrt(coef_sq_sum);
-			}
-		}
-		coef_sq_sum = 0;
-		facet_distance = 0;
-	}
-	for(unsigned int k=0;k<trace_end_pt.size();k++)
-		grad[k] = grad[k]*chain_mult[k];
-	return grad;
-}
-/* objective function without auto differentiation */
+/* objective function */
 double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		void *my_func_data) {
 
@@ -257,25 +148,34 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 
 		int loc_index = locIdList[i];
 		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+		polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
+		assert(d.C.size() == dim);
+
+		trace_distance = 0;
+		std::vector<double> traj_dist_grad(dim,0); // holds the grads of the trajectories distance to invariant
+		y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I, traj_dist_grad);
 
 		d.MatrixA.matrix_exponentiation(expAt,x[N*dim+i]);
 		assert(expAt.size1() == dim);
 		assert(expAt.size2() == dim);
 
-		polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
-		assert(d.C.size() == dim);
-
-		trace_distance = 0;
-		y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I);
-		
-
-		/** Add the distance of the end point to the invariant. This is for validation testing */
-//		cost+=I->point_distance(y[i]);
-//		if(trace_distance!=0){
-//			//std::cout << "trace distance = " << trace_distance << std::endl;
-//			cost+=trace_distance;
-//		}
-
+		std::vector<double> Axplusb(dim), diag_expAt(dim);
+		d.MatrixA.mult_vector(y[i],Axplusb);
+		assert(d.C.size() == Axplusb.size());
+		for (unsigned int j = 0; j < dim; j++) {
+			Axplusb[j] = Axplusb[j] + d.C[j];
+			diag_expAt[j] = expAt(j,j);
+		}
+		std::vector<double> grad_x(dim,0), grad_t(dim,0);
+		grad_t = dist_grad(y[i],I,Axplusb);
+		grad_x = dist_grad(y[i],I,diag_expAt);
+#ifdef VALIDATION
+		if(trace_distance!=0){
+			//std::cout << "trace distance = " << trace_distance << std::endl;
+			//cost+=trace_distance;
+			cost += I->point_distance(y[i]); // adding to cost, the distance of end point to Inv
+		}
+#endif
 		transition::ptr Tptr= *(T_iter);
 		// assignment of the form: Ax + b
 		Assign R = Tptr->getAssignT();
@@ -295,73 +195,84 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		if(T_iter!=transList.end())
 			T_iter.operator ++();
 
-		std::vector<double> next_start(dim); // current jump start point
-		for(unsigned int j=0;j<dim;j++)
-			next_start[j] = x[(i+1)*dim + j];
+		double sum=0;
 		//compute the Euclidean distance between the next start point and the simulated end point
 		for (unsigned int j = 0; j < dim; j++) {
-			cost += (y[i][j] - next_start[j]) * (y[i][j] - next_start[j]);
-			if(i==0)
-				deriv[i*dim+j] = 2*(y[i][j]-next_start[j])* expAt(j,j);
-			else{
-				deriv[i*dim+j] =( 2*(y[i][j]-next_start[j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]);
-			}
-		}
+			cost += (y[i][j] - x[(i+1)*dim + j]) * (y[i][j] - x[(i+1)*dim + j]);
+			if(i==0){
+//				deriv[i*dim+j] = 2*(y[i][j]-next_start[j])* expAt(j,j) + traj_dist_grad[j];
 
+#ifdef VALIDATION
+				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* expAt(j,j) + grad_x[j];
+#else
+				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* expAt(j,j);
+#endif
+			}
+			else{
+//				deriv[i*dim+j] = ( 2*(y[i][j]-next_start[j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + traj_dist_grad[j];
+//				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_x[j];
+
+#ifdef VALIDATION
+				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_x[j];
+#else
+				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]);
+#endif
+			}
+#ifdef VALIDATION
+			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * Axplusb[j]  + grad_t[j];
+#else
+			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * Axplusb[j];
+#endif
+		}
+		deriv[N*dim+i] = sum;
 	}
 	std::vector<double> v(dim, 0);
 	for (unsigned int j = 0; j < dim; j++) {
 		v[j] = x[ (N-1) * dim + j];
 	}
-	std::vector<double> trace_end_pt(dim,0);
+	std::vector<double> trace_end_pt(dim,0), traj_dist_grad(dim,0);
 	int loc_index = locIdList[N-1];
 	Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
 	polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
 	trace_distance = 0;
-	trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I);
+	trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I, traj_dist_grad);
 
-	// analytical grad computation
+//	cost+=trace_distance; // last trace must also be valid
+#ifdef VALIDATION
+	cost += I->point_distance(trace_end_pt); // adding the distance of last point to Inv, for validation
+#endif
+
+	// analytical grad computation wrt start point
 	math::matrix<double> Aexp(d.MatrixA.size1(),d.MatrixA.size2());
+	std::vector<double> Axplusb(dim), chain_mult(dim);
 	d.MatrixA.matrix_exponentiation(Aexp,x[N*dim+N-1]);
-	std::vector<double> chain_mult(dim);
-	for(unsigned int k=0;k<dim;k++)
-		chain_mult[k] = Aexp(k,k);
-	std::vector<double> d_dist_dx = dist_grad(trace_end_pt,bad_poly,chain_mult);
+	d.MatrixA.mult_vector(trace_end_pt,Axplusb);
+
 	for(unsigned int j=0;j<dim;j++){
-		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + d_dist_dx[j];
+		chain_mult[j] = Aexp(j,j);
+		Axplusb[j] = Axplusb[j] + d.C[j];
 	}
-	// analytical grad wrt dwell times
-	for(unsigned int i=0;i<N-1;i++){
-		int loc_index=locIdList[i];
-		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
-		std::vector<double> res(dim);
-		d.MatrixA.mult_vector(y[i],res);
-		assert(d.C.size() == res.size());
-		for (unsigned int j = 0; j < dim; j++) {
-			res[j] = res[j] + d.C[j];
-		}
-		double sum=0;
-		for (unsigned int j = 0; j < dim; j++) {
-			sum+= 2*(y[i][j] - x[(i+1)*dim+j]) * res[j];
-		}
-		deriv[N*dim+i] = sum;
+	std::vector<double> Inv_dist_grad_x(dim,0), Inv_dist_grad_t(dim,0), bad_dist_gradx(dim,0), bad_dist_gradt(dim,0);
+
+	bad_dist_gradx = dist_grad(trace_end_pt,bad_poly,chain_mult);
+
+	Inv_dist_grad_t = dist_grad(trace_end_pt,I,Axplusb);
+	Inv_dist_grad_x = dist_grad(trace_end_pt,I,chain_mult);
+
+	for(unsigned int j=0;j<dim;j++){
+//		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + d_dist_dx[j] + traj_dist_grad[j];
+		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + bad_dist_gradx[j];
+		deriv[(N-1)*dim+j] += Inv_dist_grad_x[j];
 	}
+
+
 	//deriv of cost function w.r.t dwell time of last trajectory going to bad set
 
-	loc_index=locIdList[N-1];
-	d = HA->getLocation(loc_index)->getSystem_Dynamics();
-	std::vector<double> res(dim);
-	d.MatrixA.mult_vector(trace_end_pt,res);
-	assert(d.C.size() == res.size());
-	for (unsigned int j = 0; j < dim; j++) {
-		res[j] = res[j] + d.C[j];
-	}
-	deriv[N*dim + N - 1] = 0;
-	d_dist_dx = dist_grad(trace_end_pt,bad_poly,res);
+	deriv[N*dim+N-1] = 0;
+	bad_dist_gradt = dist_grad(trace_end_pt,bad_poly,Axplusb);
 	for(unsigned int j=0;j<dim;j++)
-		deriv[N*dim+N-1]+=d_dist_dx[j];
+		deriv[N*dim+N-1]+=bad_dist_gradt[j] + Inv_dist_grad_t[j];
 	// compute the distance of this endpoint with the forbidden polytope
-//	cost+=trace_distance; // the last traj segment should also satisfy the location invariant
 	cost+= bad_poly->point_distance(trace_end_pt);
 
 // Analytic Solution
@@ -371,24 +282,6 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 			grad[i] = deriv[i];
 		}
 	}
-	//-------gsl derivative
-//	if(!grad.empty()){
-//		gsl_function F;
-//		F.function = &compute_cost;
-//		double x_params[x.size()+1];
-//		for(unsigned int i=0;i<x.size();i++)
-//			x_params[i] = x[i];
-//
-//		double abserr;
-//		for(unsigned int i=0;i<x.size();i++){
-//			x_params[x.size()] = i;
-//			F.params = &x_params;
-//			gsl_deriv_central(&F,x[i],1e-10,&grad[i],&abserr);
-////			std::cout << "Numerical Gradient=" << grad[i] << ": ";
-////			std::cout << "Analytic Gradient=" << deriv[i] << std::endl;
-//		}
-//	}
-	//------
 
 	std::cout << "current cost=" << cost << std::endl;
 //	exit(0);
@@ -643,14 +536,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance) {
 	unsigned int index = 0;
 	for (unsigned int i = 0; i < N; i++) {
 		C = get_symbolic_state(i)->getInitialSet();
-//		//debug
-//		std::ofstream myfile;
-//		string fname = "initpoly";
-//		myfile.open(fname.c_str());
-//		C->print2file(fname, 0, 1);
-//		system("graph -TX -BC initpoly");
-//		myfile.close();
-		//---
 		A = C->getCoeffMatrix();
 		b = C->getColumnVector();
 
@@ -731,14 +616,14 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	refinements = std::list<violating_CE>();
 	// call to genCE func with no refining trajectory
 	concreteCE::ptr cexample = gen_concreteCE(tolerance);
-	return cexample;
-//	if(cexample->validate())
-//	{
-//		std::cout << "Generated Trace Validated\n";
-//		return cexample;
-//	}
-//	else
-//		throw std::runtime_error("Validation of counter example FAILED\n");
+//	return cexample;
+	if(cexample->validate())
+	{
+		std::cout << "Generated Trace Validated\n";
+		return cexample;
+	}
+	else
+		throw std::runtime_error("Validation of counter example FAILED\n");
 /*
 	violating_CE v;
 	v = cexample->validate();
