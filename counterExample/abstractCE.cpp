@@ -663,17 +663,4 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 		return concreteCE::ptr(new concreteCE());
 	}
 
-/*
-	violating_CE v;
-	v = cexample->validate();
-
-	if(!v.flag){
-		std::cout << "Trajectory validation failed\n";
-		refinements.push_back(v); // refining trajectory added
-		cexample = gen_concreteCE(tolerance);
-		v = cexample->validate();
-	}
-	else
-		std::cout << "Trajectory Validation PASSED\n";*/
-
 }

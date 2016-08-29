@@ -13,6 +13,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include "Utilities/Template_Polyhedra.h"
 #include "Utilities/Post_Assignment.h"
+#include "Utilities/dump_abstractCE_list.h"
 #include <list>
 #include <utility>
 #include <iterator>
@@ -80,7 +81,7 @@ int main(int argc, char *argv[]) {
 
 	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)}
 	std::string bad_state; // string to capture the bad state description given by the user
-	abstractCE::ptr ce;	//object of class counter_example
+	std::list<abstractCE::ptr> ce_candidates;	//object of class counter_example
 	userOptions user_options;
 
 	//int number_of_times = 1; //Make this 1 for Memory Profiling
@@ -443,7 +444,7 @@ int main(int argc, char *argv[]) {
 		if (user_options.get_automata_exploration_algorithm() == BFS) { //Sequential Search implemented for Discrete Jumps
 
 			std::cout << "\nRunning Sequential BFS\n";
-			Symbolic_states_list = reach.computeSeqentialBFSReach(ce);
+			Symbolic_states_list = reach.computeSeqentialBFSReach(ce_candidates);
 			/*Symbolic_states_list = reach(Hybrid_Automata, init_state,
 					reach_parameters, transition_iterations, Algorithm_Type,
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
@@ -453,12 +454,12 @@ int main(int argc, char *argv[]) {
 			//Symbolic_states_list = reach.computeParallelBFSReach(ce);
 			//Symbolic_states_list = reach.computeParallelBFSReachLockAvoid(ce);	//without LOAD Balance Approach
 
-			Symbolic_states_list = reach.ParallelBFS_GH();	// Golzman algorithm adaption
+			Symbolic_states_list = reach.ParallelBFS_GH();	// Holzmann algorithm adaptation
 
 		} else if (user_options.get_automata_exploration_algorithm() == PBFS_LB) { //Parallel Breadth First Search implemented for Discrete Jumps
 			std::cout << "\nRunning Parallel BFS using Load Balancing Algorithm.\n";
 			//Symbolic_states_list = reach.computeParallelLoadBalanceReach(ce);	//Our LOAD Balance Approach
-			Symbolic_states_list = reach.LoadBalanceAll(ce);
+			Symbolic_states_list = reach.LoadBalanceAll(ce_candidates);
 			/*Symbolic_states_list = reach_pbfs(Hybrid_Automata, init_state,
 					reach_parameters, transition_iterations, Algorithm_Type,
 					Total_Partition, lp_solver_type_choosen, number_of_streams,
@@ -613,9 +614,15 @@ std::list<symbolic_states::ptr>::iterator it;
 	}
 	outFile.close();
 
-
-	if (ce != NULL) {
+	/*
+	 * counterExample utility. Plot the location sequence of every abstract CE in a file
+	 */
+	dump_abstractCE_list(ce_candidates);
+	/** End of debug */
+	bool real_ce = false;
+	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
 		cout << "******** Safety Property Violated ********\n";
+		abstractCE::ptr ce = *(it);
 		std::list<abstract_symbolic_state::ptr> list_sym_states;
 		std::list<transition::ptr> list_transition;
 		list_sym_states = ce->get_CE_sym_states();
@@ -631,18 +638,24 @@ std::list<symbolic_states::ptr>::iterator it;
 				user_options.get_second_plot_dimension());
 		concreteCE::ptr bad_trace = ce->get_validated_CE(1.5);
 		if(bad_trace->is_empty()){
-			std::cout << "No real counter example found\n";
-			return 0;
+			continue;
 		}
-		bad_trace->set_automaton(ce->get_automaton());
-		std::string tracefile = "./bad_trace.o";
-		bad_trace->plot_ce(tracefile,user_options.get_first_plot_dimension(), user_options.get_second_plot_dimension());
+		else {
+			bad_trace->set_automaton(ce->get_automaton());
+			std::string tracefile = "./bad_trace.o";
+			bad_trace->plot_ce(tracefile,user_options.get_first_plot_dimension(), user_options.get_second_plot_dimension());
+			real_ce = true;
+			break;
+		}
 
-	} else {
-
+	}
+	if(!real_ce){
 		cout << "******** Does NOT Violate Safety Property ********\n";
 	}
-
+	else
+	{
+		std::cout << "Counter Example Trace Plotted in the file bad_trace.o\n";
+	}
 	cout << "\n******** Summary of XSpeed ********\n";
 	return 0; //returning only the Wall time taken to execute the Hybrid System
 }

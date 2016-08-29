@@ -65,26 +65,26 @@ public:
 
 	//Sequential Breadth First Search for Discrete Jumps
 	std::list<symbolic_states::ptr> computeSeqentialBFSReach(
-			abstractCE::ptr& ce);
+			std::list<abstractCE::ptr>& ce);
 
 	//1)  Parallel Breadth First Search for Discrete Jumps with critical section for adding newSymbolicState
 	std::list<symbolic_states::ptr> computeParallelBFSReach(
-			abstractCE::ptr& ce);
+			std::list<abstractCE::ptr>& ce_candidates);
 
 	//2)  Lock Avoidance for adding newSymbolicState:: Parallel Breadth First Search for Discrete Jumps
 	//separate Read and Write Queue (pwlist.WaitingList)
-		std::list<symbolic_states::ptr> computeParallelBFSReachLockAvoid(abstractCE::ptr& ce);
+		std::list<symbolic_states::ptr> computeParallelBFSReachLockAvoid(std::list<abstractCE::ptr>& ce_candidates);
 
 	/*
 	 * Both 1) and 2) method resulted in same performance as Work-Load for flowpipe computation is uneven
 	 * So 3) will aggregrate all flowpipe computation work into one BIG task and will run that in parallel by multi-core CPU or GPU
 	 */
-		std::list<symbolic_states::ptr> computeParallelLoadBalanceReach(abstractCE::ptr& ce);
+		std::list<symbolic_states::ptr> computeParallelLoadBalanceReach(std::list<abstractCE::ptr>& ce_candidates);
 
 	/*
 	 * Here we also apply Load Balancing algorithm for POST_D computation
 	 */
-	std::list<symbolic_states::ptr> LoadBalanceAll(abstractCE::ptr& ce);
+	std::list<symbolic_states::ptr> LoadBalanceAll(std::list<abstractCE::ptr>& ce);
 
 
 
@@ -114,8 +114,8 @@ private:
 				template_polyhedra::ptr& reach_region);
 
 	/*Returns True, if safety has been violated on the current computed Symbolic States and sets/creates the counterExample class
-	Returns False, if safety not violated and the object of counterExample class remains NULL pointer */
-	bool safetyVerify(symbolic_states::ptr& computedSymStates, std::list<symbolic_states::ptr>& Reachability_Region, abstractCE::ptr& ce);
+	Returns False, if safety not violated the counterExample list remains empty*/
+	bool safetyVerify(symbolic_states::ptr& computedSymStates, std::list<symbolic_states::ptr>& Reachability_Region, std::list<abstractCE::ptr>& ce);
 
 	/*void preLoadBalanceReachCompute(ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics,
 			supportFunctionProvider::ptr Initial, polytope::ptr invariant, bool isInvariantExist, math::matrix<float>& List_dir_X0,
