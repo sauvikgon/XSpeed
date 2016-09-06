@@ -636,8 +636,10 @@ std::list<symbolic_states::ptr>::iterator it;
 		int index = 0;
 		ce->plot(user_options.get_first_plot_dimension(),
 				user_options.get_second_plot_dimension());
-		concreteCE::ptr bad_trace = ce->get_validated_CE(1.5);
+		concreteCE::ptr bad_trace = ce->get_validated_CE(0.001);
 		if(bad_trace->is_empty()){
+			std::cout << "Cannot Splice Trajectories within Accepted Error Tolerance\n";
+			std::cout << "Looking for Other paths to Bad Set\n";
 			continue;
 		}
 		else {

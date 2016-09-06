@@ -305,7 +305,7 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 		}
 	}
 
-	std::cout << "current cost=" << cost << std::endl;
+//	std::cout << "current cost=" << cost << std::endl;
 //	exit(0);
 	return cost;
 }
@@ -604,7 +604,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
-		std::cout << "Obtained minimum less than " << tolerance << std::endl;
+		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
 		return cexample;
 	} else {
 
@@ -647,14 +647,20 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	do{
 		struct refinement_point pt;
 		cexample = gen_concreteCE(tolerance,refinements);
+		if(cexample->is_empty())
+			return cexample;
+
 		val_res = cexample->valid(pt);
 		if(!val_res){
+			std::cout << "FAILED VALIDATION\n";
 			refinements.push_back(pt);
 			ref_count++;
 		}
+		//debug
+		//break;
 	}while(!val_res && ref_count< max_refinements);
 
-	if(ref_count < max_refinements){
+	if((ref_count < max_refinements) & !cexample->is_empty()){
 		std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
 		return cexample;
 	}
