@@ -10,6 +10,7 @@
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "gsl/gsl_deriv.h"
 #include "Utilities/gradient.h"
+#include "core_system/math/analyticODESol.h"
 #include <fstream>
 #include <string>
 
@@ -153,7 +154,13 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 
 		trace_distance = 0;
 		std::vector<double> traj_dist_grad(dim,0); // holds the grads of the trajectories distance to invariant
-		y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I, traj_dist_grad);
+		// If dynamics invertible, then get analytical solution. Otherwise, perform
+		// numerically simulation with Euler steps.
+		if(d.MatrixA.inverse(expAt)){
+			y[i] = ODESol(v,d,x[N * dim + i]);
+		}
+		else
+			y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I, traj_dist_grad);
 
 		d.MatrixA.matrix_exponentiation(expAt,x[N*dim+i]);
 		assert(expAt.size1() == dim);
