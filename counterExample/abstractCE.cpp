@@ -287,20 +287,42 @@ double myobjfunc(const std::vector<double> &x, std::vector<double> &grad,
 	for(std::list<refinement_point>::iterator it = ref_pts.begin();it!=ref_pts.end();it++)
 	{
 		refinement_point p = *it;
+		assert(p.seq_no<N);
 		unsigned int locID = locIdList[p.seq_no];
-		std::vector<double> v = p.violating_pt;
-		polytope::ptr I = HA->getLocation(locID)->getInvariant();
-		cost+=I->point_distance(v);
+		double dwell_time = x[N*dim+p.seq_no];
+		// if the sampled time is less than the time when the refinement point violated the Inv, then ignore this refinement
+		if(dwell_time<p.time)
+			continue;
+		// Compute the new point v at p.time units from the new sampled start point.
 		Dynamics d = HA->getLocation(locID)->getSystem_Dynamics();
-		math::matrix<double> expA;
-		d.MatrixA.matrix_exponentiation(expA,p.time);
-		std::vector<double> diag_expAt(dim,0);
-		for(unsigned int j=0;j<dim;j++)
-			diag_expAt[j] = expAt(j,j);
+		polytope::ptr I = HA->getLocation(locID)->getInvariant();
+		assert(d.C.size() == dim);
 
-		std::vector<double> grad_dist_x = dist_grad(v,I,diag_expAt);
-		for(unsigned int j=0;j<dim;j++)
-			deriv[p.seq_no*dim+j] += grad_dist_x[j];
+		// If dynamics invertible, then get analytical solution. Otherwise, perform
+		// numerically simulation with Euler steps.
+		std::vector<double> v(dim);
+		for(unsigned int i=0;i<dim;i++)
+			v[i] = x[p.seq_no*dim+i];
+
+		if(d.MatrixA.inverse(expAt)){
+			v = ODESol(v,d,dwell_time);
+		}
+		else
+			v = simulate_trajectory(v, d, dwell_time, trace_distance, I, traj_dist_grad);
+
+		double dist = I->point_distance(v);
+		if(dist>0){
+			cost+= dist;
+			math::matrix<double> expA;
+			d.MatrixA.matrix_exponentiation(expA,p.time);
+			std::vector<double> diag_expAt(dim,0);
+			for(unsigned int j=0;j<dim;j++)
+				diag_expAt[j] = expAt(j,j);
+
+			std::vector<double> grad_dist_x = dist_grad(v,I,diag_expAt);
+			for(unsigned int j=0;j<dim;j++)
+				deriv[p.seq_no*dim+j] += grad_dist_x[j];
+		}
 	}
 #endif
 

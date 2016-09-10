@@ -378,18 +378,6 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 		for(unsigned int i=0;i<dimension;i++)
 			v[i] = NV_Ith_S(u,i);
 		distance += I->point_distance(v);
-//		D.MatrixA.matrix_exponentiation(expAt,t);
-
-		//chain multiplicant vector
-//		std::vector<double> res(dimension,0);
-//		for(unsigned int j=0;j<expAt.size1();j++){
-//			res[j] = expAt(j,j);
-//		}
-//		g = dist_grad(v,I,res);
-
-//		for(unsigned int j=0;j<expAt.size1();j++){
-//			grad[j] += g[j];
-//		}
 	}
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);
