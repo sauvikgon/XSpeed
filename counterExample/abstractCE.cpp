@@ -462,7 +462,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative bases
 
-	myopt.set_maxeval(500);
+	myopt.set_maxeval(1000);
 	myopt.set_stopval(0.000001);
 
 //	myopt.set_xtol_rel(1e-4);

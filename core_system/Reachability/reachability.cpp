@@ -28,8 +28,6 @@ void reachability::setReachParameter(hybrid_automata& h, initial_state::ptr& i,
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
 std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list<abstractCE::ptr>& ce_candidates) {
-	//	std::cout<<"Algorithm_Type = "<<Algorithm_Type<<std::endl;
-	//std::list<template_polyhedra> Reachability_Region;
 
 	std::list < symbolic_states::ptr > Reachability_Region;
 	template_polyhedra::ptr reach_region;
@@ -178,7 +176,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 			int locID = current_location->getLocId();
 			cout<<"Running Safety Check for Loc = "<<locID<<std::endl;
 
-			if (locID == forbidden_set.first) { //forbidden locID matches
+			if (forbidden_set.first==-1 || locID == forbidden_set.first) { //forbidden locID matches
 				polytope::ptr forbid_poly = forbidden_set.second;
 				std::list < template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
@@ -369,10 +367,6 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		template_polyhedra::ptr& reach_region) {
 
 	if (Algorithm_Type == SEQ) { //Continuous Sequential Algorithm
-		//cout << "\nRunning Sequntial\n";
-		//		std::cout<<"\nBefore entering reachability Sequential = " << gurobi_lp_solver::gurobi_lp_count;
-		//		std::cout<<"\nBefore entering reachability Sequential = " << lp_solver::lp_solver_count;
-//			int a;			std::cin>>a;
 		/*boost::timer::cpu_timer AllReach_time;
 		AllReach_time.start();*/
 		reach_region = reachabilitySequential(NewTotalIteration, current_location->getSystem_Dynamics(),
@@ -745,9 +739,6 @@ cout<<"Breadth - Level === "<<number_times<<"\n";
 		// the size of the PWList at each iteration
 		//	cout << "Test 5\n";
 		unsigned int count = getSize_Qpw_list(Qpw_list[t]); //get the size of PWList
-		//iter_max = iter_max + count;
-		//	cout << "\nCount = " << count << "\n";
-		//vector<template_polyhedra::ptr> reach_region_list(count); //each thread write's flowpipe on separate index
 		std::vector < symbolic_states::ptr > S(count);
 
 		std::vector <location::ptr> list_currLocation(count);	//Data structure required to separate PostD from PostC
@@ -758,10 +749,10 @@ cout<<"Breadth - Level === "<<number_times<<"\n";
 		//Create a sublist of initial_state and work with it inside the parallel region(each thread accesses uniquely)
 		//vector<symbolic_states> list_U(count); //SubList for parallel
 		vector < initial_state::ptr > list_U(count); //SubList for parallel
-		//	cout << "Test 6\n";
+
 		list_U = getAllpw_list(Qpw_list, t, count, allPassedList); //All initial_state have been deleted
-		//for (int i=0;i<Qpw_list[t].size();i++)
-			Qpw_list[t].resize(0);
+
+		Qpw_list[t].resize(0);
 		cout<<"Qpw_list[t].size() = "<<Qpw_list[t].size()<<std::endl;
 
 		Qpw_list[1 - t].resize(count); //resize to accommodate
@@ -782,10 +773,9 @@ cout<<"Breadth - Level === "<<number_times<<"\n";
 			boost::timer::cpu_timer t702;
 			t702.start();
 			if (id==0){
-			 std::cout<<"\nMax Thread in Outer Level = "<< omp_get_num_threads();
-			 //std::cout<<"\nMax Active Levels = "<<omp_get_max_active_levels();
-			 }
-			 //std::cout<<"\n Outer threadID = "<<omp_get_thread_num()<<"\n";
+				std::cout<<"\nMax Thread in Outer Level = "<< omp_get_num_threads();
+
+			}
 			//there will be different current_location, continuous_initial_polytope, reach_parameters
 			initial_state::ptr U; //local
 			//	symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states());
@@ -806,12 +796,6 @@ cout<<"Breadth - Level === "<<number_times<<"\n";
 			S[id]->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-			/*
-			 for (std::set<int>::iterator it =
-			 discrete_state.getDiscreteElements().begin();
-			 it != discrete_state.getDiscreteElements().end(); ++it)
-			 location_id = (*it); //have to modify later for multiple elements of the set:: Now assumed only one element
-			 */
 			location::ptr current_location;
 			current_location = H.getLocation(location_id);
 			string name = current_location->getName();
@@ -1071,10 +1055,6 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 	template_polyhedra::ptr reach_region;
 
 	if (Algorithm_Type == SEQ) { //Continuous Sequential Algorithm
-		//	cout << "\nRunning Sequntial\n";
-		//		std::cout<<"\nBefore entering reachability Sequential = " << gurobi_lp_solver::gurobi_lp_count;
-		//		std::cout<<"\nBefore entering reachability Sequential = " << lp_solver::lp_solver_count;
-//			int a;			std::cin>>a;
 		boost::timer::cpu_timer AllReach_time;
 		AllReach_time.start();
 
@@ -1094,8 +1074,6 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 	}
 
 	if (Algorithm_Type == PAR_OMP) {
-		//Parallel implementation using OMP parallel			//	double wall_timer = omp_get_wtime();
-		//cout << "\nRunning Parallel Using OMP Thread\n";
 		boost::timer::cpu_timer AllReach_time;
 		AllReach_time.start();
 
@@ -2394,8 +2372,6 @@ template_polyhedra::ptr reachability::substitute_in_ReachAlgorithm(
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	template_polyhedra::ptr reachableRegion; //template_polyhedra::ptr reachRegion;
 
-	//std::cout << "\n Running BIG_Task Reach Algorithm " << std::endl;
-
 /*	boost::timer::cpu_timer reachLoop_time;
 	reachLoop_time.start();*/
 	unsigned int numVectors = LoadBalanceDS.reach_param.Directions.size1(); //size2 or the dimension will be some for all sym_state
@@ -2422,9 +2398,7 @@ template_polyhedra::ptr reachability::substitute_in_ReachAlgorithm(
 		cores = numVectors;
 	else
 		cores = numCoreAvail;
-//	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
 
-//#pragma omp parallel for num_threads(cores)
 	for (unsigned int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 		unsigned int index_X0, index_U; //making the index suitable for parallelizing
 		//unsigned int index; 	//index = eachDirection * NewTotalIteration;
@@ -2445,21 +2419,16 @@ template_polyhedra::ptr reachability::substitute_in_ReachAlgorithm(
 		double sVariable = 0.0, s1Variable; //initialize s0
 		std::vector<double> rVariable(dimension), r1Variable(dimension);
 		unsigned int loopIteration = 0;
-		//	std::cout<<"Testing 1\n";
+
 		//  ************** Omega Function   ********************
 		res1 = LoadBalanceDS.sf_X0[index_X0]; //X0->SF(direction)			//	0
-		//	std::cout<<"Testing 2\n";
-		//term3b = support_unitball_infnorm(Direction_List[index].direction);
+
 		term3b = (double) LoadBalanceDS.sf_UnitBall[index_X0]; //  needed  0
-		//cout<<"term3b = "<<term3b<<"\n";
 		if (!LoadBalanceDS.current_location->getSystem_Dynamics().isEmptyC) {
 			term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_dotProduct[index_X0];
-			//	cout<<"dot_product(SystemDynamics.C, rVariable) = "<<LoadBalanceDS.sf_dotProduct[index_X0]<<"\n";
 		}
-		//	std::cout<<"Testing 3\n";
 		index_X0++; //	made 1
 		term1 = LoadBalanceDS.sf_X0[index_X0]; //X0->SF(phi_trans_dir)		//  1
-		//	std::cout<<"Testing 4\n";
 		index_X0++; //	made 2
 		if (!U_empty) {
 			term2 = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_U[index_U]; //U->SF(Btrans_dir)
@@ -2483,18 +2452,9 @@ template_polyhedra::ptr reachability::substitute_in_ReachAlgorithm(
 			//  ************** W_Support Function   ********************
 			double result, res_sup;
 			if (!U_empty) {
-				/*	res1 = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_U[index_U - 1]; //replace previous value
-				 //index_U++;
-				 } else {
-				 res1 = 0;*/
 				result1 = term2;
 			}
 			double beta = LoadBalanceDS.reach_param.result_beta;
-			//res_sup = (double) support_unitball_infnorm(Direction_List[index].direction);
-			//res_sup = (double) supp_func_UnitBall[d_index];  d_index++;	//Should replace from previous computation
-			//res_sup = term3b; //replaced from previous steps
-			/*if (loopIteration == 1) // needed  0 again here
-			 res_sup = supp_func_UnitBall[index_X0 - 2]; //Should replace from previous computation*/
 
 			//double res_beta = beta * res_sup;
 			double res_beta = beta * term3b;
@@ -2504,15 +2464,12 @@ template_polyhedra::ptr reachability::substitute_in_ReachAlgorithm(
 			//  ************** W_Support Function   ********************
 			s1Variable = sVariable + zV;
 			//  ************** Omega Function   ********************
-			//double res1;
-			//res1 = LoadBalanceDS.sf_X0[index_X0 - 1]; ////replace previous value....  X0->SF(direction)		//	(2 -1)=1
 			res1 = term1; ////replace
 
 			term3b = (double) LoadBalanceDS.sf_UnitBall[index_X0 - 1]; //Compute here	//needed 1
-			//	cout<<"term3b = "<<term3b<<"\n";
+
 			if (!LoadBalanceDS.current_location->getSystem_Dynamics().isEmptyC) {
 				term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_dotProduct[index_X0 - 1];
-				//	cout<<"dot_product(SystemDynamics.C, r1Variable) = "<<LoadBalanceDS.sf_dotProduct[index_X0 - 1]<<"\n";
 			}
 			double term3, term3a, res2;
 			term1 = LoadBalanceDS.sf_X0[index_X0]; //X0->SF(phi_trans_dir)		//	2
@@ -2541,62 +2498,34 @@ template_polyhedra::ptr reachability::substitute_in_ReachAlgorithm(
 		} //end of all Iterations of each vector/direction
 	} //end of for each vector/directions
 
-	//std::cout<<"working 2ab"<<std::endl;
-	std::cout << std::fixed; //to assign precision on the std::output stream
-	std::cout.precision(10); //cout << setprecision(17);
-	/*boost::timer::cpu_timer invSet;
-	invSet.start();*/
+	std::cout << std::fixed;
+	std::cout.precision(10);
 	if (LoadBalanceDS.current_location->isInvariantExists() == true) { //if invariant exist. Computing
-		//std::cout<<"Invariant Exists Test inside 1a\n";
+
 		math::matrix<double> inv_sfm;
-//		std::cout<<"num_inv = "<<num_inv <<"\n";
-//		std::cout<<"working"<<std::endl;
 		inv_sfm.resize(num_inv, LoadBalanceDS.newIteration);
 		for (int eachInvDirection = 0; eachInvDirection < num_inv; eachInvDirection++) {
-			//std::cout<<"working"<<std::endl;
-//#pragma omp parallel for //num_threads(cores)
 			for (unsigned int i = 0; i < LoadBalanceDS.newIteration; i++) {
-				//inv_sfm(eachInvDirection, i) = invariant->getColumnVector()[eachInvDirection];
 				inv_sfm(eachInvDirection, i) = inv_bounds[eachInvDirection];
-				//cout<<"inv_bounds[eachInvDirection] = "<< inv_bounds[eachInvDirection]<<"\n";
-				//inv_sfm(eachInvDirection, i) = LoadBalanceDS.current_location->getInvariant()->getColumnVector()[eachInvDirection];
-				//cout<<"inv_bounds[eachInvDirection] = "<< inv_sfm(eachInvDirection, i)<<"\n";
+
 			}
 		}
-		//	std::cout<<"working a2"<<std::endl;
+
 		reachableRegion = template_polyhedra::ptr(new template_polyhedra());
-		//	std::cout<<"reachRegion size = "<<reachableRegion->getTotalIterations()<<std::endl;
-		//	std::cout<<"working 2b"<<std::endl;
 		reachableRegion->setTemplateDirections(LoadBalanceDS.reach_param.Directions);
-		//	std::cout<<"LoadBalanceDS.reach_param.Directions = "<<LoadBalanceDS.reach_param.Directions<<std::endl;
 		reachableRegion->setMatrix_InvariantBound(inv_sfm);
-		//std::cout<<"working 3"<<std::endl;
 		reachableRegion->setInvariantDirections(inv_directions);
-		//std::cout<<"working 4"<<std::endl;
 		reachableRegion->setMatrixSupportFunction(MatrixValue);
-		//return template_polyhedra::ptr( new template_polyhedra(MatrixValue, inv_sfm, ReachParameters.Directions, inv_directions));
 	} else {
-		//	std::cout<<"Invariant does not Exists!!!\n";
 		reachableRegion = template_polyhedra::ptr(new template_polyhedra());
 		reachableRegion->setMatrixSupportFunction(MatrixValue);
 		reachableRegion->setTemplateDirections(LoadBalanceDS.reach_param.Directions);
-		//	return template_polyhedra::ptr(	new template_polyhedra(MatrixValue, ReachParameters.Directions));
 	}
-	/*invSet.stop();
-	double wall_clock_invSet;
-	wall_clock_invSet = invSet.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-	double invSet_Time = wall_clock_invSet / (double) 1000;
-	std::cout << "\nInvariantSet Time:Wall  (in Seconds) = " << invSet_Time<< std::endl;*/
-/*	reachLoop_time.stop();
-	double wall_clock;
-	wall_clock = reachLoop_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-	double reach_Time = wall_clock / (double) 1000;
-	std::cout << "\nFinal Reach Loop Time:Wall  (in Seconds) = " << reach_Time<< std::endl;*/
 
 	return reachableRegion;
 
 }
-// Golzman algorithm adaption
+// Holzmann algorithm adaption
 
 std::list<symbolic_states::ptr> reachability::ParallelBFS_GH()
 {

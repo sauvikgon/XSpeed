@@ -506,7 +506,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 
 	std::string tokString = *tok_iter;
 	if(tokString.compare("loc")!=0 && tokString.compare("Loc")!=0 && tokString.compare("LOC")!=0 ){
-		throw std::runtime_error("forbidden state string improper: start with loc=id & ...\n");
+		throw std::runtime_error("forbidden state string improper: start with loc=id & ...\n use loc=-1 for any location\n");
 	}
 	tok_iter++;
 	f_set.first = std::atoi((*tok_iter).c_str());
