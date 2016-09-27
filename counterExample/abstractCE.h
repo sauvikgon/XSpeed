@@ -18,6 +18,8 @@
 #include "nlopt.hpp"
 #include "counterExample/abstract_symbolic_state.h"
 #include "counterExample/concreteCE.h"
+#include "nlpFunctions.h"
+
 
 #include <fstream>
 #include <string>
@@ -40,6 +42,8 @@ extern std::vector<int> locIdList;
 extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
 extern std::list<refinement_point> ref_pts; // a list of invariant violating points to refine the search and obtained a validated trajectory
+extern std::vector<std::vector<double> > X0; // list of start point of the trajectory segments. Used only in the NLP-LP mixed program
+extern std::list<abstract_symbolic_state::ptr> sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
 
 class abstractCE
 {
@@ -150,9 +154,18 @@ private:
 	polytope::ptr forbid_poly;
 
 	/**
-	 * Returns an instance of the concrete counter-example from the abstract.
+	 * Returns an instance of the concrete counter-example from the abstract using NLP and flowpipe constraints
 	 */
 	concreteCE::ptr gen_concreteCE(double tolerance, const std::list<refinement_point>& refinements);
+
+	/**
+	 * Returns an instance of the concrete counter-example, if it exists, using mixed NLP-LP
+	 */
+	concreteCE::ptr gen_concreteCE_NLP_LP(double tolerance, const std::list<refinement_point>& refinements);
+	/**
+	 * Returns an instance of the concrete counter-example, if it exists, using NLP and limited HA constraints
+	 */
+	concreteCE::ptr gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements);
 };
 
 

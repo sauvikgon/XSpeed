@@ -13,25 +13,29 @@
  * Reference for model is https://ths.rwth-aachen.de/research/projects/hypro/filtered-oscillator/
  *
  */
-void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::ptr& init_state,
+void SetOscillatorParameters(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	polytope::ptr initial_polytope_I;
 	polytope::ptr invariant1, invariant2, invariant3, invariant4;
-	polytope::ptr gaurd_polytope1, gaurd_polytope2, gaurd_polytope3, gaurd_polytope4;
+	polytope::ptr gaurd_polytope1, gaurd_polytope2, gaurd_polytope3,
+			gaurd_polytope4;
 	Dynamics system_dynamics;
 
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
-			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix, Bmatrix;
-	std::vector<double> boundValueI, boundValueV, invariantBoundValue, gaurdBoundValue;
+			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
+			Bmatrix;
+	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
+			gaurdBoundValue;
 
 	std::vector<double> vector_c;
 	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
 
 	size_type row, col;
 	// ********* constants Declaration **********
-	double a1 = -2.0, a2 =-1.0,c=0.5, x0=0.7, y0=0.7;
+	double a1 = -2.0, a2 = -1.0, c = 0.5, x0 = 0.7, y0 = 0.7;
 	// ********* constants Declaration Done **********
 
 	unsigned int initial_location_id = 3; //the initial Location ID
@@ -58,7 +62,8 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 
 	boundSignI = 1;
 	// Initial Polytope is initialised
-	initial_polytope_I = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+	initial_polytope_I = polytope::ptr(
+			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 // ********************* Initial Set Assignment Done **********************
 // **************************** Location ID=1 Label=np  ***************************
 
@@ -86,12 +91,12 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = vector_c;
 
-	system_dynamics.U = polytope::ptr(new polytope(true));	//system_dynamics.U->setIsEmpty(true); //set empty
+	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
 //	Dynamics Initalised ---------------------
 //Location 'loc1' has Transition 't1' with guard is x==0 & y + 0.714268*x >= 0 and No Assignment so its identity i.e., x'=x and y'=y
 	row = 3;
 	col = 2;
- 	gaurdConstraintsMatrix.resize(row, col);
+	gaurdConstraintsMatrix.resize(row, col);
 	gaurdConstraintsMatrix(0, 0) = 1;
 	gaurdConstraintsMatrix(0, 1) = 0;
 	gaurdConstraintsMatrix(1, 0) = -1;
@@ -105,7 +110,9 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	gaurdBoundValue[2] = 0;
 
 	gaurdBoundSign = 1;
-	gaurd_polytope1 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
+	gaurd_polytope1 = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
 
 //Transition Dynamics  Rx + w where R is the Assignment Mapping and w is a vector
 	math::matrix<double> R;	//Transition Dynamics
@@ -123,7 +130,8 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	assignment.Map = R;
 	assignment.b = w;
 //--------------
-	transition::ptr t1 = transition::ptr(new transition(1, "t1", 1, 3, gaurd_polytope1, assignment));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "t1", 1, 3, gaurd_polytope1, assignment));
 
 //Location 1:: Invariant constraint : x<=0 &  y >= -c/x0 * x
 	row = 2;
@@ -138,19 +146,23 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	invariantBoundValue[0] = 0;
 	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
-	invariant1 = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant1 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	Out_Going_Trans_fromLoc1.push_back(t1);
 
-	location::ptr l1 = location::ptr(new location(1, "loc1", system_dynamics, invariant1, true, Out_Going_Trans_fromLoc1));
+	location::ptr l1 = location::ptr(
+			new location(1, "loc1", system_dynamics, invariant1, true,
+					Out_Going_Trans_fromLoc1));
 // ********************** Initalised for Location 1 Done **********************
 
 // **************************** Location ID=2 Label=pp  ***************************
 //Location 'loc2' has Transition 't2' with guard is x<=0 & y + 0.714268*x == 0  and No Assignment so its identity i.e., x'=x and y'=y
 
 	//Dynamics  matrix A is common for all locations
-	row=2;
+	row = 2;
 	vector_c.resize(row);
 	vector_c[0] = -1.4;
 	vector_c[1] = 0.7;
@@ -164,8 +176,7 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = vector_c;
 
-	system_dynamics.U = polytope::ptr(new polytope(true));	//system_dynamics.U->setIsEmpty(true); //set empty
-
+	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
 
 	row = 3;
 	col = 2;
@@ -183,8 +194,11 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	gaurdBoundValue[2] = 0;
 
 	gaurdBoundSign = 1;
-	gaurd_polytope2 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign));
-	transition::ptr t2 = transition::ptr(new transition(2, "t2", 2, 1, gaurd_polytope2, assignment));
+	gaurd_polytope2 = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "t2", 2, 1, gaurd_polytope2, assignment));
 
 //Location 2:: Invariant constraint : y <=0
 	row = 2;
@@ -199,14 +213,17 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	invariantBoundValue[0] = 0;
 	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
-	invariant2 = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant2 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc2;
 	Out_Going_Trans_fromLoc2.push_back(t2);
 
-	location::ptr l2 = location::ptr(new location(2, "loc2", system_dynamics, invariant2, true, Out_Going_Trans_fromLoc2));
+	location::ptr l2 = location::ptr(
+			new location(2, "loc2", system_dynamics, invariant2, true,
+					Out_Going_Trans_fromLoc2));
 // ********************** Initalised for Location 2 Done **********************
-
 
 // **************************** Location ID=3 Label=loc3  ***************************
 //Location 'loc3' has Transition 't3' with guard is x>=0 & y + 0.714268*x == 0  and No Assignment so its identity i.e., x'=x and y'=y
@@ -226,9 +243,9 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = vector_c;
 
-	system_dynamics.U = polytope::ptr(new polytope(true));	//system_dynamics.U->setIsEmpty(true); //set empty
+	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
 //	Dynamics Initalised ---------------------
-	//Location 3::has transition t3::with guard is x>=0 & y<=0
+			//Location 3::has transition t3::with guard is x>=0 & y<=0
 	row = 3;
 	col = 2;
 	gaurdConstraintsMatrix.resize(row, col);
@@ -244,8 +261,11 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	gaurdBoundValue[1] = 0;
 	gaurdBoundValue[2] = 0;
 	gaurdBoundSign = 1;
-	gaurd_polytope3 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t3 = transition::ptr(new transition(3, "t3", 3, 4, gaurd_polytope3, assignment));
+	gaurd_polytope3 = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "t3", 3, 4, gaurd_polytope3, assignment));
 
 	//Location 3:: Invariant constraint : x<=0 & y<=0
 	row = 2;
@@ -260,14 +280,17 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	invariantBoundValue[0] = 0;
 	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
-	invariant3 = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant3 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc3;
 	Out_Going_Trans_fromLoc3.push_back(t3);
 
-	location::ptr l3 = location::ptr(new location(3, "loc3", system_dynamics, invariant3, true, Out_Going_Trans_fromLoc3));
+	location::ptr l3 = location::ptr(
+			new location(3, "loc3", system_dynamics, invariant3, true,
+					Out_Going_Trans_fromLoc3));
 // ********************** Initalised for Location 3 Done **********************
-
 
 // **************************** Location ID=4 Label=loc4  ***************************
 //Location 'loc4' has Transition 't4' with guard is x==0 & y + 0.714286 * x <=0 and No Assignment so its identity i.e., x'=x and y'=y
@@ -286,7 +309,7 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = vector_c;
 
-	system_dynamics.U = polytope::ptr(new polytope(true));	//system_dynamics.U->setIsEmpty(true); //set empty
+	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
 	//	Dynamics Initalised ---------------------
 
 	row = 3;
@@ -305,8 +328,11 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	gaurdBoundValue[2] = 0;
 	gaurdBoundSign = 1;
 
-	gaurd_polytope4 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t4 = transition::ptr(new transition(4, "t4", 4, 2, gaurd_polytope4, assignment));
+	gaurd_polytope4 = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "t4", 4, 2, gaurd_polytope4, assignment));
 
 	//Location 4:: Invariant constraint : x<=0 & y<=-c/x0 * x
 	row = 2;
@@ -321,12 +347,16 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	invariantBoundValue[0] = 0;
 	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
-	invariant4 = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant4 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc4;
 	Out_Going_Trans_fromLoc4.push_back(t4);
 
-	location::ptr l4 = location::ptr(new location(4, "loc4", system_dynamics, invariant4, true, Out_Going_Trans_fromLoc4));
+	location::ptr l4 = location::ptr(
+			new location(4, "loc4", system_dynamics, invariant4, true,
+					Out_Going_Trans_fromLoc4));
 // ********************** Initalised for Location 3 Done **********************
 
 	int dim = initial_polytope_I->getSystemDimension();
@@ -337,16 +367,17 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::pt
 	Hybrid_Automata.addLocation(l3);
 	Hybrid_Automata.addLocation(l4);
 
-	Hybrid_Automata.insert_to_map("x",0);
-	Hybrid_Automata.insert_to_map("y",1);
+	Hybrid_Automata.insert_to_map("x", 0);
+	Hybrid_Automata.insert_to_map("y", 1);
 
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet
-	initial_state::ptr I = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I, S, transition_id));
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
 
 	init_state = I;
 }
-
 
 /*This function is incomplete missing guard
  * 		The model has same dynamics matrix A for all Locations but different vector_c
@@ -362,19 +393,22 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	polytope::ptr initial_polytope_I;
 	polytope::ptr invariant1, invariant2, invariant3, invariant4;
-	polytope::ptr gaurd_polytope1, gaurd_polytope2, gaurd_polytope3, gaurd_polytope4;
+	polytope::ptr gaurd_polytope1, gaurd_polytope2, gaurd_polytope3,
+			gaurd_polytope4;
 	Dynamics system_dynamics;
 
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
-			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix, Bmatrix;
-	std::vector<double> boundValueI, boundValueV, invariantBoundValue, gaurdBoundValue;
+			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
+			Bmatrix;
+	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
+			gaurdBoundValue;
 
 	std::vector<double> vector_c;
 	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
 
 	size_type row, col;
 	// ********* constants Declaration **********
-	double a1 = -2.0, a2 =-1.0,c=0.5, x0=0.7, y0=0.7;
+	double a1 = -2.0, a2 = -1.0, c = 0.5, x0 = 0.7, y0 = 0.7;
 	// ********* constants Declaration Done **********
 
 	unsigned int initial_location_id = 1; //the initial Location ID
@@ -401,7 +435,8 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 
 	boundSignI = 1;
 	// Initial Polytope is initialised
-	initial_polytope_I = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+	initial_polytope_I = polytope::ptr(
+			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 // ********************* Initial Set Assignment Done **********************
 // **************************** Location ID=1 Label=np  ***************************
 
@@ -429,22 +464,22 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = vector_c;
 
-	system_dynamics.U = polytope::ptr(new polytope(true));	//system_dynamics.U->setIsEmpty(true); //set empty
+	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
 //	Dynamics Initalised ---------------------
 //Location 'np' has Transition 'hop' with guard is ..... and No Assignment so its identity i.e., x'=x and y'=y
 	row = 2;
 	col = 2;
-/* Find out what is the guard for Oscillator
- * 	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = 1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0;
-	gaurdConstraintsMatrix(1, 1) = -1;
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundSign = 1;
-	gaurd_polytope1 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));*/
+	/* Find out what is the guard for Oscillator
+	 * 	gaurdConstraintsMatrix.resize(row, col);
+	 gaurdConstraintsMatrix(0, 0) = 1;
+	 gaurdConstraintsMatrix(0, 1) = 0;
+	 gaurdConstraintsMatrix(1, 0) = 0;
+	 gaurdConstraintsMatrix(1, 1) = -1;
+	 gaurdBoundValue.resize(row);
+	 gaurdBoundValue[0] = 0;
+	 gaurdBoundValue[1] = 0;
+	 gaurdBoundSign = 1;
+	 gaurd_polytope1 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));*/
 
 //Transition Dynamics  Rx + w where R is the Assignment Mapping and w is a vector
 	math::matrix<double> R;	//Transition Dynamics
@@ -460,7 +495,8 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 //--------------
-	transition::ptr t1 = transition::ptr(new transition(1, "hop", 1, 2, gaurd_polytope1, assignment));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "hop", 1, 2, gaurd_polytope1, assignment));
 
 //Location 1:: Invariant constraint : x<=0 &  y >= -c/x0 * x
 	row = 2;
@@ -468,19 +504,23 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix(0, 0) = 1;
 	invariantConstraintsMatrix(0, 1) = 0;
-	invariantConstraintsMatrix(1, 0) = -1 * c/x0;
+	invariantConstraintsMatrix(1, 0) = -1 * c / x0;
 	invariantConstraintsMatrix(1, 1) = -1;
 
 	invariantBoundValue.resize(row);
 	invariantBoundValue[0] = 0;
 	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
-	invariant1 = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant1 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	Out_Going_Trans_fromLoc1.push_back(t1);
 
-	location::ptr l1 = location::ptr(new location(1, "np", system_dynamics, invariant1, true, Out_Going_Trans_fromLoc1));
+	location::ptr l1 = location::ptr(
+			new location(1, "np", system_dynamics, invariant1, true,
+					Out_Going_Trans_fromLoc1));
 // ********************** Initalised for Location 1 Done **********************
 
 // **************************** Location ID=2 Label=pp  ***************************
@@ -498,22 +538,24 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = vector_c;
 
-	system_dynamics.U = polytope::ptr(new polytope(true));	//system_dynamics.U->setIsEmpty(true); //set empty
-
+	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
 
 	row = 2;
 	col = 2;
 	/*gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = 1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0;
-	gaurdConstraintsMatrix(1, 1) = 1;
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundSign = 1;*/
-	gaurd_polytope2 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign));
-	transition::ptr t2 = transition::ptr(new transition(2, "hop", 2, 3, gaurd_polytope2, assignment));
+	 gaurdConstraintsMatrix(0, 0) = 1;
+	 gaurdConstraintsMatrix(0, 1) = 0;
+	 gaurdConstraintsMatrix(1, 0) = 0;
+	 gaurdConstraintsMatrix(1, 1) = 1;
+	 gaurdBoundValue.resize(row);
+	 gaurdBoundValue[0] = 0;
+	 gaurdBoundValue[1] = 0;
+	 gaurdBoundSign = 1;*/
+	gaurd_polytope2 = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "hop", 2, 3, gaurd_polytope2, assignment));
 
 //Location 2:: Invariant constraint : y <=0
 	row = 2;
@@ -521,21 +563,24 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix(0, 0) = 1;
 	invariantConstraintsMatrix(0, 1) = 0;
-	invariantConstraintsMatrix(1, 0) = -1 * c/x0;
+	invariantConstraintsMatrix(1, 0) = -1 * c / x0;
 	invariantConstraintsMatrix(1, 1) = -1;
 
 	invariantBoundValue.resize(row);
 	invariantBoundValue[0] = 0;
 	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
-	invariant2 = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant2 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc2;
 	Out_Going_Trans_fromLoc2.push_back(t2);
 
-	location::ptr l2 = location::ptr(new location(2, "pp", system_dynamics, invariant2, true, Out_Going_Trans_fromLoc2));
+	location::ptr l2 = location::ptr(
+			new location(2, "pp", system_dynamics, invariant2, true,
+					Out_Going_Trans_fromLoc2));
 // ********************** Initalised for Location 2 Done **********************
-
 
 // **************************** Location ID=3 Label=pn  ***************************
 //Location 'pn' has Transition 'hop' with guard is ..... and No Assignment so its identity i.e., x'=x and y'=y
@@ -555,22 +600,25 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = vector_c;
 
-	system_dynamics.U = polytope::ptr(new polytope(true));	//system_dynamics.U->setIsEmpty(true); //set empty
+	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
 //	Dynamics Initalised ---------------------
-	//Location 3::has transition t3::with guard is x>=0 & y<=0
+			//Location 3::has transition t3::with guard is x>=0 & y<=0
 	row = 2;
 	col = 2;
 	/*gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = -1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0;
-	gaurdConstraintsMatrix(1, 1) = 1;
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundSign = 1;*/
-	gaurd_polytope3 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t3 = transition::ptr(new transition(3, "hop", 3, 4, gaurd_polytope3, assignment));
+	 gaurdConstraintsMatrix(0, 0) = -1;
+	 gaurdConstraintsMatrix(0, 1) = 0;
+	 gaurdConstraintsMatrix(1, 0) = 0;
+	 gaurdConstraintsMatrix(1, 1) = 1;
+	 gaurdBoundValue.resize(row);
+	 gaurdBoundValue[0] = 0;
+	 gaurdBoundValue[1] = 0;
+	 gaurdBoundSign = 1;*/
+	gaurd_polytope3 = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "hop", 3, 4, gaurd_polytope3, assignment));
 
 	//Location 3:: Invariant constraint : x<=0 & y<=0
 	row = 2;
@@ -578,21 +626,24 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix(0, 0) = -1;
 	invariantConstraintsMatrix(0, 1) = 0;
-	invariantConstraintsMatrix(1, 0) = c/x0;
+	invariantConstraintsMatrix(1, 0) = c / x0;
 	invariantConstraintsMatrix(1, 1) = 1;
 
 	invariantBoundValue.resize(row);
 	invariantBoundValue[0] = 0;
 	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
-	invariant3 = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant3 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc3;
 	Out_Going_Trans_fromLoc3.push_back(t3);
 
-	location::ptr l3 = location::ptr(new location(3, "pn", system_dynamics, invariant3, true, Out_Going_Trans_fromLoc3));
+	location::ptr l3 = location::ptr(
+			new location(3, "pn", system_dynamics, invariant3, true,
+					Out_Going_Trans_fromLoc3));
 // ********************** Initalised for Location 3 Done **********************
-
 
 // **************************** Location ID=4 Label=nn  ***************************
 //Location 'nn' has Transition 'hop' with guard is ..... and No Assignment so its identity i.e., x'=x and y'=y
@@ -608,23 +659,26 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = vector_c;
 
-	system_dynamics.U = polytope::ptr(new polytope(true));	//system_dynamics.U->setIsEmpty(true); //set empty
+	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
 	//	Dynamics Initalised ---------------------
 
 	row = 2;
 	col = 2;
 	/*gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = -1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0;
-	gaurdConstraintsMatrix(1, 1) = -1;
+	 gaurdConstraintsMatrix(0, 0) = -1;
+	 gaurdConstraintsMatrix(0, 1) = 0;
+	 gaurdConstraintsMatrix(1, 0) = 0;
+	 gaurdConstraintsMatrix(1, 1) = -1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundSign = 1;*/
-	gaurd_polytope4 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t4 = transition::ptr(new transition(4, "hop", 4, 1, gaurd_polytope4, assignment));
+	 gaurdBoundValue.resize(row);
+	 gaurdBoundValue[0] = 0;
+	 gaurdBoundValue[1] = 0;
+	 gaurdBoundSign = 1;*/
+	gaurd_polytope4 = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "hop", 4, 1, gaurd_polytope4, assignment));
 
 	//Location 4:: Invariant constraint : x<=0 & y<=-c/x0 * x
 	row = 2;
@@ -632,19 +686,23 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix(0, 0) = 1;
 	invariantConstraintsMatrix(0, 1) = 0;
-	invariantConstraintsMatrix(1, 0) = c/x0;
+	invariantConstraintsMatrix(1, 0) = c / x0;
 	invariantConstraintsMatrix(1, 1) = 1;
 
 	invariantBoundValue.resize(row);
 	invariantBoundValue[0] = 0;
 	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
-	invariant4 = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant4 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc4;
 	Out_Going_Trans_fromLoc4.push_back(t4);
 
-	location::ptr l4 = location::ptr(new location(4, "nn", system_dynamics, invariant4, true, Out_Going_Trans_fromLoc4));
+	location::ptr l4 = location::ptr(
+			new location(4, "nn", system_dynamics, invariant4, true,
+					Out_Going_Trans_fromLoc4));
 // ********************** Initalised for Location 3 Done **********************
 
 	int dim = initial_polytope_I->getSystemDimension();
@@ -655,13 +713,14 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l3);
 	Hybrid_Automata.addLocation(l4);
 
-	Hybrid_Automata.insert_to_map("x",0);
-	Hybrid_Automata.insert_to_map("y",1);
-
+	Hybrid_Automata.insert_to_map("x", 0);
+	Hybrid_Automata.insert_to_map("y", 1);
 
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet
-	initial_state::ptr I = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I, S, transition_id));
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
 
 	init_state = I;
 }

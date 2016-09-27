@@ -7,8 +7,8 @@
 
 #include "Hybrid_Model_Parameters_Design/ConstantMotion/ConstantMotion.h"
 
-
-void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& init_state,
+void SetConstantMotion(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -67,7 +67,8 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	boundValueI[5] = 0;
 
 	boundSignI = 1;
-	initial_polytope_I = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+	initial_polytope_I = polytope::ptr(
+			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 	//initial_polytope_I.setPolytope(ConstraintsMatrixI, boundValueI, boundSignI);
 
 	row = 3;
@@ -155,9 +156,12 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 
-	gaurd_polytope = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
 
-	transition::ptr t1 = transition::ptr(new transition(1, "1 to 2", 1, 2, gaurd_polytope, assignment));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "1 to 2", 1, 2, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x2==1 and 0<=x1<=1 and  -100<=t<=100
 	gaurdBoundValue[1] = 0;
@@ -167,9 +171,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[5] = 100;
 
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr
-	t2 = transition::ptr(new transition(2, "1 to 6", 1, 6, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "1 to 6", 1, 6, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x1==2 and 0<=x2<=1 and  -100<=t<=100
 	gaurdBoundValue[1] = -2;
@@ -179,8 +185,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[5] = 100;
 
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t3 = transition::ptr(new transition(3, "2 to 3", 2, 3, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "2 to 3", 2, 3, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x2==1 and 1<=x1<=2 and  -100<=t<=100
 	gaurdBoundValue[1] = -1;
@@ -189,8 +198,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t4 = transition::ptr(new transition(4, "2 to 5", 2, 5, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "2 to 5", 2, 5, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x1==1 and 0<=x2<=1 and  -100<=t<=100
 	gaurdBoundValue[1] = -1;
@@ -199,8 +211,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t5 = transition::ptr(new transition(5, "2 to 1", 2, 1, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t5 = transition::ptr(
+			new transition(5, "2 to 1", 2, 1, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 3; // x2==1 and 2<=x1<=3 and  -100<=t<=100
 	gaurdBoundValue[1] = -2;
@@ -209,8 +224,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t6 = transition::ptr(new transition(6, "3 to 4", 3, 4, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t6 = transition::ptr(
+			new transition(6, "3 to 4", 3, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x1==2 and 0<=x2<=1 and  -100<=t<=100
 	gaurdBoundValue[1] = -2;
@@ -220,8 +238,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[5] = 100;
 
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t7 = transition::ptr(new transition(7, "3 to 2", 3, 2, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t7 = transition::ptr(
+			new transition(7, "3 to 2", 3, 2, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x1==2 and 1<=x2<=2 and  -100<=t<=100
 	gaurdBoundValue[1] = -2;
@@ -230,8 +251,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 //gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t8 = transition::ptr(new transition(8, "4 to 5", 4, 5, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t8 = transition::ptr(
+			new transition(8, "4 to 5", 4, 5, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 3; // x2==1 and 2<=x1<=3 and  -100<=t<=100
 	gaurdBoundValue[1] = -2;
@@ -240,8 +264,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t9 = transition::ptr(new transition(9, "4 to 3", 4, 3, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t9 = transition::ptr(
+			new transition(9, "4 to 3", 4, 3, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x1==2 and 1<=x2<=2 and  -100<=t<=100
 	gaurdBoundValue[1] = -2;
@@ -253,7 +280,8 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t10 = transition::ptr(new transition(10, "5 to 4", 5, 4, gaurd_polytope, assignment));
+	transition::ptr t10 = transition::ptr(
+			new transition(10, "5 to 4", 5, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x1==1 and 1<=x2<=2 and  -100<=t<=100
 	gaurdBoundValue[1] = -1;
@@ -262,8 +290,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t11 = transition::ptr(new transition(11, "5 to 6", 5, 6, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t11 = transition::ptr(
+			new transition(11, "5 to 6", 5, 6, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x2==1 and 1<=x1<=2 and  -100<=t<=100
 	gaurdBoundValue[1] = -1;
@@ -272,8 +303,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t12 = transition::ptr(new transition(12, "5 to 2", 5, 2, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t12 = transition::ptr(
+			new transition(12, "5 to 2", 5, 2, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x1==1 and 1<=x2<=2 and  -100<=t<=100
 	gaurdBoundValue[1] = -1;
@@ -281,8 +315,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[3] = -1;
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t13 = transition::ptr(new transition(13, "6 to 5", 6, 5, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t13 = transition::ptr(
+			new transition(13, "6 to 5", 6, 5, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x2==1 and 0<=x1<=1 and  -100<=t<=100
 	gaurdBoundValue[1] = 0;
@@ -291,8 +328,11 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	gaurdBoundValue[4] = 100;
 	gaurdBoundValue[5] = 100;
 	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr( new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	transition::ptr t14 = transition::ptr(new transition(14, "6 to 1", 6, 1, gaurd_polytope, assignment));
+	gaurd_polytope = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
+					gaurdBoundSign));
+	transition::ptr t14 = transition::ptr(
+			new transition(14, "6 to 1", 6, 1, gaurd_polytope, assignment));
 // ******************* Transition initialized **************************
 
 	/*	*************** Initialization of all Locations *******************
@@ -341,13 +381,17 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 
 	system_dynamics.U = polytope::ptr(new polytope(true));
 
-	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	Out_Going_Trans_fromLoc1.push_back(t1);
 	Out_Going_Trans_fromLoc1.push_back(t2);
 
-	location::ptr l1 = location::ptr(new location(1, "loc1", system_dynamics, invariant, true, Out_Going_Trans_fromLoc1));
+	location::ptr l1 = location::ptr(
+			new location(1, "loc1", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc1));
 //  ************ Location ID=1 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -372,14 +416,18 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 
 	system_dynamics.U = polytope::ptr(new polytope(true));
 
-	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc2;
 	Out_Going_Trans_fromLoc2.push_back(t3);
 	Out_Going_Trans_fromLoc2.push_back(t4);
 	Out_Going_Trans_fromLoc2.push_back(t5);
 
-	location::ptr l2 = location::ptr(new location(2, "loc2", system_dynamics, invariant, true, Out_Going_Trans_fromLoc2));
+	location::ptr l2 = location::ptr(
+			new location(2, "loc2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc2));
 	//  ************ Location ID=2 completed  ************
 
 	row = 4;
@@ -405,13 +453,17 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 
 	system_dynamics.U = polytope::ptr(new polytope(true));
 
-	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc3;
 	Out_Going_Trans_fromLoc3.push_back(t6);
 	Out_Going_Trans_fromLoc3.push_back(t7);
 
-	location::ptr l3 = location::ptr(new location(3, "loc3", system_dynamics, invariant, true, Out_Going_Trans_fromLoc3));
+	location::ptr l3 = location::ptr(
+			new location(3, "loc3", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc3));
 	//  ************ Location ID=3 completed  ************
 
 	row = 4;
@@ -437,13 +489,17 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 
 	system_dynamics.U = polytope::ptr(new polytope(true));
 
-	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc4;
 	Out_Going_Trans_fromLoc4.push_back(t8);
 	Out_Going_Trans_fromLoc4.push_back(t9);
 
-	location::ptr l4 = location::ptr(new location(4, "loc4", system_dynamics, invariant, true, Out_Going_Trans_fromLoc4));
+	location::ptr l4 = location::ptr(
+			new location(4, "loc4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc4));
 	//  ************ Location ID=4 completed  ************
 
 	row = 4;
@@ -469,14 +525,18 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 
 	system_dynamics.U = polytope::ptr(new polytope(true));
 
-	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc5;
 	Out_Going_Trans_fromLoc5.push_back(t10);
 	Out_Going_Trans_fromLoc5.push_back(t11);
 	Out_Going_Trans_fromLoc5.push_back(t12);
 
-	location::ptr l5 = location::ptr(new location(5, "loc5", system_dynamics, invariant, true, Out_Going_Trans_fromLoc5));
+	location::ptr l5 = location::ptr(
+			new location(5, "loc5", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc5));
 	//  ************ Location ID=5 completed  ************
 
 	row = 4;
@@ -502,13 +562,17 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 
 	system_dynamics.U = polytope::ptr(new polytope(true));
 
-	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue, invariantBoundSign));
+	invariant = polytope::ptr(
+			new polytope(invariantConstraintsMatrix, invariantBoundValue,
+					invariantBoundSign));
 
 	std::list<transition::ptr> Out_Going_Trans_fromLoc6;
 	Out_Going_Trans_fromLoc6.push_back(t13);
 	Out_Going_Trans_fromLoc6.push_back(t14);
 
-	location::ptr l6 = location::ptr(new location(6, "loc6", system_dynamics, invariant, true, Out_Going_Trans_fromLoc6));
+	location::ptr l6 = location::ptr(
+			new location(6, "loc6", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc6));
 	//  ************ Location ID=6 completed  ************
 
 	//	*************** Locations Initialized *******************
@@ -525,13 +589,15 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata, initial_state::ptr& ini
 	Hybrid_Automata.addLocation(l5);
 	Hybrid_Automata.addLocation(l6);
 
-	Hybrid_Automata.insert_to_map("x1",0);
-	Hybrid_Automata.insert_to_map("x2",1);
-	Hybrid_Automata.insert_to_map("t",2);
+	Hybrid_Automata.insert_to_map("x1", 0);
+	Hybrid_Automata.insert_to_map("x2", 1);
+	Hybrid_Automata.insert_to_map("t", 2);
 
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
 	int transition_id = 0; //initial location no transition taken yet
-	initial_state::ptr I = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I, S, transition_id));
+	initial_state::ptr I = initial_state::ptr(
+			new initial_state(initial_location_id, initial_polytope_I, S,
+					transition_id));
 
 	init_state = I;
 

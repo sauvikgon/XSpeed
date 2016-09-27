@@ -175,7 +175,8 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 
-	transition::ptr trans = transition::ptr(new transition(1, "hop", 1, 1, gaurd_polytope, assignment));
+	transition::ptr trans = transition::ptr(
+			new transition(1, "hop", 1, 1, gaurd_polytope, assignment));
 	location::ptr source;
 	source = location::ptr(new location());
 	source->setLocId(1);
@@ -191,8 +192,8 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 
-	Hybrid_Automata.insert_to_map("x",0);
-	Hybrid_Automata.insert_to_map("v",1);
+	Hybrid_Automata.insert_to_map("x", 0);
+	Hybrid_Automata.insert_to_map("v", 1);
 
 	/*discrete_set d_set;		//now not needed
 	 d_set.insert_element(1);*/

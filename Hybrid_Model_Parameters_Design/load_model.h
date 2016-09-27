@@ -22,15 +22,14 @@
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed3by3.h"
 //#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed5by5.h"
-#include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 #include "Hybrid_Model_Parameters_Design/oscillator_model/Oscillator.h"
 #include "Hybrid_Model_Parameters_Design/ConstantMotion/ConstantMotion.h"
 
 /**
  * Creates the pre-defined hybrid automata models in memory with config parameters.
  */
-void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions& op,
-		ReachabilityParameters& reach_parameters,
+void load_model(initial_state::ptr& init_state, hybrid_automata& ha,
+		userOptions& op, ReachabilityParameters& reach_parameters,
 		std::pair<int, polytope::ptr>& forbidden_set);
 
 #endif

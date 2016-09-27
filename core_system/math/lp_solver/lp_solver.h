@@ -26,6 +26,14 @@ public:
 	//  ****** Main Functions **********
 	void setConstraints(math::matrix<double> coeff_constraints,
 			std::vector<double> bounds, int bound_signs);
+	/**
+	 * Adds the variables and constraints of the polytope to the current LP problem.
+	 * Note that this function is different from just adding constraints since joining
+	 * a polytope implies adding its variables as new variables and also adding constraints
+	 * on these new variables given as parameters.
+	 */
+	void join_poly_constraints(math::matrix<double> coeff_constraints, std::vector<double> bounds, int bound_signs);
+
 	void setMin_Or_Max(int Min_Or_Max);
 	double Compute_LLP(std::vector<double> coeff_function);
 

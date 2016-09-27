@@ -9,8 +9,7 @@
 
 void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
-		ReachabilityParameters& reach_parameters)
-{
+		ReachabilityParameters& reach_parameters) {
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	polytope::ptr initial_polytope_I;
 	polytope::ptr invariant1, invariant2, invariant3, invariant4;
@@ -118,7 +117,8 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope1 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t1 = transition::ptr(new transition(1, "T1", 1, 2, gaurd_polytope1, assignment));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "T1", 1, 2, gaurd_polytope1, assignment));
 
 //Location 1:: Invariant constraint : y >=0
 	row = 2;
@@ -140,8 +140,9 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc1;
 	Out_Going_Trans_fromLoc1.push_back(t1);
 
-	location::ptr l1 = location::ptr(new location(1, "Loc-1", system_dynamics, invariant1, true,
-			Out_Going_Trans_fromLoc1));
+	location::ptr l1 = location::ptr(
+			new location(1, "Loc-1", system_dynamics, invariant1, true,
+					Out_Going_Trans_fromLoc1));
 //	Initalised for Location 1	 ---------------------
 
 //Location 2::has transition t2::with guard is x<=0 & y<=0
@@ -160,7 +161,8 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope2 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t2 = transition::ptr(new transition(2, "T2", 2, 3, gaurd_polytope2, assignment));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "T2", 2, 3, gaurd_polytope2, assignment));
 
 //Location 2:: Invariant constraint : y <=0
 	row = 2;
@@ -182,8 +184,9 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc2;
 	Out_Going_Trans_fromLoc2.push_back(t2);
 
-	location::ptr l2 = location::ptr(new location(2, "Loc-2", system_dynamics, invariant2, true,
-			Out_Going_Trans_fromLoc2));
+	location::ptr l2 = location::ptr(
+			new location(2, "Loc-2", system_dynamics, invariant2, true,
+					Out_Going_Trans_fromLoc2));
 //Initialised Location 2	--------------------------
 
 	//Location 3::has transition t3::with guard is x>=0 & y<=0
@@ -202,7 +205,8 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope3 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t3 = transition::ptr(new transition(3, "T3", 3, 4, gaurd_polytope3, assignment));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "T3", 3, 4, gaurd_polytope3, assignment));
 
 	//Location 3:: Invariant constraint : x<=0 & y<=0
 	row = 2;
@@ -224,8 +228,9 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc3;
 	Out_Going_Trans_fromLoc3.push_back(t3);
 
-	location::ptr l3 = location::ptr(new location(3, "Loc-3", system_dynamics, invariant3, true,
-			Out_Going_Trans_fromLoc3));
+	location::ptr l3 = location::ptr(
+			new location(3, "Loc-3", system_dynamics, invariant3, true,
+					Out_Going_Trans_fromLoc3));
 	//Initialised Location 3	--------------------------
 
 	//Location 4::has transition t4::with guard is x>=0 & y>=0
@@ -244,7 +249,8 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope4 = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t4 = transition::ptr(new transition(4, "T4", 4, 1, gaurd_polytope4, assignment));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "T4", 4, 1, gaurd_polytope4, assignment));
 
 	//Location 4:: Invariant constraint : x>=0 & y<=0
 	row = 2;
@@ -266,8 +272,9 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc4;
 	Out_Going_Trans_fromLoc4.push_back(t4);
 
-	location::ptr l4 = location::ptr(new location(4, "Loc-4", system_dynamics, invariant4, true,
-			Out_Going_Trans_fromLoc4));
+	location::ptr l4 = location::ptr(
+			new location(4, "Loc-4", system_dynamics, invariant4, true,
+					Out_Going_Trans_fromLoc4));
 	//Initialised Location 4	--------------------------
 
 	int dim = initial_polytope_I->getSystemDimension();
@@ -277,12 +284,11 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l2);
 	Hybrid_Automata.addLocation(l3);
 	Hybrid_Automata.addLocation(l4);
-	Hybrid_Automata.insert_to_map("x",1);
-	Hybrid_Automata.insert_to_map("y",2);
+	Hybrid_Automata.insert_to_map("x", 1);
+	Hybrid_Automata.insert_to_map("y", 2);
 
-
-	Hybrid_Automata.insert_to_map("x",0);
-	Hybrid_Automata.insert_to_map("y",1);
+	Hybrid_Automata.insert_to_map("x", 0);
+	Hybrid_Automata.insert_to_map("y", 1);
 
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation

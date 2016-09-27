@@ -65,6 +65,19 @@ void lp_solver::setConstraints(math::matrix<double> coeff_constraints,
 	// ******* More can be added later  **************
 }
 
+void lp_solver::join_poly_constraints(math::matrix<double> coeff_constraints,
+		std::vector<double> bounds, int bound_signs)
+{
+	if (lp_solver_type == GLPK_SOLVER) {
+		glpk_lp_problem->join_poly_constraints(coeff_constraints, bounds, bound_signs);
+	}
+	else
+	{
+		throw std::runtime_error("join_poly_constraints: Cannot join new polytopes in the current LP problem with the chosen type of LP Solver\n");
+	}
+
+}
+
 double lp_solver::Compute_LLP(std::vector<double> coeff_function) {
 	double res = 0.0;
 	if (lp_solver_type == GLPK_SOLVER) {

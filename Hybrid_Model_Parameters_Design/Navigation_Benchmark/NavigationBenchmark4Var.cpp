@@ -8,7 +8,7 @@
  *      	B 2 4
  *      	4 3 4
  *   		2 2 A
-*   	With matrix A=[-1.2 0.1; 0.1 -1.2]
+ *   	With matrix A=[-1.2 0.1; 0.1 -1.2]
  */
 
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
@@ -264,7 +264,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t1 = transition::ptr(new transition(1, "1 to Bad", 1, 9, gaurd_polytope, assignment));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "1 to Bad", 1, 9, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 1<=y<=2
 	gaurdBoundValue[1] = -1;
@@ -274,7 +275,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t2 = transition::ptr(new transition(2, "1 to 4", 1, 4, gaurd_polytope, assignment));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "1 to 4", 1, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // y==1 and 0<=x<=1
 	gaurdBoundValue[1] = 0;
@@ -284,7 +286,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t3 = transition::ptr(new transition(3, "1 to 2", 1, 2, gaurd_polytope, assignment));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "1 to 2", 1, 2, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // y==1 and 0<=x<=1
 	gaurdBoundValue[1] = 0;
@@ -294,7 +297,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t4 = transition::ptr(new transition(4, "2 to 1", 2, 1, gaurd_polytope, assignment));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "2 to 1", 2, 1, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1
 	gaurdBoundValue[1] = -1;
@@ -304,7 +308,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t5 = transition::ptr(new transition(5, "2 to 3", 2, 3, gaurd_polytope, assignment));
+	transition::ptr t5 = transition::ptr(
+			new transition(5, "2 to 3", 2, 3, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // y==1 and 1<=x<=2
 	gaurdBoundValue[1] = -1;
@@ -314,7 +319,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t6 = transition::ptr(new transition(6, "3 to 4", 3, 4, gaurd_polytope, assignment));
+	transition::ptr t6 = transition::ptr(
+			new transition(6, "3 to 4", 3, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 0<=y<=1
 	gaurdBoundValue[1] = -1;
@@ -324,7 +330,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t7 = transition::ptr(new transition(7, "3 to 2", 3, 2, gaurd_polytope, assignment));
+	transition::ptr t7 = transition::ptr(
+			new transition(7, "3 to 2", 3, 2, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 0<=y<=1
 	gaurdBoundValue[1] = -2;
@@ -334,7 +341,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t8 = transition::ptr(new transition(8, "3 to A", 3, 8, gaurd_polytope, assignment));
+	transition::ptr t8 = transition::ptr(
+			new transition(8, "3 to A", 3, 8, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 1<=y<=2
 	gaurdBoundValue[1] = -1;
@@ -344,7 +352,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t9 = transition::ptr(new transition(9, "4 to 1", 4, 1, gaurd_polytope, assignment));
+	transition::ptr t9 = transition::ptr(
+			new transition(9, "4 to 1", 4, 1, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // y==2 and 1<=x<=2
 	gaurdBoundValue[1] = -1;
@@ -354,7 +363,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t10 = transition::ptr(new transition(10, "4 to 5", 4, 5, gaurd_polytope, assignment));
+	transition::ptr t10 = transition::ptr(
+			new transition(10, "4 to 5", 4, 5, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 1<=y<=2
 	gaurdBoundValue[1] = -2;
@@ -364,7 +374,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t11 = transition::ptr(new transition(11, "4 to 6", 4, 6, gaurd_polytope, assignment));
+	transition::ptr t11 = transition::ptr(
+			new transition(11, "4 to 6", 4, 6, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // y==1 and 1<=x<=2
 	gaurdBoundValue[1] = -1;
@@ -374,7 +385,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t12 = transition::ptr(new transition(12, "4 to 3", 4, 3, gaurd_polytope, assignment));
+	transition::ptr t12 = transition::ptr(
+			new transition(12, "4 to 3", 4, 3, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // y==2 and 1<=x<=2
 	gaurdBoundValue[1] = -1;
@@ -384,7 +396,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t13 = transition::ptr(new transition(13, "5 to 4", 5, 4, gaurd_polytope, assignment));
+	transition::ptr t13 = transition::ptr(
+			new transition(13, "5 to 4", 5, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 2<=y<=3
 	gaurdBoundValue[1] = -2;
@@ -394,7 +407,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t14 = transition::ptr(new transition(14, "5 to 7", 5, 7, gaurd_polytope, assignment));
+	transition::ptr t14 = transition::ptr(
+			new transition(14, "5 to 7", 5, 7, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 1; // x==1 and 2<=y<=3
 	gaurdBoundValue[1] = -1;
@@ -404,7 +418,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t15 = transition::ptr(new transition(15, "5 to Bad", 5, 9, gaurd_polytope, assignment));
+	transition::ptr t15 = transition::ptr(
+			new transition(15, "5 to Bad", 5, 9, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 3; // y==2 and 2<=x<=3
 	gaurdBoundValue[1] = -2;
@@ -414,7 +429,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t16 = transition::ptr(new transition(16, "6 to 7", 6, 7, gaurd_polytope, assignment));
+	transition::ptr t16 = transition::ptr(
+			new transition(16, "6 to 7", 6, 7, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 1<=y<=2
 	gaurdBoundValue[1] = -2;
@@ -424,7 +440,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t17 = transition::ptr(new transition(17, "6 to 4", 6, 4, gaurd_polytope, assignment));
+	transition::ptr t17 = transition::ptr(
+			new transition(17, "6 to 4", 6, 4, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 3; // y==1 and 2<=x<=3
 	gaurdBoundValue[1] = -2;
@@ -434,7 +451,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t18 = transition::ptr(new transition(18, "6 to A", 6, 8, gaurd_polytope, assignment));
+	transition::ptr t18 = transition::ptr(
+			new transition(18, "6 to A", 6, 8, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 3; // y==2 and 2<=x<=3
 	gaurdBoundValue[1] = -2;
@@ -444,7 +462,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t19 = transition::ptr(new transition(19, "7 to 6", 7, 6, gaurd_polytope, assignment));
+	transition::ptr t19 = transition::ptr(
+			new transition(19, "7 to 6", 7, 6, gaurd_polytope, assignment));
 
 	gaurdBoundValue[0] = 2; // x==2 and 2<=y<=3
 	gaurdBoundValue[1] = -2;
@@ -454,7 +473,8 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t20 = transition::ptr(new transition(20, "7 to 5", 4, 5, gaurd_polytope, assignment));
+	transition::ptr t20 = transition::ptr(
+			new transition(20, "7 to 5", 4, 5, gaurd_polytope, assignment));
 
 // ******************* Transition initialized **************************
 
@@ -570,8 +590,9 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc1.push_back(t2);
 	Out_Going_Trans_fromLoc1.push_back(t3);
 
-	location::ptr l1 = location::ptr(new location(1, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc1));
+	location::ptr l1 = location::ptr(
+			new location(1, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc1));
 //  ************ Location ID=1 completed  ************
 
 	invariantBoundValue[0] = 1; //0<=x<=1 and 0<=y<=1
@@ -607,8 +628,9 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc2.push_back(t4);
 	Out_Going_Trans_fromLoc2.push_back(t5);
 
-	location::ptr l2 = location::ptr(new location(2, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc2));
+	location::ptr l2 = location::ptr(
+			new location(2, "2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc2));
 	//  ************ Location ID=2 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x<=2 and 0<=y<=1
@@ -645,8 +667,9 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc3.push_back(t7);
 	Out_Going_Trans_fromLoc3.push_back(t8);
 
-	location::ptr l3 = location::ptr(new location(3, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc3));
+	location::ptr l3 = location::ptr(
+			new location(3, "2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc3));
 	//  ************ Location ID=3 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x<=2 and 1<=y<=2
@@ -684,8 +707,9 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc4.push_back(t11);
 	Out_Going_Trans_fromLoc4.push_back(t12);
 
-	location::ptr l4 = location::ptr(new location(4, "3", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc4));
+	location::ptr l4 = location::ptr(
+			new location(4, "3", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc4));
 	//  ************ Location ID=4 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x<=2 and 2<=y<=3
@@ -722,8 +746,9 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc5.push_back(t14);
 	Out_Going_Trans_fromLoc5.push_back(t15);
 
-	location::ptr l5 = location::ptr(new location(5, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc5));
+	location::ptr l5 = location::ptr(
+			new location(5, "2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc5));
 	//  ************ Location ID=5 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x<=3 and 1<=y<=2
@@ -760,8 +785,9 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc6.push_back(t17);
 	Out_Going_Trans_fromLoc6.push_back(t18);
 
-	location::ptr l6 = location::ptr(new location(6, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc6));
+	location::ptr l6 = location::ptr(
+			new location(6, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc6));
 	//  ************ Location ID=6 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x<=3 and 2<=y<=3
@@ -797,8 +823,9 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc7.push_back(t19);
 	Out_Going_Trans_fromLoc7.push_back(t20);
 
-	location::ptr l7 = location::ptr(new location(7, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc7));
+	location::ptr l7 = location::ptr(
+			new location(7, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc7));
 	//  ************ Location ID=7 completed  ************
 
 //	************ No dynamics available for location=8/9    ************
@@ -833,12 +860,15 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition::ptr> Out_Going_Trans_fromLoc8, Out_Going_Trans_fromLoc9;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc8,
+			Out_Going_Trans_fromLoc9;
 
-	location::ptr l8 = location::ptr(new location(8, "FINAL", system_dynamics, invariant, false,
-			Out_Going_Trans_fromLoc8));
-	location::ptr l9 = location::ptr(new location(9, "BAD", system_dynamics, invariant, false,
-			Out_Going_Trans_fromLoc9));
+	location::ptr l8 = location::ptr(
+			new location(8, "FINAL", system_dynamics, invariant, false,
+					Out_Going_Trans_fromLoc8));
+	location::ptr l9 = location::ptr(
+			new location(9, "BAD", system_dynamics, invariant, false,
+					Out_Going_Trans_fromLoc9));
 //Location ID=8 and ID=9 completed ************
 
 	//	*************** Locations Initialized *******************
@@ -866,9 +896,6 @@ void SetNavigationBenchMark4VarOurCode(hybrid_automata& Hybrid_Automata,
 	init_state = I;
 
 }
-
-
-
 
 //Hyst Generated code
 void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
@@ -1514,14 +1541,14 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixI(7, 3) = -1;
 	boundValueI.resize(row);
 
-/*	boundValueI[0] = 0.5;
-	boundValueI[1] = -0.5;
-	boundValueI[2] = 0.5;
-	boundValueI[3] = -0.5;
-	boundValueI[4] = 0;
-	boundValueI[5] = 0;
-	boundValueI[6] = 0;
-	boundValueI[7] = 0;*/
+	/*	boundValueI[0] = 0.5;
+	 boundValueI[1] = -0.5;
+	 boundValueI[2] = 0.5;
+	 boundValueI[3] = -0.5;
+	 boundValueI[4] = 0;
+	 boundValueI[5] = 0;
+	 boundValueI[6] = 0;
+	 boundValueI[7] = 0;*/
 
 	boundValueI[0] = 0.7;
 	boundValueI[1] = -0.4;
@@ -3277,55 +3304,79 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	transition::ptr t1 = transition::ptr(new transition(1, "t13", 2, 5, gaurd_polytope0, assignment0));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "t13", 2, 5, gaurd_polytope0, assignment0));
 
-	transition::ptr t2 = transition::ptr(new transition(2, "t14", 2, 3, gaurd_polytope1, assignment1));
-	transition::ptr t3 = transition::ptr(new transition(3, "t15", 2, 1, gaurd_polytope2, assignment2));
-	transition::ptr t4 = transition::ptr(new transition(4, "t19", 3, 6, gaurd_polytope3, assignment3));
-	transition::ptr t5 = transition::ptr(new transition(5, "t20", 3, 2, gaurd_polytope4, assignment4));
-	transition::ptr t6 = transition::ptr(new transition(6, "t1", 4, 1, gaurd_polytope5, assignment5));
-	transition::ptr t7 = transition::ptr(new transition(7, "t2", 4, 5, gaurd_polytope6, assignment6));
-	transition::ptr t8 = transition::ptr(new transition(8, "t3", 4, 9, gaurd_polytope7, assignment7));
-	transition::ptr t9 = transition::ptr(new transition(9, "t9", 5, 4, gaurd_polytope8, assignment8));
-	transition::ptr t10 = transition::ptr(new transition(10, "t10", 5, 2, gaurd_polytope9, assignment9));
-	transition::ptr t11 = transition::ptr(new transition(11, "t11", 5, 6, gaurd_polytope10, assignment10));
-	transition::ptr t12 = transition::ptr(new transition(12, "t12", 5, 7, gaurd_polytope11, assignment11));
-	transition::ptr t13 = transition::ptr(new transition(13, "t16", 6, 3, gaurd_polytope12, assignment12));
-	transition::ptr t14 = transition::ptr(new transition(14, "t17", 6, 5, gaurd_polytope13, assignment13));
-	transition::ptr t15 = transition::ptr(new transition(15, "t18", 6, 8, gaurd_polytope14, assignment14));
-	transition::ptr t16 = transition::ptr(new transition(16, "t6", 7, 5, gaurd_polytope15, assignment15));
-	transition::ptr t17 = transition::ptr(new transition(17, "t7", 7, 9, gaurd_polytope16, assignment16));
-	transition::ptr t18 = transition::ptr(new transition(18, "t8", 7, 8, gaurd_polytope17, assignment17));
-	transition::ptr t19 = transition::ptr(new transition(19, "t5", 9, 7, gaurd_polytope18, assignment18));
-	transition::ptr t20 = transition::ptr(new transition(20, "t4", 9, 4, gaurd_polytope19, assignment19));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "t14", 2, 3, gaurd_polytope1, assignment1));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "t15", 2, 1, gaurd_polytope2, assignment2));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "t19", 3, 6, gaurd_polytope3, assignment3));
+	transition::ptr t5 = transition::ptr(
+			new transition(5, "t20", 3, 2, gaurd_polytope4, assignment4));
+	transition::ptr t6 = transition::ptr(
+			new transition(6, "t1", 4, 1, gaurd_polytope5, assignment5));
+	transition::ptr t7 = transition::ptr(
+			new transition(7, "t2", 4, 5, gaurd_polytope6, assignment6));
+	transition::ptr t8 = transition::ptr(
+			new transition(8, "t3", 4, 9, gaurd_polytope7, assignment7));
+	transition::ptr t9 = transition::ptr(
+			new transition(9, "t9", 5, 4, gaurd_polytope8, assignment8));
+	transition::ptr t10 = transition::ptr(
+			new transition(10, "t10", 5, 2, gaurd_polytope9, assignment9));
+	transition::ptr t11 = transition::ptr(
+			new transition(11, "t11", 5, 6, gaurd_polytope10, assignment10));
+	transition::ptr t12 = transition::ptr(
+			new transition(12, "t12", 5, 7, gaurd_polytope11, assignment11));
+	transition::ptr t13 = transition::ptr(
+			new transition(13, "t16", 6, 3, gaurd_polytope12, assignment12));
+	transition::ptr t14 = transition::ptr(
+			new transition(14, "t17", 6, 5, gaurd_polytope13, assignment13));
+	transition::ptr t15 = transition::ptr(
+			new transition(15, "t18", 6, 8, gaurd_polytope14, assignment14));
+	transition::ptr t16 = transition::ptr(
+			new transition(16, "t6", 7, 5, gaurd_polytope15, assignment15));
+	transition::ptr t17 = transition::ptr(
+			new transition(17, "t7", 7, 9, gaurd_polytope16, assignment16));
+	transition::ptr t18 = transition::ptr(
+			new transition(18, "t8", 7, 8, gaurd_polytope17, assignment17));
+	transition::ptr t19 = transition::ptr(
+			new transition(19, "t5", 9, 7, gaurd_polytope18, assignment18));
+	transition::ptr t20 = transition::ptr(
+			new transition(20, "t4", 9, 4, gaurd_polytope19, assignment19));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc9;
 
-	location::ptr l1 = location::ptr(new location(1, "BAD", system_dynamics0, invariant0, true,
-			Out_Going_Trans_fromloc9));	//changing name loc9 to BAD
+	location::ptr l1 = location::ptr(
+			new location(1, "BAD", system_dynamics0, invariant0, true,
+					Out_Going_Trans_fromloc9));	//changing name loc9 to BAD
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc5;
 
 	Out_Going_Trans_fromloc5.push_back(t1);
 	Out_Going_Trans_fromloc5.push_back(t2);
 	Out_Going_Trans_fromloc5.push_back(t3);
-	location::ptr l2 = location::ptr(new location(2, "loc5", system_dynamics1, invariant1, true,
-			Out_Going_Trans_fromloc5));
+	location::ptr l2 = location::ptr(
+			new location(2, "loc5", system_dynamics1, invariant1, true,
+					Out_Going_Trans_fromloc5));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc7;
 
 	Out_Going_Trans_fromloc7.push_back(t4);
 	Out_Going_Trans_fromloc7.push_back(t5);
-	location::ptr l3 = location::ptr(new location(3, "loc7", system_dynamics2, invariant2, true,
-			Out_Going_Trans_fromloc7));
+	location::ptr l3 = location::ptr(
+			new location(3, "loc7", system_dynamics2, invariant2, true,
+					Out_Going_Trans_fromloc7));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc1;
 
 	Out_Going_Trans_fromloc1.push_back(t6);
 	Out_Going_Trans_fromloc1.push_back(t7);
 	Out_Going_Trans_fromloc1.push_back(t8);
-	location::ptr l4 = location::ptr(new location(4, "loc1", system_dynamics3, invariant3, true,
-			Out_Going_Trans_fromloc1));
+	location::ptr l4 = location::ptr(
+			new location(4, "loc1", system_dynamics3, invariant3, true,
+					Out_Going_Trans_fromloc1));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc4;
 
@@ -3333,36 +3384,41 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc4.push_back(t10);
 	Out_Going_Trans_fromloc4.push_back(t11);
 	Out_Going_Trans_fromloc4.push_back(t12);
-	location::ptr l5 = location::ptr(new location(5, "loc4", system_dynamics4, invariant4, true,
-			Out_Going_Trans_fromloc4));
+	location::ptr l5 = location::ptr(
+			new location(5, "loc4", system_dynamics4, invariant4, true,
+					Out_Going_Trans_fromloc4));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc6;
 
 	Out_Going_Trans_fromloc6.push_back(t13);
 	Out_Going_Trans_fromloc6.push_back(t14);
 	Out_Going_Trans_fromloc6.push_back(t15);
-	location::ptr l6 = location::ptr(new location(6, "loc6", system_dynamics5, invariant5, true,
-			Out_Going_Trans_fromloc6));
+	location::ptr l6 = location::ptr(
+			new location(6, "loc6", system_dynamics5, invariant5, true,
+					Out_Going_Trans_fromloc6));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc3;
 
 	Out_Going_Trans_fromloc3.push_back(t16);
 	Out_Going_Trans_fromloc3.push_back(t17);
 	Out_Going_Trans_fromloc3.push_back(t18);
-	location::ptr l7 = location::ptr(new location(7, "loc3", system_dynamics6, invariant6, true,
-			Out_Going_Trans_fromloc3));
+	location::ptr l7 = location::ptr(
+			new location(7, "loc3", system_dynamics6, invariant6, true,
+					Out_Going_Trans_fromloc3));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc8;
 
-	location::ptr l8 = location::ptr(new location(8, "GOOD", system_dynamics7, invariant7, true,
-			Out_Going_Trans_fromloc8));	//CHANGING LOC8 TO GOOD
+	location::ptr l8 = location::ptr(
+			new location(8, "GOOD", system_dynamics7, invariant7, true,
+					Out_Going_Trans_fromloc8));	//CHANGING LOC8 TO GOOD
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc2;
 
 	Out_Going_Trans_fromloc2.push_back(t19);
 	Out_Going_Trans_fromloc2.push_back(t20);
-	location::ptr l9 = location::ptr(new location(9, "loc2", system_dynamics8, invariant8, true,
-			Out_Going_Trans_fromloc2));
+	location::ptr l9 = location::ptr(
+			new location(9, "loc2", system_dynamics8, invariant8, true,
+					Out_Going_Trans_fromloc2));
 
 	dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.addInitial_Location(l1);
@@ -3377,10 +3433,10 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l9);
 	Hybrid_Automata.setDimension(dim);
 
-	Hybrid_Automata.insert_to_map("x1",0);
-	Hybrid_Automata.insert_to_map("x2",1);
-	Hybrid_Automata.insert_to_map("v1",2);
-	Hybrid_Automata.insert_to_map("v2",3);
+	Hybrid_Automata.insert_to_map("x1", 0);
+	Hybrid_Automata.insert_to_map("x2", 1);
+	Hybrid_Automata.insert_to_map("v1", 2);
+	Hybrid_Automata.insert_to_map("v2", 3);
 
 	int initial_location_id = 4;
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
@@ -3389,7 +3445,6 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
 	init_state = I;
-
 
 }
 

@@ -29,7 +29,7 @@ class glpk_lp_solver {
 public:
 	typedef boost::shared_ptr<glpk_lp_solver> glpk_ptr;
 
-	void setDefalultObject(); // same as calling a constructor
+	void setDefaultObject(); // same as calling a constructor
 	/*
 	 glpk_lp_solver(std::vector<std::vector <double> > coeff_constraints, std::vector <double> bounds,
 	 std::vector <int> bound_signs);
@@ -41,6 +41,15 @@ public:
 	void setConstraints(math::matrix<double> coeff_constraints,
 			std::vector<double> bounds, int bound_signs);	//Before calling setConstraints(), the member
 															//function setMin_or_Max() must be called.
+
+	/**
+	 * Adds the variables and constraints of the polytope to the current LP problem.
+	 * Note that this function is different from just adding constraints since joining
+	 * a polytope implies adding its variables as new variables and also adding constraints
+	 * on these new variables given as parameters.
+	 */
+	void join_poly_constraints(math::matrix<double> coeff_constraints,
+			std::vector<double> bounds, int bound_signs);
 	void setMin_Or_Max(int Min_Or_Max);
 	int getMin_Or_Max();
 	void setIteration_Limit(int limits);
@@ -62,8 +71,8 @@ public:
 
 	/*
 	 * Executes the simplex method with the objective function set to zero. That is assigning all coefficient to zero
-	 * This results in checking if the specified constraints has feasible solution or solution is infeasible or has no feasible soultion
-	 * This application can be used to test the intersection of polytope with gaurd or with another polytope.
+	 * This results in checking if the specified constraints has feasible solution or solution is infeasible or has no feasible solution
+	 * This application can be used to test the intersection of polytope with guard or with another polytope.
 	 */
 	unsigned int TestConstraints();
 
@@ -90,7 +99,7 @@ private:
 	int dimension;				//dimension of the system
 	int number_of_constraints;	//rows in glpk or facets of a polytope
 	std::vector<double> sv;// values of the variable that maximizes the result
-	double result;				//Maximize or Minimize value
+	double result;				//The optimal objective function value
 
 };
 

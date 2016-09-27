@@ -25,7 +25,6 @@
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_FourLocation.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
-#include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 
 //**************** Hybrid Automata Definition ***********************
 #include "core_system/Reachability/reachability.h"
@@ -50,7 +49,6 @@
 #include "plotter_utility.h"
 // *********** User Selected Model ***************
 #include "Hybrid_Model_Parameters_Design/load_model.h"
-#include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 
 #include "InputOutput/io_utility.h"
 // *******counter example **************/
@@ -231,7 +229,7 @@ int main(int argc, char *argv[]) {
 					projLocation, java_exeFile;
 
 			//todo:: proper path to be handled from the relative/current installed location of the software
-			replacingFile ="./user_model.cpp";
+/*			replacingFile ="./user_model.cpp";
 
 			java_exeFile = "java -jar";
 
@@ -261,7 +259,7 @@ int main(int argc, char *argv[]) {
 			cmdStr1.append(stFileNameWithPath);
 			//std::cout<<"Command = "<<cmdStr1.c_str()<<"\n";
 			//system("./XSpeed.o --internal");
-			system(cmdStr1.c_str());
+			system(cmdStr1.c_str()); */
 			exit(0);
 		}
 
@@ -328,7 +326,6 @@ int main(int argc, char *argv[]) {
 		if (vm.count("time-step") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeStep(vm["time-step"].as<double>());
 			if (user_options.get_timeStep() > 0) {
-				unsigned int iterations_size = (unsigned int) user_options.get_timeHorizon() / user_options.get_timeStep();
 				//std::cout << "\niterations_size = " << iterations_size;
 			} else { //for 0 or negative sampling-time
 				std::cout << "Invalid time-step option specified\n";
@@ -620,23 +617,14 @@ std::list<symbolic_states::ptr>::iterator it;
 	dump_abstractCE_list(ce_candidates);
 	/** End of debug */
 	bool real_ce = false;
+
 	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
 		cout << "******** Safety Property Violated ********\n";
 		abstractCE::ptr ce = *(it);
-		std::list<abstract_symbolic_state::ptr> list_sym_states;
-		std::list<transition::ptr> list_transition;
-		list_sym_states = ce->get_CE_sym_states();
-		list_transition = ce->get_CE_transitions();
-
-		std::list<abstract_symbolic_state::ptr>::iterator it_sym_state;
-		std::list<transition::ptr>::iterator it_trans;
-		discrete_set ds;
-		unsigned int locationID;
-		std::vector<int> transID(ce->get_length());	//making a vector of transition_ID so it can be printed
-		int index = 0;
-		ce->plot(user_options.get_first_plot_dimension(),
-				user_options.get_second_plot_dimension());
-		concreteCE::ptr bad_trace = ce->get_validated_CE(0.15);
+//		ce->plot(user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+		tt1.start(); // start time
+		concreteCE::ptr bad_trace = ce->get_validated_CE(0.001);
+		tt1.stop();
 		if(bad_trace->is_empty()){
 			std::cout << "Cannot Splice Trajectories within Accepted Error Tolerance\n";
 			std::cout << "Looking for Other paths to Bad Set\n";
@@ -651,12 +639,21 @@ std::list<symbolic_states::ptr>::iterator it;
 		}
 
 	}
+	//timers
+	double wall_clock, user_clock, system_clock;
+	wall_clock = tt1.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+	user_clock = tt1.elapsed().user / 1000000;
+	system_clock = tt1.elapsed().system / 1000000;
+
+	//--end of timers
 	if(!real_ce){
 		cout << "******** Does NOT Violate Safety Property ********\n";
+		std::cout << "Time to search concrete counter-examples (milliseconds):" << user_clock << std::endl;
 	}
 	else
 	{
 		std::cout << "Counter Example Trace Plotted in the file bad_trace.o\n";
+		std::cout << "Time to get counter-example (milliseconds):" << user_clock << std::endl;
 	}
 	cout << "\n******** Summary of XSpeed ********\n";
 	return 0; //returning only the Wall time taken to execute the Hybrid System

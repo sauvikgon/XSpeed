@@ -182,8 +182,9 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	//Out_Going_Trans_fromLoc1.push_back(t1);
 
 //NO INVARIANT EXITS
-	location::ptr l1 = location::ptr(new location(1, "Loc-1", system_dynamics, invariant1, false,
-			Out_Going_Trans_fromLoc1));
+	location::ptr l1 = location::ptr(
+			new location(1, "Loc-1", system_dynamics, invariant1, false,
+					Out_Going_Trans_fromLoc1));
 //	Initalised for Location 1	 ---------------------
 
 	int dim = initial_polytope_I->getSystemDimension();
@@ -192,8 +193,8 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l1);
 //	Hybrid_Automata.addLocation(l2);
 
-	Hybrid_Automata.insert_to_map("x",0);
-	Hybrid_Automata.insert_to_map("y",1);
+	Hybrid_Automata.insert_to_map("x", 0);
+	Hybrid_Automata.insert_to_map("y", 1);
 
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation

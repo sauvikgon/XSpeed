@@ -258,7 +258,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t1 = transition::ptr(new transition(1, "1 to 2", 1, 2, gaurd_polytope, assignment));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "1 to 2", 1, 2, gaurd_polytope, assignment));
 //  ************************* Transition: t1 End ************************************************
 //  ************************* Transition: t2 ***************************************************
 	gaurdBoundValue[0] = 1; // x1==1 and 4<=x2<=5 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -273,7 +274,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t2 = transition::ptr(new transition(2, "1 to 10", 1, 10, gaurd_polytope, assignment));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "1 to 10", 1, 10, gaurd_polytope, assignment));
 //  ************************* Transition: t2 End ************************************************
 //  ************************* Transition: t3 ***************************************************
 	gaurdBoundValue[0] = 1; // 0<=x1<=1 and x2==4 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -288,7 +290,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t3 = transition::ptr(new transition(3, "2 to 1", 2, 1, gaurd_polytope, assignment));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "2 to 1", 2, 1, gaurd_polytope, assignment));
 //  ************************* Transition: t3 End ************************************************
 //  ************************* Transition: t4 ***************************************************
 	gaurdBoundValue[0] = 1; // 0<=x1<=1 and x2==3 and   -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -303,7 +306,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t4 = transition::ptr(new transition(4, "2 to 3", 2, 3, gaurd_polytope, assignment));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "2 to 3", 2, 3, gaurd_polytope, assignment));
 //  ************************* Transition: t4 End ************************************************
 //  ************************* Transition: t5 ***************************************************
 	gaurdBoundValue[0] = 1; // x==1 and 3<=x2<=4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -318,7 +322,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t5 = transition::ptr(new transition(5, "2 to 9", 2, 9, gaurd_polytope, assignment));
+	transition::ptr t5 = transition::ptr(
+			new transition(5, "2 to 9", 2, 9, gaurd_polytope, assignment));
 //  ************************* Transition: t5 End ************************************************
 //  ************************* Transition: t6 ***************************************************
 	gaurdBoundValue[0] = 1; // 0<=x1<=1 and x2==3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -333,7 +338,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t6 = transition::ptr(new transition(6, "3 to 2", 3, 2, gaurd_polytope, assignment));
+	transition::ptr t6 = transition::ptr(
+			new transition(6, "3 to 2", 3, 2, gaurd_polytope, assignment));
 //  ************************* Transition: t6 End ************************************************
 //  ************************* Transition: t7 ***************************************************
 	gaurdBoundValue[0] = 1; // 0<=x1<=1 and x2==2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -348,7 +354,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t7 = transition::ptr(new transition(7, "3 to 4", 3, 4, gaurd_polytope, assignment));
+	transition::ptr t7 = transition::ptr(
+			new transition(7, "3 to 4", 3, 4, gaurd_polytope, assignment));
 //  ************************* Transition: t7 End ************************************************
 //  ************************* Transition: t8 ***************************************************
 	gaurdBoundValue[0] = 1; // x1==1 and 2<=x2<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -363,7 +370,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t8 = transition::ptr(new transition(8, "3 to 8", 3, 8, gaurd_polytope, assignment));
+	transition::ptr t8 = transition::ptr(
+			new transition(8, "3 to 8", 3, 8, gaurd_polytope, assignment));
 //  ************************* Transition: t8 End ************************************************
 //  ************************* Transition: t9 ***************************************************
 	gaurdBoundValue[0] = 1; // 0<=x1<=1 and x2==2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -378,7 +386,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t9 = transition::ptr(new transition(9, "4 to 3", 4, 3, gaurd_polytope, assignment));
+	transition::ptr t9 = transition::ptr(
+			new transition(9, "4 to 3", 4, 3, gaurd_polytope, assignment));
 //  ************************* Transition: t9 End ************************************************
 //  ************************* Transition: t10 ***************************************************
 	gaurdBoundValue[0] = 1; // 0<=x1<=1 and x2==1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -393,7 +402,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t10 = transition::ptr(new transition(10, "4 to 5", 4, 5, gaurd_polytope, assignment));
+	transition::ptr t10 = transition::ptr(
+			new transition(10, "4 to 5", 4, 5, gaurd_polytope, assignment));
 //  ************************* Transition: t10 End ************************************************
 //  ************************* Transition: t11 ***************************************************
 	gaurdBoundValue[0] = 1; // x1==1 and 1<=x2<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -408,7 +418,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t11 = transition::ptr(new transition(11, "4 to 7", 4, 7, gaurd_polytope, assignment));
+	transition::ptr t11 = transition::ptr(
+			new transition(11, "4 to 7", 4, 7, gaurd_polytope, assignment));
 //  ************************* Transition: t11 End ************************************************
 //  ************************* Transition: t12 ***************************************************
 	gaurdBoundValue[0] = 1; // 0<=x1<=1 and x2==1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -423,7 +434,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t12 = transition::ptr(new transition(12, "5 to 4", 5, 4, gaurd_polytope, assignment));
+	transition::ptr t12 = transition::ptr(
+			new transition(12, "5 to 4", 5, 4, gaurd_polytope, assignment));
 //  ************************* Transition: t12 End ************************************************
 //  ************************* Transition: t13 ***************************************************
 	gaurdBoundValue[0] = 1; // x1==1 and 0<=x2<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -438,7 +450,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t13 = transition::ptr(new transition(13, "5 to 6", 5, 6, gaurd_polytope, assignment));
+	transition::ptr t13 = transition::ptr(
+			new transition(13, "5 to 6", 5, 6, gaurd_polytope, assignment));
 //  ************************* Transition: t13 End ************************************************
 //  ************************* Transition: t14 ***************************************************
 	gaurdBoundValue[0] = 2; // 1<=x1<=2 and x2==2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -453,7 +466,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t14 = transition::ptr(new transition(14, "7 to 8", 7, 8, gaurd_polytope, assignment));
+	transition::ptr t14 = transition::ptr(
+			new transition(14, "7 to 8", 7, 8, gaurd_polytope, assignment));
 //  ************************* Transition: t14 End ************************************************
 //  ************************* Transition: t15 ***************************************************
 	gaurdBoundValue[0] = 1; // x1==1 and 1<=x2<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -468,7 +482,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t15 = transition::ptr(new transition(15, "7 to 4", 7, 4, gaurd_polytope, assignment));
+	transition::ptr t15 = transition::ptr(
+			new transition(15, "7 to 4", 7, 4, gaurd_polytope, assignment));
 //  ************************* Transition: t15 End ************************************************
 //  ************************* Transition: t16 ***************************************************
 	gaurdBoundValue[0] = 2; // 1<=x1<=2 and x2==1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -483,7 +498,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t16 = transition::ptr(new transition(16, "7 to A", 7, 6, gaurd_polytope, assignment));
+	transition::ptr t16 = transition::ptr(
+			new transition(16, "7 to A", 7, 6, gaurd_polytope, assignment));
 //  ************************* Transition: t16 End ************************************************
 //  ************************* Transition: t17 ***************************************************
 	gaurdBoundValue[0] = 2; // x1==2 and 1<=x2<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -498,7 +514,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t17 = transition::ptr(new transition(17, "7 to 12", 7, 12, gaurd_polytope, assignment));
+	transition::ptr t17 = transition::ptr(
+			new transition(17, "7 to 12", 7, 12, gaurd_polytope, assignment));
 //  ************************* Transition: t17 End ***********************************************
 //  ************************* Transition: t18 ***************************************************
 	gaurdBoundValue[0] = 2; //  1<=x1<=2 and x2==3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -513,7 +530,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t18 = transition::ptr(new transition(18, "8 to 9", 8, 9, gaurd_polytope, assignment));
+	transition::ptr t18 = transition::ptr(
+			new transition(18, "8 to 9", 8, 9, gaurd_polytope, assignment));
 	//  ************************* Transition: t18 End ***********************************************
 	//  ************************* Transition: t19 ***************************************************
 	gaurdBoundValue[0] = 1; // x1==1 and 2<=x2<=3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -528,7 +546,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t19 = transition::ptr(new transition(19, "8 to 3", 8, 3, gaurd_polytope, assignment));
+	transition::ptr t19 = transition::ptr(
+			new transition(19, "8 to 3", 8, 3, gaurd_polytope, assignment));
 //  ************************* Transition: t19 End ***********************************************
 //  ************************* Transition: t20 ***************************************************
 	gaurdBoundValue[0] = 2; //  1<=x1<=2 and x2==2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -543,7 +562,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t20 = transition::ptr(new transition(20, "8 to 7", 8, 7, gaurd_polytope, assignment));
+	transition::ptr t20 = transition::ptr(
+			new transition(20, "8 to 7", 8, 7, gaurd_polytope, assignment));
 //  ************************* Transition: t20 End ***********************************************
 //  ************************* Transition: t21 ***************************************************
 	gaurdBoundValue[0] = 2; //  x1==2 and 2<=x2<=3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -558,7 +578,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t21 = transition::ptr(new transition(21, "8 to B", 8, 13, gaurd_polytope, assignment));
+	transition::ptr t21 = transition::ptr(
+			new transition(21, "8 to B", 8, 13, gaurd_polytope, assignment));
 //  ************************* Transition: t21 End ***********************************************
 //  ************************* Transition: t22 ***************************************************
 	gaurdBoundValue[0] = 2; //  1<=x1<=2 and x2==4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -573,7 +594,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t22 = transition::ptr(new transition(22, "9 to 10", 9, 10, gaurd_polytope, assignment));
+	transition::ptr t22 = transition::ptr(
+			new transition(22, "9 to 10", 9, 10, gaurd_polytope, assignment));
 //  ************************* Transition: t22 End ***********************************************
 	//  ************************* Transition: t23 ***************************************************
 	gaurdBoundValue[0] = 1; // x==1 and 3<=x2<=4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -588,7 +610,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t23 = transition::ptr(new transition(23, "9 to 2", 9, 2, gaurd_polytope, assignment));
+	transition::ptr t23 = transition::ptr(
+			new transition(23, "9 to 2", 9, 2, gaurd_polytope, assignment));
 	//  ************************* Transition: t23 End ************************************************
 	//  ************************* Transition: t24 ***************************************************
 	gaurdBoundValue[0] = 2; //  1<=x1<=2 and x2==3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -603,7 +626,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t24 = transition::ptr(new transition(18, "9 to 8", 9, 8, gaurd_polytope, assignment));
+	transition::ptr t24 = transition::ptr(
+			new transition(18, "9 to 8", 9, 8, gaurd_polytope, assignment));
 	//  ************************* Transition: t24 End ***********************************************
 	//  ************************* Transition: t25 ***************************************************
 	gaurdBoundValue[0] = 2; // x==2 and 3<=x2<=4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -618,7 +642,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t25 = transition::ptr(new transition(25, "9 to 14", 9, 14, gaurd_polytope, assignment));
+	transition::ptr t25 = transition::ptr(
+			new transition(25, "9 to 14", 9, 14, gaurd_polytope, assignment));
 	//  ************************* Transition: t25 End ************************************************
 	//  ************************* Transition: t26 ***************************************************
 	gaurdBoundValue[0] = 1; // x1==1 and 4<=x2<=5 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -633,7 +658,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t26 = transition::ptr(new transition(26, "10 to 1", 10, 1, gaurd_polytope, assignment));
+	transition::ptr t26 = transition::ptr(
+			new transition(26, "10 to 1", 10, 1, gaurd_polytope, assignment));
 	//  ************************* Transition: t26 End ************************************************
 	//  ************************* Transition: t27 ***************************************************
 	gaurdBoundValue[0] = 2; //  1<=x1<=2 and x2==4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -648,7 +674,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t27 = transition::ptr(new transition(27, "10 to 9", 10, 9, gaurd_polytope, assignment));
+	transition::ptr t27 = transition::ptr(
+			new transition(27, "10 to 9", 10, 9, gaurd_polytope, assignment));
 	//  ************************* Transition: t27 End ***********************************************
 	//  ************************* Transition: t28 ***************************************************
 	gaurdBoundValue[0] = 2; // x1==2 and 4<=x2<=5 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -663,7 +690,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t28 = transition::ptr(new transition(28, "10 to 15", 10, 1, gaurd_polytope, assignment));
+	transition::ptr t28 = transition::ptr(
+			new transition(28, "10 to 15", 10, 1, gaurd_polytope, assignment));
 	//  ************************* Transition: t28 End ************************************************
 	//  ************************* Transition: t29 ***************************************************
 	gaurdBoundValue[0] = 3; //  2<=x1<=3 and x2==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -678,7 +706,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t29 = transition::ptr(new transition(29, "11 to 12", 11, 12, gaurd_polytope, assignment));
+	transition::ptr t29 = transition::ptr(
+			new transition(29, "11 to 12", 11, 12, gaurd_polytope, assignment));
 	//  ************************* Transition: t29 End ***********************************************
 	//  ************************* Transition: t30 ***************************************************
 	gaurdBoundValue[0] = 2; // x1==2 and 0<=x2<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -693,7 +722,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t30 = transition::ptr(new transition(30, "11 to A", 11, 6, gaurd_polytope, assignment));
+	transition::ptr t30 = transition::ptr(
+			new transition(30, "11 to A", 11, 6, gaurd_polytope, assignment));
 	//  ************************* Transition: t30 End ************************************************
 	//  ************************* Transition: t31 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 0<=x2<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -708,7 +738,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t31 = transition::ptr(new transition(31, "11 to 16", 11, 16, gaurd_polytope, assignment));
+	transition::ptr t31 = transition::ptr(
+			new transition(31, "11 to 16", 11, 16, gaurd_polytope, assignment));
 	//  ************************* Transition: t31 End ************************************************
 	//  ************************* Transition: t32 ***************************************************
 	gaurdBoundValue[0] = 3; //  2<=x1<=3 and x2==2 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -723,7 +754,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t32 = transition::ptr(new transition(32, "12 to B", 12, 13, gaurd_polytope, assignment));
+	transition::ptr t32 = transition::ptr(
+			new transition(32, "12 to B", 12, 13, gaurd_polytope, assignment));
 	//  ************************* Transition: t32 End ***********************************************
 	//  ************************* Transition: t33 ***************************************************
 	gaurdBoundValue[0] = 2; // x1==2 and 1<=x2<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -738,7 +770,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t33 = transition::ptr(new transition(33, "12 to 7", 12, 7, gaurd_polytope, assignment));
+	transition::ptr t33 = transition::ptr(
+			new transition(33, "12 to 7", 12, 7, gaurd_polytope, assignment));
 	//  ************************* Transition: t33 End ***********************************************
 	//  ************************* Transition: t34 ***************************************************
 	gaurdBoundValue[0] = 3; //  2<=x1<=3 and x2==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -753,7 +786,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t34 = transition::ptr(new transition(34, "12 to 11", 12, 11, gaurd_polytope, assignment));
+	transition::ptr t34 = transition::ptr(
+			new transition(34, "12 to 11", 12, 11, gaurd_polytope, assignment));
 	//  ************************* Transition: t34 End ***********************************************
 	//  ************************* Transition: t35 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 1<=x2<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -768,7 +802,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t35 = transition::ptr(new transition(35, "12 to 17", 12, 17, gaurd_polytope, assignment));
+	transition::ptr t35 = transition::ptr(
+			new transition(35, "12 to 17", 12, 17, gaurd_polytope, assignment));
 	//  ************************* Transition: t35 End ************************************************
 	//  ************************* Transition: t36 ***************************************************
 	gaurdBoundValue[0] = 3; //  2<=x1<=3 and x2==4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -783,7 +818,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t36 = transition::ptr(new transition(36, "14 to 15", 14, 15, gaurd_polytope, assignment));
+	transition::ptr t36 = transition::ptr(
+			new transition(36, "14 to 15", 14, 15, gaurd_polytope, assignment));
 	//  ************************* Transition: t36 End ***********************************************
 	//  ************************* Transition: t37 ***************************************************
 	gaurdBoundValue[0] = 2; // x==2 and 3<=x2<=4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -798,7 +834,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t37 = transition::ptr(new transition(37, "14 to 9", 14, 9, gaurd_polytope, assignment));
+	transition::ptr t37 = transition::ptr(
+			new transition(37, "14 to 9", 14, 9, gaurd_polytope, assignment));
 	//  ************************* Transition: t37 End ************************************************
 	//  ************************* Transition: t38 ***************************************************
 	gaurdBoundValue[0] = 3; //  2=x1<=3 and x2==3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -813,7 +850,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t38 = transition::ptr(new transition(38, "14 to B", 14, 13, gaurd_polytope, assignment));
+	transition::ptr t38 = transition::ptr(
+			new transition(38, "14 to B", 14, 13, gaurd_polytope, assignment));
 	//  ************************* Transition: t38 End ***********************************************
 	//  ************************* Transition: t39 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 3<=x2<=4 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -828,7 +866,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t39 = transition::ptr(new transition(39, "14 to 19", 14, 19, gaurd_polytope, assignment));
+	transition::ptr t39 = transition::ptr(
+			new transition(39, "14 to 19", 14, 19, gaurd_polytope, assignment));
 	//  ************************* Transition: t39 End ************************************************
 	//  ************************* Transition: t40 ***************************************************
 	gaurdBoundValue[0] = 2; // x1==2 and 4<=x2<=5 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -843,7 +882,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t40 = transition::ptr(new transition(40, "15 to 10", 15, 10, gaurd_polytope, assignment));
+	transition::ptr t40 = transition::ptr(
+			new transition(40, "15 to 10", 15, 10, gaurd_polytope, assignment));
 	//  ************************* Transition: t40 End ************************************************
 	//  ************************* Transition: t41 ***************************************************
 	gaurdBoundValue[0] = 3; //  2<=x1<=3 and x2==4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -858,7 +898,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t41 = transition::ptr(new transition(41, "15 to 14", 15, 14, gaurd_polytope, assignment));
+	transition::ptr t41 = transition::ptr(
+			new transition(41, "15 to 14", 15, 14, gaurd_polytope, assignment));
 	//  ************************* Transition: t41 End ***********************************************
 	//  ************************* Transition: t42 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 4<=x2<=5 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -873,7 +914,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t42 = transition::ptr(new transition(42, "15 to 20", 15, 20, gaurd_polytope, assignment));
+	transition::ptr t42 = transition::ptr(
+			new transition(42, "15 to 20", 15, 20, gaurd_polytope, assignment));
 	//  ************************* Transition: t42 End ************************************************
 	//  ************************* Transition: t43 ***************************************************
 	gaurdBoundValue[0] = 4; //  3<=x1<=4 and x2==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -888,7 +930,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t43 = transition::ptr(new transition(43, "16 to 17", 16, 17, gaurd_polytope, assignment));
+	transition::ptr t43 = transition::ptr(
+			new transition(43, "16 to 17", 16, 17, gaurd_polytope, assignment));
 	//  ************************* Transition: t43 End ***********************************************
 	//  ************************* Transition: t44 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 0<=x2<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -903,7 +946,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t44 = transition::ptr(new transition(44, "16 to 11", 16, 11, gaurd_polytope, assignment));
+	transition::ptr t44 = transition::ptr(
+			new transition(44, "16 to 11", 16, 11, gaurd_polytope, assignment));
 	//  ************************* Transition: t44 End ************************************************
 	//  ************************* Transition: t45 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 0<=x2<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -918,7 +962,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t45 = transition::ptr(new transition(45, "16 to 21", 16, 21, gaurd_polytope, assignment));
+	transition::ptr t45 = transition::ptr(
+			new transition(45, "16 to 21", 16, 21, gaurd_polytope, assignment));
 	//  ************************* Transition: t45 End ************************************************
 	//  ************************* Transition: t46 ***************************************************
 	gaurdBoundValue[0] = 4; //  3<=x1<=4 and x2==2 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -933,7 +978,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t46 = transition::ptr(new transition(46, "17 to 18", 17, 18, gaurd_polytope, assignment));
+	transition::ptr t46 = transition::ptr(
+			new transition(46, "17 to 18", 17, 18, gaurd_polytope, assignment));
 	//  ************************* Transition: t46 End ***********************************************
 	//  ************************* Transition: t47 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 1<=x2<=2 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -948,7 +994,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t47 = transition::ptr(new transition(47, "17 to 12", 17, 12, gaurd_polytope, assignment));
+	transition::ptr t47 = transition::ptr(
+			new transition(47, "17 to 12", 17, 12, gaurd_polytope, assignment));
 	//  ************************* Transition: t47 End ************************************************
 	//  ************************* Transition: t48 ***************************************************
 	gaurdBoundValue[0] = 4; //  3<=x1<=4 and x2==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -963,7 +1010,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t48 = transition::ptr(new transition(48, "17 to 16", 17, 16, gaurd_polytope, assignment));
+	transition::ptr t48 = transition::ptr(
+			new transition(48, "17 to 16", 17, 16, gaurd_polytope, assignment));
 	//  ************************* Transition: t48 End ***********************************************
 	//  ************************* Transition: t49 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 1<=x2<=2 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -978,7 +1026,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t49 = transition::ptr(new transition(49, "17 to 22", 17, 22, gaurd_polytope, assignment));
+	transition::ptr t49 = transition::ptr(
+			new transition(49, "17 to 22", 17, 22, gaurd_polytope, assignment));
 	//  ************************* Transition: t49 End ************************************************
 	//  ************************* Transition: t50 ***************************************************
 	gaurdBoundValue[0] = 4; //  3<=x1<=4 and x2==3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -993,7 +1042,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t50 = transition::ptr(new transition(50, "18 to 19", 18, 19, gaurd_polytope, assignment));
+	transition::ptr t50 = transition::ptr(
+			new transition(50, "18 to 19", 18, 19, gaurd_polytope, assignment));
 	//  ************************* Transition: t50 End ***********************************************
 	//  ************************* Transition: t51 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 2<=x2<=3 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1008,7 +1058,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t51 = transition::ptr(new transition(51, "18 to B", 18, 13, gaurd_polytope, assignment));
+	transition::ptr t51 = transition::ptr(
+			new transition(51, "18 to B", 18, 13, gaurd_polytope, assignment));
 	//  ************************* Transition: t51 End ************************************************
 	//  ************************* Transition: t52 ***************************************************
 	gaurdBoundValue[0] = 4; //  3<=x1<=4 and x2==2 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1023,7 +1074,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t52 = transition::ptr(new transition(52, "18 to 17", 18, 17, gaurd_polytope, assignment));
+	transition::ptr t52 = transition::ptr(
+			new transition(52, "18 to 17", 18, 17, gaurd_polytope, assignment));
 	//  ************************* Transition: t52 End ***********************************************
 	//  ************************* Transition: t53 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 2<=x2<=3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1038,7 +1090,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t53 = transition::ptr(new transition(53, "18 to 23", 18, 23, gaurd_polytope, assignment));
+	transition::ptr t53 = transition::ptr(
+			new transition(53, "18 to 23", 18, 23, gaurd_polytope, assignment));
 	//  ************************* Transition: t53 End ************************************************
 	//  ************************* Transition: t54 ***************************************************
 	gaurdBoundValue[0] = 4; //  3<=x1<=4 and x2==4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1053,7 +1106,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t54 = transition::ptr(new transition(54, "19 to 20", 19, 20, gaurd_polytope, assignment));
+	transition::ptr t54 = transition::ptr(
+			new transition(54, "19 to 20", 19, 20, gaurd_polytope, assignment));
 	//  ************************* Transition: t54 End ***********************************************
 	//  ************************* Transition: t55 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 3<=x2<=4 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1068,7 +1122,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t55 = transition::ptr(new transition(55, "19 to 14", 19, 14, gaurd_polytope, assignment));
+	transition::ptr t55 = transition::ptr(
+			new transition(55, "19 to 14", 19, 14, gaurd_polytope, assignment));
 	//  ************************* Transition: t55 End ************************************************
 	//  ************************* Transition: t56 ***************************************************
 	gaurdBoundValue[0] = 4; //  3<=x1<=4 and x2==3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1083,7 +1138,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t56 = transition::ptr(new transition(56, "19 to 18", 19, 18, gaurd_polytope, assignment));
+	transition::ptr t56 = transition::ptr(
+			new transition(56, "19 to 18", 19, 18, gaurd_polytope, assignment));
 	//  ************************* Transition: t56 End ***********************************************
 	//  ************************* Transition: t57 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 3<=x2<=4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1098,7 +1154,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t57 = transition::ptr(new transition(57, "19 to 24", 19, 24, gaurd_polytope, assignment));
+	transition::ptr t57 = transition::ptr(
+			new transition(57, "19 to 24", 19, 24, gaurd_polytope, assignment));
 	//  ************************* Transition: t57 End ************************************************
 	//  ************************* Transition: t58 ***************************************************
 	gaurdBoundValue[0] = 3; // x1==3 and 4<=x2<=5 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1113,7 +1170,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t58 = transition::ptr(new transition(58, "20 to 15", 20, 15, gaurd_polytope, assignment));
+	transition::ptr t58 = transition::ptr(
+			new transition(58, "20 to 15", 20, 15, gaurd_polytope, assignment));
 	//  ************************* Transition: t58 End ************************************************
 	//  ************************* Transition: t59 ***************************************************
 	gaurdBoundValue[0] = 4; //  3<=x1<=4 and x2==4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1128,7 +1186,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t59 = transition::ptr(new transition(59, "20 to 19", 20, 19, gaurd_polytope, assignment));
+	transition::ptr t59 = transition::ptr(
+			new transition(59, "20 to 19", 20, 19, gaurd_polytope, assignment));
 	//  ************************* Transition: t59 End ***********************************************
 	//  ************************* Transition: t60 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 4<=x2<=5 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1143,7 +1202,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t60 = transition::ptr(new transition(60, "20 to 25", 20, 25, gaurd_polytope, assignment));
+	transition::ptr t60 = transition::ptr(
+			new transition(60, "20 to 25", 20, 25, gaurd_polytope, assignment));
 	//  ************************* Transition: t60 End ************************************************
 	//  ************************* Transition: t61 ***************************************************
 	gaurdBoundValue[0] = 5; //  4<=x1<=5 and x2==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1158,7 +1218,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t61 = transition::ptr(new transition(61, "21 to 22", 21, 22, gaurd_polytope, assignment));
+	transition::ptr t61 = transition::ptr(
+			new transition(61, "21 to 22", 21, 22, gaurd_polytope, assignment));
 	//  ************************* Transition: t61 End ***********************************************
 	//  ************************* Transition: t62 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 0<=x2<=1 and  -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1173,7 +1234,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t62 = transition::ptr(new transition(62, "21 to 16", 21, 16, gaurd_polytope, assignment));
+	transition::ptr t62 = transition::ptr(
+			new transition(62, "21 to 16", 21, 16, gaurd_polytope, assignment));
 	//  ************************* Transition: t62 End ************************************************
 	//  ************************* Transition: t63 ***************************************************
 	gaurdBoundValue[0] = 5; //  4<=x1<=5 and x2==2 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1188,7 +1250,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t63 = transition::ptr(new transition(63, "22 to 23", 22, 23, gaurd_polytope, assignment));
+	transition::ptr t63 = transition::ptr(
+			new transition(63, "22 to 23", 22, 23, gaurd_polytope, assignment));
 	//  ************************* Transition: t63 End ***********************************************
 	//  ************************* Transition: t64 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 1<=x2<=2 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1203,7 +1266,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t64 = transition::ptr(new transition(64, "22 to 17", 22, 17, gaurd_polytope, assignment));
+	transition::ptr t64 = transition::ptr(
+			new transition(64, "22 to 17", 22, 17, gaurd_polytope, assignment));
 	//  ************************* Transition: t64 End ************************************************
 	//  ************************* Transition: t65 ***************************************************
 	gaurdBoundValue[0] = 5; //  4<=x1<=5 and x2==1 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1218,7 +1282,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t65 = transition::ptr(new transition(65, "22 to 21", 22, 21, gaurd_polytope, assignment));
+	transition::ptr t65 = transition::ptr(
+			new transition(65, "22 to 21", 22, 21, gaurd_polytope, assignment));
 	//  ************************* Transition: t65 End ***********************************************
 	//  ************************* Transition: t66 ***************************************************
 	gaurdBoundValue[0] = 5; //  4<=x1<=5 and x2==3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1233,7 +1298,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t66 = transition::ptr(new transition(66, "23 to 24", 23, 24, gaurd_polytope, assignment));
+	transition::ptr t66 = transition::ptr(
+			new transition(66, "23 to 24", 23, 24, gaurd_polytope, assignment));
 	//  ************************* Transition: t66 End ***********************************************
 	//  ************************* Transition: t67 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 2<=x2<=3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1248,7 +1314,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t67 = transition::ptr(new transition(67, "23 to 18", 23, 18, gaurd_polytope, assignment));
+	transition::ptr t67 = transition::ptr(
+			new transition(67, "23 to 18", 23, 18, gaurd_polytope, assignment));
 	//  ************************* Transition: t67 End ************************************************
 	//  ************************* Transition: t68 ***************************************************
 	gaurdBoundValue[0] = 5; //  4<=x1<=5 and x2==2 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1263,7 +1330,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t68 = transition::ptr(new transition(68, "23 to 23", 23, 22, gaurd_polytope, assignment));
+	transition::ptr t68 = transition::ptr(
+			new transition(68, "23 to 23", 23, 22, gaurd_polytope, assignment));
 	//  ************************* Transition: t68 End ***********************************************
 	//  ************************* Transition: t69 ***************************************************
 	gaurdBoundValue[0] = 5; //  4<=x1<=5 and x2==4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1278,7 +1346,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t69 = transition::ptr(new transition(69, "24 to 25", 24, 25, gaurd_polytope, assignment));
+	transition::ptr t69 = transition::ptr(
+			new transition(69, "24 to 25", 24, 25, gaurd_polytope, assignment));
 	//  ************************* Transition: t69 End ***********************************************
 	//  ************************* Transition: t70 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 3<=x2<=4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1293,7 +1362,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t70 = transition::ptr(new transition(70, "24 to 19", 24, 19, gaurd_polytope, assignment));
+	transition::ptr t70 = transition::ptr(
+			new transition(70, "24 to 19", 24, 19, gaurd_polytope, assignment));
 	//  ************************* Transition: t70 End ************************************************
 	//  ************************* Transition: t71 ***************************************************
 	gaurdBoundValue[0] = 5; //  4<=x1<=5 and x2==3 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1308,7 +1378,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t71 = transition::ptr(new transition(71, "24 to 23", 24, 23, gaurd_polytope, assignment));
+	transition::ptr t71 = transition::ptr(
+			new transition(71, "24 to 23", 24, 23, gaurd_polytope, assignment));
 	//  ************************* Transition: t71 End ***********************************************
 	//  ************************* Transition: t72 ***************************************************
 	gaurdBoundValue[0] = 4; // x1==4 and 4<=x2<=5 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1323,7 +1394,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t72 = transition::ptr(new transition(72, "25 to 20", 25, 20, gaurd_polytope, assignment));
+	transition::ptr t72 = transition::ptr(
+			new transition(72, "25 to 20", 25, 20, gaurd_polytope, assignment));
 	//  ************************* Transition: t72 End ************************************************
 	//  ************************* Transition: t73 ***************************************************
 	gaurdBoundValue[0] = 5; //  4<=x1<=5 and x2==4 and -1000<=v1<=1000 &  -1000<=v2<=1000
@@ -1338,7 +1410,8 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	gaurd_polytope = polytope::ptr(
 			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
 					gaurdBoundSign));
-	transition::ptr t73 = transition::ptr(new transition(73, "25 to 24", 25, 24, gaurd_polytope, assignment));
+	transition::ptr t73 = transition::ptr(
+			new transition(73, "25 to 24", 25, 24, gaurd_polytope, assignment));
 	//  ************************* Transition: t73 End ***********************************************
 // *******************************************************************************************************
 //	////// ********************* Transition Created and all Initialized **************************  //////
@@ -1454,8 +1527,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc1.push_back(t1);
 	Out_Going_Trans_fromLoc1.push_back(t2);
 
-	location::ptr l1 = location::ptr(new location(1, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc1));
+	location::ptr l1 = location::ptr(
+			new location(1, "2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc1));
 //  ************ Location ID=1 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -1494,8 +1568,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc2.push_back(t4);
 	Out_Going_Trans_fromLoc2.push_back(t5);
 
-	location::ptr l2 = location::ptr(new location(2, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc2));
+	location::ptr l2 = location::ptr(
+			new location(2, "2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc2));
 //  ************ Location ID=2 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -1534,8 +1609,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc3.push_back(t7);
 	Out_Going_Trans_fromLoc3.push_back(t8);
 
-	location::ptr l3 = location::ptr(new location(3, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc3));
+	location::ptr l3 = location::ptr(
+			new location(3, "2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc3));
 //  ************ Location ID=3 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -1574,8 +1650,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc4.push_back(t10);
 	Out_Going_Trans_fromLoc4.push_back(t11);
 
-	location::ptr l4 = location::ptr(new location(4, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc4));
+	location::ptr l4 = location::ptr(
+			new location(4, "2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc4));
 //  ************ Location ID=4 completed  ************
 	row = 4;
 	invariantBoundValue.resize(row);
@@ -1613,8 +1690,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc5.push_back(t12);
 	Out_Going_Trans_fromLoc5.push_back(t13);
 
-	location::ptr l5 = location::ptr(new location(5, "2", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc5));
+	location::ptr l5 = location::ptr(
+			new location(5, "2", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc5));
 //  ************ Location ID=5 completed  ************
 
 	//	************ No dynamics available for location=6/13    ************
@@ -1648,12 +1726,15 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
-	std::list<transition::ptr> Out_Going_Trans_fromLoc6, Out_Going_Trans_fromLoc13;
+	std::list<transition::ptr> Out_Going_Trans_fromLoc6,
+			Out_Going_Trans_fromLoc13;
 
-	location::ptr l6 = location::ptr(new location(6, "FINAL", system_dynamics, invariant, false,
-			Out_Going_Trans_fromLoc6));
-	location::ptr l13 = location::ptr(new location(13, "BAD", system_dynamics, invariant, false,
-			Out_Going_Trans_fromLoc13));
+	location::ptr l6 = location::ptr(
+			new location(6, "FINAL", system_dynamics, invariant, false,
+					Out_Going_Trans_fromLoc6));
+	location::ptr l13 = location::ptr(
+			new location(13, "BAD", system_dynamics, invariant, false,
+					Out_Going_Trans_fromLoc13));
 
 //  *********  Location ID=6 and ID=13 completed  *****************
 
@@ -1690,8 +1771,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc7.push_back(t15);
 	Out_Going_Trans_fromLoc7.push_back(t16);
 	Out_Going_Trans_fromLoc7.push_back(t17);
-	location::ptr l7 = location::ptr(new location(7, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc7));
+	location::ptr l7 = location::ptr(
+			new location(7, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc7));
 	//  ************ Location ID=7 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x1<=2 and 2<=x2<=3
@@ -1727,7 +1809,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc8.push_back(t19);
 	Out_Going_Trans_fromLoc8.push_back(t20);
 	Out_Going_Trans_fromLoc8.push_back(t21);
-	location::ptr l8 = location::ptr(new location(8, "4", system_dynamics, invariant, true, Out_Going_Trans_fromLoc8));
+	location::ptr l8 = location::ptr(
+			new location(8, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc8));
 	//  ************ Location ID=8 completed  ************
 	invariantBoundValue[0] = 2;	//1<=x1<=2 and 3<=x2<=4
 	invariantBoundValue[1] = -1;
@@ -1762,8 +1846,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc9.push_back(t23);
 	Out_Going_Trans_fromLoc9.push_back(t24);
 	Out_Going_Trans_fromLoc9.push_back(t25);
-	location::ptr l9 = location::ptr(new location(9, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc9));
+	location::ptr l9 = location::ptr(
+			new location(9, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc9));
 	//  ************ Location ID=9 completed  ************
 
 	invariantBoundValue[0] = 2; //1<=x1<=2 and 4<=x2<=5
@@ -1798,8 +1883,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc10.push_back(t26);
 	Out_Going_Trans_fromLoc10.push_back(t27);
 	Out_Going_Trans_fromLoc10.push_back(t28);
-	location::ptr l10 = location::ptr(new location(10, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc10));
+	location::ptr l10 = location::ptr(
+			new location(10, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc10));
 	//  ************ Location ID=10 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x1<=3 and 0<=x2<=1
@@ -1834,8 +1920,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc11.push_back(t29);
 	Out_Going_Trans_fromLoc11.push_back(t30);
 	Out_Going_Trans_fromLoc11.push_back(t31);
-	location::ptr l11 = location::ptr(new location(11, "0", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc11));
+	location::ptr l11 = location::ptr(
+			new location(11, "0", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc11));
 	//  ************ Location ID=11 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x1<=3 and 1<=x2<=2
@@ -1871,8 +1958,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc12.push_back(t33);
 	Out_Going_Trans_fromLoc12.push_back(t34);
 	Out_Going_Trans_fromLoc12.push_back(t35);
-	location::ptr l12 = location::ptr(new location(12, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc12));
+	location::ptr l12 = location::ptr(
+			new location(12, "6", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc12));
 	//  ************ Location ID=12 completed  ************
 	//  ************ Location ID=13 Done above  ************
 
@@ -1909,8 +1997,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc14.push_back(t37);
 	Out_Going_Trans_fromLoc14.push_back(t38);
 	Out_Going_Trans_fromLoc14.push_back(t39);
-	location::ptr l14 = location::ptr(new location(14, "7", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc14));
+	location::ptr l14 = location::ptr(
+			new location(14, "7", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc14));
 	//  ************ Location ID=14 completed  ************
 
 	invariantBoundValue[0] = 3; //2<=x1<=3 and 4<=x2<=5
@@ -1945,8 +2034,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc15.push_back(t40);
 	Out_Going_Trans_fromLoc15.push_back(t41);
 	Out_Going_Trans_fromLoc15.push_back(t42);
-	location::ptr l15 = location::ptr(new location(15, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc15));
+	location::ptr l15 = location::ptr(
+			new location(15, "6", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc15));
 	//  ************ Location ID=15 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 0<=x2<=1
@@ -1981,8 +2071,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc16.push_back(t43);
 	Out_Going_Trans_fromLoc16.push_back(t44);
 	Out_Going_Trans_fromLoc16.push_back(t45);
-	location::ptr l16 = location::ptr(new location(16, "0", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc16));
+	location::ptr l16 = location::ptr(
+			new location(16, "0", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc16));
 	//  ************ Location ID=16 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 1<=x2<=2
@@ -2018,8 +2109,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc17.push_back(t47);
 	Out_Going_Trans_fromLoc17.push_back(t48);
 	Out_Going_Trans_fromLoc17.push_back(t49);
-	location::ptr l17 = location::ptr(new location(17, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc17));
+	location::ptr l17 = location::ptr(
+			new location(17, "6", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc17));
 	//  ************ Location ID=17 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 2<=x2<=3
@@ -2055,8 +2147,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc18.push_back(t51);
 	Out_Going_Trans_fromLoc18.push_back(t52);
 	Out_Going_Trans_fromLoc18.push_back(t53);
-	location::ptr l18 = location::ptr(new location(18, "3", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc18));
+	location::ptr l18 = location::ptr(
+			new location(18, "3", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc18));
 	//  ************ Location ID=18 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 3<=x2<=4
@@ -2092,8 +2185,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc19.push_back(t55);
 	Out_Going_Trans_fromLoc19.push_back(t56);
 	Out_Going_Trans_fromLoc19.push_back(t57);
-	location::ptr l19 = location::ptr(new location(19, "7", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc19));
+	location::ptr l19 = location::ptr(
+			new location(19, "7", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc19));
 	//  ************ Location ID=19 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 4<=x2<=5
@@ -2128,8 +2222,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc20.push_back(t58);
 	Out_Going_Trans_fromLoc20.push_back(t59);
 	Out_Going_Trans_fromLoc20.push_back(t60);
-	location::ptr l20 = location::ptr(new location(20, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc20));
+	location::ptr l20 = location::ptr(
+			new location(20, "6", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc20));
 	//  ************ Location ID=20 completed  ************
 
 	invariantBoundValue[0] = 4; //3<=x1<=4 and 0<=x2<=1
@@ -2163,8 +2258,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc21;
 	Out_Going_Trans_fromLoc21.push_back(t61);
 	Out_Going_Trans_fromLoc21.push_back(t62);
-	location::ptr l21 = location::ptr(new location(21, "0", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc21));
+	location::ptr l21 = location::ptr(
+			new location(21, "0", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc21));
 	//  ************ Location ID=21 completed  ************
 
 	invariantBoundValue[0] = 5; //4<=x1<=5 and 1<=x2<=2
@@ -2199,8 +2295,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc22.push_back(t63);
 	Out_Going_Trans_fromLoc22.push_back(t64);
 	Out_Going_Trans_fromLoc22.push_back(t65);
-	location::ptr l22 = location::ptr(new location(22, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc22));
+	location::ptr l22 = location::ptr(
+			new location(22, "6", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc22));
 	//  ************ Location ID=22 completed  ************
 
 	invariantBoundValue[0] = 5; //4<=x1<=5 and 2<=x2<=3
@@ -2235,8 +2332,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc23.push_back(t66);
 	Out_Going_Trans_fromLoc23.push_back(t67);
 	Out_Going_Trans_fromLoc23.push_back(t68);
-	location::ptr l23 = location::ptr(new location(23, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc23));
+	location::ptr l23 = location::ptr(
+			new location(23, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc23));
 	//  ************ Location ID=23 completed  ************
 
 	invariantBoundValue[0] = 5; //4<=x1<=5 and 3<=x2<=4
@@ -2272,8 +2370,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromLoc24.push_back(t69);
 	Out_Going_Trans_fromLoc24.push_back(t70);
 	Out_Going_Trans_fromLoc24.push_back(t71);
-	location::ptr l24 = location::ptr(new location(24, "4", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc24));
+	location::ptr l24 = location::ptr(
+			new location(24, "4", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc24));
 	//  ************ Location ID=24 completed  ************
 
 	invariantBoundValue[0] = 5; //4<=x1<=5 and 4<=x2<=5
@@ -2308,8 +2407,9 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 	std::list<transition::ptr> Out_Going_Trans_fromLoc25;
 	Out_Going_Trans_fromLoc25.push_back(t72);
 	Out_Going_Trans_fromLoc25.push_back(t73);
-	location::ptr l25 = location::ptr(new location(25, "6", system_dynamics, invariant, true,
-			Out_Going_Trans_fromLoc25));
+	location::ptr l25 = location::ptr(
+			new location(25, "6", system_dynamics, invariant, true,
+					Out_Going_Trans_fromLoc25));
 	//  ************ Location ID=25 completed  ************
 // ******************************************************************************************
 //	// ************************* Locations Created and Initialized **************************
@@ -4169,14 +4269,14 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	boundValueI[6] = 0.1;
 	boundValueI[7] = -0.1;
 
-/*	boundValueI[0] = 3.5;
-	boundValueI[1] = -3.5;
-	boundValueI[2] = 3.5;
-	boundValueI[3] = -3.5;
-	boundValueI[4] = 0.1;
-	boundValueI[5] = -0.1;
-	boundValueI[6] = 0.1;
-	boundValueI[7] = -0.1;*/
+	/*	boundValueI[0] = 3.5;
+	 boundValueI[1] = -3.5;
+	 boundValueI[2] = 3.5;
+	 boundValueI[3] = -3.5;
+	 boundValueI[4] = 0.1;
+	 boundValueI[5] = -0.1;
+	 boundValueI[6] = 0.1;
+	 boundValueI[7] = -0.1;*/
 
 	boundSignI = 1;
 
@@ -10534,87 +10634,161 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	transition::ptr t1 = transition::ptr(new transition(1, "t6", 1, 10, gaurd_polytope0, assignment0));
-	transition::ptr t2 = transition::ptr(new transition(2, "t8", 1, 2, gaurd_polytope1, assignment1));
-	transition::ptr t3 = transition::ptr(new transition(3, "t7", 1, 4, gaurd_polytope2, assignment2));
-	transition::ptr t4 = transition::ptr(new transition(4, "t20", 2, 5, gaurd_polytope3, assignment3));
-	transition::ptr t5 = transition::ptr(new transition(5, "t21", 2, 3, gaurd_polytope4, assignment4));
-	transition::ptr t6 = transition::ptr(new transition(6, "t19", 2, 1, gaurd_polytope5, assignment5));
-	transition::ptr t7 = transition::ptr(new transition(7, "t18", 2, 13, gaurd_polytope6, assignment6));
-	transition::ptr t8 = transition::ptr(new transition(8, "t9", 4, 1, gaurd_polytope7, assignment7));
-	transition::ptr t9 = transition::ptr(new transition(9, "t11", 4, 5, gaurd_polytope8, assignment8));
-	transition::ptr t10 = transition::ptr(new transition(10, "t10", 4, 9, gaurd_polytope9, assignment9));
-	transition::ptr t11 = transition::ptr(new transition(11, "t15", 5, 4, gaurd_polytope10, assignment10));
-	transition::ptr t12 = transition::ptr(new transition(12, "t14", 5, 2, gaurd_polytope11, assignment11));
-	transition::ptr t13 = transition::ptr(new transition(13, "t17", 5, 6, gaurd_polytope12, assignment12));
-	transition::ptr t14 = transition::ptr(new transition(14, "t16", 5, 7, gaurd_polytope13, assignment13));
-	transition::ptr t15 = transition::ptr(new transition(15, "t32", 6, 3, gaurd_polytope14, assignment14));
-	transition::ptr t16 = transition::ptr(new transition(16, "t33", 6, 5, gaurd_polytope15, assignment15));
-	transition::ptr t17 = transition::ptr(new transition(17, "t34", 6, 8, gaurd_polytope16, assignment16));
-	transition::ptr t18 = transition::ptr(new transition(18, "t35", 6, 18, gaurd_polytope17, assignment17));
-	transition::ptr t19 = transition::ptr(new transition(19, "t31", 8, 20, gaurd_polytope18, assignment18));
-	transition::ptr t20 = transition::ptr(new transition(20, "t30", 8, 7, gaurd_polytope19, assignment19));
-	transition::ptr t21 = transition::ptr(new transition(21, "t29", 8, 6, gaurd_polytope20, assignment20));
-	transition::ptr t22 = transition::ptr(new transition(22, "t13", 9, 7, gaurd_polytope21, assignment21));
-	transition::ptr t23 = transition::ptr(new transition(23, "t12", 9, 4, gaurd_polytope22, assignment22));
-	transition::ptr t24 = transition::ptr(new transition(24, "t4", 10, 1, gaurd_polytope23, assignment23));
-	transition::ptr t25 = transition::ptr(new transition(25, "t3", 10, 11, gaurd_polytope24, assignment24));
-	transition::ptr t26 = transition::ptr(new transition(26, "t5", 10, 13, gaurd_polytope25, assignment25));
-	transition::ptr t27 = transition::ptr(new transition(27, "t1", 11, 10, gaurd_polytope26, assignment26));
-	transition::ptr t28 = transition::ptr(new transition(28, "t2", 11, 12, gaurd_polytope27, assignment27));
-	transition::ptr t29 = transition::ptr(new transition(29, "t26", 12, 11, gaurd_polytope28, assignment28));
-	transition::ptr t30 = transition::ptr(new transition(30, "t28", 12, 14, gaurd_polytope29, assignment29));
-	transition::ptr t31 = transition::ptr(new transition(31, "t27", 12, 13, gaurd_polytope30, assignment30));
-	transition::ptr t32 = transition::ptr(new transition(32, "t23", 13, 10, gaurd_polytope31, assignment31));
-	transition::ptr t33 = transition::ptr(new transition(33, "t22", 13, 12, gaurd_polytope32, assignment32));
-	transition::ptr t34 = transition::ptr(new transition(34, "t25", 13, 15, gaurd_polytope33, assignment33));
-	transition::ptr t35 = transition::ptr(new transition(35, "t24", 13, 2, gaurd_polytope34, assignment34));
-	transition::ptr t36 = transition::ptr(new transition(36, "t40", 14, 12, gaurd_polytope35, assignment35));
-	transition::ptr t37 = transition::ptr(new transition(37, "t42", 14, 16, gaurd_polytope36, assignment36));
-	transition::ptr t38 = transition::ptr(new transition(38, "t41", 14, 15, gaurd_polytope37, assignment37));
-	transition::ptr t39 = transition::ptr(new transition(39, "t36", 15, 14, gaurd_polytope38, assignment38));
-	transition::ptr t40 = transition::ptr(new transition(40, "t37", 15, 13, gaurd_polytope39, assignment39));
-	transition::ptr t41 = transition::ptr(new transition(41, "t39", 15, 17, gaurd_polytope40, assignment40));
-	transition::ptr t42 = transition::ptr(new transition(42, "t38", 15, 3, gaurd_polytope41, assignment41));
-	transition::ptr t43 = transition::ptr(new transition(43, "t58", 16, 14, gaurd_polytope42, assignment42));
-	transition::ptr t44 = transition::ptr(new transition(44, "t60", 16, 21, gaurd_polytope43, assignment43));
-	transition::ptr t45 = transition::ptr(new transition(45, "t59", 16, 17, gaurd_polytope44, assignment44));
-	transition::ptr t46 = transition::ptr(new transition(46, "t55", 17, 15, gaurd_polytope45, assignment45));
-	transition::ptr t47 = transition::ptr(new transition(47, "t57", 17, 22, gaurd_polytope46, assignment46));
-	transition::ptr t48 = transition::ptr(new transition(48, "t54", 17, 16, gaurd_polytope47, assignment47));
-	transition::ptr t49 = transition::ptr(new transition(49, "t56", 17, 19, gaurd_polytope48, assignment48));
-	transition::ptr t50 = transition::ptr(new transition(50, "t46", 18, 19, gaurd_polytope49, assignment49));
-	transition::ptr t51 = transition::ptr(new transition(51, "t49", 18, 24, gaurd_polytope50, assignment50));
-	transition::ptr t52 = transition::ptr(new transition(52, "t48", 18, 20, gaurd_polytope51, assignment51));
-	transition::ptr t53 = transition::ptr(new transition(53, "t47", 18, 6, gaurd_polytope52, assignment52));
-	transition::ptr t54 = transition::ptr(new transition(54, "t50", 19, 17, gaurd_polytope53, assignment53));
-	transition::ptr t55 = transition::ptr(new transition(55, "t51", 19, 3, gaurd_polytope54, assignment54));
-	transition::ptr t56 = transition::ptr(new transition(56, "t53", 19, 23, gaurd_polytope55, assignment55));
-	transition::ptr t57 = transition::ptr(new transition(57, "t52", 19, 18, gaurd_polytope56, assignment56));
-	transition::ptr t58 = transition::ptr(new transition(58, "t43", 20, 18, gaurd_polytope57, assignment57));
-	transition::ptr t59 = transition::ptr(new transition(59, "t45", 20, 25, gaurd_polytope58, assignment58));
-	transition::ptr t60 = transition::ptr(new transition(60, "t44", 20, 8, gaurd_polytope59, assignment59));
-	transition::ptr t61 = transition::ptr(new transition(61, "t72", 21, 16, gaurd_polytope60, assignment60));
-	transition::ptr t62 = transition::ptr(new transition(62, "t73", 21, 22, gaurd_polytope61, assignment61));
-	transition::ptr t63 = transition::ptr(new transition(63, "t70", 22, 17, gaurd_polytope62, assignment62));
-	transition::ptr t64 = transition::ptr(new transition(64, "t69", 22, 21, gaurd_polytope63, assignment63));
-	transition::ptr t65 = transition::ptr(new transition(65, "t71", 22, 23, gaurd_polytope64, assignment64));
-	transition::ptr t66 = transition::ptr(new transition(66, "t66", 23, 22, gaurd_polytope65, assignment65));
-	transition::ptr t67 = transition::ptr(new transition(67, "t67", 23, 19, gaurd_polytope66, assignment66));
-	transition::ptr t68 = transition::ptr(new transition(68, "t68", 23, 24, gaurd_polytope67, assignment67));
-	transition::ptr t69 = transition::ptr(new transition(69, "t63", 24, 23, gaurd_polytope68, assignment68));
-	transition::ptr t70 = transition::ptr(new transition(70, "t65", 24, 25, gaurd_polytope69, assignment69));
-	transition::ptr t71 = transition::ptr(new transition(71, "t64", 24, 18, gaurd_polytope70, assignment70));
-	transition::ptr t72 = transition::ptr(new transition(72, "t61", 25, 24, gaurd_polytope71, assignment71));
-	transition::ptr t73 = transition::ptr(new transition(73, "t62", 25, 20, gaurd_polytope72, assignment72));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "t6", 1, 10, gaurd_polytope0, assignment0));
+	transition::ptr t2 = transition::ptr(
+			new transition(2, "t8", 1, 2, gaurd_polytope1, assignment1));
+	transition::ptr t3 = transition::ptr(
+			new transition(3, "t7", 1, 4, gaurd_polytope2, assignment2));
+	transition::ptr t4 = transition::ptr(
+			new transition(4, "t20", 2, 5, gaurd_polytope3, assignment3));
+	transition::ptr t5 = transition::ptr(
+			new transition(5, "t21", 2, 3, gaurd_polytope4, assignment4));
+	transition::ptr t6 = transition::ptr(
+			new transition(6, "t19", 2, 1, gaurd_polytope5, assignment5));
+	transition::ptr t7 = transition::ptr(
+			new transition(7, "t18", 2, 13, gaurd_polytope6, assignment6));
+	transition::ptr t8 = transition::ptr(
+			new transition(8, "t9", 4, 1, gaurd_polytope7, assignment7));
+	transition::ptr t9 = transition::ptr(
+			new transition(9, "t11", 4, 5, gaurd_polytope8, assignment8));
+	transition::ptr t10 = transition::ptr(
+			new transition(10, "t10", 4, 9, gaurd_polytope9, assignment9));
+	transition::ptr t11 = transition::ptr(
+			new transition(11, "t15", 5, 4, gaurd_polytope10, assignment10));
+	transition::ptr t12 = transition::ptr(
+			new transition(12, "t14", 5, 2, gaurd_polytope11, assignment11));
+	transition::ptr t13 = transition::ptr(
+			new transition(13, "t17", 5, 6, gaurd_polytope12, assignment12));
+	transition::ptr t14 = transition::ptr(
+			new transition(14, "t16", 5, 7, gaurd_polytope13, assignment13));
+	transition::ptr t15 = transition::ptr(
+			new transition(15, "t32", 6, 3, gaurd_polytope14, assignment14));
+	transition::ptr t16 = transition::ptr(
+			new transition(16, "t33", 6, 5, gaurd_polytope15, assignment15));
+	transition::ptr t17 = transition::ptr(
+			new transition(17, "t34", 6, 8, gaurd_polytope16, assignment16));
+	transition::ptr t18 = transition::ptr(
+			new transition(18, "t35", 6, 18, gaurd_polytope17, assignment17));
+	transition::ptr t19 = transition::ptr(
+			new transition(19, "t31", 8, 20, gaurd_polytope18, assignment18));
+	transition::ptr t20 = transition::ptr(
+			new transition(20, "t30", 8, 7, gaurd_polytope19, assignment19));
+	transition::ptr t21 = transition::ptr(
+			new transition(21, "t29", 8, 6, gaurd_polytope20, assignment20));
+	transition::ptr t22 = transition::ptr(
+			new transition(22, "t13", 9, 7, gaurd_polytope21, assignment21));
+	transition::ptr t23 = transition::ptr(
+			new transition(23, "t12", 9, 4, gaurd_polytope22, assignment22));
+	transition::ptr t24 = transition::ptr(
+			new transition(24, "t4", 10, 1, gaurd_polytope23, assignment23));
+	transition::ptr t25 = transition::ptr(
+			new transition(25, "t3", 10, 11, gaurd_polytope24, assignment24));
+	transition::ptr t26 = transition::ptr(
+			new transition(26, "t5", 10, 13, gaurd_polytope25, assignment25));
+	transition::ptr t27 = transition::ptr(
+			new transition(27, "t1", 11, 10, gaurd_polytope26, assignment26));
+	transition::ptr t28 = transition::ptr(
+			new transition(28, "t2", 11, 12, gaurd_polytope27, assignment27));
+	transition::ptr t29 = transition::ptr(
+			new transition(29, "t26", 12, 11, gaurd_polytope28, assignment28));
+	transition::ptr t30 = transition::ptr(
+			new transition(30, "t28", 12, 14, gaurd_polytope29, assignment29));
+	transition::ptr t31 = transition::ptr(
+			new transition(31, "t27", 12, 13, gaurd_polytope30, assignment30));
+	transition::ptr t32 = transition::ptr(
+			new transition(32, "t23", 13, 10, gaurd_polytope31, assignment31));
+	transition::ptr t33 = transition::ptr(
+			new transition(33, "t22", 13, 12, gaurd_polytope32, assignment32));
+	transition::ptr t34 = transition::ptr(
+			new transition(34, "t25", 13, 15, gaurd_polytope33, assignment33));
+	transition::ptr t35 = transition::ptr(
+			new transition(35, "t24", 13, 2, gaurd_polytope34, assignment34));
+	transition::ptr t36 = transition::ptr(
+			new transition(36, "t40", 14, 12, gaurd_polytope35, assignment35));
+	transition::ptr t37 = transition::ptr(
+			new transition(37, "t42", 14, 16, gaurd_polytope36, assignment36));
+	transition::ptr t38 = transition::ptr(
+			new transition(38, "t41", 14, 15, gaurd_polytope37, assignment37));
+	transition::ptr t39 = transition::ptr(
+			new transition(39, "t36", 15, 14, gaurd_polytope38, assignment38));
+	transition::ptr t40 = transition::ptr(
+			new transition(40, "t37", 15, 13, gaurd_polytope39, assignment39));
+	transition::ptr t41 = transition::ptr(
+			new transition(41, "t39", 15, 17, gaurd_polytope40, assignment40));
+	transition::ptr t42 = transition::ptr(
+			new transition(42, "t38", 15, 3, gaurd_polytope41, assignment41));
+	transition::ptr t43 = transition::ptr(
+			new transition(43, "t58", 16, 14, gaurd_polytope42, assignment42));
+	transition::ptr t44 = transition::ptr(
+			new transition(44, "t60", 16, 21, gaurd_polytope43, assignment43));
+	transition::ptr t45 = transition::ptr(
+			new transition(45, "t59", 16, 17, gaurd_polytope44, assignment44));
+	transition::ptr t46 = transition::ptr(
+			new transition(46, "t55", 17, 15, gaurd_polytope45, assignment45));
+	transition::ptr t47 = transition::ptr(
+			new transition(47, "t57", 17, 22, gaurd_polytope46, assignment46));
+	transition::ptr t48 = transition::ptr(
+			new transition(48, "t54", 17, 16, gaurd_polytope47, assignment47));
+	transition::ptr t49 = transition::ptr(
+			new transition(49, "t56", 17, 19, gaurd_polytope48, assignment48));
+	transition::ptr t50 = transition::ptr(
+			new transition(50, "t46", 18, 19, gaurd_polytope49, assignment49));
+	transition::ptr t51 = transition::ptr(
+			new transition(51, "t49", 18, 24, gaurd_polytope50, assignment50));
+	transition::ptr t52 = transition::ptr(
+			new transition(52, "t48", 18, 20, gaurd_polytope51, assignment51));
+	transition::ptr t53 = transition::ptr(
+			new transition(53, "t47", 18, 6, gaurd_polytope52, assignment52));
+	transition::ptr t54 = transition::ptr(
+			new transition(54, "t50", 19, 17, gaurd_polytope53, assignment53));
+	transition::ptr t55 = transition::ptr(
+			new transition(55, "t51", 19, 3, gaurd_polytope54, assignment54));
+	transition::ptr t56 = transition::ptr(
+			new transition(56, "t53", 19, 23, gaurd_polytope55, assignment55));
+	transition::ptr t57 = transition::ptr(
+			new transition(57, "t52", 19, 18, gaurd_polytope56, assignment56));
+	transition::ptr t58 = transition::ptr(
+			new transition(58, "t43", 20, 18, gaurd_polytope57, assignment57));
+	transition::ptr t59 = transition::ptr(
+			new transition(59, "t45", 20, 25, gaurd_polytope58, assignment58));
+	transition::ptr t60 = transition::ptr(
+			new transition(60, "t44", 20, 8, gaurd_polytope59, assignment59));
+	transition::ptr t61 = transition::ptr(
+			new transition(61, "t72", 21, 16, gaurd_polytope60, assignment60));
+	transition::ptr t62 = transition::ptr(
+			new transition(62, "t73", 21, 22, gaurd_polytope61, assignment61));
+	transition::ptr t63 = transition::ptr(
+			new transition(63, "t70", 22, 17, gaurd_polytope62, assignment62));
+	transition::ptr t64 = transition::ptr(
+			new transition(64, "t69", 22, 21, gaurd_polytope63, assignment63));
+	transition::ptr t65 = transition::ptr(
+			new transition(65, "t71", 22, 23, gaurd_polytope64, assignment64));
+	transition::ptr t66 = transition::ptr(
+			new transition(66, "t66", 23, 22, gaurd_polytope65, assignment65));
+	transition::ptr t67 = transition::ptr(
+			new transition(67, "t67", 23, 19, gaurd_polytope66, assignment66));
+	transition::ptr t68 = transition::ptr(
+			new transition(68, "t68", 23, 24, gaurd_polytope67, assignment67));
+	transition::ptr t69 = transition::ptr(
+			new transition(69, "t63", 24, 23, gaurd_polytope68, assignment68));
+	transition::ptr t70 = transition::ptr(
+			new transition(70, "t65", 24, 25, gaurd_polytope69, assignment69));
+	transition::ptr t71 = transition::ptr(
+			new transition(71, "t64", 24, 18, gaurd_polytope70, assignment70));
+	transition::ptr t72 = transition::ptr(
+			new transition(72, "t61", 25, 24, gaurd_polytope71, assignment71));
+	transition::ptr t73 = transition::ptr(
+			new transition(73, "t62", 25, 20, gaurd_polytope72, assignment72));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc3;
 
 	Out_Going_Trans_fromloc3.push_back(t1);
 	Out_Going_Trans_fromloc3.push_back(t2);
 	Out_Going_Trans_fromloc3.push_back(t3);
-	location::ptr l1 = location::ptr(new location(1, "loc3", system_dynamics0, invariant0, true,
-			Out_Going_Trans_fromloc3));
+	location::ptr l1 = location::ptr(
+			new location(1, "loc3", system_dynamics0, invariant0, true,
+					Out_Going_Trans_fromloc3));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc8;
 
@@ -10622,21 +10796,24 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc8.push_back(t5);
 	Out_Going_Trans_fromloc8.push_back(t6);
 	Out_Going_Trans_fromloc8.push_back(t7);
-	location::ptr l2 = location::ptr(new location(2, "loc8", system_dynamics1, invariant1, true,
-			Out_Going_Trans_fromloc8));
+	location::ptr l2 = location::ptr(
+			new location(2, "loc8", system_dynamics1, invariant1, true,
+					Out_Going_Trans_fromloc8));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc13;
 
-	location::ptr l3 = location::ptr(new location(3, "BAD", system_dynamics2, invariant2, true,
-			Out_Going_Trans_fromloc13));
+	location::ptr l3 = location::ptr(
+			new location(3, "BAD", system_dynamics2, invariant2, true,
+					Out_Going_Trans_fromloc13));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc4;
 
 	Out_Going_Trans_fromloc4.push_back(t8);
 	Out_Going_Trans_fromloc4.push_back(t9);
 	Out_Going_Trans_fromloc4.push_back(t10);
-	location::ptr l4 = location::ptr(new location(4, "loc4", system_dynamics3, invariant3, true,
-			Out_Going_Trans_fromloc4));
+	location::ptr l4 = location::ptr(
+			new location(4, "loc4", system_dynamics3, invariant3, true,
+					Out_Going_Trans_fromloc4));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc7;
 
@@ -10644,8 +10821,9 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc7.push_back(t12);
 	Out_Going_Trans_fromloc7.push_back(t13);
 	Out_Going_Trans_fromloc7.push_back(t14);
-	location::ptr l5 = location::ptr(new location(5, "loc7", system_dynamics4, invariant4, true,
-			Out_Going_Trans_fromloc7));
+	location::ptr l5 = location::ptr(
+			new location(5, "loc7", system_dynamics4, invariant4, true,
+					Out_Going_Trans_fromloc7));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc12;
 
@@ -10653,51 +10831,58 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc12.push_back(t16);
 	Out_Going_Trans_fromloc12.push_back(t17);
 	Out_Going_Trans_fromloc12.push_back(t18);
-	location::ptr l6 = location::ptr(new location(6, "loc12", system_dynamics5, invariant5, true,
-			Out_Going_Trans_fromloc12));
+	location::ptr l6 = location::ptr(
+			new location(6, "loc12", system_dynamics5, invariant5, true,
+					Out_Going_Trans_fromloc12));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc6;
 
-	location::ptr l7 = location::ptr(new location(7, "GOOD", system_dynamics6, invariant6, true,
-			Out_Going_Trans_fromloc6));
+	location::ptr l7 = location::ptr(
+			new location(7, "GOOD", system_dynamics6, invariant6, true,
+					Out_Going_Trans_fromloc6));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc11;
 
 	Out_Going_Trans_fromloc11.push_back(t19);
 	Out_Going_Trans_fromloc11.push_back(t20);
 	Out_Going_Trans_fromloc11.push_back(t21);
-	location::ptr l8 = location::ptr(new location(8, "loc11", system_dynamics7, invariant7, true,
-			Out_Going_Trans_fromloc11));
+	location::ptr l8 = location::ptr(
+			new location(8, "loc11", system_dynamics7, invariant7, true,
+					Out_Going_Trans_fromloc11));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc5;
 
 	Out_Going_Trans_fromloc5.push_back(t22);
 	Out_Going_Trans_fromloc5.push_back(t23);
-	location::ptr l9 = location::ptr(new location(9, "loc5", system_dynamics8, invariant8, true,
-			Out_Going_Trans_fromloc5));
+	location::ptr l9 = location::ptr(
+			new location(9, "loc5", system_dynamics8, invariant8, true,
+					Out_Going_Trans_fromloc5));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc2;
 
 	Out_Going_Trans_fromloc2.push_back(t24);
 	Out_Going_Trans_fromloc2.push_back(t25);
 	Out_Going_Trans_fromloc2.push_back(t26);
-	location::ptr l10 = location::ptr(new location(10, "loc2", system_dynamics9, invariant9, true,
-			Out_Going_Trans_fromloc2));
+	location::ptr l10 = location::ptr(
+			new location(10, "loc2", system_dynamics9, invariant9, true,
+					Out_Going_Trans_fromloc2));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc1;
 
 	Out_Going_Trans_fromloc1.push_back(t27);
 	Out_Going_Trans_fromloc1.push_back(t28);
-	location::ptr l11 = location::ptr(new location(11, "loc1", system_dynamics10, invariant10, true,
-			Out_Going_Trans_fromloc1));
+	location::ptr l11 = location::ptr(
+			new location(11, "loc1", system_dynamics10, invariant10, true,
+					Out_Going_Trans_fromloc1));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc10;
 
 	Out_Going_Trans_fromloc10.push_back(t29);
 	Out_Going_Trans_fromloc10.push_back(t30);
 	Out_Going_Trans_fromloc10.push_back(t31);
-	location::ptr l12 = location::ptr(new location(12, "loc10", system_dynamics11, invariant11, true,
-			Out_Going_Trans_fromloc10));
+	location::ptr l12 = location::ptr(
+			new location(12, "loc10", system_dynamics11, invariant11, true,
+					Out_Going_Trans_fromloc10));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc9;
 
@@ -10705,16 +10890,18 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc9.push_back(t33);
 	Out_Going_Trans_fromloc9.push_back(t34);
 	Out_Going_Trans_fromloc9.push_back(t35);
-	location::ptr l13 = location::ptr(new location(13, "loc9", system_dynamics12, invariant12, true,
-			Out_Going_Trans_fromloc9));
+	location::ptr l13 = location::ptr(
+			new location(13, "loc9", system_dynamics12, invariant12, true,
+					Out_Going_Trans_fromloc9));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc15;
 
 	Out_Going_Trans_fromloc15.push_back(t36);
 	Out_Going_Trans_fromloc15.push_back(t37);
 	Out_Going_Trans_fromloc15.push_back(t38);
-	location::ptr l14 = location::ptr(new location(14, "loc15", system_dynamics13, invariant13, true,
-			Out_Going_Trans_fromloc15));
+	location::ptr l14 = location::ptr(
+			new location(14, "loc15", system_dynamics13, invariant13, true,
+					Out_Going_Trans_fromloc15));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc14;
 
@@ -10722,16 +10909,18 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc14.push_back(t40);
 	Out_Going_Trans_fromloc14.push_back(t41);
 	Out_Going_Trans_fromloc14.push_back(t42);
-	location::ptr l15 = location::ptr(new location(15, "loc14", system_dynamics14, invariant14, true,
-			Out_Going_Trans_fromloc14));
+	location::ptr l15 = location::ptr(
+			new location(15, "loc14", system_dynamics14, invariant14, true,
+					Out_Going_Trans_fromloc14));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc20;
 
 	Out_Going_Trans_fromloc20.push_back(t43);
 	Out_Going_Trans_fromloc20.push_back(t44);
 	Out_Going_Trans_fromloc20.push_back(t45);
-	location::ptr l16 = location::ptr(new location(16, "loc20", system_dynamics15, invariant15, true,
-			Out_Going_Trans_fromloc20));
+	location::ptr l16 = location::ptr(
+			new location(16, "loc20", system_dynamics15, invariant15, true,
+					Out_Going_Trans_fromloc20));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc19;
 
@@ -10739,8 +10928,9 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc19.push_back(t47);
 	Out_Going_Trans_fromloc19.push_back(t48);
 	Out_Going_Trans_fromloc19.push_back(t49);
-	location::ptr l17 = location::ptr(new location(17, "loc19", system_dynamics16, invariant16, true,
-			Out_Going_Trans_fromloc19));
+	location::ptr l17 = location::ptr(
+			new location(17, "loc19", system_dynamics16, invariant16, true,
+					Out_Going_Trans_fromloc19));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc17;
 
@@ -10748,8 +10938,9 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc17.push_back(t51);
 	Out_Going_Trans_fromloc17.push_back(t52);
 	Out_Going_Trans_fromloc17.push_back(t53);
-	location::ptr l18 = location::ptr(new location(18, "loc17", system_dynamics17, invariant17, true,
-			Out_Going_Trans_fromloc17));
+	location::ptr l18 = location::ptr(
+			new location(18, "loc17", system_dynamics17, invariant17, true,
+					Out_Going_Trans_fromloc17));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc18;
 
@@ -10757,54 +10948,61 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromloc18.push_back(t55);
 	Out_Going_Trans_fromloc18.push_back(t56);
 	Out_Going_Trans_fromloc18.push_back(t57);
-	location::ptr l19 = location::ptr(new location(19, "loc18", system_dynamics18, invariant18, true,
-			Out_Going_Trans_fromloc18));
+	location::ptr l19 = location::ptr(
+			new location(19, "loc18", system_dynamics18, invariant18, true,
+					Out_Going_Trans_fromloc18));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc16;
 
 	Out_Going_Trans_fromloc16.push_back(t58);
 	Out_Going_Trans_fromloc16.push_back(t59);
 	Out_Going_Trans_fromloc16.push_back(t60);
-	location::ptr l20 = location::ptr(new location(20, "loc16", system_dynamics19, invariant19, true,
-			Out_Going_Trans_fromloc16));
+	location::ptr l20 = location::ptr(
+			new location(20, "loc16", system_dynamics19, invariant19, true,
+					Out_Going_Trans_fromloc16));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc25;
 
 	Out_Going_Trans_fromloc25.push_back(t61);
 	Out_Going_Trans_fromloc25.push_back(t62);
-	location::ptr l21 = location::ptr(new location(21, "loc25", system_dynamics20, invariant20, true,
-			Out_Going_Trans_fromloc25));
+	location::ptr l21 = location::ptr(
+			new location(21, "loc25", system_dynamics20, invariant20, true,
+					Out_Going_Trans_fromloc25));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc24;
 
 	Out_Going_Trans_fromloc24.push_back(t63);
 	Out_Going_Trans_fromloc24.push_back(t64);
 	Out_Going_Trans_fromloc24.push_back(t65);
-	location::ptr l22 = location::ptr(new location(22, "loc24", system_dynamics21, invariant21, true,
-			Out_Going_Trans_fromloc24));
+	location::ptr l22 = location::ptr(
+			new location(22, "loc24", system_dynamics21, invariant21, true,
+					Out_Going_Trans_fromloc24));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc23;
 
 	Out_Going_Trans_fromloc23.push_back(t66);
 	Out_Going_Trans_fromloc23.push_back(t67);
 	Out_Going_Trans_fromloc23.push_back(t68);
-	location::ptr l23 = location::ptr(new location(23, "loc23", system_dynamics22, invariant22, true,
-			Out_Going_Trans_fromloc23));
+	location::ptr l23 = location::ptr(
+			new location(23, "loc23", system_dynamics22, invariant22, true,
+					Out_Going_Trans_fromloc23));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc22;
 
 	Out_Going_Trans_fromloc22.push_back(t69);
 	Out_Going_Trans_fromloc22.push_back(t70);
 	Out_Going_Trans_fromloc22.push_back(t71);
-	location::ptr l24 = location::ptr(new location(24, "loc22", system_dynamics23, invariant23, true,
-			Out_Going_Trans_fromloc22));
+	location::ptr l24 = location::ptr(
+			new location(24, "loc22", system_dynamics23, invariant23, true,
+					Out_Going_Trans_fromloc22));
 
 	std::list<transition::ptr> Out_Going_Trans_fromloc21;
 
 	Out_Going_Trans_fromloc21.push_back(t72);
 	Out_Going_Trans_fromloc21.push_back(t73);
-	location::ptr l25 = location::ptr(new location(25, "loc21", system_dynamics24, invariant24, true,
-			Out_Going_Trans_fromloc21));
+	location::ptr l25 = location::ptr(
+			new location(25, "loc21", system_dynamics24, invariant24, true,
+					Out_Going_Trans_fromloc21));
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.addInitial_Location(l1);
@@ -10835,10 +11033,10 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l25);
 	Hybrid_Automata.setDimension(dim);
 
-	Hybrid_Automata.insert_to_map("x1",0);
-	Hybrid_Automata.insert_to_map("x2",1);
-	Hybrid_Automata.insert_to_map("v1",2);
-	Hybrid_Automata.insert_to_map("v2",3);
+	Hybrid_Automata.insert_to_map("x1", 0);
+	Hybrid_Automata.insert_to_map("x2", 1);
+	Hybrid_Automata.insert_to_map("v1", 2);
+	Hybrid_Automata.insert_to_map("v2", 3);
 
 	unsigned int initial_location_id = 17; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation

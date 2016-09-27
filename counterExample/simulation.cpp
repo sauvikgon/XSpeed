@@ -70,14 +70,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	// return the same initial point if the simulation time is smaller than the simulation time_step
 	double time_step = Tfinal/N;
 
-	if (time < time_step)
-		return x;
-
-//	while(time_step < 1e-6){
-//		N/=10;
-//		time_step = Tfinal/N;
-//	}
-
 	for(unsigned int i=0;i<dimension;i++)
 		NV_Ith_S(u,i) = x[i];
 
@@ -170,14 +162,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	{
 		res[i] = NV_Ith_S(u,i);
 	}
-	//debug
-//	std::cout << "last but final time end point" << last[2] << std::endl;
-//	std::cout << "final time end point" << res[2] << std::endl;
-	//--
-	//linear interpolate the last two ODE solution points to get
-	// better estimate of the last solution point.
-//	double lin_factor = (N*time_step - Tfinal)/time_step;
-//	res = lin_interpolate(last, res ,lin_factor);
 	N_VDestroy_Serial(u); /* Free u vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
 
@@ -361,11 +345,6 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
 
 	std::vector<double> v(dimension);
-//	double time_step = Tfinal/N;
-//	if(time_step < 1e-12){
-//		N = N/10;
-//		time_step = Tfinal/N;
-//	}
 
 	math::matrix<double> expAt;
 	std::vector<double> g(dimension);

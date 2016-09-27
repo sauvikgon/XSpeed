@@ -18,7 +18,8 @@
  * Reference for model is https://ths.rwth-aachen.de/research/projects/hypro/filtered-oscillator/
  *
  */
-void SetOscillatorParameters(hybrid_automata& Hybrid_Automata, initial_state::ptr& init_state,
+void SetOscillatorParameters(hybrid_automata& Hybrid_Automata,
+		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* OSCILLATOR_H_ */

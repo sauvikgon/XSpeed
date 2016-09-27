@@ -7,14 +7,14 @@
 
 #include "Hybrid_Model_Parameters_Design/load_model.h"
 
-
-void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions& op,
-		ReachabilityParameters& reach_parameters,
+void load_model(initial_state::ptr& init_state, hybrid_automata& ha,
+		userOptions& op, ReachabilityParameters& reach_parameters,
 		std::pair<int, polytope::ptr>& forbidden_set) {
 	unsigned int row, col;
 
 	reach_parameters.TimeBound = op.get_timeHorizon(); //Total Time Interval
-	reach_parameters.Iterations = (unsigned int) op.get_timeHorizon()/op.get_timeStep(); // number of iterations
+	reach_parameters.Iterations = (unsigned int) op.get_timeHorizon()
+			/ op.get_timeStep(); // number of iterations
 	reach_parameters.time_step = op.get_timeStep();
 
 //Assigning the Model of the Hybrid System
@@ -25,12 +25,12 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 	unsigned int Directions_Type = op.get_directionTemplate(); //(1,2,>2) = (BOX, OCT, UNIFORM)
 
 	if (HybridSystem_Model_Type == BBALL) {
-		SetBouncingBall_Parameters(ha, init_state,
-				reach_parameters);
+		SetBouncingBall_Parameters(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == TBBALL) {
 
-		SetTimedBouncingBall_ParametersHystOutput(ha, init_state,reach_parameters);
+		SetTimedBouncingBall_ParametersHystOutput(ha, init_state,
+				reach_parameters);
 
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {
@@ -63,11 +63,12 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) {
-	//	SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
+		//	SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
 	}
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
-		SetRotationCircleOneLocation_Parameters(ha, init_state, reach_parameters);
+		SetRotationCircleOneLocation_Parameters(ha, init_state,
+				reach_parameters);
 	}
 	if (HybridSystem_Model_Type == CIRCLE_TWO_LOC) {
 
@@ -78,14 +79,14 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 		SetRotationCircle4Location_Parameters(ha, init_state, reach_parameters);
 		//SetRotation_Navtimed_Parameters(ha, init_state,reach_parameters);
 	}
-	if (HybridSystem_Model_Type == OSCILLATOR) {		
-		SetOscillatorParameters(ha,init_state,reach_parameters);
+	if (HybridSystem_Model_Type == OSCILLATOR) {
+		SetOscillatorParameters(ha, init_state, reach_parameters);
 	}
 
 	if (HybridSystem_Model_Type == 14) {
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
-		//Set_NavTimed_Parameters(ha, init_state,reach_parameters);
-		user_model(ha, init_state,reach_parameters);
+		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+		//user_model(ha, init_state,reach_parameters);
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
 	}
 
@@ -127,8 +128,8 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha, userOptions
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
 
-	if(!op.get_forbidden_state().empty()){
-		string_to_poly(op.get_forbidden_state(),forbidden_set);
+	if (!op.get_forbidden_state().empty()) {
+		string_to_poly(op.get_forbidden_state(), forbidden_set);
 	}
 
 }

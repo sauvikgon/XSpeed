@@ -40,15 +40,12 @@ using namespace std;
 using namespace boost::numeric::ublas;
 //using namespace boost;
 
-
-
 /*void SetHelicopter_Parameters3(ReachabilityParameters& reach_parameters,
-		polytope& initial_polytope_I, Dynamics& system_dynamics,
-		polytope& invariant, polytope& gaurd_polytope) */
+ polytope& initial_polytope_I, Dynamics& system_dynamics,
+ polytope& invariant, polytope& gaurd_polytope) */
 
 void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 		initial_state::ptr& init_state,
 		ReachabilityParameters& reach_parameters);
-
 
 #endif /* HELICOPTERMODEL28DIM_H_ */

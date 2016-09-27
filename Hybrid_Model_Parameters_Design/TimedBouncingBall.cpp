@@ -126,9 +126,9 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 
 	// Adding the C vector of the dynamics
 	C.resize(3);
-	C[0]=0;
-	C[1]=-1; // g = -1
-	C[2]=1; //  t = 1
+	C[0] = 0;
+	C[1] = -1; // g = -1
+	C[2] = 1; //  t = 1
 	// TO BE CHANGED LATER  WHEN DISCRETE JUMP WILL BE CHECKED
 	row = 3; //4;
 	col = 3;
@@ -240,10 +240,10 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 
-
-/*transitions t;
-t=NULL;*/
-	transition::ptr trans = transition::ptr(new transition(1,"hop",1,1,gaurd_polytope,assignment));
+	/*transitions t;
+	 t=NULL;*/
+	transition::ptr trans = transition::ptr(
+			new transition(1, "hop", 1, 1, gaurd_polytope, assignment));
 
 	location::ptr source = location::ptr(new location());
 	source->setLocId(1);
@@ -272,9 +272,9 @@ t=NULL;*/
 	Hybrid_Automata.addInitial_Location(source);
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
-	Hybrid_Automata.insert_to_map("x",0);
-	Hybrid_Automata.insert_to_map("v",1);
-	Hybrid_Automata.insert_to_map("t",2);
+	Hybrid_Automata.insert_to_map("x", 0);
+	Hybrid_Automata.insert_to_map("v", 1);
+	Hybrid_Automata.insert_to_map("t", 2);
 	/*
 	 Hybrid_Automata.addInitLoc(source);
 	 Hybrid_Automata.addTransition(trans_list);
@@ -354,7 +354,9 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	invariantBoundValue0.resize(row);
 	invariantBoundValue0[0] = -0.0;
 	invariantBoundSign = 1;
-	invariant0 = polytope::ptr(new polytope(invariantConstraintsMatrix0, invariantBoundValue0, invariantBoundSign));
+	invariant0 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix0, invariantBoundValue0,
+					invariantBoundSign));
 
 	system_dynamics0.U = polytope::ptr(new polytope(true));
 
@@ -407,7 +409,9 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	gaurdBoundValue0[0] = 0.1;
 	gaurdBoundValue0[1] = 0.0;
 	gaurdBoundSign = 1;
-	gaurd_polytope0 = polytope::ptr( new polytope(gaurdConstraintsMatrix0, gaurdBoundValue0, gaurdBoundSign));
+	gaurd_polytope0 = polytope::ptr(
+			new polytope(gaurdConstraintsMatrix0, gaurdBoundValue0,
+					gaurdBoundSign));
 
 // The transition label is   hop
 
@@ -438,22 +442,24 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	initial_polytope_I = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	transition::ptr t1 = transition::ptr(new transition(1, "hop", 1, 1, gaurd_polytope0, assignment0));
+	transition::ptr t1 = transition::ptr(
+			new transition(1, "hop", 1, 1, gaurd_polytope0, assignment0));
 
 	std::list<transition::ptr> Out_Going_Trans_fromalways_running;
 
 	Out_Going_Trans_fromalways_running.push_back(t1);
-	location::ptr l1 = location::ptr(new location(1, "always_running", system_dynamics0, invariant0, true,
-			Out_Going_Trans_fromalways_running));
+	location::ptr l1 = location::ptr(
+			new location(1, "always_running", system_dynamics0, invariant0,
+					true, Out_Going_Trans_fromalways_running));
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.addInitial_Location(l1);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.setDimension(dim);
 
-	Hybrid_Automata.insert_to_map("x",0);
-	Hybrid_Automata.insert_to_map("v",1);
-	Hybrid_Automata.insert_to_map("t",2);
+	Hybrid_Automata.insert_to_map("x", 0);
+	Hybrid_Automata.insert_to_map("v", 1);
+	Hybrid_Automata.insert_to_map("t", 2);
 
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
