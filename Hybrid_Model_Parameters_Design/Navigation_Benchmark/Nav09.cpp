@@ -14,7 +14,7 @@
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
 
 void SetNavigationModel9by9(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 
 	cout << "Running Navigation Model 9 X 9 !!!\n";
@@ -31871,5 +31871,5 @@ void SetNavigationModel9by9(hybrid_automata& Hybrid_Automata,
 			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
 
-	init_state = I;
+	init_state_list.push_back(I);
 }

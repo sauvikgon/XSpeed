@@ -15,7 +15,7 @@
 #include "core_system/math/matrix.h"
 
 void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* ROTATION_CIRCLE_ONE_LOCATION_H_ */

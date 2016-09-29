@@ -8,7 +8,7 @@
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed3by3.h"
 
 void Set_NavTimed_Parameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
@@ -3032,6 +3032,6 @@ void Set_NavTimed_Parameters(hybrid_automata& Hybrid_Automata,
 	initial_state::ptr I = initial_state::ptr(
 			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
-	init_state = I;
+	init_state_list.push_back(I);
 }
 

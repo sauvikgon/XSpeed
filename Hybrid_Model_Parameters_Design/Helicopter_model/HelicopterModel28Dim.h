@@ -45,7 +45,12 @@ using namespace boost::numeric::ublas;
  polytope& invariant, polytope& gaurd_polytope) */
 
 void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
+		ReachabilityParameters& reach_parameters);
+
+//Hyst Generated output
+void SetHelicopter_Parameters3InCorrect(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* HELICOPTERMODEL28DIM_H_ */

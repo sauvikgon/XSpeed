@@ -31,12 +31,12 @@
 #include "core_system/symbolic_states/initial_state.h"
 
 void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 //Only the desired-velocities of  Loc 3 and Loc 4 have been changed
 void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 /*
@@ -44,11 +44,11 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
  * Standard model used by most researchers by the Model name : NAV04
  */
 void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 //Model (5 x 5) containing 81-Locations with 280 transitions

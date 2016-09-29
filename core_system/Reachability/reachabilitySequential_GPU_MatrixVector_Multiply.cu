@@ -36,8 +36,8 @@ template_polyhedra::ptr reachabilitySequential_GPU_MatrixVector_Multiply(
 	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 	size_type row = numVectors, col = shm_NewTotalIteration;
 	if (isInvariantExist == true) { //if invariant exist. Computing
-		shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
-				ReachParameters, invariant, lp_solver_type_choosen);
+	//todo :: fix this later
+		//shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial, ReachParameters, invariant, lp_solver_type_choosen);
 	} //End of Invariant Directions
 
 	if (shm_NewTotalIteration == 1) {

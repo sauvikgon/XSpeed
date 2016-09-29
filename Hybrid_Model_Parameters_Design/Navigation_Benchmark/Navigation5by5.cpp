@@ -24,7 +24,7 @@
 //		Invariants converted to 4 Variables
 //		Similarly Guard is also converted to 4 Variables
 void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -2451,13 +2451,13 @@ void SetNavigationModel5by5OurCode(hybrid_automata& Hybrid_Automata,
 			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
 
-	init_state = I;
+	init_state_list.push_back(I);
 
 }
 
 //Hyst generated Output   HystCode
 void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -11045,6 +11045,6 @@ void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
 
-	init_state = I;
+	init_state_list.push_back(I);
 
 }

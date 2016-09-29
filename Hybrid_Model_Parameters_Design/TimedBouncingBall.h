@@ -27,11 +27,16 @@
 #include "core_system/symbolic_states/symbolic_states.h"
 #include "core_system/symbolic_states/initial_state.h"
 
-void SetTimedBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
+		ReachabilityParameters& reach_parameters);
+
+//Testing for 2 initial set
+void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* TIMEDBOUNCINGBALL_H_ */

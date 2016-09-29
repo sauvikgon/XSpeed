@@ -14,7 +14,7 @@
  *
  */
 void SetOscillatorParameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -376,18 +376,18 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata,
 			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
 
-	init_state = I;
+	init_state_list.push_back(I);
 }
 
 /*This function is incomplete missing guard
  * 		The model has same dynamics matrix A for all Locations but different vector_c
- *      also with differnt Invariant polytope with no guard and assignment
+ *      also with different Invariant polytope with no guard and assignment
  *      so guard polytope =
  *      and assignments  may be identity assignments
  *
  */
 void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -722,6 +722,6 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
 
-	init_state = I;
+	init_state_list.push_back(I);
 }
 

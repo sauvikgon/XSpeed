@@ -17,11 +17,11 @@
 #include "core_system/math/matrix.h"
 
 void SetRotationTimedCircle_Parameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 void SetRotationTimedCircle_Parameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* ROTATION_TIMED_CIRCLE_H_ */

@@ -6,7 +6,7 @@
 using namespace std;
 #define CORE 8
 
-void reachability::setReachParameter(hybrid_automata& h, initial_state::ptr& i,
+void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i,
 		ReachabilityParameters& reach_param, int bound_limit,
 		unsigned int algorithm_type, unsigned int total_partition,
 		int lp_solver_type, unsigned int streams_size,
@@ -37,9 +37,13 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 	//discrete_set discrete_state;
 
 	pwlist pw_list; //list of initial_state
-	pw_list.WaitingList_insert(I);
+	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++){
+		pw_list.WaitingList_insert(*(i));
+		queue.push_back(BreadthLevel); //insert at REAR, first Location
+		//std::cout<<"initial set pushed in pw_list.WaitingList()\n";
+	}
 
-	queue.push_back(BreadthLevel); //insert at REAR, first Location
+	//queue.push_back(BreadthLevel); //insert at REAR, first Location
 	bool starting_location = true;
 	bool saftey_violated = false;
 
@@ -47,10 +51,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 
 	unsigned int num_flowpipe_computed=0;	//keeping track of number of flowpipe computed
 	while (!pw_list.isEmpty_WaitingList()) {
-
 		symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states()); //required to be pushed into the Reachability_Region
 		initial_state::ptr U;
-
 		U = pw_list.WaitingList_delete_front();
 		int levelDeleted = queue.front(); //get FRONT element
 		queue.pop_front(); //delete from FRONT
@@ -58,7 +60,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 			break; //stopping due to number of transitions exceeds the bound
 
 		int location_id;
-		//		cout<<"\nTesting 2 a 2\n";
+		//cout<<"\nTesting 2 a 2\n";
 		//discrete_state = U.getDiscreteSet();
 		location_id = U->getLocationId();
 		//std::cout<<"location_id from U = "<<location_id<<std::endl;
@@ -103,7 +105,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
 		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
 		 * */
-		//	cout<<"\nTesting 2 c\n";
+	//	cout<<"\nTesting 2 c\n";
 		double result_alfa = compute_alfa(reach_parameters.time_step,
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
@@ -299,7 +301,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 //			break; //no need to compute rest of the locations
 //		}
 		//  ******************************** Safety Verification section Ends********************************
-
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) {
 			//computed reach_region is empty and optimize transition BreadthLevel-wise
@@ -480,7 +481,9 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 	//	template_polyhedra::ptr reach_region;
 
 	pwlist pw_list;
-	pw_list.WaitingList_insert(I);
+	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++)
+		pw_list.WaitingList_insert(*(i));
+		//pw_list.WaitingList_insert(I);
 	int number_times = 0;
 	unsigned int iter_max = 1;
 
@@ -717,10 +720,19 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 	std::vector < std::vector<pwlist::ptr> > Qpw_list(2); // QpwList[0] for read and QpwList[1] for write
 	//pwlist pw_list;	//Shared Queue(pwList)
 	//cout << "Test 1\n";
-	Qpw_list[t].resize(1); //resize for the first symbolic_state
+	unsigned int nos_initial_states=1;
+	nos_initial_states=I.size();	//retrieve the size of the number of initial states supplied by the user/model
+
+	Qpw_list[t].resize(nos_initial_states); //resize for the first symbolic_state
 	//cout << "Test 2\n";
-	Qpw_list[t][0] = pwlist::ptr(new pwlist()); //have to instantiate it
-	Qpw_list[t][0]->WaitingList_insert(I);
+	int initialState_index=0;// first initial state
+	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++){
+
+		Qpw_list[t][initialState_index] = pwlist::ptr(new pwlist()); //have to instantiate it
+		Qpw_list[t][initialState_index]->WaitingList_insert(*(i));
+
+		initialState_index++; //next initial state
+	}
 	//cout << "Test 3\n";
 //Since Qpw_list is a temporary working list is it switches between Read and Write so we can not maintain the passedList in it.
 	pwlist::ptr allPassedList; //so we create a permanent pwlist for storing only the passedList;
@@ -744,7 +756,6 @@ cout<<"Breadth - Level === "<<number_times<<"\n";
 		std::vector <location::ptr> list_currLocation(count);	//Data structure required to separate PostD from PostC
 		std::vector <int> list_invBounaryValue(count);	//Data structure required to separate invCheck from PostC
 		std::vector <LoadBalanceData> SymDataStruct(count);
-
 
 		//Create a sublist of initial_state and work with it inside the parallel region(each thread accesses uniquely)
 		//vector<symbolic_states> list_U(count); //SubList for parallel
@@ -1174,10 +1185,23 @@ std::list<symbolic_states::ptr> reachability::computeParallelLoadBalanceReach(st
 
 	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
 	int t = 0; //0 for Read and 1 for Write
+
 	std::vector < std::vector<pwlist::ptr> > Qpw_list(2); // QpwList[0] for read and QpwList[1] for write 	//cout << "Test 1\n";
-	Qpw_list[t].resize(1); //resize for the first symbolic_state 	//cout << "Test 2\n";
-	Qpw_list[t][0] = pwlist::ptr(new pwlist()); //have to instantiate it
-	Qpw_list[t][0]->WaitingList_insert(I); //cout << "Test 3\n";
+
+	unsigned int nos_initial_states=1;
+	nos_initial_states=I.size();	//retrieve the size of the number of initial states supplied by the user/model
+
+	Qpw_list[t].resize(nos_initial_states); //resize for the first symbolic_state
+	//cout << "Test 2\n";
+	int initialState_index=0;// first initial state
+	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++){
+
+		Qpw_list[t][initialState_index] = pwlist::ptr(new pwlist()); //have to instantiate it
+		Qpw_list[t][initialState_index]->WaitingList_insert(*(i));
+
+		initialState_index++; //next initial state
+	}
+
 	pwlist::ptr allPassedList; //so we create a permanent pwlist for storing only the passedList;
 	allPassedList = pwlist::ptr(new pwlist()); //have to instantiate it
 	int number_times = 0;
@@ -1487,10 +1511,27 @@ std::list<symbolic_states::ptr> reachability::LoadBalanceAll(std::list<abstractC
 
 	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
 	int t = 0; //0 for Read and 1 for Write
+
 	std::vector < std::vector<pwlist::ptr> > Qpw_list(2); // QpwList[0] for read and QpwList[1] for write 	//cout << "Test 1\n";
-	Qpw_list[t].resize(1); //resize for the first symbolic_state 	//cout << "Test 2\n";
+
+	/*Qpw_list[t].resize(1); //resize for the first symbolic_state 	//cout << "Test 2\n";
 	Qpw_list[t][0] = pwlist::ptr(new pwlist()); //have to instantiate it
-	Qpw_list[t][0]->WaitingList_insert(I); //cout << "Test 3\n";
+	Qpw_list[t][0]->WaitingList_insert(I); //cout << "Test 3\n";*/
+
+	unsigned int nos_initial_states=1;
+	nos_initial_states=I.size();	//retrieve the size of the number of initial states supplied by the user/model
+
+	Qpw_list[t].resize(nos_initial_states); //resize for the first symbolic_state
+	//cout << "Test 2\n";
+	int initialState_index=0;// first initial state
+	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++){
+
+		Qpw_list[t][initialState_index] = pwlist::ptr(new pwlist()); //have to instantiate it
+		Qpw_list[t][initialState_index]->WaitingList_insert(*(i));
+
+		initialState_index++; //next initial state
+	}
+
 	pwlist::ptr allPassedList; //so we create a permanent pwlist for storing only the passedList;
 	allPassedList = pwlist::ptr(new pwlist()); //have to instantiate it
 	int number_times = 0;
@@ -2541,7 +2582,15 @@ std::list<symbolic_states::ptr> reachability::ParallelBFS_GH()
 			}
 		}
 	}
-	Wlist[t][0][0].push_back(this->I);
+	int initialState_index = 0; // first initial state
+	for (std::list<initial_state::ptr>::iterator i = I.begin(); i != I.end(); i++) {
+
+		Wlist[t][initialState_index][0].push_back(*(i));
+
+		initialState_index++; //next initial state
+	}	//Wlist[t][0][0].push_back(this->I); //old implementation
+
+
 	std::list<symbolic_states::ptr> PASSED;
 	unsigned int level = 0;
 	bool done;

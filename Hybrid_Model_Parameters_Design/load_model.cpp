@@ -7,7 +7,7 @@
 
 #include "Hybrid_Model_Parameters_Design/load_model.h"
 
-void load_model(initial_state::ptr& init_state, hybrid_automata& ha,
+void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		userOptions& op, ReachabilityParameters& reach_parameters,
 		std::pair<int, polytope::ptr>& forbidden_set) {
 	unsigned int row, col;
@@ -29,8 +29,8 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha,
 	}
 	if (HybridSystem_Model_Type == TBBALL) {
 
-		SetTimedBouncingBall_ParametersHystOutput(ha, init_state,
-				reach_parameters);
+		//SetTimedBouncingBall_ParametersHystOutput(ha, init_state,	reach_parameters);
+		SetTimedBouncingBall_2initSet(ha, init_state, reach_parameters);
 
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {
@@ -67,11 +67,9 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha,
 	}
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
-		SetRotationCircleOneLocation_Parameters(ha, init_state,
-				reach_parameters);
+		SetRotationCircleOneLocation_Parameters(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == CIRCLE_TWO_LOC) {
-
 		//SetRotationCircle_Parameters(ha, init_state, reach_parameters);
 		SetRotationTimedCircle_Parameters(ha, init_state, reach_parameters);
 	}
@@ -89,8 +87,10 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha,
 		//user_model(ha, init_state,reach_parameters);
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
 	}
-
-	unsigned int dims = init_state->getInitialSet()->getSystemDimension();
+	unsigned int dims=0;
+	for (std::list<initial_state::ptr>::iterator it=init_state.begin();it!=init_state.end();it++){
+		dims = (*it)->getInitialSet()->getSystemDimension();
+	}
 
 //Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
 //todo:: needs to decide that is this the right place to include Invariant direction
@@ -127,9 +127,7 @@ void load_model(initial_state::ptr& init_state, hybrid_automata& ha,
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
-
 	if (!op.get_forbidden_state().empty()) {
 		string_to_poly(op.get_forbidden_state(), forbidden_set);
 	}
-
 }
