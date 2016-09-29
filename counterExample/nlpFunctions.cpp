@@ -90,12 +90,44 @@ double myobjfunc3(const std::vector<double> &x, std::vector<double> &grad, void 
 
 	abstract_symbolic_state::ptr s_ptr;
 	std::list<abstract_symbolic_state::ptr>::const_iterator it = sym_states.begin();
+	unsigned int i=0;
+	polytope::ptr Trans_p;
+
 	while(it!=sym_states.end())
 	{
+		std::set<int>::iterator dset_iter = (*it)->getDiscreteSet().getDiscreteElements().begin();
+		unsigned int locId = *dset_iter;
+		Dynamics d = HA->getLocation(locId)->getSystem_Dynamics();
+		math::matrix<double> expAt;
+		d.MatrixA.matrix_exponentiation(expAt,x[i]);
+
+		math::matrix<double> M_inv;
+		bool invertible = expAt.inverse(M_inv);
+		if(!invertible)
+			std::runtime_error("nlpfunctions: myobjfunc3: expAt matrix not invertible. Required for Time translation of initial set\n");
+
 		polytope::ptr p = (*it)->getInitialSet();
-		lp.join_poly_constraints(p->getCoeffMatrix(), p->getColumnVector(), p->getInEqualitySign());
+
+		math::matrix<double> A_prime = p->getCoeffMatrix().multiply(M_inv, A_prime);
+
+		if(i==0){
+			p->setCoeffMatrix(A_prime); // p changed to time translated polytope
+			lp.join_poly_constraints(p->getCoeffMatrix(), p->getColumnVector(), p->getInEqualitySign());
+		}
+		else{
+			lp.join_poly_constraints(p->getCoeffMatrix(), p->getColumnVector(), p->getInEqualitySign());
+			p->setCoeffMatrix(A_prime); // p changed to time translated polytope
+			lp.join_poly_constraints(p->getCoeffMatrix(), p->getColumnVector(), p->getInEqualitySign());
+		}
+		i++; // counting the symbolic states
 	}
+	// add the bad set constraints also in the lp
+	lp.join_poly_constraints(bad_poly->getCoeffMatrix(),bad_poly->getColumnVector(),bad_poly->getInEqualitySign());
+
+	// todo: add additional constraints to convert abs to linear objective function
 	// At this point, the constraint space of the joint LP is created
+
+	// todo:set the lp objective function
 
 }
 /* objective function */
