@@ -8,7 +8,7 @@
 #include "core_system/math/matrix.h"
 
 void setSysParams(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 #endif		/* FIVE_DIM_SYS_H_	*/

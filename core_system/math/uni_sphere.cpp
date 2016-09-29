@@ -87,8 +87,7 @@ std::vector<vector<double> > uni_sphere(int N, int dim, int max_iter,
 
 	// cout << "Generate N points on the sphere"<< endl; // DEBUG__
 	for (j = 0; j < N; j++) {
-
-		vector<double> new_point = vector<double>(give_sphere_pt());
+		std::vector<double> new_point = std::vector<double>(give_sphere_pt());
 		vout.at(j) = new_point;
 
 	}

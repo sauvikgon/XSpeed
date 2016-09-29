@@ -53,10 +53,10 @@ using namespace std;
 class reachability {
 
 public:
-	reachability(){
+/*	reachability(){
 	//	cout<< "Calling from reachability Class\n";
-	}
-	void setReachParameter(hybrid_automata& H, initial_state::ptr& I,
+	}*/
+	void setReachParameter(hybrid_automata& H, std::list<initial_state::ptr>& I,
 			ReachabilityParameters& reach_parameters, int bound,
 			unsigned int Algorithm_Type, unsigned int Total_Partition,
 			int lp_solver_type_choosen, unsigned int number_of_streams,
@@ -96,7 +96,8 @@ public:
 
 private:
 	hybrid_automata H; //todo:: have to change it to boost::ptr
-	initial_state::ptr I;
+	//initial_state::ptr I;
+	std::list<initial_state::ptr> I; //converted to a list of initial state
 	ReachabilityParameters reach_parameters;
 
 	int bound;

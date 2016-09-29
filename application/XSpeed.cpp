@@ -56,7 +56,7 @@
 
 namespace po = boost::program_options;
 
-initial_state::ptr init_state;
+std::list<initial_state::ptr> init_state;
 //**************** Hybrid Automata Definition ***********************
 ReachabilityParameters reach_parameters;
 //**************** Hybrid Automata Definition ***********************
@@ -427,20 +427,19 @@ int main(int argc, char *argv[]) {
 	double cpu_usage;
 	boost::timer::cpu_timer tt1;
 	unsigned int number_of_times = 1;	//Taking Average of 5 readings
-	for (int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
+	for (unsigned int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		init_cpu_usage();	//initializing the CPU Usage utility to start recording usages
 		tt1.start();
 		reachability reach;
 		unsigned int transition_iters = user_options.get_bfs_level();
 
-		reach.setReachParameter(Hybrid_Automata, init_state,
-				reach_parameters, transition_iters, user_options.get_flow_algorithm(),
+		reach.setReachParameter(Hybrid_Automata, init_state, reach_parameters, transition_iters, user_options.get_flow_algorithm(),
 				Total_Partition, lp_solver_type_choosen, number_of_streams,
 				Solver_GLPK_Gurobi_GPU, forbidden_set);
 
 		if (user_options.get_automata_exploration_algorithm() == BFS) { //Sequential Search implemented for Discrete Jumps
 
-			std::cout << "\nRunning Sequential BFS\n";
+			std::cout << "\nRunning Sequential BFS.\n";
 			Symbolic_states_list = reach.computeSeqentialBFSReach(ce_candidates);
 			/*Symbolic_states_list = reach(Hybrid_Automata, init_state,
 					reach_parameters, transition_iterations, Algorithm_Type,
@@ -512,13 +511,9 @@ int main(int argc, char *argv[]) {
 		//----Disabling the console Output to Generate the Data using Shell Script
 
 		std::cout << "\nCPU Usage:(%) = " << Avg_cpu_use<< std::endl;
-
-		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
-				<< std::endl;
-		std::cout << "\nBoost Time taken:User  (in Seconds) = "
-				<< Avg_user_clock / (double) 1000 << std::endl;
-		std::cout << "\nBoost Time taken:System  (in Seconds) = "
-				<< Avg_system_clock / (double) 1000 << std::endl;
+		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time << std::endl;
+		std::cout << "\nBoost Time taken:User  (in Seconds) = " << Avg_user_clock / (double) 1000 << std::endl;
+		std::cout << "\nBoost Time taken:System  (in Seconds) = " << Avg_system_clock / (double) 1000 << std::endl;
 		cout << endl << "Number of Vectors = " << reach_parameters.Directions.size1();
 
 	}
@@ -526,16 +521,10 @@ int main(int argc, char *argv[]) {
 
 		//----Disabling the console Output to Generate the Data using Shell Script
 		std::cout << "\nCPU Usage:(%) = " << Avg_cpu_use<< std::endl;
-		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
-				<< std::endl;
-
-		std::cout << "\nBoost Time taken:User  (in Seconds) = "
-				<< Avg_user_clock / (double) 1000 << std::endl;
-		std::cout << "\nBoost Time taken:System  (in Seconds) = "
-				<< Avg_system_clock / (double) 1000 << std::endl;
-
-		cout << endl << "Number of Vectors = "
-				<< reach_parameters.Directions.size1();
+		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time << std::endl;
+		std::cout << "\nBoost Time taken:User  (in Seconds) = " << Avg_user_clock / (double) 1000 << std::endl;
+		std::cout << "\nBoost Time taken:System  (in Seconds) = " << Avg_system_clock / (double) 1000 << std::endl;
+		cout << endl << "Number of Vectors = " << reach_parameters.Directions.size1();
 	} 
 	cout << endl << "Memory Usages = " << (double)(total_mem_used / 1024.0) / number_of_times << " MB\n";
 
@@ -586,8 +575,8 @@ std::list<symbolic_states::ptr>::iterator it;
 			sfm.matrix_join(invariant_bound_values, big_b);
 		}
 		std::vector<double> b(big_b.size1()); //rows of big_b
-		for (int i = 0; i < big_b.size2(); i++) { //all the columns of new formed sfm
-			for (int j = 0; j < big_b.size1(); j++) { //value of all the rows
+		for (unsigned int i = 0; i < big_b.size2(); i++) { //all the columns of new formed sfm
+			for (unsigned int j = 0; j < big_b.size1(); j++) { //value of all the rows
 				b[j] = big_b(j, i);
 			} //creating vector 'b'
 
@@ -598,8 +587,8 @@ std::list<symbolic_states::ptr>::iterator it;
 			//vertices_list = p->enumerate_2dVertices(x, y); //
 
 			// ------------- Printing the vertices on the Output File -------------
-			for (int i = 0; i < vertices_list.size1(); i++) {
-				for (int j = 0; j < vertices_list.size2(); j++) {
+			for (unsigned int i = 0; i < vertices_list.size1(); i++) {
+				for (unsigned int j = 0; j < vertices_list.size2(); j++) {
 					outFile << vertices_list(i, j) << " ";
 				}
 				outFile << std::endl;

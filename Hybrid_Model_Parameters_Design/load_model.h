@@ -28,7 +28,7 @@
 /**
  * Creates the pre-defined hybrid automata models in memory with config parameters.
  */
-void load_model(initial_state::ptr& init_state, hybrid_automata& ha,
+void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		userOptions& op, ReachabilityParameters& reach_parameters,
 		std::pair<int, polytope::ptr>& forbidden_set);
 

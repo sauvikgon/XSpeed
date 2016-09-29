@@ -19,7 +19,7 @@
 #include "core_system/symbolic_states/initial_state.h"
 
 void Set_NavTimed_Parameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* NAVIGATIONTIMED3BY3_H_ */

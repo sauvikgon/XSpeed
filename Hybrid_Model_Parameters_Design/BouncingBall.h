@@ -30,7 +30,7 @@
  Dynamics& system_dynamics, polytope& invariant,
  polytope::ptr gaurd_polytope, TransitionDynamics& Rw)*/
 void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* BOUNCINGBALL_H_ */

@@ -15,7 +15,7 @@
 #include "core_system/math/matrix.h"
 
 void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* ROTATION_CIRCLE_FOURLOCATION_H_ */
