@@ -79,6 +79,8 @@ polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> 
  * Computing Transition Successors with Support Function
  * Recall proposition of support function with matrix and convex set in any directions
  *
+ * This function assumes a non-deterministic input set W given in the transition assignment.
+ * i.e. X' = Rx + W
  */
 
 polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double> R,
@@ -101,6 +103,39 @@ polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double>
 
 		b[i] = newPolytope->computeSupportFunction(direction_trans, lp)
 				+ W.computeSupportFunction(each_direction, lp);
+	}
+
+	return polytope::ptr(new polytope(Directions, b, 1));
+}
+/*
+ * Computing Transition Successors with Support Function
+ * Recall proposition of support function with matrix and convex set in any directions
+ *
+ * This function assumes a vector w given in the transition assignment. Hence, deterministic.
+ * i.e. X' = Rx + w
+ */
+
+polytope::ptr post_assign_approx_deterministic(polytope::ptr newPolytope, math::matrix<double> R,
+		std::vector<double> w, math::matrix<double> Directions, int lp_solver_type) {
+	math::matrix<double> R_transpose;
+	int max_or_min = 2;	//Maximizing
+	std::vector<double> b(Directions.size1()), each_direction(
+			Directions.size2()), direction_trans;
+	R.transpose(R_transpose);
+	//create glpk object to be used by the polytope
+	int type=lp_solver_type;
+	lp_solver lp(type);
+
+	lp.setConstraints(newPolytope->getCoeffMatrix(),newPolytope->getColumnVector(),newPolytope->getInEqualitySign());
+
+	for (unsigned int i = 0; i < Directions.size1(); i++) {
+		for (unsigned int j = 0; j < Directions.size2(); j++)
+			each_direction[j] = Directions(i, j);
+		R_transpose.mult_vector(each_direction, direction_trans);
+
+	//todo: change this.
+//		b[i] = newPolytope->computeSupportFunction(direction_trans, lp)
+//				+ W.computeSupportFunction(each_direction, lp);
 	}
 
 	return polytope::ptr(new polytope(Directions, b, 1));
