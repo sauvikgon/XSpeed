@@ -194,7 +194,12 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matri
 	size_type row, col, index_i;
 	row = this->size1();
 	col = this->size2();
-	if (col == mat2.size2()) {
+//	std::cout <<"sfm-directions = "<<col<<" and invariant/mat2.size2() = "<<mat2.size2()<<"\n";
+	if (mat2.size2()==0){	//second matrix is empty
+		joined_matrix = matrix(row,col,this->data());
+	} else if (col==0){
+		joined_matrix = mat2;
+	} else if (col == mat2.size2()) {
 		ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 		matrix mat1;
 		mat1 = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());

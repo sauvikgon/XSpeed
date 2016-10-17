@@ -65,10 +65,13 @@ polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
 	math::matrix<double> directional_constraints, all_dirs;
 	math::matrix<double> each_sfm;
 
-	directional_constraints = sfm->getTemplateDirections();
-
-	directional_constraints.matrix_join(sfm->getInvariantDirections(), all_dirs);
-
+	if (sfm->getInvariantDirections().size2()==0){	//no invariant exists
+		all_dirs = sfm->getTemplateDirections();
+	}else{	//invariants exists so join the directions
+		//std::cout<<" called  ";
+		directional_constraints = sfm->getTemplateDirections();
+		directional_constraints.matrix_join(sfm->getInvariantDirections(), all_dirs);
+	}
 	each_sfm = sfm->getMatrixSupportFunction();
 	//boundingPolytope->setCoeffMatrix(directional_constraints);
 	boundingPolytope->setCoeffMatrix(all_dirs);
@@ -91,13 +94,17 @@ polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
 		polytope_bounds[i] = max_value;
 	} //end of sfm returns vector of all variables[min,max] intervals
 
-	std::vector<double> inv_bounds(sfm->getMatrix_InvariantBound().size1());
-	for (unsigned int k = 0; k < sfm->getInvariantDirections().size1(); k++) { //k==rows or number of invariants
-		inv_bounds[k] = sfm->getMatrix_InvariantBound()(k,0);
-	}
-
 	std::vector<double> all_polytope_bounds;
-	all_polytope_bounds = vector_join(polytope_bounds, inv_bounds);
+
+	if (sfm->getInvariantDirections().size2()==0){	//no invariant exists
+		all_polytope_bounds = polytope_bounds;
+	}else{	////invariants exists so join the bounds
+		std::vector<double> inv_bounds(sfm->getMatrix_InvariantBound().size1());
+		for (unsigned int k = 0; k < sfm->getInvariantDirections().size1(); k++) { //k==rows or number of invariants
+			inv_bounds[k] = sfm->getMatrix_InvariantBound()(k,0);
+		}
+		all_polytope_bounds = vector_join(polytope_bounds, inv_bounds);
+	}
 
 	boundingPolytope->setColumnVector(all_polytope_bounds);
 	boundingPolytope->setInEqualitySign(1);//Indicating all <= sign
