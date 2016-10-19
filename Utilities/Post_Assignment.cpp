@@ -6,6 +6,7 @@
  */
 
 #include "Utilities/Post_Assignment.h"
+#include "application/sf_utility.h"
 
 /*
  * Assignment to a constraint polyhedron newPolytope
@@ -71,16 +72,16 @@ polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> 
 		 cout << b_dash[j] << "\t";
 		 */
 
-	} else
+	} else{
 		std::cout << "\nThe Transition Dynamics Matrix is not Invertible!!!\n";
+		//post_assign_approx(newPolytope, R, W,)
+	}
 	return polytope::ptr(new polytope(A_dash, b_dash, 1));
 }
 /*
  * Computing Transition Successors with Support Function
  * Recall proposition of support function with matrix and convex set in any directions
  *
- * This function assumes a non-deterministic input set W given in the transition assignment.
- * i.e. X' = Rx + W
  */
 
 polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double> R,
@@ -93,7 +94,7 @@ polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double>
 	//create glpk object to be used by the polytope
 	int type=lp_solver_type;
 	lp_solver lp(type);
-
+	lp.setMin_Or_Max(max_or_min);
 	lp.setConstraints(newPolytope->getCoeffMatrix(),newPolytope->getColumnVector(),newPolytope->getInEqualitySign());
 
 	for (unsigned int i = 0; i < Directions.size1(); i++) {
@@ -101,12 +102,14 @@ polytope::ptr post_assign_approx(polytope::ptr newPolytope, math::matrix<double>
 			each_direction[j] = Directions(i, j);
 		R_transpose.mult_vector(each_direction, direction_trans);
 
-		b[i] = newPolytope->computeSupportFunction(direction_trans, lp)
-				+ W.computeSupportFunction(each_direction, lp);
+		b[i] = newPolytope->computeSupportFunction(direction_trans, lp) + W.computeSupportFunction(each_direction, lp);
 	}
 
 	return polytope::ptr(new polytope(Directions, b, 1));
 }
+
+
+
 /*
  * Computing Transition Successors with Support Function
  * Recall proposition of support function with matrix and convex set in any directions
@@ -125,21 +128,14 @@ polytope::ptr post_assign_approx_deterministic(polytope::ptr newPolytope, math::
 	//create glpk object to be used by the polytope
 	int type=lp_solver_type;
 	lp_solver lp(type);
-
+	lp.setMin_Or_Max(max_or_min);
 	lp.setConstraints(newPolytope->getCoeffMatrix(),newPolytope->getColumnVector(),newPolytope->getInEqualitySign());
-
 	for (unsigned int i = 0; i < Directions.size1(); i++) {
 		for (unsigned int j = 0; j < Directions.size2(); j++)
 			each_direction[j] = Directions(i, j);
 		R_transpose.mult_vector(each_direction, direction_trans);
 
-	//todo: change this.
-//		b[i] = newPolytope->computeSupportFunction(direction_trans, lp)
-//				+ W.computeSupportFunction(each_direction, lp);
+		b[i] = newPolytope->computeSupportFunction(direction_trans, lp) + dot_product(each_direction, w);
 	}
-
 	return polytope::ptr(new polytope(Directions, b, 1));
 }
-
-
-

@@ -106,7 +106,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
 		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
 		 * */
-	//	cout<<"\nTesting 2 c\n";
+		//cout<<"\nTesting 2 c\n";
 		double result_alfa = compute_alfa(reach_parameters.time_step,
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
@@ -131,7 +131,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 			current_location->getSystem_Dynamics().MatrixB.transpose(B_trans);
 			reach_parameters.B_trans = B_trans;
 		}
-
+	//	cout<<"\nTesting 2 d\n";
 		// ******************* Computing Parameters *******************************
 
 
@@ -155,7 +155,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		}
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 
-
+	//	cout<<"\nTesting 2 e\n";
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 		num_flowpipe_computed++;//computed one Flowpipe
 
@@ -174,6 +174,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		polytope::ptr abs_flowpipe; //bounding_box Polytope
 		polytope::ptr polyI; //initial polytope of the abstract flowpipe
 		std::list < transition::ptr > list_transitions;
+		//cout<<"\nTesting 2 f\n";
 		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe exists
 				//so perform intersection with forbidden set provided locID matches
 			int locID = current_location->getLocId();
@@ -319,11 +320,18 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 				current_destination = H.getLocation((*t)->getDestination_Location_Id());
 
 				string locName = current_destination->getName();
-
-				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
-
 				std::list<polytope::ptr> polys;
-				polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
+				if (!gaurd_polytope->getIsUniverse())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
+				{
+					std::cout<<"Not universal\n";
+					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+				} else {	//the guard polytope is universal
+					std::cout<<"Guard is universal\n";
+					polytope::ptr templated_hull_flowpipe; //bounding_box Polytope
+					templated_hull_flowpipe = convertBounding_Box(reach_region);
+					polys.push_back(templated_hull_flowpipe);
+				}
 
 				//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 				if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
@@ -344,8 +352,19 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 					polytope::ptr newShiftedPolytope, newPolytope; //created an object here
 					newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);
 					//Returns the intersected region as a single newpolytope.
-					newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);
 
+					math::matrix<double> test(current_assignment.Map.size1(),current_assignment.Map.size2());
+
+					if (current_assignment.Map.inverse(test))	//invertible?
+					{
+						std::cout<<"Exact Post Assignment\n";
+						newShiftedPolytope = post_assign_exact(newPolytope,
+								current_assignment.Map, current_assignment.b);
+					} else {
+						std::cout<<"Approximate Post Assignment\n";
+						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
+								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
+					}
 
 					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 					newState->setTransitionId(transition_id); // keeps track of the transition_ID
@@ -1766,8 +1785,29 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 					intersectedRegion = (*it);
 					polytope::ptr newShiftedPolytope, newPolytope; //created an object here
 					newPolytope = intersectedRegion->GetPolytope_Intersection(loadBalPostD[id].guard_list[trans]); //Retuns only the intersected region as a single newpolytope. ****** with added directions
-					newShiftedPolytope = post_assign_exact(newPolytope, loadBalPostD[id].assign_list[trans].Map,
-							loadBalPostD[id].assign_list[trans].b); //initial_polytope_I = post_assign_exact(newPolytope, R, w);
+
+					/*newShiftedPolytope = post_assign_exact(newPolytope, loadBalPostD[id].assign_list[trans].Map,
+						loadBalPostD[id].assign_list[trans].b); */
+
+					math::matrix<double> test(
+							loadBalPostD[id].assign_list[trans].Map.size1(),
+							loadBalPostD[id].assign_list[trans].Map.size2());
+					if (loadBalPostD[id].assign_list[trans].Map.inverse(test)) //invertible?
+							{
+						std::cout << "Exact Post Assignment\n";
+						newShiftedPolytope = post_assign_exact(newPolytope,
+								loadBalPostD[id].assign_list[trans].Map,
+								loadBalPostD[id].assign_list[trans].b);
+					} else {
+						std::cout << "Approximate Post Assignment\n";
+						newShiftedPolytope = post_assign_approx_deterministic(
+								newPolytope,
+								loadBalPostD[id].assign_list[trans].Map,
+								loadBalPostD[id].assign_list[trans].b,
+								reach_parameters.Directions,
+								lp_solver_type_choosen);
+					}
+
 					initial_state::ptr newState = initial_state::ptr(new initial_state(loadBalPostD[id].dest_locID[trans], newShiftedPolytope));
 					newState->setTransitionId(loadBalPostD[id].trans_ID[trans]); // keeps track of the transition_ID
 					newState->setParentPtrSymbolicState(S[id]);
@@ -2813,7 +2853,22 @@ std::list<initial_state::ptr> reachability::postD(symbolic_states::ptr symb)
 				//	GeneratePolytopePlotter(intersectedRegion);
 				polytope::ptr newShiftedPolytope, newPolytope;//created an object here
 				newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
-				newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);//initial_polytope_I = post_assign_exact(newPolytope, R, w);
+				//newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);//initial_polytope_I = post_assign_exact(newPolytope, R, w);
+
+				math::matrix<double> test(current_assignment.Map.size1(),
+						current_assignment.Map.size2());
+				if (current_assignment.Map.inverse(test))	//invertible?
+				{
+					std::cout << "Exact Post Assignment\n";
+					newShiftedPolytope = post_assign_exact(newPolytope,
+							current_assignment.Map, current_assignment.b);
+				} else {
+					std::cout << "Approximate Post Assignment\n";
+					newShiftedPolytope = post_assign_approx_deterministic(
+							newPolytope, current_assignment.Map,
+							current_assignment.b, reach_parameters.Directions,
+							lp_solver_type_choosen);
+				}
 
 				//	newShiftedPolytope->print2file(newInitSet,0,1); //printing the New Initial Set
 				initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));

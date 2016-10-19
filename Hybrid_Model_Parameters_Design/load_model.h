@@ -25,6 +25,8 @@
 #include "Hybrid_Model_Parameters_Design/oscillator_model/Oscillator.h"
 #include "Hybrid_Model_Parameters_Design/ConstantMotion/ConstantMotion.h"
 
+#include "Hybrid_Model_Parameters_Design/TTEthernet/TTEthernetModel.h"
+
 /**
  * Creates the pre-defined hybrid automata models in memory with config parameters.
  */
