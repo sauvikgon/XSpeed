@@ -23,7 +23,7 @@ polytope::ptr bad_poly;
 std::list<refinement_point> ref_pts;
 std::vector<std::vector<double> > X0; // list of start point of the trajectory segments. Used only in the NLP-LP mixed program
 
-std::list<abstract_symbolic_state::ptr> sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
+std::list<abstract_symbolic_state::ptr> ce_sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
 
 unsigned int samples = 0;
 
@@ -253,15 +253,15 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		max = lp.Compute_LLP(dmax);
 		min = -1 * lp.Compute_LLP(dmin);
 		// we add the bounds as constraints in the nlopt
-		
+
 		// Get the min and max time projection of start set
 		lp_solver lp1(GLPK_SOLVER);
 		P=S->getInitialSet();
 		lp1.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
 				P->getInEqualitySign());
-		
+
 		start_min = -1 * lp1.Compute_LLP(dmin);
-		
+
 		B[i].var_index = N*dim + i;
 		B[i].bound = max - start_min;
 		B[i].is_ge = false;
@@ -381,9 +381,10 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP(double tolerance, const std::l
 	transList = this->get_CE_transitions();
 	bad_poly = this->forbid_poly;
 	ref_pts = refinements;
-	sym_states = this->get_CE_sym_states();
+	ce_sym_states = this->get_CE_sym_states();
+	X0 = std::vector<std::vector<double> >(N);
 
-	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
+	std::cout << "gen_concreteCE_NLP_LP: dimension =" << dim <<", length of CE=" << N << std::endl;
 	// initialize the global locIdList
 	locIdList.resize(N);
 
@@ -402,9 +403,10 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP(double tolerance, const std::l
 	std::cout << "nlopt problem dimension = " << optD << std::endl;
 
 	// choose the type of NLOPT solver
-	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative based
+//	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative based
+	nlopt::opt myopt(nlopt::LN_COBYLA,optD); // derivative free method
 
-	myopt.set_maxeval(2000);
+	myopt.set_maxeval(5000);
 	myopt.set_stopval(1e-6);
 
 //	myopt.set_xtol_rel(1e-4);
@@ -467,7 +469,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP(double tolerance, const std::l
 		x[i] = (max + min)/2;
 		if(it!=transList.end())
 			it++;
-
+//		std::cout << "First time range: min = " << min << ", max = " << max << std::endl;
 	}
 
 	double minf;
@@ -492,7 +494,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP(double tolerance, const std::l
 
 		// one trajectory per symbolic state to be added in the concreteCE
 		// Assumption: X0 contains the start points of the trajectory segments returned by NLOPT
-		for (unsigned int i = 0; i < N; i++) {
+		for (unsigned int i = 1; i < N; i++) {
 			// create the sample
 			concreteCE::sample s;
 			std::set<int>::iterator dset_iter =
@@ -500,7 +502,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP(double tolerance, const std::l
 			unsigned int locId = *dset_iter;
 
 			std::vector<double> y(dim);
-			y = X0[i]; // X0 is initiated by the LP solver
+			y = X0[i-1]; // X0 is initiated by the LP solver
 
 			double time = x[i];
 			s.first = y;
@@ -517,7 +519,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP(double tolerance, const std::l
 }
 
 /**
- * Generate concrete trajectory using splicing with NLP problem (Zutchi, Sankaranarayanan's method Idea)
+ * Generate concrete trajectory using splicing with NLP problem (Zutchi, Sankaranarayanan's  Idea)
  */
 
 concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements) {
@@ -537,7 +539,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	bad_poly = this->forbid_poly;
 	ref_pts = refinements;
 
-	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
+	std::cout << "gen_concreteCE_NLP_HA: dimension =" << dim <<", length of CE=" << N << std::endl;
 	// initialize the global locIdList
 	locIdList.resize(N);
 
@@ -563,7 +565,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative bases
 
-	myopt.set_maxeval(2000);
+	myopt.set_maxeval(4000);
 	myopt.set_stopval(1e-3);
 
 //	myopt.set_xtol_rel(1e-4);
@@ -594,8 +596,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 		else{
 			int locId = locIdList[i];
 			P = HA->getLocation(locId)->getInvariant();
-			T = *(it);
-			P=P->GetPolytope_Intersection(T->getGaurd());
+//			T = *(it);
+//			P=P->GetPolytope_Intersection(T->getGaurd());
 			size += P->getCoeffMatrix().size1();
 			PList[i] = P;
 			it++;
@@ -606,10 +608,9 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 	math::matrix<double> A;
 	math::vector<double> b;
-	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
+	for (unsigned int i = 0; i < N; i++) // iterate over the N invariants of the counter-example
 	{
-//		To get a point from the polytope, we create a random obj function and
-//		solve the lp. The solution point is taken as an initial value.
+
 		P = PList[i];
 		A = P->getCoeffMatrix();
 		b = P->getColumnVector();
@@ -648,7 +649,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	assert(index==size);
 
 	// adding time constraints
-	boundConstriant B[N],B1[N];
+/*	boundConstriant B[N],B1[N];
 	for (unsigned int i = 0; i < N; i++) {
 
 		B[i].var_index = N*dim + i;
@@ -661,7 +662,69 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
 		// We may choose to take the max-min as the initial dwell time
 		x[N * dim + i] = 0.1;
-	}
+	} */
+//// TEST CODE
+//	unsigned int t_index =
+//		get_first_symbolic_state()->getContinuousSet()->get_index("t");
+//
+//	assert((t_index >= 0) && (t_index < dim));
+//
+//	boundConstriant B[N],B1[N];
+//	std::vector<double> dmin(dim, 0), dmax(dim, 0);
+//	dmax[t_index] = 1;
+//	dmin[t_index] = -1;
+//	it = transList.begin();
+////	transition::ptr T;
+//	double max,min,start_min;
+//	for (unsigned int i = 0; i < N; i++) {
+//		S = get_symbolic_state(i);
+//		P = S->getContinuousSet();
+//		if(i==N-1){
+//			// If last abst sym state, then take time projection of flowpipe \cap bad_poly
+//			P=P->GetPolytope_Intersection(bad_poly);
+////			std::ofstream myfile;
+////			myfile.open("./polyBad");
+////			P->print2file("./polyBad",0,1);
+//		}
+//		else{
+//			// Take time projection of flowpipe \cap transition guard
+//			T = *(it);
+//			P=P->GetPolytope_Intersection(T->getGaurd());
+//		}
+////		To get a point from the polytope, we create a random obj function and
+////		solve the lp. The solution point is taken as an initial value.
+//
+//		lp_solver lp(GLPK_SOLVER);
+//		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
+//				P->getInEqualitySign());
+//		max = lp.Compute_LLP(dmax);
+//		min = -1 * lp.Compute_LLP(dmin);
+//		// we add the bounds as constraints in the nlopt
+//
+//		// Get the min and max time projection of start set
+//		lp_solver lp1(GLPK_SOLVER);
+//		P=S->getInitialSet();
+//		lp1.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
+//				P->getInEqualitySign());
+//
+//		start_min = -1 * lp1.Compute_LLP(dmin);
+//
+//		B[i].var_index = N*dim + i;
+//		B[i].bound = max - start_min;
+//		B[i].is_ge = false;
+//		myopt.add_inequality_constraint(myBoundConstraint, &B[i], 1e-8);
+//		B1[i].var_index = B[i].var_index;
+//		B1[i].is_ge=true;
+//		B1[i].bound = min-start_min;
+//		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
+//		// We may choose to take the max-min as the initial dwell time
+//		x[N * dim + i] = (max -start_min + min - start_min)/2;
+//		if(it!=transList.end())
+//			it++;
+//
+//	}
+
+//---------------
 
 	double minf;
 	try {
@@ -721,7 +784,9 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	unsigned int max_refinements = 100, ref_count = 0; // maximum limit to refinement points to be added.
 	do{
 		struct refinement_point pt;
+		cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
 		cexample = gen_concreteCE(tolerance,refinements);
+		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
 		if(cexample->is_empty())
 			return cexample;
 
@@ -732,16 +797,15 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 			ref_count++;
 		}
 		//debug
-		//break;
+//		break;
 	}while(!val_res && ref_count< max_refinements);
 
 	if((ref_count < max_refinements) & !cexample->is_empty()){
 		std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
 		return cexample;
 	}
-	else{
+	else {
 		throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
 		return concreteCE::ptr(new concreteCE());
 	}
-
 }

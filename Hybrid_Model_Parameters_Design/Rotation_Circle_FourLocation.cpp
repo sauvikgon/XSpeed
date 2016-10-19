@@ -284,8 +284,6 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l2);
 	Hybrid_Automata.addLocation(l3);
 	Hybrid_Automata.addLocation(l4);
-	Hybrid_Automata.insert_to_map("x", 1);
-	Hybrid_Automata.insert_to_map("y", 2);
 
 	Hybrid_Automata.insert_to_map("x", 0);
 	Hybrid_Automata.insert_to_map("y", 1);

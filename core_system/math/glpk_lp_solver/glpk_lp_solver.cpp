@@ -18,11 +18,7 @@ unsigned int glpk_lp_solver::lp_count = 0;		//initialize the static variable
 glpk_lp_solver::~glpk_lp_solver() {
 	//cout<<"\nLP problem died Here \n";
 	lp_count--;
-		glp_delete_prob(mylp);
-	//	glp_free(mylp);
-	//	if (lp_count == 0) {
-	//		glp_free_env();
-	//	}
+	glp_delete_prob(mylp);
 }
 void glpk_lp_solver::free_glpk_lp_solver() {
 	lp_count--;
@@ -31,6 +27,10 @@ void glpk_lp_solver::free_glpk_lp_solver() {
 	//	if (lp_count <= 0) {
 	//		glp_free_env();
 	//	}
+}
+void glpk_lp_solver::delete_prob()
+{
+	glp_delete_prob(mylp);
 }
 void glpk_lp_solver::free_environment_glpk_lp_solver() {
 	glp_free_env();
@@ -82,6 +82,7 @@ void glpk_lp_solver::setMin_Or_Max(int Min_Or_Max) {
 		this->Min_Or_Max = GLP_MAX;
 	else
 		throw std::runtime_error("setMin_Or_Max: LP MIN MAX type error\n");
+	glp_set_obj_dir(mylp,this->Min_Or_Max);
 }
 
 int glpk_lp_solver::getMin_Or_Max() {
@@ -151,32 +152,101 @@ void glpk_lp_solver::join_poly_constraints(math::matrix<double> coeff_constraint
 	this->number_of_constraints += bounds.size();
 
 	int r = glp_add_rows(mylp, bounds.size());
-	for(unsigned int i=r;i<=r+bounds.size();i++)
+
+	for(unsigned int i=r,j=0;i < r+bounds.size();i++,j++)
 	{
 		if (bound_signs == 1)		//Ax<=b
-			glp_set_row_bnds(mylp, i , GLP_UP, 0.0, bounds[i]);
+			glp_set_row_bnds(mylp, i , GLP_UP, 0.0, bounds[j]);
 		else
 			//Ax>=b
-			glp_set_row_bnds(mylp, i , GLP_LO, bounds[i], 0.0);
+			glp_set_row_bnds(mylp, i , GLP_LO, bounds[j], 0.0);
 	}
 
 	int c = glp_add_cols(mylp,coeff_constraints.size2());
-	for (unsigned int i = c; i <= c + coeff_constraints.size2(); i++) {
+	for (unsigned int i = c; i < c+coeff_constraints.size2(); i++) {
 		glp_set_col_bnds(mylp, i, GLP_FR, 0.0, 0.0);
 	}
 
 	// set the new added rows and columns
 	unsigned int len = coeff_constraints.size2();
-	for(unsigned int i=r, row = 0;i<=r+bounds.size();i++, row++)
+	for(unsigned int i=r, row = 0;i<r+bounds.size();i++, row++)
 	{
-		int ind[len];
-		double val[len];
+		int ind[len+1];
+		double val[len+1];
 		for(unsigned int j=0;j<len;j++){
 			ind[j+1]= c + j; val[j+1] = coeff_constraints(row, j);
 		}
 		glp_set_mat_row(mylp, i, len, ind, val);
 	}
+}
+void glpk_lp_solver::add_new_cols(int cols)
+{
+	this->dimension += cols;
+	int c = glp_add_cols(mylp, cols);
+	for (unsigned int i = c; i < c+cols; i++) {
+		glp_set_col_bnds(mylp, i, GLP_LO, 0.0, 0.0);
+	}
+}
+void glpk_lp_solver::add_new_constraint(int len, int ind[], double val[])
+{
+	this->number_of_constraints++;
+	int r = glp_add_rows(mylp,1);
+//	std::cout << "Number of columns = " << glp_get_num_cols(mylp) << std::endl;
+//	std::cout << "Column indices are \n";
+//	for(unsigned int i=1;i<=len;i++)
+//		std::cout << ind[i] << " ";
+//	std::cout << "\n";
+	glp_set_mat_row(mylp,r,len,ind,val);
+	glp_set_row_bnds(mylp,r,GLP_UP,0.0,0.0);
 
+}
+void glpk_lp_solver::set_obj_coeff(unsigned int j, double val){
+	glp_set_obj_coef(mylp, j,val);
+}
+
+double glpk_lp_solver::get_obj_coeff(unsigned int j)
+{
+	return glp_get_obj_coef(mylp,j);
+}
+double glpk_lp_solver::solve(){
+	glp_init_smcp(&param);
+//	glp_term_out(GLP_OFF);
+	int status = glp_simplex(mylp,&param);
+	if(status != 0)
+	{
+		std::cout << "GLPK solver failed to successfully solve the lp\n" << std::endl;
+	}
+	// debug
+	std::cout << "Number of non zero coefficients = " << glp_get_num_nz(mylp) << std::endl;
+	std::cout << "Number of columns in the LP = " << glp_get_num_cols(mylp) << std::endl;
+	std::cout << "Number of rows in the LP = " << glp_get_num_rows(mylp) << std::endl;
+	if(glp_get_obj_dir(mylp) == GLP_MIN)
+		std::cout << "Direction of LP is MIN " << std::endl;
+	else if(glp_get_obj_dir(mylp) == GLP_MAX)
+		std::cout << "Direction of LP is MAX " << std::endl;
+	else
+		std::cout << "LP Direction not set " << std::endl;
+
+	double result = glp_get_obj_val(mylp);
+	// End of debug
+	for(unsigned int i=1;i<=glp_get_num_rows(mylp);i++)
+	{
+		int ind[100];
+		double val[100];
+
+		int len = glp_get_mat_row(mylp, i, ind, val);
+		std::cout << "Contents of row number i:" << i << std::endl;
+		for(unsigned int k=1;k<=len;k++){
+			std::cout << "index: " << ind[k] << ", value = " << val[k] << std::endl;
+		}
+
+	}
+	return result;
+}
+
+double glpk_lp_solver::get_col_val(int i)
+{
+	return glp_get_col_prim(mylp, i);
 }
 void glpk_lp_solver::setIteration_Limit(int limits) {
 	param.it_lim = limits;
@@ -241,6 +311,5 @@ double glpk_lp_solver::Compute_LLP(std::vector<double> coeff_function) {//Here a
 std::vector<double> glpk_lp_solver::getMaximizing_Variables(){
 	return this->sv;
 }
-
 
 #endif /* LP_SOLVER_CPP_ */

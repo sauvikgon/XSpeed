@@ -50,7 +50,37 @@ public:
 	 */
 	void join_poly_constraints(math::matrix<double> coeff_constraints,
 			std::vector<double> bounds, int bound_signs);
+
+	/**
+	 * Adds n new column variable to the problem
+	 */
+	void add_new_cols(int n);
+	/**
+	 * Adds a new constrain with the problem, in the ax <= b form
+	 * len is the number of non-zero entries in the constraint
+	 * ind is the array of column indices of the coefficient in the lp coeff matrix
+	 * val is the corresponding array of values of the coefficient matrix
+	 */
+	void add_new_constraint(int len, int ind[], double val[]);
 	void setMin_Or_Max(int Min_Or_Max);
+	/**
+	 * Sets the coefficient of the objective function
+	 */
+	void set_obj_coeff(unsigned int j, double val);
+	/*
+	 * Returns the coefficient of the column variable with index j
+	 */
+	double get_obj_coeff(unsigned int j);
+	/**
+	 * Solve the LP w.r.t the objective function that is set already
+	 */
+	double solve();
+
+	/*
+	 * Gets the optimal value of the variable, after solving the lp, having the index passed as parameter
+	 */
+	double get_col_val(int i);
+
 	int getMin_Or_Max();
 	void setIteration_Limit(int limits);
 	void setInitial_SimplexControlParameters();
@@ -78,6 +108,11 @@ public:
 
 	// ******* Functions to be Interfaced later to the common LP_Solver class **********
 	void displayMaxVariables();
+	/*
+	 * Deletes the GLPK problem
+	 */
+	void delete_prob();
+
 	void free_glpk_lp_solver();
 	static void free_environment_glpk_lp_solver();
 	static unsigned int lp_count;

@@ -43,7 +43,7 @@ extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
 extern std::list<refinement_point> ref_pts; // a list of invariant violating points to refine the search and obtained a validated trajectory
 extern std::vector<std::vector<double> > X0; // list of start point of the trajectory segments. Used only in the NLP-LP mixed program
-extern std::list<abstract_symbolic_state::ptr> sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
+extern std::list<abstract_symbolic_state::ptr> ce_sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
 
 class abstractCE
 {

@@ -1,6 +1,7 @@
 #include "reachability.h"
 #include "InputOutput/cpu_utilities/cpu_utilities.h"
 #include "Utilities/flow_cost_estimate.h"
+#include "core_system/symbolic_states/symbolic_states.h"
 #include <ctime>
 
 using namespace std;

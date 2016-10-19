@@ -612,7 +612,7 @@ std::list<symbolic_states::ptr>::iterator it;
 		abstractCE::ptr ce = *(it);
 //		ce->plot(user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
 		tt1.start(); // start time
-		concreteCE::ptr bad_trace = ce->get_validated_CE(0.001);
+		concreteCE::ptr bad_trace = ce->get_validated_CE(1e-3);
 		tt1.stop();
 		if(bad_trace->is_empty()){
 			std::cout << "Cannot Splice Trajectories within Accepted Error Tolerance\n";

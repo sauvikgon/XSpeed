@@ -1,7 +1,8 @@
 #include "core_system/symbolic_states/symbolic_states.h"
 
 symbolic_states::symbolic_states() {
-	;
+	this->transition_id  = 0;
+
 }
 /*
  symbolic_states::symbolic_states(discrete_set DiscreteSet, polytope::ptr ContinuousSet){

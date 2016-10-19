@@ -35,6 +35,33 @@ lp_solver::~lp_solver() {
 	;
 }
 
+void lp_solver::add_variables(int n)
+{
+	if (lp_solver_type == GLPK_SOLVER) {
+		glpk_lp_problem->add_new_cols(n);
+	}
+	else{
+		throw std::runtime_error("add new variable: Cannot add new variables in the LP problem with the chosen type of LP Solver\n");
+	}
+}
+void lp_solver::add_new_constraint(int len, int ind[], double val[])
+{
+	if (lp_solver_type == GLPK_SOLVER) {
+		glpk_lp_problem->add_new_constraint(len, ind, val);
+	}
+	else{
+		throw std::runtime_error("add new constraint: Cannot add new constraint in the LP problem with the chosen type of LP Solver\n");
+	}
+}
+double lp_solver::get_col_val(int i)
+{
+	if (lp_solver_type == GLPK_SOLVER) {
+		glpk_lp_problem->get_col_val(i);
+	}
+	else{
+		throw std::runtime_error("get_col_val: Getting the optimal value of a LP variable not implemented for the chosen LP type\n");
+	}
+}
 void lp_solver::setMin_Or_Max(int Min_Or_Max) {
 
 	if (lp_solver_type == GLPK_SOLVER) {
@@ -44,7 +71,39 @@ void lp_solver::setMin_Or_Max(int Min_Or_Max) {
 //	if (lp_solver_type == GUROBI_SOLVER) {
 //		gurobi_lp_problem->setMin_Or_Max(Min_Or_Max);
 //	}
+	else{
+		throw std::runtime_error("Set min or max: Cannot set LP problem objective function with the chosen type of LP Solver\n");
+	}
 	// ******* More can be added later  **************
+}
+
+void lp_solver::set_obj_coeff(unsigned int j, double val)
+{
+	if (lp_solver_type == GLPK_SOLVER) {
+		glpk_lp_problem->set_obj_coeff(j, val);
+	}
+	else{
+		throw std::runtime_error("set objective coeff: Cannot set objective function coefficient in the LP problem with the chosen type of LP Solver\n");
+	}
+}
+double lp_solver::get_obj_coeff(unsigned int j)
+{
+	if (lp_solver_type == GLPK_SOLVER) {
+		glpk_lp_problem->get_obj_coeff(j);
+	}
+	else{
+		throw std::runtime_error("set objective coeff: Cannot set objective function coefficient in the LP problem with the chosen type of LP Solver\n");
+	}
+}
+double lp_solver::solve()
+{
+	if (lp_solver_type == GLPK_SOLVER) {
+			double res = glpk_lp_problem->solve();
+			return res;
+	}
+	else {
+		throw std::runtime_error("solve objective coeff: Cannot set objective function coefficient in the LP problem with the chosen type of LP Solver\n");
+	}
 }
 
 void lp_solver::setConstraints(math::matrix<double> coeff_constraints,
@@ -210,6 +269,15 @@ unsigned int lp_solver::TestConstraints() {
 	return status;
 }
 
+void lp_solver::delete_prob(){
+	if (lp_solver_type == GLPK_SOLVER) {
+		glpk_lp_problem->delete_prob();
+	}
+	else
+	{
+		throw std::runtime_error("Delete problem: Cannot delete LP problem of the chosen type of LP Solver\n");
+	}
+}
 void lp_solver::free_environment_glpk_lp_solver() {
 	if (lp_solver_type == GLPK_SOLVER) {
 		glpk_lp_problem->free_environment_glpk_lp_solver();
