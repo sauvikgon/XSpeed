@@ -20,8 +20,11 @@
 #include "application/userOptions.h"
 
 
-void user_model(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
-		ReachabilityParameters& reach_parameters);
+//void user_model(hybrid_automata& Hybrid_Automata,initial_state::ptr& init_state,ReachabilityParameters& reach_parameters);
+
+void user_model(hybrid_automata& ha,
+		std::list<initial_state::ptr>& init_state,
+		ReachabilityParameters& reach_parameters,
+		userOptions& op);
 
 #endif /* USER_MODEL_H_ */

@@ -107,6 +107,13 @@ public:
 	std::vector<double> getInvariantBoundValue(int iterations_number);
 	void resize_matrix_SupportFunction(int dir_nums,
 			int iterations_before_intersection);
+
+	void Testing_print(){
+		std::cout<<"total_template_Directions = "<<total_template_Directions<<std::endl;
+		std::cout<<"total_invariant_Directions = "<<total_invariant_Directions<<std::endl;
+		std::cout<<"total_iterations = "<<total_iterations<<std::endl;
+	}
+
 private:
 	/*polytope*/
 	math::matrix<double> Matrix_SupportFunction;//Note if it has invariants_dirs then Matrix_SupportFunction will also have bound_value

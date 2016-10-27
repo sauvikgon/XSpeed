@@ -160,6 +160,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
+
 	int Min_Or_Max = 2;
 
 	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
@@ -342,7 +343,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 
 			//  **************  Omega Function Over  ********************
 			TempOmega = zI + s1Variable; //Y1
-			//cout<<"TempOmega = "<< TempOmega<<std::endl;
+		//	std::cout<<"TempOmega = "<< TempOmega<<std::endl;
 			MatrixValue(eachDirection, loopIteration) = TempOmega; //Y1
 			rVariable = CopyVector(r1Variable); //source to destination
 			sVariable = s1Variable;

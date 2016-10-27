@@ -13,6 +13,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 		int lp_solver_type, unsigned int streams_size,
 		int solver_GLPK_Gurobi_for_GPU,
 		std::pair<int, polytope::ptr> forbidden) {
+	//std::cout<<"setReachParameter function called"<<std::endl;
 	H = h;
 	I = i;
 	reach_parameters = reach_param;
@@ -23,13 +24,14 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	number_of_streams = streams_size;
 	Solver_GLPK_Gurobi_GPU = solver_GLPK_Gurobi_for_GPU; //todo:: used for comparing GLPK solver vs GPU. Can be removed
 	forbidden_set = forbidden;
+	std::cout<<"OK\n"<<std::endl;
 }
 
 //bound is the maximum number of transitions or jumps permitted.
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
 std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list<abstractCE::ptr>& ce_candidates) {
-
+	//std::cout<<"Hello from Sequential Reach!!"<<std::endl;
 	std::list < symbolic_states::ptr > Reachability_Region;
 	template_polyhedra::ptr reach_region;
 
@@ -61,7 +63,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 			break; //stopping due to number of transitions exceeds the bound
 
 		int location_id;
-		//cout<<"\nTesting 2 a 2\n";
+	//	cout<<"\nTesting 2 a 2\n";
 		//discrete_state = U.getDiscreteSet();
 		location_id = U->getLocationId();
 		//std::cout<<"location_id from U = "<<location_id<<std::endl;
@@ -106,7 +108,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
 		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
 		 * */
-		//cout<<"\nTesting 2 c\n";
+	//	cout<<"\nTesting 2 c\n";
 		double result_alfa = compute_alfa(reach_parameters.time_step,
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
@@ -140,7 +142,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		// ************ Compute flowpipe_cost:: estimation Starts **********************************
 
 		if (current_location->isInvariantExists()){
-
 			if (current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==true){
 				//Approach of Coarse-time-step and Fine-time-step
 				jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
@@ -151,19 +152,22 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
 					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 			}
-
 		}
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 
-	//	cout<<"\nTesting 2 e\n";
+		//cout<<"\nTesting 2 e\n";
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
+		//cout<<"\nTesting 2 e 1\n";
 		num_flowpipe_computed++;//computed one Flowpipe
-
+		//cout<<"\nTesting 2 e 2\n";
 		//	*********************************************** Reach or Flowpipe Computed ************************************
 		if (previous_level != levelDeleted) {
 			previous_level = levelDeleted;
 			BreadthLevel++;
 		}
+
+		reach_region->Testing_print();
+		//cout<<"\nTesting 2 e 3\n";
 		if (reach_region->getTotalIterations() != 0) {
 			S->setContinuousSetptr(reach_region);
 			Reachability_Region.push_back(S);
@@ -174,7 +178,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		polytope::ptr abs_flowpipe; //bounding_box Polytope
 		polytope::ptr polyI; //initial polytope of the abstract flowpipe
 		std::list < transition::ptr > list_transitions;
-		//cout<<"\nTesting 2 f\n";
+//		cout<<"\nTesting 2 f\n";
 		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe exists
 				//so perform intersection with forbidden set provided locID matches
 			int locID = current_location->getLocId();
@@ -332,7 +336,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 					templated_hull_flowpipe = convertBounding_Box(reach_region);
 					polys.push_back(templated_hull_flowpipe);
 				}
-
+//std::cout<<"\nTesting 2 g\n";
 				//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 				if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
 						|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0))
@@ -352,7 +356,11 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 					polytope::ptr newShiftedPolytope, newPolytope; //created an object here
 					newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);
 					//Returns the intersected region as a single newpolytope.
-
+//std::cout<<"\nTesting 2 h\n";
+					std::cout << "current_assignment.Map.size1() = ";
+					std::cout << current_assignment.Map.size1();
+					std::cout << " current_assignment.Map.size2() = ";
+					std::cout << current_assignment.Map.size2() << std::endl;
 					math::matrix<double> test(current_assignment.Map.size1(),current_assignment.Map.size2());
 
 					if (current_assignment.Map.inverse(test))	//invertible?
@@ -390,9 +398,11 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 	if (Algorithm_Type == SEQ) { //Continuous Sequential Algorithm
 		/*boost::timer::cpu_timer AllReach_time;
 		AllReach_time.start();*/
+		//std::cout << "\nFlowpipe" << std::endl;
 		reach_region = reachabilitySequential(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
 				current_location->isInvariantExists(), lp_solver_type_choosen);
+		//std::cout << "\nFlowpipe computed" << std::endl;
 		/*AllReach_time.stop();
 		double wall_clock1;
 		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds

@@ -62,7 +62,6 @@ public:
 			int lp_solver_type_choosen, unsigned int number_of_streams,
 			int Solver_GLPK_Gurobi_GPU,
 			std::pair<int, polytope::ptr> forbidden_set);
-
 	//Sequential Breadth First Search for Discrete Jumps
 	std::list<symbolic_states::ptr> computeSeqentialBFSReach(
 			std::list<abstractCE::ptr>& ce);

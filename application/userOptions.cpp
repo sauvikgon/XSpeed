@@ -13,7 +13,8 @@ userOptions::userOptions() {
 	direction_template = 0; //default directions, box template
 	output_var_X = 0; // default first dimension of plot
 	output_var_Y = 1; // default second dimension of plot
-	automata_exploration_algorithm = 0; // sequential BFS
+	automata_exploration_algorithm = 12; // sequential BFS
+	flow_algorithm = 1;	// SEQ
 }
 std::string userOptions::get_modelFile()
 {
