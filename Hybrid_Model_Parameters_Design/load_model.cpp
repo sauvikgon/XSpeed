@@ -80,7 +80,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	if (HybridSystem_Model_Type == OSCILLATOR) {
 		SetOscillatorParameters(ha, init_state, reach_parameters);
 	}
-std::cout <<"HybridSystem_Model_Type = "<<HybridSystem_Model_Type <<std::endl;
+//std::cout <<"HybridSystem_Model_Type = "<<HybridSystem_Model_Type <<std::endl;
 	if (HybridSystem_Model_Type == 14) {
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);

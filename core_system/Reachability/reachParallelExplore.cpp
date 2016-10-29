@@ -14,197 +14,6 @@
 #include "Utilities/Template_Polyhedra.h"
 #include "application/All_PP_Definition.h"
 
-/*
- * Called from Parallel_Iterations with different initial sets
- */
-const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool invariantExists, int CORES,
-		unsigned int Algorithm_Type, int lp_solver_type_choosen) {
-	double T = ReachParameters.TimeBound;
-	//double original_time_step = ReachParameters.time_step;
-
-	// ******** New Change after boundaryCheckOutside ***************
-	if (invariantExists)	//if invariant exist than NewTotalIteration will be greater than 0
-		ReachParameters.Iterations = NewTotalIteration; //Actual number of iteration after boundary check evaluation
-	// ******** New Change ***************
-	unsigned int original_Iterations = ReachParameters.Iterations;
-	double newTimeBound = T / CORES;
-
-	ReachParameters.TimeBound = newTimeBound; //correct one.	//ReachParameters.TimeBound = 1;
-
-
-	// ******** New Change after boundaryCheckOutside ***************
-	//ReachParameters.Iterations = ReachParameters.TimeBound / ReachParameters.time_step; //required in Invarian_Boundary_Check
-	ReachParameters.Iterations = ReachParameters.Iterations / CORES; //required in Invarian_Boundary_Check
-	//Todo::: please handle when the value of this expression is in Fraction
-	// ******** New Change ***************
-
-//	cout << "partition_iterations" << ReachParameters.Iterations << "\n";
-//ReachParameters.time_step = newTimeBound/ partition_iterations;	//computed for 1st partition
-	template_polyhedra::ptr reachability_region;
-	reachability_region = template_polyhedra::ptr(new template_polyhedra());
-	//std::list<polytope::ptr> initial_polys_list;
-//omp_set_nested(1);		//Enabling the Nested Loop in OpenMP Programming
-	//std::cout<<"omp_get_nested() = "<<omp_get_nested()<<std::endl;
-
-//use g++ -fopenmp for compiling #pragma omp
-
-
-
-//#pragma omp parallel for
-	for (int i = 0; i < CORES; i++) { //for (double i = 0; i < T; i += newTimeBound) {
-
-		template_polyhedra::ptr Tpoly;
-		math::matrix<double> phi, phi_trans, A_inv_phi, y_matrix, y_trans;
-		double START_TIME = i * newTimeBound; //first iteration START_TIME = i = 0 which make beta = 0
-		//	std::cout << "\nStart_Time = " << START_TIME << "\n";
-		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
-		phi.transpose(phi_trans); //phi_trans computed
-
-		math::matrix<double> A_inv; //(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
-		A_inv = ReachParameters.A_inv;
-		A_inv.multiply(phi, A_inv_phi);
-		A_inv_phi.minus(A_inv, y_matrix);
-		y_matrix.transpose(y_trans);
-//(phi_trans . X0 + y_trans . U)
-//		std::cout << "\ncomputing initial object\n";
-		supportFunctionProvider::ptr Initial = transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,
-						phi_trans, y_trans, 1, 0));
-//		cout<<"Done TransMinkPoly \n";
-		//Calling Sequential algorithm here and later can mix with parallel for direction
-		if (Algorithm_Type == PAR_ITER) {
-//			std::cout << "\nFrom Parallel Only Iterations BEFORE\n";
-			Tpoly = reachabilitySequential_For_Parallel_Iterations(ReachParameters.Iterations, SystemDynamics, Initial, ReachParameters, invariant,
-					invariantExists, lp_solver_type_choosen);
-//			std::cout << "\nFrom Parallel Only Iterations AFTER\n";
-		}
-
-		if (Algorithm_Type == PAR_ITER_DIR) {
-			Tpoly = reachabilityParallel_For_Parallel_Iter_Dir(ReachParameters.Iterations, SystemDynamics,
-					Initial, ReachParameters, invariant, invariantExists, lp_solver_type_choosen);
-			//	std::cout << "\nFrom Parallel over Iterations and Directions\n";
-		}
-//		cout<<"Done creating initial partition \n";
-#pragma omp critical
-		//	if (i != 0)
-		reachability_region = reachability_region->union_TemplatePolytope(Tpoly);
-	} //end of pragma for loop
-	//this may not be required if Average_number_of_times = 1 otherwise must.
-	ReachParameters.Iterations = original_Iterations;
-	ReachParameters.TimeBound = T; //restore the original timebound for next transition or location
-	//GenerateInitialPolytopePlotter(initial_polys_list);
-	return reachability_region;
-}
-
-/*
- //Implementation of reachability parallel using OMP approach  -- Before Optimizing support function computation
- *
- const template_polyhedra reachabilityParallel(Dynamics& SystemDynamics,
- supportFunctionProvider::ptr Initial,
- ReachabilityParameters& ReachParameters, polytope::ptr invariant,
- bool isInvariantExist, int lp_solver_type_choosen) {
- //typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
-
- //omp_set_num_threads(numVectors);
- //#pragma omp parallel
- //int tid;
- int numVectors = ReachParameters.Directions.size1();
- int dimension = Initial->getSystemDimension();
- unsigned int shm_NewTotalIteration = ReachParameters.Iterations;//Shared Variable for resize iterations number on crossing with invariant
- int Min_Or_Max = 2;
-
- math::matrix<double> MatrixValue;	//Shared Matrix for all child thread
- //size_type row = numVectors, col = shm_NewTotalIteration;
- boost::numeric::ublas::matrix<double>::size_type row = numVectors, col =
- shm_NewTotalIteration;
-
- if (isInvariantExist == true) {	//if invariant exist. Computing
- shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial,
- ReachParameters, invariant, lp_solver_type_choosen);
- //	cout <<"\nInvariant Exists!!!\n";
- }	//End of Invariant Directions
- col = shm_NewTotalIteration;
- MatrixValue.resize(row, col);
-
- //omp_set_nested(1);
- int type = lp_solver_type_choosen;
- #pragma omp parallel for
- for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
- lp_solver s_per_thread_I(type), s_per_thread_U(type), s_per_thread_inv(
- type);
- s_per_thread_I.setMin_Or_Max(2);
- if (!Initial->getIsEmpty()) {//set glpk constraints If not an empty polytope
- s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
- ReachParameters.X0->getColumnVector(),
- ReachParameters.X0->getInEqualitySign());
- }
- s_per_thread_U.setMin_Or_Max(2);
- if (SystemDynamics.U->getIsEmpty()) {	//empty polytope
- //Polytope is empty so no glpk object constraints to be set
- } else {
- s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
- SystemDynamics.U->getColumnVector(),
- SystemDynamics.U->getInEqualitySign());
- }
- double zIInitial = 0.0, zI = 0.0, zV = 0.0;
- double sVariable, s1Variable;
- std::vector<double> r1Variable;	//now single dimension
- r1Variable.resize(dimension);
- std::vector<double> rVariable;
- rVariable.resize(dimension);
- for (int i = 0; i < dimension; i++) {
- rVariable[i] = ReachParameters.Directions(eachDirection, i);
- }
- unsigned int loopIteration = 0;
- sVariable = 0.0; 		//initialize s0
- zIInitial = Omega_Support(ReachParameters, rVariable, Initial,
- SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
- MatrixValue(eachDirection, loopIteration) = zIInitial;
- loopIteration++;
- for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
- double TempOmega;
- //		std::cout<<"\tHello = "<<loopIteration;
- ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);
- * Precompute beta and send it as parameter
- zV = W_Support(ReachParameters, SystemDynamics, rVariable,
- s_per_thread_U, Min_Or_Max);
- //cout<<"zV= "<<zV<<"\t";
- s1Variable = sVariable + zV;
- zI = Omega_Support(ReachParameters, r1Variable, Initial,
- SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
- //	cout<<"zi= "<<zI<<"\t";
- TempOmega = zI + s1Variable; 		//Y1
- MatrixValue(eachDirection, loopIteration) = TempOmega; 		//Y1
- //	std::cout<<TempOmega<<"\t";
- rVariable = CopyVector(r1Variable);		//source to destination
- sVariable = s1Variable;
- loopIteration++;	//for the next Omega-iteration or Time-bound
- }	//end of while for each vector
- //cout<<endl;
- }	//end of pragma omp parallel for
-
- if (isInvariantExist == true) {		//if invariant exist. Computing
- math::matrix<double> inv_sfm;
- int num_inv = invariant->getColumnVector().size();//number of Invariant's constriants
- inv_sfm.resize(num_inv, shm_NewTotalIteration);
- for (int eachInvDirection = 0; eachInvDirection < num_inv;
- eachInvDirection++) {
- for (unsigned int i = 0; i < shm_NewTotalIteration; i++) {
- inv_sfm(eachInvDirection, i) =
- invariant->getColumnVector()[eachInvDirection];
- }
- }
- //cout<<"\nAmit"<<MatrixValue.size2()<<"\n";
- return template_polyhedra(MatrixValue, inv_sfm,
- ReachParameters.Directions, invariant->getCoeffMatrix());
- //return template_polyhedra(MatrixValue, ReachParameters.TotalDirections, ReachParameters.Directions, invariant->getCoeffMatrix());
- //return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
- } else {
- MatrixValue.resize(numVectors, shm_NewTotalIteration, true);//but writing or resizing only upto the NewTotalIteration
- return template_polyhedra(MatrixValue, ReachParameters.Directions);
- }
- }
- */
 
 //Optimizing Supp_Func Computation:: Implementation of parallel reachability using OMP approach
 const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIteration, Dynamics& SystemDynamics,
@@ -243,11 +52,11 @@ const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIterat
 	B_trans = ReachParameters.B_trans;
 
 	int type = lp_solver_type_choosen;
-	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
+	//omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
 	//omp_set_nested(3);	//enable nested parallelism
 	//omp_set_num_threads(10);
 	//omp_set_max_active_levels(3);
-#pragma omp parallel for num_threads(2)
+#pragma omp parallel for //num_threads(2)
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 
 		if (eachDirection==0){
@@ -399,157 +208,98 @@ const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIterat
 	}
 }
 
-/*
- * Same Code as Above but Called from Nested OMP Parallel FOR
- *
- * todo needs to implement + C of the equation Ax + Bu + C
- */
-const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(unsigned int boundedTotIteration,
-		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int lp_solver_type_choosen) {
-	//typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
-
-	int numVectors = ReachParameters.Directions.size1();
-	int dimension = Initial->getSystemDimension();
-	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
-	int Min_Or_Max = 2;
-
-	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
-	//size_type row = numVectors, col = shm_NewTotalIteration;
-	boost::numeric::ublas::matrix<double>::size_type row = numVectors, col =
-			shm_NewTotalIteration;
-	MatrixValue.resize(row, col);
-
-	if (isInvariantExist == true) { //if invariant exist. Computing
-		shm_NewTotalIteration = boundedTotIteration;
-	} //End of Invariant Directions
-//omp_set_nested(4);
-	int type = lp_solver_type_choosen;
-#pragma omp parallel for
-	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
-		//std::cout<<"\nNumber of Threads = "<<omp_get_num_threads()<<endl;
-		//	std::cout<<"\nThread ID / Each Direction = "<<eachDirection<<endl;
-		lp_solver s_per_thread_I(type), s_per_thread_U(type), s_per_thread_inv(
-				type);
-
-		s_per_thread_I.setMin_Or_Max(2);
-		if (!Initial->getIsEmpty()) { //set glpk constraints If not an empty polytope
-			s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
-					ReachParameters.X0->getColumnVector(),
-					ReachParameters.X0->getInEqualitySign());
-		}
-		s_per_thread_U.setMin_Or_Max(2);
-		if (!SystemDynamics.U->getIsEmpty()) { //empty polytope
-			s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
-					SystemDynamics.U->getColumnVector(),
-					SystemDynamics.U->getInEqualitySign());
-		}
-		double zIInitial = 0.0, zI = 0.0, zV = 0.0;
-		double sVariable, s1Variable;
-		//std::cout<<"omp_get_max_active_levels() = "<<omp_get_max_active_levels()<<std::endl;
-		//std::cout<<"omp_get_thread_limit() = "<<omp_get_thread_limit()<<std::endl;
-		std::vector<double> r1Variable; //now single dimension
-		r1Variable.resize(dimension);
-		std::vector<double> rVariable;
-		rVariable.resize(dimension);
-		for (int i = 0; i < dimension; i++) {
-			rVariable[i] = ReachParameters.Directions(eachDirection, i);
-		}
-		unsigned int loopIteration = 0;
-		sVariable = 0.0; //initialize s0
-		zIInitial = Omega_Support(ReachParameters, rVariable, Initial,
-				SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
-		MatrixValue(eachDirection, loopIteration) = zIInitial;
-		loopIteration++;
-		for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
-			double TempOmega;
-			//		std::cout<<"\tHello = "<<loopIteration;
-			ReachParameters.phi_trans.mult_vector(rVariable, r1Variable);
-			zV = W_Support(ReachParameters, SystemDynamics, rVariable,
-					s_per_thread_U, Min_Or_Max); //cout<<"zV= "<<zV<<"\t";
-			s1Variable = sVariable + zV;
-			zI = Omega_Support(ReachParameters, r1Variable, Initial,
-					SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
-			//	cout<<"zi= "<<zI<<"\t";
-			TempOmega = zI + s1Variable; //Y1
-			MatrixValue(eachDirection, loopIteration) = TempOmega; //Y1
-			rVariable = CopyVector(r1Variable); //source to destination
-			sVariable = s1Variable;
-			loopIteration++; //for the next Omega-iteration or Time-bound
-		} //end of while for each vector
-		  //cout<<endl;
-	} //end of pragma omp parallel for
-	  //cout<<"Outside Parallel\n";
-	/*
-	 * Appending invariant directions and invariant constraints/bounds(alfa)
-	 * Goal : To truncate the reachable region within the Invariant region
-	 */
-	//todo:: Redundant invariant directional constraints to be removed
-	if (isInvariantExist == true) { //if invariant exist. Computing
-		math::matrix<double> inv_sfm;
-		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constriants
-		inv_sfm.resize(num_inv, shm_NewTotalIteration);
-		for (int eachInvDirection = 0; eachInvDirection < num_inv;
-				eachInvDirection++) {
-			for (unsigned int i = 0; i < shm_NewTotalIteration; i++) {
-				inv_sfm(eachInvDirection, i) =
-						invariant->getColumnVector()[eachInvDirection];
-			}
-		}
-		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, inv_sfm,
-				ReachParameters.Directions, invariant->getCoeffMatrix()));
-		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections,ReachParameters.Directions, invariant->getCoeffMatrix());
-		//return template_polyhedra(MatrixValue, ReachParameters.TotalDirections);
-	} else {
-		//MatrixValue.resize(numVectors, shm_NewTotalIteration, true);//but writing or resizing only upto the NewTotalIteration
-		return template_polyhedra::ptr (new template_polyhedra(MatrixValue, ReachParameters.Directions));
-	}
-
-}
 
 
-/*
- * Implementation of reachability for each partitions of initial set executed in
- * different partitions of iterations. Also can be made parallel using OMP approach
- * Algorithm type = PAR_BY_PARTS_PAR_ITERS
- */
 
-const template_polyhedra::ptr reachabilityPartitions_par_iters(unsigned int NewTotalIteration,
-		Dynamics& SystemDynamics, polytope::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int partitions_size,
-		int lp_solver_type_choosen) {
 
-	std::list<polytope::ptr> polys;
+
+
+
+
+
+
+
+const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool invariantExists, int CORES,
+		unsigned int Algorithm_Type, int lp_solver_type_choosen) {
+	double T = ReachParameters.TimeBound;
+	//double original_time_step = ReachParameters.time_step;
+
+	// ******** New Change after boundaryCheckOutside ***************
+	if (invariantExists)	//if invariant exist than NewTotalIteration will be greater than 0
+		ReachParameters.Iterations = NewTotalIteration; //Actual number of iteration after boundary check evaluation
+	// ******** New Change ***************
+	unsigned int original_Iterations = ReachParameters.Iterations;
+	double newTimeBound = T / CORES;
+
+	ReachParameters.TimeBound = newTimeBound; //correct one.	//ReachParameters.TimeBound = 1;
+
+
+	// ******** New Change after boundaryCheckOutside ***************
+	//ReachParameters.Iterations = ReachParameters.TimeBound / ReachParameters.time_step; //required in Invarian_Boundary_Check
+	ReachParameters.Iterations = ReachParameters.Iterations / CORES; //required in Invarian_Boundary_Check
+	//Todo::: please handle when the value of this expression is in Fraction
+	// ******** New Change ***************
+
+//	cout << "partition_iterations" << ReachParameters.Iterations << "\n";
+//ReachParameters.time_step = newTimeBound/ partition_iterations;	//computed for 1st partition
 	template_polyhedra::ptr reachability_region;
-	unsigned int nVar = 1;
-	unsigned int p = 2; //number of partitions for each variables(eg 2 for 2 equal halfs or 3 equal halfs,etc
-	polys = Partition_BoundingPolytope(Initial, nVar, p);
+	reachability_region = template_polyhedra::ptr(new template_polyhedra());
+	//std::list<polytope::ptr> initial_polys_list;
+//omp_set_nested(1);		//Enabling the Nested Loop in OpenMP Programming
+	//std::cout<<"omp_get_nested() = "<<omp_get_nested()<<std::endl;
 
-	polytope::ptr initial_set;
-	template_polyhedra::ptr Tpoly;
+//use g++ -fopenmp for compiling #pragma omp
 
-	cout << "Partition Done" << endl;
-	for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end();
-			i++) {
-		initial_set = (*i);
-		ReachParameters.X0 = initial_set;
 
-		/*Tpoly = reachabilitySequential(SystemDynamics, initial_set,
-		 ReachParameters, invariant, isInvariantExist,
-		 lp_solver_type_choosen);*/
 
-		Tpoly = reachParallelExplore(NewTotalIteration, SystemDynamics, initial_set,
-				ReachParameters, invariant, isInvariantExist, partitions_size,
-				PAR_ITER, lp_solver_type_choosen);
+#pragma omp parallel for
+	for (int i = 0; i < CORES; i++) { //for (double i = 0; i < T; i += newTimeBound) {
 
-		cout << "First round Done" << endl;
+		template_polyhedra::ptr Tpoly;
+		math::matrix<double> phi, phi_trans, A_inv_phi, y_matrix, y_trans;
+		double START_TIME = i * newTimeBound; //first iteration START_TIME = i = 0 which make beta = 0
+		//	std::cout << "\nStart_Time = " << START_TIME << "\n";
+		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
+		phi.transpose(phi_trans); //phi_trans computed
+
+		math::matrix<double> A_inv; //(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
+		A_inv = ReachParameters.A_inv;
+		A_inv.multiply(phi, A_inv_phi);
+		A_inv_phi.minus(A_inv, y_matrix);
+		y_matrix.transpose(y_trans);
+//(phi_trans . X0 + y_trans . U)
+//		std::cout << "\ncomputing initial object\n";
+		supportFunctionProvider::ptr Initial = transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,
+						phi_trans, y_trans, 1, 0));
+//		cout<<"Done TransMinkPoly \n";
+		//Calling Sequential algorithm here and later can mix with parallel for direction
+		if (Algorithm_Type == TIME_SLICE) {
+//			std::cout << "\nFrom Parallel Only Iterations BEFORE\n";
+			Tpoly = reachabilitySequential_For_Parallel_Iterations(ReachParameters.Iterations, SystemDynamics, Initial, ReachParameters, invariant,
+					invariantExists, lp_solver_type_choosen);
+//			std::cout << "\nFrom Parallel Only Iterations AFTER\n";
+		}
+
+//		cout<<"Done creating initial partition \n";
 #pragma omp critical
-		{
-			reachability_region = reachability_region->union_TemplatePolytope(
-					Tpoly);
-		} //end of pragma for loop
-	}
+		//	if (i != 0)
+		reachability_region = reachability_region->union_TemplatePolytope(Tpoly);
+	} //end of pragma for loop
+	//this may not be required if Average_number_of_times = 1 otherwise must.
+	ReachParameters.Iterations = original_Iterations;
+	ReachParameters.TimeBound = T; //restore the original timebound for next transition or location
+	//GenerateInitialPolytopePlotter(initial_polys_list);
 	return reachability_region;
 }
+
+
+
+
+
+
+
+
+
+
+

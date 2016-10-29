@@ -17,6 +17,18 @@
 #include "Utilities/Template_Polyhedra.h"
 #include "application/DataStructureDirections.h"
 
+
+const template_polyhedra::ptr reachabilityParallel(
+			unsigned int NewTotalIteration, Dynamics& SystemDynamics,
+			supportFunctionProvider::ptr Initial,
+			ReachabilityParameters& ReachParameters, polytope::ptr invariant,
+			bool isInvariantExist, int lp_solver_type_choosen);
+
+
+
+
+
+
 /**
  * Reachability function which explores the state space in parallel starting at different initial sets.
  *
@@ -28,31 +40,5 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 		bool isInvariantExist, int CORES, unsigned int Algorithm_Type,
 		int lp_solver_type_choosen);
 
-const template_polyhedra::ptr reachabilityParallel(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int lp_solver_type_choosen);
-/*
- * Called from Parallel Algorithm for combining parallelizing over Iterations and Directions
- */
-const template_polyhedra::ptr reachabilityParallel_For_Parallel_Iter_Dir(unsigned int NewTotalIteration,
-		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int lp_solver_type_choosen);
-
-/*
- * Implementation of reachability for each partitions can be made parallel using OMP approach
- */
-const template_polyhedra::ptr reachabilityPartitions(Dynamics& SystemDynamics,
-		polytope::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int lp_solver_type_choosen);
-
-
-const template_polyhedra::ptr reachabilityPartitions_par_iters(
-		Dynamics& SystemDynamics, polytope::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool isInvariantExist, int partitions_size,
-		int lp_solver_type_choosen);
 
 #endif /* REACHPARALLELEXPLORE_H_ */

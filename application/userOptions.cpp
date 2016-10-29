@@ -13,8 +13,10 @@ userOptions::userOptions() {
 	direction_template = 0; //default directions, box template
 	output_var_X = 0; // default first dimension of plot
 	output_var_Y = 1; // default second dimension of plot
-	automata_exploration_algorithm = 12; // sequential BFS
-	flow_algorithm = 1;	// SEQ
+//	automata_exploration_algorithm = 12; // sequential BFS
+//	flow_algorithm = 1;	// SEQ
+
+	stream_size =1;	//default set to 1 streams
 }
 std::string userOptions::get_modelFile()
 {
@@ -88,7 +90,7 @@ void userOptions::set_bfs_level(unsigned int l)
 {
 	level = l;
 }
-unsigned int userOptions::get_flow_algorithm()
+/*unsigned int userOptions::get_flow_algorithm()
 {
 	return flow_algorithm;
 }
@@ -103,7 +105,8 @@ unsigned int userOptions::get_automata_exploration_algorithm()
 void userOptions::set_automata_exploration_algorithm(unsigned int exp_alg)
 {
 	automata_exploration_algorithm = exp_alg;
-}
+}*/
+
 std::string userOptions::get_forbidden_state()
 {
 	return forbidden_state;
@@ -116,3 +119,30 @@ void userOptions::set_forbidden_state(std::string forbid_s){
 userOptions::~userOptions() {
 	// TODO Auto-generated destructor stub
 }
+
+
+unsigned int userOptions::get_algorithm() {
+	return algo;	//returns the selected Algorithm
+}
+
+void userOptions::set_algorithm(unsigned int alg) {
+	algo =alg;	//assigns the Algorithm selected by the user
+}
+
+unsigned int userOptions::getStreamSize() const {
+	return stream_size;
+}
+
+void userOptions::setStreamSize(unsigned int streamSize) {
+	stream_size = streamSize;
+}
+
+unsigned int userOptions::getTotalSliceSize() const {
+	return total_slice_size;
+}
+
+void userOptions::setTotalSliceSize(unsigned int totalSliceSize) {
+	total_slice_size = totalSliceSize;
+}
+
+

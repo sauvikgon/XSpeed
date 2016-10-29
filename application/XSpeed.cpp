@@ -53,6 +53,9 @@
 // *******counter example **************/
 #include "counterExample/concreteCE.h"
 
+
+#include "reachabilityCaller.h"
+
 namespace po = boost::program_options;
 
 std::list<initial_state::ptr> init_state;
@@ -80,10 +83,11 @@ int main(int argc, char *argv[]) {
 	userOptions user_options;
 
 	//int number_of_times = 1; //Make this 1 for Memory Profiling
-	unsigned int number_of_streams = 1;
+//	unsigned int number_of_streams = 1;
+//	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
 	int lp_solver_type_choosen = 1; //	1 for GLPK and 2 for Gurobi
 	int Solver_GLPK_Gurobi_GPU = 3; //if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
-	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
+
 
 	bool isConfigFileAssigned = false, isModelParsed = false;
 
@@ -112,7 +116,7 @@ int main(int argc, char *argv[]) {
 					"11. Circle with TWO locations model: Variables{x,y} \n"
 					"12. Circle with FOUR locations model: Variables{x,y} \n"
 					"13. Oscillator model without any filters: Variables{x,y}\n"
-					"14. Testing Model: Variables{x1,x2,t}\n")
+					"14. Testing Model: Variables{depends on the model in test}\n")
 	("directions", po::value<int>()->default_value(1), "Set the directions for template polyhedra:\n"
 					"1. Box Directions (Set to default)\n"
 					"2. Octagonal Directions \n"
@@ -120,34 +124,26 @@ int main(int argc, char *argv[]) {
 	("time-horizon", po::value<double>(), "Set the Time horizon for the flowpipe computation per Location(Local time).")
 	("time-step", po::value<double>(), "Set the sampling time for the flowpipe computation.")
 	("transition-size", po::value<int>(), "Set the maximum number of Jumps(0 for no jump(breadth=1), 1 for first jump(breadth=2).")
-	("algorithm", po::value<int>()->default_value(1), "set algorithm for Flowpipe computation\n"
-			"1. Sequential Algorithm  (Set to default)\n"
-			"2. Parallel Algorithm: Lazy evaluation of support function\n"
-			"3. Parallel Algorithm: Process-- Not in Use\n"
-			"4. Time-Slice Parallel Algorithm: Time Sliced Reachability selected\n"
-			"11. Flowpipe(PostC) Computation done using GPU\n"
-	/*"5. PAR_ITER_DIR Algorithm: Process-- Not in Use\n"
-	 "6. PAR_BY_PARTS Algorithm: Process-- Not in Use\n"
-	 "7. PAR_BY_PARTS_ITERS Algorithm: Process-- Not in Use\n"
-	 "8. SAME_DIRS Algorithm: Process-- Not in Use\n"
-	 "9. ALL_DIRS Algorithm: Process-- Not in Use\n"
-	 "10. GPU_MULTI_SEQ Algorithm: Process-- Not in Use\n"
-	 "11. GPU_SF Algorithm: Process-- GPU Acceleration\n" */)
-	("gpu", "Enable GPU Acceleration. GPU acceleration is OFF by default.")
+
+	("algo,a",po::value<int>()->default_value(1), "Set the algorithm\n"
+			"1/seq-SF -- Sequential Algorithm (both PostC and PostD are sequential) (Set to default)\n"
+			"2/par-SF -- Lazy evaluation algorithm (Parallel PostC but Sequential PostD/BFS)\n"
+			"3/time-slice-SF -- Time slicing algorithm (Parallel PostC but Sequential PostD/BFS)\n"
+			"4/AGJH -- Adaptation of Gerard J. Holzmann\n"
+			"5/TPBFS -- Load Balancing Algorithm\n"
+			"6/gpu-postc -- Bounded input sets (PostC in GPU but Sequential PostD/BFS)\n")
 	("number-of-streams", po::value<int>()->default_value(1), "Set the maximum number of GPU-streams (Set to 1 by default).")
-	("time-slice", po::value<int>(), "Set the maximum number of Time Sliced(or partitions)")
-	("pbfs", "Enable Parallel Breadth First Exploration of Hybrid Automata Locations. PBFS is OFF by default")
+	("time-slice", po::value<int>(), "Set the maximum number of Time Sliced(or partitions)for algo=time-slice-SF")
 	("internal", "called internally when running hyst-xspeed model")
-	("jumps", po::value<int>()->default_value(1), "set an algorithm for Discrete Jumps\n"
-					"1. Sequential Breadth First Exploration of Locations. (Set to default)\n"
-					"2. Parallel Breadth First Exploration of Locations, an adaptation of Gerard J. Holzmann\n"
-					"3. Parallel Breadth First Exploration of Locations using Load Balancing Algorithm\n")
 	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst
-	("output-variable,v", po::value<std::string>(), "projecting variables for e.g., 'x,v' for Bouncing Ball") //better to be handled by hyst
 	("include-path,I", po::value<std::string>(), "include file path")
 	("model-file,m", po::value<std::string>(), "include model file")
 	("config-file,c", po::value<std::string>(), "include configuration file")
-	("output-file,o", po::value<std::string>(), "output file name for redirecting the outputs");
+	("output-file,o", po::value<std::string>(), "output file name for redirecting the outputs")
+	("output-variable,v", po::value<std::string>(), "projecting variables for e.g., 'x,v' for Bouncing Ball") //better to be handled by hyst
+;
+
+
 
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
@@ -358,34 +354,24 @@ int main(int argc, char *argv[]) {
 			return 0;
 		}
 
-		if (vm.count("gpu")) {
-			user_options.set_flow_algorithm(11); //GPU_SF algorithm is selected
-		}
-		if (vm.count("gpu")) { //if gpu enabled then
-			if (vm.count("number-of-streams")) { //Compulsory Options but set 1 by default
-				int no_streams = vm["number-of-streams"].as<int>(); //default value ==1
-				if (no_streams >= 1) {
-					number_of_streams = no_streams; //Number of GPU-Streams selected
-				} else {
-					std::cout << "Invalid number_of_streams option specified\n";
-					return 0;
-				}
-			}
-		}
-		//Algorithm Preference is given to 1 to 4 even if gpu is enabled i.e., overwrite Algorithm_Type==gpu
-		if (vm.count("algorithm")) {
-			user_options.set_flow_algorithm(vm["algorithm"].as<int>());
-			if (user_options.get_flow_algorithm() < 0
-					|| user_options.get_flow_algorithm() > 11) {
+		//Algorithm Preference
+		if (vm.count("algo")) {
+			user_options.set_algorithm(vm["algo"].as<int>());
+			std::cout<<"algo = "<<user_options.get_algorithm() <<std::endl;
+			if (user_options.get_algorithm() < 0 || user_options.get_algorithm() > MAX_ALGO) {
 				std::cout << "Invalid algorithm option specified\n";
 				return 0;
 			}
+		}else{
+			std::cout << "Missing algo option\n";
+			return 0;
 		}
-		if (user_options.get_flow_algorithm() == 4) { //this argument will be set only if algorithm==time-slice or PAR_ITER
+		if (user_options.get_algorithm() == 3) { //this argument will be set only if algorithm==time-slice or PAR_ITER
 			if (vm.count("time-slice")) { //Compulsory Options if algorithm-type==Time-Slice(4)
 				int partition_size = vm["time-slice"].as<int>();
 				if (partition_size > 0) {
-					Total_Partition = partition_size;
+					//Total_Partition = partition_size;
+					user_options.setTotalSliceSize(partition_size);
 				} else { //for 0 or negative time-slice
 					std::cout << "Invalid time-slice option specified\n";
 					return 0;
@@ -395,22 +381,17 @@ int main(int argc, char *argv[]) {
 				return 0;
 			}
 		}
-
-		if (vm.count("jumps")) { //Compulsory Options but set to 1 by default
-			int d = vm["jumps"].as<int>();
-			if (d == 1) {
-				user_options.set_automata_exploration_algorithm(12); //Sequential Breadth First Search
-			} else if (d == 2) {
-				user_options.set_automata_exploration_algorithm(13);
-				//DiscreteAlgorithm = 13; //Parallel Breadth First Search using Gerard J. Holzmann
-			} else if (d == 3) {
-				user_options.set_automata_exploration_algorithm(14);
-				//DiscreteAlgorithm = 14; //Parallel Breadth First Search using Load Balancing Algorithm
-			} else { //for 0 or negative directions
-				std::cout << "Invalid 'jumps' option specified!!!\n";
-				return 0;
+		if (user_options.get_algorithm() == 6) { //if gpu enabled then
+			if (vm.count("number-of-streams")) { //Compulsory Options but set 1 by default
+				int no_streams = vm["number-of-streams"].as<int>(); //default value ==1
+				if (no_streams >= 1) {
+					//number_of_streams = no_streams; //Number of GPU-Streams selected
+					user_options.setStreamSize(no_streams);
+				} else {
+					std::cout << "Invalid number_of_streams option specified\n";
+					return 0;
+				}
 			}
-
 		}
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
@@ -443,42 +424,13 @@ int main(int argc, char *argv[]) {
 	for (unsigned int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		init_cpu_usage(); //initializing the CPU Usage utility to start recording usages
 		tt1.start();
-		reachability reach;
-		unsigned int transition_iters = user_options.get_bfs_level();
 
-		std::cout << " user_options.get_flow_algorithm():" << user_options.get_flow_algorithm()<< std::endl;
-		reach.setReachParameter(Hybrid_Automata, init_state, reach_parameters,
-				transition_iters, user_options.get_flow_algorithm(),
-				Total_Partition, lp_solver_type_choosen, number_of_streams,
-				Solver_GLPK_Gurobi_GPU, forbidden_set);
+		//unsigned int transition_iters = user_options.get_bfs_level();
 
-		if (user_options.get_automata_exploration_algorithm() == BFS) { //Sequential Search implemented for Discrete Jumps
+		reachabilityCaller(Hybrid_Automata, init_state, reach_parameters,
+				user_options, lp_solver_type_choosen, Solver_GLPK_Gurobi_GPU, forbidden_set,
+				Symbolic_states_list, ce_candidates);
 
-			std::cout << "\nRunning Sequential BFS.\n";
-
-			Symbolic_states_list = reach.computeSeqentialBFSReach(ce_candidates);
-			/*Symbolic_states_list = reach(Hybrid_Automata, init_state,
-			 reach_parameters, transition_iterations, Algorithm_Type,
-			 Total_Partition, lp_solver_type_choosen, number_of_streams,
-			 Solver_GLPK_Gurobi_GPU, forbidden_set, ce);*/
-		} else if (user_options.get_automata_exploration_algorithm() == PBFS_GJH) { //Parallel Breadth First Search implemented for Discrete Jumps
-			std::cout
-					<< "\nRunning Parallel BFS using Adapted Gerard J. Holzmann's Algorithm.\n";
-			//Symbolic_states_list = reach.computeParallelBFSReach(ce);
-			//Symbolic_states_list = reach.computeParallelBFSReachLockAvoid(ce);	//without LOAD Balance Approach
-
-			Symbolic_states_list = reach.ParallelBFS_GH();// Holzmann algorithm adaptation
-
-		} else if (user_options.get_automata_exploration_algorithm() == PBFS_LB) { //Parallel Breadth First Search implemented for Discrete Jumps
-			std::cout
-					<< "\nRunning Parallel BFS using Load Balancing Algorithm.\n";
-			//Symbolic_states_list = reach.computeParallelLoadBalanceReach(ce);	//Our LOAD Balance Approach
-			Symbolic_states_list = reach.LoadBalanceAll(ce_candidates);
-			/*Symbolic_states_list = reach_pbfs(Hybrid_Automata, init_state,
-			 reach_parameters, transition_iterations, Algorithm_Type,
-			 Total_Partition, lp_solver_type_choosen, number_of_streams,
-			 Solver_GLPK_Gurobi_GPU, forbidden_set, ce);*/
-		}
 		tt1.stop();
 		cpu_usage = getCurrent_ProcessCPU_usage();
 		Avg_cpu_use = Avg_cpu_use + cpu_usage;
@@ -489,7 +441,7 @@ int main(int argc, char *argv[]) {
 		user_clock = tt1.elapsed().user / 1000000;
 		system_clock = tt1.elapsed().system / 1000000;
 
-		if (user_options.get_flow_algorithm() == 11) {
+		if (user_options.get_algorithm() == 6) {	//GPU_SF
 			//11 is GPU:: First execution of GPU includes warm-up time, so this time should not be included for averaging
 			if (i == 1) { //first run for averaging
 				continue; //do not include time here
@@ -507,7 +459,7 @@ int main(int argc, char *argv[]) {
 	Avg_cpu_use = Avg_cpu_use / number_of_times;
 	total_mem_used = getCurrentProcess_PhysicalMemoryUsed();
 
-	if (user_options.get_flow_algorithm() == 11) {
+	if (user_options.get_algorithm() == 6) {	//GPU_SF
 		Avg_wall_clock = Avg_wall_clock / (number_of_times - 1);
 		Avg_user_clock = Avg_user_clock / (number_of_times - 1);
 		Avg_system_clock = Avg_system_clock / (number_of_times - 1);
