@@ -331,10 +331,10 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 				if (!gaurd_polytope->getIsUniverse())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 				{
-					std::cout<<"Not universal\n";
+					//std::cout<<"Not universal\n";
 					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 				} else {	//the guard polytope is universal
-					std::cout<<"Guard is universal\n";
+					//std::cout<<"Guard is universal\n";
 					polytope::ptr templated_hull_flowpipe; //bounding_box Polytope
 					templated_hull_flowpipe = convertBounding_Box(reach_region);
 					polys.push_back(templated_hull_flowpipe);
@@ -364,11 +364,11 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 
 					if (current_assignment.Map.inverse(test))	//invertible?
 					{
-						std::cout<<"Exact Post Assignment\n";
+						//std::cout<<"Exact Post Assignment\n";
 						newShiftedPolytope = post_assign_exact(newPolytope,
 								current_assignment.Map, current_assignment.b);
 					} else {
-						std::cout<<"Approximate Post Assignment\n";
+						//std::cout<<"Approximate Post Assignment\n";
 						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
 								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
 					}
@@ -414,19 +414,18 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 	if (Algorithm_Type == PAR_SF) {
 		//Parallel implementation using OMP parallel			//	double wall_timer = omp_get_wtime();
 		//	cout << "\nRunning Parallel Using OMP Thread\n";
-		boost::timer::cpu_timer AllReach_time;
-		AllReach_time.start();
+		/*boost::timer::cpu_timer AllReach_time;
+		AllReach_time.start();*/
 		reach_region = reachabilityParallel(NewTotalIteration,
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(),
 				current_location->isInvariantExists(), lp_solver_type_choosen);
-		AllReach_time.stop();
+		/*AllReach_time.stop();
 		double wall_clock1;
 		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nFlowpipe:Time:Wall(Seconds) = " << return_Time1
-				<< std::endl;
+		std::cout << "\nFlowpipe:Time:Wall(Seconds) = " << return_Time1 << std::endl;*/
 		//	std::cout << "Parallel Done\n";
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}

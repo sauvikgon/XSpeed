@@ -13,6 +13,8 @@ userOptions::userOptions() {
 	direction_template = 0; //default directions, box template
 	output_var_X = 0; // default first dimension of plot
 	output_var_Y = 1; // default second dimension of plot
+	output_var_Z = 0; //default third plot dimension
+
 //	automata_exploration_algorithm = 12; // sequential BFS
 //	flow_algorithm = 1;	// SEQ
 
@@ -50,6 +52,16 @@ void userOptions::set_second_plot_dimension(unsigned int outdim)
 {
 	output_var_Y = outdim;
 }
+
+unsigned int userOptions::get_third_plot_dimension()
+{
+	return output_var_Z;
+}
+void userOptions::set_third_plot_dimension(unsigned int outdim)
+{
+	output_var_Z = outdim;
+}
+
 double userOptions::get_timeStep()
 {
 	return time_step;

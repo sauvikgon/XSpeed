@@ -59,10 +59,10 @@ const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIterat
 #pragma omp parallel for //num_threads(2)
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 
-		if (eachDirection==0){
+		/*if (eachDirection==0){
 			std::cout<<"\nMax Thread in Inner Level = "<< omp_get_num_threads();
 			//std::cout<<"\nMax Active Levels = "<<omp_get_max_active_levels();
-		}
+		}*/
 		//std::cout<<"\n eachDirection = "<<eachDirection<<"\n";
 		//std::cout<<"\n Inner threadID = "<<omp_get_thread_num()<<"\n";
 		//std::cout<<"\n Inner thread omp_get_nested() = "<<omp_get_nested()<<"\n";

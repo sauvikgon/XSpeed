@@ -17,6 +17,7 @@ class userOptions {
 	std::string forbidden_state; // the string of forbidden state description
 	unsigned int output_var_X; // first  dimension for plotting
 	unsigned int output_var_Y; // second dimension for plotting
+	unsigned int output_var_Z; // third dimension for plotting
 
 	unsigned int model; // name of the pre-defined model to run for reachability.
 	unsigned int direction_template; // template used for approximating support functions
@@ -42,6 +43,8 @@ public:
 	void set_first_plot_dimension(unsigned int outdim);
 	unsigned int get_second_plot_dimension();
 	void set_second_plot_dimension(unsigned int outdim);
+	unsigned int get_third_plot_dimension();
+	void set_third_plot_dimension(unsigned int outdim);
 
 	double get_timeStep();
 	void set_timeStep(double t);

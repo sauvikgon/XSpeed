@@ -278,18 +278,15 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 							loadBalPostD[id].assign_list[trans].Map.size2());
 					if (loadBalPostD[id].assign_list[trans].Map.inverse(test)) //invertible?
 							{
-						std::cout << "Exact Post Assignment\n";
+						//std::cout << "Exact Post Assignment\n";
 						newShiftedPolytope = post_assign_exact(newPolytope,
 								loadBalPostD[id].assign_list[trans].Map,
 								loadBalPostD[id].assign_list[trans].b);
 					} else {
-						std::cout << "Approximate Post Assignment\n";
-						newShiftedPolytope = post_assign_approx_deterministic(
-								newPolytope,
-								loadBalPostD[id].assign_list[trans].Map,
-								loadBalPostD[id].assign_list[trans].b,
-								reach_parameters.Directions,
-								lp_solver_type_choosen);
+						//std::cout << "Approximate Post Assignment\n";
+						newShiftedPolytope = post_assign_approx_deterministic( newPolytope,
+								loadBalPostD[id].assign_list[trans].Map, loadBalPostD[id].assign_list[trans].b,
+								reach_parameters.Directions, lp_solver_type_choosen);
 					}
 
 					initial_state::ptr newState = initial_state::ptr(new initial_state(loadBalPostD[id].dest_locID[trans], newShiftedPolytope));

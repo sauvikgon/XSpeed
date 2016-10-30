@@ -259,11 +259,11 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb)
 						current_assignment.Map.size2());
 				if (current_assignment.Map.inverse(test))	//invertible?
 				{
-					std::cout << "Exact Post Assignment\n";
+					//std::cout << "Exact Post Assignment\n";
 					newShiftedPolytope = post_assign_exact(newPolytope,
 							current_assignment.Map, current_assignment.b);
 				} else {
-					std::cout << "Approximate Post Assignment\n";
+					//std::cout << "Approximate Post Assignment\n";
 					newShiftedPolytope = post_assign_approx_deterministic(
 							newPolytope, current_assignment.Map,
 							current_assignment.b, reach_parameters.Directions,
