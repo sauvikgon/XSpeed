@@ -286,17 +286,17 @@ int status;
 	/** End of debug */
 	bool real_ce = false;
 
-	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin();
-			it != ce_candidates.end(); it++) {
+
+	tt1.start(); // start time
+	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
+
 		cout << "******** Safety Property Violated ********\n";
 		abstractCE::ptr ce = *(it);
 //		ce->plot(user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-		tt1.start(); // start time
 		concreteCE::ptr bad_trace = ce->get_validated_CE(1e-3);
-		tt1.stop();
-		if (bad_trace->is_empty()) {
-			std::cout
-					<< "Cannot Splice Trajectories within Accepted Error Tolerance\n";
+		if(bad_trace->is_empty()){
+			std::cout << "Cannot Splice Trajectories within Accepted Error Tolerance\n";
+
 			std::cout << "Looking for Other paths to Bad Set\n";
 			continue;
 		} else {
@@ -308,8 +308,8 @@ int status;
 			real_ce = true;
 			break;
 		}
-
 	}
+	tt1.stop(); //stop time
 	//timers
 	double wall_clock, user_clock, system_clock;
 	wall_clock = tt1.elapsed().wall / 1000000; //convert nanoseconds to milliseconds

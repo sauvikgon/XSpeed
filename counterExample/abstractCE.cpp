@@ -150,7 +150,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	// initialize the global locIdList
 	locIdList.resize(N);
       
-	
 	std::set<int> d;
 	for(unsigned int i=0;i<N;i++){
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
@@ -781,11 +780,13 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 
 	concreteCE::ptr cexample;
 	bool val_res;
+	bool NLP_HA_algo_flag = false;
 	unsigned int max_refinements = 100, ref_count = 0; // maximum limit to refinement points to be added.
 	do{
 		struct refinement_point pt;
-		cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
-		cexample = gen_concreteCE(tolerance,refinements);
+
+		cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
+		//cexample = gen_concreteCE(tolerance,refinements);
 		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
 		if(cexample->is_empty())
 			return cexample;
@@ -793,6 +794,10 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 		val_res = cexample->valid(pt);
 		if(!val_res){
 			std::cout << "FAILED VALIDATION\n";
+			if(NLP_HA_algo_flag){
+				std::cout << "Splice Trace NOT VALID\n";
+				return cexample = concreteCE::ptr(new concreteCE());
+			}
 			refinements.push_back(pt);
 			ref_count++;
 		}
@@ -801,6 +806,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	}while(!val_res && ref_count< max_refinements);
 
 	if((ref_count < max_refinements) & !cexample->is_empty()){
+
 		std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
 		return cexample;
 	}
