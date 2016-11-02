@@ -54,8 +54,8 @@
 #include "counterExample/concreteCE.h"
 
 
-#include "reachabilityCaller.h"
-#include "readCommandLine.h"
+#include "application/reachabilityCaller.h"
+#include "application/readCommandLine.h"
 
 
 namespace po = boost::program_options;
@@ -98,6 +98,10 @@ int main(int argc, char *argv[]) {
 
 int status;
 	status = readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters);
+	// Parse the forbidden state string to make a polytope
+	if (!user_options.get_forbidden_state().empty()) {
+		string_to_poly(user_options.get_forbidden_state(), forbidden_set);
+	}
 	if (status==0)
 		return 0;	//unsatisfied commandLine options
 

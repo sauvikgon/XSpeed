@@ -13,7 +13,7 @@
 class sequentialSF : public reachability{
 public:
 	//Sequential Breadth First Search for Discrete Jumps
-		//std::list<symbolic_states::ptr> computeSeqentialBFSReach(std::list<abstractCE::ptr>& ce);
+	//std::list<symbolic_states::ptr> computeSeqentialBFSReach(std::list<abstractCE::ptr>& ce);
 
 };
 

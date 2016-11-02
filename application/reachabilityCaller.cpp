@@ -48,7 +48,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 						std::cout<< "\nRunning Task parallel (Load Balancing) BFS algorithm.\n";
 						Symbolic_states_list = reach.LoadBalanceAll(
 								ce_candidates);
-					} else if (user_options.get_algorithm() == 6) { //gpu-postc -- PostC in GPU and Sequential BFS
+			} else if (user_options.get_algorithm() == 6) { //gpu-postc -- PostC in GPU and Sequential BFS
 						reachability reach;
 						reach.setReachParameter(Hybrid_Automata, init_state, reach_parameters,
 										user_options.get_bfs_level(), user_options.get_algorithm(),
@@ -57,7 +57,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 
 							std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
 							//Symbolic_states_list = reach.LoadBalanceAll(ce_candidates);
-						}
+			}
 
 }
 

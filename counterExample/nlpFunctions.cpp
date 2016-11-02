@@ -250,11 +250,13 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		std::vector<double> traj_dist_grad(dim,0); // holds the grads of the trajectories distance to invariant
 		// If dynamics invertible, then get analytical solution. Otherwise, perform
 		// numerically simulation with Euler steps.
-		if(d.MatrixA.inverse(expAt)){
-			y[i] = ODESol(v,d,x[N * dim + i]);
-		}
-		else
-			y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I, traj_dist_grad);
+//		if(d.MatrixA.inverse(expAt)){
+//			y[i] = ODESol(v,d,x[N * dim + i]);
+//		}
+//		else
+//			y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I, traj_dist_grad);
+
+		y[i] = ODESol(v,d,x[N*dim + i]);
 
 		d.MatrixA.matrix_exponentiation(expAt,x[N*dim+i]);
 		assert(expAt.size1() == dim);
@@ -336,7 +338,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
 	polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
 	trace_distance = 0;
-	trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I, traj_dist_grad);
+	//trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I, traj_dist_grad);
+	trace_end_pt = ODESol(v, d, x[N * dim + N-1]);
 
 //	cost+=trace_distance; // last trace must also be valid
 #ifdef VALIDATION
@@ -398,11 +401,12 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		for(unsigned int i=0;i<dim;i++)
 			v[i] = x[p.seq_no*dim+i];
 
-		if(d.MatrixA.inverse(expAt)){
-			v = ODESol(v,d,dwell_time);
-		}
-		else
-			v = simulate_trajectory(v, d, dwell_time, trace_distance, I, traj_dist_grad);
+//		if(d.MatrixA.inverse(expAt)){
+//			v = ODESol(v,d,dwell_time);
+//		}
+//		else
+//			v = simulate_trajectory(v, d, dwell_time, trace_distance, I, traj_dist_grad);
+		v = ODESol(v, d, x[N * dim + N-1]);
 
 		double dist = I->point_distance(v);
 		if(dist>0){

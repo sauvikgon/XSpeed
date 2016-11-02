@@ -747,7 +747,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 	bool saftey_violated = false;
 	//cout << "Test 4\n";
 	while (!isEmpty_Qpw_list(Qpw_list[t]) && (number_times <= bound)) {
-cout<<"Breadth - Level === "<<number_times<<"\n";
+		cout<<"Breadth - Level === "<<number_times<<"\n";
 		//To avoid write-contention for reach_region, Vector/List of reach_region_list created for each threads
 		// write in its respective index. So need a unique ID for each thread which can be obtained from
 		// the size of the PWList at each iteration

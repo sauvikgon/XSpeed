@@ -2,6 +2,7 @@
 #include "core_system/math/matrix.h"
 #include "counterExample/simulation.h"
 #include "application/DataStructureDirections.h"
+#include "core_system/math/analyticODESol.h"
 #include <iostream>
 #include <sstream>
 #include <exception>
@@ -85,40 +86,71 @@ TEST_FIXTURE(Example, solutionTest) {
 	for(unsigned int i=0;i<5;i++)
 		std::cout << final[i] << " " << std::endl;
 
-	// analytic solution
+	final = ODESol(x0,dyn,sim_time);
 
-	math::matrix<double> expAt(5,5);
-	math::matrix<double> A(Amatrix);
-
-	Amatrix.scalar_multiply(sim_time);
-	Amatrix.matrix_exponentiation(expAt);
-
-	std::vector<double> res1(5), res2(5), res3(5);
-
-	expAt.mult_vector(x0,res1);
-
-	math::matrix<double> AInv(5,5);
-	A.inverse(AInv);
-	std::vector<double> minusV(5);
-	for(unsigned int i=0;i<5;i++)
-		minusV[i] = (-1)*v[i];
-
-	AInv.mult_vector(minusV,res2);
-	math::matrix<double> mult(5,5);
-	AInv.multiply(expAt,mult);
-	mult.mult_vector(v,res3);
-
-
-	for(unsigned int i=0;i<res1.size();i++){
-		res1[i] = res1[i] + res2[i] + res3[i];
-	}
 	std::cout << "Analytical Solution of ODE:";
 	for(unsigned int i=0;i<5;i++)
-		std::cout << res1[i] << " " << std::endl;
+		std::cout << final[i] << " " << std::endl;
 
-//	expected << "0.544242";
-//	test << minf;
-//	CHECK_EQUAL(expected.str(), test.str());
+	// another test
+	math::matrix<double> Amatrix1(4,4);
+	Amatrix1(0, 0) = 0;
+	Amatrix1(0, 1) = 0;
+	Amatrix1(0, 2) = 1;
+	Amatrix1(0, 3) = 0;
+
+	Amatrix1(1, 0) = 0;
+	Amatrix1(1, 1) = 0;
+	Amatrix1(1, 2) = 0;
+	Amatrix1(1, 3) = 1;
+
+	Amatrix1(2, 0) = 0;
+	Amatrix1(2, 1) = 0;
+	Amatrix1(2, 2) = 0.3480;
+	Amatrix1(2, 3) = 8.6344;
+
+	Amatrix1(3, 0) = 0;
+	Amatrix1(3, 1) = 0;
+	Amatrix1(3, 2) = 0.8171;
+	Amatrix1(3, 3) = 0.0909;
+
+
+	dyn.MatrixA =Amatrix1;
+	dyn.isEmptyMatrixA = false;
+
+	dyn.isEmptyMatrixB = true;
+
+	std::vector<double> v1(4);
+	v1[0]=0.01;
+	v1[1]=0.01;
+	v1[2]=0.01;
+	v1[3]=0.01;
+
+	dyn.C = v1;
+
+	sim = simulation::ptr(new simulation(4,100,dyn));
+	sim->insert_to_map("x1",0);
+	sim->insert_to_map("x2",1);
+	sim->insert_to_map("v1",2);
+	sim->insert_to_map("v2",3);
+
+	std::vector<double> x(4);
+	x[0] = 1.01; x[3] = 0.01;
+	x[1] = 0.1;
+	x[2] = 0.1;
+
+	sim_time = 5.3;
+	final = sim->simulate(x,sim_time);
+	std::cout << "Numerical Solution of ODE:";
+	for(unsigned int i=0;i<4;i++)
+		std::cout << final[i] << " " << std::endl;
+	//analytical solution
+
+	final = ODESol(x,dyn,sim_time);
+	std::cout << "Analytic Solution of ODE:";
+	for(unsigned int i=0;i<4;i++)
+		std::cout << final[i] << " " << std::endl;
+
 }
 
 }

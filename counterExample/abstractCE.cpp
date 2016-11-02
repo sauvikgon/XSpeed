@@ -785,8 +785,8 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	do{
 		struct refinement_point pt;
 
-		cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
-		//cexample = gen_concreteCE(tolerance,refinements);
+		//cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
+		cexample = gen_concreteCE(tolerance,refinements);
 		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
 		if(cexample->is_empty())
 			return cexample;
