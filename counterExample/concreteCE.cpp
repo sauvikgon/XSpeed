@@ -89,16 +89,16 @@ bool concreteCE::valid(struct refinement_point& ref_pt)
 		simulation_sample = seg.second;
 		//debug
 
-		std::vector<double> start = simulation_sample.first;
-		std::cout << "The start point of the first segment:\n";
-		if(flag)
-		{
-			for(unsigned int i=0;i<start.size();i++)
-			{
-				std::cout << start[i] << " " << std::endl ;
-			}
-			flag = false;
-		}
+//		std::vector<double> start = simulation_sample.first;
+//		std::cout << "The start point of the first segment:\n";
+//		if(flag)
+//		{
+//			for(unsigned int i=0;i<start.size();i++)
+//			{
+//				std::cout << start[i] << " " << std::endl ;
+//			}
+//			flag = false;
+//		}
 		//---
 		polytope::ptr Inv;
 		Inv = ha->getLocation(locId)->getInvariant();
