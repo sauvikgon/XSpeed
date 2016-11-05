@@ -29,6 +29,7 @@ void hybrid_automata::addInitial_Location(location::ptr& initLoc) {
 
 location::ptr hybrid_automata::getLocation(int Loc_Id){
 	//iterate through the transition and find for given input Name that match with the source_location
+	assert(list_locations.count(Loc_Id)!=0);
 	location::ptr l;
 	l = list_locations[Loc_Id];
 //	std::cout<<"\ntest 3\n";

@@ -462,14 +462,14 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
 		assert(d.C.size() == dim);
 		// If dynamics invertible, then get analytical solution. Otherwise, perform
 		// numerically simulation with Euler steps.
-		if(d.MatrixA.inverse(expAt)){
-			y[i] = ODESol(v,d,x[N * dim + i]);
-		}
-		else {
-			simulation::ptr sim = simulation::ptr(new simulation(dim,1000,d));
-			y[i] = sim->simulate(v, x[N * dim + i]);
-		}
-
+//		if(d.MatrixA.inverse(expAt)){
+//			y[i] = ODESol(v,d,x[N * dim + i]);
+//		}
+//		else {
+//			simulation::ptr sim = simulation::ptr(new simulation(dim,1000,d));
+//			y[i] = sim->simulate(v, x[N * dim + i]);
+//		}
+		y[i] = ODESol(v,d,x[N*dim + i]);
 		transition::ptr Tptr= *(T_iter);
 		// assignment of the form: Ax + b
 		Assign R = Tptr->getAssignT();
@@ -528,7 +528,8 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
 	polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
 
 	simulation::ptr sim = simulation::ptr(new simulation(dim,1000,d));
-	trace_end_pt = sim->simulate(v, x[N * dim + N-1]);
+	//trace_end_pt = sim->simulate(v, x[N * dim + N-1]);
+	trace_end_pt = ODESol(v, d, x[N * dim + N-1]);
 
 	// analytical grad computation wrt start point
 	math::matrix<double> Aexp(d.MatrixA.size1(),d.MatrixA.size2());

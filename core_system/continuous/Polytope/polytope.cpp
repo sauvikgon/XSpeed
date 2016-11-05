@@ -248,6 +248,7 @@ double polytope::max_norm(int lp_solver_type_choosen,
 
 const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2) {
 
+	assert(P2!=NULL);
 	math::matrix<double> total_coeffMatrix, m1;
 	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
 	m1.matrix_join(P2->getCoeffMatrix(), total_coeffMatrix);

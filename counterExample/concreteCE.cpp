@@ -78,13 +78,28 @@ bool concreteCE::valid(struct refinement_point& ref_pt)
 	simulation::ptr sim;
 
 	double steps = 100; // defines the precision of validation
-	double distance;
 	unsigned int seq_no = 0;
+
+	// debug
+	bool flag = true;
+	//--
 	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
 		seg = *it;
 		locId = seg.first;
 		simulation_sample = seg.second;
+		//debug
 
+		std::vector<double> start = simulation_sample.first;
+		std::cout << "The start point of the first segment:\n";
+		if(flag)
+		{
+			for(unsigned int i=0;i<start.size();i++)
+			{
+				std::cout << start[i] << " " << std::endl ;
+			}
+			flag = false;
+		}
+		//---
 		polytope::ptr Inv;
 		Inv = ha->getLocation(locId)->getInvariant();
 

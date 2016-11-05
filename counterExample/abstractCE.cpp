@@ -169,12 +169,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
-	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative bases
+	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative based
 
-	myopt.set_maxeval(2000);
-	myopt.set_stopval(1e-5);
+	myopt.set_maxeval(4000);
+	myopt.set_stopval(tolerance);
 
-//	myopt.set_xtol_rel(1e-4);
 
 	myopt.set_min_objective(myobjfunc2, NULL);
 	//myopt.set_initial_step(0.001);
@@ -280,25 +279,29 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 //	Constraints over C_i added to the optimization problem
 
-	polytope::ptr C;
+	polytope::ptr C[N];
 	math::matrix<double> A;
 	math::vector<double> b;
 
 
+	polytope::ptr Inv;
 	unsigned int size=0;
 	for(unsigned int i=0;i<N;i++){
-		size += get_symbolic_state(i)->getInitialSet()->getCoeffMatrix().size1();
+		Inv = HA->getLocation(locIdList[i])->getInvariant();
+		C[i] = get_symbolic_state(i)->getInitialSet();
+		C[i] = C[i]->GetPolytope_Intersection(Inv);
+		size += C[i]->getCoeffMatrix().size1();
 	}
 	polyConstraints I[size];
 	unsigned int index = 0;
+
 	for (unsigned int i = 0; i < N; i++) {
-		C = get_symbolic_state(i)->getInitialSet();
-		A = C->getCoeffMatrix();
-		b = C->getColumnVector();
+		A = C[i]->getCoeffMatrix();
+		b = C[i]->getColumnVector();
 
 // 		We assume that the polytope is expressed as Ax<=b
 
-		assert(C->getInEqualitySign() == 1);
+		assert(C[i]->getInEqualitySign() == 1);
 		assert(A.size2() == dim);
 		assert(b.size() == A.size1());
 		assert(size > index);
@@ -792,6 +795,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 			return cexample;
 
 		val_res = cexample->valid(pt);
+
 		if(!val_res){
 			std::cout << "FAILED VALIDATION\n";
 			if(NLP_HA_algo_flag){

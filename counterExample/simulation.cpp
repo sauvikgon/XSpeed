@@ -182,12 +182,16 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	realtype Tfinal = time;
 	realtype t=0;
 	Dynamics *data = &D;
-
+	bound_sim b;
 	N_Vector u = NULL;
 
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
 
+	double dist = math::abs(I->point_distance(x));
+	if(dist > 1e-5 ){
+		throw std::runtime_error("bounded simulation: initial point outside invariant. NLP problem constrains not set correctly\n");
+	}
 	for(unsigned int i=0;i<dimension;i++)
 		NV_Ith_S(u,i) = x[i];
 
@@ -232,6 +236,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 
 	bool print_flag = false;
+
 	std::ofstream myfile;
 	if(!filename.empty()){
 		myfile.open(this->filename.c_str(),std::fstream::app);
@@ -242,8 +247,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	prev_v = x;
 
 	double time_step = Tfinal/N;
-
-	bound_sim b;
+//	std::cout << "Total simulation time:" << time << std::endl;
 	status = true;
 	if(print_flag){
 		// We plot the initial point also
@@ -269,7 +273,11 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 			// check polytope satisfaction
 			for(unsigned int i=0;i<dimension;i++)
 				v[i] = NV_Ith_S(u,i);
-			if(I->point_distance(v)!=0){
+			double dist = I->point_distance(v);
+
+			if(math::abs(dist) > 1e-5){
+//				std::cout << "time:" << t << " ";
+//				std::cout << "distance = " << dist << std::endl;
 				status = false;
 				break;
 			}

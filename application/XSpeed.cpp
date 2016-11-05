@@ -289,7 +289,7 @@ int status;
 	dump_abstractCE_list(ce_candidates);
 	/** End of debug */
 	bool real_ce = false;
-
+	double error_tol = 1e-4	;
 
 	tt1.start(); // start time
 	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
@@ -297,7 +297,7 @@ int status;
 		cout << "******** Safety Property Violated ********\n";
 		abstractCE::ptr ce = *(it);
 //		ce->plot(user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-		concreteCE::ptr bad_trace = ce->get_validated_CE(1e-3);
+		concreteCE::ptr bad_trace = ce->get_validated_CE(error_tol);
 		if(bad_trace->is_empty()){
 			std::cout << "Cannot Splice Trajectories within Accepted Error Tolerance\n";
 
