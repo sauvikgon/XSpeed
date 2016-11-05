@@ -372,6 +372,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
 								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
 					}
+					// @Rajarshi: the newShifted satisfy the destination location invariant
+					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
 					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 					newState->setTransitionId(transition_id); // keeps track of the transition_ID
