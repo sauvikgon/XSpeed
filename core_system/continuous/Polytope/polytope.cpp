@@ -171,7 +171,10 @@ std::vector<double> polytope::getColumnVector() {
 
 double polytope::computeSupportFunction(std::vector<double> direction,
 		lp_solver &lp) {
+
+	assert(direction.size()>0);
 	double sf;
+
 //	std::cout<<"Entered inside ComputeSupportFunction 1 !!\n";
 	if (this->getIsEmpty()){
 	//	throw std::runtime_error("\nCompute Support Function called for an Empty Polytope.\n");

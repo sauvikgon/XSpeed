@@ -25,7 +25,20 @@ static int check_flag(void *flagvalue, char *funcname, int opt);
 static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data)
 {
 	Dynamics* D = (Dynamics *)(f_data);
-	math::matrix<double> A(D->MatrixA);
+	math::matrix<double> A;
+
+	if(D->isEmptyMatrixA)
+	{
+		assert(!D->isEmptyC);
+		unsigned int dim = D->C.size();
+		A = math::matrix<double>(D->C.size(),D->C.size());
+		for(unsigned int i=0;i<dim;i++)
+			for(unsigned int j=0;j<dim;j++)
+				A(i,j)=0;
+	}
+	else
+		A = math::matrix<double>(D->MatrixA);
+
 	std::vector<double> C(A.size1());
 
 	assert(A.size1() == A.size2());

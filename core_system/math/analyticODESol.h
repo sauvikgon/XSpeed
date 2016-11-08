@@ -14,7 +14,7 @@
 /*
  * Returns the solution of an ODE of the form X' = A*X+b at some time
  */
-std::vector<double> ODESol(std::vector<double> x0, Dynamics& D, double time);
+std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double time);
 
 
 #endif /* ANALYTICODESOL_H_ */

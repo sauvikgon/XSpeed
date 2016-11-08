@@ -258,12 +258,26 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 		y[i] = ODESol(v,d,x[N*dim + i]);
 
-		d.MatrixA.matrix_exponentiation(expAt,x[N*dim+i]);
+		// patch for constant dynamics
+
+		math::matrix<double> A;
+		if(d.isEmptyMatrixA){
+			A = math::matrix<double>(dim,dim);
+			for(unsigned int i=0;i<dim;i++){
+				for(unsigned int j=0;j<dim;j++){
+					A(i,j)=0;
+				}
+			}
+		}
+		else
+			A = d.MatrixA;
+
+		A.matrix_exponentiation(expAt,x[N*dim+i]);
 		assert(expAt.size1() == dim);
 		assert(expAt.size2() == dim);
 
 		std::vector<double> Axplusb(dim), diag_expAt(dim);
-		d.MatrixA.mult_vector(y[i],Axplusb);
+		A.mult_vector(y[i],Axplusb);
 		assert(d.C.size() == Axplusb.size());
 		for (unsigned int j = 0; j < dim; j++) {
 			Axplusb[j] = Axplusb[j] + d.C[j];
@@ -280,12 +294,17 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		}
 #endif
 		transition::ptr Tptr= *(T_iter);
+		polytope::ptr g;
+		Assign R;
 		// assignment of the form: Ax + b
-		Assign R = Tptr->getAssignT();
+		if(Tptr!=NULL){
+			R = Tptr->getAssignT();
 		//guard as a polytope
-		polytope::ptr g = Tptr->getGaurd();
+			g = Tptr->getGaurd();
+		}else
+
 		// If traj end point inside guard, then apply map.
-		if(g->point_distance(y[i])==0)
+		if(g.get()!=NULL && g->point_distance(y[i])==0)
 		{
 			assert(y[i].size() == R.Map.size2());
 			std::vector<double> res(y[i].size(),0);
@@ -341,16 +360,30 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	//trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I, traj_dist_grad);
 	trace_end_pt = ODESol(v, d, x[N * dim + N-1]);
 
+	// patch for constant dynamics
+
+	math::matrix<double> A;
+	if(d.isEmptyMatrixA){
+		A = math::matrix<double>(dim,dim);
+		for(unsigned int i=0;i<dim;i++){
+			for(unsigned int j=0;j<dim;j++){
+				A(i,j)=0;
+			}
+		}
+	}
+	else
+		A = d.MatrixA;
+
 //	cost+=trace_distance; // last trace must also be valid
 #ifdef VALIDATION
 	cost += I->point_distance(trace_end_pt); // adding the distance of last point to Inv, for validation
 #endif
 
 	// analytical grad computation wrt start point
-	math::matrix<double> Aexp(d.MatrixA.size1(),d.MatrixA.size2());
+	math::matrix<double> Aexp(A.size1(),A.size2());
 	std::vector<double> Axplusb(dim), chain_mult(dim);
-	d.MatrixA.matrix_exponentiation(Aexp,x[N*dim+N-1]);
-	d.MatrixA.mult_vector(trace_end_pt,Axplusb);
+	A.matrix_exponentiation(Aexp,x[N*dim+N-1]);
+	A.mult_vector(trace_end_pt,Axplusb);
 
 	for(unsigned int j=0;j<dim;j++){
 		chain_mult[j] = Aexp(j,j);
@@ -407,12 +440,25 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //		else
 //			v = simulate_trajectory(v, d, dwell_time, trace_distance, I, traj_dist_grad);
 		v = ODESol(v, d, x[N * dim + N-1]);
+		// patch for constant dynamics
+
+		math::matrix<double> A;
+		if(d.isEmptyMatrixA){
+			A = math::matrix<double>(dim,dim);
+			for(unsigned int i=0;i<dim;i++){
+				for(unsigned int j=0;j<dim;j++){
+					A(i,j)=0;
+				}
+			}
+		}
+		else
+			A = d.MatrixA;
 
 		double dist = I->point_distance(v);
 		if(dist>0){
 			cost+= dist;
 			math::matrix<double> expA;
-			d.MatrixA.matrix_exponentiation(expA,p.time);
+			A.matrix_exponentiation(expA,p.time);
 			std::vector<double> diag_expAt(dim,0);
 			for(unsigned int j=0;j<dim;j++)
 				diag_expAt[j] = expAt(j,j);

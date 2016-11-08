@@ -9,11 +9,23 @@
 #include <vector>
 #include "core_system/math/matrix.h"
 
-std::vector<double> ODESol(std::vector<double> x0, Dynamics& D, double time)
+std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double time)
 {
+	if(D.isEmptyMatrixA && D.isEmptyMatrixB)
+	{
+		unsigned int dim = x0.size();
+		std::vector<double> res(x0);
+		for(unsigned int i=0;i<dim;i++)
+		{
+			res[i]+=D.C[i]*time;
+		}
+		return res;
+	}
+
 	unsigned int dim = D.MatrixA.size2();
 
 	assert(D.MatrixA.size1() == D.MatrixA.size2());
+	std::cout << "X0 size:" << x0.size() << ", A matrix col 2 size:" << D.MatrixA.size2() << std::endl;
 	assert(x0.size() == D.MatrixA.size2());
 
 	math::matrix<double> expAt(dim,dim);

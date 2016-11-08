@@ -240,7 +240,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		else{
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
-			P=P->GetPolytope_Intersection(T->getGaurd());
+			if(T!=NULL && T->getGaurd()!=NULL)
+				P=P->GetPolytope_Intersection(T->getGaurd());
 		}
 //		To get a point from the polytope, we create a random obj function and
 //		solve the lp. The solution point is taken as an initial value.
