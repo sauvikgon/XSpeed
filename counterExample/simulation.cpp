@@ -290,7 +290,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 			if(math::abs(dist) > 1e-5){
 //				std::cout << "time:" << t << " ";
-//				std::cout << "distance = " << dist << std::endl;
+				std::cout << "distance = " << dist << std::endl;
 				status = false;
 				break;
 			}

@@ -25,7 +25,6 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 	unsigned int dim = D.MatrixA.size2();
 
 	assert(D.MatrixA.size1() == D.MatrixA.size2());
-	std::cout << "X0 size:" << x0.size() << ", A matrix col 2 size:" << D.MatrixA.size2() << std::endl;
 	assert(x0.size() == D.MatrixA.size2());
 
 	math::matrix<double> expAt(dim,dim);

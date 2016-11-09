@@ -414,6 +414,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 #ifdef VALIDATION
 	// add to cost the distance of refinement points. Modify the derivatives.
+
 	for(std::list<refinement_point>::iterator it = ref_pts.begin();it!=ref_pts.end();it++)
 	{
 		refinement_point p = *it;
@@ -439,7 +440,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //		}
 //		else
 //			v = simulate_trajectory(v, d, dwell_time, trace_distance, I, traj_dist_grad);
-		v = ODESol(v, d, x[N * dim + N-1]);
+		v = ODESol(v, d, p.time);
 		// patch for constant dynamics
 
 		math::matrix<double> A;
