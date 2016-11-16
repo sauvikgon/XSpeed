@@ -10,7 +10,7 @@
 
 
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
-
+#include "core_system/symbolic_states/symbolic_states.h"
 #include "core_system/HybridAutomata/Transition.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include <list>
@@ -43,49 +43,49 @@ extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
 extern std::list<refinement_point> ref_pts; // a list of invariant violating points to refine the search and obtained a validated trajectory
 extern std::vector<std::vector<double> > X0; // list of start point of the trajectory segments. Used only in the NLP-LP mixed program
-extern std::list<abstract_symbolic_state::ptr> ce_sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
+extern std::list<symbolic_states::ptr> ce_sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
 
 class abstractCE
 {
 public:
 	typedef boost::shared_ptr<abstractCE> ptr;
-
+	typedef boost::shared_ptr<const abstractCE> const_ptr;
 	/**empty constructor */
 	abstractCE() {
 	}
 	;
 	/* another constructor */
-	abstractCE(std::list<abstract_symbolic_state::ptr> s_states,
+	abstractCE(std::list<symbolic_states::ptr> s_states,
 			std::list<transition::ptr> ts, hybrid_automata::ptr h, polytope::ptr fpoly);
 	/* destructor */
 	~abstractCE() {
 	}
 	;
-	const std::list<abstract_symbolic_state::ptr> get_CE_sym_states() const {
+	std::list<symbolic_states::ptr> get_CE_sym_states() const {
 		return sym_states;
 	}
-	const std::list<transition::ptr> get_CE_transitions() const {
+	std::list<transition::ptr> get_CE_transitions() const {
 		return trans;
 	}
 
-	const abstract_symbolic_state::ptr get_first_symbolic_state() const;
+	symbolic_states::const_ptr get_first_symbolic_state() const;
 
 	/**
 	 * The semantics assumes that the last abstract_symbolic_state in the list contains the
 	 * unsafe polytope
 	 */
-	const abstract_symbolic_state::ptr get_last_symbolic_state() const;
+	symbolic_states::const_ptr get_last_symbolic_state() const;
 
 	/**
 	 * Returns the forbidden polytope
 	 */
-	const polytope::ptr get_forbidden_poly(){
+	polytope::ptr get_forbidden_poly(){
 		return forbid_poly;
 	}
 	/**
 	 * Returns the i-th symbolic state from the CE
 	 */
-	abstract_symbolic_state::ptr get_symbolic_state(unsigned int i) const;
+	symbolic_states::const_ptr get_symbolic_state(unsigned int i) const;
 
 	const unsigned int get_length() const {
 		return length;
@@ -95,7 +95,7 @@ public:
 		length = len;
 	}
 
-	void set_sym_states(std::list<abstract_symbolic_state::ptr> sym);
+	void set_sym_states(std::list<symbolic_states::ptr> sym);
 
 	void set_transitions(std::list<transition::ptr> transitions) {
 		trans = transitions;
@@ -124,14 +124,14 @@ public:
 	 * Plot the counter example projected along dimensions passed
 	 * as parameters
 	 */
-	void plot(unsigned int i, unsigned int j);
+//	void plot(unsigned int i, unsigned int j);
 
 private:
 	/**
 	 * The first symbolic state is the initial symbolic state and the last one
 	 * is the unsafe symbolic state
 	 */
-	std::list<abstract_symbolic_state::ptr> sym_states;
+	std::list<symbolic_states::ptr> sym_states;
 
 	/**
 	 * The list of transitions taken from the initial abstract_symbolic_state to the

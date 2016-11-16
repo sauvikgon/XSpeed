@@ -18,7 +18,8 @@ template_polyhedra::template_polyhedra() {
 	total_template_Directions = 0;
 	total_invariant_Directions = 0;
 }
-template_polyhedra::template_polyhedra(
+
+template_polyhedra::template_polyhedra (
 		math::matrix<double> matrix_support_function,
 		math::matrix<double> template_directions) {
 //	this->setTotalIterations(matrix_support_function.size2());
@@ -54,6 +55,11 @@ template_polyhedra::template_polyhedra(
 
 	this->setTemplateDirections(template_directions);
 	this->setInvariantDirections(invariant_directions);
+}
+
+unsigned int template_polyhedra::get_dimension(){
+	assert(template_Directions.size2()!=0);
+	return template_Directions.size2();
 }
 
 const math::matrix<double>& template_polyhedra::getTemplateDirections() const {
@@ -322,7 +328,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 	 * the function returns the point_of_intersection_started with the guard G.
 	 * And only returns the interescted region with the guard G as a new template_polyhedra:::with added invariant_directions
 	 */
-//	point_of_intersection = intersection_start;
+
 	return intersected_region;
 }
 
@@ -377,24 +383,26 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 	}
 	return intersected_range;
 }
-
+/*
+ * returns the template hull of the flowpipe-guard intersected template polytopes
+ */
 std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(polytope::ptr guard, int lp_solver_type_choosen){
 
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
 	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type_choosen);
-	//cout <<"range_list.size = "<<range_list.size();
+//	cout <<"range_list.size = "<<range_list.size();
 	std::list<polytope::ptr> polys;
 	unsigned int poly_dir_size = this->template_Directions.size1() +this->invariant_Directions.size1();
 	std::vector<double> colVector(poly_dir_size);
 	for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
 			range_it++) {
 		unsigned int start = (*range_it).first, end=(*range_it).second;
-		//cout << "first = " << start << "  second = " << end << std::endl;
+
 		for (unsigned int eachTemplateDir=0;eachTemplateDir<this->template_Directions.size1();eachTemplateDir++){
 
 			double Max_sf=this->Matrix_SupportFunction(eachTemplateDir,start);
 			for (int i = start+1; i <= end; i++) {
-				double sf=this->Matrix_SupportFunction(eachTemplateDir,i);
+				double sf = this->Matrix_SupportFunction(eachTemplateDir,i);
 				if (sf > Max_sf)
 					Max_sf = sf;
 			}//end of each intersected region

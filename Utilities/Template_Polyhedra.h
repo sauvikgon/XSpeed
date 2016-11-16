@@ -39,6 +39,9 @@ public:
 			math::matrix<double> matrix_invariant_bounds,
 			math::matrix<double> template_directions,
 			math::matrix<double> invariant_directions);
+
+	/* returns the dimension of the template polyhedra/flowpipe*/
+	unsigned int get_dimension();
 	/*const math::matrix<double>& getAllDirections() const;
 	 void setAllDirections(math::matrix<double>& allDirections);*/
 	const math::matrix<double>& getMatrixSupportFunction() const;

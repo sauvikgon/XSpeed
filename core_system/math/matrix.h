@@ -53,7 +53,8 @@ public:
 	 * inverse of a matrix : Returns True if Inverse Exists otherwise returns False
 	 */
 	bool inverse(math::matrix<scalar_type>& res);
-
+	/* Returns the boolean status of invertibility */
+	bool isInvertible();
 	/*private:
 	 ublas_matrix_impl my_matrix;*/
 };

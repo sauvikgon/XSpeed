@@ -11,10 +11,10 @@
 
 #include "core_system/math/matrix.h"
 
-#define VALIDATION
+//#define VALIDATION
 
 struct polyConstraints {
-	math::vector<double> a;
+	std::vector<double> a;
 	double b;
 	unsigned int sstate_index;
 };
@@ -39,7 +39,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
  * Objective function for splicing with mixed NLP-LP . (Goran's Idea)
  */
 double myobjfunc3(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
-
 
 double myconstraint(const std::vector<double> &x, std::vector<double> &grad, void *data);
 

@@ -692,7 +692,7 @@ std::cout<<"Ist initial Set created\n";
 	initial_state::ptr I2 = initial_state::ptr(
 			new initial_state(initial_location_id, initial_polytope_I2, S2,
 					transition_id));
-	init_state_list.push_back(I2); //pushing 2nd initial set object
-	std::cout<<"2nd initial Set created\n";
+//	init_state_list.push_back(I2); //pushing 2nd initial set object
+//	std::cout<<"2nd initial Set created\n";
 }
 

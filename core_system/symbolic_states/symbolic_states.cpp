@@ -37,7 +37,7 @@ const discrete_set& symbolic_states::getDiscreteSet() const {
 	return DiscreteSet;
 }
 
-template_polyhedra::ptr symbolic_states::getContinuousSetptr() {
+template_polyhedra::ptr symbolic_states::getContinuousSetptr() const {
 	return ContinuousSetptr;
 }
 
@@ -67,10 +67,6 @@ void symbolic_states::setTransitionId(int transitionId) {
 	transition_id = transitionId;
 }
 
-polytope::ptr symbolic_states::getInitial_ContinousSetptr() const {
-
-	polytope::ptr initial_polytope_I;
-	initial_polytope_I = this->ContinuousSetptr->getPolytope(0); //gets the 1st polytope from the sfm
-
-	return initial_polytope_I;
+polytope::ptr symbolic_states::getInitialPolytope() const {
+	return initial_polytope;
 }

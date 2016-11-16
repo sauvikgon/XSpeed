@@ -30,10 +30,11 @@ std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::ptr I,
 			facet_distance += trace_end_pt[j]*C(i,j);
 			coef_sq_sum += C(i,j)*C(i,j);
 		}
+		double denom = math::sqrt(coef_sq_sum);
 		facet_distance -=b[i];
 		if(facet_distance > 0){
 			for(unsigned int k=0;k<grad.size();k++){
-				grad[k] += C(i,k)/math::sqrt(coef_sq_sum);
+				grad[k] += C(i,k)/denom;
 			}
 		}
 		coef_sq_sum = 0;

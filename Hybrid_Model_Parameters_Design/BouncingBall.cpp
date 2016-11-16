@@ -204,9 +204,9 @@ void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
 	int transition_id = 0; //initial location no transition taken yet
 	initial_state::ptr Init_state;
 
-	Init_state = initial_state::ptr(
-			new initial_state(initial_location_id, initial_polytope_I, S,
-					transition_id));
+//	Init_state = initial_state::ptr(
+//			new initial_state(initial_location_id, initial_polytope_I, S,
+//					transition_id));
 
 	init_state_list.push_back(Init_state);
 

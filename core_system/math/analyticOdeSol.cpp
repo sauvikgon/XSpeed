@@ -13,6 +13,7 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 {
 	if(D.isEmptyMatrixA && D.isEmptyMatrixB)
 	{
+		assert(!D.isEmptyC);
 		unsigned int dim = x0.size();
 		std::vector<double> res(x0);
 		for(unsigned int i=0;i<dim;i++)
@@ -32,6 +33,7 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 	math::matrix<double> At(A);
 
 	At.scalar_multiply(time);
+
 	At.matrix_exponentiation(expAt);
 
 	std::vector<double> res1(dim), res2(dim), res3(dim);

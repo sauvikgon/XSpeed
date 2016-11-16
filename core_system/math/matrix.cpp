@@ -40,12 +40,6 @@ template<typename scalar_type> math::matrix<scalar_type>::matrix(size_type r,
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_exponentiation(
 		math::matrix<scalar_type>& res, double time_tau) const {
 
-	/*ublas_matrix_impl emat(size1(),size2());
-	 for(unsinged int i=0;i<size1()i++){
-	 for(unsigned int j=0;j<size2();j++){
-	 emat(i,j) = this
-	 }
-	 }*/
 	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 	m = expm_pad(m, time_tau);
 	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
@@ -59,12 +53,6 @@ template<typename scalar_type>
 void math::matrix<scalar_type>::matrix_exponentiation(
 		math::matrix<scalar_type>& res) const {
 
-	/*ublas_matrix_impl emat(size1(),size2());
-	 for(unsinged int i=0;i<size1()i++){
-	 for(unsigned int j=0;j<size2();j++){
-	 emat(i,j) = this
-	 }
-	 }*/
 	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 	m = expm_pad(m);
 	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
@@ -78,6 +66,8 @@ void math::matrix<scalar_type>::matrix_exponentiation(
 
 template<typename scalar_type> void math::matrix<scalar_type>::multiply(
 		matrix& A, matrix& res) {
+
+	assert(this->size2() == A.size1());
 
 	ublas_matrix_impl m1(this->size1(), this->size2(), this->data());
 	ublas_matrix_impl m2(A.size1(), A.size2(), A.data());
@@ -103,6 +93,8 @@ template<typename scalar_type> void math::matrix<scalar_type>::minus(
  */
 template<typename scalar_type> void math::matrix<scalar_type>::mult_vector(
 		std::vector<scalar_type> v, std::vector<scalar_type> &res) const {
+	assert(this->size2() == v.size());
+
 	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 	ublas_vector_impl uv(v.size());
 //#pragma omp parallel for
@@ -112,7 +104,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::mult_vector(
 	res.resize(uv.size());
 	//cout<<"\n"<<v.size()<<endl;
 //#pragma omp parallel for
-	for (unsigned int i = 0; i < m.size1(); i++)	//m.size1()  or uv.size()
+	for (unsigned int i = 0; i < uv.size(); i++)	//m.size1()  or uv.size()
 		res[i] = uv(i);
 	//cout<<"\n"<<uv.size()<<endl;
 }
@@ -250,22 +242,28 @@ template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf()
  Uses lu_factorize and lu_substitute in uBLAS to invert a matrix */
 template<typename scalar_type>
 bool math::matrix<scalar_type>::inverse(math::matrix<scalar_type>& inverse) {
-	//bool NonSingular=false;
+	if(!isInvertible())
+		return false;
+	using namespace boost::numeric::ublas;
+	typedef permutation_matrix<std::size_t> pmatrix;
+
+	// create identity matrix of "inverse"
+	inverse.assign(identity_matrix<scalar_type>(this->size1()));
+	ublas_matrix_impl A(this->size1(), this->size2(), this->data());
+	pmatrix pm(A.size1());
+	int res = lu_factorize(A, pm);
+	// backsubstitute to get the inverse
+	lu_substitute(A, pm, inverse);
+	return true;	//	NonSingular=true;
+}
+template<typename scalar_type>
+bool math::matrix<scalar_type>::isInvertible()
+{
 	assert(this->size1() == this->size2());
 	using namespace boost::numeric::ublas;
 	typedef permutation_matrix<std::size_t> pmatrix;
 	// create a working copy of the input
 	ublas_matrix_impl A(this->size1(), this->size2(), this->data());
-	// make A same as the current matrix.
-	/*
-	 cout << "\nAmit here\n";
-	 for (int i = 0; i < A.size1(); i++) {
-	 for (int j = 0; j < A.size2(); j++)
-	 cout << A(i, j) << "\t";
-	 cout << endl;
-	 }
-	 cout << "\nAmit there\n";
-	 */
 	// create a permutation matrix for the LU-factorization
 	pmatrix pm(A.size1());
 	// perform LU-factorization
@@ -274,11 +272,6 @@ bool math::matrix<scalar_type>::inverse(math::matrix<scalar_type>& inverse) {
 		//NonSingular=false;
 		return false;
 	}
-	// create identity matrix of "inverse"
-	inverse.assign(identity_matrix<scalar_type>(A.size1()));
-	// backsubstitute to get the inverse
-	lu_substitute(A, pm, inverse);
-	return true;	//	NonSingular=true;
+	else return true;
 }
-
 #endif

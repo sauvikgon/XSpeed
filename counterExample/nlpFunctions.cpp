@@ -90,7 +90,7 @@ double myobjfunc3(const std::vector<double> &x, std::vector<double> &grad, void 
 	polytope::ptr Trans_p;
 
 
-	for(std::list<abstract_symbolic_state::ptr>::const_iterator it = ce_sym_states.begin();it!=ce_sym_states.end();it++)
+	for(std::list<symbolic_states::ptr>::const_iterator it = ce_sym_states.begin();it!=ce_sym_states.end();it++)
 	{
 		std::set<int>::iterator dset_iter = (*it)->getDiscreteSet().getDiscreteElements().begin();
 		unsigned int locId = *dset_iter;
@@ -104,7 +104,7 @@ double myobjfunc3(const std::vector<double> &x, std::vector<double> &grad, void 
 			throw std::runtime_error("nlpfunctions: myobjfunc3: expAt matrix not invertible. Required for Time translation of initial set\n");
 		}
 
-		polytope::ptr p = (*it)->getInitialSet();
+		polytope::ptr p = (*it)->getInitialPolytope();
 
 		math::matrix<double> A_prime(d.MatrixA.size1(),d.MatrixA.size2());
 		p->getCoeffMatrix().multiply(M_inv, A_prime);
@@ -224,18 +224,22 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 	//-----------------------------------------
 
-	math::matrix<double> expAt(dim,dim);
+	math::matrix<double> expAt;
 
 	std::vector<std::vector<double> > y(N-1);
 	for(unsigned int j=0;j<N-1;j++)
 		y[j] = std::vector<double>(dim,0);
 
 	double cost = 0;
-	double deriv[x.size()];// contains the gradient
+	double deriv[x.size()]; // contains the gradient
+
 
 	std::list<transition::ptr>::iterator T_iter = transList.begin();
-	double trace_distance;
+	transition::ptr Tptr = *(T_iter);
+	assert(transList.size() == N-1);
+
 	for (unsigned int i = 0; i < N-1; i++) {
+
 		std::vector<double> v(dim, 0);
 		for (unsigned int j = 0; j < dim; j++) {
 			v[j] = x[i * dim + j];
@@ -246,17 +250,11 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
 		assert(d.C.size() == dim);
 
-		trace_distance = 0;
 		std::vector<double> traj_dist_grad(dim,0); // holds the grads of the trajectories distance to invariant
-		// If dynamics invertible, then get analytical solution. Otherwise, perform
-		// numerically simulation with Euler steps.
-//		if(d.MatrixA.inverse(expAt)){
-//			y[i] = ODESol(v,d,x[N * dim + i]);
-//		}
-//		else
-//			y[i] = simulate_trajectory(v, d, x[N * dim + i], trace_distance, I, traj_dist_grad);
 
 		y[i] = ODESol(v,d,x[N*dim + i]);
+//		double dist = 0;
+//		y[i] = simulate_trajectory(v,d,x[N*dim + i],dist, I,traj_dist_grad);
 
 		// patch for constant dynamics
 
@@ -272,9 +270,9 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		else
 			A = d.MatrixA;
 
-		A.matrix_exponentiation(expAt,x[N*dim+i]);
-		assert(expAt.size1() == dim);
-		assert(expAt.size2() == dim);
+		math::matrix<double> At(A);
+		At.scalar_multiply(x[N*dim+i]);
+		At.matrix_exponentiation(expAt);
 
 		std::vector<double> Axplusb(dim), diag_expAt(dim);
 		A.mult_vector(y[i],Axplusb);
@@ -284,50 +282,65 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			diag_expAt[j] = expAt(j,j);
 		}
 		std::vector<double> grad_x(dim,0), grad_t(dim,0);
+
 		grad_t = dist_grad(y[i],I,Axplusb);
 		grad_x = dist_grad(y[i],I,diag_expAt);
+
 #ifdef VALIDATION
-		if(trace_distance!=0){
-			//std::cout << "trace distance = " << trace_distance << std::endl;
-			//cost+=trace_distance;
-			cost += I->point_distance(y[i]); // adding to cost, the distance of end point to Inv
-		}
+
+		//std::cout << "trace distance = " << trace_distance << std::endl;
+		//cost+=trace_distance;
+		cost += I->point_distance(y[i]); // adding to cost, the distance of end point to Inv
+
 #endif
-		transition::ptr Tptr= *(T_iter);
 		polytope::ptr g;
 		Assign R;
-		// assignment of the form: Ax + b
-		if(Tptr!=NULL){
-			R = Tptr->getAssignT();
+		math::matrix<double> mapExpAt(expAt);
+		// assignment of the form: Rx + w
+
+		R = Tptr->getAssignT();
 		//guard as a polytope
-			g = Tptr->getGaurd();
-		}else
+		// This matrix is require to compute the derivative
+		g = Tptr->getGaurd();
+
+		std::vector<double> mapderiv(Axplusb);
 
 		// If traj end point inside guard, then apply map.
-		if(g.get()!=NULL && g->point_distance(y[i])==0)
+		if(g->point_distance(y[i])==0)
 		{
+//			std::cout << "Inside g condition\n";
 			assert(y[i].size() == R.Map.size2());
-			std::vector<double> res(y[i].size(),0);
-			R.Map.mult_vector(y[i],res);
+			std::vector<double> transform(y[i].size(),0);
+			R.Map.mult_vector(y[i],transform);
 			// add vectors
 			assert(y[i].size() == R.b.size());
-			for(unsigned int j=0;j<res.size();j++)
-				y[i][j] = res[j] + R.b[j];
+			for(unsigned int j=0;j<transform.size();j++)
+				y[i][j] = transform[j] + R.b[j];
+
+			assert(mapExpAt.size1()==R.Map.size2());
+			R.Map.multiply(expAt,mapExpAt);
+
+			assert(R.Map.size1() == Axplusb.size());
+			R.Map.mult_vector(Axplusb, mapderiv);
+		}
+		else{
+//			std::cout << "Outside g condition\n";
 		}
 		if(T_iter!=transList.end())
-			T_iter.operator ++();
+			T_iter++;
 
 		double sum=0;
+
 		//compute the Euclidean distance between the next start point and the simulated end point
 		for (unsigned int j = 0; j < dim; j++) {
 			cost += (y[i][j] - x[(i+1)*dim + j]) * (y[i][j] - x[(i+1)*dim + j]);
 			if(i==0){
 //				deriv[i*dim+j] = 2*(y[i][j]-next_start[j])* expAt(j,j) + traj_dist_grad[j];
-
 #ifdef VALIDATION
-				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* expAt(j,j) + grad_x[j];
+
+				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* mapExpAt(j,j) + grad_x[j];
 #else
-				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* expAt(j,j);
+				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* mapExpAt(j,j);
 #endif
 			}
 			else{
@@ -335,19 +348,21 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_x[j];
 
 #ifdef VALIDATION
-				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_x[j];
+				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * mapExpAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_x[j];
 #else
-				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]);
+				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * mapExpAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]);
 #endif
 			}
+
 #ifdef VALIDATION
-			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * Axplusb[j]  + grad_t[j];
+			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * mapderiv[j]  + grad_t[j];
 #else
-			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * Axplusb[j];
+			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * mapderiv[j];
 #endif
 		}
 		deriv[N*dim+i] = sum;
 	}
+
 	std::vector<double> v(dim, 0);
 	for (unsigned int j = 0; j < dim; j++) {
 		v[j] = x[ (N-1) * dim + j];
@@ -356,10 +371,11 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	int loc_index = locIdList[N-1];
 	Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
 	polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
-	trace_distance = 0;
+
 	//trace_end_pt = simulate_trajectory(v, d, x[N * dim + N-1], trace_distance, I, traj_dist_grad);
 	trace_end_pt = ODESol(v, d, x[N * dim + N-1]);
-
+//	double dist = 0;
+//	trace_end_pt = simulate_trajectory(v,d,x[N*dim + N-1], dist, I,traj_dist_grad);
 	// patch for constant dynamics
 
 	math::matrix<double> A;
@@ -374,19 +390,18 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	else
 		A = d.MatrixA;
 
-//	cost+=trace_distance; // last trace must also be valid
 #ifdef VALIDATION
 	cost += I->point_distance(trace_end_pt); // adding the distance of last point to Inv, for validation
 #endif
 
 	// analytical grad computation wrt start point
-	math::matrix<double> Aexp(A.size1(),A.size2());
+	math::matrix<double> expA(A.size1(),A.size2());
 	std::vector<double> Axplusb(dim), chain_mult(dim);
-	A.matrix_exponentiation(Aexp,x[N*dim+N-1]);
+	A.matrix_exponentiation(expA,x[N*dim+N-1]);
 	A.mult_vector(trace_end_pt,Axplusb);
 
 	for(unsigned int j=0;j<dim;j++){
-		chain_mult[j] = Aexp(j,j);
+		chain_mult[j] = expA(j,j);
 		Axplusb[j] = Axplusb[j] + d.C[j];
 	}
 	std::vector<double> Inv_dist_grad_x(dim,0), Inv_dist_grad_t(dim,0), bad_dist_gradx(dim,0), bad_dist_gradt(dim,0);
@@ -397,9 +412,10 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	Inv_dist_grad_x = dist_grad(trace_end_pt,I,chain_mult);
 
 	for(unsigned int j=0;j<dim;j++){
-//		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + d_dist_dx[j] + traj_dist_grad[j];
-		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + bad_dist_gradx[j];
+		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]) + bad_dist_gradx[j] ;
+#ifdef VALIDATION
 		deriv[(N-1)*dim+j] += Inv_dist_grad_x[j];
+#endif
 	}
 
 
@@ -407,8 +423,12 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 	deriv[N*dim+N-1] = 0;
 	bad_dist_gradt = dist_grad(trace_end_pt,bad_poly,Axplusb);
-	for(unsigned int j=0;j<dim;j++)
-		deriv[N*dim+N-1]+=bad_dist_gradt[j] + Inv_dist_grad_t[j];
+	for(unsigned int j=0;j<dim;j++){
+		deriv[N*dim+N-1]+=bad_dist_gradt[j];
+#ifdef VALIDATION
+		deriv[N*dim+N-1]+= Inv_dist_grad_t[j];
+#endif
+	}
 	// compute the distance of this endpoint with the forbidden polytope
 	cost+= bad_poly->point_distance(trace_end_pt);
 
@@ -458,8 +478,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		double dist = I->point_distance(v);
 		if(dist>0){
 			cost+= dist;
-			math::matrix<double> expA;
-			A.matrix_exponentiation(expA,p.time);
+			math::matrix<double> expAt;
+			A.matrix_exponentiation(expAt,p.time);
 			std::vector<double> diag_expAt(dim,0);
 			for(unsigned int j=0;j<dim;j++)
 				diag_expAt[j] = expAt(j,j);
@@ -575,8 +595,8 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
 	polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
 
 	simulation::ptr sim = simulation::ptr(new simulation(dim,1000,d));
-	//trace_end_pt = sim->simulate(v, x[N * dim + N-1]);
-	trace_end_pt = ODESol(v, d, x[N * dim + N-1]);
+	trace_end_pt = sim->simulate(v, x[N * dim + N-1]);
+	//trace_end_pt = ODESol(v, d, x[N * dim + N-1]);
 
 	// analytical grad computation wrt start point
 	math::matrix<double> Aexp(d.MatrixA.size1(),d.MatrixA.size2());

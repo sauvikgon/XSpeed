@@ -252,6 +252,13 @@ double polytope::max_norm(int lp_solver_type_choosen,
 const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2) {
 
 	assert(P2!=NULL);
+	if(P2->getIsUniverse())
+	{
+		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign())); // by default this will be empty
+	}
+	else if(P2->IsEmpty)
+		return P2; // return empty polytope pointer
+
 	math::matrix<double> total_coeffMatrix, m1;
 	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
 	m1.matrix_join(P2->getCoeffMatrix(), total_coeffMatrix);
@@ -440,14 +447,23 @@ math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
 }
 
 double polytope::point_distance(std::vector<double> v){
+	if(this->IsUniverse)
+		return 0;
+	if(this->IsEmpty){
+		std::cout << "distance of a point from am empty polytope asked\n";
+		exit(0);
+	}
+
 	math::matrix<double> C = getCoeffMatrix();
-	math::vector<double> b = getColumnVector();
+	std::vector<double> b = getColumnVector();
 
 	assert(v.size() == C.size2());
 	assert(getInEqualitySign()==1);
+
 	double distance = 0;
 	double facet_distance = 0;
 	double coef_sq_sum = 0;
+
 	for(unsigned int i=0;i<C.size1();i++){
 		for(unsigned int j=0;j<C.size2();j++){
 			facet_distance += v[j]*C(i,j);
