@@ -86,7 +86,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
-		//Set_NavTimed_9by9(ha,init_state,reach_parameters);
+	//	Set_NavTimed_9by9(ha,init_state,reach_parameters);
 		//std::cout <<"Running the Test Model "<<std::endl;
 		setTTEthernetModel2(ha, init_state, reach_parameters);
 		//std::cout <<"Test Model Assigned"<<std::endl;
@@ -123,7 +123,9 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	}
 	if (Directions_Type > 2) {
 		unsigned int dir_nums = op.get_directionTemplate(); // ASSIGN HERE Number of Vectors/Directions for UNIform spear algorithm
-		newDirections = math::uni_sphere(dir_nums, dims, 100, 0.0005);
+	//	newDirections = math::uni_sphere(dir_nums, dims, 100, 0.0005);
+		//In SpaceEx math::uni_sphere(nb, dim, 10000 * nb, 1e-3);
+		newDirections = math::uni_sphere(dir_nums, dims, 10000 * dir_nums, 0.001);
 
 		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
 		row = dir_nums;

@@ -21,8 +21,23 @@
 
 
 //void user_model(hybrid_automata& Hybrid_Automata,initial_state::ptr& init_state,ReachabilityParameters& reach_parameters);
-
 void user_model(hybrid_automata& ha,
+		std::list<initial_state::ptr>& init_state,
+		ReachabilityParameters& reach_parameters,
+		userOptions& op);
+void module1(hybrid_automata& ha,
+		std::list<initial_state::ptr>& init_state,
+		ReachabilityParameters& reach_parameters,
+		userOptions& op);
+void module2(hybrid_automata& ha,
+		std::list<initial_state::ptr>& init_state,
+		ReachabilityParameters& reach_parameters,
+		userOptions& op);
+void module3(hybrid_automata& ha,
+		std::list<initial_state::ptr>& init_state,
+		ReachabilityParameters& reach_parameters,
+		userOptions& op);
+void module4(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters,
 		userOptions& op);

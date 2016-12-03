@@ -358,10 +358,9 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
-	// Initialize the model with the parameters given by the user
+	// Initialize the model with the parameters given by the user from Command Line
 	if (!isModelParsed) { //all command line options has been supplied
-		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
-				forbidden_set);
+		load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
 
 		unsigned int x1 = Hybrid_Automata.get_index(output_vars[0]);
 		unsigned int x2 = Hybrid_Automata.get_index(output_vars[1]);
