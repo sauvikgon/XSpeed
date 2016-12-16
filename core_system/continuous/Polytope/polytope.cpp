@@ -252,7 +252,7 @@ double polytope::max_norm(int lp_solver_type_choosen,
 const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2) {
 
 	assert(P2!=NULL);
-	if(P2->getIsUniverse())
+	if(P2->IsUniverse)
 	{
 		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign())); // by default this will be empty
 	}
@@ -306,6 +306,13 @@ const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2) {
 
 bool polytope::check_polytope_intersection(polytope::ptr p2,
 		int lp_solver_type_choosen) {
+	// if the parameter polytope is a univserse, then return true
+	if(p2->getIsUniverse())
+		return true;
+	// if the parameter polytope is empty, return false
+	if(p2->getIsEmpty())
+			return false;
+
 	bool flag = false;
 	/*
 	 * Process: Add all constraints of P1(the calling polytope object) and P2 to form new constraints
@@ -413,6 +420,11 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 
 std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 		int j) {
+	if(this->IsUniverse)
+		throw std::runtime_error("Cannot enumerate vertices of universe polytope\n");
+	if(this->IsEmpty)
+		throw std::runtime_error("Cannot enumerate vertices of an empty polytope\n");
+
 	std::set < std::pair<double, double> > All_vertices;
 //	std::cout<<"Called enumerateVertices()!!\n";
 	//enumerate the vertices in the first quadrant

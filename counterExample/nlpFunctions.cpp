@@ -282,6 +282,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			diag_expAt[j] = expAt(j,j);
 		}
 		std::vector<double> grad_x(dim,0), grad_t(dim,0);
+		std::vector<double> grad_gx(dim,0), grad_gt(dim,0);
 
 		grad_t = dist_grad(y[i],I,Axplusb);
 		grad_x = dist_grad(y[i],I,diag_expAt);
@@ -306,7 +307,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		std::vector<double> mapderiv(Axplusb);
 
 		// If traj end point inside guard, then apply map.
-		if(g->point_distance(y[i])==0)
+		double guard_dist = g->point_distance(y[i]);
+		if(guard_dist == 0)
 		{
 //			std::cout << "Inside g condition\n";
 			assert(y[i].size() == R.Map.size2());
@@ -324,7 +326,10 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			R.Map.mult_vector(Axplusb, mapderiv);
 		}
 		else{
-//			std::cout << "Outside g condition\n";
+//			cost += g->point_distance(y[i]);
+//			grad_gt = dist_grad(y[i],I,Axplusb);
+//			grad_gx = dist_grad(y[i],I,diag_expAt);
+
 		}
 		if(T_iter!=transList.end())
 			T_iter++;
@@ -338,9 +343,9 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //				deriv[i*dim+j] = 2*(y[i][j]-next_start[j])* expAt(j,j) + traj_dist_grad[j];
 #ifdef VALIDATION
 
-				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* mapExpAt(j,j) + grad_x[j];
+				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* mapExpAt(j,j) + grad_x[j] + grad_gx[j];
 #else
-				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* mapExpAt(j,j);
+				deriv[i*dim+j] = 2*(y[i][j]-x[(i+1)*dim + j])* mapExpAt(j,j) + grad_gx[j];
 #endif
 			}
 			else{
@@ -348,16 +353,16 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * expAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_x[j];
 
 #ifdef VALIDATION
-				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * mapExpAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_x[j];
+				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * mapExpAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_gx[j] + grad_x[j];
 #else
-				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * mapExpAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]);
+				deriv[i*dim+j] = ( 2*(y[i][j] - x[(i+1)*dim + j]) * mapExpAt(j,j) ) - 2*(y[(i-1)][j] - x[i*dim+j]) + grad_gx[j];
 #endif
 			}
 
 #ifdef VALIDATION
-			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * mapderiv[j]  + grad_t[j];
+			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * mapderiv[j]  + grad_gt[j] + grad_t[j];
 #else
-			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * mapderiv[j];
+			sum+= 2*(y[i][j] - x[(i+1)*dim + j]) * mapderiv[j] + grad_gt[j];
 #endif
 		}
 		deriv[N*dim+i] = sum;

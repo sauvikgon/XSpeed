@@ -13,6 +13,7 @@
 
 //#define VALIDATION
 
+
 struct polyConstraints {
 	std::vector<double> a;
 	double b;

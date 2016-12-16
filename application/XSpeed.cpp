@@ -289,7 +289,7 @@ int status;
 	dump_abstractCE_list(ce_candidates);
 	/** End of debug */
 	bool real_ce = false;
-	double error_tol = 1e-4;
+	double error_tol = 0.01;
 
 	tt1.start(); // start time
 	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {

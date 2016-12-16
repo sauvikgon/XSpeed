@@ -160,8 +160,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	//assert that the number of transitions equals 1 less than the length of the abstract CE path
 
-//	std::cout << "Length of the CE, N=" << N << std::endl;
-//	std::cout << "#Transitions in CE" << transList.size() << std::endl;
+	std::cout << "Length of the CE, N=" << N << std::endl;
+	std::cout << "#Transitions in CE" << transList.size() << std::endl;
 	assert(transList.size() == N-1);
 	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
 	// initialize the global locIdList
@@ -292,13 +292,17 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
 			guard = T->getGaurd();
+			if(guard->getIsUniverse())
+				std::cout << "#Guard is Universe#\n" << std::endl;
+
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(guard,1);
 			if(polys.size()>1)
 				P = convertBounding_Box(S->getContinuousSetptr());
 			else
 				P=polys.front();
 
-			P=P->GetPolytope_Intersection(guard);
+			if(!guard->getIsEmpty())
+				P=P->GetPolytope_Intersection(guard);
 
 		}
 //		To get a point from the polytope, we create a random obj function and
@@ -307,7 +311,9 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		// When flowpipe intersects the guard only at more than one place, take a bounding box approx of the flowpipe and project time
 		//debug
 //		math::matrix<double> vertices_list;
-//		vertices_list = P->get_2dVertices(2, 0);
+//		vertices_list = P->get_2dVertices(0, 10);
+//		std::cout << "Number of vertices of the polytope: " << vertices_list.size1() << std::endl;
+//
 //		// ------------- Printing the vertices on the Output File -------------
 //		for (unsigned int p = 0; p < vertices_list.size1(); p++) {
 //			for (unsigned int q = 0; q < vertices_list.size2(); q++) {
@@ -358,9 +364,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		if(it!=transList.end())
 			it++;
 
-		//debug
-		//std::cout << "Time bounds obtained on trace " << i << ": " << B1[i].bound << "to " << B[i].bound << std::endl;
-		//--
 	}
 	tracefile.close();
 
@@ -446,6 +449,9 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			std::cout << "Local optimization algorithm called:" << myopt_local.get_algorithm_name() << std::endl;
 			myopt_local.set_stopval(tolerance);
 			myopt_local.optimize(x, minf);
+			// Another alternative: Call the optimizer only on the position parameters.
+			// Fix the dwell times returned by the first call to the optimizer.
+
 		}
 
 	} catch (std::exception& e) {

@@ -143,7 +143,6 @@ polytope::ptr template_polyhedra::getPolytope(unsigned int Iterations_Number) {
 const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionSequential(polytope::ptr G, int lp_solver_type_choosen) { //need testing due to modification
 	size_type row = 0;
 	size_type col = 0;
-//	cout << "1 = Testing INSIDE \n";
 	math::matrix<double> mat_sf(row, col);
 	bool is_intersected = false, intersection_started = false, immediate_false =
 			false, intersection_ended = false;
@@ -390,7 +389,6 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(pol
 
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
 	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type_choosen);
-//	cout <<"range_list.size = "<<range_list.size();
 	std::list<polytope::ptr> polys;
 	unsigned int poly_dir_size = this->template_Directions.size1() +this->invariant_Directions.size1();
 	std::vector<double> colVector(poly_dir_size);

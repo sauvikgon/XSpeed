@@ -79,7 +79,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		S->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-
 		pw_list.PassedList_insert(U);
 
 		location::ptr current_location;
