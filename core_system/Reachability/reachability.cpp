@@ -17,7 +17,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	H = h;
 	I = i;
 	reach_parameters = reach_param;
-	bound = bound_limit;
+	bound = bound_limit;	//bfs_level
 	Algorithm_Type = algorithm_type;	//Important parameter to decide to select an algorithm to execute
 	Total_Partition = total_partition;
 	lp_solver_type_choosen = lp_solver_type;
@@ -118,8 +118,13 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
 
+		//std::cout<<"alfa = "<<result_alfa<<"   beta = "<<result_beta;
+		//std::cout<<"  reach_parameters.TimeBound = "<<reach_parameters.TimeBound;
+		//std::cout<<"  reach_parameters.time_step = "<<reach_parameters.time_step;
+		//std::cout<<"  reach_parameters.Iterations = "<<reach_parameters.Iterations <<"\n";
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
+
 		// Intialised the transformation and its transpose matrix
 		math::matrix<double> phi_matrix, phi_trans;
 
@@ -311,6 +316,9 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 //		}
 		//  ******************************** Safety Verification section Ends********************************
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
+
+	//	std::cout<<"\nreach_region->getTotalIterations() = " <<reach_region->getTotalIterations();
+
 		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) {
 			//computed reach_region is empty and optimize transition BreadthLevel-wise
 			for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
@@ -339,6 +347,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 					templated_hull_flowpipe = convertBounding_Box(reach_region);
 					polys.push_back(templated_hull_flowpipe);
 				}
+			//	std::cout<<"\npolys.size() ="<<polys.size()<<" locName = "<<locName<<"\n";
 //std::cout<<"\nTesting 2 g\n";
 				//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 				if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
@@ -372,8 +381,12 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
 								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
 					}
+					//newShiftedPolytope->print2file("test.txt",0,1);
 					// @Rajarshi: the newShifted satisfy the destination location invariant
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+
+					//newShiftedPolytope->print2file("test.txt",0,1);
+
 
 					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 					newState->setTransitionId(transition_id); // keeps track of the transition_ID

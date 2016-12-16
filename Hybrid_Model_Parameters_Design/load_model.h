@@ -28,6 +28,10 @@
 
 #include "Hybrid_Model_Parameters_Design/TTEthernet/TTEthernetModel.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/build_48.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fwr.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/pll.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/heart.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/mesh.h"
 
 /**
  * Creates the pre-defined hybrid automata models in memory with config parameters.

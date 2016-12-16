@@ -22,6 +22,11 @@ polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> 
 	math::matrix<double> R_inverse(R.size1(), R.size2());
 	std::vector<double> b_p, b_dash, term2;
 	bool invertible;
+
+	/*std::cout<<"newPolytope->getCoeffMatrix()="<<newPolytope->getCoeffMatrix()<<"\n columnVector are ";
+		for (int i=0;i<newPolytope->getColumnVector().size();i++)
+			std::cout<<newPolytope->getColumnVector()[i]<<"\n";*/
+
 //polytope post_assign;
 	b_p = newPolytope->getColumnVector();
 //	cout<<"bp size = "<<b_p.size()<<endl;
@@ -76,6 +81,11 @@ polytope::ptr post_assign_exact(polytope::ptr newPolytope, math::matrix<double> 
 		std::cout << "\nThe Transition Dynamics Matrix is not Invertible!!!\n";
 		//post_assign_approx(newPolytope, R, W,)
 	}
+
+	/*std::cout<<"\nnewShiftedPolytope->getCoeffMatrix()="<<A_dash<<"\n columnVector are ";
+			for (int i=0;i<b_dash.size();i++)
+				std::cout<<b_dash[i]<<"\n";*/
+
 	return polytope::ptr(new polytope(A_dash, b_dash, 1));
 }
 /*
@@ -122,8 +132,11 @@ polytope::ptr post_assign_approx_deterministic(polytope::ptr newPolytope, math::
 		std::vector<double> w, math::matrix<double> Directions, int lp_solver_type) {
 	math::matrix<double> R_transpose;
 	int max_or_min = 2;	//Maximizing
-	std::vector<double> b(Directions.size1()), each_direction(
-			Directions.size2()), direction_trans;
+	std::vector<double> b(Directions.size1()), each_direction(Directions.size2()), direction_trans;
+	/*std::cout<<"newPolytope->getCoeffMatrix()="<<newPolytope->getCoeffMatrix()<<"\n columnVector are";
+	for (int i=0;i<newPolytope->getColumnVector().size();i++)
+		std::cout<<newPolytope->getColumnVector()[i]<<"\n";*/
+
 	R.transpose(R_transpose);
 	//create glpk object to be used by the polytope
 	int type=lp_solver_type;
@@ -137,5 +150,10 @@ polytope::ptr post_assign_approx_deterministic(polytope::ptr newPolytope, math::
 
 		b[i] = newPolytope->computeSupportFunction(direction_trans, lp) + dot_product(each_direction, w);
 	}
+
+	/*std::cout<<"\nnewShiftedPolytope->getCoeffMatrix()="<<Directions<<"\n columnVector are";
+		for (int i=0;i<b.size();i++)
+			std::cout<<b[i]<<"\n";*/
+
 	return polytope::ptr(new polytope(Directions, b, 1));
 }

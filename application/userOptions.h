@@ -21,7 +21,10 @@ class userOptions {
 
 	unsigned int model; // name of the pre-defined model to run for reachability.
 	unsigned int direction_template; // template used for approximating support functions
-	unsigned int time_horizon; // time horizon for reachability
+
+	//OLD VALUE unsigned int time_horizon; // time horizon for reachability
+	double time_horizon; // time horizon for reachability
+
 	double time_step; // the time step of the support function algorithm
 	unsigned int level; // the breadth level in bfs to stop reachability
 //	unsigned int flow_algorithm; // Choice of the reachability algorithm

@@ -13,8 +13,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	unsigned int row, col;
 
 	reach_parameters.TimeBound = op.get_timeHorizon(); //Total Time Interval
-	reach_parameters.Iterations = (unsigned int) op.get_timeHorizon()
-			/ op.get_timeStep(); // number of iterations
+	reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
 	reach_parameters.time_step = op.get_timeStep();
 
 //Assigning the Model of the Hybrid System
@@ -88,7 +87,17 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
 	//	Set_NavTimed_9by9(ha,init_state,reach_parameters);
 		//std::cout <<"Running the Test Model "<<std::endl;
-		setTTEthernetModel2(ha, init_state, reach_parameters);
+
+		//---------------Not working models-------------
+		//setbuild48(ha, init_state, reach_parameters);
+		//setfwr(ha, init_state, reach_parameters);
+		//setpllConv(ha, init_state, reach_parameters);
+		//setheart(ha, init_state, reach_parameters);
+		// --------------------------------------------
+
+		//setTTEthernetModel2(ha, init_state, reach_parameters);
+		setmesh(ha, init_state, reach_parameters);
+
 		//std::cout <<"Test Model Assigned"<<std::endl;
 	}
 	unsigned int dims=0;
