@@ -9,7 +9,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <cstdlib>
-//#include <cuda_runtime.h>
+#include <cuda_runtime.h>
 #include <ctime>
 #include <malloc.h>
 #include <vector>

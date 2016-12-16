@@ -285,7 +285,7 @@ void reachabilitySequential_GPU(unsigned int boundedTotIteration, Dynamics& Syst
 //	}
 //	std::cout << "num_inv = "<<num_inv<<"\n";
 	if (isInvariantExist == true) { //if invariant exist. Computing
-		std::cout << "Yes Invariant Exist!!!";
+	//	std::cout << "Yes Invariant Exist!!!";
 		NewTotalIteration = boundedTotIteration;
 		std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 	} //End of Invariant Directions
@@ -306,7 +306,7 @@ void reachabilitySequential_GPU(unsigned int boundedTotIteration, Dynamics& Syst
 //std::vector<AllDirection> Direction_List;
 	unsigned int numVectors = ReachParameters.Directions.size1();
 
-	unsigned int totalDirList1 = numVectors * (NewTotalIteration + 1); //1 extra for loop1
+	unsigned int totalDirList1 = numVectors * (NewTotalIteration + 1); //1 extra per loop1
 	math::matrix<float> List_for_X0(totalDirList1,
 			ReachParameters.Directions.size2());
 	unsigned int totalDirList2 = numVectors * NewTotalIteration; //'n' dirs for each 'n' loops

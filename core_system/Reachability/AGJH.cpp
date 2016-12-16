@@ -269,6 +269,9 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb)
 							current_assignment.b, reach_parameters.Directions,
 							lp_solver_type_choosen);
 				}
+				// @Amit: the newShifted satisfy the destination location invariant
+				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+
 
 				//	newShiftedPolytope->print2file(newInitSet,0,1); //printing the New Initial Set
 				initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));

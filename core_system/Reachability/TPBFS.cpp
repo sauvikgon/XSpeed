@@ -288,6 +288,8 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 								loadBalPostD[id].assign_list[trans].Map, loadBalPostD[id].assign_list[trans].b,
 								reach_parameters.Directions, lp_solver_type_choosen);
 					}
+					// @Amit: the newShifted satisfy the destination location invariant
+					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant());
 
 					initial_state::ptr newState = initial_state::ptr(new initial_state(loadBalPostD[id].dest_locID[trans], newShiftedPolytope));
 					newState->setTransitionId(loadBalPostD[id].trans_ID[trans]); // keeps track of the transition_ID
