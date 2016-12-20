@@ -32,6 +32,7 @@
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/pll.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/heart.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/mesh.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/platoon.h"
 
 /**
  * Creates the pre-defined hybrid automata models in memory with config parameters.
