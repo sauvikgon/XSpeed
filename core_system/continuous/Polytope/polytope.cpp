@@ -360,7 +360,7 @@ void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytop
 bool polytope::contains(polytope::ptr poly, int lp_solver_type_choosen){
 
 	assert(this->getCoeffMatrix().size2() == poly->getCoeffMatrix().size2());	//same dimension
-	assert(this->getCoeffMatrix().size1() == poly->getCoeffMatrix().size1());	//same number of constraints
+	//assert(this->getCoeffMatrix().size1() == poly->getCoeffMatrix().size1());	//same number of constraints
 	lp_solver lp1(lp_solver_type_choosen), lp2(lp_solver_type_choosen);
 	lp1.setMin_Or_Max(2); lp2.setMin_Or_Max(2);
 	lp1.setConstraints(this->getCoeffMatrix(), this->getColumnVector(),this->getInEqualitySign());

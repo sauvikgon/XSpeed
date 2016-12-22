@@ -391,18 +391,21 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 					if (is_ContainmentCheckRequired){	//Containtment Checking required
 
 						bool isContain=false;
-						polytope::ptr newPoly = polytope::ptr(new polytope());
+
 
 						/*
 						 * The function tempaltedDirectionHull() need not be done if we are using
 						 * some efficient library such as PPL we can directly check with the
 						 * actual polytope obtained after assignment operation i.e., newShiftedPolytope
 						 */
-						//std::cout<<"Before templatedHull\n";
+						/*polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 						newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
-						//std::cout<<"After templatedHull\n";
 						isContain = isContainted(destination_locID, newPoly, Reachability_Region, lp_solver_type_choosen);
-						//std::cout<<"doesNotContain = "<<doesNotContain<<"\n";
+						*/
+						//Calling with the newShifted polytope to use PPL library
+						isContain = isContainted(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
+
+					//	std::cout<<"doesNotContain = "<<isContain<<"\n";
 
 						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 							initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
@@ -420,12 +423,14 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 						pw_list.WaitingList_insert(newState);
 						queue.push_back(BreadthLevel); //insert at REAR first Location
 					}
-
 				}
 			} //end of multiple transaction
 		}
 	} //end of while loop checking waiting_list != empty
 
+	if (BreadthLevel<=bound){	//did not reach to the assigned bound
+		std::cout<<"\n\nFound Fixed-point after "<<BreadthLevel - 1<<" Jumps!!!\n";
+	}
 	cout << "\n ***************************************************************************\n";
 	cout << "\nMaximum Iterations Completed = " << num_flowpipe_computed << "\n";
 	cout << "\n ***************************************************************************\n";
@@ -478,17 +483,23 @@ bool reachability::isContainted(int locID, polytope::ptr poly, std::list<symboli
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
 
-// ***************** This adding of InvariantDirections is not required  **********************************
-				//std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());
-				//constraint_bound_values = flowpipe->getInvariantBoundValue(i);
-				//p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);
-// ***************************** Not Required *************************************************************
+				std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());
+				constraint_bound_values = flowpipe->getInvariantBoundValue(i);
+				p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);
+
 				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
 				if (intersects){
-					contained = p->contains(poly, lp_solver_type_choosen);
+					//todo:: if Contained in a union of Omegas
+	//Good testing		std::cout<<"Intersected = "<<intersects<<std::endl;
+					//contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+
+					PPL_Polyhedron::ptr p1=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
+					PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(poly->getCoeffMatrix(),poly->getColumnVector(),poly->getInEqualitySign()));
+
+					contained = p1->is_contained(p2);
 					if (contained){
-						std::cout<<"\n\nFound Fixed-point!!!\n";
-						break;
+					//	std::cout<<"\n\nFound Fixed-point!!!\n";
+						break;	//No need to check the rest if contained in a single Omega
 					}
 				}
 			}
