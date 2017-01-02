@@ -35,10 +35,12 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
 	unsigned int level = 0;
 	bool done;
 	//srand(time(NULL));
-	int count=1;	//for initial symbolic state
-	unsigned int previousBreadth=1;
-	cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << count<< "\n";
+	int count=0, waiting_sym=0;	//for initial symbolic state
+	unsigned int previousBreadth=0, sym_passed=0;
+	//cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << count<< "\n";
 	do {
+		boost::timer::cpu_timer jump_time;
+		jump_time.start();	//Start recording the entire time for jump
 		done = true;
 #pragma omp parallel for
 		for(unsigned int i=0;i<N;i++){
@@ -48,6 +50,9 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
 					template_polyhedra::ptr R;
 					R = postC(s);
 					symbolic_states::ptr R1 = symbolic_states::ptr(new symbolic_states());
+
+					R1->setParentPtrSymbolicState(s->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
+
 					R1->setContinuousSetptr(R);
 					discrete_set d;
 					d.insert_element(s->getLocationId());
@@ -55,6 +60,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
 #pragma omp critical
 				{
 					PASSED.push_back(R1);
+					count = count + 1;
 				}
 					//----end of postC on s
 
@@ -62,11 +68,15 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
 
 					std::list<initial_state::ptr> R2;
 					if (level < bound){	//Check level to avoid last PostD computation
-						R2 = postD(R1);
-#pragma omp critical
+						R2 = postD(R1, PASSED);
+					#pragma omp critical
+						{
+							waiting_sym = waiting_sym + R2.size();
+						}
+/*#pragma omp critical
 					{
 					 count = count + R2.size();
-					}
+					}*/
 						//cout <<"postD size = " <<R2.size()<<std::endl;
 						std::vector<int> ArrCores(N);	//If this is done only once outside time saved but race-condition?
 						for (int id=0;id<N;id++){
@@ -101,16 +111,39 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
 			if(!done)
 				break;
 		}
-		unsigned int temp = count - previousBreadth;
-		if (level < bound){
-			cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << temp << "\n";
-		}
+		unsigned int curr_count = count - previousBreadth;
+		/*if (level < bound){
+			cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << curr_count << "\n";
+		}*/
 		previousBreadth = count;
 
 		level++;
 		t = 1 - t;
+
+		jump_time.stop();
+		/*
+		 * Stop recording the entire time for the jump/iteration
+		 * This time include time taken for flowpipe computation, "safety verification", postD computation and containment check
+		*/
+		double wall_clock;
+		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
+
+		//if (level<bound && done){
+		//	std::cout << "\nJump " << level - 1 << "..."<< count<< " Symbolic States Passed, "
+		//		<< curr_count << " waiting ..."<< wall_clock <<" seconds";
+		//} else {
+			std::cout << "\nJump " << level - 1 << "..."<< count<< " Symbolic States Passed, "
+				<< waiting_sym << " waiting ..."<< wall_clock <<" seconds";
+			waiting_sym=0;
+		//}
+
 	}while(level<=bound && !done);
-cout<<"******************************************************************\n";
+
+	if (level <= bound) {	//did not reach to the assigned bound
+		std::cout << "\n\nFound Fix-point after " << level - 1 << " Jumps!!!\n";
+	}
+cout<<"\n******************************************************************\n";
 cout <<"Maximum number of Symbolic states Passed = " <<count<<"\n";
 cout<<"******************************************************************\n";
 	return PASSED;
@@ -202,7 +235,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 
 	return reach_region;
 }
-std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb)
+std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED)
 {
 	template_polyhedra::ptr reach_region= symb->getContinuousSetptr();
 	int locId = *(symb->getDiscreteSet().getDiscreteElements().begin());
@@ -271,12 +304,31 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb)
 				}
 				// @Amit: the newShifted satisfy the destination location invariant
 				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+				/*
+				 * Now perform containment check similar to sequential algorithm.
+				 */
+				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
+				if (is_ContainmentCheckRequired){	//Containtment Checking required
+					bool isContain=false;
+					//Calling with the newShifted polytope to use PPL library
+					isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, lp_solver_type_choosen);
 
+				//	std::cout<<"doesNotContain = "<<isContain<<"\n";
 
-				//	newShiftedPolytope->print2file(newInitSet,0,1); //printing the New Initial Set
-				initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
-				newState->setTransitionId(transition_id);// keeps track of the transition_ID
-				res.push_back(newState);
+					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
+						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
+						newState->setTransitionId(transition_id); // keeps track of the transition_ID
+						newState->setParentPtrSymbolicState(symb);
+						res.push_back(newState);
+					}
+
+				}else{	//Containtment Checking NOT Formed
+
+					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
+					newState->setTransitionId(transition_id); // keeps track of the transition_ID
+					newState->setParentPtrSymbolicState(symb);
+					res.push_back(newState);
+				}
 			} //end of multiple intersected region with guard
 
 		} //end of multiple transaction
