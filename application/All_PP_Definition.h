@@ -52,7 +52,7 @@
 
 
 #define CORE 	8	//Total number of existing cores in the working PC; Although we detect/read from program in Load Balance Algorithm
-#define MAX_ALGO 	6	//Total number of existing Algorithm. This value need to be increased for new Algorithm when implemented
+#define MAX_ALGO 	7	//Total number of existing Algorithm. This value need to be increased for new Algorithm when implemented
 
 
 #endif /* ALL_PP_DEFINITION_H_ */

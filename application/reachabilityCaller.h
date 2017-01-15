@@ -21,6 +21,7 @@
 #include "core_system/Reachability/TimeSliceSF.h"
 #include "core_system/Reachability/AGJH.h"
 #include "core_system/Reachability/TPBFS.h"
+#include "core_system/Reachability/AsyncBFS.h"
 
 void reachabilityCaller(hybrid_automata& H, std::list<initial_state::ptr>& I,
 		ReachabilityParameters& reach_parameters, userOptions& user_options,
