@@ -132,6 +132,187 @@ symbolic_states::const_ptr abstractCE::get_symbolic_state(unsigned int i) const 
 //	/**end of tracefile generation */
 //}
 
+/*  Handmade objection function
+*
+* @ Rajarshi
+*/
+
+/**
+ * Handmade concrete gen function for testing
+ * @Rajarshi
+ * 21st Jan 2017
+ */
+
+
+double myobjfunc_handmade(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data) {
+
+	std::list<transition::ptr>::iterator T_iter = transList.begin();
+	transition::ptr Tptr = *(T_iter);
+	assert(transList.size() == N-1);
+
+	std::vector<std::vector<double> > y(N);
+	double cost = 0;
+	for (unsigned int i = 0; i < N; i++) {
+
+		std::vector<double> v(dim, 0);
+		for (unsigned int j = 0; j < dim; j++) {
+			v[j] = x[i * dim + j];
+		}
+
+		int loc_index = locIdList[i];
+		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+
+		assert(d.C.size() == dim);
+
+		y[i] = ODESol(v,d,x[N*dim + i]);
+		// apply transition assignment map
+		if(i==N-1)
+			break;
+		else { // find the distance on this end point with the next start point
+			polytope::ptr g;
+			Assign R;
+			// assignment of the form: Rx + w
+
+			R = Tptr->getAssignT();
+			//guard as a polytope
+			// This matrix is require to compute the derivative
+			g = Tptr->getGaurd();
+
+			// If traj end point inside guard, then apply map.
+////			double guard_dist = g->point_distance(y[i]);
+////			if(guard_dist == 0)
+//			{
+	//			std::cout << "Inside g condition\n";
+				assert(y[i].size() == R.Map.size2());
+				std::vector<double> transform(y[i].size(),0);
+				R.Map.mult_vector(y[i],transform);
+				// add vectors
+				assert(y[i].size() == R.b.size());
+				for(unsigned int j=0;j<transform.size();j++)
+					y[i][j] = transform[j] + R.b[j];
+//			}
+//			else{
+	//			cost += g->point_distance(y[i]);
+	//			grad_gt = dist_grad(y[i],I,Axplusb);
+	//			grad_gx = dist_grad(y[i],I,diag_expAt);
+
+//			}
+			if(T_iter!=transList.end())
+				T_iter++;
+			for(unsigned int j=0;j<dim;j++){
+				cost += (y[i][j] - x[(i+1)*dim + j]) * (y[i][j] - x[(i+1)*dim + j]);
+			}
+//			//debug print
+//			std::cout << "trace end point:\n";
+//			for(unsigned int j=0;j<dim;j++){
+//				std::cout << y[i][j] << " ";
+//			}
+//			std::cout << "Next start point:\n";
+//			for(unsigned int j=0;j<dim;j++){
+//				std::cout << x[(i+1)*dim + j] << " ";
+//			}
+//			std::cout << "\n";
+		}
+	}
+	// compute the distance of this endpoint with the forbidden polytope
+	cost += bad_poly->point_distance(y[N-1]);
+	std::cout << "cost = " << cost  << std::endl;
+	return cost;
+
+}
+
+concreteCE::ptr gen_concreteHandmade(double tolerance, const std::list<refinement_point>& refinements) {
+
+	unsigned int optD = N * dim + N;
+	std::cout << "nlopt problem dimension = " << optD << std::endl;
+
+// 	local optimization routine
+//	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative based local
+	nlopt::opt myopt(nlopt::LN_COBYLA, optD);
+	myopt.set_min_objective(myobjfunc_handmade, NULL);
+//	myopt.set_min_objective(myobjfunc2, NULL);
+//	myopt.set_maxeval(4000);
+	myopt.set_stopval(0.0019);
+	//myopt.set_initial_step(0.001);
+
+	std::vector<double> x(optD,0);
+	// Assume N = 10;
+	std::cout << " TEST function: N = " << N << std::endl;
+	assert(N==9);
+
+//	std::vector<double> lb(optD,0), ub(optD,0);
+//	lb[0]=20; lb[3]=0; lb[6]=0; lb[9]=0; lb[12]=0; lb[15]=0; lb[18]=0; lb[21]=0; lb[24]=0; lb[27]=0;
+//	lb[1]=0; lb[4]=5; lb[7]=5; lb[10]=4; lb[13]=4; lb[16]=3; lb[19]=3; lb[22]=3; lb[25]=2; lb[28]=2;
+//	lb[2]=0; lb[5]=6;lb[8]=17;lb[11]=27; lb[14]=37; lb[17]=45; lb[20]=52; lb[23]=59; lb[26]=65; lb[29]=70;
+//
+//	ub[0]=20.2; ub[3]=0; ub[6]=0; ub[9]=0; ub[12]=0; ub[15]=0; ub[18]=0; ub[21]=0; ub[24]=0; ub[27]=0;
+//	ub[1]=0; ub[4]=6; ub[7]=6; ub[10]=5; ub[13]=5; ub[16]=4; ub[19]=4; ub[22]=4; ub[25]=4; ub[28]=3;
+//	ub[2]=0; ub[5]=7;ub[8]=18;ub[11]=28; ub[14]=38; ub[17]=46; ub[20]=53; ub[23]=60; ub[26]=66; ub[29]=72;
+//
+//	lb[30]=6; lb[31]=10; lb[32]=9; lb[33]=9; lb[34]=7; lb[35] = 6; lb[36]= 6; lb[37]= 5 ; lb[38]=4; lb[39]=3;
+//	ub[30]=7; ub[31]=12; ub[32]=11; ub[33]=11; ub[34]=9; ub[35]= 8; ub[36]= 8; ub[37]= 7; ub[38]=7; ub[39]=10;
+
+	std::vector<double> lb(optD,0), ub(optD,0);
+	lb[0]=20; lb[3]=0; lb[6]=0; lb[9]=0; lb[12]=0; lb[15]=0; lb[18]=0; lb[21]=0; lb[24]= 0;
+	lb[1]=0; lb[4]=5; lb[7]=5; lb[10]=4; lb[13]=4; lb[16]=3; lb[19]=3; lb[22]=2; lb[25]= 2;
+	lb[2]=0; lb[5]=6;lb[8]=17;lb[11]=27; lb[14]=37; lb[17]=45; lb[20]=52; lb[23]=59; lb[26]= 65;
+
+	ub[0]=20.2; ub[3]=0; ub[6]=0; ub[9]=0; ub[12]=0; ub[15]=0; ub[18]=0; ub[21]=0; ub[24] =0;
+	ub[1]=0; ub[4]=6; ub[7]=6; ub[10]=5; ub[13]=5; ub[16]=4; ub[19]=4; ub[22] = 4; ub[25] = 4;
+	ub[2]=0; ub[5]=7;ub[8]=18;ub[11]=28; ub[14]=38; ub[17]=46; ub[20]=53; ub[23] = 60; ub[26]= 66;
+
+	lb[27]=6; lb[28]=10; lb[29]=9; lb[30]=9; lb[31]=7; lb[32]= 6; lb[33] = 6; lb[34] = 5; lb[35]= 2;
+	ub[27]=7; ub[28]=12; ub[29]=11; ub[30]=11; ub[31]=9; ub[32]= 8; ub[33] = 8 ; ub[34] = 7;ub[35]= 3;
+
+	myopt.set_lower_bounds(lb);
+	myopt.set_upper_bounds(ub);
+
+	//Set Initial value to the optimization problem
+	for(unsigned int i=0;i<optD;i++)
+	{
+		x[i] = lb[i];
+	}
+
+
+	double minf;
+	nlopt::result result = myopt.optimize(x, minf);
+
+	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
+	cexample->set_automaton(HA);
+	if (minf > tolerance) {
+		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
+		return cexample;
+	} else {
+
+		// one trajectory per symbolic state to be added in the concreteCE
+		// Assumption: X0 contains the start points of the trajectory segments returned by NLOPT
+		for (unsigned int i = 1; i < N; i++) {
+			// one trajectory per symbolic state to be added in the concreteCE
+			for (unsigned int i = 0; i < N; i++) {
+				// create the sample
+				concreteCE::sample s;
+				unsigned int locId = 1;
+
+				std::vector<double> y(dim);
+				for (unsigned int j = 0; j < dim; j++) {
+					y[j] = x[i * dim + j];
+				}
+
+				double time = x[N * dim + i];
+				s.first = y;
+				//s.second = y[dim-1];
+				s.second = time;
+				concreteCE::traj_segment traj;
+				traj.first = locId;
+				traj.second = s;
+				cexample->push_back(traj);
+			}
+		}
+	}
+
+	return cexample;
+
+}
 /**
  * Routine to compute concrete trajectory from given
  * abstract counter example using non-linear optimization
@@ -158,20 +339,31 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	bad_poly = this->forbid_poly;
 	ref_pts = refinements;
 
-	//assert that the number of transitions equals 1 less than the length of the abstract CE path
-
-	std::cout << "Length of the CE, N=" << N << std::endl;
-	std::cout << "#Transitions in CE" << transList.size() << std::endl;
-	assert(transList.size() == N-1);
-	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
-	// initialize the global locIdList
 	locIdList.resize(N);
-      
+
 	std::set<int> d;
 	for(unsigned int i=0;i<N;i++){
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		locIdList[i] = *(d.begin());
 	}
+
+	//assert that the number of transitions equals 1 less than the length of the abstract CE path
+
+		std::cout << "Length of the CE, N=" << N << std::endl;
+		std::cout << "#Transitions in CE" << transList.size() << std::endl;
+		assert(transList.size() == N-1);
+		std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
+		// initialize the global locIdList
+
+	// temporary debug code: to check NLOPT-------------
+
+	if(N!=9)
+		return concreteCE::ptr(new concreteCE());
+
+	return gen_concreteHandmade(tolerance, refinements);
+
+	//-----------end of temporary debug code-------------
+
 
 //	 2. The dimensionality of the opt problem is N vectors, one starting point
 //	 for each of the abstract sym state of the CE + N dwell times. Moreover,
@@ -261,7 +453,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	dmax[t_index] = 1;
 	dmin[t_index] = -1;
 
-	boundConstriant B[N],B1[N];
+	boundConstraint B[N],B1[N];
 
 
 	std::list<polytope::ptr> polys;
@@ -288,7 +480,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 				P=polys.front();
 			P = P->GetPolytope_Intersection(bad_poly);
 		}
-		else{
+		else {
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
 			guard = T->getGaurd();
@@ -555,7 +747,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP(double tolerance, const std::l
 	dmax[t_index] = 1;
 	dmin[t_index] = -1;
 
-	boundConstriant B[N],B1[N];
+	boundConstraint B[N],B1[N];
 
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
@@ -782,7 +974,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	assert(index==size);
 
 	// adding time constraints
-/*	boundConstriant B[N],B1[N];
+/*	boundConstraint B[N],B1[N];
 	for (unsigned int i = 0; i < N; i++) {
 
 		B[i].var_index = N*dim + i;
@@ -802,7 +994,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 //
 //	assert((t_index >= 0) && (t_index < dim));
 //
-//	boundConstriant B[N],B1[N];
+//	boundConstraint B[N],B1[N];
 //	std::vector<double> dmin(dim, 0), dmax(dim, 0);
 //	dmax[t_index] = 1;
 //	dmin[t_index] = -1;

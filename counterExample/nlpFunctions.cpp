@@ -49,14 +49,12 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad,
 		void *data){
 
-	boundConstriant *d = reinterpret_cast<boundConstriant *>(data);
+	boundConstraint *d = reinterpret_cast<boundConstraint *>(data);
 	if (!grad.empty()) {
 		for(unsigned int i=0;i<x.size();i++){
 			grad[i] = 0 ;
 		}
 	}
-
-//	assert(d->var_index>=N*dim && d->var_index<N*dim+N);
 
 	if(d->is_ge){
 //		std::cout << "lower bound constraint on time with bound = " << d->bound << std::endl;
@@ -503,9 +501,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			grad[i] = deriv[i];
 		}
 	}
-
-//	std::cout << "current cost=" << cost << std::endl;
-//	exit(0);
+	std::cout << "current cost=" << cost << std::endl;
 	return cost;
 }
 

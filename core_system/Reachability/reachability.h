@@ -67,7 +67,7 @@ public:
 	//reach_parameters includes the different parameters needed in the computation of reachability.
 	//I is the initial symbolic state
 	//Although this interface can be pushed in a separate sequential class but it can also be used to call par_SF and time_slice algorithms.
-	std::list<symbolic_states::ptr> computeSeqentialBFSReach(std::list<abstractCE::ptr>& ce_candidates);
+	std::list<symbolic_states::ptr> computeSequentialBFSReach(std::list<abstractCE::ptr>& ce_candidates);
 
 
 	//1)  Parallel Breadth First Search for Discrete Jumps with critical section for adding newSymbolicState

@@ -33,7 +33,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 			std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
 		}
 
-		Symbolic_states_list = reach_SEQ_BFS.computeSeqentialBFSReach(ce_candidates);
+		Symbolic_states_list = reach_SEQ_BFS.computeSequentialBFSReach(ce_candidates);
 
 	} else if (user_options.get_algorithm() == 4) { //Adaptation of Gerard J. Holzmann's algorithm (Seq PostC and PBFS)
 		agjh reach_AGJH;

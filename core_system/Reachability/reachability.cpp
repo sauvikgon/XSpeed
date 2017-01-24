@@ -31,7 +31,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 //bound is the maximum number of transitions or jumps permitted.
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
-std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list<abstractCE::ptr>& ce_candidates) {
+std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::list<abstractCE::ptr>& ce_candidates) {
 
 	//std::cout<<"Hello from Sequential Reach!!"<<std::endl;
 	std::list < symbolic_states::ptr > Reachability_Region;
