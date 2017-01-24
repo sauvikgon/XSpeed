@@ -259,10 +259,10 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 				for (int trans=0;trans<loadBalPostD[id].trans_size;trans++){
 					std::list<polytope::ptr> polys;
 					polys = loadBalPostD[id].polys_list[trans];
-/*					#pragma omp critical
+					#pragma omp critical
 					{
 						iter_max += polys.size();
-					}*/
+					}
 					string locName = H.getLocation(loadBalPostD[id].dest_locID[trans])->getName();
 					if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0) || (locName.compare("FINAL") == 0)
 							|| (locName.compare("UNSAFE") == 0)) {
@@ -305,13 +305,15 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 						int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 						if (is_ContainmentCheckRequired){	//Containtment Checking required
 							bool isContain=false;
-							//Calling with the newShifted polytope to use PPL library
-							isContain = isContainted(
-									loadBalPostD[id].dest_locID[trans],
-									newShiftedPolytope, Reachability_Region,
-									lp_solver_type_choosen);
 
-						//	std::cout<<"doesNotContain = "<<isContain<<"\n";
+
+							polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
+							newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
+							isContain = templated_isContainted(loadBalPostD[id].dest_locID[trans], newPoly, Reachability_Region, lp_solver_type_choosen);//over-approximated but threadSafe
+
+
+							//Calling with the newShifted polytope to use PPL library This is NOT ThreadSafe
+							//isContain = isContainted(loadBalPostD[id].dest_locID[trans], newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
 
 							if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 								initial_state::ptr newState = initial_state::ptr(new initial_state(loadBalPostD[id].dest_locID[trans], newShiftedPolytope));
@@ -327,12 +329,6 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 							newState->setParentPtrSymbolicState(S[id]);
 							Qpw_list[1 - t][id]->WaitingList_insert(newState); //False RACE CONDITION HERE
 						}
-
-/*#pragma omp critical
-				{
-					iter_max +=  getSize_Qpw_list(Qpw_list[1-t]);	//keep count of actual sym_states in the waiting list
-				}*/
-
 
 					} //end of multiple intersected region with guard
 				}//end of for each guard or transitions
@@ -363,7 +359,7 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 		std::cout<<"\n\nFound Fix-point after "<<number_times - 1<<" Jumps!!!\n";
 	}
 	cout << "\n **********************************************************\n";
-	cout << "   *** Maximum Iterations Completed = " << sym_passed << "  ***\n";
+	cout << "   *** Maximum Iterations Completed = " << iter_max << "  ***\n";
 	cout << "\n **********************************************************\n";
 
 	return Reachability_Region;
@@ -1085,5 +1081,3 @@ std::list<symbolic_states::ptr> tpbfs::computeParallelLoadBalanceReach(
 	cout << "\n **********************************************************\n";
 	return Reachability_Region;
 }
-
-

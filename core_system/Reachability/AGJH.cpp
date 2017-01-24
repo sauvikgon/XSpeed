@@ -8,8 +8,7 @@
 #include "AGJH.h"
 
 // Holzmann algorithm adaption
-std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
-{
+std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
 	int t = 0; //0 for Read and 1 for Write
 	int N = CORE; // Number of cores in the machine
@@ -35,9 +34,11 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
 	unsigned int level = 0;
 	bool done;
 	//srand(time(NULL));
-	int count=0, waiting_sym=0;	//for initial symbolic state
-	unsigned int previousBreadth=0, sym_passed=0;
+
+	int count=1;	//for initial symbolic state
+	unsigned int previousBreadth=1, sym_passed=0;
 	//cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << count<< "\n";
+
 	do {
 		boost::timer::cpu_timer jump_time;
 		jump_time.start();	//Start recording the entire time for jump
@@ -63,20 +64,15 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
 					count = count + 1;
 				}
 					//----end of postC on s
-
 				//Currently removed the Safety Check Section from here
-
 					std::list<initial_state::ptr> R2;
 					if (level < bound){	//Check level to avoid last PostD computation
+
 						R2 = postD(R1, PASSED);
-					#pragma omp critical
-						{
-							waiting_sym = waiting_sym + R2.size();
-						}
-/*#pragma omp critical
+#pragma omp critical
 					{
 					 count = count + R2.size();
-					}*/
+					}
 						//cout <<"postD size = " <<R2.size()<<std::endl;
 						std::vector<int> ArrCores(N);	//If this is done only once outside time saved but race-condition?
 						for (int id=0;id<N;id++){
@@ -129,14 +125,8 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH()
 		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
 
-		//if (level<bound && done){
-		//	std::cout << "\nJump " << level - 1 << "..."<< count<< " Symbolic States Passed, "
-		//		<< curr_count << " waiting ..."<< wall_clock <<" seconds";
-		//} else {
-			std::cout << "\nJump " << level - 1 << "..."<< count<< " Symbolic States Passed, "
-				<< waiting_sym << " waiting ..."<< wall_clock <<" seconds";
-			waiting_sym=0;
-		//}
+		std::cout << "\nJump " << level - 1 << "..."<< count - 1<< " Symbolic States Passed, " << curr_count << " waiting ..."<< wall_clock <<" seconds";
+
 
 	}while(level<=bound && !done);
 
@@ -304,16 +294,23 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				}
 				// @Amit: the newShifted satisfy the destination location invariant
 				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+
 				/*
 				 * Now perform containment check similar to sequential algorithm.
 				 */
 				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
-					//Calling with the newShifted polytope to use PPL library
-					isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, lp_solver_type_choosen);
 
-				//	std::cout<<"doesNotContain = "<<isContain<<"\n";
+
+					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
+					newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
+					isContain = templated_isContainted(destination_locID, newPoly, PASSED, lp_solver_type_choosen);//over-approximated but threadSafe
+
+
+
+					//Calling with the newShifted polytope to use PPL library
+					//isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, lp_solver_type_choosen);	//Not ThreadSafe
 
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
@@ -329,6 +326,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 					newState->setParentPtrSymbolicState(symb);
 					res.push_back(newState);
 				}
+
 			} //end of multiple intersected region with guard
 
 		} //end of multiple transaction
