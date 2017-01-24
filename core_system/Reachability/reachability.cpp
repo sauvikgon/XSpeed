@@ -56,6 +56,9 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 	unsigned int num_flowpipe_computed=0;	//keeping track of number of flowpipe computed
 	while (!pw_list.isEmpty_WaitingList()) {
+
+		boost::timer::cpu_timer jump_time;
+		jump_time.start();	//Start recording the entire time for jump
 		symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states()); //required to be pushed into the Reachability_Region
 		initial_state::ptr U;
 		U = pw_list.WaitingList_delete_front();
@@ -85,14 +88,18 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 		current_location = H.getLocation(location_id);
 		string name = current_location->getName();
+<<<<<<< local
 
 		if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
 				|| (name.compare("UNSAFE") == 0)
 				|| (name.compare("FINAL") == 0))
+=======
+		//cout << "\nLocation ID = "<<location_id<<", Location Name = " << name << "\n";
+		if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0) || (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0))
+>>>>>>> other
 			continue; //do not compute the continuous reachability algorithm
 		bool foundSkippingLocation = false;
-		for (int StopLoc = 0; StopLoc < reach_parameters.Stop_locID.size();
-				StopLoc++) {
+		for (int StopLoc = 0; StopLoc < reach_parameters.Stop_locID.size(); StopLoc++) {
 			if (location_id == reach_parameters.Stop_locID[StopLoc]) {
 				foundSkippingLocation = true;
 			}
@@ -262,10 +269,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 //			break; //no need to compute rest of the locations
 //		}
 		//  ******************************** Safety Verification section Ends********************************
-		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 
+
+//  *********** POST_D Operation Begins ******* Check to see if Computed FlowPipe is Empty  **********
 	//	std::cout<<"\nreach_region->getTotalIterations() = " <<reach_region->getTotalIterations();
-
 		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) {
 			//computed reach_region is empty and optimize transition BreadthLevel-wise
 			for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
@@ -326,20 +333,65 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					// @Rajarshi: the newShifted satisfy the destination location invariant
 
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
-
 					//newShiftedPolytope->print2file("test.txt",0,1);
 
+					int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 
-					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
-					newState->setTransitionId(transition_id); // keeps track of the transition_ID
-					newState->setParentPtrSymbolicState(S);
-					pw_list.WaitingList_insert(newState);
-					queue.push_back(BreadthLevel); //insert at REAR first Location
+					if (is_ContainmentCheckRequired){	//Containtment Checking required
+
+						bool isContain=false;
+
+
+						/*
+						 * The function tempaltedDirectionHull() need not be done if we are using
+						 * some efficient library such as PPL we can directly check with the
+						 * actual polytope obtained after assignment operation i.e., newShiftedPolytope
+						 */
+						/*polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
+						newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
+						isContain = isContainted(destination_locID, newPoly, Reachability_Region, lp_solver_type_choosen);
+						*/
+						//Calling with the newShifted polytope to use PPL library
+						isContain = isContainted(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
+
+					//	std::cout<<"doesNotContain = "<<isContain<<"\n";
+
+						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
+							initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
+							newState->setTransitionId(transition_id); // keeps track of the transition_ID
+							newState->setParentPtrSymbolicState(S);
+							pw_list.WaitingList_insert(newState);
+							queue.push_back(BreadthLevel); //insert at REAR first Location
+						}
+
+					}else{	//Containtment Checking NOT Formed
+
+						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
+						newState->setTransitionId(transition_id); // keeps track of the transition_ID
+						newState->setParentPtrSymbolicState(S);
+						pw_list.WaitingList_insert(newState);
+						queue.push_back(BreadthLevel); //insert at REAR first Location
+					}
 				}
 			} //end of transition iterator
 		}
+		jump_time.stop();
+		/*
+		 * Stop recording the entire time for the jump/iteration
+		 * This time include time taken for flowpipe computation, safety verification, postD computation and containment check
+		*/
+		double wall_clock;
+		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
+
+		std::cout << "\nJump " << BreadthLevel - 1 << "..."
+				<< num_flowpipe_computed << " Symbolic States Passed, "
+				<< pw_list.getWaitingList().size() << " waiting ..."<< wall_clock <<" seconds";
 	} //end of while loop checking waiting_list != empty
 
+	if (BreadthLevel<=bound){	//did not reach to the assigned bound
+		std::cout<<"\n\nFound Fix-point after "<<BreadthLevel - 1<<" Jumps!!!\n";
+	}
 	cout << "\n ***************************************************************************\n";
 	cout << "\nMaximum Iterations Completed = " << num_flowpipe_computed << "\n";
 	cout << "\n ***************************************************************************\n";
@@ -347,7 +399,75 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 	return Reachability_Region;
 }
 
+bool reachability::isContainted(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
 
+	bool contained = false;
+	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
+
+	for (std::list <symbolic_states::ptr>::iterator it = Reachability_Region.begin(); it !=Reachability_Region.end();it++){
+		discrete_set ds;
+		ds = (*it)->getDiscreteSet();
+		int locationID;
+		for (std::set<int>::iterator i = ds.getDiscreteElements().begin();i != ds.getDiscreteElements().end(); ++i)
+			locationID = (*i);
+		if (locationID == locID){	//found Location matching so perform containment check with the flowpipe
+			/*
+			 * Now perform the following
+			 * 1) get the template_polyhedra::ptr the continuousSet from (*it)
+			 * 2) totalOmegas = template_polyhedra.size()
+			 * 	Try Two Methods to see which one takes less time
+			 *
+			 * 	1st Method
+			 * 	  for i=0; i<totalOmegas;i++ {
+			 * 	  	get each Omega and check intersection with "poly"
+			 * 	  	if intersected only than check containment with PPL library	//todo
+			 * 	  	if contained then {
+			 * 	  		no need to check the rest of the Omegas so break;
+			 * 	  	}
+			 * 	  }
+			 *  * * * * * * * *
+			 * 	2nd Method
+			 * 	  for i=0; i<totalOmegas;i++ {
+			 * 	  	get each Omega and directly check containment with PPL library 	//todo
+			 * 	  	if contained then {
+			 * 	  		no need to check the rest of the Omegas so break;
+			 * 	  	}
+			 * 	  }
+			 *
+			 */
+			template_polyhedra::ptr flowpipe;
+			flowpipe = (*it)->getContinuousSetptr();
+			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
+			bool intersects=false;
+			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
+				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
+				polytope::ptr p;
+				p = flowpipe->getPolytope(i);
+
+				std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());
+				constraint_bound_values = flowpipe->getInvariantBoundValue(i);
+				p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);
+
+				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				if (intersects){
+					//todo:: if Contained in a union of Omegas
+	//Good testing		std::cout<<"Intersected = "<<intersects<<std::endl;
+					//contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+
+					PPL_Polyhedron::ptr p1=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
+					PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(poly->getCoeffMatrix(),poly->getColumnVector(),poly->getInEqualitySign()));
+
+					contained = p1->is_contained(p2);
+					if (contained){
+					//	std::cout<<"\n\nFound Fixed-point!!!\n";
+						break;	//No need to check the rest if contained in a single Omega
+					}
+				}
+			}
+		}
+	}
+return contained;
+}
 
 void reachability::sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location,
 		polytope::ptr continuous_initial_polytope,

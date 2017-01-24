@@ -46,6 +46,9 @@
 #include <vector>
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
+
+#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
+
 //***************** End Sequential BFS *****************************
 
 using namespace std;
@@ -92,6 +95,13 @@ public:
 
 		void sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 						template_polyhedra::ptr& reach_region);
+
+/*
+ * Returns True is the newShiftedPolytope is containted in the symbolic_states denoted by Reachability_Region in the location
+ * represented by locationID as destination_locID
+ * Otherwise returns False
+ */
+		bool isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
 private:
 

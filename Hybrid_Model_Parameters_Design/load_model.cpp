@@ -101,8 +101,13 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//setheart(ha, init_state, reach_parameters);
 		// --------------------------------------------
 
-		//setTTEthernetModel2(ha, init_state, reach_parameters);
-		setmesh(ha, init_state, reach_parameters);
+
+		setTTEthernetModel2(ha, init_state, reach_parameters);
+
+		//setmesh(ha, init_state, reach_parameters);	//precision issue
+	//	setplatoon(ha, init_state, reach_parameters);
+
+		//std::cout <<"Test Model Assigned"<<std::endl;
 	}
 	unsigned int dims=0;
 	for (std::list<initial_state::ptr>::iterator it=init_state.begin();it!=init_state.end();it++){

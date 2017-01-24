@@ -110,6 +110,24 @@ public:
 	 */
 	const polytope::ptr GetPolytope_Intersection(polytope::ptr P2);
 
+	/*
+	 * Returns as reference parameter resPoly by taking a Hull in the templated direction
+	 * of the system of the calling polytope.
+	 * This is an operation that takes an over-approximation of a given input/calling polytope
+	 */
+	void templatedDirectionHull(math::matrix<double> templateDir, polytope::ptr &resPoly, int lp_solver_type_choosen);
+
+	/*
+	 * Performs containment check. If poly is contained in the calling polytope then returns TRUE
+	 * otherwise returns false
+	 * Note: both the calling polytope and passed polytope poly should be of same type
+	 * 		same type means that they are both created using the same templated directions
+	 * 		Example both should be either box or octagonal, etc.
+	 *
+	 * 		Such an operations can be done by solving LPs of order equal to the number of templated directions
+	 */
+	bool contains(polytope::ptr poly, int lp_solver_type_choosen);
+
 	/**
 	 * Enumerate all vertices of the polytope between the two vectors
 	 * given as arguments
@@ -124,7 +142,6 @@ public:
 	 * 	   the value/index of i and j begins with 0 to n-1
 	 */
 	std::set<std::pair<double, double> > enumerate_2dVertices(int i, int j);
-
 
 	/*
 	 * Returns the list of vertices of the polytope in 2d with the given inputs as

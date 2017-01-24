@@ -353,6 +353,51 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 
 	return flag;
 }
+
+void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytope::ptr &resPoly, int lp_solver_type_choosen){
+
+	std::vector<double> colVector(templatedDir.size1());
+	lp_solver lp(lp_solver_type_choosen);
+	lp.setMin_Or_Max(2);//Maximization
+	lp.setConstraints(this->getCoeffMatrix(), this->getColumnVector(),this->getInEqualitySign());
+
+	for (int i=0;i<templatedDir.size1();i++){
+		std::vector<double> dir(templatedDir.size2());
+		for (int j=0;j<templatedDir.size2();j++)
+			dir[j] = templatedDir(i,j);
+
+		colVector[i] = lp.Compute_LLP(dir);
+	}
+	resPoly->setPolytope(templatedDir,colVector,this->getInEqualitySign());
+}
+
+bool polytope::contains(polytope::ptr poly, int lp_solver_type_choosen){
+
+	assert(this->getCoeffMatrix().size2() == poly->getCoeffMatrix().size2());	//same dimension
+	//assert(this->getCoeffMatrix().size1() == poly->getCoeffMatrix().size1());	//same number of constraints
+	lp_solver lp1(lp_solver_type_choosen), lp2(lp_solver_type_choosen);
+	lp1.setMin_Or_Max(2); lp2.setMin_Or_Max(2);
+	lp1.setConstraints(this->getCoeffMatrix(), this->getColumnVector(),this->getInEqualitySign());
+	lp2.setConstraints(poly->getCoeffMatrix(), poly->getColumnVector(),poly->getInEqualitySign());
+	double val1, val2;
+	bool is_inside=false;
+	for (int i=0;i<this->getCoeffMatrix().size2();i++){
+		std::vector<double> dir(this->getCoeffMatrix().size2());
+		for (int j=0;j<this->getCoeffMatrix().size2();j++){
+			dir[j]=this->getCoeffMatrix()(i,j);
+		}
+		val1 = lp1.Compute_LLP(dir);
+		val2 = lp2.Compute_LLP(dir);
+		if (val1 > val2)
+			is_inside = true;
+		else
+			is_inside = false;
+		if (is_inside==false)
+			break;
+	}
+	return is_inside;
+}
+
 /*
  * Searches the 2D vertices of the polytope between the directions u and v
  */

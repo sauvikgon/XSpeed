@@ -384,10 +384,9 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
 		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
 				forbidden_set);
-		std::cout<<"Running user_model"<<std::endl;
-		//user_model(Hybrid_Automata, init_state, reach_parameters,
-		//					user_options);
-		std::cout<<"Running user_model"<<std::endl;
+		//std::cout<<"Running user_model"<<std::endl;
+		//user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
+
 		//	if ((output_vars[0]>-1))
 		//		std::cout << "Wrong output variables" << std::endl;
 		//	else {
