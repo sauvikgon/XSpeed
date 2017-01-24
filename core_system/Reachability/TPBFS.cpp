@@ -305,13 +305,15 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 						int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 						if (is_ContainmentCheckRequired){	//Containtment Checking required
 							bool isContain=false;
-							//Calling with the newShifted polytope to use PPL library
-							isContain = isContainted(
-									loadBalPostD[id].dest_locID[trans],
-									newShiftedPolytope, Reachability_Region,
-									lp_solver_type_choosen);
 
-						//	std::cout<<"doesNotContain = "<<isContain<<"\n";
+
+							polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
+							newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
+							isContain = templated_isContainted(loadBalPostD[id].dest_locID[trans], newPoly, Reachability_Region, lp_solver_type_choosen);//over-approximated but threadSafe
+
+
+							//Calling with the newShifted polytope to use PPL library This is NOT ThreadSafe
+							//isContain = isContainted(loadBalPostD[id].dest_locID[trans], newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
 
 							if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 								initial_state::ptr newState = initial_state::ptr(new initial_state(loadBalPostD[id].dest_locID[trans], newShiftedPolytope));

@@ -61,6 +61,5 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 		std::cout<< "\nRunning Asynchronous parallel BFS algorithm.\n";
 		Symbolic_states_list = reach.reachComputeAsynBFS(ce_candidates);
 	}
-
 }
 

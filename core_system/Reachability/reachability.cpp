@@ -446,7 +446,9 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 	return Reachability_Region;
 }
 
-
+/*
+ * This is NOT thread-safe but uses PPL library with exact computation
+ */
 bool reachability::isContainted(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
 
 	bool contained = false;
@@ -509,6 +511,56 @@ bool reachability::isContainted(int locID, polytope::ptr poly, std::list<symboli
 					contained = p1->is_contained(p2);
 					if (contained){
 						std::cout<<"\n\nFound Fixed-point!!!\n";
+						break;	//No need to check the rest if contained in a single Omega
+					}
+				}
+			}
+		}
+	}
+return contained;
+}
+
+
+/*
+ * This is thread-safe but uses template_Hull over-approximated technique
+ */
+bool reachability::templated_isContainted(int locID, polytope::ptr poly,
+		std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen) {
+	bool contained = false;
+	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
+
+	for (std::list <symbolic_states::ptr>::iterator it = Reachability_Region.begin(); it !=Reachability_Region.end();it++){
+		discrete_set ds;
+		ds = (*it)->getDiscreteSet();
+		int locationID;
+		for (std::set<int>::iterator i = ds.getDiscreteElements().begin();i != ds.getDiscreteElements().end(); ++i)
+			locationID = (*i);
+		if (locationID == locID){	//found Location matching so perform containment check with the flowpipe
+
+			template_polyhedra::ptr flowpipe;
+			flowpipe = (*it)->getContinuousSetptr();
+			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
+			bool intersects=false;
+			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
+				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
+				polytope::ptr p;
+				p = flowpipe->getPolytope(i);
+
+				/*std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());	//Need to avoid adding this otherwise assertion of constraints fails
+				constraint_bound_values = flowpipe->getInvariantBoundValue(i);
+				p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);*/
+
+				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				if (intersects){
+					//todo:: if Contained in a union of Omegas
+					//std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
+					contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+					/*PPL_Polyhedron::ptr p1=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
+					PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(poly->getCoeffMatrix(),poly->getColumnVector(),poly->getInEqualitySign()));
+					contained = p1->is_contained(p2);*/
+
+					if (contained){
+						//std::cout<<"\n\nFound Fixed-point!!!\n";
 						break;	//No need to check the rest if contained in a single Omega
 					}
 				}

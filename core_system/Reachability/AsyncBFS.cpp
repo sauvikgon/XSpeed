@@ -29,12 +29,13 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 // ******** Required Results *****************
 	int level=0;
 	long totalSymStates=0;
+	int levelCompleted=0;
 // ******** Required Results *****************
 	std::vector<std::thread> workers;
 	for (std::list<initial_state::ptr>::iterator i = I.begin(); i != I.end(); i++) {
 		initial_state::ptr s;	//A symbolic state
 		s =*(i);	//	initialState_index++; //next initial state
-		workers.push_back(std::thread(AsyncBFS_recursiveFunc, std::ref(PASSED), s, level, std::ref(reachData),std::ref(totalSymStates)));	//thread called
+		workers.push_back(std::thread(AsyncBFS_recursiveFunc, std::ref(PASSED), s, level, std::ref(reachData),std::ref(totalSymStates),std::ref(levelCompleted)));	//thread called
 	}
 	for (int i=0;i<workers.size();i++){
 		if (i==(workers.size() - 1)){	//increasing level only once
@@ -47,6 +48,10 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 		workers[i].join();
 	}
 
+	if (levelCompleted< bound){
+		std::cout<<"\n\nFound Fixed-point after "<<levelCompleted -1 <<" jumps!!!\n";
+	}
+
 	std::cout<<"\n******************************************************************\n";
 	std::cout <<"Maximum number of Symbolic states Passed = " <<totalSymStates<<"\n";
 	std::cout<<"******************************************************************\n";
@@ -57,7 +62,7 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 
 
 
-void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_state::ptr s, int level, AsyncBFSData& reachData, long& totalSymStates) {
+void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_state::ptr s, int level, AsyncBFSData& reachData, long& totalSymStates, int& levelCompleted) {
 
 	//std::cout<<"Printing From Thread\n";
 	template_polyhedra::ptr R;
@@ -88,21 +93,15 @@ void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_sta
 		R2 = postD(R1, PASSED, reachData);
 		std::vector<std::thread> RecursiveWorkers;
 		level++;// ***** increased locally and send this for all recursive thread ****
+		mu.lock();
+		levelCompleted++;	//increased locally and also passed back and forth in all threads
+		mu.unlock();
 		for (std::list<initial_state::ptr>::iterator i = R2.begin(); i != R2.end(); i++) {
 			initial_state::ptr s;	//A symbolic state
 			s =*(i);	//	initialState_index++; //next initial state
-			RecursiveWorkers.push_back(std::thread(AsyncBFS_recursiveFunc, std::ref(PASSED), s, level, std::ref(reachData),std::ref(totalSymStates)));	//thread called
+			RecursiveWorkers.push_back(std::thread(AsyncBFS_recursiveFunc, std::ref(PASSED), s, level, std::ref(reachData),std::ref(totalSymStates),std::ref(levelCompleted)));	//thread called
 		}
 		for (int i=0;i<RecursiveWorkers.size();i++){
-/*
-			if (i==(RecursiveWorkers.size() - 1)){	//increasing level only once
-				std::cout<<"Over Level "<<level<<std::endl;
-				std::cout<<"bound value ="<<reachData.bound<<std::endl;
-				//mu.lock();
-				level++;
-				//mu.unlock();
-			}
-*/
 			RecursiveWorkers[i].join();
 		}
 	}
@@ -270,10 +269,13 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
-					//Calling with the newShifted polytope to use PPL library
-					isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, myData.lp_solver_type_choosen);
 
-				//	std::cout<<"doesNotContain = "<<isContain<<"\n";
+					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
+					newShiftedPolytope->templatedDirectionHull(myData.reach_parameters.Directions, newPoly, myData.lp_solver_type_choosen);
+					isContain = templated_isContainted(destination_locID, newPoly, PASSED, myData.lp_solver_type_choosen);//over-approximated but threadSafe
+
+					//Calling with the newShifted polytope to use PPL library
+					//isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, myData.lp_solver_type_choosen);
 
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
@@ -297,6 +299,50 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 
 } //end of while loop checking waiting_list != empty
 
+
+/*
+ * This is thread-safe but uses template_Hull of poly an over-approximated technique
+ */
+bool templated_isContainted(int locID, polytope::ptr poly,
+		std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen) {
+	bool contained = false;
+	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
+
+	for (std::list <symbolic_states::ptr>::iterator it = Reachability_Region.begin(); it !=Reachability_Region.end();it++){
+		discrete_set ds;
+		ds = (*it)->getDiscreteSet();
+		int locationID;
+		for (std::set<int>::iterator i = ds.getDiscreteElements().begin();i != ds.getDiscreteElements().end(); ++i)
+			locationID = (*i);
+		if (locationID == locID){	//found Location matching so perform containment check with the flowpipe
+
+			template_polyhedra::ptr flowpipe;
+			flowpipe = (*it)->getContinuousSetptr();
+			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
+			bool intersects=false;
+			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
+				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
+				polytope::ptr p;
+				p = flowpipe->getPolytope(i);
+				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				if (intersects){
+					//todo:: if Contained in a union of Omegas
+					//std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
+					contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+					if (contained){
+						//std::cout<<"\n\nFound Fixed-point!!!\n";
+						break;	//No need to check the rest if contained in a single Omega
+					}
+				}
+			}
+		}
+	}
+return contained;
+}
+
+/*
+ * This is NOT ThreadSafe interface as it uses PPL library however it computes with exact shifted polytope
+ */
 bool isContainted(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
 
 	bool contained = false;

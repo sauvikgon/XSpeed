@@ -32,7 +32,7 @@ private:
 
 void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED,
 		initial_state::ptr s, int level, AsyncBFSData& reachData,
-		long& totalSymStates);
+		long& totalSymStates, int& levelCompleted);
 
 /*
  *	This functions utilities has been implemented due to fast and ease of implementation.
@@ -47,11 +47,19 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData);
 /**
  * computes postD from a template polyhedra computed by postC
  */
-std::list<initial_state::ptr> postD(symbolic_states::ptr symb,
-		std::list<symbolic_states::ptr> PASSED, AsyncBFSData reachData);
+std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED, AsyncBFSData reachData);
 
-bool isContainted(int locID, polytope::ptr poly,
-		std::list<symbolic_states::ptr> Reachability_Region,
-		int lp_solver_type_choosen);
+/*
+ * Returns True if the newShiftedPolytope is containted in the symbolic_states denoted by Reachability_Region in the location
+ * represented by locationID as destination_locID
+ * Otherwise returns False
+ * This interface is NOT threadSafe but it has exact computed result AND SEQUENTIAL algorithm has no issue with threadSafety
+ */
+bool isContainted(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+
+/*
+ * This is thread-safe but uses template_Hull of poly an over-approximated technique
+ */
+bool templated_isContainted(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
 #endif /* ASYNCBFS_H_ */

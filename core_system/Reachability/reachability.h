@@ -94,11 +94,18 @@ public:
 						template_polyhedra::ptr& reach_region);
 
 /*
- * Returns True is the newShiftedPolytope is containted in the symbolic_states denoted by Reachability_Region in the location
+ * Returns True if the newShiftedPolytope is containted in the symbolic_states denoted by Reachability_Region in the location
  * represented by locationID as destination_locID
  * Otherwise returns False
+ * This interface is NOT threadSafe but it has exact computed result AND SEQUENTIAL algorithm has no issue with threadSafety
  */
 		bool isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+
+		/*
+		 * Uses the templated (an over-approximated) newShiftedPolytope to check for containment in the Omegas of the flowpipe
+		 * This interface is threadSafe however it is over-approximated result
+		 */
+		bool templated_isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
 private:
 	//initial_state::ptr I;

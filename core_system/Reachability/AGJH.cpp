@@ -61,9 +61,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 					PASSED.push_back(R1);
 				}
 					//----end of postC on s
-
 				//Currently removed the Safety Check Section from here
-
 					std::list<initial_state::ptr> R2;
 					if (level < bound){	//Check level to avoid last PostD computation
 						R2 = postD(R1, PASSED);
@@ -123,8 +121,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
 
-		std::cout << "\nJump " << level - 1 << "..."<< count -1<< " Symbolic States Passed, "
-					<< curr_count << " waiting ..."<< wall_clock <<" seconds";
+		std::cout << "\nJump " << level - 1 << "..."<< count - 1<< " Symbolic States Passed, " << curr_count << " waiting ..."<< wall_clock <<" seconds";
 
 	}while(level<=bound && !done);
 
@@ -298,10 +295,13 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
-					//Calling with the newShifted polytope to use PPL library
-					isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, lp_solver_type_choosen);
 
-				//	std::cout<<"doesNotContain = "<<isContain<<"\n";
+					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
+					newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
+					isContain = templated_isContainted(destination_locID, newPoly, PASSED, lp_solver_type_choosen);//over-approximated but threadSafe
+
+					//Calling with the newShifted polytope to use PPL library
+					//isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, lp_solver_type_choosen);	//Not ThreadSafe
 
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
