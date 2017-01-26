@@ -20,7 +20,7 @@ struct polyConstraints {
 	unsigned int sstate_index;
 };
 
-struct boundConstraint {
+struct boundConstriant {
 	double bound;
 	unsigned int var_index;
 	bool is_ge; // to mark if bound is a >= constraint

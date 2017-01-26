@@ -189,7 +189,7 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	R(0, 1) = 0;
 	R(0, 2) = 0;
 	R(1, 0) = 0;
-	R(1, 1) = -0.9;
+	R(1, 1) = -0.75;
 	R(1, 2) = 0;
 	R(2, 0) = 0;
 	R(2, 1) = 0;
@@ -424,7 +424,7 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	R0(0, 2) = 0.0;
 
 	R0(1, 0) = 0.0;
-	R0(1, 1) = -0.9;
+	R0(1, 1) = -0.75;
 	R0(1, 2) = 0.0;
 
 	R0(2, 0) = 0.0;
@@ -543,7 +543,6 @@ void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
 
 	system_dynamics0.U = polytope::ptr(new polytope(true));
 
-
 	row = 6;
 	col = 3;
 	ConstraintsMatrixI.resize(row, col);
@@ -566,8 +565,8 @@ void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixI(5, 1) = 0;
 	ConstraintsMatrixI(5, 2) = -1;
 	boundValueI.resize(row);
-	boundValueI[0] = 20.2;
-	boundValueI[1] = -20;
+	boundValueI[0] = 10.2;
+	boundValueI[1] = -10;
 	boundValueI[2] = 0;
 	boundValueI[3] = 0;
 	boundValueI[4] = 0;
@@ -608,7 +607,7 @@ void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
 	R0(0, 2) = 0.0;
 
 	R0(1, 0) = 0.0;
-	R0(1, 1) = -0.9;
+	R0(1, 1) = -0.75;
 	R0(1, 2) = 0.0;
 
 	R0(2, 0) = 0.0;
@@ -644,7 +643,6 @@ void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.insert_to_map("x", 0);
 	Hybrid_Automata.insert_to_map("v", 1);
 	Hybrid_Automata.insert_to_map("t", 2);
-
 
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
