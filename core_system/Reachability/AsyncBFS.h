@@ -15,7 +15,7 @@
 using namespace std;
 
 /*
- * We apply a parallel BFS Alogrithm with the absence of breadth-level synchronization.
+ * We apply a parallel BFS Algorithm with the absence of breadth-level synchronization.
  * Thus we called this as the Asynchronous parallel BFS Algorithm.
  */
 class AsyncBFS: public reachability {

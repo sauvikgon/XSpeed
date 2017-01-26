@@ -59,7 +59,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 				user_options.getTotalSliceSize(), lp_solver_type_choosen, user_options.getStreamSize(),
 				Solver_GLPK_Gurobi_GPU, forbidden_set);
 		std::cout<< "\nRunning Asynchronous parallel BFS algorithm.\n";
-		Symbolic_states_list = reach.reachComputeAsynBFS(ce_candidates);
+//		Symbolic_states_list = reach.reachComputeAsynBFS(ce_candidates);
 	}
 }
 
