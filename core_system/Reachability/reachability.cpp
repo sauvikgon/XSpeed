@@ -197,7 +197,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					do {
 						int locationID, locationID2;
 						discrete_set ds, ds2;
-
 						// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 						for (std::set<int>::iterator it =
 								ds.getDiscreteElements().begin();
@@ -242,6 +241,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState()== NULL)) { //root is missed
 
 						int transID = current_forbidden_state->getTransitionId();
+
 						list_sym_states.push_front(current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
 					}
 					saftey_violated = true;
