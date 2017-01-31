@@ -216,14 +216,18 @@ int status;
 	 * Generating Vertices as output which can be plotted using gnuplot utilites
 	 */
 
+
 // ********************** Setting for Output file **********************************
-	std::string fileName1, fullPath1, fileWithPath1;
+    std::string fileWithPath1;
+	fileWithPath1.append(fileName);
+	stFileNameWithPath = fileWithPath1.c_str();
+	std::cout << "FileName with Path = " << stFileNameWithPath << "\n";
+
+	/*std::string fileName1, fullPath1, fileWithPath1;
 	fullPath1 = "./"; //default file path
 	fileWithPath1.append(fullPath1);
 	if (vm.count("output-file")) {
 		fileName1 = vm["output-file"].as<std::string>();
-		//std::cout << "fileName is: " << fileName1 << "\n";
-
 	} else {
 		fileName1 = "out.txt";
 	}
@@ -231,7 +235,7 @@ int status;
 	//std::cout << "fileWithPath is: " << fileWithPath << "\n";
 	stFileNameWithPath = fileWithPath1.c_str();
 	//std::cout << "fileWithPath is: " << fileWithPath1 << "\n";
-	std::cout << "FileName with Path = " << stFileNameWithPath << "\n";
+	std::cout << "FileName with Path = " << stFileNameWithPath << "\n";*/
 // ********************** Setting for Output file Done **********************************
 
 	outFile.open(stFileNameWithPath);

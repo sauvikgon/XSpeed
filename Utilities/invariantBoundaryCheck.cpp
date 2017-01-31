@@ -6,11 +6,13 @@
  */
 
 #include "invariantBoundaryCheck.h"
+#include "Utilities/UtilitiesDataStructure.h"
 
 void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
 		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
+	//std::cout<<"\nTotal is "<<shm_NewTotalIteration <<std::endl;
 	int dimension = Initial->getSystemDimension();
 	int Min_Or_Max = 2;
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
@@ -48,6 +50,9 @@ int type = lp_solver_type_choosen;
 		// ******** Lamda Computation for each invariant's directions/constraints **********
 		double invariant_SupportFunction;
 		invariant_SupportFunction = invariant->getColumnVector()[eachInvariantDirection];
+		/*if (eachInvariantDirection==0)
+			std::cout<<"invariant_bound[0]= "<< invariant_SupportFunction<<"\t";*/
+
 		// **********************XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX******************
 
 		lp_solver s_per_thread_I_minus(type), s_per_thread_U_minus(type);
@@ -95,6 +100,8 @@ int type = lp_solver_type_choosen;
 			TempOmega_min = res1_minus;	//zIInitial_minus = res1_minus;
 		else
 			TempOmega_min = res2_minus;	//zIInitial_minus = res2_minus;
+		/*if (eachInvariantDirection==0)
+			std::cout<<"TempOmega = "<<TempOmega_min<<"\t";*/
 
 
 //  **************  Omega Function Over  ********************
@@ -155,6 +162,9 @@ int type = lp_solver_type_choosen;
 			//  **************  Omega Function Over  ********************
 			TempOmega_min = zI_min + s1Variable_min; //Y1
 			//		cout<<"TempOmega_min = "<<TempOmega_min<<"\t";
+			/*if (eachInvariantDirection==0)
+				std::cout<<"TempOmega = "<< TempOmega_min<<"\t";*/
+
 			// ************************************************   Negative Direction Ends *******************************************
 			loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
 
@@ -169,7 +179,377 @@ int type = lp_solver_type_choosen;
 	unsigned int min_Total_Iteration;
 	min_Total_Iteration = *min_element(boundaryIterations.begin(), boundaryIterations.end()); // - 1 ;//excluding the last outside Omega
 	newTotIters = min_Total_Iteration;
+	//std::cout<<"Breaking at "<<newTotIters<<std::endl;
 }
+
+
+//Using a single lp_solver object for initial and U polytopes each for all iteration and for all invariant faces
+void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
+
+	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
+	int dimension = Initial->getSystemDimension();
+	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
+	// *************************** For Negative ************************************
+
+	std::vector<double> Btrans_dir_minus, phi_trans_dir_minus, phi_trans_dir1_minus;
+	math::matrix<double> B_trans, phi_tau_Transpose;
+	if (!SystemDynamics.isEmptyMatrixA) //current_location's SystemDynamics's or ReachParameters
+		phi_tau_Transpose = ReachParameters.phi_trans;
+	if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
+		B_trans = ReachParameters.B_trans;
+	// *******************************************************************************************************************
+	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
+	int type = lp_solver_type_choosen;
+
+
+	std::vector<InvariantCheckData> AllInvData(numberOfInvariants);
+	bool invariantCrossed = false;
+
+	double zI_min = 0.0, zV_min = 0.0;
+	//double sVariable_min, s1Variable_min; //For Minimization of First Vector only
+	std::vector<double> r1Variable_minus,rVariable_minus;
+	r1Variable_minus.resize(dimension);
+	rVariable_minus.resize(dimension);
+	unsigned int loopIteration = 0;
+
+
+	lp_solver s_per_thread_I_minus(type), s_per_thread_U_minus(type);
+	s_per_thread_I_minus.setMin_Or_Max(2);
+	if (!Initial->getIsEmpty()) //set glpk constraints If not an empty polytope
+		s_per_thread_I_minus.setConstraints(ReachParameters.X0->getCoeffMatrix(), ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
+	s_per_thread_U_minus.setMin_Or_Max(2);
+	if (!SystemDynamics.U->getIsEmpty()) { //empty polytope
+		s_per_thread_U_minus.setConstraints(SystemDynamics.U->getCoeffMatrix(), SystemDynamics.U->getColumnVector(), SystemDynamics.U->getInEqualitySign());
+	}
+	double term3a_minus, res2_minus;
+
+
+// Iteration = 0 for eachInvariantDirection
+	for (int eachInvariantDirection = 0; eachInvariantDirection < numberOfInvariants; eachInvariantDirection++) {
+		AllInvData[eachInvariantDirection].r_minus.resize(dimension);
+		//AllInvData[eachInvariantDirection].phi_trans_dir_minus.resize(dimension);
+		//AllInvData[eachInvariantDirection].invariantCrossed = false;
+		AllInvData[eachInvariantDirection].sVariable_min = 0.0;
+		AllInvData[eachInvariantDirection].term2_minus = 0.0;
+		AllInvData[eachInvariantDirection].term3c_minus = 0.0;
+		AllInvData[eachInvariantDirection].term1_minus =  0.0;
+
+		for (int i = 0; i < dimension; i++) {
+			AllInvData[eachInvariantDirection].r_minus[i] = -1 * invariant->getCoeffMatrix()(eachInvariantDirection, i); //Second vector negative of First vector
+		//	rVariable_minus[i] = -1 * invariant->getCoeffMatrix()(eachInvariantDirection, i); //Second vector negative of First vector
+		}
+		AllInvData[eachInvariantDirection].invariant_bound = invariant->getColumnVector()[eachInvariantDirection];// Lamda for each invariant's directions/constraints
+
+		// ******************************************* For Negative Direction Starts *******************************************
+		//zIInitial = Omega_Support(ReachParameters, rVariable_minus, Initial,SystemDynamics, s_per_thread_I_minus, s_per_thread_U_minus, Min_Or_Max);
+		//  **************    Omega Function   ********************
+		//res1_minus = Initial->computeSupportFunction(rVariable_minus, s_per_thread_I_minus);
+		AllInvData[eachInvariantDirection].res1_minus = Initial->computeSupportFunction(AllInvData[eachInvariantDirection].r_minus, s_per_thread_I_minus);
+
+		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+			phi_tau_Transpose.mult_vector(AllInvData[eachInvariantDirection].r_minus, phi_trans_dir_minus);
+			AllInvData[eachInvariantDirection].phi_trans_dir_minus = phi_trans_dir_minus;	//Todo: to verify this copy
+			AllInvData[eachInvariantDirection].term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus, s_per_thread_I_minus);
+		}else if (SystemDynamics.isEmptyMatrixA) { //if A is empty :: {tau.A}' reduces to zero so, e^{tau.A}' reduces to 1
+			AllInvData[eachInvariantDirection].term1_minus = Initial->computeSupportFunction(AllInvData[eachInvariantDirection].r_minus, s_per_thread_I_minus);
+		}//handling constant dynamics
+
+		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
+			B_trans.mult_vector(AllInvData[eachInvariantDirection].r_minus, Btrans_dir_minus);
+		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
+			AllInvData[eachInvariantDirection].term2_minus = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir_minus, s_per_thread_U_minus);
+		//AllInvData[eachInvariantDirection].term2_minus = term2_minus;
+		term3a_minus = ReachParameters.result_alfa;
+		AllInvData[eachInvariantDirection].term3b_minus = (double) support_unitball_infnorm(AllInvData[eachInvariantDirection].r_minus);
+		if (!SystemDynamics.isEmptyC) {
+			AllInvData[eachInvariantDirection].term3c_minus = ReachParameters.time_step * dot_product(SystemDynamics.C, AllInvData[eachInvariantDirection].r_minus); //Added +tau* sf_C(l) 8/11/2015
+		}
+		//term3_minus = term3a_minus * term3b_minus;
+		AllInvData[eachInvariantDirection].term3_minus = term3a_minus * AllInvData[eachInvariantDirection].term3b_minus;
+		//res2_minus = term1_minus + term2_minus + term3_minus + term3c_minus;
+		res2_minus = AllInvData[eachInvariantDirection].term1_minus
+				+ AllInvData[eachInvariantDirection].term2_minus
+				+ AllInvData[eachInvariantDirection].term3_minus + AllInvData[eachInvariantDirection].term3c_minus;
+
+		if (AllInvData[eachInvariantDirection].res1_minus > res2_minus)
+			AllInvData[eachInvariantDirection].TempOmega_min = AllInvData[eachInvariantDirection].res1_minus;	//zIInitial_minus = res1_minus;
+		else
+			AllInvData[eachInvariantDirection].TempOmega_min = res2_minus;	//zIInitial_minus = res2_minus;
+	}
+
+//  **************  Omega Function Over  ********************
+// ******************************************* Negative Direction Ends *******************************************
+	loopIteration++;	//needed for returning 1 for Omega_0
+	for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
+		double term3a_minus, res2_minus, beta_minus;
+		for (int eachInvariantDirection = 0; eachInvariantDirection < numberOfInvariants; eachInvariantDirection++) {
+
+			if ((-1 * AllInvData[eachInvariantDirection].TempOmega_min) > AllInvData[eachInvariantDirection].invariant_bound) { // Should have been correct
+				invariantCrossed = true;
+				newTotIters = loopIteration;
+				break;//no need to compute reachable set anymore nor need to check with other invariant faces
+			}
+			//  **************    W_Support Function   ********************
+			//result1_minus = term2_minus;
+			AllInvData[eachInvariantDirection].result1_minus = AllInvData[eachInvariantDirection].term2_minus;
+			beta_minus = ReachParameters.result_beta;
+			//res_beta_minus = beta_minus * term3b_minus; //Replacing term3b from previous step
+			AllInvData[eachInvariantDirection].res_beta_minus = beta_minus * AllInvData[eachInvariantDirection].term3b_minus; //Replacing term3b from previous step
+
+			//result_minus = result1_minus + res_beta_minus + term3c_minus;	// ********TODO :: VERIFY res_beta_minus from res_beta
+			zV_min = AllInvData[eachInvariantDirection].result1_minus + AllInvData[eachInvariantDirection].res_beta_minus + AllInvData[eachInvariantDirection].term3c_minus;	// ********TODO :: VERIFY res_beta_minus from res_beta
+
+			//  **************  W_Support Function Over  ********************
+			//s1Variable_min = sVariable_min + zV_min;
+			AllInvData[eachInvariantDirection].s1Variable_min = AllInvData[eachInvariantDirection].sVariable_min + zV_min;
+			if (SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
+				//r1Variable_minus = rVariable_minus;
+				AllInvData[eachInvariantDirection].r1_minus = AllInvData[eachInvariantDirection].r_minus;
+			}else{
+				//r1Variable_minus = phi_trans_dir_minus;
+				AllInvData[eachInvariantDirection].r1_minus = AllInvData[eachInvariantDirection].phi_trans_dir_minus;
+			}
+			//zI = Omega_Support(ReachParameters, r1Variable, Initial,SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
+			//  **************    Omega Function   ********************
+		//	res1_minus = term1_minus;
+			AllInvData[eachInvariantDirection].res1_minus = AllInvData[eachInvariantDirection].term1_minus;
+			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+				phi_tau_Transpose.mult_vector(AllInvData[eachInvariantDirection].r1_minus, phi_trans_dir_minus);
+				AllInvData[eachInvariantDirection].phi_trans_dir_minus = phi_trans_dir_minus;	//Todo: to verify this copy
+				//term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus, s_per_thread_I_minus);
+				AllInvData[eachInvariantDirection].term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus, s_per_thread_I_minus);
+			}
+			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
+				//B_trans.mult_vector(r1Variable_minus, Btrans_dir_minus);
+				B_trans.mult_vector(AllInvData[eachInvariantDirection].r1_minus, Btrans_dir_minus);
+				AllInvData[eachInvariantDirection].term2_minus = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir_minus, s_per_thread_U_minus);
+			}
+			term3a_minus = ReachParameters.result_alfa;
+			AllInvData[eachInvariantDirection].term3b_minus = support_unitball_infnorm(r1Variable_minus);
+			if (!SystemDynamics.isEmptyC) {
+				AllInvData[eachInvariantDirection].term3c_minus = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable_minus); //Added +tau* sf_C(l) 8/11/2015
+			}
+			//term3_minus = term3a_minus * term3b_minus;
+			AllInvData[eachInvariantDirection].term3_minus = term3a_minus * AllInvData[eachInvariantDirection].term3b_minus;
+			//res2_minus = term1_minus + term2_minus + term3_minus + term3c_minus;
+			res2_minus = AllInvData[eachInvariantDirection].term1_minus
+							+ AllInvData[eachInvariantDirection].term2_minus
+							+ AllInvData[eachInvariantDirection].term3_minus + AllInvData[eachInvariantDirection].term3c_minus;
+
+			if (AllInvData[eachInvariantDirection].res1_minus > res2_minus)
+				zI_min = AllInvData[eachInvariantDirection].res1_minus;
+			else
+				zI_min = res2_minus;
+			//  **************  Omega Function Over  ********************
+			//TempOmega_min = zI_min + s1Variable_min; //Y1 //cout<<"TempOmega_min = "<<TempOmega_min<<"\t";
+			AllInvData[eachInvariantDirection].TempOmega_min = zI_min + AllInvData[eachInvariantDirection].s1Variable_min;
+			// ************************************************   Negative Direction Ends *******************************************
+			loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
+			//rVariable_minus = CopyVector(r1Variable_minus);
+			AllInvData[eachInvariantDirection].r_minus = CopyVector(AllInvData[eachInvariantDirection].r1_minus);
+			//sVariable_min = s1Variable_min;
+			AllInvData[eachInvariantDirection].sVariable_min = AllInvData[eachInvariantDirection].s1Variable_min;
+
+		} //end of eachInvariantDirection
+
+		//ToDo:: check if any of the invariantCrossed is true exit and return the value
+		if (invariantCrossed == true){
+			break;
+		}
+	} //end of iterations
+	//return value is modified by this point
+}
+
+
+//Using independent lp_solver object for initial and U polytopes for each invariant faces so that for all iteration same lp_solver object can be called
+//--- this is an optimization technique/property provided by GLPK (glpk being the lp_solver)
+void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
+
+	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
+//	std::cout<<"\nTotal is "<<shm_NewTotalIteration <<std::endl;
+	int dimension = Initial->getSystemDimension();
+	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
+	// *************************** For Negative ************************************
+
+	std::vector<double> Btrans_dir_minus, phi_trans_dir_minus, phi_trans_dir1_minus;
+	math::matrix<double> B_trans, phi_tau_Transpose;
+	if (!SystemDynamics.isEmptyMatrixA) //current_location's SystemDynamics's or ReachParameters
+		phi_tau_Transpose = ReachParameters.phi_trans;
+	if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
+		B_trans = ReachParameters.B_trans;
+	// *******************************************************************************************************************
+	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
+	int type = lp_solver_type_choosen;
+
+
+	std::vector<InvariantCheckData> AllInvData(numberOfInvariants);
+	bool invariantCrossed = false;
+
+	double zI_min = 0.0, zV_min = 0.0;
+	unsigned int loopIteration = 0;
+
+
+	double term3a_minus, res2_minus;
+
+
+// Iteration = 0 for eachInvariantDirection
+	for (int invDir = 0; invDir < numberOfInvariants; invDir++) {
+		AllInvData[invDir].r_minus.resize(dimension);
+		//AllInvData[eachInvariantDirection].phi_trans_dir_minus.resize(dimension);
+		//AllInvData[eachInvariantDirection].invariantCrossed = false;
+		AllInvData[invDir].sVariable_min = 0.0;
+		AllInvData[invDir].term2_minus = 0.0;
+		AllInvData[invDir].term3c_minus = 0.0;
+		AllInvData[invDir].term1_minus =  0.0;
+
+		//AllInvData[invDir].I_minus = lp_solver::lp_solver_ptr(new lp_solver(type));
+		//AllInvData[invDir].U_minus = lp_solver::lp_solver_ptr(new lp_solver(type));
+
+		if (!Initial->getIsEmpty()){ //set glpk constraints If not an empty polytope
+			AllInvData[invDir].I_minus.setMin_Or_Max(2);
+			AllInvData[invDir].I_minus.setConstraints(ReachParameters.X0->getCoeffMatrix(), ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
+		}
+		if (!SystemDynamics.U->getIsEmpty()) { //empty polytope
+			AllInvData[invDir].U_minus.setMin_Or_Max(2);
+			AllInvData[invDir].U_minus.setConstraints(SystemDynamics.U->getCoeffMatrix(), SystemDynamics.U->getColumnVector(), SystemDynamics.U->getInEqualitySign());
+		}
+		for (int i = 0; i < dimension; i++) {
+			AllInvData[invDir].r_minus[i] = -1 * invariant->getCoeffMatrix()(invDir, i); //Second vector negative of First vector
+		//	rVariable_minus[i] = -1 * invariant->getCoeffMatrix()(invDir, i); //Second vector negative of First vector
+		}
+		AllInvData[invDir].invariant_bound = invariant->getColumnVector()[invDir];// Lamda for each invariant's directions/constraints
+		/*if (invDir==0)
+			std::cout<<"AllInvData[0].invariant_bound = "<< AllInvData[invDir].invariant_bound<<"\t";*/
+		// ******************************************* For Negative Direction Starts *******************************************
+		//zIInitial = Omega_Support(ReachParameters, rVariable_minus, Initial,SystemDynamics, s_per_thread_I_minus, s_per_thread_U_minus, Min_Or_Max);
+		//  **************    Omega Function   ********************
+		//res1_minus = Initial->computeSupportFunction(rVariable_minus, s_per_thread_I_minus);
+		AllInvData[invDir].res1_minus = Initial->computeSupportFunction(AllInvData[invDir].r_minus, AllInvData[invDir].I_minus);
+
+		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+			phi_tau_Transpose.mult_vector(AllInvData[invDir].r_minus, phi_trans_dir_minus);
+			AllInvData[invDir].phi_trans_dir_minus = phi_trans_dir_minus;	//Todo: to verify this copy
+			AllInvData[invDir].term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus, AllInvData[invDir].I_minus);
+		}else if (SystemDynamics.isEmptyMatrixA) { //if A is empty :: {tau.A}' reduces to zero so, e^{tau.A}' reduces to 1
+			AllInvData[invDir].term1_minus = Initial->computeSupportFunction(AllInvData[invDir].r_minus, AllInvData[invDir].I_minus);
+		}//handling constant dynamics
+
+		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
+			B_trans.mult_vector(AllInvData[invDir].r_minus, Btrans_dir_minus);
+		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
+			AllInvData[invDir].term2_minus = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir_minus, AllInvData[invDir].U_minus);
+		//AllInvData[eachInvariantDirection].term2_minus = term2_minus;
+		term3a_minus = ReachParameters.result_alfa;
+		AllInvData[invDir].term3b_minus = (double) support_unitball_infnorm(AllInvData[invDir].r_minus);
+		if (!SystemDynamics.isEmptyC) {
+			AllInvData[invDir].term3c_minus = ReachParameters.time_step * dot_product(SystemDynamics.C, AllInvData[invDir].r_minus); //Added +tau* sf_C(l) 8/11/2015
+		}
+		//term3_minus = term3a_minus * term3b_minus;
+		AllInvData[invDir].term3_minus = term3a_minus * AllInvData[invDir].term3b_minus;
+		//res2_minus = term1_minus + term2_minus + term3_minus + term3c_minus;
+		res2_minus = AllInvData[invDir].term1_minus
+				+ AllInvData[invDir].term2_minus
+				+ AllInvData[invDir].term3_minus + AllInvData[invDir].term3c_minus;
+
+		if (AllInvData[invDir].res1_minus > res2_minus)
+			AllInvData[invDir].TempOmega_min = AllInvData[invDir].res1_minus;	//zIInitial_minus = res1_minus;
+		else
+			AllInvData[invDir].TempOmega_min = res2_minus;	//zIInitial_minus = res2_minus;
+		/*if (invDir==0)
+			std::cout<<"TempOmega = "<< AllInvData[invDir].TempOmega_min<<"\t";*/
+	}
+
+//  **************  Omega Function Over  ********************
+// ******************************************* Negative Direction Ends *******************************************
+	loopIteration++;	//needed for returning 1 for Omega_0
+	for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
+		double term3a_minus, res2_minus, beta_minus;
+		for (int invDir = 0; invDir < numberOfInvariants; invDir++) {
+			if ((-1 * AllInvData[invDir].TempOmega_min) > AllInvData[invDir].invariant_bound) { // Should have been correct
+				invariantCrossed = true;
+				newTotIters = loopIteration;
+			//	std::cout<<"Breaking at "<<loopIteration<<std::endl;
+				break;//no need to compute reachable set anymore nor need to check with other invariant faces
+			}
+			//  **************    W_Support Function   ********************
+			//result1_minus = term2_minus;
+			AllInvData[invDir].result1_minus = AllInvData[invDir].term2_minus;
+			beta_minus = ReachParameters.result_beta;
+			//res_beta_minus = beta_minus * term3b_minus; //Replacing term3b from previous step
+			AllInvData[invDir].res_beta_minus = beta_minus * AllInvData[invDir].term3b_minus; //Replacing term3b from previous step
+
+			//result_minus = result1_minus + res_beta_minus + term3c_minus;	// ********TODO :: VERIFY res_beta_minus from res_beta
+			zV_min = AllInvData[invDir].result1_minus + AllInvData[invDir].res_beta_minus + AllInvData[invDir].term3c_minus;	// ********TODO :: VERIFY res_beta_minus from res_beta
+
+			//  **************  W_Support Function Over  ********************
+			//s1Variable_min = sVariable_min + zV_min;
+			AllInvData[invDir].s1Variable_min = AllInvData[invDir].sVariable_min + zV_min;
+			if (SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
+				//r1Variable_minus = rVariable_minus;
+				AllInvData[invDir].r1_minus = AllInvData[invDir].r_minus;
+			}else{
+				//r1Variable_minus = phi_trans_dir_minus;
+				AllInvData[invDir].r1_minus = AllInvData[invDir].phi_trans_dir_minus;
+			}
+			//zI = Omega_Support(ReachParameters, r1Variable, Initial,SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
+			//  **************    Omega Function   ********************
+		//	res1_minus = term1_minus;
+			AllInvData[invDir].res1_minus = AllInvData[invDir].term1_minus;
+			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
+				phi_tau_Transpose.mult_vector(AllInvData[invDir].r1_minus, phi_trans_dir_minus);
+				AllInvData[invDir].phi_trans_dir_minus = phi_trans_dir_minus;	//Todo: to verify this copy
+				//term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus, s_per_thread_I_minus);
+				AllInvData[invDir].term1_minus = Initial->computeSupportFunction(phi_trans_dir_minus, AllInvData[invDir].I_minus);
+			}
+			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
+				//B_trans.mult_vector(r1Variable_minus, Btrans_dir_minus);
+				B_trans.mult_vector(AllInvData[invDir].r1_minus, Btrans_dir_minus);
+				AllInvData[invDir].term2_minus = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir_minus, AllInvData[invDir].U_minus);
+			}
+			term3a_minus = ReachParameters.result_alfa;
+			AllInvData[invDir].term3b_minus = support_unitball_infnorm(AllInvData[invDir].r1_minus);
+			if (!SystemDynamics.isEmptyC) {
+				AllInvData[invDir].term3c_minus = ReachParameters.time_step * dot_product(SystemDynamics.C, AllInvData[invDir].r_minus); //Added +tau* sf_C(l) 8/11/2015
+			}
+			//term3_minus = term3a_minus * term3b_minus;
+			AllInvData[invDir].term3_minus = term3a_minus * AllInvData[invDir].term3b_minus;
+			//res2_minus = term1_minus + term2_minus + term3_minus + term3c_minus;
+			res2_minus = AllInvData[invDir].term1_minus
+							+ AllInvData[invDir].term2_minus
+							+ AllInvData[invDir].term3_minus + AllInvData[invDir].term3c_minus;
+
+			if (AllInvData[invDir].res1_minus > res2_minus)
+				zI_min = AllInvData[invDir].res1_minus;
+			else
+				zI_min = res2_minus;
+			//  **************  Omega Function Over  ********************
+			//TempOmega_min = zI_min + s1Variable_min; //Y1 //cout<<"TempOmega_min = "<<TempOmega_min<<"\t";
+			AllInvData[invDir].TempOmega_min = zI_min + AllInvData[invDir].s1Variable_min;
+			/*if (invDir==0)
+				std::cout<<"TempOmega = "<< AllInvData[invDir].TempOmega_min<<"\t";*/
+
+			// ************************************************   Negative Direction Ends *******************************************
+
+			//rVariable_minus = CopyVector(r1Variable_minus);
+			AllInvData[invDir].r_minus = CopyVector(AllInvData[invDir].r1_minus);
+			//sVariable_min = s1Variable_min;
+			AllInvData[invDir].sVariable_min = AllInvData[invDir].s1Variable_min;
+		} //end of eachInvariantDirection
+
+		loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
+
+		//ToDo:: check if any of the invariantCrossed is true exit and return the value
+		if (invariantCrossed == true){
+			break;
+		}
+	} //end of iterations
+	//return value is modified by this point
+}
+
+
+
 
 //In-efficient method of checking each invariants face one after another
 void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
