@@ -13,11 +13,11 @@
 #include <cmath>
 
 /*
- * Computes derivative of point to polytope distance x to I w.r.t x.
+ * Computes derivative of vector (x) to polytope distance d w.r.t x.
  * The definition of point to polytope distance is as defined in the
  * polytope.cpp class implementation
  */
-std::vector<double> dist_grad(std::vector<double> x, polytope::ptr I, std::vector<double> chain_mult);
+std::vector<double> dist_grad(std::vector<double> x, polytope::ptr I);
 
 
 #endif /* GRADIENT_H_ */

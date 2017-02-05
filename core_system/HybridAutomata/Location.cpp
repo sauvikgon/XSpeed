@@ -66,8 +66,7 @@ void location::add_Out_Going_Transition(transition::ptr t){
 transition::ptr location::getTransition(int trans_id){
 	transition::ptr temp;
 	std::list<transition::ptr>::iterator it;
-	for (it=Out_Going_Transitions.begin(); it != Out_Going_Transitions.end();it++){
-		//cout <<"(*it)->getTransitionId()= "<<(*it)->getTransitionId()<<endl;
+	for (it=Out_Going_Transitions.begin(); it != Out_Going_Transitions.end(); it++){
 		int transID = (*it)->getTransitionId();
 		if (transID==trans_id){
 			temp = (*it);

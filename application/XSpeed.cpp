@@ -96,7 +96,7 @@ unsigned int Uniform_Directions_Size;
 
 int main(int argc, char *argv[]) {
 
-int status;
+	int status;
 	status = readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters);
 	// Parse the forbidden state string to make a polytope
 	if (!user_options.get_forbidden_state().empty()) {
@@ -289,7 +289,7 @@ int status;
 	dump_abstractCE_list(ce_candidates);
 	/** End of debug */
 	bool real_ce = false;
-	double error_tol = 0.01;
+	double error_tol = 1e-6;
 
 	tt1.start(); // start time
 	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {

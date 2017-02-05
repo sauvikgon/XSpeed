@@ -142,16 +142,21 @@ void polytope::setMoreConstraints(math::matrix<double> coeff_constraints,
 	dim_size = this->getCoeffMatrix().size2(); //dimension of the polytope
 	rows_new = coeff_constraints.size1();
 	//dim_size =coeff_constraints.size2();
+	std::cout << "dim size = " << dim_size << ", dim of poly cons to add:" << coeff_constraints.size2() << std::endl;
+	assert(dim_size == coeff_constraints.size2());
+
 	unsigned int new_total_rows = row_size + rows_new;
 
 	this->coeffMatrix.resize(new_total_rows, dim_size, true); //adding more constraints
 	this->columnVector.resize(new_total_rows); //adding more constraint's bound values
+
 	for (unsigned int i = 0; i < rows_new; i++) {
 		for (unsigned int j = 0; j < dim_size; j++) {
 			this->coeffMatrix(row_size + i, j) = coeff_constraints(i, j);
 		}
 		this->columnVector[row_size + i] = bound_values[i];
 	}
+
 }
 
 int polytope::getInEqualitySign() const {

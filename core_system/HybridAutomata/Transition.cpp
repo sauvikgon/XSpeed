@@ -12,9 +12,14 @@ using namespace std;
 transition::transition() {
 	trans_id = -1;	//indicates Empty Transition
 	label = "";
+	math::matrix<double> m;
+	Gaurd = polytope::ptr(new polytope()); // universal guard, always true
+	unsigned int dim = Gaurd->map_size();
+	m.matrix_Identity(dim, Assign_T.Map);
+	Assign_T.b = std::vector<double>(dim,0);
 }
 transition::transition(int transition_id, string label_name, int source_id,
-		int dest_id, polytope::ptr gaurd, Assign& assign_Trans) {
+		int dest_id, polytope::ptr gaurd, Assign assign_Trans) {
 	trans_id = transition_id;
 	label = label_name;
 	source_location_id =source_id;

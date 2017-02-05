@@ -8,13 +8,12 @@
 #include <Utilities/gradient.h>
 
 /*
- * Computes derivative of point to polytope distance x to I w.r.t x.
+ * Computes derivative of distance of a vector to a polytope w.r.t the vector.
  * The definition of point to polytope distance is as defined in the
  * polytope.cpp class implementation
  */
-std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::ptr I, std::vector<double> chain_mult)
+std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::ptr I)
 {
-	assert(chain_mult.size() == trace_end_pt.size());
 	std::vector<double> grad(trace_end_pt.size(),0 );
 
 	math::matrix<double> C = I->getCoeffMatrix();
@@ -40,7 +39,5 @@ std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::ptr I,
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
-	for(unsigned int k=0;k<trace_end_pt.size();k++)
-		grad[k] = grad[k]*chain_mult[k];
 	return grad;
 }

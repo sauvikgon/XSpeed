@@ -85,12 +85,8 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
 
-		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
+		Set_NavTimed_5by5(ha, init_state, reach_parameters);
 		//Set_NavTimed_9by9(ha,init_state,reach_parameters);
-
-		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
-		//Set_NavTimed_9by9(ha,init_state,reach_parameters);
-
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
