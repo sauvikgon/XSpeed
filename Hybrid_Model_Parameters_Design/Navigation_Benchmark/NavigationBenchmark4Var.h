@@ -50,10 +50,21 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 void SetNavigationModel5by5(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
-
 //Model (5 x 5) containing 81-Locations with 280 transitions
-/*void SetNavigationModel9by9(hybrid_automata& Hybrid_Automata,
- initial_state::ptr& init_state,
- ReachabilityParameters& reach_parameters); */
+
+void SetNavigationModel9by9Timed(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters);	//With time variable included
+
+
+/*
+ * Navigatgion 9x9 model WITHOUT Time variable
+ */
+void SetNavigationModel9by9(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters);
+
+void NavModule1(hybrid_automata& ha, std::list<initial_state::ptr>& init_state, ReachabilityParameters& reach_parameters);
+void NavModule2(hybrid_automata& ha, std::list<initial_state::ptr>& init_state, ReachabilityParameters& reach_parameters);
+void NavModule3(hybrid_automata& ha, std::list<initial_state::ptr>& init_state, ReachabilityParameters& reach_parameters);
+void NavModule4(hybrid_automata& ha, std::list<initial_state::ptr>& init_state, ReachabilityParameters& reach_parameters);
 
 #endif /* NAVIGATIONBENCHMARK4Var_H_ */

@@ -46,12 +46,14 @@
 #include <vector>
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
+
+#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
+
 //***************** End Sequential BFS *****************************
 
 using namespace std;
 
 class reachability {
-
 public:
 /*	reachability(){
 	//	cout<< "Calling from reachability Class\n";
@@ -67,8 +69,7 @@ public:
 	//reach_parameters includes the different parameters needed in the computation of reachability.
 	//I is the initial symbolic state
 	//Although this interface can be pushed in a separate sequential class but it can also be used to call par_SF and time_slice algorithms.
-	std::list<symbolic_states::ptr> computeSequentialBFSReach(std::list<abstractCE::ptr>& ce_candidates);
-
+	std::list<symbolic_states::ptr> computeSeqentialBFSReach(std::list<abstractCE::ptr>& ce_candidates);
 
 	//1)  Parallel Breadth First Search for Discrete Jumps with critical section for adding newSymbolicState
 	std::list<symbolic_states::ptr> computeParallelBFSReach(
@@ -77,7 +78,6 @@ public:
 	//2)  Lock Avoidance for adding newSymbolicState:: Parallel Breadth First Search for Discrete Jumps
 	//separate Read and Write Queue (pwlist.WaitingList)
 		std::list<symbolic_states::ptr> computeParallelBFSReachLockAvoid(std::list<abstractCE::ptr>& ce_candidates);
-
 
 	/*
 	 * List of private variables now converted into public due to class inheritance framework
@@ -93,23 +93,32 @@ public:
 		void sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 						template_polyhedra::ptr& reach_region);
 
+/*
+ * Returns True if the newShiftedPolytope is containted in the symbolic_states denoted by Reachability_Region in the location
+ * represented by locationID as destination_locID
+ * Otherwise returns False
+ * This interface is NOT threadSafe but it has exact computed result AND SEQUENTIAL algorithm has no issue with threadSafety
+ */
+		bool isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+
+		/*
+		 * Uses the templated (an over-approximated) newShiftedPolytope to check for containment in the Omegas of the flowpipe
+		 * This interface is threadSafe however it is over-approximated result
+		 */
+		bool templated_isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+
 private:
-
 	//initial_state::ptr I;
-
-
 	unsigned int Algorithm_Type;
 	unsigned int Total_Partition;
 	unsigned int number_of_streams;
 
-
-
 	void parallelReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);
 
-
-	/*Returns True, if safety has been violated on the current computed Symbolic States and sets/creates the counterExample class
-	Returns False, if safety not violated the counterExample list remains empty*/
+/*Returns True, if safety has been violated on the current computed Symbolic States and sets/creates the counterExample class
+	Returns False, if safety not violated the counterExample list remains empty
+*/
 	bool safetyVerify(symbolic_states::ptr& computedSymStates, std::list<symbolic_states::ptr>& Reachability_Region, std::list<abstractCE::ptr>& ce);
 
 	/*Performs the task of computing support functions on the specified polytopes for the given directions
@@ -120,11 +129,9 @@ private:
 	/*
 	 * Performs the task of computing support functions in parallel using the approach of task_scheduling
 	 */
-
 	void parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS);
 
 	double boxLPSolver(polytope::ptr poly, std::vector<double> dir);
-
 	double LPSolver(polytope::ptr poly, std::vector<double> dirs);
 
 };

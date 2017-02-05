@@ -67,7 +67,8 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			"3/time-slice-SF -- Time slicing algorithm (Parallel PostC but Sequential PostD/BFS)\n"
 			"4/AGJH -- Adaptation of Gerard J. Holzmann\n"
 			"5/TPBFS -- Load Balancing Algorithm\n"
-			"6/gpu-postc -- Bounded input sets (PostC in GPU but Sequential PostD/BFS)\n")
+			"6/gpu-postc -- Bounded input sets (PostC in GPU but Sequential PostD/BFS)\n"
+			"7/AsyncBFS -- Asynchronous parallel BFS state-space exploration\n")
 	("number-of-streams", po::value<int>()->default_value(1), "Set the maximum number of GPU-streams (Set to 1 by default).")
 	("time-slice", po::value<int>(), "Set the maximum number of Time Sliced(or partitions)for algo=time-slice-SF")
 	//("internal", "called internally when running hyst-xspeed model")
@@ -384,10 +385,9 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
 		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
 				forbidden_set);
-		std::cout<<"Running user_model"<<std::endl;
-		//user_model(Hybrid_Automata, init_state, reach_parameters,
-		//					user_options);
-		std::cout<<"Running user_model"<<std::endl;
+		//std::cout<<"Running user_model"<<std::endl;
+		//user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
+
 		//	if ((output_vars[0]>-1))
 		//		std::cout << "Wrong output variables" << std::endl;
 		//	else {

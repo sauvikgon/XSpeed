@@ -62,7 +62,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) {
-		//	SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
+		SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
 	}
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
@@ -97,8 +97,13 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//setheart(ha, init_state, reach_parameters);
 		// --------------------------------------------
 
-		//setTTEthernetModel2(ha, init_state, reach_parameters);
-		setmesh(ha, init_state, reach_parameters);
+
+		setTTEthernetModel2(ha, init_state, reach_parameters);
+
+		//setmesh(ha, init_state, reach_parameters);	//precision issue
+	//	setplatoon(ha, init_state, reach_parameters);
+
+		//std::cout <<"Test Model Assigned"<<std::endl;
 	}
 	unsigned int dims=0;
 	for (std::list<initial_state::ptr>::iterator it=init_state.begin();it!=init_state.end();it++){
@@ -106,7 +111,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	}
 
 //Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
-//todo:: needs to decide that is this the right place to include Invariant direction
+//todo:: needs to decide that, is this the right place to include Invariant direction
 	//and also Redundant invariant directional constraints to be removed
 
 	math::matrix<double> Real_Directions; //List of all directions

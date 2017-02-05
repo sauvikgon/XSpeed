@@ -146,8 +146,15 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	bad_poly = this->forbid_poly;
 	ref_pts = refinements;
 
-	locIdList.resize(N);
+	//assert that the number of transitions equals 1 less than the length of the abstract CE path
 
+	std::cout << "Length of the CE, N=" << N << std::endl;
+	std::cout << "#Transitions in CE" << transList.size() << std::endl;
+	assert(transList.size() == N-1);
+	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
+	// initialize the global locIdList
+	locIdList.resize(N);
+      
 	std::set<int> d;
 	for(unsigned int i=0;i<N;i++){
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
@@ -264,7 +271,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 				P=polys.front();
 			P = P->GetPolytope_Intersection(bad_poly);
 		}
-		else {
+		else{
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
 			guard = T->getGaurd();

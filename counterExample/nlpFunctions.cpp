@@ -390,8 +390,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	{
 		dist_gradt +=  badpoly_dist_grad[j] * Axplusb[j];
 	}
-	deriv[N*dim + N-1] = dist_gradt;
 
+	deriv[N*dim + N-1] = dist_gradt;
 	// Analytic gradients
 	if(!grad.empty())
 	{

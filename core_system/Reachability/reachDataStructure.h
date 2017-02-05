@@ -9,6 +9,7 @@
 #define REACHDATASTRUCTURE_H_
 
 #include "core_system/HybridAutomata/Location.h"
+#include "core_system/HybridAutomata/Hybrid_Automata.h"
 
 //Data structure used for POST_C computation in Load Balancing Algorithm
 struct LoadBalanceData{
@@ -52,5 +53,16 @@ struct LoadBalanceData_PostD{
 	//Each transition will have destination_loc, guard and assignments
 };
 
+//Data structure required for AsyncBFS as auxiliary storage
+struct AsyncBFSData{
+	//std::list<initial_state::ptr> I; //converted to a list of initial state
+	int bound;
+	ReachabilityParameters reach_parameters;
+	hybrid_automata H; //todo:: have to change it to boost::ptr
+	int lp_solver_type_choosen;
+	std::pair<int, polytope::ptr> forbidden_set;
+	int Solver_GLPK_Gurobi_GPU;
+
+};
 
 #endif /* REACHDATASTRUCTURE_H_ */

@@ -33,25 +33,33 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 			std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
 		}
 
-		Symbolic_states_list = reach_SEQ_BFS.computeSequentialBFSReach(ce_candidates);
+		Symbolic_states_list = reach_SEQ_BFS.computeSeqentialBFSReach(ce_candidates);
 
 	} else if (user_options.get_algorithm() == 4) { //Adaptation of Gerard J. Holzmann's algorithm (Seq PostC and PBFS)
 		agjh reach_AGJH;
 		reach_AGJH.setReachParameter(Hybrid_Automata, init_state, reach_parameters,
-						user_options.get_bfs_level(), user_options.get_algorithm(),
-						user_options.getTotalSliceSize(), lp_solver_type_choosen, user_options.getStreamSize(),
-						Solver_GLPK_Gurobi_GPU, forbidden_set);
-				std::cout << "\nRunning adaptation of Gerard J. Holzmann's algorithm.\n";
-				Symbolic_states_list = reach_AGJH.ParallelBFS_GH(); // Holzmann algorithm adaptation
-			} else if (user_options.get_algorithm() == 5) { // TPBFS -- Task parallel BFS (Load Balancing Algorithm)
-				tpbfs reach;
-				reach.setReachParameter(Hybrid_Automata, init_state, reach_parameters,
-								user_options.get_bfs_level(), user_options.get_algorithm(),
-								user_options.getTotalSliceSize(), lp_solver_type_choosen, user_options.getStreamSize(),
-								Solver_GLPK_Gurobi_GPU, forbidden_set);
-						std::cout<< "\nRunning Task parallel (Load Balancing) BFS algorithm.\n";
-						Symbolic_states_list = reach.LoadBalanceAll(
-								ce_candidates);
-					}
+				user_options.get_bfs_level(), user_options.get_algorithm(),
+				user_options.getTotalSliceSize(), lp_solver_type_choosen, user_options.getStreamSize(),
+				Solver_GLPK_Gurobi_GPU, forbidden_set);
+		std::cout << "\nRunning adaptation of Gerard J. Holzmann's algorithm.\n";
+		Symbolic_states_list = reach_AGJH.ParallelBFS_GH(); // Holzmann algorithm adaptation
+	} else if (user_options.get_algorithm() == 5) { // TPBFS -- Task parallel BFS (Load Balancing Algorithm)
+		tpbfs reach;
+		reach.setReachParameter(Hybrid_Automata, init_state, reach_parameters,
+				user_options.get_bfs_level(), user_options.get_algorithm(),
+				user_options.getTotalSliceSize(), lp_solver_type_choosen, user_options.getStreamSize(),
+				Solver_GLPK_Gurobi_GPU, forbidden_set);
+		std::cout<< "\nRunning Task parallel (Load Balancing) BFS algorithm.\n";
+		Symbolic_states_list = reach.LoadBalanceAll(
+				ce_candidates);
+	} else if (user_options.get_algorithm() == 7) { // AsyncBFS -- Asynchronous parallel BFS (Does not synchronous like in BFS Algorithm)
+		AsyncBFS reach;
+		reach.setReachParameter(Hybrid_Automata, init_state, reach_parameters,
+				user_options.get_bfs_level(), user_options.get_algorithm(),
+				user_options.getTotalSliceSize(), lp_solver_type_choosen, user_options.getStreamSize(),
+				Solver_GLPK_Gurobi_GPU, forbidden_set);
+		std::cout<< "\nRunning Asynchronous parallel BFS algorithm.\n";
+//		Symbolic_states_list = reach.reachComputeAsynBFS(ce_candidates);
+	}
 }
 
