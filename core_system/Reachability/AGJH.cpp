@@ -192,14 +192,16 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	unsigned int NewTotalIteration = reach_parameters.Iterations;
 	if (current_location->isInvariantExists()) {
 
-		if (current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==true){
+		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
 			//Approach of Coarse-time-step and Fine-time-step
 			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-									current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+				current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 		}else{
 			//Approach of Sequential invariant check will work for all case
-			InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
-					 reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+			//InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
+			//	reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);	//OLD implementation
+			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
+				reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 		}
 
 		/*jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,

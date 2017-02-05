@@ -148,15 +148,17 @@ std::list<symbolic_states::ptr> reachability::computeSeqentialBFSReach(std::list
 		// ************ Compute flowpipe_cost:: estimation Starts **********************************
 
 		if (current_location->isInvariantExists()){
-			if (current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==true){
+			if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
 				//Approach of Coarse-time-step and Fine-time-step
 				jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 				cout<<"Running Approach of Coarse-time-step and Fine-time-step\n";
 			}else{
 				//Approach of Sequential invariant check will work for all case
-				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
-					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+				InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
+						reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+				//InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
+				//	reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);	//OLD implementation
 			}
 		}
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************

@@ -10,6 +10,28 @@
 #include "core_system/math/lp_solver/All_Solver_Definition.h"
 
 int lp_solver::lp_solver_count = 0;
+lp_solver::lp_solver() {
+
+	lp_solver_count++; //one instance of either glpk or gurobi object is created
+
+	lp_solver_type = GLPK_SOLVER;	//By default
+
+	if (lp_solver_type == GLPK_SOLVER) {
+		glpk_lp_problem = glpk_lp_solver::glpk_ptr(new glpk_lp_solver());
+	}
+
+//	if (lp_solver_type == GUROBI_SOLVER) {
+//		gurobi_lp_problem = gurobi_lp_solver::gurobi_ptr(
+//				new gurobi_lp_solver());
+//	}
+
+	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
+		simplex_cpu_lp_problem = Simplex_CPU::simplex_ptr(new Simplex_CPU());
+	}
+
+	// ******* More can be added later  **************
+}
+
 lp_solver::lp_solver(int solver_type) {
 
 	lp_solver_count++; //one instance of either glpk or gurobi object is created

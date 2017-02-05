@@ -146,21 +146,17 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 
 			if (LoadBalanceDS[id].current_location->isInvariantExists()) {
 
-				if (LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixB == true
-						&& LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyC == true) {
+				if (LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixA == true && LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixB == true
+						&& LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyC == false) {
 					//Approach of Coarse-time-step and Fine-time-step
-					jumpInvariantBoundaryCheck(
-							LoadBalanceDS[id].current_location->getSystem_Dynamics(),
-							LoadBalanceDS[id].X0, LoadBalanceDS[id].reach_param,
-							LoadBalanceDS[id].current_location->getInvariant(),
-							lp_solver_type_choosen, NewTotalIteration);
+					jumpInvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(), LoadBalanceDS[id].X0, LoadBalanceDS[id].reach_param,
+						LoadBalanceDS[id].current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 				} else {
 					//Approach of Sequential invariant check will work for all case
-					InvariantBoundaryCheck(
-							LoadBalanceDS[id].current_location->getSystem_Dynamics(),
-							LoadBalanceDS[id].X0, LoadBalanceDS[id].reach_param,
-							LoadBalanceDS[id].current_location->getInvariant(),
-							lp_solver_type_choosen, NewTotalIteration);
+					//InvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(),LoadBalanceDS[id].X0,
+					//	LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type_choosen, NewTotalIteration);//OLD implementation
+					InvariantBoundaryCheckNewLPSolver(LoadBalanceDS[id].current_location->getSystem_Dynamics(),LoadBalanceDS[id].X0,
+						LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type_choosen, NewTotalIteration);
 				}
 				LoadBalanceDS[id].newIteration = NewTotalIteration; //Important to take care
 				//cout<<"Invariant setting Done\n";

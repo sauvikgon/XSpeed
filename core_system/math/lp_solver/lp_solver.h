@@ -21,6 +21,7 @@
 class lp_solver {
 public:
 	typedef boost::shared_ptr<lp_solver> lp_solver_ptr;
+	lp_solver();	//default constructor with type of lp_solver as glpk
 	lp_solver(int solver_type);	//constructor decide the type of lp_solver to be created glpk/gurobi/par_simplex/Gimplex/etc
 	~lp_solver();
 	//  ****** Main Functions **********

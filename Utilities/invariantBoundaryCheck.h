@@ -29,8 +29,8 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 
 /*
  * Sequential Algorithm using support-function-algorithm to perform invariant crossing check
- * searches EFFICIENTLY at one go to all invariant faces.
- * Also computes ONLY negative direction of the invariant's faces
+ * searches EFFICIENTLY at one go to all invariant faces one after another.
+ * Computes ONLY negative direction of the invariant's faces
  *
  * Returns the iterations(=Time-horizon/time-step), for which flowpipe's Omegas are completely inside the invariant
  * NOTE::
@@ -39,6 +39,35 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
  */
 void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type_choosen, unsigned int &newTotIters);
+
+/*
+ * Sequential Algorithm using support-function-algorithm to perform invariant crossing check
+ * searches EFFICIENTLY:: Check at the same time each Omega to all invariant faces, instead of one after another.
+ * Computes ONLY negative direction of the invariant's faces
+ *
+ * Returns the iterations(=Time-horizon/time-step), for which flowpipe's Omegas are completely inside the invariant
+ * NOTE::
+ * it returns based on "1-indexing" i.e., if Omega_0, Omega_1 and Omega_2 are completely inside it returns 3 as the
+ * number of Omega's that need to be constructed in flowpipe is three.
+ */
+void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type_choosen, unsigned int &newTotIters);
+
+
+/*
+ * Sequential Algorithm using support-function-algorithm to perform invariant crossing check
+ * searches EFFICIENTLY:: Check at the same time each Omega to all invariant faces, instead of one after another.
+ * Computes ONLY negative direction of the invariant's faces
+ *
+ * Returns the iterations(=Time-horizon/time-step), for which flowpipe's Omegas are completely inside the invariant
+ * NOTE::
+ * it returns based on "1-indexing" i.e., if Omega_0, Omega_1 and Omega_2 are completely inside it returns 3 as the
+ * number of Omega's that need to be constructed in flowpipe is three.
+ * //Using independent lp_solver object for initial and U polytopes for each invariant faces so that for all iteration same lp_solver object can be called
+//--- this is an optimization technique/property provided by GLPK (glpk being the lp_solver)
+ */
+void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters);
 
 /*
  * Using Binary Search Algorithm to perform a Quick Check if an Omega crossing the invariant (uses actual set computation)
