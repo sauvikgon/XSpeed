@@ -6,7 +6,7 @@
  */
 
 #ifndef PPL_POLYHEDRON_H_
-#define POLYHEDRON_H_
+#define PPL_POLYHEDRON_H_
 
 #include "core_system/math/matrix.h"
 #include <ppl.hh>

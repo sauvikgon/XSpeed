@@ -12,7 +12,7 @@
 #include "core_system/symbolic_states/initial_state.h"
 #include "application/DataStructureDirections.h"
 #include "counterExample/abstractCE.h"
-#include <utility>	//for std::pair
+#include <utility>
 #include <set>
 //***************** From Sequential BFS *****************************
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
@@ -55,9 +55,6 @@ using namespace std;
 
 class reachability {
 public:
-/*	reachability(){
-	//	cout<< "Calling from reachability Class\n";
-	}*/
 	void setReachParameter(hybrid_automata& H, std::list<initial_state::ptr>& I,
 			ReachabilityParameters& reach_parameters, int bound,
 			unsigned int Algorithm_Type, unsigned int Total_Partition,
@@ -69,29 +66,29 @@ public:
 	//reach_parameters includes the different parameters needed in the computation of reachability.
 	//I is the initial symbolic state
 	//Although this interface can be pushed in a separate sequential class but it can also be used to call par_SF and time_slice algorithms.
-	std::list<symbolic_states::ptr> computeSeqentialBFSReach(std::list<abstractCE::ptr>& ce_candidates);
+
+	std::list<symbolic_states::ptr> computeSequentialBFSReach(std::list<abstractCE::ptr>& ce_candidates);
 
 	//1)  Parallel Breadth First Search for Discrete Jumps with critical section for adding newSymbolicState
-	std::list<symbolic_states::ptr> computeParallelBFSReach(
-			std::list<abstractCE::ptr>& ce_candidates);
+	std::list<symbolic_states::ptr> computeParallelBFSReach( std::list<abstractCE::ptr>& ce_candidates);
 
 	//2)  Lock Avoidance for adding newSymbolicState:: Parallel Breadth First Search for Discrete Jumps
 	//separate Read and Write Queue (pwlist.WaitingList)
-		std::list<symbolic_states::ptr> computeParallelBFSReachLockAvoid(std::list<abstractCE::ptr>& ce_candidates);
+	std::list<symbolic_states::ptr> computeParallelBFSReachLockAvoid(std::list<abstractCE::ptr>& ce_candidates);
 
 	/*
 	 * List of private variables now converted into public due to class inheritance framework
 	 */
-		std::list<initial_state::ptr> I; //converted to a list of initial state
-		int bound;
-		ReachabilityParameters reach_parameters;
-		hybrid_automata H; //todo:: have to change it to boost::ptr
-		int lp_solver_type_choosen;
-		std::pair<int, polytope::ptr> forbidden_set;
-		int Solver_GLPK_Gurobi_GPU;
+	std::list<initial_state::ptr> I; //converted to a list of initial state
+	int bound;
+	ReachabilityParameters reach_parameters;
+	hybrid_automata H; //todo:: have to change it to boost::ptr
+	int lp_solver_type_choosen;
+	std::pair<int, polytope::ptr> forbidden_set;
+	int Solver_GLPK_Gurobi_GPU;
 
-		void sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
-						template_polyhedra::ptr& reach_region);
+	void sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
+					template_polyhedra::ptr& reach_region);
 
 /*
  * Returns True if the newShiftedPolytope is containted in the symbolic_states denoted by Reachability_Region in the location
@@ -99,13 +96,13 @@ public:
  * Otherwise returns False
  * This interface is NOT threadSafe but it has exact computed result AND SEQUENTIAL algorithm has no issue with threadSafety
  */
-		bool isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+	bool isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
-		/*
-		 * Uses the templated (an over-approximated) newShiftedPolytope to check for containment in the Omegas of the flowpipe
-		 * This interface is threadSafe however it is over-approximated result
-		 */
-		bool templated_isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+	/*
+	 * Uses the templated (an over-approximated) newShiftedPolytope to check for containment in the Omegas of the flowpipe
+	 * This interface is threadSafe however it is over-approximated result
+	 */
+	bool templated_isContainted(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
 private:
 	//initial_state::ptr I;

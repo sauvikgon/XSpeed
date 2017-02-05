@@ -11,9 +11,10 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	 * For algorithm (Seq-SF, Par-SF and Time-Slice) only the Algorithm-Type/user_options.get_algorithm decides to execute
 	 */
 	 //Sequential PostC and PostD
+
 	if ((user_options.get_algorithm() == 1)
 			|| (user_options.get_algorithm() == 2)
-			|| (user_options.get_algorithm() == 3) || (user_options.get_algorithm() == 6)) {
+			|| (user_options.get_algorithm() == 3) || (user_options.get_algorithm() == 6) ) {
 		//sequentialSF reach;
 		reachability reach_SEQ_BFS;	//user_options.get_algorithm decides to choose Sequential Algorithm
 		reach_SEQ_BFS.setReachParameter(Hybrid_Automata, init_state, reach_parameters,
@@ -33,7 +34,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 			std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
 		}
 
-		Symbolic_states_list = reach_SEQ_BFS.computeSeqentialBFSReach(ce_candidates);
+		Symbolic_states_list = reach_SEQ_BFS.computeSequentialBFSReach(ce_candidates);
 
 	} else if (user_options.get_algorithm() == 4) { //Adaptation of Gerard J. Holzmann's algorithm (Seq PostC and PBFS)
 		agjh reach_AGJH;
