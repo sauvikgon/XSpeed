@@ -57,9 +57,9 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 					"1. Box Directions (Set to default)\n"
 					"2. Octagonal Directions \n"
 					"n. 'n' uniform Directions \n")
-	("time-horizon", po::value<double>(), "Set the Time horizon for the flowpipe computation per Location(Local time).")
-	("time-step", po::value<double>(), "Set the sampling time for the flowpipe computation.")
-	("transition-size", po::value<int>(), "Set the maximum number of Jumps(0 for no jump(breadth=1), 1 for first jump(breadth=2).")
+	("time-horizon", po::value<double>(), "Set the local time horizon of flowpipe computation.")
+	("time-step", po::value<double>(), "Set the sampling time of flowpipe computation.")
+	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking (0 for only postC)")
 
 	("algo,a",po::value<int>()->default_value(1), "Set the algorithm\n"
 			"1/seq-SF -- Sequential Algorithm (both PostC and PostD are sequential) (Set to default)\n"
@@ -258,27 +258,20 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				return 0;
 			}
 		}
-		//std::cout << " transition size " << vm.count("transition-size") << " configAssigned is " << isConfigFileAssigned << std::endl;
-		if (vm.count("transition-size") && isConfigFileAssigned == false) { //Compulsory Options
-		//if (vm.count("transition-size")) { //Compulsory Options
-		//	std::cout << "yes setting " << std::endl;
-			user_options.set_bfs_level(vm["transition-size"].as<int>());
-			//std::cout << "bfs level is " << user_options.get_bfs_level()<< std::endl;
+		if (vm.count("depth") && isConfigFileAssigned == false) { //Compulsory Options
+			user_options.set_bfs_level(vm["depth"].as<int>());
 			if (user_options.get_bfs_level() < 0) {
 				std::cout<< "Invalid bfs level specified, a positive number expected\n";
 				return 0;
 			}
 		}
-		//else if (isConfigFileAssigned == false) {
-		//std::cout<<"yes"<<std::endl;
 		else if (user_options.get_model() != 15) {
-			std::cout << "Missing transition-size option\n";
+			std::cout << "Missing depth option\n";
 			return 0;
 		}
 		if ((user_options.get_model() == 3 || user_options.get_model() == 4)
 				&& user_options.get_bfs_level() != 0) {
-			std::cout
-					<< "Invalid transition size. (Model 3 and 4 transition-size=0)\n";
+			std::cout << "Invalid depth. Only depth 0 permitted \n";
 			exit(0);
 		}
 		if (vm.count("output-variable")) {
@@ -295,17 +288,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				//std::cout << "Output Variable = " << output_vars[index] << "\n";
 				index++;
 			}
-
-			/*unsigned int x1 = Hybrid_Automata.get_index(output_vars[0]);
-			unsigned int x2 = Hybrid_Automata.get_index(output_vars[1]);
-			//std::cout << "yes2" << std::endl;
-			user_options.set_first_plot_dimension(x1);
-			user_options.set_second_plot_dimension(x2);
-			//std::cout << "yes3" << std::endl;
-			if (!(output_vars[2].empty())) {
-				unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
-				user_options.set_third_plot_dimension(x3);
-			}*/
 		}
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 		//if (vm.count("forbidden")) { //Compulsory Options but set to 1 by default

@@ -56,6 +56,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 	unsigned int num_flowpipe_computed=0;	//keeping track of number of flowpipe computed
 	while (!pw_list.isEmpty_WaitingList()) {
+
+		boost::timer::cpu_timer jump_time;
+		jump_time.start();	//Start recording the entire time for jump
+
 		symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states()); //required to be pushed into the Reachability_Region
 		initial_state::ptr U;
 		U = pw_list.WaitingList_delete_front();
@@ -327,18 +331,55 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
-					//newShiftedPolytope->print2file("test.txt",0,1);
+					int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 
+					if (is_ContainmentCheckRequired){	//Containtment Checking required
+						bool isContain=false;
+						/*
+						 * The function tempaltedDirectionHull() need not be done if we are using
+						 * some efficient library such as PPL we can directly check with the
+						 * actual polytope obtained after assignment operation i.e., newShiftedPolytope
+						 */
+						//Calling with the newShifted polytope to use PPL library
+						isContain = isContainted(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
 
-					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
-					newState->setTransitionId(transition_id); // keeps track of the transition_ID
-					newState->setParentPtrSymbolicState(S);
-					pw_list.WaitingList_insert(newState);
-					queue.push_back(BreadthLevel); //insert at REAR first Location
+						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
+							initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
+							newState->setTransitionId(transition_id); // keeps track of the transition_ID
+							newState->setParentPtrSymbolicState(S);
+							pw_list.WaitingList_insert(newState);
+							queue.push_back(BreadthLevel); //insert at REAR first Location
+						}
+
+					}else{	//Containtment Checking NOT Formed
+
+						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
+						newState->setTransitionId(transition_id); // keeps track of the transition_ID
+						newState->setParentPtrSymbolicState(S);
+						pw_list.WaitingList_insert(newState);
+						queue.push_back(BreadthLevel); //insert at REAR first Location
+					}
 				}
 			} //end of transition iterator
 		}
+		jump_time.stop();
+		/*
+		 * Stop recording the entire time for the jump/iteration
+		 * This time include time taken for flowpipe computation, safety verification, postD computation and containment check
+		*/
+		double wall_clock;
+		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
+
+		std::cout << "\nJump " << BreadthLevel - 1 << "..."
+				<< num_flowpipe_computed << " Symbolic States Passed, "
+				<< pw_list.getWaitingList().size() << " waiting ..."<< wall_clock <<" seconds";
+
 	} //end of while loop checking waiting_list != empty
+
+	if (BreadthLevel<=bound){	//did not reach to the assigned bound
+			std::cout<<"\n\nFound Fix-point after "<<BreadthLevel - 1<<" Jumps!!!\n";
+	}
 
 	cout << "\n ***************************************************************************\n";
 	cout << "\nMaximum Iterations Completed = " << num_flowpipe_computed << "\n";
