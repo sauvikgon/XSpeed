@@ -27,33 +27,25 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		SetBouncingBall_Parameters(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == TBBALL) {
-
 		//SetTimedBouncingBall_ParametersHystOutput(ha, init_state,	reach_parameters);
 		SetTimedBouncingBall_2initSet(ha, init_state, reach_parameters);
-
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {
-
 		SetHelicopter_Parameters3(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == FIVEDIMSYS) {
-
 		setSysParams(ha, init_state, reach_parameters);
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-
 		SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
-
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_2) {
-
 		SetNavigationModel2(ha, init_state, reach_parameters); //My own testing Model NAV2
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_3) {
-
 		SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
 
 	}

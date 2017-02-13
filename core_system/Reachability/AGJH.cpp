@@ -67,7 +67,6 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 				//Currently removed the Safety Check Section from here
 					std::list<initial_state::ptr> R2;
 					if (level < bound){	//Check level to avoid last PostD computation
-
 						R2 = postD(R1, PASSED);
 #pragma omp critical
 					{
@@ -214,7 +213,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	}
 
 	template_polyhedra::ptr reach_region;
-//	std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
+	//std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 
 	//parallelReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_parameters, reach_region, id);
 	reach_region = reachabilitySequential(NewTotalIteration,
@@ -297,9 +296,6 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				// @Amit: the newShifted satisfy the destination location invariant
 				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
-				/*
-				 * Now perform containment check similar to sequential algorithm.
-				 */
 				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
@@ -307,12 +303,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 					newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
-					isContain = templated_isContainted(destination_locID, newPoly, PASSED, lp_solver_type_choosen);//over-approximated but threadSafe
-
-
-
-					//Calling with the newShifted polytope to use PPL library
-					//isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, lp_solver_type_choosen);	//Not ThreadSafe
+					isContain = templated_isContained(destination_locID, newPoly, PASSED, lp_solver_type_choosen);//over-approximated but threadSafe
 
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));

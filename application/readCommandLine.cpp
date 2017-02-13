@@ -14,14 +14,8 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		ReachabilityParameters& reach_parameters) {
 
 	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)}
-	//	std::string bad_state; // string to capture the bad state description given by the user
-	//	std::list<abstractCE::ptr> ce_candidates; //object of class counter_example
-	//userOptions user_options;
-
 	//int number_of_times = 1; //Make this 1 for Memory Profiling
 	unsigned int number_of_streams = 1;
-	//	int lp_solver_type_choosen = 1; //	1 for GLPK and 2 for Gurobi
-	//	int Solver_GLPK_Gurobi_GPU = 3; //if Algorithm == 11 then (1 for GLPK; 2 for Gurobi; 3 for GPU)
 	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
 
 	bool isConfigFileAssigned = false, isModelParsed = false;
@@ -32,7 +26,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	if (argc == 1) { //No argument:: When Running directly from the Eclipse Editor
 		std::cout << "Missing arguments!\n";
 		std::cout << "Try XSpeed --help to see the command-line options\n";
-		//exit(0);
 		return 0;
 	}
 
@@ -97,8 +90,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			input.append(" ");
 		}
 	}
-	//std::cout << "The input is:" << input << std::endl;
-	//std::cout << "argc is:" << argc << std::endl;
 	if (argc > 1) { // Boost Options to be filled-up
 		if (vm.count("help")) {
 			cout << desc << "\n";
@@ -109,20 +100,14 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				config_filename = ""; //default set to empty
 		if (vm.count("include-path")) {
 			include_path = vm["include-path"].as<std::string>();
-			//std::cout << "Include Path is: " << include_path << "\n";
 		}
 
 		if (vm.count("config-file")) {
-
 			user_options.set_configFile(vm["config-file"].as<std::string>());
-			//std::cout << "Configuration file is: " << user_options.get_configFile() << "\n";
 		}
 		if (vm.count("model-file")) {
-
 			user_options.set_modelFile(vm["model-file"].as<std::string>());
-			//std::cout << "Model file is: " << user_options.get_modelFile() << "\n";
 		}
-
 		if (vm.count("model")) { //Compulsory Options but set to 1 by default
 			user_options.set_model(vm["model"].as<int>());
 			//if (user_options.get_model() < 1 || user_options.get_model() > 13) {
@@ -135,27 +120,19 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 		// ********************** Setting for Output file **********************************
 		std::string fileName, fullPath, fileWithPath;
-		//std::string fileName, fullPath;
-		//std::string fullPath,fileWithPath;
-		//cout << endl << "Working here 2\n";
 		if (vm.count("include-path")) {
 			fullPath = vm["include-path"].as<std::string>();
-			//std::cout << "Include Path is: " << fullPath << "\n";
 		} else {
 			fullPath = "./"; //default file path
 		}
 		fileWithPath.append(fullPath);
 		if (vm.count("output-file")) {
 			fileName = vm["output-file"].as<std::string>();
-			//std::cout << "fileName is: " << fileName << "\n";
 		} else {
 			fileName = "out.txt";
 		}
 		fileWithPath.append(fileName);
-		//std::cout << "fileWithPath is: " << fileWithPath << "\n";
 		stFileNameWithPath = fileWithPath.c_str();
-		//std::cout << "fileWithPath is: " << fileWithPath << "\n";
-		//std::cout << "stFileNameWithPath = " << stFileNameWithPath << "\n";
 		// ********************** Setting for Output file Done **********************************
 
 		if (vm.count("model-file") && vm.count("config-file")
@@ -172,12 +149,9 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout << "Translating user model with Hyst\n";
 				std::string cmdStr, replacingFile, SingleSpace = " ", projLocation,
 						java_exeFile;
-
-			//todo:: proper path to be handled from the relative/current installed location of the software
 			replacingFile = "./user_model.cpp";
 			//replacingFile = "../src/Hybrid_Model_Parameters_Design/user_model/user_model.cpp";
 			java_exeFile = "java -jar";
-
 			cmdStr.append(java_exeFile);
 			cmdStr.append(SingleSpace);
 			cmdStr.append("./bin/Hyst-XSpeed.jar -t xspeed \"\" -o");
@@ -190,55 +164,23 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			const char *st, *st2, *st3, *st4, *st5;
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
-			//std::cout << "Creating user_model object" << std::endl;
-			//clock_t tStart = clock();
-			//boost::timer::cpu_timer tStart,t2;
-			//tStart.start();
 			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
 			//system("g++ -c -I../src/ -I../Hybrid_Model_Parameters_Design/user_model/ user_model.cpp -o user_model.o");
-			//std::cout << "Done user_model.o now XSpeed.o" << std::endl;
-			/*tStart.stop();
-			 double wall_clock, user_clock, system_clock;
-			 wall_clock = tStart.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-			 user_clock = tStart.elapsed().user / 1000000;
-			 system_clock = tStart.elapsed().system / 1000000;
-			 std::cout<<"Time taken to build user_model.cpp: wall "<<wall_clock<<"user clock"<<user_clock<<"system clock"<<system_clock<<std::endl;
-			 std::cout<<"Done creating user model object now xspeed object going on"<<std::endl;
-			 */
-			//clock_t tStart2 = clock();
-			//t2.start();
-			system(
-					"g++ -L./lib/ user_model.o -lXSpeed -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
-			/*t2.stop();
-			 wall_clock = t2.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-			 user_clock = t2.elapsed().user / 1000000;
-			 system_clock = t2.elapsed().system / 1000000;
-			 //std::cout<<"Time taken to build user_model.o to XSpeed.o: "<<((double)(clock() - tStart2)/CLOCKS_PER_SEC)<<std::endl;
-			 std::cout<<"Time taken to build user_model.cpp: wall "<<wall_clock<<" user clock:"<<user_clock<<" system clock:"<<system_clock<<std::endl;
-			 */
+			system("g++ -L./lib/ user_model.o -lXSpeed -lppl -lgmp -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
 			string cmdStr1;
-			//std::cout << "Done xspeed.o now Gonna rebuild now" << std::endl;
 			cmdStr1.append("./XSpeed.o --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(stFileNameWithPath);
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(input);
 			system(cmdStr1.c_str());
-			//std::cout << "Rebuilding is done" << std::endl;
 			exit(0);
 		}
-		//std::cout << "yes" << std::endl;
-
 		if (vm.count("model-file") && vm.count("config-file")
 				&& user_options.get_model() == 15) { //This condition specifies Recursive call of XSpeed
-				//isConfigFileAssigned=false;
-				//std::cout<<"Going in user model now"<<std::endl;
 			user_model(Hybrid_Automata, init_state, reach_parameters,
 					user_options);
-			//std::cout<<"Done user model"<<std::endl;
 			isModelParsed = true;
-			//std::cout << "yes middle" << std::endl;
-			//std::cout<<"reach_patimestep:"<<reach_parameters.time_step<<std::endl;
 			if (reach_parameters.time_step == 0
 					&& reach_parameters.Iterations == 0) {
 				std::cout
@@ -247,11 +189,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				exit(0);
 			}
 		}
-
-		//std::cout << "yes2" << std::endl;
-
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-		//if (vm.count("directions")) { //Compulsory Options but set to 1 by default
 			user_options.set_directionTemplate(vm["directions"].as<int>());
 			if (user_options.get_directionTemplate() <= 0) {
 				std::cout << "Invalid Directions option specified\n";
@@ -285,30 +223,25 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			for (tokenizer::iterator tok_iter = tokens.begin();
 					tok_iter != tokens.end(); ++tok_iter) {
 				output_vars[index] = (std::string) (*tok_iter);
-				//std::cout << "Output Variable = " << output_vars[index] << "\n";
 				index++;
 			}
 		}
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-		//if (vm.count("forbidden")) { //Compulsory Options but set to 1 by default
 			user_options.set_forbidden_state(vm["forbidden"].as<std::string>());
 		}
 
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
-		//if (vm.count("time-horizon")) { //Compulsory Options
 			user_options.set_timeHorizon(vm["time-horizon"].as<double>());
 			if (user_options.get_timeHorizon() <= 0) { //for 0 or negative time-bound
-				std::cout
-						<< "Invalid time-horizon option specified, A positive non zero bound expected\n";
+				std::cout << "Invalid time-horizon option specified, A positive non zero bound expected\n";
 				return 0;
 			}
-		} //else if (isConfigFileAssigned == false) {
+		}
 		else if (user_options.get_model() != 15) {
 			std::cout << "Missing time-horizon option\n";
 			return 0;
 		}
 		if (vm.count("time-step") && isConfigFileAssigned == false) { //Compulsory Options
-		//if (vm.count("time-step")) { //Compulsory Options
 			user_options.set_timeStep(vm["time-step"].as<double>());
 			if (user_options.get_timeStep() > 0) {
 				//std::cout << "\niterations_size = " << iterations_size;
@@ -325,21 +258,18 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		//Algorithm Preference
 		if (vm.count("algo")) {
 			user_options.set_algorithm(vm["algo"].as<int>());
-			//std::cout << "algo = " << user_options.get_algorithm() << std::endl;
-			if (user_options.get_algorithm()
-					< 0|| user_options.get_algorithm() > MAX_ALGO) {
+			if (user_options.get_algorithm()< 0|| user_options.get_algorithm() > MAX_ALGO) {
 				std::cout << "Invalid algorithm option specified\n";
 				return 0;
 			}
 		} else if (user_options.get_model() != 15) {
-			std::cout << "Missing algo option\n";
+			std::cout << "Missing --algo option\n";
 			return 0;
 		}
 		if (user_options.get_algorithm() == 3) { //this argument will be set only if algorithm==time-slice or PAR_ITER
 			if (vm.count("time-slice")) { //Compulsory Options if algorithm-type==Time-Slice(4)
 				int partition_size = vm["time-slice"].as<int>();
 				if (partition_size > 0) {
-					//Total_Partition = partition_size;
 					user_options.setTotalSliceSize(partition_size);
 				} else { //for 0 or negative time-slice
 					std::cout << "Invalid time-slice option specified\n";
@@ -367,12 +297,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
 		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
 				forbidden_set);
-		//std::cout<<"Running user_model"<<std::endl;
-		//user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
-
-		//	if ((output_vars[0]>-1))
-		//		std::cout << "Wrong output variables" << std::endl;
-		//	else {
 		if(output_vars[0].empty() && output_vars[1].empty())
 		{
 			std::cout<<"Output variables not specified.\n"<<std::endl;
@@ -383,18 +307,14 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 		unsigned int x1 = Hybrid_Automata.get_index(output_vars[0]);
 		unsigned int x2 = Hybrid_Automata.get_index(output_vars[1]);
-		//std::cout<<"yes2"<<std::endl;
-			user_options.set_first_plot_dimension(x1);
-			user_options.set_second_plot_dimension(x2);
-		//	std::cout<<"yes3"<<std::endl;
-			if (!(output_vars[2].empty())) {
-						unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
-						user_options.set_third_plot_dimension(x3);
-					}
-		//	std::cout<<"yes4"<<std::endl;
-			if (!user_options.get_forbidden_state().empty())
-				forbidden_set.second->print2file("./bad_poly", x1, x2);
-
+		user_options.set_first_plot_dimension(x1);
+		user_options.set_second_plot_dimension(x2);
+		if (!(output_vars[2].empty())) {
+			unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
+			user_options.set_third_plot_dimension(x3);
+		}
+		if (!user_options.get_forbidden_state().empty())
+			forbidden_set.second->print2file("./bad_poly", x1, x2);
 	}
 	return 1;
 }

@@ -222,20 +222,6 @@ int main(int argc, char *argv[]) {
 	fileWithPath1.append(fileName);
 	stFileNameWithPath = fileWithPath1.c_str();
 	std::cout << "FileName with Path = " << stFileNameWithPath << "\n";
-
-	/*std::string fileName1, fullPath1, fileWithPath1;
-	fullPath1 = "./"; //default file path
-	fileWithPath1.append(fullPath1);
-	if (vm.count("output-file")) {
-		fileName1 = vm["output-file"].as<std::string>();
-	} else {
-		fileName1 = "out.txt";
-	}
-	fileWithPath1.append(fileName1);
-	//std::cout << "fileWithPath is: " << fileWithPath << "\n";
-	stFileNameWithPath = fileWithPath1.c_str();
-	//std::cout << "fileWithPath is: " << fileWithPath1 << "\n";
-	std::cout << "FileName with Path = " << stFileNameWithPath << "\n";*/
 // ********************** Setting for Output file Done **********************************
 
 	outFile.open(stFileNameWithPath);

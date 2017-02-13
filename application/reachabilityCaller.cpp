@@ -25,11 +25,23 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 			std::cout << "\nRunning sequential BFS.\n";
 		} else if (user_options.get_algorithm() == 2) { //ParallelSF reach;
 			//Parallel PostC using Lazy SF algorithm and Sequential PostD
-			std::cout
-					<< "\nRunning parallel PostC using lazy SF algorithm and sequential PostD.\n";
+			std::cout << "\nRunning parallel PostC using lazy SF algorithm and sequential PostD.\n";
 		} else if (user_options.get_algorithm() == 3) { //Parallel PostC using Time-Slice algorithm and Sequential PostD
-			std::cout
-					<< "\nRunning parallel PostC using Time-Slice algorithm and sequential PostD.\n";
+			std::cout << "\nRunning parallel PostC using Time-Slice algorithm and sequential PostD.\n";
+			/* **** Best place to check invertible matrix A *** */
+			for (std::list<initial_state::ptr>::iterator i=init_state.begin();i!=init_state.end();i++){
+				location::ptr l = Hybrid_Automata.getLocation((*i)->getLocationId());	//Checking only on initial locations
+				if (!l->getSystem_Dynamics().isEmptyMatrixA) {
+					if (!l->getSystem_Dynamics().MatrixA.isInvertible()){
+						std::cout << "\nDynamics Matrix A is not invertible\n";
+						exit(1); //This algorithm Does not support it.
+					}
+				}/* else {
+					std::cout << "\nFlow Dynamics Matrix A does not exists!!!\n";
+					template_polyhedra::ptr poly_emptyp;
+					reach_region = poly_emptyp; //returning an empty reach_region for this location
+				}*/
+			}
 		} else if (user_options.get_algorithm() == 6) { //gpu-postc -- PostC in GPU and Sequential BFS
 			std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
 		}
@@ -60,7 +72,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 				user_options.getTotalSliceSize(), lp_solver_type_choosen, user_options.getStreamSize(),
 				Solver_GLPK_Gurobi_GPU, forbidden_set);
 		std::cout<< "\nRunning Asynchronous parallel BFS algorithm.\n";
-//		Symbolic_states_list = reach.reachComputeAsynBFS(ce_candidates);
+		Symbolic_states_list = reach.reachComputeAsynBFS(ce_candidates);
 	}
 }
 

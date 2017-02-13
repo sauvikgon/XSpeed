@@ -102,7 +102,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			location::ptr current_location;
 			current_location = H.getLocation(location_id);
 			string name = current_location->getName();
-			//	cout<<"Location Name = "<< name<<"\n";
+		//	cout<<"Location Name = "<< name<<"\n";
 			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
 					|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0))
 				continue; //do not compute the continuous reachability algorithm
@@ -139,7 +139,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			LoadBalanceDS[id].symState_ID = id;
 			LoadBalanceDS[id].reach_param = reach_parameter_local;
 		}	//END of count FOR-LOOP  -- reach parameters computed
-
+//std::cout<<"\nbefore flowpipe cost Computation ";
 #pragma omp parallel for // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) { //separate parameters assignment with Invariant check and preLoadBalanceReachCompute task
 			unsigned int NewTotalIteration;
@@ -162,48 +162,60 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 				//cout<<"Invariant setting Done\n";
 			}else
 				LoadBalanceDS[id].newIteration = LoadBalanceDS[id].reach_param.Iterations; //Important to take care
-			//std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
+		//	std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 		}	//END of count FOR-LOOP  -- invariant boundary check done
 
 		int numCoreAvail = 1;
 		if (numCores >= count)
 			numCoreAvail = numCores - count;
-
+	//	std::cout<<" :: before flowpipe pre-reach compute ";
 		#pragma omp parallel for //num_threads(count)
 		for (unsigned int id = 0; id < count; id++) {
 			math::matrix<float> listX0, listU;
 			//Generation of Directions which can be a nested parallelism
-			preLoadBalanceReachCompute(LoadBalanceDS[id],numCoreAvail);	// Step 1
+			preLoadBalanceReachCompute(LoadBalanceDS[id], numCoreAvail);	// Step 1
 			//Todo:: if newIteration is <= 1 than do not store this flow-pipe details in LoadBalanceDS
 			// and accordingly reduce count or handle while computing LPsolver
 		} //END of count FOR-LOOP
-
+		//std::cout<<" :: before flowpipe reach compute ";
 		parallelLoadBalance_Task(LoadBalanceDS);//Step 2:  An appropriate combination of parallel with sequential GLPK object is used.
 	//	omp_set_nested(1); //enable nested parallelism
 
 #pragma omp parallel for // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) {
+
+			/*if (LoadBalanceDS[id].newIteration <= 1){
+				// ToDo:: also handle this in parallelLoadBalance_Task() function
+				//Create a template_polyhedra of only one Omega from the initial_set (ie LoadBalanceDS.X0)
+
+				template_polyhedra::ptr reachRegion = template_polyhedra::ptr(new template_polyhedra());
+				reachRegion = polytopeTo_templatepolyhedra(LoadBalanceDS[id]);
+				S[id]->setContinuousSetptr(reachRegion);
+			}else{
+				S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id], numCoreAvail)); // Step 3
+			}*/
 			S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id], numCoreAvail)); // Step 3
 		}
-
+		//std::cout<<":: before reach substitute "<<std::endl;
 //  ********************* POST_C computation Done ********************
-sym_passed = sym_passed + count;
+		sym_passed = sym_passed + count;
 
 		bool foundUnSafe = false;
 		for (unsigned int index = 0; index < count; index++) {
+			//std::cout<<"Yes here"<<std::endl;std::cout<<"TotalIterations() = "<<S[index]->getContinuousSetptr()->getTotalIterations()<<std::endl;
 			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0) { //computed reach_region is NOT empty
 				Reachability_Region.push_back(S[index]);
 			}
 		}
 		number_times++; //One Level or one Breadth Search over
-
+		//std::cout<<":: number_times = "<<number_times;
 		if (number_times > bound) {
 			levelcompleted = true; //check to see how many jumps have been made(i.e., number of discrete transitions made)
 		}
 		/*if (levelcompleted || foundUnSafe) { //any true
 			break; //OUT FROM WHILE LOOP 	//no need to compute rest of the locations
 		}*/
-
+		//std::cout<<":: before PostD computation ";
 
 std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 //  ***************** Load Balanced POST_D computation Begins::Has 3 Steps ***********************************
@@ -305,7 +317,7 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 
 							polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 							newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
-							isContain = templated_isContainted(loadBalPostD[id].dest_locID[trans], newPoly, Reachability_Region, lp_solver_type_choosen);//over-approximated but threadSafe
+							isContain = templated_isContained(loadBalPostD[id].dest_locID[trans], newPoly, Reachability_Region, lp_solver_type_choosen);//over-approximated but threadSafe
 
 
 							//Calling with the newShifted polytope to use PPL library This is NOT ThreadSafe
@@ -368,19 +380,17 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	template_polyhedra::ptr reachableRegion; //template_polyhedra::ptr reachRegion;
 
+
 /*	boost::timer::cpu_timer reachLoop_time;
 	reachLoop_time.start();*/
 	unsigned int numVectors = LoadBalanceDS.reach_param.Directions.size1(); //size2 or the dimension will be some for all sym_state
-	int num_inv =
-			LoadBalanceDS.current_location->getInvariant()->getColumnVector().size(); //number of Invariant's constriants
+	int num_inv = LoadBalanceDS.current_location->getInvariant()->getColumnVector().size(); //number of Invariant's constriants
 	math::matrix<double> inv_directions;
-	inv_directions =
-			LoadBalanceDS.current_location->getInvariant()->getCoeffMatrix();
+	inv_directions = LoadBalanceDS.current_location->getInvariant()->getCoeffMatrix();
 	std::vector<double> inv_bounds(num_inv);
-	inv_bounds =
-			LoadBalanceDS.current_location->getInvariant()->getColumnVector();
+	inv_bounds = LoadBalanceDS.current_location->getInvariant()->getColumnVector();
 
-	if (LoadBalanceDS.newIteration <= 1) {
+	if (LoadBalanceDS.newIteration < 1) {	//MOdified due to error on nav04.xml (from <= to < like in algo 4,7 etc)
 		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
@@ -404,8 +414,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		} else { //
 			index_X0 = eachDirection * LoadBalanceDS.newIteration + eachDirection; //only X0(list_X0) has 2 directions for first-iteration
 		}
-		bool U_empty =
-				LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty();
+		bool U_empty = LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty();
 		if (!U_empty) {
 			index_U = eachDirection * LoadBalanceDS.newIteration;
 		}
@@ -499,14 +508,13 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 	if (LoadBalanceDS.current_location->isInvariantExists() == true) { //if invariant exist. Computing
 
 		math::matrix<double> inv_sfm;
+
 		inv_sfm.resize(num_inv, LoadBalanceDS.newIteration);
 		for (int eachInvDirection = 0; eachInvDirection < num_inv; eachInvDirection++) {
 			for (unsigned int i = 0; i < LoadBalanceDS.newIteration; i++) {
 				inv_sfm(eachInvDirection, i) = inv_bounds[eachInvDirection];
-
 			}
 		}
-
 		reachableRegion = template_polyhedra::ptr(new template_polyhedra());
 		reachableRegion->setTemplateDirections(LoadBalanceDS.reach_param.Directions);
 		reachableRegion->setMatrix_InvariantBound(inv_sfm);
@@ -517,11 +525,57 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		reachableRegion->setMatrixSupportFunction(MatrixValue);
 		reachableRegion->setTemplateDirections(LoadBalanceDS.reach_param.Directions);
 	}
-
 	return reachableRegion;
-
 }
 
+template_polyhedra::ptr tpbfs::polytopeTo_templatepolyhedra(LoadBalanceData LoadBalanceDS) {
+	//convert the LoadBalanceDS.X0 to templated_polyhedra
+	template_polyhedra::ptr reachableRegion;
+
+
+	lp_solver lp(lp_solver_type_choosen);
+	lp.setMin_Or_Max(2);//maximize
+	lp.setConstraints(LoadBalanceDS.X0->getCoeffMatrix(), LoadBalanceDS.X0->getColumnVector(), LoadBalanceDS.X0->getInEqualitySign());
+
+	math::matrix<double> MatrixValue(LoadBalanceDS.reach_param.Directions.size1(), 1); //only 1 Omega
+
+	for (int Direction = 0; Direction < LoadBalanceDS.reach_param.Directions.size1(); Direction++) {
+		std::vector<double> dir(LoadBalanceDS.X0->getSystemDimension());
+		for (unsigned int i = 0; i < LoadBalanceDS.reach_param.Directions.size2(); i++) {
+			dir[i] = LoadBalanceDS.reach_param.Directions(Direction, i);
+		}
+		MatrixValue(Direction, 0) = lp.Compute_LLP(dir);
+	}
+
+	if (LoadBalanceDS.current_location->isInvariantExists() == true) { //if invariant exist. Computing
+		math::matrix<double> inv_directions;
+		inv_directions = LoadBalanceDS.current_location->getInvariant()->getCoeffMatrix();
+		int num_inv = LoadBalanceDS.current_location->getInvariant()->getColumnVector().size(); //number of Invariant's constriants
+		math::matrix<double> inv_sfm;
+		inv_sfm.resize(num_inv, LoadBalanceDS.newIteration); //LoadBalanceDS.newIteration is EQUAL to 1
+
+		reachableRegion = template_polyhedra::ptr(new template_polyhedra());
+		reachableRegion->setMatrixSupportFunction(MatrixValue);
+		reachableRegion->setTemplateDirections(LoadBalanceDS.reach_param.Directions);
+
+		for (int eachInvDirection = 0; eachInvDirection < inv_directions.size1(); eachInvDirection++) {
+			std::vector<double> dir(LoadBalanceDS.X0->getSystemDimension());
+			for (unsigned int i = 0; i < inv_directions.size2(); i++) {
+				dir[i] = inv_directions(eachInvDirection, i);
+			}
+			inv_sfm(eachInvDirection, 0) = lp.Compute_LLP(dir);
+		}
+		reachableRegion->setMatrix_InvariantBound(inv_sfm);
+		reachableRegion->setInvariantDirections(inv_directions);
+
+
+	} else {
+		reachableRegion = template_polyhedra::ptr(new template_polyhedra());
+		reachableRegion->setMatrixSupportFunction(MatrixValue);
+		reachableRegion->setTemplateDirections(LoadBalanceDS.reach_param.Directions);
+	}
+	return reachableRegion;
+}
 
 void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS) {
 //cout<<"Inside parallelLoadBalance_Task\n";
@@ -538,6 +592,11 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 	int dimension = LoadBalanceDS[0].List_dir_X0.size2();
 	unsigned int countTotal_X = 0, countTotal_U = 0;
 	for (int i = 0; i < LoadBalanceDS.size(); i++) { //for each symbolic-states
+
+		/*if (LoadBalanceDS[i].newIteration <= 1){	//Modified for nav04.xml
+			continue;
+		}*/
+
 		countTotal_X += LoadBalanceDS[i].List_dir_X0.size1();
 		//cout<<"   = "<<LoadBalanceDS[i].List_dir_X0.size1()<<std::endl;
 		countTotal_U += LoadBalanceDS[i].List_dir_U.size1();
@@ -657,7 +716,7 @@ unsigned int NewTotalIteration;
 	bool U_empty = false;
 
 	NewTotalIteration = LoadBalanceDS.newIteration;
-	if (NewTotalIteration <= 1) {
+	if (NewTotalIteration < 1) {	//Modified from <= 1  to   < 1  for nav04.xml
 		return;
 	}
 	if (LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set

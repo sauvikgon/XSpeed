@@ -55,6 +55,11 @@ private:
 		 */
 			std::list<symbolic_states::ptr> computeParallelLoadBalanceReach(std::list<abstractCE::ptr>& ce_candidates);
 
+		/*
+		 * Function that takes a polytope and returns a template_polyhedra with direction and invariant_direction
+		 */
+		template_polyhedra::ptr polytopeTo_templatepolyhedra(LoadBalanceData data);
+
 };
 
 

@@ -274,7 +274,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 					newShiftedPolytope->templatedDirectionHull(myData.reach_parameters.Directions, newPoly, myData.lp_solver_type_choosen);
-					isContain = templated_isContainted(destination_locID, newPoly, PASSED, myData.lp_solver_type_choosen);//over-approximated but threadSafe
+					isContain = templated_isContained(destination_locID, newPoly, PASSED, myData.lp_solver_type_choosen);//over-approximated but threadSafe
 
 					//Calling with the newShifted polytope to use PPL library
 					//isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, myData.lp_solver_type_choosen);
@@ -305,7 +305,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 /*
  * This is thread-safe but uses template_Hull of poly an over-approximated technique
  */
-bool templated_isContainted(int locID, polytope::ptr poly,
+bool templated_isContained(int locID, polytope::ptr poly,
 		std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen) {
 	bool contained = false;
 	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
@@ -345,7 +345,7 @@ return contained;
 /*
  * This is NOT ThreadSafe interface as it uses PPL library however it computes with exact shifted polytope
  */
-bool isContainted(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
+bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
 
 	bool contained = false;
 	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";

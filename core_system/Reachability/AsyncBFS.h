@@ -55,11 +55,11 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
  * Otherwise returns False
  * This interface is NOT threadSafe but it has exact computed result AND SEQUENTIAL algorithm has no issue with threadSafety
  */
-bool isContainted(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
 /*
  * This is thread-safe but uses template_Hull of poly an over-approximated technique
  */
-bool templated_isContainted(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+bool templated_isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
 #endif /* ASYNCBFS_H_ */

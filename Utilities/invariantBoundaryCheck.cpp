@@ -368,7 +368,8 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
-//	std::cout<<"\nTotal is "<<shm_NewTotalIteration <<std::endl;
+	newTotIters = shm_NewTotalIteration;	//by default full iterations. This is modified if smaller value found
+	//std::cout<<"\nTotal is "<<shm_NewTotalIteration <<std::endl;
 	int dimension = Initial->getSystemDimension();
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
 	// *************************** For Negative ************************************
@@ -539,7 +540,7 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 		} //end of eachInvariantDirection
 
 		loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
-
+		//std::cout<<"Loop Breaking at "<<loopIteration<<std::endl;
 		//ToDo:: check if any of the invariantCrossed is true exit and return the value
 		if (invariantCrossed == true){
 			break;
