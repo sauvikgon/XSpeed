@@ -162,7 +162,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 				//cout<<"Invariant setting Done\n";
 			}else
 				LoadBalanceDS[id].newIteration = LoadBalanceDS[id].reach_param.Iterations; //Important to take care
-		//	std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
+			//std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 		}	//END of count FOR-LOOP  -- invariant boundary check done
 
 		int numCoreAvail = 1;
@@ -177,26 +177,16 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			//Todo:: if newIteration is <= 1 than do not store this flow-pipe details in LoadBalanceDS
 			// and accordingly reduce count or handle while computing LPsolver
 		} //END of count FOR-LOOP
-		//std::cout<<" :: before flowpipe reach compute ";
-		parallelLoadBalance_Task(LoadBalanceDS);//Step 2:  An appropriate combination of parallel with sequential GLPK object is used.
+
+		LoadBalanceDataSF LoadBalanceData_sf;
+		parallelLoadBalance_Task(LoadBalanceDS, LoadBalanceData_sf);//Step 2:  An appropriate combination of parallel with sequential GLPK object is used.
 	//	omp_set_nested(1); //enable nested parallelism
 
 #pragma omp parallel for // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) {
-
-			/*if (LoadBalanceDS[id].newIteration <= 1){
-				// ToDo:: also handle this in parallelLoadBalance_Task() function
-				//Create a template_polyhedra of only one Omega from the initial_set (ie LoadBalanceDS.X0)
-
-				template_polyhedra::ptr reachRegion = template_polyhedra::ptr(new template_polyhedra());
-				reachRegion = polytopeTo_templatepolyhedra(LoadBalanceDS[id]);
-				S[id]->setContinuousSetptr(reachRegion);
-			}else{
-				S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id], numCoreAvail)); // Step 3
-			}*/
-			S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id], numCoreAvail)); // Step 3
+			S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id], numCoreAvail, LoadBalanceData_sf, id)); // Step 3
 		}
-		//std::cout<<":: before reach substitute "<<std::endl;
+
 //  ********************* POST_C computation Done ********************
 		sym_passed = sym_passed + count;
 
@@ -284,16 +274,19 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 					for (std::list<polytope::ptr>::iterator it = polys.begin(); it != polys.end(); it++) {
 						intersectedRegion = (*it);
 						polytope::ptr newShiftedPolytope, newPolytope; //created an object here
-						newPolytope = intersectedRegion->GetPolytope_Intersection(loadBalPostD[id].guard_list[trans]); //Retuns only the intersected region as a single newpolytope. ****** with added directions
+
+
+
+						if (!loadBalPostD[id].guard_list[trans])
+							newPolytope = intersectedRegion->GetPolytope_Intersection(loadBalPostD[id].guard_list[trans]); //Retuns only the intersected region as a single newpolytope. ****** with added directions
+						else
+							newPolytope = intersectedRegion;
+					//	newPolytope = intersectedRegion->GetPolytope_Intersection(loadBalPostD[id].guard_list[trans]); //Retuns only the intersected region as a single newpolytope. ****** with added directions
 
 						/*newShiftedPolytope = post_assign_exact(newPolytope, loadBalPostD[id].assign_list[trans].Map,
 							loadBalPostD[id].assign_list[trans].b); */
 
-						math::matrix<double> test(
-								loadBalPostD[id].assign_list[trans].Map.size1(),
-								loadBalPostD[id].assign_list[trans].Map.size2());
-						if (loadBalPostD[id].assign_list[trans].Map.inverse(test)) //invertible?
-								{
+						if (loadBalPostD[id].assign_list[trans].Map.isInvertible()) { //invertible?
 							//std::cout << "Exact Post Assignment\n";
 							newShiftedPolytope = post_assign_exact(newPolytope,
 									loadBalPostD[id].assign_list[trans].Map,
@@ -375,14 +368,12 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 
 
 template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
-		LoadBalanceData& LoadBalanceDS, int numCoreAvail) {
+		LoadBalanceData& LoadBalanceDS, int numCoreAvail, LoadBalanceDataSF& LoadBalanceData_sf, unsigned int id) {
+
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	template_polyhedra::ptr reachableRegion; //template_polyhedra::ptr reachRegion;
 
-
-/*	boost::timer::cpu_timer reachLoop_time;
-	reachLoop_time.start();*/
 	unsigned int numVectors = LoadBalanceDS.reach_param.Directions.size1(); //size2 or the dimension will be some for all sym_state
 	int num_inv = LoadBalanceDS.current_location->getInvariant()->getColumnVector().size(); //number of Invariant's constriants
 	math::matrix<double> inv_directions;
@@ -426,17 +417,17 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		unsigned int loopIteration = 0;
 
 		//  ************** Omega Function   ********************
-		res1 = LoadBalanceDS.sf_X0[index_X0]; //X0->SF(direction)			//	0
+		res1 = LoadBalanceData_sf.sf_X0(index_X0,id); //X0->SF(direction)			//	0
 
-		term3b = (double) LoadBalanceDS.sf_UnitBall[index_X0]; //  needed  0
+		term3b = (double) LoadBalanceData_sf.sf_UnitBall(index_X0,id); //  needed  0
 		if (!LoadBalanceDS.current_location->getSystem_Dynamics().isEmptyC) {
-			term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_dotProduct[index_X0];
+			term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceData_sf.sf_dotProduct(index_X0,id);
 		}
 		index_X0++; //	made 1
-		term1 = LoadBalanceDS.sf_X0[index_X0]; //X0->SF(phi_trans_dir)		//  1
+		term1 = LoadBalanceData_sf.sf_X0(index_X0,id); //X0->SF(phi_trans_dir)		//  1
 		index_X0++; //	made 2
 		if (!U_empty) {
-			term2 = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_U[index_U]; //U->SF(Btrans_dir)
+			term2 = LoadBalanceDS.reach_param.time_step * LoadBalanceData_sf.sf_U(index_U,id); //U->SF(Btrans_dir)
 			index_U++;
 		} else
 			term2 = 0;
@@ -471,16 +462,16 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 			//  ************** Omega Function   ********************
 			res1 = term1; ////replace
 
-			term3b = (double) LoadBalanceDS.sf_UnitBall[index_X0 - 1]; //Compute here	//needed 1
+			term3b = (double) LoadBalanceData_sf.sf_UnitBall(index_X0 - 1,id); //Compute here	//needed 1
 
 			if (!LoadBalanceDS.current_location->getSystem_Dynamics().isEmptyC) {
-				term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_dotProduct[index_X0 - 1];
+				term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceData_sf.sf_dotProduct(index_X0 - 1,id);
 			}
 			double term3, term3a, res2;
-			term1 = LoadBalanceDS.sf_X0[index_X0]; //X0->SF(phi_trans_dir)		//	2
+			term1 = LoadBalanceData_sf.sf_X0(index_X0,id); //X0->SF(phi_trans_dir)		//	2
 			index_X0++; // 	made 3
 			if (!U_empty) {
-				term2 = LoadBalanceDS.reach_param.time_step * LoadBalanceDS.sf_U[index_U]; //U->SF(Btrans_dir)
+				term2 = LoadBalanceDS.reach_param.time_step * LoadBalanceData_sf.sf_U(index_U,id); //U->SF(Btrans_dir)
 				index_U++;
 			} else {
 				term2 = 0;
@@ -577,7 +568,8 @@ template_polyhedra::ptr tpbfs::polytopeTo_templatepolyhedra(LoadBalanceData Load
 	return reachableRegion;
 }
 
-void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS) {
+void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS, LoadBalanceDataSF& LoadBalanceData_sf) {
+
 //cout<<"Inside parallelLoadBalance_Task\n";
 	int numCores = omp_get_num_procs(); //get the number of cores
 //	cout<<"numCores = "<<numCores<<std::endl;
@@ -593,31 +585,28 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 	unsigned int countTotal_X = 0, countTotal_U = 0;
 	for (int i = 0; i < LoadBalanceDS.size(); i++) { //for each symbolic-states
 
-		/*if (LoadBalanceDS[i].newIteration <= 1){	//Modified for nav04.xml
-			continue;
-		}*/
-
 		countTotal_X += LoadBalanceDS[i].List_dir_X0.size1();
 		//cout<<"   = "<<LoadBalanceDS[i].List_dir_X0.size1()<<std::endl;
 		countTotal_U += LoadBalanceDS[i].List_dir_U.size1();
 		// *********** resize all result vector  *********************
-		LoadBalanceDS[i].sf_X0.resize(LoadBalanceDS[i].List_dir_X0.size1()); // resize
-		LoadBalanceDS[i].sf_U.resize(LoadBalanceDS[i].List_dir_U.size1()); // resize
-		LoadBalanceDS[i].sf_UnitBall.resize(LoadBalanceDS[i].List_dir_X0.size1()); // resize
-		LoadBalanceDS[i].sf_dotProduct.resize(LoadBalanceDS[i].List_dir_X0.size1()); // resize
 	} //getCountTotal(LoadBalanceDS, countTotal_X, countTotal_U);
+
+	/*
+	 * result of Support Functions are stored in a matrix form
+	 * where (i,j) is the index of values stored with j the symbolic_state and i the result on the ith dir_X0
+	 */
+	LoadBalanceData_sf.sf_X0.resize(countTotal_X, LoadBalanceDS.size());
+	LoadBalanceData_sf.sf_UnitBall.resize(countTotal_X, LoadBalanceDS.size());
+	LoadBalanceData_sf.sf_dotProduct.resize(countTotal_X, LoadBalanceDS.size());
+	LoadBalanceData_sf.sf_U.resize(countTotal_U, LoadBalanceDS.size());
+
 // ************* Chunk_approach for polytope X ******************************
-	//cout << "countTotal_X = " << countTotal_X << std::endl;
-	/*if (countTotal_X <= size) {
-		chunk_size = (int)countTotal_X;	//todo:: may be do it sequential
-	} else
-		chunk_size = compute_chunk_size(countTotal_X);//todo: find an appropriate number of chunk-size based on the size of countTotal_X*/
 	if (countTotal_X < numCores)
 		chunk_size = 1;
 	else
 		chunk_size = numCores;
 	seq_LP =(unsigned int) (countTotal_X / chunk_size); //Last group/partition may not be equal if result is fraction
-	//cout<<"  chunk_size = "<<chunk_size <<"  seq_LP = "<<seq_LP<<std::endl;
+//	cout<<"  chunk_size = "<<chunk_size <<"  seq_LP = "<<seq_LP<<"   countTotal_X = "<<countTotal_X<<std::endl;
 
 #pragma omp parallel for
 	for (int i = 0; i < chunk_size; i++) { //number of partition for load balancing
@@ -636,21 +625,23 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 			lp.setConstraints(LoadBalanceDS[index].X0->getCoeffMatrix(), LoadBalanceDS[index].X0->getColumnVector(),
 					LoadBalanceDS[index].X0->getInEqualitySign());
 			//for (;(j < ub) && (oldIndex == index);){
+		//	std::cout<<"index= "<<index <<" and indexDir ="<<indexDir<<std::endl;
 			while (j < ub){
 				std::vector<double> dir(dimension);
 				for (int ind = 0; ind < dimension; ind++) {
 					dir[ind] = LoadBalanceDS[index].List_dir_X0(indexDir, ind);
 				}
-				LoadBalanceDS[index].sf_X0[indexDir] = lp.Compute_LLP(dir);	//support function of X0
+			//	cout<<j<<"\t";
+				LoadBalanceData_sf.sf_X0(indexDir, index) = lp.Compute_LLP(dir);	//support function of X0
 			//	cout<<LoadBalanceDS[index].sf_X0[indexDir]<<"\t";
 				// ******DotProduction and Support Function of UnitBall  *******
 				//TODO: MAKE DECISION TO KEEP IT OUTSIDE AT ONE LOOP-VALUE LIKE BEFORE
 				if (!LoadBalanceDS[index].current_location->getSystem_Dynamics().isEmptyC) {
-					LoadBalanceDS[index].sf_dotProduct[indexDir] = dot_product(LoadBalanceDS[index].current_location->getSystem_Dynamics().C,dir);
+					LoadBalanceData_sf.sf_dotProduct(indexDir,index) = dot_product(LoadBalanceDS[index].current_location->getSystem_Dynamics().C,dir);
 				}
-				LoadBalanceDS[index].sf_UnitBall[indexDir] = support_unitball_infnorm(dir);
+				LoadBalanceData_sf.sf_UnitBall(indexDir,index) = support_unitball_infnorm(dir);
 				// ******DotProduction and Support Function of UnitBall  *******
-				//cout<<j<<"\t";
+
 				j++;//next LP problem
 				search_SymState_dirsX0Index(j, LoadBalanceDS, index, indexDir);
 				if (oldIndex != index){
@@ -660,11 +651,12 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 		}//end-while	//cout<<"\n\n";
 	}//end of parallel
 // ************* Chunk_approach for polytope X ******************************
+	cout<<"Done on X!!!!\n";
 	bool U_empty;
 	U_empty = LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();//assuming all symbolic states has same setup for polytope U
 	if (!U_empty) {
 // ************* Chunk_approach for polytope U ******************************
-	//	cout<<"polytope U is NOT empty!!!!\n";
+		cout<<"polytope U is NOT empty!!!!\n";
 		if (countTotal_X <= numCores)
 			chunk_size = 1;
 		else
@@ -691,7 +683,7 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 					for (int ind = 0; ind < dimension; ind++) {
 						dir[ind] = LoadBalanceDS[index].List_dir_U(indexDir, ind);
 					}
-					LoadBalanceDS[index].sf_U[indexDir] = lp.Compute_LLP(dir);	//support function of U
+					LoadBalanceData_sf.sf_U(indexDir,index) = lp.Compute_LLP(dir);	//support function of U
 					//cout<<j<<"\t";
 					j++;//next LP problem
 					search_SymState_dirsUIndex(j, LoadBalanceDS, index, indexDir);
@@ -877,262 +869,3 @@ int count = loadBalPostD.size();
 }
 
 
-//Aggregrate All Flowpipe computation work into one BIG task and will run that in parallel either by multi-core CPU or GPU
-//This interface is not in use now.
-std::list<symbolic_states::ptr> tpbfs::computeParallelLoadBalanceReach(
-		std::list<abstractCE::ptr>& ce_candidates) {
-
-	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
-	int t = 0; //0 for Read and 1 for Write
-
-	std::vector < std::vector<pwlist::ptr> > Qpw_list(2); // QpwList[0] for read and QpwList[1] for write 	//cout << "Test 1\n";
-
-	unsigned int nos_initial_states=1;
-	nos_initial_states=I.size();	//retrieve the size of the number of initial states supplied by the user/model
-
-	Qpw_list[t].resize(nos_initial_states); //resize for the first symbolic_state
-	//cout << "Test 2\n";
-	int initialState_index=0;// first initial state
-	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++){
-
-		Qpw_list[t][initialState_index] = pwlist::ptr(new pwlist()); //have to instantiate it
-		Qpw_list[t][initialState_index]->WaitingList_insert(*(i));
-
-		initialState_index++; //next initial state
-	}
-
-	pwlist::ptr allPassedList; //so we create a permanent pwlist for storing only the passedList;
-	allPassedList = pwlist::ptr(new pwlist()); //have to instantiate it
-	int number_times = 0;
-	bool levelcompleted = false;
-	unsigned int iter_max = 1;
-	int numCores = omp_get_num_procs(); //get the number of cores
-
-	while (!isEmpty_Qpw_list(Qpw_list[t]) && (number_times <= bound)) { //	cout << "Test 5\n";
-	//	cout<<"Breadth - Level === "<<number_times<<"\n";
-//		boost::timer::cpu_timer t73;
-//		t73.start();
-		unsigned int count = getSize_Qpw_list(Qpw_list[t]); //get the size of PWList
-			cout << "\nCount = " << count << "\n";
-		std::vector < symbolic_states::ptr > S(count);
-		vector < initial_state::ptr > list_U(count); //SubList for parallel		//	cout << "Test 6\n";
-		list_U = getAllpw_list(Qpw_list, t, count, allPassedList); //All initial_state have been deleted //cout<<"Identifed pwList Done\n";
-		//cout<<"list_U = "<<list_U.size();
-
-		Qpw_list[t].resize(0);
-		//cout<<"Qpw_list[t].size() = "<<Qpw_list[t].size()<<std::endl;
-
-		Qpw_list[1 - t].resize(count); //resize to accommodate
-		for (int i = 0; i < count; i++) {
-			Qpw_list[1 - t][i] = pwlist::ptr(new pwlist()); //have to instantiate it
-		}
-//		t73.stop();
-//		double clock73;
-//		clock73 = t73.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-//		double return73 = clock73 / (double) 1000;
-//		std::cout << "\nHow Much queue delete  Time:Wall(Seconds) = "<< return73 << std::endl;
-
-		// ********************************* BFS Starts **********************************************************
-		//	cout << "Test 7\n";
-// ***************** DIRECTION and BIG_Task CREATION:: per breadth-level *****************
-		std::vector < LoadBalanceData > LoadBalanceDS(count);
-// ***************** DIRECTION and BIG_Task CREATION *****************
-
-		//omp_set_nested(1);	//enables nested parallelization
-#pragma omp parallel for // num_threads(count)
-		for (unsigned int id = 0; id < count; id++) {
-			initial_state::ptr U; //local
-			U = list_U[id]; //independent symbolic state to work with
-			discrete_set discrete_state; //local
-			polytope::ptr continuous_initial_polytope; //local
-			ReachabilityParameters reach_parameter_local; //local
-			int location_id = U->getLocationId();
-			discrete_state.insert_element(location_id);
-			continuous_initial_polytope = U->getInitialSet();
-			reach_parameter_local = reach_parameters;
-			reach_parameter_local.X0 = continuous_initial_polytope; //	cout<<"\nInside for Loop";
-			S[id] = symbolic_states::ptr(new symbolic_states());
-			S[id]->setDiscreteSet(discrete_state);
-			S[id]->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
-			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
-			location::ptr current_location;
-			current_location = H.getLocation(location_id);
-			string name = current_location->getName();
-			//	cout<<"Location Name = "<< name<<"\n";
-			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
-					|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0))
-				continue; //do not compute the continuous reachability algorithm
-			// ******************* Computing Parameters ************************ //current_location:: parameters alfa, beta and phi_trans
-			//cout<<"\nBefore Compute Alfa";
-			double result_alfa = compute_alfa(reach_parameter_local.time_step,
-					current_location->getSystem_Dynamics(), continuous_initial_polytope, lp_solver_type_choosen); //cout<<"\nCompute Alfa Done";
-			//cout<<"\nCompute alfa  = " << result_alfa;
-			double result_beta = compute_beta(current_location->getSystem_Dynamics(),
-					reach_parameter_local.time_step, lp_solver_type_choosen); // NO glpk object created here
-			//	cout<<"\nCompute Beta  = " << result_beta;
-			reach_parameter_local.result_alfa = result_alfa;
-			reach_parameter_local.result_beta = result_beta;
-			math::matrix<double> phi_matrix, phi_trans;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
-				current_location->getSystem_Dynamics().MatrixA.matrix_exponentiation(phi_matrix, reach_parameter_local.time_step);
-				phi_matrix.transpose(phi_trans);
-				reach_parameter_local.phi_trans = phi_trans;
-			}
-			math::matrix<double> B_trans;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
-				current_location->getSystem_Dynamics().MatrixB.transpose(B_trans);
-				reach_parameter_local.B_trans = B_trans;
-			}
-			// ******************* Computing Parameters Done *******************************
-// *************** POST_C computation ********** in 3 steps ***************
-			bool U_empty = false;
-			if (current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set
-				U_empty = true;
-			}
-			LoadBalanceDS[id].X0 = continuous_initial_polytope;
-			LoadBalanceDS[id].U = current_location->getSystem_Dynamics().U;
-			LoadBalanceDS[id].current_location = current_location;
-			LoadBalanceDS[id].symState_ID = id;
-			LoadBalanceDS[id].reach_param = reach_parameter_local;
-		}	//END of count FOR-LOOP  -- reach parameters computed
-
-#pragma omp parallel for // num_threads(count)
-		for (unsigned int id = 0; id < count; id++) { //separate parameters assignment with Invariant check and preLoadBalanceReachCompute task
-			unsigned int NewTotalIteration;
-			if (LoadBalanceDS[id].current_location->isInvariantExists()) {
-				InvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(), LoadBalanceDS[id].X0,
-						LoadBalanceDS[id].reach_param, LoadBalanceDS[id].current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
-				LoadBalanceDS[id].newIteration = NewTotalIteration; //Important to take care
-			}else
-				LoadBalanceDS[id].newIteration = LoadBalanceDS[id].reach_param.Iterations; //Important to take care
-
-			std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
-		}	//END of count FOR-LOOP  -- invariant boundary check done
-
-//		double cpu_usage; //including the directionComputation + SF_computation + substitute_Algo
-//		init_cpu_usage();//initializing the CPU Usage utility to start recording usages
-
-	//	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
-	//	omp_set_nested(1); //enable nested parallelism
-		int numCoreAvail = 1;
-		if (numCores >= count)
-			numCoreAvail = numCores - count;
-
-#pragma omp parallel for //num_threads(count)
-		for (unsigned int id = 0; id < count; id++) {
-			math::matrix<float> listX0, listU;
-			//	cout << "Test 8\n";
-			//Generation of Directions which can be a nested parallelism
-			preLoadBalanceReachCompute(LoadBalanceDS[id],numCoreAvail);	// Step 1
-			//	cout << "Test 9\n";
-			//Todo:: if newIteration is <= 1 than do not store this flow-pipe details in LoadBalanceDS
-			// and accordingly reduce count or handle while computing LPsolver
-		} //END of count FOR-LOOP
-		parallelLoadBalance_Task(LoadBalanceDS);
-		omp_set_nested(1); //enable nested parallelism
-
-#pragma omp parallel for // num_threads(count)
-		for (unsigned int id = 0; id < count; id++) {
-			S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id], numCoreAvail)); // Step 3
-		}
-//  ********************* POST_C computation Done ********************
-
-		bool foundUnSafe = false;
-	//this being a simple task of only pushing pointer into the "Reachability_Region" so separated from inside
-	//the omp parallel region to avoid having it inside the critical region
-		for (unsigned int index = 0; index < count; index++) {
-			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0) { //computed reach_region is NOT empty
-				Reachability_Region.push_back(S[index]);
-			}
-		}
-
-		number_times++; //One Level or one Breadth Search over
-
-		if (number_times > bound) {
-			levelcompleted = true; //check to see how many jumps have been made(i.e., number of discrete transitions made)
-		}
-		if (levelcompleted || foundUnSafe) { //any true
-			break; //OUT FROM WHILE LOOP 	//no need to compute rest of the locations
-		}
-
-#pragma omp parallel for // num_threads(count)
-		for (int id = 0; id < count; id++) {
-//  ************************************** POST_D computation Begins **********************************************************
-			template_polyhedra::ptr t_poly = S[id]->getContinuousSetptr();
-			if (t_poly->getTotalIterations() != 0) { //computed reach_region is empty && optimize computation
-				for (std::list<transition::ptr>::iterator trans =LoadBalanceDS[id].current_location->getOut_Going_Transitions().begin();
-						trans!= LoadBalanceDS[id].current_location->getOut_Going_Transitions().end(); trans++) { // get each destination_location_id and push into the pwl.waiting_list
-					int transition_id = (*trans)->getTransitionId();
-					location::ptr current_destination;
-					Assign current_assignment;
-					polytope::ptr gaurd_polytope;
-					//std::list < template_polyhedra::ptr > intersected_polyhedra;
-					polytope::ptr intersectedRegion; //created two objects here
-					discrete_set ds;
-					current_destination = H.getLocation((*trans)->getDestination_Location_Id());
-					string locName = current_destination->getName();
-					//	cout << "\nNext Loc ID = " << current_destination.getLocId() << " Location Name = " << locName << "\n";
-					gaurd_polytope = (*trans)->getGaurd();
-					current_assignment = (*trans)->getAssignT();
-					boost::timer::cpu_timer t100;
-					//this intersected_polyhedra will have invariant direction added in it
-					string trans_name = (*trans)->getLabel();
-					std::list<polytope::ptr> polys;
-					//intersected_polyhedra = t_poly->polys_intersectionParallel(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
-					polys = t_poly->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
-					//intersected_polyhedra =t_poly->polys_intersectionSequential(gaurd_polytope,lp_solver_type_choosen); //, intersection_start_point);
-					std::cout << "Intersected = " <<polys.size() << std::endl;
-					if (polys.size() > 0) { //there is intersection so new symbolic state will be inserted into the waitingList
-#pragma omp critical
-						{
-							iter_max += polys.size();
-						}
-					}
-					// Handle this later as In SpaceEx model we did not specified BAD or GOOD
-					if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0) || (locName.compare("FINAL") == 0)
-							|| (locName.compare("UNSAFE") == 0)) {
-						continue; //do not push into the waitingList
-					} //	std::cout << "Before calling getTemplate_approx\n";
-					int destination_locID = (*trans)->getDestination_Location_Id();
-					ds.insert_element(destination_locID);
-				//	cout << "\nNumber of Intersections = "<<intersected_polyhedra.size()<<std::endl;
-					for (std::list<polytope::ptr>::iterator it = polys.begin(); it != polys.end(); it++) {
-						//cout << "\nNumber of Intersections #1\n";
-
-						//intersectedRegion = (*it)->getTemplate_approx(lp_solver_type_choosen);
-						intersectedRegion = (*it);
-						//Returns a single over-approximated polytope from the list of intersected polytopes
-						polytope::ptr newShiftedPolytope, newPolytope; //created an object here
-						newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope); //Retuns only the intersected region as a single newpolytope. ****** with added directions
-						//std::cout << "Before calling post_assign_exact\n";
-						newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b); //initial_polytope_I = post_assign_exact(newPolytope, R, w);
-
-						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
-						newState->setTransitionId(transition_id); // keeps track of the transition_ID
-						newState->setParentPtrSymbolicState(S[id]);
-//#pragma omp critical
-//					{
-
-	// Todo:: we insert all the symbolic_states into the pwlist for computing FlowPipe iff 1) and 2) holds
-	// Step 1) the new current_destination.getLocID() is NOT in the Passed List and
-	// Step 2) the "New Initial Polytope" or "the newShiftedPolytope" is NOT contained in the FlowPipe of LocationID of step 1
-	//  as the FlowPipe in the same location will be same if the newShiftedPolytope is IN FlowPipe
-	// But if Step 1 holds and Step 2 does not then it will be inserted in pwlist even if the LocationID is in Passed List
-	//
-						Qpw_list[1 - t][id]->WaitingList_insert(newState); //RACE CONDITION HERE
-						//					}
-					} //end of multiple intersected region with guard
-					//cout<<"Size = "<< pwlist.getWaitingList().size()<<endl;
-				} //end of multiple transaction
-				  //Here we have again populated the pwlist for next-round's parallel process
-			} // End-if
-//  ************************************** POST_D computation Ends **********************************************************
-		} //parallel for-loop
-		t = 1 - t; //Switching Read/Write options for Qpw_list[1-t]
-		// ************************* BFS Ends *************************************
-	} //end of while loop checking waiting_list != empty
-	cout << "\n **********************************************************\n";
-	cout << "   *** Maximum Iterations Completed = " << iter_max << "  ***\n";
-	cout << "\n **********************************************************\n";
-	return Reachability_Region;
-}

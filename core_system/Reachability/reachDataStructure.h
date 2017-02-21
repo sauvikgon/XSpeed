@@ -32,6 +32,15 @@ struct LoadBalanceData{
 	ReachabilityParameters reach_param;	//placed here as it is comfortable here
 };
 
+//Additional Data structure used for POST_C computation in Load Balancing Algorithm
+//used matrix rows indicates the results of support functions and columns the symbolic_state (index) to avoid unven row size
+struct LoadBalanceDataSF{
+	math::matrix<double> sf_X0;	//Result Support Function on polytope X0 for List_dir_X0 for each symbolic_state;
+	math::matrix<double> sf_U;	//Result Support Function on polytope U for List_dir_U for each symbolic_state;
+	math::matrix<double>  sf_UnitBall;	//Result Support Function of UnitBall for List_dir_X0 for each symbolic_state;
+	math::matrix<double>  sf_dotProduct;	//Result dotProduct of List_dir_X0 and C (dynamic's expression + C) for each symbolic_state;
+};
+
 
 //Data structure used for POST_D computation in Load Balancing Algorithm
 struct LoadBalanceData_PostD{
