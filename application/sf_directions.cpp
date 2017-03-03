@@ -88,7 +88,7 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 		cores = numCoresAvail;
 
 //	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
-#pragma omp parallel for num_threads(cores)
+//#pragma omp parallel for num_threads(cores)
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 		unsigned int index_X, indexU; //making the index suitable for parallelizing
 		if (!U_empty) {

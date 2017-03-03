@@ -19,9 +19,11 @@ public:
 
 private:
 
-		template_polyhedra::ptr substitute_in_ReachAlgorithm(LoadBalanceData& LoadBalanceDS, int numCoreAvail);
+	template_polyhedra::ptr substitute_in_ReachAlgorithm(
+			LoadBalanceData& LoadBalanceDS, int numCoreAvail,
+			LoadBalanceDataSF& LoadBalanceData_sf, unsigned int id);
 
-		void parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS);
+		void parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS, LoadBalanceDataSF& LoadBalanceData_sf);
 
 		/*void preLoadBalanceReachCompute(ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics,
 				supportFunctionProvider::ptr Initial, polytope::ptr invariant, bool isInvariantExist, math::matrix<float>& List_dir_X0,
@@ -46,14 +48,6 @@ private:
 		 */
 		void templateApproximation(std::vector<LoadBalanceData_PostD>& loadBalPostD);
 
-
-		/*
-		 * Both 1) and 2) method resulted in same performance as Work-Load for flowpipe computation is uneven
-		 * So 3) will aggregrate all flowpipe computation work into one BIG task and will run that in
-		 * parallel by multi-core CPU or GPU
-		------------- This interface is not in use now.
-		 */
-			std::list<symbolic_states::ptr> computeParallelLoadBalanceReach(std::list<abstractCE::ptr>& ce_candidates);
 
 		/*
 		 * Function that takes a polytope and returns a template_polyhedra with direction and invariant_direction
