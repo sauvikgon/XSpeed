@@ -250,8 +250,60 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			Axplusb[j] = Axplusb[j] + d.C[j];
 		}
 
-		std::vector<double> grad_x(dim,0), grad_t(dim,0);
-		std::vector<double> grad_gx(dim,0), grad_gt(dim,0);
+		// For validation, add the distance of trace end points to the invariant
+
+		std::vector<double> inv_dist_grad(dim,0);
+		cost+= I->point_distance(y[i]); // end point distance to invariant added to cost
+		inv_dist_grad = dist_grad(y[i], I);
+		for(unsigned int j=0;j<dim;j++) {
+			double dist_gradx_j = 0;
+			for(unsigned int k=0;k<dim;k++)
+			{
+				dist_gradx_j +=  inv_dist_grad[k] * expAt(k,j);
+			}
+			deriv[i*dim+j] += dist_gradx_j;
+			//debug code
+			if(j==5 && i==0){
+				std::cout << "computed derivative algorithmically [d(cost)/d(x0[0])]:" << dist_gradx_j << std::endl;
+				double grad_numeric;
+				double fx = I->point_distance(y[i]);
+				std::vector<double> delta_y(dim,0);
+				std::vector<double> vh(v);
+				vh[j]+=1e-6;
+				delta_y = ODESol(vh,d,x[N*dim + i]);
+				double fxh = I->point_distance(delta_y);
+				grad_numeric = (fxh - fx)/1e-6;
+				std::cout << "computed derivative numerically [d(cost)/d(x0[0])]:" << grad_numeric << std::endl;
+			}
+
+			// -----
+
+		}
+		// add the cost gradient w.r.t traj segment's dwell time
+		double dist_gradt = 0;
+		for(unsigned int j=0;j<dim;j++)
+		{
+			dist_gradt +=  inv_dist_grad[j] * Axplusb[j];
+		}
+
+		deriv[N*dim + i] += dist_gradt;
+
+		// debug code
+		// check time derivative
+		if(i==1){
+			std::cout << "computed derivative algorithmically [d(cost)/dt]:" << dist_gradt << std::endl;
+			double grad_numeric_t;
+			double fx = I->point_distance(y[i]);
+			std::vector<double> delta_y(dim,0);
+			double delta_time=x[N*dim+i]+1e-6;
+			delta_y = ODESol(v,d,delta_time);
+			double fxh = I->point_distance(delta_y);
+			grad_numeric_t = (fxh - fx)/1e-6;
+			std::cout << "computed derivative numerically [d(cost)/dt]:" << grad_numeric_t << std::endl;
+		}
+		//end of debug code
+
+		//end of validation logic
 
 		if(i==N-1)
 			break;
@@ -391,7 +443,10 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		dist_gradt +=  badpoly_dist_grad[j] * Axplusb[j];
 	}
 
-	deriv[N*dim + N-1] = dist_gradt;
+	deriv[N*dim + N-1] += dist_gradt;
+
+
+
 	// Analytic gradients
 	if(!grad.empty())
 	{

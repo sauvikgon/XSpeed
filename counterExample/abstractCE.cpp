@@ -8,7 +8,6 @@
 #include "counterExample/abstractCE.h"
 #include "counterExample/simulation.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
-#include "gsl/gsl_deriv.h"
 #include "Utilities/gradient.h"
 #include "core_system/math/analyticODESol.h"
 #include "InputOutput/io_utility.h"
@@ -180,15 +179,15 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
-//	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
+	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 //	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative based
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	local optimization routine
-	nlopt::opt myopt_local(nlopt::LD_SLSQP, optD); // derivative based local
-	myopt_local.set_min_objective(myobjfunc2, NULL);
-	myopt_local.set_maxeval(2000);
-	myopt_local.set_stopval(1e-6);
+//	nlopt::opt myopt_local(nlopt::LD_SLSQP, optD); // derivative based local
+	myopt.set_min_objective(myobjfunc2, NULL);
+	myopt.set_maxeval(2000);
+	myopt.set_stopval(1e-6);
 	//myopt.set_initial_step(0.001);
 
 	//Set Initial value to the optimization problem
@@ -285,6 +284,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 				P=polys.front();
 
 		}
+
 //		To get a point from the polytope, we create a random obj function and
 //		solve the lp. The solution point is taken as an initial value.
 
@@ -336,63 +336,63 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	}
 	tracefile.close();
 
-	myopt_local.set_lower_bounds(lb);
-	myopt_local.set_upper_bounds(ub);
+	myopt.set_lower_bounds(lb);
+	myopt.set_upper_bounds(ub);
 
 
 	std::cout << "Computed initial dwell times and added dwell time constraints\n";
 
 //	Constraints over C_i added to the optimization problem
 
-	polytope::ptr C[N];
-	math::matrix<double> A;
-	std::vector<double> b;
-
-
-	polytope::ptr Inv;
-	unsigned int size=0;
-	for(unsigned int i=0;i<N;i++){
-//		Inv = HA->getLocation(locIdList[i])->getInvariant();
-		C[i] = get_symbolic_state(i)->getInitialPolytope();
-//		C[i] = C[i]->GetPolytope_Intersection(Inv);
-		size += C[i]->getCoeffMatrix().size1();
-	}
-	polyConstraints I[size];
-	unsigned int index = 0;
-
-	for (unsigned int i = 0; i < N; i++) {
-		A = C[i]->getCoeffMatrix();
-		b = C[i]->getColumnVector();
-
-// 		We assume that the polytope is expressed as Ax<=b
-
-		assert(C[i]->getInEqualitySign() == 1);
-		assert(A.size2() == dim);
-		assert(b.size() == A.size1());
-		assert(size > index);
-
-		for (unsigned int j = 0; j < A.size1(); j++) {
-			I[index].sstate_index = i;
-			I[index].a.resize(A.size2());
-
-			for(unsigned int k=0;k<dim;k++){
-				I[index].a[k] = A(j,k);
-			}
-			I[index].b = b[j];
-			myopt_local.add_inequality_constraint(myconstraint, &I[index], 1e-8);
-			index++;
-		}
-	}
-	assert(index==size);
-	std::cout << "added constraints on starting point of each trajectory segment.\n";
+//	polytope::ptr C[N];
+//	math::matrix<double> A;
+//	std::vector<double> b;
+//
+//
+//	polytope::ptr Inv;
+//	unsigned int size=0;
+//	for(unsigned int i=0;i<N;i++){
+////		Inv = HA->getLocation(locIdList[i])->getInvariant();
+//		C[i] = get_symbolic_state(i)->getInitialPolytope();
+////		C[i] = C[i]->GetPolytope_Intersection(Inv);
+//		size += C[i]->getCoeffMatrix().size1();
+//	}
+//	polyConstraints I[size];
+//	unsigned int index = 0;
+//
+//	for (unsigned int i = 0; i < N; i++) {
+//		A = C[i]->getCoeffMatrix();
+//		b = C[i]->getColumnVector();
+//
+//// 		We assume that the polytope is expressed as Ax<=b
+//
+//		assert(C[i]->getInEqualitySign() == 1);
+//		assert(A.size2() == dim);
+//		assert(b.size() == A.size1());
+//		assert(size > index);
+//
+//		for (unsigned int j = 0; j < A.size1(); j++) {
+//			I[index].sstate_index = i;
+//			I[index].a.resize(A.size2());
+//
+//			for(unsigned int k=0;k<dim;k++){
+//				I[index].a[k] = A(j,k);
+//			}
+//			I[index].b = b[j];
+//			myopt.add_inequality_constraint(myconstraint, &I[index], 1e-8);
+//			index++;
+//		}
+//	}
+//	assert(index==size);
+//	std::cout << "added constraints on starting point of each trajectory segment.\n";
 // 	todo: Constraints over dwell time to be added
 
 
 	double minf;
 	try {
-		std::cout << "Local optimization algorithm called:" << myopt_local.get_algorithm_name() << std::endl;
-		myopt_local.set_stopval(tolerance);
-		myopt_local.optimize(x, minf);
+		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
+		myopt.set_stopval(tolerance);
+		myopt.optimize(x, minf);
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
@@ -853,7 +853,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	concreteCE::ptr cexample;
 	bool val_res=true;
 	bool NLP_HA_algo_flag = false;
-	unsigned int max_refinements = 100, ref_count = 0; // maximum limit to refinement points to be added.
+	unsigned int max_refinements = 100, ref_count = 100; // maximum limit to refinement points to be added.
 	do{
 		struct refinement_point pt;
 
@@ -867,24 +867,24 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 
 		if(!val_res){
 			std::cout << "FAILED VALIDATION\n";
+			break;
 			if(NLP_HA_algo_flag){
 				std::cout << "Splice Trace NOT VALID\n";
 				return cexample = concreteCE::ptr(new concreteCE());
 			}
-			refinements.push_back(pt);
-			ref_count++;
+//			refinements.push_back(pt);
+//			ref_count++;
 		}
 		//debug
 //		break;
 	}while(!val_res && ref_count< max_refinements);
 
 	if((ref_count < max_refinements) & !cexample->is_empty()){
-
 		std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
 		return cexample;
 	}
 	else {
-		throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
+//		throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
 		return concreteCE::ptr(new concreteCE());
 	}
 }

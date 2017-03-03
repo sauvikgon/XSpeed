@@ -281,6 +281,8 @@ int main(int argc, char *argv[]) {
 	bool real_ce = false;
 	double error_tol = 1e-6;
 
+	std::cout << "Number of abstract paths to the bad set:" << ce_candidates.size() <<std::endl;
+
 	tt1.start(); // start time
 	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
 
