@@ -532,7 +532,7 @@ double polytope::point_distance(std::vector<double> v){
 		}
 		facet_distance -=b[i];
 		if(facet_distance > 0){
-			distance += facet_distance/math::sqrt(coef_sq_sum);
+			distance += facet_distance/coef_sq_sum;
 		}
 		coef_sq_sum = 0;
 		facet_distance = 0;
@@ -554,10 +554,6 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 		myfile << "\n";
 	}
 	myfile.close();
-}
-
-void polytope::print2files(){
-	cout<<"\nJust printing a test Line\n";
 }
 
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)

@@ -191,6 +191,9 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 bound_sim simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I, bool& status)
 {
 	int flag;
+	// tolerance for crossing invariant bound
+	double tolerance = 1e-3;
+
 	realtype T0 = 0;
 	realtype Tfinal = time;
 	realtype t=0;
@@ -278,7 +281,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 		myfile << "\n";
 		myfile.close();
 	}
-	else{ // no printing the simulation points to file
+	else { // no printing the simulation points to file
 		for(unsigned int k=1;k<=N;k++) {
 			double tout = (k*Tfinal)/N;
 			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
@@ -288,7 +291,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 				v[i] = NV_Ith_S(u,i);
 			double dist = I->point_distance(v);
 
-			if(math::abs(dist) > 1e-5){
+			if(math::abs(dist) > tolerance){
 //				std::cout << "time:" << t << " ";
 				std::cout << "distance = " << dist << std::endl;
 				status = false;

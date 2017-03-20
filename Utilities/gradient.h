@@ -11,6 +11,8 @@
 #include <core_system/continuous/Polytope/Polytope.h>
 #include <vector>
 #include <cmath>
+#include <gsl/gsl_deriv.h>
+#include "core_system/math/analyticODESol.h"
 
 /*
  * Computes derivative of vector (x) to polytope distance d w.r.t x.
@@ -19,5 +21,11 @@
  */
 std::vector<double> dist_grad(std::vector<double> x, polytope::ptr I);
 
+/*
+ * Computes derivative of vector (x) to polytope distance d w.r.t x.
+ * The derivative is computed numerically using the gsl library.
+ */
+
+std::vector<double> dist_grad_numeric(std::vector<double> x, polytope::ptr I);
 
 #endif /* GRADIENT_H_ */

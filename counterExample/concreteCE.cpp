@@ -93,6 +93,9 @@ bool concreteCE::valid(struct refinement_point& ref_pt)
 		b =  sim->bounded_simulation(simulation_sample.first,simulation_sample.second, Inv, status);
 
 		if(!status){
+			std::cout << "Inv violated in location id:" << locId << std::endl;
+			std::cout << "Violated point is:\n";
+			std::cout << b.v[0] << ", " << b.v[1] << std::endl;
 			ref_pt.seq_no = seq_no;
 			ref_pt.violating_pt = b.v;
 			ref_pt.time = b.cross_over_time;

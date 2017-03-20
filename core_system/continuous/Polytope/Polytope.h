@@ -166,11 +166,6 @@ public:
 
 	void print2file(std::string fname, unsigned int dim1, unsigned int dim2);
 
-	/*
-	 * debug function
-	 */
-	void print2files();
-
 };
 
 

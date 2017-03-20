@@ -194,7 +194,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	// 2. Get the N end points of the simulation trace, say, y[i].
 	// 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
 	// Computes the L2 norm or Euclidean distances between the trace end points.
-
 	//-----------------------------------------
 
 	std::vector<std::vector<double> > y(N);
@@ -250,8 +249,28 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			Axplusb[j] = Axplusb[j] + d.C[j];
 		}
 
-		std::vector<double> grad_x(dim,0), grad_t(dim,0);
-		std::vector<double> grad_gx(dim,0), grad_gt(dim,0);
+		// For validation, add the distance of trace end points to the invariant
+
+//		std::vector<double> inv_dist_grad(dim,0);
+//		cost+= I->point_distance(y[i]); // end point distance to invariant added to cost
+//		for(unsigned int j=0;j<dim;j++) {
+//			double dist_gradx_j = 0;
+//			for(unsigned int k=0;k<dim;k++)
+//			{
+//				dist_gradx_j +=  inv_dist_grad[k] * expAt(k,j);
+//			}
+//			deriv[i*dim+j] += dist_gradx_j;
+//
+//		}
+//		// add the cost gradient w.r.t traj segment's dwell time
+//		double dist_gradt = 0;
+//		for(unsigned int j=0;j<dim;j++)
+//		{
+//			dist_gradt +=  inv_dist_grad[j] * Axplusb[j];
+//		}
+//		deriv[N*dim + i] += dist_gradt;
+
+		//end of validation logic
 
 		if(i==N-1)
 			break;
@@ -391,7 +410,10 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		dist_gradt +=  badpoly_dist_grad[j] * Axplusb[j];
 	}
 
-	deriv[N*dim + N-1] = dist_gradt;
+	deriv[N*dim + N-1] += dist_gradt;
+
+
+
 	// Analytic gradients
 	if(!grad.empty())
 	{
