@@ -12,10 +12,11 @@
 #include "core_system/math/analyticODESol.h"
 #include "InputOutput/io_utility.h"
 #include <fstream>
-#include <string>
+#include <sstream>
 
 unsigned int dim;
 unsigned int N;
+
 hybrid_automata::ptr HA;
 std::vector<int> locIdList;
 std::list<transition::ptr> transList;
@@ -157,6 +158,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	std::set<int> d;
 	for(unsigned int i=0;i<N;i++){
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
+		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
 	}
 
@@ -176,17 +178,14 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	unsigned int optD = N * dim + N;
 	std::cout << "nlopt problem dimension = " << optD << std::endl;
-//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
-//	nlopt::opt myopt(nlopt::LN_AUGLAG_EQ, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
-//	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative based
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	local optimization routine
 //	nlopt::opt myopt_local(nlopt::LD_SLSQP, optD); // derivative based local
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(2000);
+	myopt.set_maxeval(4000);
 	myopt.set_stopval(1e-6);
 	//myopt.set_initial_step(0.001);
 
@@ -201,6 +200,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	std::vector<double> v(dim);
 
 	std::vector<double> lb(optD), ub(optD);
+	double max,min,start_min,start_max;
 
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
@@ -223,8 +223,15 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			dir[j] = 1;
 			max = lp.Compute_LLP(dir);
 			unsigned int index = i*dim+j;
+			if(min>max) // swap min and max
+			{
+				min = min+max;
+				max = min-max;
+				min = min-max;
+			}
 			lb[index] = min;
 			ub[index] = max;
+
 			dir[j] = 0;
 			x[index] = (lb[index] + ub[index])/2;
 		}
@@ -257,13 +264,12 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
 
-	double max,min,start_min,start_max;
-
 	for (unsigned int i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		if(i==N-1){
 			// If last abst sym state, then take time projection of flowpipe \cap bad_poly
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(bad_poly,1);
+			assert(polys.size()>=0); // The last sym state of an abstract CE must intersect with the bad set
 			if(polys.size()>1)
 				P = convertBounding_Box(S->getContinuousSetptr());
 			else
@@ -278,11 +284,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 				std::cout << "#Guard is Universe#\n" << std::endl;
 
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(guard,1);
+			assert(polys.size()>=1); // An abstract CE state must have intersection with the trans guard
 			if(polys.size()>1)
 				P = convertBounding_Box(S->getContinuousSetptr());
 			else
 				P=polys.front();
-
 		}
 
 //		To get a point from the polytope, we create a random obj function and
@@ -330,12 +336,40 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		// We may choose to take the average time as the initial dwell time
 		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
 
+//		// some sanity check for debug
+//		S = get_symbolic_state(i);
+//		P = S->getInitialPolytope();
+//		if(i<N-1){
+//			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(guard,1);
+//			assert(polys.size()>=1); // An abstract CE state must have intersection with the trans guard
+//		}
+//		if(polys.size()>1)
+//			P = convertBounding_Box(S->getContinuousSetptr());
+//		else
+//			P=polys.front();
+//		std::stringstream filename;
+//		filename << "filename";
+//		filename << i;
+//		std::cout << "THE FILE TO PRINT THE FLOWPIPE IS:" << filename.str() << std::endl;
+//		//P->print2file(filename.str(), 0, 1);
+//		P->print2file(filename.str(), 0, 1);
+//		if(P->getIsEmpty())
+//			throw std::runtime_error("The initial polytope is empty in flowpipe");
+//		//--end of debug
+
 		if(it!=transList.end())
 			it++;
 
 	}
 	tracefile.close();
 
+	// debug (print lb,ub)
+//	for(unsigned int i=0;i<lb.size();i++){
+//		std::cout << "lb at " << i << " =" << lb[i] << std::endl;
+//		std::cout << "ub at " << i << " =" << ub[i] << std::endl;
+//		//assert(lb[i] <= ub[i]);
+//	}
+	//--
 	myopt.set_lower_bounds(lb);
 	myopt.set_upper_bounds(ub);
 
@@ -387,7 +421,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	std::cout << "added constraints on starting point of each trajectory segment.\n";
 // 	todo: Constraints over dwell time to be added
 
-
 	double minf;
 	try {
 		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
@@ -406,6 +439,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
 		return cexample;
 	} else {
+		std::ofstream ce_trace;
 		// one trajectory per symbolic state to be added in the concreteCE
 		for (unsigned int i = 0; i < N; i++) {
 			// create the sample
@@ -853,7 +887,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	concreteCE::ptr cexample;
 	bool val_res=true;
 	bool NLP_HA_algo_flag = false;
-	unsigned int max_refinements = 100, ref_count = 100; // maximum limit to refinement points to be added.
+	unsigned int max_refinements = 100, ref_count = 0; // maximum limit to refinement points to be added.
 	do{
 		struct refinement_point pt;
 
@@ -875,16 +909,14 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 //			refinements.push_back(pt);
 //			ref_count++;
 		}
+		else{
+			std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
+			return cexample;
+		}
 		//debug
 //		break;
 	}while(!val_res && ref_count< max_refinements);
 
-	if((ref_count < max_refinements) & !cexample->is_empty()){
-		std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
-		return cexample;
-	}
-	else {
-//		throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
-		return concreteCE::ptr(new concreteCE());
-	}
+//	throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
+	return concreteCE::ptr(new concreteCE());
 }
