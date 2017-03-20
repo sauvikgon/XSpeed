@@ -181,7 +181,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 		LoadBalanceDataSF LoadBalanceData_sf;
 		parallelLoadBalance_Task(LoadBalanceDS, LoadBalanceData_sf);//Step 2:  An appropriate combination of parallel with sequential GLPK object is used.
 	//	omp_set_nested(1); //enable nested parallelism
-
+	//	std::cout<<" :: After flowpipe reach compute ";
 #pragma omp parallel for // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) {
 			S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id], numCoreAvail, LoadBalanceData_sf, id)); // Step 3
@@ -303,6 +303,7 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 						/*
 						 * Now perform containment check similar to sequential algorithm.
 						 */
+						std::cout<<"Before containment check\n";
 						int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 						if (is_ContainmentCheckRequired){	//Containtment Checking required
 							bool isContain=false;
@@ -494,8 +495,8 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		} //end of all Iterations of each vector/direction
 	} //end of for each vector/directions
 
-	std::cout << std::fixed;
-	std::cout.precision(10);
+	/*std::cout << std::fixed;
+	std::cout.precision(10);*/  //Main Cause of Race condition
 	if (LoadBalanceDS.current_location->isInvariantExists() == true) { //if invariant exist. Computing
 
 		math::matrix<double> inv_sfm;
@@ -651,12 +652,12 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 		}//end-while	//cout<<"\n\n";
 	}//end of parallel
 // ************* Chunk_approach for polytope X ******************************
-	cout<<"Done on X!!!!\n";
+//	cout<<"Done on X!!!!\n";
 	bool U_empty;
 	U_empty = LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();//assuming all symbolic states has same setup for polytope U
 	if (!U_empty) {
 // ************* Chunk_approach for polytope U ******************************
-		cout<<"polytope U is NOT empty!!!!\n";
+//		cout<<"polytope U is NOT empty!!!!\n";
 		if (countTotal_X <= numCores)
 			chunk_size = 1;
 		else
@@ -764,9 +765,12 @@ void tpbfs::loadBalancedPostD(std::vector<LoadBalanceData_PostD>& loadBalPostD){
 		search_sfmIndex_colIndex(i, loadBalPostD, sfmIndex, sfmColIndex);
 		polytope::ptr p;
 		p = loadBalPostD[sfmIndex].sfm->getPolytope(sfmColIndex);
-		std::vector<double> constraint_bound_values(loadBalPostD[sfmIndex].sfm->getInvariantDirections().size1());
-		constraint_bound_values = loadBalPostD[sfmIndex].sfm->getInvariantBoundValue(sfmColIndex);
-		p->setMoreConstraints(loadBalPostD[sfmIndex].sfm->getInvariantDirections(),constraint_bound_values);
+		//std::cout<<"Invariant size = "<<loadBalPostD[sfmIndex].sfm->getInvariantDirections().size1()<<std::endl;
+		if (loadBalPostD[sfmIndex].sfm->getInvariantDirections().size1() !=0){
+			std::vector<double> constraint_bound_values(loadBalPostD[sfmIndex].sfm->getInvariantDirections().size1());
+			constraint_bound_values = loadBalPostD[sfmIndex].sfm->getInvariantBoundValue(sfmColIndex);
+			p->setMoreConstraints(loadBalPostD[sfmIndex].sfm->getInvariantDirections(),constraint_bound_values);
+		}
 		for (int trans = 0; trans < loadBalPostD[sfmIndex].trans_size; trans++) {
 			loadBalPostD[sfmIndex].bool_arr(trans, sfmColIndex) = p->check_polytope_intersection(loadBalPostD[sfmIndex].guard_list[trans], lp_solver_type_choosen);//result of intersection
 		}

@@ -139,7 +139,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				cout<<"Running Approach of Coarse-time-step and Fine-time-step\n";
 			}else{
 				//Approach of Sequential invariant check will work for all case
-				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
+				InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
 					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 			}
 		}

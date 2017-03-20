@@ -41,9 +41,6 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 		if (i==(workers.size() - 1)){	//increasing level only once
 		  //std::cout<<"Breadth-Level "<<level<<" Processed"<<" and reachData.bound ="<<reachData.bound<<std::endl;
 		  //std::cout<<"Breadth-Level "<<level<<" Processed... Symbolic states processed so far "<<totalSymStates<<" ..."<<std::endl;
-		/*	mu.lock();
-			level++;
-			mu.unlock();*/
 		}
 		workers[i].join();
 	}

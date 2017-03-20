@@ -11,7 +11,8 @@
 std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
 	int t = 0; //0 for Read and 1 for Write
-	int N = CORE; // Number of cores in the machine
+	int N = omp_get_num_procs(); //get the number of cores // Number of cores in the machine
+	//std::cout<<"Number of Cores = "<<N<<std::endl;
 	std::list<initial_state::ptr> Wlist[2][N][N];
 	for(unsigned int i=0;i<2;i++){
 		for(unsigned int j=0;j<N;j++){
@@ -35,8 +36,8 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 	bool done;
 	//srand(time(NULL));
 
-	int count=1;	//for initial symbolic state
-	unsigned int previousBreadth=1, sym_passed=0;
+	int waiting_count=0;	//number of waiting symbolic state
+	unsigned int passed_count=0; //total number of passed list
 	//cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << count<< "\n";
 
 	do {
@@ -61,7 +62,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 #pragma omp critical
 				{
 					PASSED.push_back(R1);
-					count = count + 1;
+					passed_count = passed_count + 1;
 				}
 					//----end of postC on s
 				//Currently removed the Safety Check Section from here
@@ -70,7 +71,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 						R2 = postD(R1, PASSED);
 #pragma omp critical
 					{
-					 count = count + R2.size();
+						waiting_count = waiting_count + R2.size();
 					}
 						//cout <<"postD size = " <<R2.size()<<std::endl;
 						std::vector<int> ArrCores(N);	//If this is done only once outside time saved but race-condition?
@@ -106,11 +107,6 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 			if(!done)
 				break;
 		}
-		unsigned int curr_count = count - previousBreadth;
-		/*if (level < bound){
-			cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << curr_count << "\n";
-		}*/
-		previousBreadth = count;
 
 		level++;
 		t = 1 - t;
@@ -124,8 +120,8 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
 
-		std::cout << "\nJump " << level - 1 << "..."<< count - 1<< " Symbolic States Passed, " << curr_count << " waiting ..."<< wall_clock <<" seconds";
-
+		std::cout << "\nJump " << level - 1 << "..."<< passed_count<< " Symbolic States Passed, " << waiting_count << " waiting ..."<< wall_clock <<" seconds";
+		waiting_count = 0; //reset to 0 for next level waiting list
 
 	}while(level<=bound && !done);
 
@@ -133,7 +129,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 		std::cout << "\n\nFound Fix-point after " << level - 1 << " Jumps!!!\n";
 	}
 cout<<"\n******************************************************************\n";
-cout <<"Maximum number of Symbolic states Passed = " <<count<<"\n";
+cout <<"Maximum number of Symbolic states Passed = " <<passed_count<<"\n";
 cout<<"******************************************************************\n";
 	return PASSED;
 

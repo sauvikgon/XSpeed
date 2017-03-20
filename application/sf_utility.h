@@ -88,9 +88,11 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		result = 0;	//norm_A will be zero and which is common term
 	}else {
 		double tt1 = exp(tau * norm_A);
-		//cout<<"exp(tau * norm_A) = " << tt1<<"\n";
-		if (std::isinf(tt1))	//todo:: need to handle for infinity value, temporary fix
+
+		if (std::isinf(tt1)){	//todo:: need to handle for infinity value, temporary fix
+			cout<<"exp(tau * norm_A) = " << tt1<<"\n";
 			tt1 = 1;	//randomly assigning some big value
+		}
 		//result = (exp(tau * norm_A) - 1 - tau * norm_A) * (V_max_norm / norm_A);
 		result = (tt1 - 1 - tau * norm_A) * (V_max_norm / norm_A);
 	}
@@ -139,9 +141,11 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		result = 0;	//norm_A will be zero and which is common term
 	}else {
 		double tt1 = exp(tau * norm_A);
-		//cout<<"exp(tau * norm_A) = " << tt1<<"\n";
-		if (std::isinf(tt1))	//todo:: need to handle for infinity value, temporary fix
+
+		if (std::isinf(tt1)){	//todo:: need to handle for infinity value, temporary fix
+			cout<<"exp(tau * norm_A) = " << tt1<<"\n";
 			tt1 = 1;	//randomly assigning some big value
+		}
 		result = (tt1 - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
 		//	result = (exp(tau * norm_A) - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
 	}

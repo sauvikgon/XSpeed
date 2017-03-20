@@ -592,6 +592,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 	tok_iter++;
 	f_set.first = std::atoi((*tok_iter).c_str());
 
+
 	std::string varname;
 	unsigned int i;
 	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
