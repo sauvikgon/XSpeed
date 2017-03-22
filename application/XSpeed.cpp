@@ -231,14 +231,14 @@ int main(int argc, char *argv[]) {
 	 * Choosing from the output format options
 	 */
 
-	if(user_options.getOutputFormatType().compare("GEN")==0)
-		vertex_generator(Symbolic_states_list,user_options);
-	else if(user_options.getOutputFormatType().compare("INTV")==0)
-	{
-		interval_generator(Symbolic_states_list,user_options);
-	}
-	/*vertex_generator(Symbolic_states_list,user_options);
-	interval_generator(Symbolic_states_list,user_options);*/
+//	if(user_options.getOutputFormatType().compare("GEN")==0)
+//		vertex_generator(Symbolic_states_list,user_options);
+//	else if(user_options.getOutputFormatType().compare("INTV")==0)
+//	{
+//		interval_generator(Symbolic_states_list,user_options);
+//	}
+	vertex_generator(Symbolic_states_list,user_options);
+	interval_generator(Symbolic_states_list,user_options);
 
 
 	/*
