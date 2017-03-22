@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) {
 
 	int status;
 	status = readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters);
+
 	// Parse the forbidden state string to make a polytope
 	if (!user_options.get_forbidden_state().empty()) {
 		string_to_poly(user_options.get_forbidden_state(), forbidden_set);
@@ -229,16 +230,15 @@ int main(int argc, char *argv[]) {
 	/**
 	 * Choosing from the output format options
 	 */
-	/*std::cout<<"user options XSpeed = "<<user_options.getOutputFormatType()<<std::endl;
-	if(user_options.getOutputFormatType().compare("GEN"))
+
+	if(user_options.getOutputFormatType().compare("GEN")==0)
 		vertex_generator(Symbolic_states_list,user_options);
-	else if(user_options.getOutputFormatType().compare("INTV"))
+	else if(user_options.getOutputFormatType().compare("INTV")==0)
 	{
-		std::cout << "INSIDE INTV\n";
 		interval_generator(Symbolic_states_list,user_options);
-	}*/
-	vertex_generator(Symbolic_states_list,user_options);
-	interval_generator(Symbolic_states_list,user_options);
+	}
+	/*vertex_generator(Symbolic_states_list,user_options);
+	interval_generator(Symbolic_states_list,user_options);*/
 
 
 	/*

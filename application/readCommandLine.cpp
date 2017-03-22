@@ -131,6 +131,8 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			user_options.setOutputFormatType(vm["output-format"].as<std::string>());
 		}
 
+		std::cout<<"user_options.getOutputFormatType = "<<user_options.getOutputFormatType()<<std::endl;
+
 		if (vm.count("output-file")) {
 			fileName = vm["output-file"].as<std::string>();
 			user_options.setOutFilename(fileName);
