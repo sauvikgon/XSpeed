@@ -3,7 +3,7 @@
 // Converted from file: /home/movies/MyData/Models-HybridSystems/Flora/Navigation Model/Model_Nav09_9x9/Nav09.xml
 // Command Line arguments: -tool xspeed "" -verbose -output "/home/movies/MyData/Models-HybridSystems/Flora/Navigation Model/Model_Nav09_9x9/nav09-NEW-Optimize-Conversion.cpp" -input "/home/movies/MyData/Models-HybridSystems/Flora/Navigation Model/Model_Nav09_9x9/Nav09.xml" "/home/movies/MyData/Models-HybridSystems/Flora/Navigation Model/Model_Nav09_9x9/nav09.cfg"
 
-#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
+#include "NavigationBenchmark.h"
 
 void SetNavigationModel9by9(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,

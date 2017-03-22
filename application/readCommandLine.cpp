@@ -71,6 +71,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("config-file,c", po::value<std::string>(), "include configuration file")
 	("output-file,o", po::value<std::string>(), "output file name for redirecting the outputs")
 	("output-variable,v", po::value<std::string>(), "projecting variables for e.g., 'x,v' for Bouncing Ball") //better to be handled by hyst
+	("output-format", po::value<std::string>(), "The type of output format, either GEN or INTV. GEN prints the vertices of the reach set and INTV prints the global bounds on the output variables (Set to GEN by default)")
 ;
 
 	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -126,8 +127,14 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			fullPath = "./"; //default file path
 		}
 		fileWithPath.append(fullPath);
+		if (vm.count("output-format")) {
+			user_options.setOutputFormatType(vm["output-format"].as<std::string>());
+		}
+
 		if (vm.count("output-file")) {
 			fileName = vm["output-file"].as<std::string>();
+			user_options.setOutFilename(fileName);
+
 		} else {
 			fileName = "out.txt";
 		}
@@ -164,9 +171,9 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			const char *st, *st2, *st3, *st4, *st5;
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
-			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
+			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
 			//system("g++ -c -I../src/ -I../Hybrid_Model_Parameters_Design/user_model/ user_model.cpp -o user_model.o");
-			system("g++ -L./lib/ user_model.o -lXSpeed -lppl -lgmp -lboost_timer -lboost_system -lboost_chrono -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
+			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed.o");
 			string cmdStr1;
 			cmdStr1.append("./XSpeed.o --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
 			cmdStr1.append(SingleSpace);

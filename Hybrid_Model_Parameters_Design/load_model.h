@@ -38,7 +38,7 @@
  * Only ONE out of these headers should be declared at a time
  * since they all include the module1,module2,module3 and module4 declaration
  */
-#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
+#include "Navigation_Benchmark/NavigationBenchmark.h"
 //#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/heart.h"
 //Todo:: or the user_model which need to be fix if error occurs at runtime as it will be included at runtime
 // **************************************************************************************

@@ -4,7 +4,7 @@
 // Command Line arguments: -tool xspeed "" -verbose -output /home/hazel/hazel/models/Benchmarks/nv09test.cpp -input /home/hazel/hazel/models/Benchmarks/Nav09t.xml /home/hazel/hazel/models/Benchmarks/Nav09.cfg
 
 
-#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
+#include "NavigationBenchmark.h"
 
 void SetNavigationModel9by9Timed(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,

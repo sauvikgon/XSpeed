@@ -15,6 +15,8 @@ class userOptions {
 	std::string model_filename; // filename of the automata model .xml file
 	std::string config_filename; // filename of the configuration file .cfg
 	std::string forbidden_state; // the string of forbidden state description
+	std::string out_filename; // The output filename
+	std::string output_format_type; // the string of output format description
 	unsigned int output_var_X; // first  dimension for plotting
 	unsigned int output_var_Y; // second dimension for plotting
 	unsigned int output_var_Z; // third dimension for plotting
@@ -72,6 +74,10 @@ public:
 	void setStreamSize(unsigned int streamSize);
 	unsigned int getTotalSliceSize() const;
 	void setTotalSliceSize(unsigned int totalSliceSize);
+	const std::string& getOutputFormatType() const;
+	void setOutputFormatType(const std::string& outputFormatType);
+	const std::string& getOutFilename() const;
+	void setOutFilename(const std::string& outFilename);
 };
 
 #endif /* USEROPTIONS_H_ */
