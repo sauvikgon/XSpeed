@@ -16,6 +16,7 @@
 #include "core_system/continuous/ConvexSet/transMinkPoly.h"
 #include "Utilities/Template_Polyhedra.h"
 #include "application/DataStructureDirections.h"
+#include "core_system/math/analyticODESol.h"
 
 
 const template_polyhedra::ptr reachabilityParallel(

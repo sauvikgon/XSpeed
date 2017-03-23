@@ -54,7 +54,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) {
-		SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
+//		SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
 	}
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
@@ -93,7 +93,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
-		setmesh(ha, init_state, reach_parameters);	//precision issue
+		//setmesh(ha, init_state, reach_parameters);	//precision issue
 		//setplatoon(ha, init_state, reach_parameters);
 
 		//std::cout <<"Test Model Assigned"<<std::endl;

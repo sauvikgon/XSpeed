@@ -140,7 +140,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			user_options.setOutFilename(fileName);
 		}
 		fileWithPath.append(fileName);
-		stFileNameWithPath = fileWithPath.c_str();
+		stFileNameWithPath = fileWithPath.c_str();//Required for recursive Call
 		// ********************** Setting for Output file Done **********************************
 
 		if (vm.count("model-file") && vm.count("config-file")
@@ -172,9 +172,12 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			const char *st, *st2, *st3, *st4, *st5;
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
-			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
+			system("g++ -c -I./include/ user_model.cpp -o user_model.o");//@Amit
+			//system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");//@For Sir
 			//system("g++ -c -I../src/ -I../Hybrid_Model_Parameters_Design/user_model/ user_model.cpp -o user_model.o");
-			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed.o");
+			//system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed.o");
+			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
+			std::cout<<"Model Parsed Successfully!!"<<std::endl;
 			string cmdStr1;
 			cmdStr1.append("./XSpeed.o --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
 			cmdStr1.append(SingleSpace);

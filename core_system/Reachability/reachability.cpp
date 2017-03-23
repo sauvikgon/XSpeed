@@ -18,7 +18,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	reach_parameters = reach_param;
 	bound = bound_limit;	//bfs_level
 	Algorithm_Type = algorithm_type;	//Important parameter to decide to select an algorithm to execute
-	Total_Partition = total_partition;
+	Total_Partition = total_partition; //slice size
 	lp_solver_type_choosen = lp_solver_type;
 	number_of_streams = streams_size;
 	Solver_GLPK_Gurobi_GPU = solver_GLPK_Gurobi_for_GPU; //todo:: used for comparing GLPK solver vs GPU. Can be removed
@@ -145,6 +145,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		}
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
+
+		//std::cout<<"reach_region->getTotalIterations() = "<< reach_region->getTotalIterations()<<"\n";
 		num_flowpipe_computed++;//computed one Flowpipe
 		//	*********************************************** Reach or Flowpipe Computed ************************************
 		if (previous_level != levelDeleted) {
@@ -386,11 +388,11 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 
 	if (Algorithm_Type == TIME_SLICE) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout << "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
-		math::matrix<double> A_inv(current_location->getSystem_Dynamics().MatrixA.size1(),
+		/*math::matrix<double> A_inv(current_location->getSystem_Dynamics().MatrixA.size1(),
 							current_location->getSystem_Dynamics().MatrixA.size2());
 		bool flag = current_location->getSystem_Dynamics().MatrixA.inverse(A_inv); //size of A_inv must be declared else error
 
-		reach_parameters.A_inv = A_inv;
+		reach_parameters.A_inv = A_inv;*/
 		int NCores = Total_Partition; //Number of Partitions (number of threads)
 		reach_region = reachParallelExplore(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),

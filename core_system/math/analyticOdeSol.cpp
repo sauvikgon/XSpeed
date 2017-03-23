@@ -104,4 +104,39 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 	return res1;
 }
 
+math::matrix<double> time_slice_component(math::matrix<double>& A, double time){
+	unsigned int dim = A.size2();
+	math::matrix<double> expAt(dim, dim);
+	math::matrix<double> At(A);
+	At.scalar_multiply(time);
+// compute the expression A^-1 (e^At - I) alternatively as a sub-matrix of the exp(M),
+// as shown in the SpaceEx paper, page 8, phi_1.
+	math::matrix<double> M(3 * dim, 3 * dim);
+// putting this check to see if M is initialized to 0 matrix above
+	for (unsigned int i = 0; i < 3 * dim; i++) {
+		for (unsigned int j = 0; j < 3 * dim; j++)
+			M(i, j) = 0;
+	}
+// initialize the submatrix[0,dim-1][0,dim-1] with matrixAt
+	for (unsigned int i = 0; i < dim; i++) {
+		for (unsigned int j = 0; j < dim; j++)
+			M(i, j) = At(i, j);
+	}
+// initialize the [0,dim-1][dim,2*dim-1] with matrixAt
+	for (unsigned int i = 0, j = dim; i < 2 * dim; i++, j++)
+		M(i, j) = time;
+// initialize the [dim,2*dim-1][2*dim,3*dim-1] with matrixAt
+	for (unsigned int i = dim, j = 2 * dim; i < 2 * dim; i++, j++)
+		M(i, j) = time;
 
+// compute the exponential of M
+	math::matrix<double> expM(dim, dim);
+	M.matrix_exponentiation(expM);
+// extract the submatrix [0,dim][dim+2*dim] into the matrix phi
+	math::matrix<double> phi(dim, dim);
+	for (unsigned int i = 0; i < dim; i++) {
+		for (unsigned int j = 0; j < dim; j++)
+			phi(i, j) = expM(i, dim + j);
+	}
+	return phi;
+}

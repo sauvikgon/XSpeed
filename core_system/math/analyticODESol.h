@@ -16,5 +16,9 @@
  */
 std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double time);
 
+/*
+ * compute the expression A^-1 (e^At - I) alternatively as a sub-matrix of the exp(M), as shown in the SpaceEx paper, page 8, phi_1.
+ */
+math::matrix<double> time_slice_component(math::matrix<double>& A, double time);
 
 #endif /* ANALYTICODESOL_H_ */

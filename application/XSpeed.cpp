@@ -106,19 +106,6 @@ int main(int argc, char *argv[]) {
 	if (status==0)
 		return 0;	//unsatisfied commandLine options
 
-	std::string input, fileName;
-	int arg_i;
-	for (arg_i = 1; arg_i < argc; arg_i++) {
-		if (std::string(argv[arg_i]).find("-o") != string::npos) {
-			fileName = argv[arg_i + 1];
-			break;
-		}
-		//if((!((std::string(argv[i]).find("-m") !=string::npos) ||(std::string(argv[i]).find("-model-file") !=string::npos))
-		//		|| !((std::string(argv[i]).find("-c") !=string::npos) ||(std::string(argv[i]).find("-config-file") !=string::npos))) )
-	}
-	if (arg_i == (argc - 1))
-		fileName = "out.txt";
-
 
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
@@ -216,16 +203,6 @@ int main(int argc, char *argv[]) {
 	/*
 	 * Generating Vertices as output which can be plotted using gnuplot utilites
 	 */
-
-
-// ********************** Setting for Output file **********************************
-    std::string fileWithPath1;
-	fileWithPath1.append(fileName);
-	stFileNameWithPath = fileWithPath1.c_str();
-	std::cout << "FileName with Path = " << stFileNameWithPath << "\n";
-// ********************** Setting for Output file Done **********************************
-
-	outFile.open(stFileNameWithPath);
 
 	/**
 	 * Choosing from the output format options

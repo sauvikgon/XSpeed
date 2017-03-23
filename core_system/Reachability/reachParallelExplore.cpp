@@ -234,12 +234,13 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 
 	ReachParameters.TimeBound = newTimeBound; //correct one.	//ReachParameters.TimeBound = 1;
 
-
 	// ******** New Change after boundaryCheckOutside ***************
 	//ReachParameters.Iterations = ReachParameters.TimeBound / ReachParameters.time_step; //required in Invarian_Boundary_Check
 	ReachParameters.Iterations = ReachParameters.Iterations / CORES; //required in Invarian_Boundary_Check
 	//Todo::: please handle when the value of this expression is in Fraction
 	// ******** New Change ***************
+//	std::cout<<"NewTotalIteration = "<<NewTotalIteration<<"\n";
+//	std::cout<<"ReachParameters.Iterations = "<<ReachParameters.Iterations<<"\n";
 
 //	cout << "partition_iterations" << ReachParameters.Iterations << "\n";
 //ReachParameters.time_step = newTimeBound/ partition_iterations;	//computed for 1st partition
@@ -259,14 +260,22 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 		template_polyhedra::ptr Tpoly;
 		math::matrix<double> phi, phi_trans, A_inv_phi, y_matrix, y_trans;
 		double START_TIME = i * newTimeBound; //first iteration START_TIME = i = 0 which make beta = 0
-		//	std::cout << "\nStart_Time = " << START_TIME << "\n";
+
+		//std::cout<<"i and START_TIME are = "<<i<< "    "<< START_TIME<<"\n";
 		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
 		phi.transpose(phi_trans); //phi_trans computed
 
-		math::matrix<double> A_inv; //(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
-		A_inv = ReachParameters.A_inv;
-		A_inv.multiply(phi, A_inv_phi);
-		A_inv_phi.minus(A_inv, y_matrix);
+		if (SystemDynamics.MatrixA.isInvertible()){//if A inverse exist
+
+			math::matrix<double> A_inv(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
+			bool flag = SystemDynamics.MatrixA.inverse(A_inv); //size of A_inv must be declared else error
+			//A_inv = ReachParameters.A_inv;
+			A_inv.multiply(phi, A_inv_phi);
+			A_inv_phi.minus(A_inv, y_matrix);
+		}else {
+			y_matrix = time_slice_component(SystemDynamics.MatrixA, START_TIME);
+			//std::cout<<"y_matrix = "<<y_matrix;
+		}
 		y_matrix.transpose(y_trans);
 //(phi_trans . X0 + y_trans . U)
 //		std::cout << "\ncomputing initial object\n";
@@ -275,7 +284,7 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 //		cout<<"Done TransMinkPoly \n";
 		//Calling Sequential algorithm here and later can mix with parallel for direction
 		if (Algorithm_Type == TIME_SLICE) {
-//			std::cout << "\nFrom Parallel Only Iterations BEFORE\n";
+			//std::cout << "\nFrom Parallel Only Iterations BEFORE\n";
 			Tpoly = reachabilitySequential_For_Parallel_Iterations(ReachParameters.Iterations, SystemDynamics, Initial, ReachParameters, invariant,
 					invariantExists, lp_solver_type_choosen);
 //			std::cout << "\nFrom Parallel Only Iterations AFTER\n";
@@ -283,8 +292,10 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 
 //		cout<<"Done creating initial partition \n";
 #pragma omp critical
-		//	if (i != 0)
-		reachability_region = reachability_region->union_TemplatePolytope(Tpoly);
+		{
+		//if (i != 0)
+			reachability_region = reachability_region->union_TemplatePolytope(Tpoly);
+		}
 	} //end of pragma for loop
 	//this may not be required if Average_number_of_times = 1 otherwise must.
 	ReachParameters.Iterations = original_Iterations;
