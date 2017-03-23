@@ -157,4 +157,18 @@ void userOptions::setTotalSliceSize(unsigned int totalSliceSize) {
 	total_slice_size = totalSliceSize;
 }
 
+const std::string& userOptions::getOutputFormatType() const {
+	return output_format_type;
+}
 
+void userOptions::setOutputFormatType(const std::string& outputFormatType) {
+	output_format_type = outputFormatType;
+}
+
+const std::string& userOptions::getOutFilename() const {
+	return out_filename;
+}
+
+void userOptions::setOutFilename(const std::string& outFilename) {
+	out_filename = outFilename;
+}

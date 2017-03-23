@@ -11,7 +11,7 @@
  *   	With matrix A=[-1.2 0.1; 0.1 -1.2]
  */
 
-#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
+#include "NavigationBenchmark.h"
 
 /*
  * velocity v1 in the x-axis directions and velocity v2 in the y-coordinate directions

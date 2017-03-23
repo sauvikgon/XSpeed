@@ -19,7 +19,7 @@
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
 #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
 #include "Hybrid_Model_Parameters_Design/FiveDimSys.h"
-#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark4Var.h"
+#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_FourLocation.h"
 #include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) {
 
 	int status;
 	status = readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters);
+
 	// Parse the forbidden state string to make a polytope
 	if (!user_options.get_forbidden_state().empty()) {
 		string_to_poly(user_options.get_forbidden_state(), forbidden_set);
@@ -226,52 +227,19 @@ int main(int argc, char *argv[]) {
 
 	outFile.open(stFileNameWithPath);
 
-	for (it = Symbolic_states_list.begin(); it != Symbolic_states_list.end();
-			it++) {
-		template_polyhedra::ptr temp_polyhedra;
-		temp_polyhedra = (*it)->getContinuousSetptr();
+	/**
+	 * Choosing from the output format options
+	 */
 
-		math::matrix<double> A, template_directions, invariant_directions;
-		math::matrix<double> big_b, sfm, invariant_bound_values;
+//	if(user_options.getOutputFormatType().compare("GEN")==0)
+//		vertex_generator(Symbolic_states_list,user_options);
+//	else if(user_options.getOutputFormatType().compare("INTV")==0)
+//	{
+//		interval_generator(Symbolic_states_list,user_options);
+//	}
+	vertex_generator(Symbolic_states_list,user_options);
+	interval_generator(Symbolic_states_list,user_options);
 
-		template_directions = temp_polyhedra->getTemplateDirections();
-		invariant_directions = temp_polyhedra->getInvariantDirections(); //invariant_directions
-
-		sfm = temp_polyhedra->getMatrixSupportFunction(); //total number of columns of SFM
-		invariant_bound_values = temp_polyhedra->getMatrix_InvariantBound(); //invariant_bound_matrix
-
-		if (invariant_directions.size1() == 0) { //indicate no invariants exists
-			A = template_directions;
-			big_b = sfm;
-		} else {
-			template_directions.matrix_join(invariant_directions, A); //creating matrix A
-			sfm.matrix_join(invariant_bound_values, big_b);
-		}
-		std::vector<double> b(big_b.size1()); //rows of big_b
-		for (unsigned int i = 0; i < big_b.size2(); i++) { //all the columns of new formed sfm
-			for (unsigned int j = 0; j < big_b.size1(); j++) { //value of all the rows
-				b[j] = big_b(j, i);
-			} //creating vector 'b'
-
-			polytope::ptr p = polytope::ptr(new polytope(A, b, 1));
-			vertices_list = p->get_2dVertices(
-					user_options.get_first_plot_dimension(),
-					user_options.get_second_plot_dimension()); //
-			//vertices_list = p->enumerate_2dVertices(x, y); //
-
-			// ------------- Printing the vertices on the Output File -------------
-			for (unsigned int i = 0; i < vertices_list.size1(); i++) {
-				for (unsigned int j = 0; j < vertices_list.size2(); j++) {
-					outFile << vertices_list(i, j) << " ";
-				}
-				outFile << std::endl;
-			}
-			outFile << std::endl; // 1 gap after each polytope plotted
-			// ------------- Printing the vertices on the Output File -------------
-
-		}
-	}
-	outFile.close();
 
 	/*
 	 * counterExample utility. Plot the location sequence of every abstract CE in a file
