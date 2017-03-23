@@ -137,6 +137,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 		} else {
 			fileName = "out.txt";
+			user_options.setOutFilename(fileName);
 		}
 		fileWithPath.append(fileName);
 		stFileNameWithPath = fileWithPath.c_str();

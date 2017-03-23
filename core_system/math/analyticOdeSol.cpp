@@ -57,7 +57,11 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 			for(unsigned int j=0;j<dim;j++)
 				M(i,j) = At(i,j);
 		}
+		// initialize the [0,dim-1][dim,2*dim-1] with matrixAt
 		for(unsigned int i=0,j=dim;i<2*dim;i++,j++)
+			M(i,j)=time;
+		// initialize the [dim,2*dim-1][2*dim,3*dim-1] with matrixAt
+		for(unsigned int i=dim,j=2*dim;i<2*dim;i++,j++)
 			M(i,j)=time;
 
 		// compute the exponential of M
