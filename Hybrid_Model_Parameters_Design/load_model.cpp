@@ -142,5 +142,6 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	}
 	if (!op.get_forbidden_state().empty()) {
 		string_to_poly(op.get_forbidden_state(), forbidden_set);
+		//string_to_poly_HystFormat(op.get_forbidden_state(), forbidden_set);
 	}
 }

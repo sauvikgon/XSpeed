@@ -173,6 +173,6 @@ public:
  * Creates a pair of <loc_id, poly> from the user given bad state string
  */
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set);
-
+void string_to_poly_HystFormat(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set);
 
 #endif /* POLYTOPE_H_ */

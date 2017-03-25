@@ -84,13 +84,25 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	const char *stFileNameWithPath;
 	std::string input;
 	for (int i = 1; i < argc; i++) {
+		//std::cout<<"1..argv[i] = " <<argv[i]<<std::endl;
 		if (std::string(argv[i]).find("-o") != string::npos)
 			i++;
 		else {
-			input.append(argv[i]);
-			input.append(" ");
+			if (std::string(argv[i]).find("-F") != string::npos){
+				//std::cout<<"argv[i] = " <<argv[i]<<std::endl;
+				input.append(argv[i]);	//-F
+				input.append(" ");
+				i++; //move next arg ie options for -F
+				input.append("\"");
+				input.append(argv[i]);
+				input.append("\" ");
+			}else{
+				input.append(argv[i]);
+				input.append(" ");
+			}
 		}
 	}
+	//std::cout<<"input str = "<<input<<std::endl;
 	if (argc > 1) { // Boost Options to be filled-up
 		if (vm.count("help")) {
 			cout << desc << "\n";
@@ -120,7 +132,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 
 		// ********************** Setting for Output file **********************************
-		std::string fileName, fullPath, fileWithPath;
+		std::string fileName, fullPath, fileWithPath, forbidStr;
 		if (vm.count("include-path")) {
 			fullPath = vm["include-path"].as<std::string>();
 		} else {
@@ -184,6 +196,8 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			cmdStr1.append(stFileNameWithPath);
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(input);
+
+			//std::cout<<"string = " <<cmdStr1<<std::endl;
 			system(cmdStr1.c_str());
 			exit(0);
 		}
@@ -200,6 +214,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				exit(0);
 			}
 		}
+		std::cout<<"user_model function called\n";
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_directionTemplate(vm["directions"].as<int>());
 			if (user_options.get_directionTemplate() <= 0) {
@@ -213,8 +228,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout<< "Invalid bfs level specified, a positive number expected\n";
 				return 0;
 			}
-		}
-		else if (user_options.get_model() != 15) {
+		} else if (user_options.get_model() != 15) {
 			std::cout << "Missing depth option\n";
 			return 0;
 		}
@@ -240,15 +254,13 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_forbidden_state(vm["forbidden"].as<std::string>());
 		}
-
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeHorizon(vm["time-horizon"].as<double>());
 			if (user_options.get_timeHorizon() <= 0) { //for 0 or negative time-bound
 				std::cout << "Invalid time-horizon option specified, A positive non zero bound expected\n";
 				return 0;
 			}
-		}
-		else if (user_options.get_model() != 15) {
+		} else if (user_options.get_model() != 15) {
 			std::cout << "Missing time-horizon option\n";
 			return 0;
 		}
@@ -265,7 +277,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			std::cout << "Missing time-step option\n";
 			return 0;
 		}
-
 		//Algorithm Preference
 		if (vm.count("algo")) {
 			user_options.set_algorithm(vm["algo"].as<int>());
@@ -303,6 +314,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				}
 			}
 		}
+
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
