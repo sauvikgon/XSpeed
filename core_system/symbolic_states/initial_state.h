@@ -8,7 +8,7 @@
 #ifndef INITIAL_STATE_H_
 #define INITIAL_STATE_H_
 
-#include "core_system/continuous/Polytope/Polytope.h"
+#include "../continuous/Polytope/Polytope.h"
 #include "symbolic_states.h"
 
 class initial_state {

@@ -9,8 +9,8 @@
 #define TRANSITION_H_
 
 #include "core_system/HybridAutomata/DataStructureHybridAutomata.h"
-#include "core_system/continuous/Polytope/Polytope.h"
 #include <boost/shared_ptr.hpp>
+#include "../continuous/Polytope/Polytope.h"
 
 class transition {
 	int trans_id;

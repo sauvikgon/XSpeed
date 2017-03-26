@@ -11,9 +11,10 @@
 #include <vector>
 #include <list>
 #include <utility>
+
+#include "../core_system/continuous/Polytope/Polytope.h"
 #include "core_system/symbolic_states/symbolic_states.h"
 #include "core_system/symbolic_states/initial_state.h"
-#include "core_system/continuous/Polytope/Polytope.h"
 #include "Utilities/StandardVector.h"
 #include "application/userOptions.h"
 #include <fstream>

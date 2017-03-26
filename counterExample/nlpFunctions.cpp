@@ -9,8 +9,9 @@
  */
 
 #include "nlpFunctions.h"
-#include "core_system/continuous/Polytope/Polytope.h"
 #include "vector"
+
+#include "../core_system/continuous/Polytope/Polytope.h"
 #include "application/DataStructureDirections.h"
 #include "abstractCE.h"
 #include "core_system/math/analyticODESol.h"
@@ -249,7 +250,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			Axplusb[j] = Axplusb[j] + d.C[j];
 		}
 
-		// For validation, add the distance of trace end points to the invariant
+//		For validation, add the distance of trace end points to the invariant
 
 //		std::vector<double> inv_dist_grad(dim,0);
 //		cost+= I->point_distance(y[i]); // end point distance to invariant added to cost
@@ -412,8 +413,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 	deriv[N*dim + N-1] += dist_gradt;
 
-
-
 	// Analytic gradients
 	if(!grad.empty())
 	{
@@ -421,7 +420,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			grad[i] = deriv[i];
 		}
 	}
-	std::cout << "current cost=" << cost << std::endl;
+//	std::cout << "current cost=" << cost << std::endl;
 
 	return cost;
 }
