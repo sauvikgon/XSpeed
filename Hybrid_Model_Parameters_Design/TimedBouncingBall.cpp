@@ -203,7 +203,8 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.isEmptyMatrixB = true;
+	system_dynamics.isEmptyMatrixB = false; //@Amit corrected to false
+	//system_dynamics.isEmptyMatrixB = true;
 	system_dynamics.MatrixB = Bmatrix;
 
 	system_dynamics.isEmptyC = false;

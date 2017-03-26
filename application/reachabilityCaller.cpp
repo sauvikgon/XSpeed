@@ -28,20 +28,9 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 			std::cout << "\nRunning parallel PostC using lazy SF algorithm and sequential PostD.\n";
 		} else if (user_options.get_algorithm() == 3) { //Parallel PostC using Time-Slice algorithm and Sequential PostD
 			std::cout << "\nRunning parallel PostC using Time-Slice algorithm and sequential PostD.\n";
-			/* **** Best place to check invertible matrix A *** */
-			/*for (std::list<initial_state::ptr>::iterator i=init_state.begin();i!=init_state.end();i++){
-				location::ptr l = Hybrid_Automata.getLocation((*i)->getLocationId());	//Checking only on initial locations
-				if (!l->getSystem_Dynamics().isEmptyMatrixA) {
-					if (!l->getSystem_Dynamics().MatrixA.isInvertible()){
-						std::cout << "\nDynamics Matrix A is not invertible\n";
-						exit(1); //This algorithm Does not support it.
-					}
-				}
-			}*/
 		} else if (user_options.get_algorithm() == 6) { //gpu-postc -- PostC in GPU and Sequential BFS
 			std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
 		}
-
 		Symbolic_states_list = reach_SEQ_BFS.computeSequentialBFSReach(ce_candidates);
 
 	} else if (user_options.get_algorithm() == 4) { //Adaptation of Gerard J. Holzmann's algorithm (Seq PostC and PBFS)

@@ -7,52 +7,36 @@
 
 #include "Utilities/computeInitialPolytope.h"
 
-/*
-
 polytope::ptr create_polytope_set(supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics) {
-	//polytope p;
+
 	std::vector<double> columnvector(ReachParameters.Directions.size1());
-	glpk_lp_solver lp, lp_U;
+	lp_solver lp;
 	lp.setMin_Or_Max(2);
-	lp_U.setMin_Or_Max(2);
+	if (!Initial->getIsEmpty()) //set glpk constraints If not an empty polytope
+		lp.setConstraints(ReachParameters.X0->getCoeffMatrix(),
+				ReachParameters.X0->getColumnVector(),
+				ReachParameters.X0->getInEqualitySign());
 
 	int dim = ReachParameters.Directions.size2();
 	std::vector<double> direction(dim);
-	std::cout << "Dim =  " << dim;
-	std::cout << "Direction = " << ReachParameters.Directions.size1()
-			<< std::endl;
+
 	for (unsigned int i = 0; i < ReachParameters.Directions.size1(); i++) {
-		std::cout << "loop 1 \n";
+		//std::cout << "loop 1 \n";
 		for (int j = 0; j < dim; j++) {
 			direction[j] = ReachParameters.Directions(i, j);
-			std::cout << "loop 2 \n";
+			//std::cout << "loop 2 \n";
 		}
-		if (!Initial->getIsEmpty()) //set glpk constraints If not an empty polytope
-			lp.setConstraints(ReachParameters.X0->getCoeffMatrix(),
-					ReachParameters.X0->getColumnVector(),
-					ReachParameters.X0->getInEqualitySign());
-
-		if (!SystemDynamics.U->getIsEmpty()) {	//empty polytope
-			lp_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
-					SystemDynamics.U->getColumnVector(),
-					SystemDynamics.U->getInEqualitySign());
-
-			columnvector[i] = Initial->computeSupportFunction(direction, lp,
-					lp_U, 2);
-		}
+		columnvector[i] = Initial->computeSupportFunction(direction, lp);
 	}
-	/ *
-	 p.setCoeffMatrix(ReachParameters.Directions);
-	 p.setColumnVector(columnvector);
-	 p.setInEqualitySign(1);
-	 * /
 	polytope::ptr p = polytope::ptr(
 			new polytope(ReachParameters.Directions, columnvector, 1));
 
 	return p;
 }
 
+
+/*
 
 template_polyhedra Reach_Parallel_Iteration(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr initial,

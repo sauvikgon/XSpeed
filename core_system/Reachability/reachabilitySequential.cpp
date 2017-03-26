@@ -231,6 +231,8 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 /*
  * Code AFTER optimising the support function computation
  * Same Code as above but with critical region in InvariantExist block
+ *
+ * @Amit: Modifying to match with the always updated Sequential algorithm.
  */
 template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned int boundedTotIteration,
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
@@ -249,12 +251,11 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 		//shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial, ReachParameters, invariant, lp_solver_type_choosen);
 		shm_NewTotalIteration = boundedTotIteration;
 	} //End of Invariant Directions
-	if (shm_NewTotalIteration == 1) {
+	//cout<<"shm_NewTotalIteration = " <<shm_NewTotalIteration<<std::endl;
+	if (shm_NewTotalIteration < 1) {
 		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
 	}
-//cout<<"shm_NewTotalIteration = " <<shm_NewTotalIteration<<std::endl;
-	//	cout<<"OK 1 \n";
 	int solver_type = lp_solver_type_choosen;
 
 	lp_solver s_per_thread_I(solver_type), s_per_thread_U(solver_type),
@@ -265,9 +266,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 				ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
 
 	s_per_thread_U.setMin_Or_Max(2);
-	if (SystemDynamics.U->getIsEmpty()) { //empty polytope
-		//Polytope is empty so no glpk object constraints to be set
-	} else {
+	if (!SystemDynamics.U->getIsEmpty()) { //empty polytope
 		s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
 				SystemDynamics.U->getColumnVector(), SystemDynamics.U->getInEqualitySign());
 	}
@@ -275,8 +274,10 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 	double res1, result, term2, result1, term1;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 	math::matrix<double> B_trans, phi_tau_Transpose;
-	phi_tau_Transpose = ReachParameters.phi_trans;
-	B_trans = ReachParameters.B_trans;
+	if (!SystemDynamics.isEmptyMatrixA) //current_location's SystemDynamics's or ReachParameters
+		phi_tau_Transpose = ReachParameters.phi_trans;
+	if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
+		B_trans = ReachParameters.B_trans;
 
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 
@@ -287,7 +288,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 			rVariable[i] = ReachParameters.Directions(eachDirection, i);
 		}
 		unsigned int loopIteration = 0;
-		double term3, term3a, term3b, res2, term3c = 0.0;
+		double term3, term3a = 0.0, term3b = 0.0, res2, term3c = 0.0;
 		sVariable = 0.0; //initialize s0
 //		cout<<"OK 3 \n";
 		//  **************    Omega Function   ********************
@@ -296,15 +297,19 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
 			term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
-		}
+		}else if (SystemDynamics.isEmptyMatrixA) { //if A is empty :: {tau.A}' reduces to zero so, e^{tau.A}' reduces to 1
+			term1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
+		}//handling constant dynamics
+
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 			B_trans.mult_vector(rVariable, Btrans_dir);
 
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
 			term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
-
 		term3a = ReachParameters.result_alfa;
-		term3b = support_unitball_infnorm(rVariable);
+		term3b = (double) support_unitball_infnorm(rVariable);
+		//	cout<<"term3b = "<<term3b<<"\n";
+
 		if (!SystemDynamics.isEmptyC) {
 			term3c = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
 		}
@@ -335,11 +340,22 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 			s1Variable = sVariable + zV;
 
 			//phi_tau_Transpose.mult_vector(rVariable, r1Variable);
-			r1Variable = phi_trans_dir; //replacement
+			//r1Variable = phi_trans_dir; //replacement
 
+			if (SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
+				r1Variable = rVariable;
+			} else {
+				r1Variable = phi_trans_dir;
+			}
 			//  **************    Omega Function   ********************
 			//res1 = Initial->computeSupportFunction(r1Variable, s_per_thread_I, s_per_thread_U, Min_Or_Max);
-			res1 = term1; //replacement
+			//res1 = term1; //replacement
+			if (SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
+				//res1 = res1; //A is empty than r1Variable is NOT computable and so is term1. Hence res1 is previous  res1
+			} else {
+				res1 = term1; //A is not empty than r1Variable is computable and so is term1
+			}
+
 
 			double term3, term3a, res2;
 

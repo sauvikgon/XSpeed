@@ -17,6 +17,14 @@
 #include "Utilities/Template_Polyhedra.h"
 #include "application/DataStructureDirections.h"
 #include "core_system/math/analyticODESol.h"
+#include "core_system/Reachability/reachabilitySequential.h"
+#include "core_system/Reachability/NewApproach/Partition_BoundingPolytope.h"
+#include "Utilities/invariantBoundaryCheck.h"
+#include "application/sf_utility.h"
+#include "Utilities/testPolytopePlotting.h"
+#include "Utilities/Template_Polyhedra.h"
+#include "application/All_PP_Definition.h"
+#include "Utilities/computeInitialPolytope.h"
 
 
 const template_polyhedra::ptr reachabilityParallel(

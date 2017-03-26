@@ -15,4 +15,5 @@ void GeneratePolytopePlotter(polytope::ptr poly);
 
 //void GenerateInitialPolytopePlotter(std::list<polytope::ptr> initial_polys_list);
 
+
 #endif /* TESTPOLYTOPEPLOTTING_H_ */
