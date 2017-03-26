@@ -11,9 +11,9 @@
 #include <string>
 #include <list>
 #include "application/DataStructureDirections.h"
-#include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Transition.h"
 #include <boost/shared_ptr.hpp>
+#include "../continuous/Polytope/Polytope.h"
 
 
 class location {

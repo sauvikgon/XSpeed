@@ -146,10 +146,10 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	bad_poly = this->forbid_poly;
 	ref_pts = refinements;
 
+
 	//assert that the number of transitions equals 1 less than the length of the abstract CE path
 
 	std::cout << "Length of the CE, N=" << N << std::endl;
-	std::cout << "#Transitions in CE" << transList.size() << std::endl;
 	assert(transList.size() == N-1);
 	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
 	// initialize the global locIdList
@@ -161,15 +161,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
 	}
-
-	//assert that the number of transitions equals 1 less than the length of the abstract CE path
-
-	std::cout << "Length of the CE, N=" << N << std::endl;
-	std::cout << "#Transitions in CE" << transList.size() << std::endl;
-	assert(transList.size() == N-1);
-	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
-// 	initialize the global locIdList
-
 
 //	 2. The dimensionality of the opt problem is N vectors, one starting point
 //	 for each of the abstract sym state of the CE + N dwell times. Moreover,
@@ -183,7 +174,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	local optimization routine
-//	nlopt::opt myopt_local(nlopt::LD_SLSQP, optD); // derivative based local
 	myopt.set_min_objective(myobjfunc2, NULL);
 	myopt.set_maxeval(4000);
 	myopt.set_stopval(1e-6);
@@ -195,8 +185,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 // A random objective function created for lp solving
 
-	std::vector<double> obj(dim, 0);
-	obj[0] = 1;
 	std::vector<double> v(dim);
 
 	std::vector<double> lb(optD), ub(optD);
@@ -206,14 +194,12 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	{
 		S = get_symbolic_state(i);
 		P = S->getInitialPolytope();
-//		To get a point from the polytope, we create a random lp obj function and
-//		solve the lp. The solution point is taken as an initial value.
 
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
 				P->getInEqualitySign());
 
-		// we add bound constraints on the position parameters, which are required to run global opt routines.
+// 		we add bound constraints on the position parameters, which are required to run global opt routines.
 		std::vector<double> dir(dim,0);
 		double min, max;
 		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
@@ -256,11 +242,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	std::list<polytope::ptr> polys;
 	polytope::ptr guard;
 
-	//debug--
-	std::ofstream tracefile;
-	tracefile.open("./ceTrace.o");
-	//-----
-
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
 
@@ -291,26 +272,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 				P=polys.front();
 		}
 
-//		To get a point from the polytope, we create a random obj function and
-//		solve the lp. The solution point is taken as an initial value.
-
-		// When flowpipe intersects the guard only at more than one place, take a bounding box approx of the flowpipe and project time
-		//debug
-//		math::matrix<double> vertices_list;
-//		vertices_list = P->get_2dVertices(0, 10);
-//		std::cout << "Number of vertices of the polytope: " << vertices_list.size1() << std::endl;
-//
-//		// ------------- Printing the vertices on the Output File -------------
-//		for (unsigned int p = 0; p < vertices_list.size1(); p++) {
-//			for (unsigned int q = 0; q < vertices_list.size2(); q++) {
-//				tracefile << vertices_list(p, q) << " ";
-//			}
-//			tracefile << std::endl;
-//		}
-//		tracefile << std::endl; // 1 gap after each polytope plotted
-
-		//----
-
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 		// ensure that time is always positive
@@ -336,32 +297,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		// We may choose to take the average time as the initial dwell time
 		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
 
-//		// some sanity check for debug
-//		S = get_symbolic_state(i);
-//		P = S->getInitialPolytope();
-//		if(i<N-1){
-//			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(guard,1);
-//			assert(polys.size()>=1); // An abstract CE state must have intersection with the trans guard
-//		}
-//		if(polys.size()>1)
-//			P = convertBounding_Box(S->getContinuousSetptr());
-//		else
-//			P=polys.front();
-//		std::stringstream filename;
-//		filename << "filename";
-//		filename << i;
-//		std::cout << "THE FILE TO PRINT THE FLOWPIPE IS:" << filename.str() << std::endl;
-//		//P->print2file(filename.str(), 0, 1);
-//		P->print2file(filename.str(), 0, 1);
-//		if(P->getIsEmpty())
-//			throw std::runtime_error("The initial polytope is empty in flowpipe");
-//		//--end of debug
 
 		if(it!=transList.end())
 			it++;
 
 	}
-	tracefile.close();
 
 	// debug (print lb,ub)
 //	for(unsigned int i=0;i<lb.size();i++){
@@ -382,13 +322,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	math::matrix<double> A;
 //	std::vector<double> b;
 //
-//
+
 //	polytope::ptr Inv;
 //	unsigned int size=0;
 //	for(unsigned int i=0;i<N;i++){
-////		Inv = HA->getLocation(locIdList[i])->getInvariant();
 //		C[i] = get_symbolic_state(i)->getInitialPolytope();
-////		C[i] = C[i]->GetPolytope_Intersection(Inv);
 //		size += C[i]->getCoeffMatrix().size1();
 //	}
 //	polyConstraints I[size];
@@ -419,7 +357,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	}
 //	assert(index==size);
 //	std::cout << "added constraints on starting point of each trajectory segment.\n";
-// 	todo: Constraints over dwell time to be added
+
 
 	double minf;
 	try {
@@ -431,7 +369,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	}
 	std::cout << "nlopt returned min : " << minf << "\n";
 	std::cout << "Length of abstract counter example:" << N <<"\n";
-//	std::cout << "Number of samples by NLopt: " << samples << "\n";
 
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);

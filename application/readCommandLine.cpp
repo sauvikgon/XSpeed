@@ -31,8 +31,8 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 	desc.add_options()
 	("help", "produce help message")
-	("model", po::value<int>()->default_value(1), "set model for reachability analysis\n"
-					"1.  Bouncing Ball Model: Variables{x,v} (Set to default)\n"
+	("model", po::value<int>()->default_value(0), "set model for reachability analysis\n"
+					"1.  Bouncing Ball Model: Variables{x,v}"
 					"2.  Timed Bouncing Ball Model: Variables{x,v,t}\n"
 					"3.  28-Dimensional Helicopter Controller Model: Variables{x1..x28}\n"
 					"4.  Five dimensional Benchmark Model: Variables{x1..x5} \n"
@@ -82,27 +82,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	//std::ofstream outFile;
 	//math::matrix<double> vertices_list;
 	const char *stFileNameWithPath;
-	std::string input;
-	for (int i = 1; i < argc; i++) {
-		//std::cout<<"1..argv[i] = " <<argv[i]<<std::endl;
-		if (std::string(argv[i]).find("-o") != string::npos)
-			i++;
-		else {
-			if (std::string(argv[i]).find("-F") != string::npos){
-				//std::cout<<"argv[i] = " <<argv[i]<<std::endl;
-				input.append(argv[i]);	//-F
-				input.append(" ");
-				i++; //move next arg ie options for -F
-				input.append("\"");
-				input.append(argv[i]);
-				input.append("\" ");
-			}else{
-				input.append(argv[i]);
-				input.append(" ");
-			}
-		}
-	}
-	//std::cout<<"input str = "<<input<<std::endl;
 	if (argc > 1) { // Boost Options to be filled-up
 		if (vm.count("help")) {
 			cout << desc << "\n";
@@ -121,11 +100,10 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("model-file")) {
 			user_options.set_modelFile(vm["model-file"].as<std::string>());
 		}
-		if (vm.count("model")) { //Compulsory Options but set to 1 by default
+		if (vm.count("model")) { //Compulsory Options but set to 0 by default
 			user_options.set_model(vm["model"].as<int>());
-			//if (user_options.get_model() < 1 || user_options.get_model() > 13) {
-			//For testing model==14
-			if (user_options.get_model() < 1 || user_options.get_model() > 15) {
+
+			if (user_options.get_model() < 0 || user_options.get_model() > 15) {
 				std::cout << "Invalid Model option specified\n";
 				return 0;
 			}
@@ -155,20 +133,22 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		stFileNameWithPath = fileWithPath.c_str();//Required for recursive Call
 		// ********************** Setting for Output file Done **********************************
 
+		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
+			user_options.set_forbidden_set(vm["forbidden"].as<std::string>());
+		}
+
 		if (vm.count("model-file") && vm.count("config-file")
-				&& user_options.get_model() != 15
-				&& (input.find("--model") != string::npos)) {
+				&& (user_options.get_model()!=0) ) { // model=0 default to no model specified
 			std::cout
-					<< "Invalid inputs (Only model number or config file should be specified.)\n"
-					<< std::endl;
+					<< "Invalid inputs (Either a model file or a pre-loaded model to be specified, but not both.)\n";
 			return 0;
 		}
 
 		if (vm.count("model-file") && vm.count("config-file")
-					&& !(input.find("--model") != string::npos)) {
-				std::cout << "Translating user model with Hyst\n";
+					&& ((user_options.get_model()==0))) { // model=0 default to no model specified
+				std::cout << "Translating user model to XSpeed format using Hyst model translator\n";
 				std::string cmdStr, replacingFile, SingleSpace = " ", projLocation,
-						java_exeFile;
+						java_exeFile, forbidden_string;
 			replacingFile = "./user_model.cpp";
 			//replacingFile = "../src/Hybrid_Model_Parameters_Design/user_model/user_model.cpp";
 			java_exeFile = "java -jar";
@@ -184,35 +164,38 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			const char *st, *st2, *st3, *st4, *st5;
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
-			system("g++ -c -I./include/ user_model.cpp -o user_model.o");//@Amit
-			//system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");//@For Sir
-			//system("g++ -c -I../src/ -I../Hybrid_Model_Parameters_Design/user_model/ user_model.cpp -o user_model.o");
-			//system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed.o");
-			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed.o");
-			std::cout<<"Model Parsed Successfully!!"<<std::endl;
+			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
+			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
+
+			std::cout<<"Model Parsed Successfully! Calling XSpeed"<<std::endl;
+
 			string cmdStr1;
-			cmdStr1.append("./XSpeed.o --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
+			cmdStr1.append("./XSpeed --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(stFileNameWithPath);
 			cmdStr1.append(SingleSpace);
-			cmdStr1.append(input);
+			cmdStr1.append("-F ");
+			cmdStr1.append("\"");
+			forbidden_string = user_options.get_forbidden_set();
+			cmdStr1.append(forbidden_string);
+			cmdStr1.append("\"");
+//			std::cout << "the command string is:" << cmdStr1 << std::endl;
 
-			//std::cout<<"string = " <<cmdStr1<<std::endl;
 			system(cmdStr1.c_str());
 			exit(0);
 		}
-		if (vm.count("model-file") && vm.count("config-file")
-				&& user_options.get_model() == 15) { //This condition specifies Recursive call of XSpeed
-			user_model(Hybrid_Automata, init_state, reach_parameters,
-					user_options);
-			isModelParsed = true;
-			if (reach_parameters.time_step == 0
-					&& reach_parameters.Iterations == 0) {
-				std::cout
-						<< "Invalid inputs (Model 15 is not a valid model number.\n)"
-						<< std::endl;
-				exit(0);
+		if (user_options.get_model() == 15) { //This condition specifies Recursive call of XSpeed
+			user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
+			unsigned int x1,x2;
+			x1 = user_options.get_first_plot_dimension();
+			x2 = user_options.get_second_plot_dimension();
+
+			if (!user_options.get_forbidden_set().empty()){
+				string_to_poly(user_options.get_forbidden_set(), forbidden_set);
+				forbidden_set.second->print2file("./bad_poly", x1, x2);
 			}
+
+			isModelParsed = true;
 		}
 		std::cout<<"user_model function called\n";
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
@@ -232,8 +215,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			std::cout << "Missing depth option\n";
 			return 0;
 		}
-		if ((user_options.get_model() == 3 || user_options.get_model() == 4)
-				&& user_options.get_bfs_level() != 0) {
+		if ((user_options.get_model() == 3 || user_options.get_model() == 4)){
 			std::cout << "Invalid depth. Only depth 0 permitted \n";
 			exit(0);
 		}
@@ -250,9 +232,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				output_vars[index] = (std::string) (*tok_iter);
 				index++;
 			}
-		}
-		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-			user_options.set_forbidden_state(vm["forbidden"].as<std::string>());
 		}
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeHorizon(vm["time-horizon"].as<double>());
@@ -336,7 +315,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
 			user_options.set_third_plot_dimension(x3);
 		}
-		if (!user_options.get_forbidden_state().empty())
+		if (!user_options.get_forbidden_set().empty())
 			forbidden_set.second->print2file("./bad_poly", x1, x2);
 	}
 	return 1;
