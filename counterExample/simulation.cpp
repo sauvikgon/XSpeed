@@ -6,8 +6,8 @@
  */
 
 #include "counterExample/simulation.h"
-#include "core_system/continuous/Polytope/Polytope.h"
 #include <fstream>
+#include "../core_system/continuous/Polytope/Polytope.h"
 
 simulation::simulation() {
 	// TODO Auto-generated constructor stub
@@ -205,7 +205,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	u = N_VNew_Serial(dimension);
 
 	double dist = math::abs(I->point_distance(x));
-	if(dist > 1e-5 ){
+	if(dist > tolerance ){
 		throw std::runtime_error("bounded simulation: initial point outside invariant. NLP problem constrains not set correctly\n");
 	}
 	for(unsigned int i=0;i<dimension;i++)

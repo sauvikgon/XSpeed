@@ -9,7 +9,7 @@
 #ifndef SYMBOLIC_STATES_H_
 #define SYMBOLIC_STATES_H_
 
-#include "core_system/continuous/Polytope/Polytope.h"
+#include "../continuous/Polytope/Polytope.h"
 #include "core_system/discrete/discrete_set/discrete_set.h"
 #include "Utilities/Template_Polyhedra.h"
 

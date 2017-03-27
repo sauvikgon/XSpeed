@@ -143,6 +143,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 			}
 		}
+		//std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 

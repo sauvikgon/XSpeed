@@ -76,8 +76,9 @@ double transMinkPoly::computeSupportFunction(std::vector<double> direction, lp_s
 		B_TRANS.mult_vector(direction,dprime);
 		res3 = dot_product(dprime, C);
 	}
-//cout<<"\t res3 = "<<res3<<std::endl;
 	double res = res1 + time * res2 + time * res3;
+	//cout<<"\t res3 = "<<res3<<std::endl;
+
 	if (beta != 0) {
 		double dir_norm = support_unitball_infnorm(direction);
 		return res + beta * dir_norm;

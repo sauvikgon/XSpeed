@@ -8,9 +8,8 @@
 #ifndef DATASTRUCTUREDIRECTIONS_H_
 #define DATASTRUCTUREDIRECTIONS_H_
 
-#include "core_system/continuous/Polytope/Polytope.h"
+#include "../core_system/continuous/Polytope/Polytope.h"
 #include "core_system/math/matrix.cpp"
-#include "core_system/continuous/Polytope/Polytope.h"
 
 /*
  * Data Structure required for our Algorithm to improve using the concept of checking glp_optimal

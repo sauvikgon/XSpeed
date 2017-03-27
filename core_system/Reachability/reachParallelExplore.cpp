@@ -6,19 +6,11 @@
  */
 
 #include "core_system/Reachability/reachParallelExplore.h"
-#include "core_system/Reachability/reachabilitySequential.h"
-#include "core_system/Reachability/NewApproach/Partition_BoundingPolytope.h"
-#include "Utilities/invariantBoundaryCheck.h"
-#include "application/sf_utility.h"
-#include "Utilities/testPolytopePlotting.h"
-#include "Utilities/Template_Polyhedra.h"
-#include "application/All_PP_Definition.h"
 
 
 //Optimizing Supp_Func Computation:: Implementation of parallel reachability using OMP approach
 const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIteration, Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
+		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool isInvariantExist, int lp_solver_type_choosen) {
 	//typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
@@ -230,7 +222,11 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 		ReachParameters.Iterations = NewTotalIteration; //Actual number of iteration after boundary check evaluation
 	// ******** New Change ***************
 	unsigned int original_Iterations = ReachParameters.Iterations;
-	double newTimeBound = T / CORES;
+	//double newTimeBound = T / CORES;
+	double newTimeHorizon = NewTotalIteration * ReachParameters.time_step; //@amit new reachable Time horizon after invariant check
+
+	double newTimeBound = newTimeHorizon / CORES; //@Amit debugging ... Modify to take the new reachable TimeBound
+	//std::cout<<"newTimeHorizon ="<<newTimeHorizon <<"  newTimeBound = "<<newTimeBound<<std::endl;
 
 	ReachParameters.TimeBound = newTimeBound; //correct one.	//ReachParameters.TimeBound = 1;
 
@@ -239,9 +235,6 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 	ReachParameters.Iterations = ReachParameters.Iterations / CORES; //required in Invarian_Boundary_Check
 	//Todo::: please handle when the value of this expression is in Fraction
 	// ******** New Change ***************
-//	std::cout<<"NewTotalIteration = "<<NewTotalIteration<<"\n";
-//	std::cout<<"ReachParameters.Iterations = "<<ReachParameters.Iterations<<"\n";
-
 //	cout << "partition_iterations" << ReachParameters.Iterations << "\n";
 //ReachParameters.time_step = newTimeBound/ partition_iterations;	//computed for 1st partition
 	template_polyhedra::ptr reachability_region;
@@ -279,8 +272,15 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 		y_matrix.transpose(y_trans);
 //(phi_trans . X0 + y_trans . U)
 //		std::cout << "\ncomputing initial object\n";
-		supportFunctionProvider::ptr Initial = transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,
-						phi_trans, y_trans, 1, 0));
+
+		supportFunctionProvider::ptr Initial;
+		if (!SystemDynamics.isEmptyC){
+			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,SystemDynamics.C ,phi_trans, y_trans, 1, 0));
+		}else{
+			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,phi_trans, y_trans, 1, 0));
+		}
+
+
 //		cout<<"Done TransMinkPoly \n";
 		//Calling Sequential algorithm here and later can mix with parallel for direction
 		if (Algorithm_Type == TIME_SLICE) {
@@ -293,14 +293,18 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 //		cout<<"Done creating initial partition \n";
 #pragma omp critical
 		{
-		//if (i != 0)
+		//if (i == 1)
 			reachability_region = reachability_region->union_TemplatePolytope(Tpoly);
 		}
+		/*if (i == 1){
+			polytope::ptr p;
+			p = create_polytope_set(Initial,ReachParameters,SystemDynamics);
+			p->print2file("test.txt",2,0);
+		}*/
 	} //end of pragma for loop
 	//this may not be required if Average_number_of_times = 1 otherwise must.
 	ReachParameters.Iterations = original_Iterations;
 	ReachParameters.TimeBound = T; //restore the original timebound for next transition or location
-	//GenerateInitialPolytopePlotter(initial_polys_list);
 	return reachability_region;
 }
 

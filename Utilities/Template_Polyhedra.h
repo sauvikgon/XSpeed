@@ -9,11 +9,11 @@
 #define TEMPLATE_POLYHEDRA_H_
 
 #include "core_system/math/matrix.h"
-#include "core_system/continuous/Polytope/Polytope.h"
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <omp.h>
+#include "../core_system/continuous/Polytope/Polytope.h"
 
 using namespace std;
 /*

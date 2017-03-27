@@ -8,10 +8,11 @@
 #ifndef GRADIENT_H_
 #define GRADIENT_H_
 
-#include <core_system/continuous/Polytope/Polytope.h>
 #include <vector>
 #include <cmath>
 #include <gsl/gsl_deriv.h>
+
+#include "../core_system/continuous/Polytope/Polytope.h"
 #include "core_system/math/analyticODESol.h"
 
 /*

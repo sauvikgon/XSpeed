@@ -140,8 +140,9 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
-	if (!op.get_forbidden_state().empty()) {
-		string_to_poly(op.get_forbidden_state(), forbidden_set);
-		//string_to_poly_HystFormat(op.get_forbidden_state(), forbidden_set);
+
+	if (!op.get_forbidden_set().empty()) {
+		string_to_poly(op.get_forbidden_set(), forbidden_set);
+		//string_to_poly_HystFormat(op.get_forbidden_set(), forbidden_set);
 	}
 }

@@ -9,7 +9,7 @@
 
 userOptions::userOptions() {
 	// TODO Auto-generated constructor stub
-	model = 0; //default model, bouncing ball
+	model = 0; //no model specified by this value
 	direction_template = 0; //default directions, box template
 	output_var_X = 0; // default first dimension of plot
 	output_var_Y = 1; // default second dimension of plot
@@ -119,12 +119,12 @@ void userOptions::set_automata_exploration_algorithm(unsigned int exp_alg)
 	automata_exploration_algorithm = exp_alg;
 }*/
 
-std::string userOptions::get_forbidden_state()
+std::string userOptions::get_forbidden_set()
 {
 	return forbidden_state;
 }
 //void userOptions::set_forbidden_state(std::__cxx11::string forbid_s){ //creates some other error if use -std=c++11 options
-void userOptions::set_forbidden_state(std::string forbid_s){
+void userOptions::set_forbidden_set(std::string forbid_s){
 
 	forbidden_state = forbid_s;
 }

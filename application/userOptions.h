@@ -65,8 +65,8 @@ public:
 	void set_flow_algorithm(unsigned int alg);
 	unsigned int get_automata_exploration_algorithm();
 	void set_automata_exploration_algorithm(unsigned int exp_alg);*/
-	std::string get_forbidden_state();
-	void set_forbidden_state(std::string);
+	std::string get_forbidden_set();
+	void set_forbidden_set(std::string);
 
 	unsigned int get_algorithm();	//returns the selected Algorithm
 	void set_algorithm(unsigned int alg);	//assigns the Algorithm selected by the user
