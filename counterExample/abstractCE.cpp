@@ -291,26 +291,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 				P=polys.front();
 		}
 
-//		To get a point from the polytope, we create a random obj function and
-//		solve the lp. The solution point is taken as an initial value.
-
-		// When flowpipe intersects the guard only at more than one place, take a bounding box approx of the flowpipe and project time
-		//debug
-//		math::matrix<double> vertices_list;
-//		vertices_list = P->get_2dVertices(0, 10);
-//		std::cout << "Number of vertices of the polytope: " << vertices_list.size1() << std::endl;
-//
-//		// ------------- Printing the vertices on the Output File -------------
-//		for (unsigned int p = 0; p < vertices_list.size1(); p++) {
-//			for (unsigned int q = 0; q < vertices_list.size2(); q++) {
-//				tracefile << vertices_list(p, q) << " ";
-//			}
-//			tracefile << std::endl;
-//		}
-//		tracefile << std::endl; // 1 gap after each polytope plotted
-
-		//----
-
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 		// ensure that time is always positive

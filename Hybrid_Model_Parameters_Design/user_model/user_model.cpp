@@ -7,7 +7,6 @@
 #include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
 void user_model(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
 
-
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
 // ************* Section required for Forbidden Inputs *************
@@ -151,7 +150,5 @@ Hybrid_Automata.setDimension(dim);
 Hybrid_Automata.insert_to_map("x",0);
 Hybrid_Automata.insert_to_map("v",1);
 Hybrid_Automata.insert_to_map("t",2);
-
-
 
 }

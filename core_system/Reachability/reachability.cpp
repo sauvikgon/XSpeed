@@ -1461,7 +1461,7 @@ bool reachability::isContained(int locID, polytope::ptr poly, std::list<symbolic
 
 					contained = p1->is_contained(p2);
 					if (contained){
-						std::cout<<"\n\nFound Fixed-point!!!\n";
+						//std::cout<<"\n\nFound Fixed-point!!!\n";
 						break;	//No need to check the rest if contained in a single Omega
 					}
 				}

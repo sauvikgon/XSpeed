@@ -109,6 +109,9 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			exit(0);
 			//return 0; //Just displaying the Help options and terminating the Project
 		}
+
+		// Setting the model and the cfg file
+
 		std::string include_path = "", model_filename = "",
 				config_filename = ""; //default set to empty
 		if (vm.count("include-path")) {
@@ -129,6 +132,11 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout << "Invalid Model option specified\n";
 				return 0;
 			}
+		}
+
+		// ** Setting the forbidden string from the commandline ***
+		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
+					user_options.set_forbidden_state(vm["forbidden"].as<std::string>());
 		}
 
 		// ********************** Setting for Output file **********************************
@@ -214,7 +222,8 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				exit(0);
 			}
 		}
-		std::cout<<"user_model function called\n";
+
+
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_directionTemplate(vm["directions"].as<int>());
 			if (user_options.get_directionTemplate() <= 0) {
@@ -251,9 +260,11 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				index++;
 			}
 		}
+
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_forbidden_state(vm["forbidden"].as<std::string>());
 		}
+
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeHorizon(vm["time-horizon"].as<double>());
 			if (user_options.get_timeHorizon() <= 0) { //for 0 or negative time-bound
