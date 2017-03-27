@@ -126,6 +126,11 @@ int main(int argc, char *argv[]) {
 				Symbolic_states_list, ce_candidates);
 
 		tt1.stop();
+		// printing the first initial polytope in the init_poly file
+		polytope::ptr init_poly = (*init_state.begin())->getInitialSet();
+		init_poly->print2file("./init_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+
+		//------
 		cpu_usage = getCurrent_ProcessCPU_usage();
 		Avg_cpu_use = Avg_cpu_use + cpu_usage;
 		//todo:: if the size of transition is greater than it can compute there is segmentation fault
@@ -165,6 +170,7 @@ int main(int argc, char *argv[]) {
 
 	std::cout << std::fixed; //to assign precision on the std::output stream
 	std::cout.precision(7);
+
 
 	double return_Time = Avg_wall_clock / (double) 1000;
 

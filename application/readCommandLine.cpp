@@ -79,9 +79,31 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 	std::vector<std::string> output_vars(3); //stores the output/plotting variables
 
-	//std::ofstream outFile;
-	//math::matrix<double> vertices_list;
+	// string with commandline options except model and cfg file names
 	const char *stFileNameWithPath;
+
+	std::string input;
+	for (int i = 1; i < argc; i++) {
+		//std::cout<<"1..argv[i] = " <<argv[i]<<std::endl;
+		if (std::string(argv[i]).find("-o") != string::npos || std::string(argv[i]).find("--output-file") != string::npos || std::string(argv[i]).find("-m") != string::npos || std::string(argv[i]).find("-c") != string::npos ||
+				std::string(argv[i]).find("--model-file") != string::npos || std::string(argv[i]).find("--config-file") != string::npos )
+			i++;
+		else {
+			if (std::string(argv[i]).find("-F") != string::npos){
+				//std::cout<<"argv[i] = " <<argv[i]<<std::endl;
+				input.append(argv[i]);	//-F
+				input.append(" ");
+				i++; //move next arg ie options for -F
+				input.append("\"");
+				input.append(argv[i]);
+				input.append("\" ");
+			}else{
+				input.append(argv[i]);
+				input.append(" ");
+			}
+		}
+	}
+	//--------
 	if (argc > 1) { // Boost Options to be filled-up
 		if (vm.count("help")) {
 			cout << desc << "\n";
@@ -110,11 +132,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout << "Invalid Model option specified\n";
 				return 0;
 			}
-		}
-
-		// ** Setting the forbidden string from the commandline ***
-		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-					user_options.set_forbidden_state(vm["forbidden"].as<std::string>());
 		}
 
 		// ********************** Setting for Output file **********************************
@@ -182,13 +199,14 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(stFileNameWithPath);
 			cmdStr1.append(SingleSpace);
-			cmdStr1.append("-F ");
-			cmdStr1.append("\"");
-			forbidden_string = user_options.get_forbidden_set();
-			cmdStr1.append(forbidden_string);
-			cmdStr1.append("\"");
+//			cmdStr1.append("-F ");
+//			cmdStr1.append("\"");
+//			forbidden_string = user_options.get_forbidden_set();
+//			cmdStr1.append(forbidden_string);
+//			cmdStr1.append("\"");
 //			std::cout << "the command string is:" << cmdStr1 << std::endl;
-
+			cmdStr1.append(input);
+			std::cout << "the command string is:" << cmdStr1 << std::endl;
 			system(cmdStr1.c_str());
 			exit(0);
 		}
@@ -244,7 +262,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
-			user_options.set_forbidden_state(vm["forbidden"].as<std::string>());
+			user_options.set_forbidden_set(vm["forbidden"].as<std::string>());
 		}
 
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
