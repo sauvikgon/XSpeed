@@ -15,6 +15,7 @@
 #include "core_system/continuous/ConvexSet/transMinkPoly.h"
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
 #include <stdlib.h>	//for using abs() absolute function
+#include "core_system/math/analyticODESol.h"
 
 /*
  * Sequential Algorithm using support-function-algorithm to perform invariant crossing check
@@ -108,12 +109,6 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,supportFunctionPro
 void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters);
 
-/*
- * Returns THE time when a convex set just crosses the invariant boundary one after another of a invariant polyhedra.
- * Note: This is an in-efficient method
- */
-double invariantCrossingCheck(double START_TIME, double time_step, double time_horizon, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, Dynamics& SystemDynamics, int lp_solver_type_choosen);
 
 /*
  * Checking for each invariant direction individually

@@ -996,35 +996,62 @@ supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParame
 
 	math::matrix<double> phi, phi_trans;
 
-	if ((SystemDynamics.isEmptyMatrixB || SystemDynamics.U->getIsEmpty()) && SystemDynamics.isEmptyC){	//both B and C is empty, so we have x'(t) = Ax(t)
+
+	if (!SystemDynamics.isEmptyMatrixA && (SystemDynamics.isEmptyMatrixB || SystemDynamics.U->getIsEmpty()) && SystemDynamics.isEmptyC){	//both B and C is empty but not A, so we have x'(t) = Ax(t)
 		//cout <<"Matrix B and Vector C is Empty!!, Dynamics is x'(t) = Ax(t)\n";
 		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
 		phi.transpose(phi_trans); //phi_trans computed
-		//	std::cout << "\ncomputing initial object\n";
+		//std::cout << "\ncomputing initial when B and C are Empty !!\n";
 		supportFunctionProvider::ptr Initial = transMinkPoly::ptr( new transMinkPoly(ReachParameters.X0, SystemDynamics.U,
 						phi_trans, phi_trans, 0, 0));//when  Bu(t) and C are empty
 		return Initial;
 	}
-	cout <<"Dynamics is NOT of type --:  x'(t) = Ax(t)\n";
+	//cout <<"Dynamics is NOT of type --:  x'(t) = Ax(t)\n";
 	math::matrix<double> A_inv_phi, y_matrix, y_trans;
-	SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
-	phi.transpose(phi_trans); //phi_trans computed	//cout << "phi_trans" << phi_trans << std::endl;
-	math::matrix<double> A_inv; //(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
-	A_inv = ReachParameters.A_inv;
-	A_inv.multiply(phi, A_inv_phi);	//cout<<"A_inv_phi = "<<A_inv_phi<<std::endl;
-	A_inv_phi.minus(A_inv, y_matrix);	//cout << "y_matrix = " << y_matrix << std::endl;
-	y_matrix.transpose(y_trans);
-	//	std::cout << "\ncomputing initial object\n";
 
-	if (SystemDynamics.isEmptyC) {
-		cout << "C is Empty\n";
-		supportFunctionProvider::ptr Initial = transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U, phi_trans, y_trans, 1, 0));	//when only C is empty
-		return Initial;
-	} else if (!SystemDynamics.isEmptyC) {
-		cout << "C is NOT Empty\n";
-		supportFunctionProvider::ptr Initial = transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U, SystemDynamics.C, phi_trans, y_trans, 1, 0));
-		return Initial;
+	if (!SystemDynamics.isEmptyMatrixA){
+		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
+		phi.transpose(phi_trans); //phi_trans computed	//cout << "phi_trans" << phi_trans << std::endl;
+
+		if (SystemDynamics.MatrixA.isInvertible()){
+			math::matrix<double> A_inv; //(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
+			A_inv = ReachParameters.A_inv;
+			A_inv.multiply(phi, A_inv_phi);	//cout<<"A_inv_phi = "<<A_inv_phi<<std::endl;
+			A_inv_phi.minus(A_inv, y_matrix);	//cout << "y_matrix = " << y_matrix << std::endl;
+		}else {
+			y_matrix = time_slice_component(SystemDynamics.MatrixA, START_TIME);
+		}
+	}else{
+		/*
+		 * Since we need matrix A to exists, so we create A to be a zero matrix if it does not exists
+		 */
+		unsigned int dim=ReachParameters.Directions.size2();
+		math::matrix<double> ZeroMatrixA(dim, dim);
+
+		if (SystemDynamics.isEmptyMatrixA){
+		 for (unsigned int i=0;i<dim;i++)
+			 for (unsigned int j=0;j<dim;j++)
+				 ZeroMatrixA(i,j)=0;
+		}
+		ZeroMatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
+		phi.transpose(phi_trans); //phi_trans computed	//cout << "phi_trans" << phi_trans << std::endl;
+
+		y_matrix = time_slice_component(ZeroMatrixA, START_TIME);
+		//std::cout<<"Matrix A does NOT exists!!\n";
 	}
+
+	y_matrix.transpose(y_trans);
+	//std::cout<<"y_trans = "<<y_trans<<std::endl;
+
+	supportFunctionProvider::ptr Initial;
+	if (!SystemDynamics.isEmptyC){
+		//cout << "C is NOT Empty\n";
+		Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,SystemDynamics.C ,phi_trans, y_trans, 1, 0));
+	}else{
+		//cout << "C is Empty\n";
+		Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,phi_trans, y_trans, 1, 0));
+	}
+	return Initial;
 }
 
 //NOTE :: this approach of increasing the time-step does not work in support-function algorithm
@@ -1439,36 +1466,6 @@ std::string filename="./coarse.out";
 	}
 }
 
-//Returns THE time when a convex set just crosses the invariant boundary one after another of a invariant polyhedra.
-//Note: This is an in-efficient method
-double invariantCrossingCheck(double START_TIME, double time_step, double time_horizon, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, Dynamics& SystemDynamics, int lp_solver_type_choosen) {
-	int dimension = ReachParameters.X0->getSystemDimension();
-	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
-	//unsigned int tot_iters = math::ceil(time_horizon / time_step);
-	std::vector<double> boundaryIters(numberOfInvariants, time_horizon); // size(dimension_size,initial_value)
-	for (int eachInvariant = 0; eachInvariant < numberOfInvariants; eachInvariant++) {
-		std::vector<double> pos_dir(dimension), neg_dir(dimension);		//	neg_dir.resize(dimension);		//cout<<"Invariant Number = "<<eachInvariantDirection<<endl;		//	cout<<"Invariant Directions ";
-	//	cout<<"eachInvariant = "<<eachInvariant<<"\n";
-		for (int i = 0; i < dimension; i++) {
-			pos_dir[i] = invariant->getCoeffMatrix()(eachInvariant, i); //First vector positive			cout << pos_dir[i] << "\t";
-			neg_dir[i] = -1 * invariant->getCoeffMatrix()(eachInvariant, i); //Second vector negative of First vector
-		}
-		double invariant_SupportFunction;
-		//invariant_SupportFunction = invariant->getColumnVector(eachInvariant);	//this is same as solving LP but better use support_function concept
-		lp_solver lpSolver(lp_solver_type_choosen);
-		lpSolver.setMin_Or_Max(2);
-		if (!invariant->getIsEmpty()) { //set glpk constraints If not an empty polytope
-			lpSolver.setConstraints(invariant->getCoeffMatrix(), invariant->getColumnVector(), invariant->getInEqualitySign());
-			invariant_SupportFunction = invariant->computeSupportFunction(pos_dir, lpSolver);	//std::cout << "\neachInvariantDirection = "<<eachInvariant<<" Invariant SupportFunction = " << invariant_SupportFunction << endl;
-		}
-		//cout<<"Test 2:: invariant_SupportFunction = "<<invariant_SupportFunction<<"\n";
-		boundaryIters[eachInvariant] = invariantFaceCrossingCheck(neg_dir, invariant_SupportFunction, START_TIME, time_step, time_horizon, Initial, ReachParameters,
-				SystemDynamics, lp_solver_type_choosen);//cout << "boundaryIters[eachInvariant] = " << boundaryIters[eachInvariant] << std::endl;
-	}	//end of each Invariant directions
-	return *min_element(boundaryIters.begin(), boundaryIters.end());
-}
-
 double invariantFaceCrossingCheck(std::vector<double>& neg_dir, double invBound, double START_TIME, double time_step, double time_horizon,
 		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type_choosen){
 
@@ -1514,6 +1511,7 @@ double invariantCrossingCheck1(double START_TIME, double time_step, double time_
 	for(double t=START_TIME; t<=time_horizon; t = t + time_step){		//cout<<"test a\n";
 		flag=false;
 		p = getInitialSet(t, ReachParameters, SystemDynamics);	//initial set at time = t
+		//std::cout<<"Initial Set created!!\n";
 		double invBound;
 		std::vector<double> neg_dir(dimension);
 		for (int eachInvariant = 0; eachInvariant < numberOfInvariants; eachInvariant++) {

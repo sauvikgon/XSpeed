@@ -145,7 +145,11 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			unsigned int NewTotalIteration;
 
 			if (LoadBalanceDS[id].current_location->isInvariantExists()) {
-
+				/*
+				 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
+				 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
+				 * and also avoid B (and poly U) for similar reason. However, C here is a constant vector.
+				 */
 				if (LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixA == true && LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixB == true
 						&& LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyC == false) {
 					//Approach of Coarse-time-step and Fine-time-step

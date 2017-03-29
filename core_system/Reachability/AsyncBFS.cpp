@@ -156,7 +156,11 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 
 	unsigned int NewTotalIteration = reach_parameters.Iterations;
 	if (current_location->isInvariantExists()) {
-
+		/*
+		 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
+		 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
+		 * and also avoid B (and poly U) for similar reason. However, C here is a constant vector.
+		 */
 		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
 			//Approach of Coarse-time-step and Fine-time-step
 			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
