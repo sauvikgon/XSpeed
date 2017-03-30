@@ -66,15 +66,13 @@ public:
 	 * Adds one constraint to the existing polytope by adding the
 	 * coefficient constraint with the bound value to the existing list.
 	 */
-	void setMoreConstraints(std::vector<double> coeff_constraint,
-			double bound_value);
+	void setMoreConstraints(std::vector<double> coeff_constraint,double bound_value);
 
 	/*
 	 * Adds one or more constraints to the existing polytope by adding the
 	 * coefficient_constraints with the bound_values to the existing list.
 	 */
-	void setMoreConstraints(math::matrix<double> coeff_constraints,
-			std::vector<double> bound_values);
+	void setMoreConstraints(math::matrix<double> coeff_constraints,std::vector<double> bound_values);
 
 	// void set_Default_lp_init();
 	// void set_lp_object(glpk_lp_solver* newObject);

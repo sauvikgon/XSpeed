@@ -307,7 +307,7 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 						/*
 						 * Now perform containment check similar to sequential algorithm.
 						 */
-						std::cout<<"Before containment check\n";
+						//std::cout<<"Before containment check\n";
 						int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 						if (is_ContainmentCheckRequired){	//Containtment Checking required
 							bool isContain=false;

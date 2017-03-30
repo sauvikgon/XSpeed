@@ -50,6 +50,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 				for(std::list<initial_state::ptr>::iterator it = Wlist[t][i][q].begin(); it!=Wlist[t][i][q].end();it++){
 					initial_state::ptr s = (*it);
 					template_polyhedra::ptr R;
+				//	std::cout<<"Before PostC called\n";
 					R = postC(s);
 					symbolic_states::ptr R1 = symbolic_states::ptr(new symbolic_states());
 
@@ -68,6 +69,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 				//Currently removed the Safety Check Section from here
 					std::list<initial_state::ptr> R2;
 					if (level < bound){	//Check level to avoid last PostD computation
+					//	std::cout<<"Before PostD called\n";
 						R2 = postD(R1, PASSED);
 #pragma omp critical
 					{
@@ -252,6 +254,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			gaurd_polytope = (*t)->getGaurd();//	GeneratePolytopePlotter(gaurd_polytope);
 
 		//cout<<"2\n";
+			//std::cout<<"Before Flowpipe intersection called\n";
 			std::list<polytope::ptr> polys;
 			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 			polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
@@ -265,7 +268,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 
 			current_assignment = (*t)->getAssignT();
 			// *** interesected_polyhedra included with invariant_directions also ******
-		//	cout<<"size = "<< intersected_polyhedra.size();
+		//cout<<"size = "<< intersected_polyhedra.size();
 
 			int destination_locID = (*t)->getDestination_Location_Id();
 			ds.insert_element(destination_locID);
@@ -275,12 +278,14 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				//intersectedRegion = (*i)->getTemplate_approx(lp_solver_type_choosen);
 				//Returns a single over-approximated polytope from the list of intersected polytopes
 				//	GeneratePolytopePlotter(intersectedRegion);
+			//	std::cout<<"Before Guard intersected region called\n";
 				polytope::ptr newShiftedPolytope, newPolytope;//created an object here
 				newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
 				//newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);//initial_polytope_I = post_assign_exact(newPolytope, R, w);
 
 				math::matrix<double> test(current_assignment.Map.size1(),
 						current_assignment.Map.size2());
+				//std::cout<<"Before Assignment called\n";
 				if (current_assignment.Map.inverse(test))	//invertible?
 				{
 					//std::cout << "Exact Post Assignment\n";
@@ -293,6 +298,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 							current_assignment.b, reach_parameters.Directions,
 							lp_solver_type_choosen);
 				}
+				//std::cout<<"Before Invariant intersection called\n";
 				// @Amit: the newShifted satisfy the destination location invariant
 				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
@@ -300,7 +306,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
 
-
+				//	std::cout<<"Before Containment check called\n";
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 					newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
 					isContain = templated_isContained(destination_locID, newPoly, PASSED, lp_solver_type_choosen);//over-approximated but threadSafe

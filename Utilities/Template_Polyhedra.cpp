@@ -344,10 +344,11 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 		//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
 		polytope::ptr p;
 		p = this->getPolytope(i);
-		std::vector<double> constraint_bound_values(this->getInvariantDirections().size1());
-		constraint_bound_values = this->getInvariantBoundValue(i);
-		p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
-
+		if (this->invariant_Directions.size1() != 0){
+			std::vector<double> constraint_bound_values(this->getInvariantDirections().size1());
+			constraint_bound_values = this->getInvariantBoundValue(i);
+			p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
+		}
 		intersects[i] = p->check_polytope_intersection(G, lp_solver_type_choosen); //result of intersection
 	} //end of parallel-loop :: we have the list of intersected polys
 

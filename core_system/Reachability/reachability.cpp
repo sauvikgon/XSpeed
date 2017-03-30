@@ -148,11 +148,11 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 			}
 		}
-		//std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
+	//	std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 
-		//std::cout<<"reach_region->getTotalIterations() = "<< reach_region->getTotalIterations()<<"\n";
+	//	std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<"\n";
 		num_flowpipe_computed++;//computed one Flowpipe
 		//	*********************************************** Reach or Flowpipe Computed ************************************
 		if (previous_level != levelDeleted) {
@@ -263,6 +263,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				string locName = current_destination->getName();
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
+			//	std::cout<<"Before flowpipe Guard intersection\n";
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 				{
 					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
@@ -288,6 +289,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {
 					polytope::ptr intersectedRegion = (*i);
 					polytope::ptr newPolytope, newShiftedPolytope; //created an object here
+				//	std::cout<<"Before Assignment\n";
 					if(!gaurd_polytope->getIsUniverse())
 						newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);
 					else
@@ -299,6 +301,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
 								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
 					}
+				//	std::cout<<"Before Invariant intersection\n";
 					// @Rajarshi: the newShifted satisfy the destination location invariant
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
@@ -311,6 +314,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						 * actual polytope obtained after assignment operation i.e., newShiftedPolytope
 						 */
 						//Calling with the newShifted polytope to use PPL library
+				//		std::cout<<"Before Containment check\n";
 						isContain = isContained(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
 						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 							initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
@@ -328,6 +332,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					}
 				}
 			} //end of transition iterator
+
 		}
 		jump_time.stop();
 		/*
@@ -1450,11 +1455,11 @@ bool reachability::isContained(int locID, polytope::ptr poly, std::list<symbolic
 				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
-
-				std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());
-				constraint_bound_values = flowpipe->getInvariantBoundValue(i);
-				p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);
-
+				if (flowpipe->getInvariantDirections().size1() !=0){	//bug fix for Platoon model where invariant does not exists
+					std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());
+					constraint_bound_values = flowpipe->getInvariantBoundValue(i);
+					p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);
+				}
 				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
