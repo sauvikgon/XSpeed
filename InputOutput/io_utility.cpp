@@ -66,10 +66,9 @@ polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
 
 typedef std::vector<std::pair<double, double> > Intervals;
 void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list,userOptions user_ops) {
-
 	symbolic_states::ptr sym_state = *symbolic_states_list.begin();
-	unsigned int system_dim = sym_state->getInitialPolytope()->getSystemDimension();
-
+	//unsigned int system_dim = sym_state->getInitialPolytope()->getSystemDimension();	//may not exists
+	unsigned int system_dim = sym_state->getContinuousSetptr()->getTemplateDirections().size2();	//this definitely exists
 	unsigned int first_var_index = user_ops.get_first_plot_dimension();
 	unsigned int second_var_index = user_ops.get_second_plot_dimension();
 
@@ -80,10 +79,8 @@ void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list,us
 	std::vector<double> d_max_2(system_dim,0), d_min_2(system_dim,0);
 	d_max_2[second_var_index] = 1;
 	d_min_2[second_var_index] = -1;
-
 	double max_global_first = INT_MIN, min_global_first=INT_MAX;
 	double max_global_second = INT_MIN, min_global_second=INT_MAX;
-
 	std::list<symbolic_states::ptr>::iterator SS;
 	for (SS = symbolic_states_list.begin(); SS != symbolic_states_list.end();
 			SS++) {

@@ -206,7 +206,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 //			cmdStr1.append("\"");
 //			std::cout << "the command string is:" << cmdStr1 << std::endl;
 			cmdStr1.append(input);
-			std::cout << "the command string is:" << cmdStr1 << std::endl;
+		//	std::cout << "the command string is:" << cmdStr1 << std::endl;
 			system(cmdStr1.c_str());
 			exit(0);
 		}
