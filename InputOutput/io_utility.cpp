@@ -6,11 +6,23 @@
  */
 #include "io_utility.h"
 
+/*
+ * Creating a bounding_box polytope with constraints as (template_directions + invariant_directions)
+ * and bounds as maximum of (sfm + invariant_bounds). The polytopes from the ith to the jth columns
+ * are merged to get a single polytope. The parameters include the i, j to be merged to get a hull
+ */
 
+polytope::ptr get_template_hull(template_polyhedra::ptr sfm, unsigned int start, unsigned int end) {
 
-//Creating a bounding_box polytope with constraints as (template_directions + invariant_directions)
-// and bounds as maximum of (sfm + invariant_bounds)
-polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
+	unsigned int template_size = sfm->getTotalIterations() ;
+
+	if(start < template_size && end > template_size)
+		end = template_size-1;
+
+	// Checking the sanity of the bounds
+	//std::cout << "start=" << start << " , end = " << end << std::endl;
+	assert(start<=end && end < sfm->getTotalIterations());
+
 	polytope::ptr boundingPolytope;
 	boundingPolytope = polytope::ptr(new polytope());
 
@@ -30,12 +42,15 @@ polytope::ptr convertBounding_Box(template_polyhedra::ptr sfm) {
 
 	double max_value;
 	int Totaldirs = each_sfm.size1();
+
+	unsigned int num_columns = end - start + 1;
+
 	std::vector<double> polytope_bounds(Totaldirs);
 
 	for (int i = 0; i < Totaldirs; i++) { //i==row_number
-		for (unsigned int k = 0; k < each_sfm.size2(); k++) { //k==col_number
+		for (unsigned int k = start; k < start+num_columns; k++) { //k==col_number
 			double sfm_value = each_sfm(i, k);
-			if (k == 0) {
+			if (k == start) {
 				max_value = sfm_value;
 			} else {
 				if (sfm_value > max_value) {
@@ -86,7 +101,7 @@ void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list,us
 			SS++) {
 
 		template_polyhedra::ptr sym_state_sfm = (*SS)->getContinuousSetptr();
-		polytope::ptr bounding_poly_ptr = convertBounding_Box(sym_state_sfm);
+		polytope::ptr bounding_poly_ptr = get_template_hull(sym_state_sfm,0,sym_state_sfm->getTotalIterations()-1);
 		lp_solver lp;
 		lp.setConstraints(bounding_poly_ptr->getCoeffMatrix(),bounding_poly_ptr->getColumnVector(),bounding_poly_ptr->getInEqualitySign());
 		lp.setMin_Or_Max(2);

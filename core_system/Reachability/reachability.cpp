@@ -1,7 +1,9 @@
 #include "reachability.h"
 #include "InputOutput/cpu_utilities/cpu_utilities.h"
 #include "Utilities/flow_cost_estimate.h"
+#include "Utilities/flowpipe_cluster.h"
 #include "core_system/symbolic_states/symbolic_states.h"
+#include "Utilities/flowpipe_cluster.h"
 #include <ctime>
 
 using namespace std;
@@ -148,7 +150,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 			}
 		}
-	//	std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
+		//std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 
@@ -269,10 +271,18 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 				}
 				else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
-				//	std::cout<<"Guard is universal\n";
-					polys.push_back(convertBounding_Box(reach_region));
+					// This alternative introduces a large approximation at switchings
+					//polys.push_back(flowpipse_cluster(reach_region,100));
+
+					// Another alternative is to consider each omega in the flowpipe as a symbolic state.
+					// The cost of flowpipe computation shall increase but the precision is likely to be better.
+					int factor=10; // Sets the percentage of clustering
+					polys = flowpipe_cluster(reach_region, factor);
+					std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
+					std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
 				}
 				else{ // empty guard
+					std::cout << "Empty guard condition\n";
 					continue;
 				}
 
@@ -286,15 +296,27 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				int destination_locID = (*t)->getDestination_Location_Id();
 				ds.insert_element(destination_locID);
 				std::list<polytope::ptr> intersected_polys;
+
+				std::cout << "Number of Polytopes in the intesection:" << polys.size() << std::endl;
+				unsigned int file_n = 0;
 				for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {
 					polytope::ptr intersectedRegion = (*i);
 					polytope::ptr newPolytope, newShiftedPolytope; //created an object here
 				//	std::cout<<"Before Assignment\n";
-					if(!gaurd_polytope->getIsUniverse())
+					if(!gaurd_polytope->getIsUniverse()){
 						newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);
-					else
-						newPolytope = intersectedRegion;
+						newPolytope->print2file("Switch-poly.txt",9,0);
+					}
 
+					else{
+						newPolytope = intersectedRegion;
+//						if(file_n==0)
+//							newPolytope->print2file("Switch-poly-universe.txt",9,0);
+//						else{
+//							newPolytope->print2file("Switch-poly-universe1.txt",9,0);
+//						}
+//						file_n++;
+					}
 					if (current_assignment.Map.isInvertible()) {
 						newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);
 					} else {
@@ -305,6 +327,9 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					// @Rajarshi: the newShifted satisfy the destination location invariant
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
+					//debug
+					//newShiftedPolytope->print2file("./nextpoly",0,10);
+					//---
 					int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 					if (is_ContainmentCheckRequired){	//Containtment Checking required
 						bool isContain=false;
@@ -314,7 +339,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						 * actual polytope obtained after assignment operation i.e., newShiftedPolytope
 						 */
 						//Calling with the newShifted polytope to use PPL library
-				//		std::cout<<"Before Containment check\n";
+						//std::cout<<"Before Containment check\n";
 						isContain = isContained(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
 						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 							initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
@@ -323,7 +348,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 							pw_list.WaitingList_insert(newState);
 							queue.push_back(BreadthLevel); //insert at REAR first Location
 						}
-					}else{	//Containtment Checking NOT Formed
+					}else{	//Containment Checking NOT Formed
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 						newState->setTransitionId(transition_id); // keeps track of the transition_ID
 						newState->setParentPtrSymbolicState(S);
@@ -1159,8 +1184,8 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 					discrete_set ds, ds2;
 					ds = current_forbidden_state->getDiscreteSet();
 
-					abs_flowpipe = convertBounding_Box(
-							current_forbidden_state->getContinuousSetptr());
+					abs_flowpipe = get_template_hull(
+							current_forbidden_state->getContinuousSetptr(),0,current_forbidden_state->getContinuousSetptr()->getTotalIterations()); // 100% hull
 					polyI =
 							current_forbidden_state->getInitialPolytope();
 					// Here create a new abstract_symbolic_state
@@ -1225,8 +1250,8 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 					discrete_set ds, ds2;
 					ds = current_forbidden_state->getDiscreteSet();
 
-					abs_flowpipe = convertBounding_Box(
-							current_forbidden_state->getContinuousSetptr());
+					abs_flowpipe = get_template_hull(
+							current_forbidden_state->getContinuousSetptr(),0,current_forbidden_state->getContinuousSetptr()->getTotalIterations()-1);
 					polyI =
 							current_forbidden_state->getInitialPolytope();
 					// Here create a new abstract_symbolic_state

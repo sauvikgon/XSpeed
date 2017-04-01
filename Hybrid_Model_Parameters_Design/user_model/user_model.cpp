@@ -12,7 +12,7 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 // ************* Section required for Forbidden Inputs *************
 unsigned int Directions_Type = 1;
 unsigned int iter_max = 6;
-double time_horizon = 10.0; 
+double time_horizon = 10.0;
 double sampling_time = 1.0E-4;
 
 op.set_timeStep(sampling_time);

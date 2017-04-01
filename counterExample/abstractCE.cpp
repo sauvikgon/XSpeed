@@ -251,10 +251,12 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			// If last abst sym state, then take time projection of flowpipe \cap bad_poly
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(bad_poly,1);
 			assert(polys.size()>=0); // The last sym state of an abstract CE must intersect with the bad set
+
 			if(polys.size()>1)
-				P = convertBounding_Box(S->getContinuousSetptr());
+				P = get_template_hull(S->getContinuousSetptr(),0,S->getContinuousSetptr()->getTotalIterations()-1); // 100% clustering
 			else
 				P=polys.front();
+
 			P = P->GetPolytope_Intersection(bad_poly);
 		}
 		else{
@@ -265,9 +267,10 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 				std::cout << "#Guard is Universe#\n" << std::endl;
 
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(guard,1);
+
 			assert(polys.size()>=1); // An abstract CE state must have intersection with the trans guard
 			if(polys.size()>1)
-				P = convertBounding_Box(S->getContinuousSetptr());
+				P = get_template_hull(S->getContinuousSetptr(),0,S->getContinuousSetptr()->getTotalIterations()-1); // 100% clustering
 			else
 				P=polys.front();
 		}
