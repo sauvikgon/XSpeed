@@ -288,19 +288,14 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					if(continuation){
 						// get the last polytope from the plowpipe
 						std::cout << "Continuation Condition Satisfied\n";
-
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
-					}
-
-					else{ // Try clustering with user defined clustering percent
-
+					} else{ // Try clustering with user defined clustering percent
 						int cluster = 10; // Sets the percentage of clustering, 10 is for 10 percent
 						polys = flowpipe_cluster(reach_region, cluster);
 						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
 						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
 					}
-
 				}
 				else{ // empty guard
 					std::cout << "Empty guard condition\n";
@@ -1538,7 +1533,7 @@ bool reachability::templated_isContained(int locID, polytope::ptr poly,
 
 			template_polyhedra::ptr flowpipe;
 			flowpipe = (*it)->getContinuousSetptr();
-			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
+			std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
 			bool intersects=false;
 			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
 				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";

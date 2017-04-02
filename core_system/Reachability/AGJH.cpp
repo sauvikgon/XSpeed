@@ -6,6 +6,7 @@
  */
 
 #include "AGJH.h"
+#include "Utilities/flowpipe_cluster.h"
 
 // Holzmann algorithm adaption
 std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
@@ -256,8 +257,57 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 		//cout<<"2\n";
 			//std::cout<<"Before Flowpipe intersection called\n";
 			std::list<polytope::ptr> polys;
+			bool clusted=false;
 			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
-			polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+			gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
+			//	std::cout<<"Before flowpipe Guard intersection\n";
+			if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
+			{
+				// Returns the template hull of the polytopes that intersect with the guard
+				polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+			}
+			else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
+				// This alternative introduces a large approximation at switchings
+				//polys.push_back(flowpipse_cluster(reach_region,100));
+
+					// Another alternative is to consider each omega in the flowpipe as a new symbolic state.
+					// The cost of flowpipe computation shall increase but the precision is likely to be better.
+					// A user may choose the clustering percent to tune the accuracy versus time overhead
+
+					/* When the guard is universal, a special case arises when destination location has same dynamics as the current one
+					 * and the transition assignment is an identity. *Take only the last polytope from the flowpipe and pass as the new
+					 * symbolic state in the waiting list. The 'continuation' principle will ensure that no reachable state is missed.
+					 */
+					bool continuation = check_continuation(current_location, current_destination, *t);
+					if(continuation){
+						// get the last polytope from the plowpipe
+						std::cout << "Continuation Condition Satisfied\n";
+						unsigned int template_poly_size = reach_region->getTotalIterations();
+						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
+					} else{ // Try clustering with user defined clustering percent
+						int cluster = 0; // Sets the percentage of clustering to 0 ie no clustering applied
+						polys = flowpipe_cluster(reach_region, cluster);
+						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
+						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
+						clusted = true;
+					}
+				}
+				else{ // empty guard
+					std::cout << "Empty guard condition\n";
+					continue;
+				}
+cout<<"intersection with guard done\n";
+
+
+
+
+
+
+
+
+
+
 
 
 		//cout<<"3\n";
@@ -278,7 +328,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				//intersectedRegion = (*i)->getTemplate_approx(lp_solver_type_choosen);
 				//Returns a single over-approximated polytope from the list of intersected polytopes
 				//	GeneratePolytopePlotter(intersectedRegion);
-			//	std::cout<<"Before Guard intersected region called\n";
+				//std::cout<<"Before Guard intersected region called\n";
 				polytope::ptr newShiftedPolytope, newPolytope;//created an object here
 				newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
 				//newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);//initial_polytope_I = post_assign_exact(newPolytope, R, w);
@@ -301,8 +351,12 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				//std::cout<<"Before Invariant intersection called\n";
 				// @Amit: the newShifted satisfy the destination location invariant
 				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+				int is_ContainmentCheckRequired = 0;	//1 will Make it Slow; 0 will skip so Fast
+				/*if (clusted)
+					is_ContainmentCheckRequired = 0;
+				else
+					is_ContainmentCheckRequired = 1;*/
 
-				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
 
