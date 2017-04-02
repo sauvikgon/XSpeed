@@ -303,4 +303,20 @@ bool math::matrix<scalar_type>::operator==(const math::matrix<scalar_type>& M)
 				return false;
 	return true;
 }
+
+template<class T>
+std::ostream& operator<<(std::ostream &os, const math::matrix<T> &t)
+{
+	os << std::endl;
+
+	for(unsigned int i=0;i<t.size1();i++){
+		for(unsigned int j=0;j<t.size2();j++){
+			os << t(i,j) << " ";
+		}
+		os << std::endl;
+	}
+
+	os << std::endl;
+	return os;
+}
 #endif

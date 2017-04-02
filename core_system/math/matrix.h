@@ -64,6 +64,12 @@ public:
 
 	// overloaded operators
 	bool operator==(const math::matrix<scalar_type>& M);
+
+	/** Overloaded << operator */
+
+	template<class U>
+	friend std::ostream& operator << (std::ostream &os, const math::matrix<U> &t);
+
 };
 
 #include "matrix.cpp"
