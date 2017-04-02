@@ -13,6 +13,7 @@
 #include <string>
 #include <sstream>
 #include <boost/shared_ptr.hpp>
+#include "core_system/continuous/Polytope/Polytope.h"
 
 
 namespace PPL = Parma_Polyhedra_Library ;
@@ -24,7 +25,9 @@ private:
 	int sign;
 	PPL::NNC_Polyhedron myPoly;
 	PPL::NNC_Polyhedron get_poly();
+
 public:
+
 	typedef boost::shared_ptr<PPL_Polyhedron> ptr;
 	PPL_Polyhedron();
 	virtual ~PPL_Polyhedron();
@@ -40,6 +43,13 @@ public:
 	 * The polyhedron poly will be tested in the calling polyhedron if it is contained within it.
 	 */
 	bool is_contained(PPL_Polyhedron::ptr poly);
+
+	/**
+	 * Returns the convex hull of the current PPL polyhedron with the passed XSpeed polyhedron.
+	 * The returned polytope is XSpeed polytoep type.
+	 */
+	polytope::ptr get_chull(polytope::ptr p);
+
 
 };
 
