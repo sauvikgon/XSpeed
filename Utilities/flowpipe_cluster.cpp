@@ -45,10 +45,10 @@ bool check_continuation(location::ptr src_loc_ptr, location::ptr dest_loc_ptr, t
 
 	if(src_d.MatrixA==dest_d.MatrixA && src_d.MatrixB == dest_d.MatrixB && src_d.C == dest_d.C){
 		// check the transition assignment for identity
-//		Assign A = trans_ptr->getAssignT();
-//		std::vector<double> zero_vec(A.b.size(),0);
-//
-//		if (A.Map.isIdentity() && A.b==zero_vec)
+		Assign A = trans_ptr->getAssignT();
+		std::vector<double> zero_vec(A.b.size(),0);
+
+		if (A.Map.isIdentity() && A.b==zero_vec)
 			return true;
 	}
 	return false;
