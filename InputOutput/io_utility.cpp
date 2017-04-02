@@ -79,6 +79,8 @@ polytope::ptr get_template_hull(template_polyhedra::ptr sfm, unsigned int start,
 	return boundingPolytope;
 }
 
+
+
 typedef std::vector<std::pair<double, double> > Intervals;
 void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list,userOptions user_ops) {
 	symbolic_states::ptr sym_state = *symbolic_states_list.begin();
