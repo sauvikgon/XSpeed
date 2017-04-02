@@ -274,4 +274,33 @@ bool math::matrix<scalar_type>::isInvertible()
 	}
 	else return true;
 }
+
+template<typename scalar_type>
+bool math::matrix<scalar_type>::isIdentity()
+{
+	assert(this->size1() == this->size2());
+	using namespace boost::numeric::ublas;
+
+	for(unsigned int i=0;i<this->size1();i++){
+		for(unsigned int j=0;j<this->size2();j++){
+			if(i==j && this->at_element(size_type(i), size_type(j))!=1)
+				return false;
+			if(i!=j && this->at_element(size_type(i), size_type(j))!=0)
+				return false;
+		}
+	}
+	return true;
+}
+
+template<typename scalar_type>
+bool math::matrix<scalar_type>::operator==(const math::matrix<scalar_type>& M)
+{
+	if(this->size1() != M.size1() || this->size2() != M.size2()) return false;
+
+	for(unsigned int i=0;i<this->size1();i++)
+		for(unsigned int j=0;i<this->size2();j++)
+			if(this->at_element(size_t(i),size_t(j))!=M(i,j) )
+				return false;
+	return true;
+}
 #endif

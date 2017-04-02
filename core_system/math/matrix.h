@@ -55,8 +55,15 @@ public:
 	bool inverse(math::matrix<scalar_type>& res);
 	/* Returns the boolean status of invertibility */
 	bool isInvertible();
+	/**
+	 * Returns true if identity, false othwerwise
+	 */
+	bool isIdentity();
 	/*private:
 	 ublas_matrix_impl my_matrix;*/
+
+	// overloaded operators
+	bool operator==(const math::matrix<scalar_type>& M);
 };
 
 #include "matrix.cpp"

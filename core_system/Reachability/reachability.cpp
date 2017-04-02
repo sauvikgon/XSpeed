@@ -154,7 +154,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 
-	//	std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<"\n";
+		//	std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<"\n";
 		num_flowpipe_computed++;//computed one Flowpipe
 		//	*********************************************** Reach or Flowpipe Computed ************************************
 		if (previous_level != levelDeleted) {
@@ -178,6 +178,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				polytope::ptr forbid_poly = forbidden_set.second;
 				std::list < template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
+
 				if (forbid_intersects.size() == 0) {
 					std::cout << "\nThe model does NOT violatesSAFETY property!!!\n";
 				} else {
@@ -265,21 +266,40 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				string locName = current_destination->getName();
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
-			//	std::cout<<"Before flowpipe Guard intersection\n";
+				//	std::cout<<"Before flowpipe Guard intersection\n";
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 				{
+					// Returns the template hull of the polytopes that intersect with the guard
 					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 				}
 				else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings
 					//polys.push_back(flowpipse_cluster(reach_region,100));
 
-					// Another alternative is to consider each omega in the flowpipe as a symbolic state.
+					// Another alternative is to consider each omega in the flowpipe as a new symbolic state.
 					// The cost of flowpipe computation shall increase but the precision is likely to be better.
-					int factor=10; // Sets the percentage of clustering
-					polys = flowpipe_cluster(reach_region, factor);
-					std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
-					std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
+					// A user may choose the clustering percent to tune the accuracy versus time overhead
+
+					/* When the guard is universal, a special case arises when destination location has same dynamics as the current one
+					 * and the transition assignment is an identity. *Take only the last polytope from the flowpipe and pass as the new
+					 * symbolic state in the waiting list. The 'continuation' principle will ensure that no reachable state is missed.
+					 */
+					bool continuation = check_continuation(current_location, current_destination, *t);
+
+					if(continuation){
+						// get the last polytope from the plowpipe
+						unsigned int template_poly_size = reach_region->getTotalIterations();
+						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
+					}
+
+					else{ // Try clustering with user defined clustering percent
+
+						int cluster = 10; // Sets the percentage of clustering, 10 is for 10 percent
+						polys = flowpipe_cluster(reach_region, cluster);
+						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
+						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
+					}
+
 				}
 				else{ // empty guard
 					std::cout << "Empty guard condition\n";
@@ -305,7 +325,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				//	std::cout<<"Before Assignment\n";
 					if(!gaurd_polytope->getIsUniverse()){
 						newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);
-						newPolytope->print2file("Switch-poly.txt",9,0);
+					//	newPolytope->print2file("Switch-poly.txt",9,0);
 					}
 
 					else{
