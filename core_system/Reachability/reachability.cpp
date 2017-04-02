@@ -285,10 +285,9 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					 * symbolic state in the waiting list. The 'continuation' principle will ensure that no reachable state is missed.
 					 */
 					bool continuation = check_continuation(current_location, current_destination, *t);
-
 					if(continuation){
 						// get the last polytope from the plowpipe
-						std::cout << "Continuation Condition hit\n";
+						std::cout << "Continuation Condition Satisfied\n";
 
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
@@ -319,25 +318,16 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				ds.insert_element(destination_locID);
 				std::list<polytope::ptr> intersected_polys;
 
-				std::cout << "Number of Polytopes in the intesection:" << polys.size() << std::endl;
-				unsigned int file_n = 0;
 				for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {
 					polytope::ptr intersectedRegion = (*i);
 					polytope::ptr newPolytope, newShiftedPolytope; //created an object here
 				//	std::cout<<"Before Assignment\n";
 					if(!gaurd_polytope->getIsUniverse()){
 						newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);
-					//	newPolytope->print2file("Switch-poly.txt",9,0);
 					}
 
 					else{
 						newPolytope = intersectedRegion;
-//						if(file_n==0)
-//							newPolytope->print2file("Switch-poly-universe.txt",9,0);
-//						else{
-//							newPolytope->print2file("Switch-poly-universe1.txt",9,0);
-//						}
-//						file_n++;
 					}
 					if (current_assignment.Map.isInvertible()) {
 						newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);
@@ -345,7 +335,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
 								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
 					}
-				//	std::cout<<"Before Invariant intersection\n";
+					//	std::cout<<"Before Invariant intersection\n";
 					// @Rajarshi: the newShifted satisfy the destination location invariant
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
