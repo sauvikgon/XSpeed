@@ -1,8 +1,8 @@
 /*
  * PPL_Polyhedron.cpp
  *
- *  Created on: 02-April-2017
- *      Author: Amit
+ *  Created on: 20-Dec-2016
+ *      Author: hazel
  */
 
 #include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
@@ -87,3 +87,53 @@ PPL_Polyhedron::~PPL_Polyhedron() {
 	// TODO Auto-generated destructor stub
 }
 
+
+polytope::ptr PPL_Polyhedron::get_chull(polytope::ptr p){
+
+	polytope::ptr res_poly;
+//	PPL::NNC_Polyhedron this_nnc_poly = this->get_poly();
+//	PPL_Polyhedron ppl_p(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign());
+//	PPL::NNC_Polyhedron other_nnc_poly = ppl_p.get_poly();
+//
+//	// get the chull
+//	this_nnc_poly.poly_hull_assign(other_nnc_poly);
+//
+//
+//	// Convert NNC poly to result poly
+//	PPL::dimension_type ppl_system_dim = this_nnc_poly.space_dimension();
+//
+//	// Check to ensure that the dimension XSpeed polytope and PPL polytope space dimension match
+//	assert(p->getSystemDimension() == ppl_system_dim);
+//
+//	Constraint_System cs = this_nnc_poly.constraints();
+//	unsigned int row_size = cs.num_inequalities();
+//	row_size+= 2*cs.num_equalities(); // equality to be converted to two inequalities
+//
+//	Constraint c;
+//	PPL::Polyhedron p;
+//
+//	math::matrix<double> A(row_size,ppl_system_dim);
+//
+//	std::vector<double> b(p->getSystemDimension());
+//
+//	for(Constraint_System_const_iterator it = cs.begin();it!=cs.end();it++){ // iterate over the constraints
+//		c = *it;
+//		if(c.is_inequality()){
+//			for(PPL::dimension_type i=0; i<ppl_system_dim; i++){
+//				Variable v(i);
+//				double coeff = c.coefficient(v);
+//			}
+//
+//		}
+//		else if(c.is_equality()){
+//
+//		}
+//		else {}
+//
+//		}
+//	}
+//
+//	//---
+	return res_poly;
+
+}

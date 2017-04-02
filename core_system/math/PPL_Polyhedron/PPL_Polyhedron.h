@@ -1,14 +1,15 @@
 /*
  * Polyhedron.h
  *
- * Created on: 02-April-2017
- *      Author: Amit
+ *  Created on: 20-Dec-2016
+ *      Author: hazel
  */
 
 #ifndef PPL_POLYHEDRON_H_
 #define PPL_POLYHEDRON_H_
 
 #include "core_system/math/matrix.h"
+#include "core_system/continuous/Polytope/Polytope.h"
 #include <ppl.hh>
 #include <string>
 #include <sstream>
@@ -16,6 +17,7 @@
 
 
 namespace PPL = Parma_Polyhedra_Library ;
+
 
 class PPL_Polyhedron {
 private:
@@ -28,22 +30,26 @@ public:
 	PPL_Polyhedron(PPL::NNC_Polyhedron mypoly);
 	PPL_Polyhedron(math::matrix<double> A, std::vector<double> b, int sgn);
 
-	/*
-	 * Converts the calling PPL polyhedron into XSpeed's format polytopes component matrix A and vector b
-	 */
 	void convert_to_poly(math::matrix<double>& a, std::vector<double> & b);
-
 	/*
 	 * The polyhedron poly will be tested in the calling polyhedron if it is contained within it.
 	 */
 	bool is_contained(PPL_Polyhedron::ptr poly);
 
+
 	/*
-	 * returns the convex_hull of p with the calling Polyhedron
+	 * returns the convex_hull of calling PPL with the PPL_Polyhedron::ptr p
 	 */
 	void convex_hull(PPL_Polyhedron::ptr p );
 
 	PPL::NNC_Polyhedron get_ppl_poly();
+
+	/**
+	 * Returns the convex hull of the current PPL polyhedron with the passed XSpeed polyhedron.
+	 * The returned polytope is XSpeed polytoep type.
+	 */
+	polytope::ptr get_chull(polytope::ptr p);
+
 
 };
 
