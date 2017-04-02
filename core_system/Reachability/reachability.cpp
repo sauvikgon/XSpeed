@@ -288,6 +288,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 					if(continuation){
 						// get the last polytope from the plowpipe
+						std::cout << "Continuation Condition hit\n";
+
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					}
