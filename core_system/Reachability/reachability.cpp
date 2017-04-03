@@ -3,7 +3,7 @@
 #include "Utilities/flow_cost_estimate.h"
 #include "Utilities/flowpipe_cluster.h"
 #include "core_system/symbolic_states/symbolic_states.h"
-#include "Utilities/flowpipe_cluster.h"
+//#include "Utilities/flowpipe_cluster.h"
 #include <ctime>
 
 using namespace std;
@@ -270,7 +270,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 				{
 					// Returns the template hull of the polytopes that intersect with the guard
-					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+					//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+					std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
+					polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);
+
 				}
 				else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings

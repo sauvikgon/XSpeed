@@ -297,7 +297,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 					std::cout << "Empty guard condition\n";
 					continue;
 				}
-cout<<"intersection with guard done\n";
+//cout<<"intersection with guard done\n";
 
 
 

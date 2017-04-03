@@ -47,6 +47,7 @@ PPL::NNC_Polyhedron PPL_Polyhedron::get_ppl_poly(){
 PPL_Polyhedron::PPL_Polyhedron(PPL::NNC_Polyhedron mypoly){
 	myPoly = mypoly;
 }
+
 void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double> & b){
 
 	const PPL::Constraint_System cs = myPoly.constraints();
@@ -72,7 +73,6 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 
 void PPL_Polyhedron::convex_hull(PPL_Polyhedron::ptr p ){
 	(this->myPoly).poly_hull_assign(p->myPoly);
-
 }
 
 bool PPL_Polyhedron::is_contained(PPL_Polyhedron::ptr poly){

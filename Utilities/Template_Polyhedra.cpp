@@ -10,6 +10,7 @@
 #include <omp.h>
 #include "Utilities/testPolytopePlotting.h"
 #include "boost/timer/timer.hpp"
+#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
@@ -425,6 +426,65 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(pol
 	//cout<<"polys.size = "<<polys.size()<<"\n";
 	return polys;
 }
+
+
+/*
+ * Use PPL library to implement convex_hull of the flowpipe-guard intersection
+ */
+
+std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type_choosen){
+
+	std::list<std::pair<unsigned int, unsigned int> > range_list;
+	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type_choosen);
+	std::list<polytope::ptr> polys;
+int count=0;//debugging variable
+	for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
+			range_it++) {
+		count++;
+		unsigned int start = (*range_it).first, end=(*range_it).second;
+		/*
+		 * Starting poly
+		 */
+		polytope::ptr start_poly;
+		start_poly = this->getPolytope(start);
+		if (this->getInvariantDirections().size1() != 0){
+			std::vector<double> constraint_bound_values(this->getInvariantDirections().size1());
+			constraint_bound_values = this->getInvariantBoundValue(start);
+			start_poly->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
+		}
+		PPL_Polyhedron::ptr joined_poly=PPL_Polyhedron::ptr(new PPL_Polyhedron(start_poly->getCoeffMatrix(),start_poly->getColumnVector(),start_poly->getInEqualitySign()));
+		//---
+
+		for (unsigned int i = start+1; i <= end; i++) {
+			polytope::ptr p;
+			p = this->getPolytope(i);
+			if (this->getInvariantDirections().size1() != 0){
+				std::vector<double> constraint_bound_values(this->getInvariantDirections().size1());
+				constraint_bound_values = this->getInvariantBoundValue(i);
+				p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
+			}
+			PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
+			joined_poly->convex_hull(p2);
+		}
+		math::matrix<double> A_joined;
+		std::vector<double> b_joined;
+		joined_poly->convert_to_poly(A_joined, b_joined);
+//debug --
+		if (count==1){
+			std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";
+			for (int x=0;x<b_joined.size();x++){
+				std::cout<<b_joined[x]<<"  ";
+			}
+		}
+//----
+		polys.push_back(polytope::ptr(new polytope(A_joined, b_joined, 1)));
+	}//end of multiple intersected region
+
+	//cout<<"polys.size = "<<polys.size()<<"\n";
+	return polys;
+}
+
+
 
 const polytope::ptr template_polyhedra::getTemplate_approx(int lp_solver_type_choosen) {
 	/*
