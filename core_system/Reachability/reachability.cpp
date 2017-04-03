@@ -267,12 +267,18 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 				//	std::cout<<"Before flowpipe Guard intersection\n";
+
+				int cluster = 100; // Sets the percentage of clustering, 10 is for 10 percent
+
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 				{
 					// Returns the template hull of the polytopes that intersect with the guard
 					//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
-					std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
+					//std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
+
 					polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);
+
+					//polys = flowpipe_cluster(reach_region,cluster); // template hull with clustering
 
 				}
 				else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
@@ -294,7 +300,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else{ // Try clustering with user defined clustering percent
-						int cluster = 10; // Sets the percentage of clustering, 10 is for 10 percent
 						polys = flowpipe_cluster(reach_region, cluster);
 						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
 						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;

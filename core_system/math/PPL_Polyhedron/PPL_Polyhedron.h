@@ -30,6 +30,9 @@ public:
 	PPL_Polyhedron(PPL::NNC_Polyhedron mypoly);
 	PPL_Polyhedron(math::matrix<double> A, std::vector<double> b, int sgn);
 
+	/**
+	 * Converts this ppl poly to matrix form polyhedron, Ax<=b. The A and b are returned by reference.
+	 */
 	void convert_to_poly(math::matrix<double>& a, std::vector<double> & b);
 	/*
 	 * The polyhedron poly will be tested in the calling polyhedron if it is contained within it.

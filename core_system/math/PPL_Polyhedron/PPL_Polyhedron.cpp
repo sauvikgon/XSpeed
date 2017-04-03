@@ -6,6 +6,7 @@
  */
 
 #include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
+#include <sstream>
 
 
 namespace PPL = Parma_Polyhedra_Library ;
@@ -51,24 +52,76 @@ PPL_Polyhedron::PPL_Polyhedron(PPL::NNC_Polyhedron mypoly){
 void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double> & b){
 
 	const PPL::Constraint_System cs = myPoly.constraints();
-	unsigned int nosCons=0;
-	for (PPL::Constraint_System::const_iterator i = cs.begin(); i != cs.end(); ++i){
-		nosCons++;
+	unsigned int row_size = 0;
+	for(PPL::Constraint_System::const_iterator i = cs.begin(); i != cs.end(); ++i){
+		Constraint c = *i;
+		if(c.is_equality())
+			row_size+=2;
+		else
+			row_size++;
 	}
-	a.resize(nosCons,cs.space_dimension());
-	b.resize(nosCons);
-	unsigned int row=0,col=0;
+
+	a.resize(row_size,cs.space_dimension());
+	b.resize(row_size);
+
+	std::stringstream strstream; // used for checking the inequality sign
+
+	unsigned int row=0;
+	Constraint c;
 	for (PPL::Constraint_System::const_iterator i = cs.begin(); i != cs.end(); ++i){
-		for (unsigned int j=0;j<(*i).space_dimension();j++){
-			double x =(*i).coefficient(PPL::Variable(j)).get_d();
-			if (x != 0)
-				x = -1 * x;//-1 todo::need to understand why but works
-			a(row,col)= x;
-			col++;
+		c = *i;
+	//	std::cout << "Printing Constraint in the PPL polyhedron\n";
+		c.ascii_dump(strstream);
+		string cons = strstream.str();
+
+		std::size_t found_equal = cons.find("=");
+		std::size_t found_geq = cons.find(">=");
+		std::size_t found_ge = cons.find(">");
+		std::size_t found_leq = cons.find("<=");
+		std::size_t found_le = cons.find("<");
+
+		if(found_equal!=std::string::npos && found_geq==std::string::npos && found_leq==std::string::npos ){
+
+			//<= constraint
+			for (unsigned int j=0;j<c.space_dimension();j++){
+					double x =c.coefficient(PPL::Variable(j)).get_d();
+					a(row,j)= x;
+			}
+			b[row] = -1 * c.inhomogeneous_term().get_d();
+			row++;
+			//>= constraint
+			for (unsigned int j=0;j<c.space_dimension();j++){
+					double x =c.coefficient(PPL::Variable(j)).get_d();
+					x = -1 * x;//-1 todo::need to understand why but works
+					a(row,j)= x;
+			}
+			b[row] = c.inhomogeneous_term().get_d();
+			row++;
 		}
-		b[row] = (*i).inhomogeneous_term().get_d();
-		row++; col=0;
+		else if(found_geq || found_ge){ // convert ge as geq since it overapproximates
+			//>= constraint
+			for (unsigned int j=0;j<c.space_dimension();j++){
+					double x =c.coefficient(PPL::Variable(j)).get_d();
+					x = -1 * x;//-1 todo::need to understand why but works
+					a(row,j)= x;
+			}
+			b[row] = c.inhomogeneous_term().get_d();
+			row++;
+		}
+
+		else if(found_leq || found_le){ // convert ge as geq since it overapproximates
+			for (unsigned int j=0;j<c.space_dimension();j++){
+					double x =c.coefficient(PPL::Variable(j)).get_d();
+					a(row,j)= x;
+			}
+			b[row] = -1 * c.inhomogeneous_term().get_d();
+			row++;
+		}
+		else{}
+		strstream.str("");
 	}
+	assert(row == row_size);
+
 }
 
 void PPL_Polyhedron::convex_hull(PPL_Polyhedron::ptr p ){
@@ -85,55 +138,4 @@ PPL::NNC_Polyhedron PPL_Polyhedron::get_poly() {
 
 PPL_Polyhedron::~PPL_Polyhedron() {
 	// TODO Auto-generated destructor stub
-}
-
-
-polytope::ptr PPL_Polyhedron::get_chull(polytope::ptr p){
-
-	polytope::ptr res_poly;
-//	PPL::NNC_Polyhedron this_nnc_poly = this->get_poly();
-//	PPL_Polyhedron ppl_p(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign());
-//	PPL::NNC_Polyhedron other_nnc_poly = ppl_p.get_poly();
-//
-//	// get the chull
-//	this_nnc_poly.poly_hull_assign(other_nnc_poly);
-//
-//
-//	// Convert NNC poly to result poly
-//	PPL::dimension_type ppl_system_dim = this_nnc_poly.space_dimension();
-//
-//	// Check to ensure that the dimension XSpeed polytope and PPL polytope space dimension match
-//	assert(p->getSystemDimension() == ppl_system_dim);
-//
-//	Constraint_System cs = this_nnc_poly.constraints();
-//	unsigned int row_size = cs.num_inequalities();
-//	row_size+= 2*cs.num_equalities(); // equality to be converted to two inequalities
-//
-//	Constraint c;
-//	PPL::Polyhedron p;
-//
-//	math::matrix<double> A(row_size,ppl_system_dim);
-//
-//	std::vector<double> b(p->getSystemDimension());
-//
-//	for(Constraint_System_const_iterator it = cs.begin();it!=cs.end();it++){ // iterate over the constraints
-//		c = *it;
-//		if(c.is_inequality()){
-//			for(PPL::dimension_type i=0; i<ppl_system_dim; i++){
-//				Variable v(i);
-//				double coeff = c.coefficient(v);
-//			}
-//
-//		}
-//		else if(c.is_equality()){
-//
-//		}
-//		else {}
-//
-//		}
-//	}
-//
-//	//---
-	return res_poly;
-
 }

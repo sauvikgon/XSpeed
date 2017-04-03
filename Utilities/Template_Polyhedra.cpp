@@ -437,7 +437,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_con
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
 	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type_choosen);
 	std::list<polytope::ptr> polys;
-int count=0;//debugging variable
+	int count=0;//debugging variable
 	for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
 			range_it++) {
 		count++;
@@ -452,7 +452,7 @@ int count=0;//debugging variable
 			constraint_bound_values = this->getInvariantBoundValue(start);
 			start_poly->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 		}
-		PPL_Polyhedron::ptr joined_poly=PPL_Polyhedron::ptr(new PPL_Polyhedron(start_poly->getCoeffMatrix(),start_poly->getColumnVector(),start_poly->getInEqualitySign()));
+		PPL_Polyhedron::ptr poly_hull=PPL_Polyhedron::ptr(new PPL_Polyhedron(start_poly->getCoeffMatrix(),start_poly->getColumnVector(),start_poly->getInEqualitySign()));
 		//---
 
 		for (unsigned int i = start+1; i <= end; i++) {
@@ -464,11 +464,11 @@ int count=0;//debugging variable
 				p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 			}
 			PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
-			joined_poly->convex_hull(p2);
+			poly_hull->convex_hull(p2);
 		}
 		math::matrix<double> A_joined;
 		std::vector<double> b_joined;
-		joined_poly->convert_to_poly(A_joined, b_joined);
+		poly_hull->convert_to_poly(A_joined, b_joined);
 //debug --
 		if (count==1){
 			std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";
