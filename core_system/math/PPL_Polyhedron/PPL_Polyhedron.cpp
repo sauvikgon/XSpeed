@@ -68,8 +68,8 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 
 	unsigned int row=0;
 	Constraint c;
-	for (PPL::Constraint_System::const_iterator i = cs.begin(); i != cs.end(); ++i){
-		c = *i;
+	for (PPL::Constraint_System::const_iterator iter = cs.begin(); iter != cs.end(); iter++){
+		c = *iter;
 	//	std::cout << "Printing Constraint in the PPL polyhedron\n";
 		c.ascii_dump(strstream);
 		string cons = strstream.str();
@@ -81,7 +81,6 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 		std::size_t found_le = cons.find("<");
 
 		if(found_equal!=std::string::npos && found_geq==std::string::npos && found_leq==std::string::npos ){
-
 			//<= constraint
 			for (unsigned int j=0;j<c.space_dimension();j++){
 					double x =c.coefficient(PPL::Variable(j)).get_d();
@@ -92,7 +91,7 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 			//>= constraint
 			for (unsigned int j=0;j<c.space_dimension();j++){
 					double x =c.coefficient(PPL::Variable(j)).get_d();
-					x = -1 * x;//-1 todo::need to understand why but works
+					x = -1 * x;
 					a(row,j)= x;
 			}
 			b[row] = c.inhomogeneous_term().get_d();
@@ -102,14 +101,14 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 			//>= constraint
 			for (unsigned int j=0;j<c.space_dimension();j++){
 					double x =c.coefficient(PPL::Variable(j)).get_d();
-					x = -1 * x;//-1 todo::need to understand why but works
+					x = -1 * x;
 					a(row,j)= x;
 			}
 			b[row] = c.inhomogeneous_term().get_d();
 			row++;
 		}
 
-		else if(found_leq || found_le){ // convert ge as geq since it overapproximates
+		else if(found_leq || found_le){ // convert le as leq since it overapproximates
 			for (unsigned int j=0;j<c.space_dimension();j++){
 					double x =c.coefficient(PPL::Variable(j)).get_d();
 					a(row,j)= x;
@@ -139,3 +138,4 @@ PPL::NNC_Polyhedron PPL_Polyhedron::get_poly() {
 PPL_Polyhedron::~PPL_Polyhedron() {
 	// TODO Auto-generated destructor stub
 }
+
