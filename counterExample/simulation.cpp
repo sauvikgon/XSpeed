@@ -192,7 +192,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 {
 	int flag;
 	// tolerance for crossing invariant bound
-	double tolerance = 1e-3;
+	double tolerance = 1e-12;
 
 	realtype T0 = 0;
 	realtype Tfinal = time;

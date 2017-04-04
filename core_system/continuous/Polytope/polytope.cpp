@@ -537,7 +537,7 @@ double polytope::point_distance(std::vector<double> v){
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
-	return distance;
+	return distance*distance; // square of the distance is returned.
 }
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)

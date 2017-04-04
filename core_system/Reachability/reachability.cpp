@@ -273,10 +273,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 				{
 					// Returns the template hull of the polytopes that intersect with the guard
-					//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 					//std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
 
-					polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);
+					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);
 
 					//polys = flowpipe_cluster(reach_region,cluster); // template hull with clustering
 

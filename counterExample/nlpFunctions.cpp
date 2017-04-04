@@ -252,24 +252,27 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 //		For validation, add the distance of trace end points to the invariant
 
-//		std::vector<double> inv_dist_grad(dim,0);
-//		cost+= I->point_distance(y[i]); // end point distance to invariant added to cost
-//		for(unsigned int j=0;j<dim;j++) {
-//			double dist_gradx_j = 0;
-//			for(unsigned int k=0;k<dim;k++)
-//			{
-//				dist_gradx_j +=  inv_dist_grad[k] * expAt(k,j);
-//			}
-//			deriv[i*dim+j] += dist_gradx_j;
-//
-//		}
-//		// add the cost gradient w.r.t traj segment's dwell time
-//		double dist_gradt = 0;
-//		for(unsigned int j=0;j<dim;j++)
-//		{
-//			dist_gradt +=  inv_dist_grad[j] * Axplusb[j];
-//		}
-//		deriv[N*dim + i] += dist_gradt;
+		std::vector<double> inv_dist_grad(dim,0);
+		cost+= I->point_distance(y[i]); // end point distance to invariant added to cost
+
+		inv_dist_grad = dist_grad(y[i],I);
+
+		for(unsigned int j=0;j<dim;j++) {
+			double dist_gradx_j = 0;
+			for(unsigned int k=0;k<dim;k++)
+			{
+				dist_gradx_j +=  inv_dist_grad[k] * expAt(k,j);
+			}
+			deriv[i*dim+j] += dist_gradx_j;
+
+		}
+		// add the cost gradient w.r.t traj segment's dwell time
+		double dist_gradt = 0;
+		for(unsigned int j=0;j<dim;j++)
+		{
+			dist_gradt +=  inv_dist_grad[j] * Axplusb[j];
+		}
+		deriv[N*dim + i] += dist_gradt;
 
 		//end of validation logic
 
