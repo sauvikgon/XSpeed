@@ -157,6 +157,13 @@ public:
 	double point_distance(std::vector<double> v);
 
 	/*
+	 * Prints the vertices of the polytope on the std::cout, passed as parameter.
+	 */
+	void print2StdOut(unsigned int dim1, unsigned int dim2);
+
+	//Prints the coefficient matrix and vector
+	void printPoly_parm();
+	/*
 	 * Prints the vertices of the polytope to a file, passed as parameter.
 	 * The file could be called with any plotting utility.
 	 *

@@ -286,7 +286,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else{ // Try clustering with user defined clustering percent
-						int cluster = 0; // Sets the percentage of clustering to 0 ie no clustering applied
+						int cluster = 100; // Sets the percentage of clustering to 100 ie only one cluster
 						polys = flowpipe_cluster(reach_region, cluster);
 						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
 						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
@@ -297,19 +297,6 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 					std::cout << "Empty guard condition\n";
 					continue;
 				}
-//cout<<"intersection with guard done\n";
-
-
-
-
-
-
-
-
-
-
-
-
 		//cout<<"3\n";
 			//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
@@ -351,7 +338,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				//std::cout<<"Before Invariant intersection called\n";
 				// @Amit: the newShifted satisfy the destination location invariant
 				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
-				int is_ContainmentCheckRequired = 0;	//1 will Make it Slow; 0 will skip so Fast
+				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 				/*if (clusted)
 					is_ContainmentCheckRequired = 0;
 				else

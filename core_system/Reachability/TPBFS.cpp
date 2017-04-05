@@ -178,8 +178,6 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			math::matrix<float> listX0, listU;
 			//Generation of Directions which can be a nested parallelism
 			preLoadBalanceReachCompute(LoadBalanceDS[id], numCoreAvail);	// Step 1
-			//Todo:: if newIteration is <= 1 than do not store this flow-pipe details in LoadBalanceDS
-			// and accordingly reduce count or handle while computing LPsolver
 		} //END of count FOR-LOOP
 
 		LoadBalanceDataSF LoadBalanceData_sf;
@@ -246,6 +244,7 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 			}
 		//	cout<<"done 2\n";
 	//Step--2 :: First Load Balancing computation Task
+			//ToDo:: need to perform optimization: 1) check_continuation and 2) check for universe_guard
 			loadBalancedPostD(loadBalPostD);	//returns array of booleans with true or FALSE based on intersected or NOT
 		//	cout<<"done 3\n";
 	//Step--3 :: Second Task to detect sequentially
@@ -311,24 +310,18 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 						int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 						if (is_ContainmentCheckRequired){	//Containtment Checking required
 							bool isContain=false;
-
-
 							polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 							newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
 							isContain = templated_isContained(loadBalPostD[id].dest_locID[trans], newPoly, Reachability_Region, lp_solver_type_choosen);//over-approximated but threadSafe
-
-
 							//Calling with the newShifted polytope to use PPL library This is NOT ThreadSafe
 							//isContain = isContainted(loadBalPostD[id].dest_locID[trans], newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
-
 							if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 								initial_state::ptr newState = initial_state::ptr(new initial_state(loadBalPostD[id].dest_locID[trans], newShiftedPolytope));
 								newState->setTransitionId(loadBalPostD[id].trans_ID[trans]); // keeps track of the transition_ID
 								newState->setParentPtrSymbolicState(S[id]);
 								Qpw_list[1 - t][id]->WaitingList_insert(newState); //False RACE CONDITION HERE
 							}
-
-						}else{	//Containtment Checking NOT Formed
+						} else {	//Containtment Checking NOT Formed
 
 							initial_state::ptr newState = initial_state::ptr(new initial_state(loadBalPostD[id].dest_locID[trans], newShiftedPolytope));
 							newState->setTransitionId(loadBalPostD[id].trans_ID[trans]); // keeps track of the transition_ID
@@ -339,13 +332,10 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 					} //end of multiple intersected region with guard
 				}//end of for each guard or transitions
 			}//end of for parallel
-
 			t = 1 - t; //Switching Read/Write options for Qpw_list[1-t]
 	}//end of postD computation
 	//  ************************************** POST_D computation Ends **********************************************************
-
 		// ************************* BFS Ends *************************************
-
 		jump_time.stop();
 		/*
 		 * Stop recording the entire time for the jump/iteration
@@ -357,8 +347,6 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 
 		std::cout << "\nJump " << number_times - 1 << "..."<< sym_passed << " Symbolic States Passed, "
 					<< getSize_Qpw_list(Qpw_list[t]) << " waiting ..."<< wall_clock <<" seconds";
-
-
 	} //end of while loop checking waiting_list != empty
 
 	if (number_times<=bound){	//did not reach to the assigned bound

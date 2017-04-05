@@ -81,6 +81,7 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 		std::size_t found_le = cons.find("<");
 
 		if(found_equal!=std::string::npos && found_geq==std::string::npos && found_leq==std::string::npos ){
+
 			//<= constraint
 			for (unsigned int j=0;j<c.space_dimension();j++){
 					double x =c.coefficient(PPL::Variable(j)).get_d();
@@ -138,4 +139,3 @@ PPL::NNC_Polyhedron PPL_Polyhedron::get_poly() {
 PPL_Polyhedron::~PPL_Polyhedron() {
 	// TODO Auto-generated destructor stub
 }
-
