@@ -22,17 +22,25 @@
 typedef std::vector<std::pair<double, double> > Intervals;
 
 /**
- * Outputs the result in Interval form
+ * Outputs the result in Interval form, for the system var with dimension d
  */
-void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_ops);
+void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list, unsigned int d);
+
 /*
  * Outputs the result in vertex enumerated form
  */
 void vertex_generator(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_ops);
+
 /**
  * Computes the template hull of the template polyhedra, by merging the polytopes between the start and end columns, including them.
  */
 polytope::ptr get_template_hull(template_polyhedra::ptr sfm, unsigned int start, unsigned int end);
+
+/**
+ *	Outputs the bounds on all system dimension.
+ */
+void print_all_intervals(std::list<symbolic_states::ptr>& symbolic_states_list);
+
 
 #endif /* IO_UTILITY_H_ */
 

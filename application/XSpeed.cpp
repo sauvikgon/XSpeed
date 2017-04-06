@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 //		interval_generator(Symbolic_states_list,user_options);
 //	}
 	vertex_generator(Symbolic_states_list,user_options);
-	interval_generator(Symbolic_states_list,user_options);
+	print_all_intervals(Symbolic_states_list);
 
 
 	/*

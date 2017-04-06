@@ -30,6 +30,15 @@ void var_to_index_map::print_var_index_map()
 	}
 }
 
+std::string var_to_index_map::get_varname(unsigned int index)
+{
+	for(std::map<std::string, unsigned int>::iterator it = var_index_map_ptr->begin(); it!=var_index_map_ptr->end();it++){
+		if(index == (*it).second)
+			return (*it).first;
+	}
+	throw std::runtime_error("var to index map: get_varname(): parameter index not in the map\n");
+}
+
 /**
  * Returns the size of the map, i.e., the number of variables of the map
  */

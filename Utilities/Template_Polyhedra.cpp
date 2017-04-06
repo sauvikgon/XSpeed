@@ -335,6 +335,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_intersectionSequential_optimize(polytope::ptr G, int lp_solver_type_choosen) {
 	size_type row = 0;
 	size_type col = 0;
+
 	math::matrix<double> mat_sf(row, col);
 	bool is_intersected = false, intersection_started = false, immediate_false = false, intersection_ended = false;
 	int foundIntersection = 0, intersection_start;
@@ -434,14 +435,31 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(pol
 
 std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type_choosen){
 
+	// debug
+//	if(guard->getIsUniverse()){
+//		std::list<polytope::ptr> polys;
+//		for(unsigned int i=0;i<this->getTotalIterations();i++)
+//			polys.push_back(this->getPolytope(i));
+//		return polys;
+//	}
+
+	//---
+
+
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
 	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type_choosen);
+
+	std::cout << "range list size= " << range_list.size() << std::endl;
 	std::list<polytope::ptr> polys;
 	int count=0;//debugging variable
 	for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
 			range_it++) {
 		count++;
 		unsigned int start = (*range_it).first, end=(*range_it).second;
+		std::cout << "SFM size = " << this->getTotalIterations() << std::endl;
+
+		std::cout << "START=" << start << ", END=" << end << std::endl;
+
 		/*
 		 * Starting poly
 		 */
@@ -452,6 +470,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_con
 			constraint_bound_values = this->getInvariantBoundValue(start);
 			start_poly->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 		}
+		std::cout << "Before call to poly hull creation\n" << std::endl;
 		PPL_Polyhedron::ptr poly_hull=PPL_Polyhedron::ptr(new PPL_Polyhedron(start_poly->getCoeffMatrix(),start_poly->getColumnVector(),start_poly->getInEqualitySign()));
 		//---
 
@@ -464,11 +483,14 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_con
 				p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 			}
 			PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
+			std::cout << "another poly hull-ed \n" << std::endl;
 			poly_hull->convex_hull(p2);
 		}
 		math::matrix<double> A_joined;
 		std::vector<double> b_joined;
+		std::cout << "Before call to convert to poly \n";
 		poly_hull->convert_to_poly(A_joined, b_joined);
+		std::cout << "Hulled poly converted successfully\n";
 //debug --
 		if (count==1){
 			std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";

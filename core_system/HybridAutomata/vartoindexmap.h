@@ -24,6 +24,11 @@ public:
 
 	var_to_index_map();
 	virtual ~var_to_index_map();
+
+	/**
+	 * Returns the variable name with the given index
+	 */
+	std::string get_varname(unsigned int index);
 	/**
 	 * Returns the index of the parameter var_name
 	 * in the varname to dimension index map

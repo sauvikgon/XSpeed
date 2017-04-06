@@ -273,12 +273,18 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 				{
 					// Returns the template hull of the polytopes that intersect with the guard
-					//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 					//std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
 
-					polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);
-
-					//polys = flowpipe_cluster(reach_region,cluster); // template hull with clustering
+//					polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);
+//
+//					if(polys.size() == 1){
+//						polytope::ptr p = *polys.begin();
+//						p->print2file("convex_hull_poly",9,0);
+//					}
+//
+//
+//					polys = flowpipe_cluster(reach_region,cluster); // template hull with clustering
 
 				}
 				else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
@@ -294,16 +300,18 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					 * symbolic state in the waiting list. The 'continuation' principle will ensure that no reachable state is missed.
 					 */
 					bool continuation = check_continuation(current_location, current_destination, *t);
+
 					if(continuation){
 						// get the last polytope from the plowpipe
 						std::cout << "Continuation Condition Satisfied\n";
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
-					} else{ // Try clustering with user defined clustering percent
-						polys = flowpipe_cluster(reach_region, cluster);
+					} else { // Try clustering with user defined clustering percent
+						//polys = flowpipe_cluster(reach_region, cluster);
 						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
-						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
+						polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 					}
+
 				}
 				else{ // empty guard
 					std::cout << "Empty guard condition\n";

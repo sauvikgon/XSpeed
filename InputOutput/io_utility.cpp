@@ -82,22 +82,26 @@ polytope::ptr get_template_hull(template_polyhedra::ptr sfm, unsigned int start,
 
 
 typedef std::vector<std::pair<double, double> > Intervals;
-void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list,userOptions user_ops) {
+
+void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list,unsigned int print_dim) {
 	symbolic_states::ptr sym_state = *symbolic_states_list.begin();
+
 	//unsigned int system_dim = sym_state->getInitialPolytope()->getSystemDimension();	//may not exists
 	unsigned int system_dim = sym_state->getContinuousSetptr()->getTemplateDirections().size2();	//this definitely exists
-	unsigned int first_var_index = user_ops.get_first_plot_dimension();
-	unsigned int second_var_index = user_ops.get_second_plot_dimension();
+	unsigned int first_var_index = print_dim;
+
+	// This polytope is initialized to get an access to the index to variable id map.
+
+	assert(sym_state->getContinuousSetptr()->getTotalIterations()!=0);
+
+	polytope::ptr p = sym_state->getContinuousSetptr()->getPolytope(0); // the first polytope of the sfm
 
 	std::vector<double> d_max_1(system_dim,0), d_min_1(system_dim,0);
 	d_max_1[first_var_index] = 1;
 	d_min_1[first_var_index] = -1;
 
-	std::vector<double> d_max_2(system_dim,0), d_min_2(system_dim,0);
-	d_max_2[second_var_index] = 1;
-	d_min_2[second_var_index] = -1;
 	double max_global_first = INT_MIN, min_global_first=INT_MAX;
-	double max_global_second = INT_MIN, min_global_second=INT_MAX;
+
 	std::list<symbolic_states::ptr>::iterator SS;
 	for (SS = symbolic_states_list.begin(); SS != symbolic_states_list.end();
 			SS++) {
@@ -114,16 +118,24 @@ void interval_generator(std::list<symbolic_states::ptr>& symbolic_states_list,us
 		if(first_dim_max > max_global_first) max_global_first = first_dim_max;
 		if(first_dim_min < min_global_first) min_global_first = first_dim_min;
 
-		double second_dim_max = bounding_poly_ptr->computeSupportFunction(d_max_2,lp);
-		double second_dim_min = -1 * bounding_poly_ptr->computeSupportFunction(d_min_2,lp);
-
-		if(second_dim_max > max_global_second) max_global_second = second_dim_max;
-		if(second_dim_min < min_global_second) min_global_second = second_dim_min;
-
 	} //end of sfm returns vector of all variables[min,max] intervals
 
-	std::cout << "The Interval for the first Dimension is:" << min_global_first << ", " << max_global_first << std::endl;
-	std::cout << "The Interval for the second Dimension is:" << min_global_second << ", " << max_global_second << std::endl;
+	std::cout << "The Interval for the variable " << p->get_varname(print_dim) << " :" << min_global_first << ", " << max_global_first << std::endl;
+
+}
+
+/**
+ * Prints the intervals for all the variables of the program
+ */
+void print_all_intervals(std::list<symbolic_states::ptr>& symbolic_states_list)
+{
+	symbolic_states::ptr sym_state = *symbolic_states_list.begin();
+	//unsigned int system_dim = sym_state->getInitialPolytope()->getSystemDimension();	//may not exists
+	unsigned int system_dim = sym_state->getContinuousSetptr()->getTemplateDirections().size2();	//this definitely exists
+
+	for(unsigned int d=0;d<system_dim;d++){
+		interval_generator(symbolic_states_list, d);
+	}
 
 }
 void vertex_generator(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options)
