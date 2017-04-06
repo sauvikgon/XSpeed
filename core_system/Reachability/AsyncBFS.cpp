@@ -79,7 +79,7 @@ void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_sta
 	totalSymStates++;	//for each symbolic states when processed (ie postC)
 	PASSED.push_back(R1);	//todo::try mutex for locking this shared resource
 	mu.unlock();
-	std::cout<<"Jump "<<level<<"..."<<totalSymStates<<" Symbolic States Passed ..."<<std::endl;
+//	std::cout<<"Jump "<<level<<"..."<<totalSymStates<<" Symbolic States Passed ..."<<std::endl;
 	//				}
 	//----end of postC on s
 	//todo:: Currently removed the Safety Check Section from here
@@ -228,8 +228,6 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, myData.lp_solver_type_choosen);
 
-
-
 			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 			gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
@@ -258,7 +256,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else{ // Try clustering with user defined clustering percent
-						int cluster = 0; // Sets the percentage of clustering to 0 ie no clustering applied
+						int cluster = 100; // Sets the percentage of clustering to 0 ie no clustering applied
 						polys = flowpipe_cluster(reach_region, cluster);
 						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
 						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
@@ -268,10 +266,6 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 					std::cout << "Empty guard condition\n";
 					continue;
 				}
-
-
-
-
 		//cout<<"3\n";
 			//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
@@ -313,26 +307,19 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 				/*
 				 * Now perform containment check similar to sequential algorithm.
 				 */
-				int is_ContainmentCheckRequired = 0;	//1 will Make it Slow; 0 will skip so Fast
+				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
-
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 					newShiftedPolytope->templatedDirectionHull(myData.reach_parameters.Directions, newPoly, myData.lp_solver_type_choosen);
 					isContain = templated_isContained(destination_locID, newPoly, PASSED, myData.lp_solver_type_choosen);//over-approximated but threadSafe
-
-					//Calling with the newShifted polytope to use PPL library
-					//isContain = isContainted(destination_locID, newShiftedPolytope, PASSED, myData.lp_solver_type_choosen);
-
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 						newState->setTransitionId(transition_id); // keeps track of the transition_ID
 						newState->setParentPtrSymbolicState(symb);
 						res.push_back(newState);
 					}
-
 				}else{	//Containtment Checking NOT Formed
-
 					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 					newState->setTransitionId(transition_id); // keeps track of the transition_ID
 					newState->setParentPtrSymbolicState(symb);

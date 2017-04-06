@@ -452,6 +452,8 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_con
 	std::cout << "range list size= " << range_list.size() << std::endl;
 	std::list<polytope::ptr> polys;
 	int count=0;//debugging variable
+	math::matrix<double> A_joined;
+	std::vector<double> b_joined;
 	for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
 			range_it++) {
 		count++;
@@ -470,8 +472,12 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_con
 			constraint_bound_values = this->getInvariantBoundValue(start);
 			start_poly->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 		}
-		std::cout << "Before call to poly hull creation\n" << std::endl;
 		PPL_Polyhedron::ptr poly_hull=PPL_Polyhedron::ptr(new PPL_Polyhedron(start_poly->getCoeffMatrix(),start_poly->getColumnVector(),start_poly->getInEqualitySign()));
+		poly_hull->convert_to_poly(A_joined, b_joined);
+		std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";
+		for (int x=0;x<b_joined.size();x++){
+			std::cout<<b_joined[x]<<"  ";
+		}
 		//---
 
 		for (unsigned int i = start+1; i <= end; i++) {
@@ -482,15 +488,22 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_con
 				constraint_bound_values = this->getInvariantBoundValue(i);
 				p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 			}
+			start_poly->print2StdOut(2,0);//for bouncing ball t,x
+			start_poly->printPoly_parm();
 			PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
 			std::cout << "another poly hull-ed \n" << std::endl;
 			poly_hull->convex_hull(p2);
+			poly_hull->convert_to_poly(A_joined, b_joined);
+
+			std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";
+			for (int x=0;x<b_joined.size();x++){
+				std::cout<<b_joined[x]<<"  ";
+			}
+			std::cout<<"Poly hulled "<<i<<",  ";
 		}
-		math::matrix<double> A_joined;
-		std::vector<double> b_joined;
-		std::cout << "Before call to convert to poly \n";
+		std::cout<<"Before convert_to_poly called"<<std::endl;
 		poly_hull->convert_to_poly(A_joined, b_joined);
-		std::cout << "Hulled poly converted successfully\n";
+		std::cout<<"convert_to_poly Successful!!"<<std::endl;
 //debug --
 		if (count==1){
 			std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";

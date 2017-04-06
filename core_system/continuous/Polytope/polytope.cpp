@@ -537,7 +537,7 @@ double polytope::point_distance(std::vector<double> v){
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
-	return distance;
+	return distance*distance; // square of the distance is returned.
 }
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
@@ -555,6 +555,30 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 	}
 	myfile.close();
 }
+
+void polytope::print2StdOut(unsigned int dim1, unsigned int dim2)
+{
+	assert(dim1 < this->map_size() && dim2 < this->map_size());
+	assert(dim1 >= 0 && dim2 >= 0);
+
+	math::matrix<double> C = get_2dVertices(dim1, dim2);
+
+	for(unsigned int i=0;i<C.size1();i++){
+		for(unsigned int j=0;j<C.size2();j++)
+			std::cout << C(i,j) << " " ;
+		std::cout << "\n";
+	}
+}
+void polytope::printPoly_parm(){
+
+	std::cout<<this->coeffMatrix;
+	std::cout<<"\nVector\n";
+	for(unsigned int j=0;j<columnVector.size();j++)
+		std::cout << this->columnVector[j] << "    " ;
+	std::cout << "\n";
+
+}
+
 
 /*
  * Reads Hyst's formats "2<=v1 & v1 <=3 & 2<=v2 & v2 <=3"

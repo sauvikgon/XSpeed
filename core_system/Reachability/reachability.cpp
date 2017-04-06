@@ -270,24 +270,15 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 				int cluster = 100; // Sets the percentage of clustering, 10 is for 10 percent
 
-				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
-				{
+				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty()){	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
+
 					// Returns the template hull of the polytopes that intersect with the guard
 					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 					//std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
+					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);//Todo::debug PPL
+					//polys = flowpipe_cluster(reach_region,cluster); // template hull with clustering
 
-//					polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);
-//
-//					if(polys.size() == 1){
-//						polytope::ptr p = *polys.begin();
-//						p->print2file("convex_hull_poly",9,0);
-//					}
-//
-//
-//					polys = flowpipe_cluster(reach_region,cluster); // template hull with clustering
-
-				}
-				else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
+				} else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings
 					//polys.push_back(flowpipse_cluster(reach_region,100));
 
@@ -361,9 +352,12 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						 * some efficient library such as PPL we can directly check with the
 						 * actual polytope obtained after assignment operation i.e., newShiftedPolytope
 						 */
-						//Calling with the newShifted polytope to use PPL library
+						polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
+						newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
+						isContain = templated_isContained(destination_locID, newPoly, Reachability_Region, lp_solver_type_choosen);//over-approximated but threadSafe
 						//std::cout<<"Before Containment check\n";
-						isContain = isContained(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
+						//Calling with the newShifted polytope to use PPL library
+						//isContain = isContained(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);//Todo::debug PPL for double data type
 						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 							initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 							newState->setTransitionId(transition_id); // keeps track of the transition_ID
@@ -1549,7 +1543,7 @@ bool reachability::templated_isContained(int locID, polytope::ptr poly,
 
 			template_polyhedra::ptr flowpipe;
 			flowpipe = (*it)->getContinuousSetptr();
-			std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
+			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
 			bool intersects=false;
 			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
 				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
