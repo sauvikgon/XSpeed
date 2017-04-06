@@ -268,11 +268,13 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 				//	std::cout<<"Before flowpipe Guard intersection\n";
 
-				int cluster = 100; // Sets the percentage of clustering, 10 is for 10 percent
+				int cluster = 20; // Sets the percentage of clustering, 10 is for 10 percent
 
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty()){	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 
 					// Returns the template hull of the polytopes that intersect with the guard
+
+					//default is 100 percent clustering when guard is not universe
 					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 					//std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
 					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);//Todo::debug PPL
@@ -286,6 +288,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					// The cost of flowpipe computation shall increase but the precision is likely to be better.
 					// A user may choose the clustering percent to tune the accuracy versus time overhead
 
+
 					/* When the guard is universal, a special case arises when destination location has same dynamics as the current one
 					 * and the transition assignment is an identity. *Take only the last polytope from the flowpipe and pass as the new
 					 * symbolic state in the waiting list. The 'continuation' principle will ensure that no reachable state is missed.
@@ -298,9 +301,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else { // Try clustering with user defined clustering percent
-						//polys = flowpipe_cluster(reach_region, cluster);
-						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
-						polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+						polys = flowpipe_cluster(reach_region,cluster);
+
+						// Below is 100% template hull option
+						//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 					}
 
 				}
