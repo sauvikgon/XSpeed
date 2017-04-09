@@ -89,15 +89,14 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 	}else {
 		double tt1 = exp(tau * norm_A);
 
-		if (std::isinf(tt1)){	//todo:: need to handle for infinity value, temporary fix
-			cout<<"exp(tau * norm_A) = " << tt1<<"\n";
-			tt1 = 1;	//randomly assigning some big value
+		if (std::isinf(tt1)){	//todo:: need to handle for infinity value
+			throw std::runtime_error("infinity in compute beta\n");
 		}
+
 		//result = (exp(tau * norm_A) - 1 - tau * norm_A) * (V_max_norm / norm_A);
 		result = (tt1 - 1 - tau * norm_A) * (V_max_norm / norm_A);
 	}
-	//result = (exp(tau * norm_A) - 1 - tau * norm_A) * (V_max_norm / norm_A);
-//	cout<<"\nBeta = "<<(double)result<<endl;
+
 	return result;
 }
 
@@ -117,39 +116,40 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 	if (!system_dynamics.isEmptyMatrixA){ //if Not Empty
 		norm_A = system_dynamics.MatrixA.norm_inf();
 	}
-	//cout<<"\nInside Testing Matrix A's infinity norm = "<<norm_A<<endl;
+	//cout<<"\nInside compute alpha Matrix A's max norm = "<< norm_A << endl;
 	dim_for_Max_norm = I->getSystemDimension();	//I is initial polytope
 	I_max_norm = I->max_norm(lp_solver_type_choosen, dim_for_Max_norm); //R_X_o ie max_norm of the Initial polytope
-	//cout << "\nInside Testing I.max_norm = " << I_max_norm << endl;
+
 
 	math::matrix<scalar_type> Btrans;
+	system_dynamics.MatrixB.transpose(Btrans);
+
 	if (!system_dynamics.isEmptyMatrixB) { //if NOT Empty
-		system_dynamics.MatrixB.transpose(Btrans);
-	//	cout <<"test11111\n";
+
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(system_dynamics.U, Btrans));
-	//	cout <<"test2222222\n";
+
 		dim_for_Max_norm = system_dynamics.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
 	//	cout <<"dim_for_Max_norm = "<<dim_for_Max_norm<<"\n";
 		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
-	//	cout <<"test33333\n";
+
 	}
+
 
 	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U
 	//cout<<"\nInside Testing V_max_norm = "<<V_max_norm <<endl;
 	if (system_dynamics.isEmptyMatrixA){ //if A is Empty
 		result = 0;	//norm_A will be zero and which is common term
 	}else {
-		double tt1 = exp(tau * norm_A);
 
+		double tt1 = exp(tau * norm_A);
 		if (std::isinf(tt1)){	//todo:: need to handle for infinity value, temporary fix
-			cout<<"exp(tau * norm_A) = " << tt1<<"\n";
-			tt1 = 1;	//randomly assigning some big value
+			throw std::runtime_error("infinity in compute alpha\n");
 		}
-		result = (tt1 - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
 		//	result = (exp(tau * norm_A) - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
+
+		result = (tt1 - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
 	}
-//	cout<<"\nAlfa = "<<(double)result<<endl;
 	return result;
 }
 

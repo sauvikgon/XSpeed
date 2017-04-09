@@ -253,53 +253,26 @@ double polytope::max_norm(int lp_solver_type_choosen,
 	return Max;
 }
 
-const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr P2) {
+const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
 
-	assert(P2!=NULL);
-	if(P2->IsUniverse)
+	assert(gPoly!=NULL);
+	if(gPoly->IsUniverse)
 	{
 		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign())); // by default this will be empty
 	}
-	else if(P2->IsEmpty)
-		return P2; // return empty polytope pointer
+	else if(gPoly->IsEmpty)
+		return gPoly; // return empty polytope pointer
 
 	math::matrix<double> total_coeffMatrix, m1;
 	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
-	m1.matrix_join(P2->getCoeffMatrix(), total_coeffMatrix);
+	m1.matrix_join(gPoly->getCoeffMatrix(), total_coeffMatrix);
 	std::vector<double> total_columnVector;
 	total_columnVector = vector_join(this->getColumnVector(),
-			P2->getColumnVector());
+			gPoly->getColumnVector());
 
 	polytope::ptr newp = polytope::ptr(
 			new polytope(total_coeffMatrix, total_columnVector, 1));
 
-	/*newp.setCoeffMatrix(total_coeffMatrix);
-	 newp.setColumnVector(total_columnVector);
-	 newp.setInEqualitySign(1);*/
-	/*
-	 //This newp is a polytope with extra directions added which will be more than the template directions
-	 //Have to over-approximate the newp polytope to restrict it to just templated directions
-	 int type = lp_solver_type;
-	 int Min_Or_Max=2;	//maximizing
-	 lp_solver lp(type);
-	 if (newp->getIsEmpty()==false){
-	 lp.setMin_Or_Max(Min_Or_Max);
-	 lp.setConstraints(newp->getCoeffMatrix(),newp->getColumnVector(),1);
-	 }
-	 unsigned int number_of_template_directions, dim; 	//same as the calling polytope's coefficient_matrix
-	 number_of_template_directions = this->getCoeffMatrix().size1();	// m1 can also be used
-	 dim = this->getCoeffMatrix().size2();
-	 std::vector<double> new_columnVector(number_of_template_directions), eachDirection(dim);
-
-	 for (unsigned int i = 0; i < number_of_template_directions; i++){
-	 for (unsigned int j=0;j<dim;j++){
-	 eachDirection[j]=this->getCoeffMatrix()(i,j);
-	 }
-	 new_columnVector[i] = lp.Compute_LLP(eachDirection);
-	 }
-	 polytope::ptr OverNewPolytope = polytope::ptr(new polytope(this->getCoeffMatrix(), new_columnVector, 1));
-	 return OverNewPolytope;
-	 */
 	return newp;
 }
 

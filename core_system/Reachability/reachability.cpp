@@ -180,7 +180,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
 
 				if (forbid_intersects.size() == 0) {
-					std::cout << "\nThe model does NOT violatesSAFETY property!!!\n";
+					std::cout << "\nThe model does NOT violate SAFETY property!!!\n";
 				} else {
 					symbolic_states::ptr current_forbidden_state;
 					current_forbidden_state = S;
@@ -266,6 +266,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				string locName = current_destination->getName();
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
+
 				//	std::cout<<"Before flowpipe Guard intersection\n";
 
 				int cluster = 20; // Sets the percentage of clustering, 10 is for 10 percent
@@ -288,6 +289,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					// The cost of flowpipe computation shall increase but the precision is likely to be better.
 					// A user may choose the clustering percent to tune the accuracy versus time overhead
 
+					std::cout << "Uniserve Guard intersection found\n";
 
 					/* When the guard is universal, a special case arises when destination location has same dynamics as the current one
 					 * and the transition assignment is an identity. *Take only the last polytope from the flowpipe and pass as the new
@@ -301,10 +303,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else { // Try clustering with user defined clustering percent
-						polys = flowpipe_cluster(reach_region,cluster);
+						//polys = flowpipe_cluster(reach_region,cluster);
 
 						// Below is 100% template hull option
-						//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+						polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 					}
 
 				}
@@ -327,7 +329,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {
 					polytope::ptr intersectedRegion = (*i);
 					polytope::ptr newPolytope, newShiftedPolytope; //created an object here
-				//	std::cout<<"Before Assignment\n";
+
+
 					if(!gaurd_polytope->getIsUniverse()){
 						newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);
 					}
@@ -335,15 +338,17 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					else{
 						newPolytope = intersectedRegion;
 					}
+
 					if (current_assignment.Map.isInvertible()) {
 						newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);
 					} else {
 						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
 								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
 					}
-					//	std::cout<<"Before Invariant intersection\n";
 					// @Rajarshi: the newShifted satisfy the destination location invariant
-					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+					if (H.getLocation(destination_locID)->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
+						newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+					}
 
 					//debug
 					//newShiftedPolytope->print2file("./nextpoly",0,10);

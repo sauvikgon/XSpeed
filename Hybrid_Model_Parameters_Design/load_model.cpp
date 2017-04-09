@@ -94,7 +94,8 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
-	//	setplatoon(ha, init_state, reach_parameters);
+		//setplatoon(ha, init_state, reach_parameters);
+		setMotorcar(ha,init_state,reach_parameters,op);
 
 		//std::cout <<"Test Model Assigned"<<std::endl;
 	}
