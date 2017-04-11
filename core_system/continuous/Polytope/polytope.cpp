@@ -254,8 +254,7 @@ double polytope::max_norm(int lp_solver_type_choosen,
 }
 
 const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
-
-	assert(gPoly!=NULL);
+	assert(gPoly != NULL);
 	if(gPoly->IsUniverse)
 	{
 		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign())); // by default this will be empty

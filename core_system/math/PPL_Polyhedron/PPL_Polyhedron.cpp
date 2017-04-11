@@ -36,8 +36,14 @@ PPL_Polyhedron::PPL_Polyhedron(math::matrix<double> A, std::vector<double> b, in
 				expr=e;
 			}
 		}
-		if(sgn==1){	//sgn is <=
+		if(sgn==1){	//sgn==1 for <=
 			PPL :: Constraint c= operator<=(expr, b[j]);
+			myPoly.add_constraint(c);
+		} else if(sgn==2){	//sgn==2 for >=
+			PPL :: Constraint c= operator>=(expr, b[j]);
+			myPoly.add_constraint(c);
+		}  else if(sgn==0){	//sgn==0 for =
+			PPL :: Constraint c= operator==(expr, b[j]);
 			myPoly.add_constraint(c);
 		}
 	}
@@ -54,7 +60,7 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 	const PPL::Constraint_System cs = myPoly.constraints();
 	unsigned int row_size = 0;
 	for(PPL::Constraint_System::const_iterator i = cs.begin(); i != cs.end(); ++i){
-		Constraint c = *i;
+		PPL::Constraint c = *i;
 		if(c.is_equality())
 			row_size+=2;
 		else
@@ -67,12 +73,12 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 	std::stringstream strstream; // used for checking the inequality sign
 
 	unsigned int row=0;
-	Constraint c;
-	for (PPL::Constraint_System::const_iterator iter = cs.begin(); iter != cs.end(); iter++){
-		c = *iter;
+	PPL::Constraint c;
+	for (PPL::Constraint_System::const_iterator i = cs.begin(); i != cs.end(); ++i){
+		c = *i;
 	//	std::cout << "Printing Constraint in the PPL polyhedron\n";
 		c.ascii_dump(strstream);
-		string cons = strstream.str();
+		std::string cons = strstream.str();
 
 		std::size_t found_equal = cons.find("=");
 		std::size_t found_geq = cons.find(">=");
@@ -92,7 +98,7 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 			//>= constraint
 			for (unsigned int j=0;j<c.space_dimension();j++){
 					double x =c.coefficient(PPL::Variable(j)).get_d();
-					x = -1 * x;
+					x = -1 * x;//-1 todo::need to understand why but works
 					a(row,j)= x;
 			}
 			b[row] = c.inhomogeneous_term().get_d();
@@ -102,14 +108,14 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 			//>= constraint
 			for (unsigned int j=0;j<c.space_dimension();j++){
 					double x =c.coefficient(PPL::Variable(j)).get_d();
-					x = -1 * x;
+					x = -1 * x;//-1 todo::need to understand why but works
 					a(row,j)= x;
 			}
 			b[row] = c.inhomogeneous_term().get_d();
 			row++;
 		}
 
-		else if(found_leq || found_le){ // convert le as leq since it overapproximates
+		else if(found_leq || found_le){ // convert ge as geq since it overapproximates
 			for (unsigned int j=0;j<c.space_dimension();j++){
 					double x =c.coefficient(PPL::Variable(j)).get_d();
 					a(row,j)= x;
@@ -126,6 +132,7 @@ void PPL_Polyhedron::convert_to_poly(math::matrix<double>& a, std::vector<double
 
 void PPL_Polyhedron::convex_hull(PPL_Polyhedron::ptr p ){
 	(this->myPoly).poly_hull_assign(p->myPoly);
+	this->myPoly.print();
 }
 
 bool PPL_Polyhedron::is_contained(PPL_Polyhedron::ptr poly){

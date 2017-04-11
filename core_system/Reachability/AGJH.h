@@ -26,7 +26,7 @@ private:
 	 * computes postD from a template polyhedra computed by postC
 	 */
 
-	std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED);
+	std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED, bool& unsafe);
 };
 
 

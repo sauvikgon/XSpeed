@@ -34,7 +34,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 
 	std::list<symbolic_states::ptr> PASSED;
 	unsigned int level = 0;
-	bool done;
+	bool done, safetyViolated=false;
 	//srand(time(NULL));
 
 	int waiting_count=0;	//number of waiting symbolic state
@@ -71,7 +71,14 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 					std::list<initial_state::ptr> R2;
 					if (level < bound){	//Check level to avoid last PostD computation
 					//	std::cout<<"Before PostD called\n";
-						R2 = postD(R1, PASSED);
+						R2 = postD(R1, PASSED, safetyViolated);
+						if (safetyViolated){//Safety Violated
+							#pragma omp critical
+							{
+								done=true;
+							}
+							break;
+						}
 #pragma omp critical
 					{
 						waiting_count = waiting_count + R2.size();
@@ -95,22 +102,36 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 						}
 					}	//end of level check
 					// call postD with res of prev step
-				}
+				}//for-loop no 3
 					Wlist[t][i][q].clear();
-			}
-		}
-		// barrier synchronization
-		for(unsigned int i=0;i<N;i++){
-			for(unsigned int j=0;j<N;j++){
-				if(!Wlist[1-t][i][j].empty()){
-					done = false;
-					break;
+					if (safetyViolated){	//Safety Violated
+						#pragma omp critical
+						{
+							done=true;
+						}
+					}
+
+			}//for-loop no 2
+			if (safetyViolated){	//Safety Violated
+				#pragma omp critical
+				{
+					done=true;
 				}
 			}
-			if(!done)
-				break;
+		}//for-loop no 1
+		// barrier synchronization
+		if (!safetyViolated){
+			for(unsigned int i=0;i<N;i++){
+				for(unsigned int j=0;j<N;j++){
+					if(!Wlist[1-t][i][j].empty()){
+						done = false;
+						break;
+					}
+				}
+				if(!done)
+					break;
+			}
 		}
-
 		level++;
 		t = 1 - t;
 
@@ -196,6 +217,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 		 */
 		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
 			//Approach of Coarse-time-step and Fine-time-step
+			//std::cout<<"Coarse-time-step and Fine-time-step Flowpipe \n";
 			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 		}else{
@@ -229,14 +251,13 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 
 	return reach_region;
 }
-std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED)
+std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED, bool& unsafe)
 {
 	template_polyhedra::ptr reach_region= symb->getContinuousSetptr();
 	int locId = *(symb->getDiscreteSet().getDiscreteElements().begin());
 
 	location::ptr current_location = H.getLocation(locId);
 	std::list<initial_state::ptr> res;
-
 	if (reach_region->getTotalIterations() != 0) { //computed reach_region is empty && optimize transition BreadthLevel-wise
 	//	cout<<"1\n";
 		for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
@@ -262,12 +283,12 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 			gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 			//	std::cout<<"Before flowpipe Guard intersection\n";
+			//std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
 			if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 			{
 				// Returns the template hull of the polytopes that intersect with the guard
 				polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
-			}
-			else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
+			} else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 				// This alternative introduces a large approximation at switchings
 				//polys.push_back(flowpipse_cluster(reach_region,100));
 
@@ -288,8 +309,8 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 					} else{ // Try clustering with user defined clustering percent
 						int cluster = 100; // Sets the percentage of clustering to 100 ie only one cluster
 						polys = flowpipe_cluster(reach_region, cluster);
-						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
-						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
+						//std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
+						//std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
 						clusted = true;
 					}
 				}
@@ -297,12 +318,37 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 					std::cout << "Empty guard condition\n";
 					continue;
 				}
-		//cout<<"3\n";
+			//std::cout<<"After flowpipe Guard intersection--res.size="<<res.size()<<std::endl;//
 			//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
-					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0))
-			continue;//do not push into the waitingList
+					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0)){
+				//--Arch-Competition: Implemented for Motorcade_5 Benchmark
+				if (polys.size()!=0){//Guard set intersected
+					#pragma omp critical
+					{
+						//std::cout<<"polys.size() = "<<polys.size()<<"\n UnSafe Location Reached!!!\n";
+						unsafe=true;
+					}
+					//std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
+					return res;//Safety Violated. Returning sym_state list passed so far.
 
+				//continue;//do not push into the waitingList
+				}
+				//-----
+				continue;//Guard set NOT intersected but these location not pushed in the waitingList
+			}
+
+			//--Arch-Competition: Implemented for Fisher_Star Benchmark
+			/*Forbidden:: loc(process1)==s4 & loc(sv)==s3 & loc(process2)==s4 & loc(process3)==s4
+			 * Location this "s4_s4_s4_s3" should not reach (most probably Hyst-XSpeed translation)
+			 */
+			if (locName.compare("s4_s4_s4_s3") == 0){
+				std::cout<<"\nREACHED FORBIDDEN Location s4_s4_s4_s3!!!\n"<<std::endl;
+				exit(0);
+			}/*else{
+				std::cout<<"NOT Reached Forbidden Location s4_s4_s4_s3!!!"<<std::endl;
+			}*/
+			//-------
 			current_assignment = (*t)->getAssignT();
 			// *** interesected_polyhedra included with invariant_directions also ******
 		//cout<<"size = "<< intersected_polyhedra.size();
@@ -317,7 +363,12 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				//	GeneratePolytopePlotter(intersectedRegion);
 				//std::cout<<"Before Guard intersected region called\n";
 				polytope::ptr newShiftedPolytope, newPolytope;//created an object here
-				newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
+				if (gaurd_polytope == NULL){
+					//std::cout<<"Guard is NULL"<<std::endl;//so do not perform intersection
+					continue;
+				}
+				else
+					newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
 				//newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);//initial_polytope_I = post_assign_exact(newPolytope, R, w);
 
 				math::matrix<double> test(current_assignment.Map.size1(),
@@ -337,8 +388,13 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				}
 				//std::cout<<"Before Invariant intersection called\n";
 				// @Amit: the newShifted satisfy the destination location invariant
-				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
-				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
+				if (H.getLocation(destination_locID)->getInvariant() == NULL){
+					//std::cout<<"Invariant is NULL"<<std::endl;//so do not perform intersection
+					//so new shifted polytope will not change
+				}else
+					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+
+				int is_ContainmentCheckRequired = 0;	//1 will Make it Slow; 0 will skip so Fast
 				/*if (clusted)
 					is_ContainmentCheckRequired = 0;
 				else

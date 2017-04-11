@@ -115,6 +115,7 @@ int main(int argc, char *argv[]) {
 	double cpu_usage;
 	boost::timer::cpu_timer tt1;
 	unsigned int number_of_times = 1;	//Taking Average of 5 readings
+
 	for (unsigned int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		init_cpu_usage(); //initializing the CPU Usage utility to start recording usages
 		tt1.start();
@@ -124,7 +125,6 @@ int main(int argc, char *argv[]) {
 		reachabilityCaller(Hybrid_Automata, init_state, reach_parameters,
 				user_options, lp_solver_type_choosen, Solver_GLPK_Gurobi_GPU, forbidden_set,
 				Symbolic_states_list, ce_candidates);
-
 		tt1.stop();
 		// printing the first initial polytope in the init_poly file
 		polytope::ptr init_poly = (*init_state.begin())->getInitialSet();

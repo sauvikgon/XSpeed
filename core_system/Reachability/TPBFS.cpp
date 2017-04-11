@@ -83,8 +83,10 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 		//omp_set_nested(1);	//enables nested parallelization
 		/*boost::timer::cpu_timer t702;
 		t702.start();*/
+		//std::cout<<"count ="<<count<<"\n";
 #pragma omp parallel for // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) {
+		//	std::cout<<"id ="<<id<<"\n";
 			initial_state::ptr U; //local
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
@@ -129,17 +131,26 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			}
 			// ******************* Computing Parameters Done *******************************
 // *************** POST_C computation ********** in 3 steps ***************
-			bool U_empty = false;
-			if (current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set
+
+			//std::cout<<"\nbefore Accessing U\n";
+			/*bool U_empty = false;
+			if (current_location->getSystem_Dynamics().U == NULL || current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set
 				U_empty = true;
-			}
+			}*/
 			LoadBalanceDS[id].X0 = continuous_initial_polytope;
-			LoadBalanceDS[id].U = current_location->getSystem_Dynamics().U;
+		//	std::cout<<"\nBefore Accessing U\n";
+			//if (current_location->getSystem_Dynamics().U != NULL && !current_location->getSystem_Dynamics().U->getIsEmpty()){
+			if (current_location->getSystem_Dynamics().U == NULL){
+			//	std::cout<<"\nInput set U is empty\n";
+			}else{
+				LoadBalanceDS[id].U = current_location->getSystem_Dynamics().U;
+			}
 			LoadBalanceDS[id].current_location = current_location;
 			LoadBalanceDS[id].symState_ID = id;
 			LoadBalanceDS[id].reach_param = reach_parameter_local;
+		//	std::cout<<"\nEnd of One symbolic state assignment\n";
 		}	//END of count FOR-LOOP  -- reach parameters computed
-//std::cout<<"\nbefore flowpipe cost Computation ";
+	//std::cout<<"\nEnd of symbolic state assignment\n";
 #pragma omp parallel for // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) { //separate parameters assignment with Invariant check and preLoadBalanceReachCompute task
 			unsigned int NewTotalIteration;
@@ -644,10 +655,10 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 		}//end-while	//cout<<"\n\n";
 	}//end of parallel
 // ************* Chunk_approach for polytope X ******************************
-//	cout<<"Done on X!!!!\n";
-	bool U_empty;
-	U_empty = LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();//assuming all symbolic states has same setup for polytope U
-	if (!U_empty) {
+	//cout<<"Done on X!!!!\n";
+	//bool U_empty;
+	//U_empty = LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();//assuming all symbolic states has same setup for polytope U
+	if (LoadBalanceDS[0].current_location->getSystem_Dynamics().U != NULL && !LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty()) {
 // ************* Chunk_approach for polytope U ******************************
 //		cout<<"polytope U is NOT empty!!!!\n";
 		if (countTotal_X <= numCores)
@@ -704,7 +715,7 @@ unsigned int NewTotalIteration;
 	if (NewTotalIteration < 1) {	//Modified from <= 1  to   < 1  for nav04.xml
 		return;
 	}
-	if (LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set
+	if (LoadBalanceDS.current_location->getSystem_Dynamics().U == NULL || LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set
 		U_empty = true;
 	}
 	int Solver = Solver_GLPK_Gurobi_GPU; //1 for CPU solver(GLPK); //2 for CPU solver(Gurobi); //3 for GPU solver(Gimplex)

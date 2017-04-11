@@ -33,6 +33,7 @@
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/mesh.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/platoon.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/motorcar.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fisher_star.h"
 
 // **************************************************************************************
 /*

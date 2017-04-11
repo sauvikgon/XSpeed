@@ -75,7 +75,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	if (HybridSystem_Model_Type == 14) {
 
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
-		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
 
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
@@ -95,8 +95,8 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
 		//setplatoon(ha, init_state, reach_parameters);
-		setMotorcar(ha,init_state,reach_parameters,op);
-
+		setFisher_Star(ha,init_state,reach_parameters);
+		std::cout<<"Model Fisher Model Successful\n";
 		//std::cout <<"Test Model Assigned"<<std::endl;
 	}
 	unsigned int dims=0;
@@ -141,7 +141,6 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
-
 	if (!op.get_forbidden_set().empty()) {
 		string_to_poly(op.get_forbidden_set(), forbidden_set);
 		//string_to_poly_HystFormat(op.get_forbidden_set(), forbidden_set);

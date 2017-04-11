@@ -1,12 +1,13 @@
 /*
- * motorcar.h
+ * fisher_star.h
  *
- *  Created on: 09-Apr-2017
- *      Author: rajarshi
+ *  Created on: 10-Apr-2017
+ *      Author: amit
  */
 
-#ifndef HYBRID_MODEL_PARAMETERS_DESIGN_TEST_MODELS_ARCH_BENCHMARK_MOTORCAR_H_
-#define HYBRID_MODEL_PARAMETERS_DESIGN_TEST_MODELS_ARCH_BENCHMARK_MOTORCAR_H_
+#ifndef FISHER_STAR_H_
+#define FISHER_STAR_H_
+
 
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
@@ -20,22 +21,22 @@
 #include "application/userOptions.h"
 
 
-//void user_model(hybrid_automata& Hybrid_Automata,initial_state::ptr& init_state,ReachabilityParameters& reach_parameters);
 
-void MCarModule1(hybrid_automata& ha,
+void FStarModule1(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters);
-void MCarModule2(hybrid_automata& ha,
+void FStarModule2(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters);
-void MCarModule3(hybrid_automata& ha,
+void FStarModule3(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters);
-void MCarModule4(hybrid_automata& ha,
+void FStarModule4(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters);
 
-void setMotorcar(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters);
+void setFisher_Star(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters);
 
 
-#endif /* HYBRID_MODEL_PARAMETERS_DESIGN_TEST_MODELS_ARCH_BENCHMARK_MOTORCAR_H_ */
+
+#endif /* FISHER_STAR_H_ */

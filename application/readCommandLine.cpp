@@ -190,14 +190,14 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
 			// Amit's machine
-//			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
-//			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
+			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
+			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
 
 			// My machine
-			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
-			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
+//			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
+//			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
 
-			std::cout<<"Model Parsed Successfully! Calling XSpeed"<<std::endl;
+			std::cout<<"Model Parsed Successfully!! Calling XSpeed"<<std::endl;
 
 			string cmdStr1;
 			cmdStr1.append("./XSpeed --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
@@ -336,11 +336,13 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
 		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
 				forbidden_set);
+		std::cout<<"Model loaded successfully\n";
 		if(output_vars[0].empty() && output_vars[1].empty())
 		{
 			std::cout<<"Output variables not specified.\n"<<std::endl;
 			exit(0);
 		}
+		std::cout<<"Output varaible not empty\n";
 		//Here check if they are specified but wrong vars, this also returns error
 		//if(Hybrid_Automata.get_index(output_vars[0]) ==-1)
 

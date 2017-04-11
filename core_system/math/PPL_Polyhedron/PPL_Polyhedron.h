@@ -28,17 +28,20 @@ public:
 	PPL_Polyhedron();
 	virtual ~PPL_Polyhedron();
 	PPL_Polyhedron(PPL::NNC_Polyhedron mypoly);
+
+	/*
+	 * Creates a PPL polyhedron
+	 */
 	PPL_Polyhedron(math::matrix<double> A, std::vector<double> b, int sgn);
 
 	/**
-	 * Converts this ppl poly to matrix form polyhedron, Ax<=b. The A and b are returned by reference.
+	 * Converts this PPL poly to matrix form polyhedron, Ax<=b. The A and b are returned by reference.
 	 */
 	void convert_to_poly(math::matrix<double>& a, std::vector<double> & b);
 	/*
 	 * The polyhedron poly will be tested in the calling polyhedron if it is contained within it.
 	 */
 	bool is_contained(PPL_Polyhedron::ptr poly);
-
 
 	/*
 	 * returns the convex_hull of calling PPL with the PPL_Polyhedron::ptr p

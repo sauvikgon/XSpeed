@@ -33,6 +33,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
 std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::list<abstractCE::ptr>& ce_candidates){
+
 	std::list < symbolic_states::ptr > Reachability_Region;
 	template_polyhedra::ptr reach_region;
 
@@ -111,7 +112,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
 
-		//std::cout<<"alfa = "<<result_alfa<<"   beta = "<<result_beta;
+	//	std::cout<<"alfa = "<<result_alfa<<"   beta = "<<result_beta;
+
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
 
@@ -150,11 +152,11 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 			}
 		}
-		//std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
+		std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 
-		//	std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<"\n";
+		//std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<"\n";
 		num_flowpipe_computed++;//computed one Flowpipe
 		//	*********************************************** Reach or Flowpipe Computed ************************************
 		if (previous_level != levelDeleted) {
@@ -250,7 +252,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		//  ******************************** Safety Verification section Ends********************************
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 
-	//	std::cout<<"\nreach_region->getTotalIterations() = " <<reach_region->getTotalIterations();
+		std::cout<<"\nreach_region->getTotalIterations() = " <<reach_region->getTotalIterations();
 
 		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) {
 			//computed reach_region is empty and optimize transition BreadthLevel-wise
@@ -289,7 +291,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					// The cost of flowpipe computation shall increase but the precision is likely to be better.
 					// A user may choose the clustering percent to tune the accuracy versus time overhead
 
-					std::cout << "Uniserve Guard intersection found\n";
+					std::cout << "Universe Guard intersection found\n";
 
 					/* When the guard is universal, a special case arises when destination location has same dynamics as the current one
 					 * and the transition assignment is an identity. *Take only the last polytope from the flowpipe and pass as the new
@@ -416,11 +418,11 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 	if (Algorithm_Type == SEQ_SF) { //Continuous Sequential Algorithm
 		/*boost::timer::cpu_timer AllReach_time;
 		AllReach_time.start();*/
-		//std::cout << "\nFlowpipe" << std::endl;
+		std::cout << "\nGoing to compute Flowpipe" << std::endl;
 		reach_region = reachabilitySequential(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
 				current_location->isInvariantExists(), lp_solver_type_choosen);
-		//std::cout << "\nFlowpipe computed" << std::endl;
+		std::cout << "\nFlowpipe computed" << std::endl;
 		/*AllReach_time.stop();
 		double wall_clock1;
 		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds

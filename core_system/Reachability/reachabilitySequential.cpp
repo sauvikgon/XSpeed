@@ -21,7 +21,6 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 
 	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 	size_type row = numVectors, col = shm_NewTotalIteration;
-//	cout << "\nBefore calling InvariantBoundaryCheck"<< "\n";
 	if (isInvariantExist == true) { //if invariant exist. Computing
 		shm_NewTotalIteration = boundedTotIteration;
 
@@ -40,13 +39,15 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 	if (!ReachParameters.X0->getIsEmpty()) //set glpk constraints If not an empty polytope
 		s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
 				ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
-
+	//cout<<"After accessing X0\n";
 	s_per_thread_U.setMin_Or_Max(2);
-	if (!SystemDynamics.U->getIsEmpty()) { //empty polytope
+
+	if (SystemDynamics.U != NULL && !SystemDynamics.U->getIsEmpty()) { //empty polytope
 		s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
 				SystemDynamics.U->getColumnVector(),
 				SystemDynamics.U->getInEqualitySign());
 	}
+	//cout<<"After accessing U set\n";
 	double res1, result, term2 = 0.0, result1, term1 = 0.0;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 	math::matrix<double> B_trans, phi_tau_Transpose;
@@ -67,7 +68,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 		sVariable = 0.0; //initialize s0
 		//  **************    Omega Function   ********************
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
-	//	cout<<"res1 = "<<res1 <<"\n";
+		//cout<<"res1 = "<<res1 <<"\n";
 
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
