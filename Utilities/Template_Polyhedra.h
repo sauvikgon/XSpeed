@@ -81,8 +81,12 @@ public:
 	 * Less Expensive function
 	 * Returns the list of polytopes with each polytope as the template_approximation of the intersected region
 	 * the intersected region is computed as range of indices of SFM using the function polys_intersectionSequential_optimize()
+	 *
+	 * If aggregation is TRUE/ON, it indicate a single template-hull convex set is returned for the set of omegas that intersect with the guard (for each
+	 * intersection region. Note there can be more than one set of omegas that intersect with the same guard, in this case list of convex sets can be returned).
+	 * If aggregation is FALSE/OFF, it indicate for each omega that intersect with the guard it will be considered as individual convex set.
 	 */
-	std::list<polytope::ptr> flowpipe_intersectionSequential(polytope::ptr guard, int lp_solver_type_choosen);
+	std::list<polytope::ptr> flowpipe_intersectionSequential(bool aggregation, polytope::ptr guard, int lp_solver_type_choosen);
 
 	/*
 	 * using PPL library returns a list of polytopes with each polytopes as the convex_hull approximation of the intersected region of guard with the flowpipe

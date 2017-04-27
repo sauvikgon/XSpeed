@@ -272,7 +272,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 				SystemDynamics.U->getColumnVector(), SystemDynamics.U->getInEqualitySign());
 	}
 //	cout<<"OK 2 \n";
-	double res1, result, term2, result1, term1;
+	double res1, result, term2=0.0, result1, term1=0.0;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 	math::matrix<double> B_trans, phi_tau_Transpose;
 	if (!SystemDynamics.isEmptyMatrixA) //current_location's SystemDynamics's or ReachParameters

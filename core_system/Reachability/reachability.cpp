@@ -152,7 +152,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 			}
 		}
-		std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
+		//std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 
@@ -252,7 +252,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		//  ******************************** Safety Verification section Ends********************************
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 
-		std::cout<<"\nreach_region->getTotalIterations() = " <<reach_region->getTotalIterations();
+	//	std::cout<<"\nreach_region->getTotalIterations() = " <<reach_region->getTotalIterations();
 
 		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) {
 			//computed reach_region is empty and optimize transition BreadthLevel-wise
@@ -271,21 +271,30 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 				//	std::cout<<"Before flowpipe Guard intersection\n";
 
-				int cluster = 20; // Sets the percentage of clustering, 10 is for 10 percent
+				int cluster = 100; // Sets the percentage of clustering, 10 is for 10 percent. 100 is a single cluster, 0 no clustering indicate invididual omegas
+				bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
+				//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
 
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty()){	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 
 					// Returns the template hull of the polytopes that intersect with the guard
-
 					//default is 100 percent clustering when guard is not universe
-					polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+					/** Steps:
+					 * First find out all Omegas that intersects with the gaurd_polytope and then push each Omega
+					 * into the polys. Guard intersection is done in the following steps below for each of these Omegas
+					 */
+
+					if (!aggregation){//ON use thull //OFF is expensive: for each Omega a new symbolic state is pushed in the Wlist
+						std::cout<<"Aggregation is OFF: going to create many symbolic states\n";
+					}
 					//std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
 					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);//Todo::debug PPL
-					//polys = flowpipe_cluster(reach_region,cluster); // template hull with clustering
+					polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
+
 
 				} else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings
-					//polys.push_back(flowpipse_cluster(reach_region,100));
+					//polys.push_back(flowpipe_cluster(reach_region,100));
 
 					// Another alternative is to consider each omega in the flowpipe as a new symbolic state.
 					// The cost of flowpipe computation shall increase but the precision is likely to be better.
@@ -308,11 +317,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						//polys = flowpipe_cluster(reach_region,cluster);
 
 						// Below is 100% template hull option
-						polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
 					}
 
-				}
-				else{ // empty guard
+				} else{ // empty guard
 					std::cout << "Empty guard condition\n";
 					continue;
 				}
@@ -335,9 +343,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 					if(!gaurd_polytope->getIsUniverse()){
 						newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);
-					}
-
-					else{
+					} else{
 						newPolytope = intersectedRegion;
 					}
 
@@ -418,11 +424,11 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 	if (Algorithm_Type == SEQ_SF) { //Continuous Sequential Algorithm
 		/*boost::timer::cpu_timer AllReach_time;
 		AllReach_time.start();*/
-		std::cout << "\nGoing to compute Flowpipe" << std::endl;
+		//std::cout << "\nGoing to compute Flowpipe" << std::endl;
 		reach_region = reachabilitySequential(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
 				current_location->isInvariantExists(), lp_solver_type_choosen);
-		std::cout << "\nFlowpipe computed" << std::endl;
+		//std::cout << "\nFlowpipe computed" << std::endl;
 		/*AllReach_time.stop();
 		double wall_clock1;
 		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds

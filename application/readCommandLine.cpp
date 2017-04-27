@@ -247,7 +247,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			std::cout << "Missing depth option\n";
 			return 0;
 		}
-		if ((user_options.get_model() == 3 || user_options.get_model() == 4)){
+		if ((user_options.get_model() == 3 || user_options.get_model() == 4) && user_options.get_bfs_level() != 0){
 			std::cout << "Invalid depth. Only depth 0 permitted \n";
 			exit(0);
 		}
@@ -336,13 +336,13 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
 		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
 				forbidden_set);
-		std::cout<<"Model loaded successfully\n";
+		//std::cout<<"Model loaded successfully\n";
 		if(output_vars[0].empty() && output_vars[1].empty())
 		{
 			std::cout<<"Output variables not specified.\n"<<std::endl;
 			exit(0);
 		}
-		std::cout<<"Output varaible not empty\n";
+		//std::cout<<"Output varaible not empty\n";
 		//Here check if they are specified but wrong vars, this also returns error
 		//if(Hybrid_Automata.get_index(output_vars[0]) ==-1)
 

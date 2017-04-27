@@ -5,6 +5,7 @@
  *      Author: amit
  *      Refrence : http://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
  *
+ *		//Also a very informative website is https://locklessinc.com/articles/memory_usage/
  */
 
 #ifndef MEMORY_USAGES_H_

@@ -388,42 +388,67 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 /*
  * returns the template hull of the flowpipe-guard intersected template polytopes
  */
-std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(polytope::ptr guard, int lp_solver_type_choosen){
+std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(bool aggregation, polytope::ptr guard, int lp_solver_type_choosen){
 
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
 	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type_choosen);
+
 	std::list<polytope::ptr> polys;
-	unsigned int poly_dir_size = this->template_Directions.size1() +this->invariant_Directions.size1();
+	unsigned int poly_dir_size = this->template_Directions.size1() + this->invariant_Directions.size1();
 	std::vector<double> colVector(poly_dir_size);
-	for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
-			range_it++) {
-		unsigned int start = (*range_it).first, end=(*range_it).second;
 
-		for (unsigned int eachTemplateDir=0;eachTemplateDir<this->template_Directions.size1();eachTemplateDir++){
 
-			double Max_sf=this->Matrix_SupportFunction(eachTemplateDir,start);
-			for (int i = start+1; i <= end; i++) {
-				double sf = this->Matrix_SupportFunction(eachTemplateDir,i);
-				if (sf > Max_sf)
-					Max_sf = sf;
+	if (!aggregation){//OFF for each Omega that intersected it is push into the polys list. Expensive Operation
+		std::cout<<"Aggregation is Switched-OFF\n";
+		for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end(); range_it++) {
+			unsigned int start = (*range_it).first, end=(*range_it).second;
+			for (int i = start; i <= end; i++) {//push in polys every polytope/Omega from start to end
+
+				polytope::ptr p=this->getPolytope(i);//gets only the polytope with out invariant of this templeted_polyhedra
+				math::matrix<double> invDirs;
+				std::vector<double> invBound(this->invariant_Directions.size1());
+				if (this->invariant_Directions.size1() != 0){//if invariant exists
+					invDirs = this->invariant_Directions;
+					invBound=this->getInvariantBoundValue(i);
+					p->setMoreConstraints(invDirs,invBound);
+				}
+				polys.push_back(p);
+
 			}//end of each intersected region
-			colVector[eachTemplateDir] = Max_sf;
-		}//end of each template direction ALSO HAVE TO PERFORM INVARIANT DIRECTION
-		unsigned int total_dir = this->template_Directions.size1();
-		for (unsigned int eachInvDir=0;eachInvDir<this->invariant_Directions.size1();eachInvDir++){
-			double Max_sf=this->Matrix_InvariantBound(eachInvDir,start);
-			for (int i = start + 1; i <= end; i++) {
-				double sf = this->Matrix_InvariantBound(eachInvDir, i);
-				if (sf > Max_sf)
-					Max_sf = sf;
-			} //end of each intersected region
-			colVector[total_dir + eachInvDir] = Max_sf;
-		}
-		math::matrix<double> allDirs;
-		this->template_Directions.matrix_join(this->invariant_Directions, allDirs);
-		polytope::ptr p = polytope::ptr(new polytope(allDirs,colVector,1));
-		polys.push_back(p);
-	}//end of multiple intersected region
+		}//end of multiple intersected region
+	} else { //ON for all intersected Omegas create a single template-hull set
+
+		for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
+				range_it++) {
+			unsigned int start = (*range_it).first, end=(*range_it).second;
+
+			for (unsigned int eachTemplateDir=0;eachTemplateDir<this->template_Directions.size1();eachTemplateDir++){
+
+				double Max_sf=this->Matrix_SupportFunction(eachTemplateDir,start);
+				for (int i = start+1; i <= end; i++) {
+					double sf = this->Matrix_SupportFunction(eachTemplateDir,i);
+					if (sf > Max_sf)
+						Max_sf = sf;
+				}//end of each intersected region
+				colVector[eachTemplateDir] = Max_sf;
+			}//end of each template direction ALSO HAVE TO PERFORM INVARIANT DIRECTION
+			unsigned int total_dir = this->template_Directions.size1();
+			for (unsigned int eachInvDir=0;eachInvDir<this->invariant_Directions.size1();eachInvDir++){
+				double Max_sf=this->Matrix_InvariantBound(eachInvDir,start);
+				for (int i = start + 1; i <= end; i++) {
+					double sf = this->Matrix_InvariantBound(eachInvDir, i);
+					if (sf > Max_sf)
+						Max_sf = sf;
+				} //end of each intersected region
+				colVector[total_dir + eachInvDir] = Max_sf;
+			}
+			math::matrix<double> allDirs;
+			this->template_Directions.matrix_join(this->invariant_Directions, allDirs);
+			polytope::ptr p = polytope::ptr(new polytope(allDirs,colVector,1));
+			polys.push_back(p);
+		}//end of multiple intersected region
+	}
+
 	//cout<<"polys.size = "<<polys.size()<<"\n";
 	return polys;
 }

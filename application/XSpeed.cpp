@@ -221,8 +221,9 @@ int main(int argc, char *argv[]) {
 //		interval_generator(Symbolic_states_list,user_options);
 //	}
 	vertex_generator(Symbolic_states_list,user_options);
+	std::cout<<"Vertex Generation Completed"<<std::endl;
 	print_all_intervals(Symbolic_states_list);
-
+	//std::cout<<"Interval Generation Completed"<<std::endl;
 
 	/*
 	 * counterExample utility. Plot the location sequence of every abstract CE in a file

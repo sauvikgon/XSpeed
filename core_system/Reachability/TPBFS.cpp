@@ -153,7 +153,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 	//std::cout<<"\nEnd of symbolic state assignment\n";
 #pragma omp parallel for // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) { //separate parameters assignment with Invariant check and preLoadBalanceReachCompute task
-			unsigned int NewTotalIteration;
+			unsigned int NewTotalIteration = LoadBalanceDS[id].reach_param.Iterations;
 
 			if (LoadBalanceDS[id].current_location->isInvariantExists()) {
 				/*
@@ -262,7 +262,11 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 			intersectionRangeDetection(loadBalPostD);	//returns list of range pair indicating Start and End as SFM's columnIndex
 		//	cout<<"done 4\n";
 	//Step--4 :: Third Task to perform Template_Approximation
-			templateApproximation(loadBalPostD);
+			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
+			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
+
+
+			templateApproximation(aggregation, loadBalPostD);
 		//	cout<<"done 5\n";
 	//Step--5 :: Finally creating new symbolic states to push in the Qpw_list[1-t]
 	#pragma omp parallel for
@@ -278,10 +282,6 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 					string locName = H.getLocation(loadBalPostD[id].dest_locID[trans])->getName();
 					if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0) || (locName.compare("FINAL") == 0)
 							|| (locName.compare("UNSAFE") == 0)) {
-				/*		#pragma omp critical
-						{
-							iter_max = iter_max - 1;
-						}*/
 						continue; //do not push into the waitingList
 					}
 					polytope::ptr intersectedRegion;
@@ -312,7 +312,8 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 									reach_parameters.Directions, lp_solver_type_choosen);
 						}
 						// @Amit: the newShifted satisfy the destination location invariant
-						newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant());
+						if (H.getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant() != NULL)
+							newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant());
 
 						/*
 						 * Now perform containment check similar to sequential algorithm.
@@ -824,7 +825,7 @@ void tpbfs::intersectionRangeDetection(std::vector<LoadBalanceData_PostD>& loadB
 
 
 
-void tpbfs::templateApproximation(std::vector<LoadBalanceData_PostD>& loadBalPostD){
+void tpbfs::templateApproximation(bool aggregation, std::vector<LoadBalanceData_PostD>& loadBalPostD){
 int count = loadBalPostD.size();
 
 #pragma omp parallel for
@@ -834,41 +835,62 @@ int count = loadBalPostD.size();
 			//range_list = loadBalPostD[id].polys_list[trans];
 			range_list = loadBalPostD[id].range_list[trans];
 			std::list<polytope::ptr> polys;
-			unsigned int poly_dir_size = loadBalPostD[id].sfm->getTotalTemplateDirections()
-							+ loadBalPostD[id].sfm->getTotalInvariantDirections();
-			std::vector<double> colVector(poly_dir_size);
-			for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin();
-					range_it != range_list.end(); range_it++) {
-				unsigned int start = (*range_it).first, end=(*range_it).second;
-			//	cout << "first = " << start << "  second = " << end << std::endl;
-				for (unsigned int eachTemplateDir=0;eachTemplateDir<loadBalPostD[id].sfm->getTotalTemplateDirections();	eachTemplateDir++){
-					double Max_sf=loadBalPostD[id].sfm->getMatrixSupportFunction()(eachTemplateDir,start);
-					for (int i = start+1; i <= end; i++) {
-						double sf=loadBalPostD[id].sfm->getMatrixSupportFunction()(eachTemplateDir,i);
-						if (sf > Max_sf)
-							Max_sf = sf;
+
+			if (!aggregation){//OFF for each Omega that intersected it is push into the polys list. Expensive Operation
+				std::cout<<"Aggregation is Switched-OFF\n";
+				for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end(); range_it++) {
+					unsigned int start = (*range_it).first, end=(*range_it).second;
+					for (int i = start; i <= end; i++) {//push in polys every polytope/Omega from start to end
+
+						polytope::ptr p=loadBalPostD[id].sfm->getPolytope(i);//gets only the polytope with out invariant of this templeted_polyhedra
+						math::matrix<double> invDirs;
+						std::vector<double> invBound(loadBalPostD[id].sfm->getInvariantDirections().size1());
+						if (loadBalPostD[id].sfm->getInvariantDirections().size1() != 0){//if invariant exists
+							invDirs = loadBalPostD[id].sfm->getInvariantDirections();
+							invBound=loadBalPostD[id].sfm->getInvariantBoundValue(i);
+							p->setMoreConstraints(invDirs,invBound);
+						}
+						polys.push_back(p);
+
 					}//end of each intersected region
-					colVector[eachTemplateDir] = Max_sf;
-				}//end of each template direction ALSO HAVE TO PERFORM INVARIANT DIRECTION
-				unsigned int total_dir = loadBalPostD[id].sfm->getTotalTemplateDirections();
-				for (unsigned int eachInvDir=0;eachInvDir<loadBalPostD[id].sfm->getTotalInvariantDirections();eachInvDir++){
-					double Max_sf=loadBalPostD[id].sfm->getMatrix_InvariantBound()(eachInvDir,start);
-					for (int i = start + 1; i <= end; i++) {
-						double sf = loadBalPostD[id].sfm->getMatrix_InvariantBound()(eachInvDir, i);
-						if (sf > Max_sf)
-							Max_sf = sf;
-					} //end of each intersected region
-					colVector[total_dir + eachInvDir] = Max_sf;
-				}
-				math::matrix<double> allDirs;
-				//Debug
-				math::matrix<double> test;
-				test =loadBalPostD[id].sfm->getTemplateDirections();
-				//-----
-				test.matrix_join(loadBalPostD[id].sfm->getInvariantDirections(), allDirs);
-				polytope::ptr p = polytope::ptr(new polytope(allDirs,colVector,1));
-				polys.push_back(p);
-			}//end of multiple intersected region
+				}//end of multiple intersected region
+			} else { //ON for all intersected Omegas create a single template-hull set
+
+				unsigned int poly_dir_size = loadBalPostD[id].sfm->getTotalTemplateDirections() + loadBalPostD[id].sfm->getTotalInvariantDirections();
+				std::vector<double> colVector(poly_dir_size);
+				for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end(); range_it++) {
+					unsigned int start = (*range_it).first, end=(*range_it).second;
+				//	cout << "first = " << start << "  second = " << end << std::endl;
+					for (unsigned int eachTemplateDir=0;eachTemplateDir<loadBalPostD[id].sfm->getTotalTemplateDirections();	eachTemplateDir++){
+						double Max_sf=loadBalPostD[id].sfm->getMatrixSupportFunction()(eachTemplateDir,start);
+						for (int i = start+1; i <= end; i++) {
+							double sf=loadBalPostD[id].sfm->getMatrixSupportFunction()(eachTemplateDir,i);
+							if (sf > Max_sf)
+								Max_sf = sf;
+						}//end of each intersected region
+						colVector[eachTemplateDir] = Max_sf;
+					}//end of each template direction ALSO HAVE TO PERFORM INVARIANT DIRECTION
+					unsigned int total_dir = loadBalPostD[id].sfm->getTotalTemplateDirections();
+					for (unsigned int eachInvDir=0;eachInvDir<loadBalPostD[id].sfm->getTotalInvariantDirections();eachInvDir++){
+						double Max_sf=loadBalPostD[id].sfm->getMatrix_InvariantBound()(eachInvDir,start);
+						for (int i = start + 1; i <= end; i++) {
+							double sf = loadBalPostD[id].sfm->getMatrix_InvariantBound()(eachInvDir, i);
+							if (sf > Max_sf)
+								Max_sf = sf;
+						} //end of each intersected region
+						colVector[total_dir + eachInvDir] = Max_sf;
+					}
+					math::matrix<double> allDirs;
+					//Debug
+					math::matrix<double> test;
+					test =loadBalPostD[id].sfm->getTemplateDirections();
+					//-----
+					test.matrix_join(loadBalPostD[id].sfm->getInvariantDirections(), allDirs);
+					polytope::ptr p = polytope::ptr(new polytope(allDirs,colVector,1));
+					polys.push_back(p);
+				}//end of multiple intersected region
+			}
+
 			loadBalPostD[id].polys_list[trans]= polys;
 		}
 	}//end for each parallel

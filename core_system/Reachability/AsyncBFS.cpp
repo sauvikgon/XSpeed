@@ -79,7 +79,7 @@ void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_sta
 	totalSymStates++;	//for each symbolic states when processed (ie postC)
 	PASSED.push_back(R1);	//todo::try mutex for locking this shared resource
 	mu.unlock();
-//	std::cout<<"Jump "<<level<<"..."<<totalSymStates<<" Symbolic States Passed ..."<<std::endl;
+	std::cout<<"Jump "<<level<<"..."<<totalSymStates<<" Symbolic States Passed ..."<<std::endl;
 	//				}
 	//----end of postC on s
 	//todo:: Currently removed the Safety Check Section from here
@@ -223,7 +223,10 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 			string locName = current_destination->getName();
 			gaurd_polytope = (*t)->getGaurd();//	GeneratePolytopePlotter(gaurd_polytope);
 
-		//cout<<"2\n";
+			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
+			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
+
+
 			std::list<polytope::ptr> polys;
 			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, myData.lp_solver_type_choosen);
@@ -235,7 +238,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 			if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 			{
 				// Returns the template hull of the polytopes that intersect with the guard
-				polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, myData.lp_solver_type_choosen);
+				polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, myData.lp_solver_type_choosen);
 			}
 			else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 				// This alternative introduces a large approximation at switchings
@@ -256,10 +259,11 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else{ // Try clustering with user defined clustering percent
-						int cluster = 100; // Sets the percentage of clustering to 0 ie no clustering applied
+						/*int cluster = 100; // Sets the percentage of clustering to 0 ie no clustering applied
 						polys = flowpipe_cluster(reach_region, cluster);
 						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
-						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
+						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;*/
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, myData.lp_solver_type_choosen);
 					}
 				}
 				else{ // empty guard
@@ -270,7 +274,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 			//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
 					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0))
-			continue;//do not push into the waitingList
+				continue;//do not push into the waitingList
 
 			current_assignment = (*t)->getAssignT();
 			// *** interesected_polyhedra included with invariant_directions also ******
@@ -303,7 +307,8 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 							myData.lp_solver_type_choosen);
 				}
 				// @Amit: the newShifted satisfy the destination location invariant
-				newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(myData.H.getLocation(destination_locID)->getInvariant());
+				if (myData.H.getLocation(destination_locID)->getInvariant() != NULL)
+					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(myData.H.getLocation(destination_locID)->getInvariant());
 				/*
 				 * Now perform containment check similar to sequential algorithm.
 				 */

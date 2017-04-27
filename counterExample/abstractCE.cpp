@@ -244,12 +244,12 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
-
+bool aggregation=true;//default is ON
 	for (unsigned int i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		if(i==N-1){
 			// If last abst sym state, then take time projection of flowpipe \cap bad_poly
-			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(bad_poly,1);
+			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation,bad_poly,1);
 			assert(polys.size()>=0); // The last sym state of an abstract CE must intersect with the bad set
 
 			if(polys.size()>1)
@@ -266,7 +266,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			if(guard->getIsUniverse())
 				std::cout << "#Guard is Universe#\n" << std::endl;
 
-			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(guard,1);
+			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation,guard,1);
 
 			assert(polys.size()>=1); // An abstract CE state must have intersection with the trans guard
 			if(polys.size()>1)

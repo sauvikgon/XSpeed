@@ -72,13 +72,15 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 					if (level < bound){	//Check level to avoid last PostD computation
 					//	std::cout<<"Before PostD called\n";
 						R2 = postD(R1, PASSED, safetyViolated);
-						if (safetyViolated){//Safety Violated
-							#pragma omp critical
-							{
-								done=true;
-							}
-							break;
-						}
+//						//--------New Safety Check for Arch-Competition
+//						if (safetyViolated){//Safety Violated For Motorcade-5 and Fisher_star model
+//							#pragma omp critical
+//							{
+//								done=true;
+//							}
+//							break;
+//						}
+//						//--------
 #pragma omp critical
 					{
 						waiting_count = waiting_count + R2.size();
@@ -104,23 +106,23 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 					// call postD with res of prev step
 				}//for-loop no 3
 					Wlist[t][i][q].clear();
-					if (safetyViolated){	//Safety Violated
-						#pragma omp critical
-						{
-							done=true;
-						}
-					}
+//					if (safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
+//						#pragma omp critical
+//						{
+//							done=true;
+//						}
+//					}
 
 			}//for-loop no 2
-			if (safetyViolated){	//Safety Violated
-				#pragma omp critical
-				{
-					done=true;
-				}
-			}
+//			if (safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
+//				#pragma omp critical
+//				{
+//					done=true;
+//				}
+//			}
 		}//for-loop no 1
 		// barrier synchronization
-		if (!safetyViolated){
+//		if (!safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
 			for(unsigned int i=0;i<N;i++){
 				for(unsigned int j=0;j<N;j++){
 					if(!Wlist[1-t][i][j].empty()){
@@ -131,7 +133,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 				if(!done)
 					break;
 			}
-		}
+//		}
 		level++;
 		t = 1 - t;
 
@@ -279,6 +281,9 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			//std::cout<<"Before Flowpipe intersection called\n";
 			std::list<polytope::ptr> polys;
 			bool clusted=false;
+			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
+			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
+
 			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
 			gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
@@ -287,7 +292,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 			{
 				// Returns the template hull of the polytopes that intersect with the guard
-				polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+				polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
 			} else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 				// This alternative introduces a large approximation at switchings
 				//polys.push_back(flowpipse_cluster(reach_region,100));
@@ -307,11 +312,12 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 						unsigned int template_poly_size = reach_region->getTotalIterations();
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else{ // Try clustering with user defined clustering percent
-						int cluster = 100; // Sets the percentage of clustering to 100 ie only one cluster
-						polys = flowpipe_cluster(reach_region, cluster);
-						//std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
-						//std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
-						clusted = true;
+
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
+
+						/*int cluster = 100; // Sets the percentage of clustering to 100 ie only one cluster
+						polys = flowpipe_cluster(reach_region, cluster);//std::cout << "Inside Universe Guard intersection with flowpipe routine\n";//std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
+						clusted = true;*/
 					}
 				}
 				else{ // empty guard
@@ -322,33 +328,31 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
 					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0)){
-				//--Arch-Competition: Implemented for Motorcade_5 Benchmark
-				if (polys.size()!=0){//Guard set intersected
-					#pragma omp critical
-					{
-						//std::cout<<"polys.size() = "<<polys.size()<<"\n UnSafe Location Reached!!!\n";
-						unsafe=true;
-					}
-					//std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
-					return res;//Safety Violated. Returning sym_state list passed so far.
 
-				//continue;//do not push into the waitingList
-				}
-				//-----
+//				//--Arch-Competition: Implemented for Motorcade_5 Benchmark
+//				if (polys.size()!=0){	//Guard set intersected
+//					#pragma omp critical
+//					{
+//						//std::cout<<"polys.size() = "<<polys.size()<<"\n UnSafe Location Reached!!!\n";
+//						unsafe=true;
+//					}
+//					//std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
+//					return res;//Safety Violated. Returning sym_state list passed so far.
+//
+//				//continue;//do not push into the waitingList
+//				}
+//				//-----
 				continue;//Guard set NOT intersected but these location not pushed in the waitingList
 			}
 
-			//--Arch-Competition: Implemented for Fisher_Star Benchmark
-			/*Forbidden:: loc(process1)==s4 & loc(sv)==s3 & loc(process2)==s4 & loc(process3)==s4
-			 * Location this "s4_s4_s4_s3" should not reach (most probably Hyst-XSpeed translation)
-			 */
-			if (locName.compare("s4_s4_s4_s3") == 0){
-				std::cout<<"\nREACHED FORBIDDEN Location s4_s4_s4_s3!!!\n"<<std::endl;
-				exit(0);
-			}/*else{
-				std::cout<<"NOT Reached Forbidden Location s4_s4_s4_s3!!!"<<std::endl;
-			}*/
-			//-------
+//			//--Arch-Competition: Implemented for Fisher_Star Benchmark
+//			//Forbidden:: loc(process1)==s4 & loc(sv)==s3 & loc(process2)==s4 & loc(process3)==s4
+//			// Location this "s4_s4_s4_s3" should not reach (most probably Hyst-XSpeed translation)
+//			if (locName.compare("s4_s4_s4_s3") == 0){
+//				std::cout<<"\nREACHED FORBIDDEN Location s4_s4_s4_s3!!!\n"<<std::endl;
+//				exit(0);
+//			}
+//			//-------
 			current_assignment = (*t)->getAssignT();
 			// *** interesected_polyhedra included with invariant_directions also ******
 		//cout<<"size = "<< intersected_polyhedra.size();
@@ -394,11 +398,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				}else
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
-				int is_ContainmentCheckRequired = 0;	//1 will Make it Slow; 0 will skip so Fast
-				/*if (clusted)
-					is_ContainmentCheckRequired = 0;
-				else
-					is_ContainmentCheckRequired = 1;*/
+				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
 
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
