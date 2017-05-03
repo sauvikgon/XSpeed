@@ -68,10 +68,10 @@ void getCountTotal(std::vector<LoadBalanceData>& LoadBalanceDS,
 
 //Running time complexity is order of the "number of symbolic states per breadth-level
 void search_SymState_dirsX0Index(unsigned int i,
-		std::vector<LoadBalanceData>& LoadBalanceDS, int& SymStateIndex,
+		std::vector<LoadBalanceData>& LoadBalanceDS,unsigned int& SymStateIndex,
 		unsigned int& dirsIndex) {
 	unsigned int tot = 0;
-	for (int id = 0; id < LoadBalanceDS.size(); id++) {
+	for (unsigned int id = 0; id < LoadBalanceDS.size(); id++) {
 		unsigned int siz = LoadBalanceDS[id].List_dir_X0.size1(); //returns the number
 	//	cout<<"siz = "<<siz<<"\t";
 		tot = tot + siz;
@@ -93,7 +93,7 @@ void search_SymState_dirsX0Index(unsigned int i,
 
 //Running time complexity is order of the "number of symbolic states per breadth-level
 void search_sfmIndex_colIndex(unsigned int i,
-		std::vector<LoadBalanceData_PostD>& LD_post_D, int& sfmIndex,
+		std::vector<LoadBalanceData_PostD>& LD_post_D, unsigned int& sfmIndex,
 		unsigned int& colIndex) {
 	unsigned int tot = 0;
 	for (int id = 0; id < LD_post_D.size(); id++) {
@@ -111,10 +111,10 @@ void search_sfmIndex_colIndex(unsigned int i,
 
 
 void search_SymState_dirsUIndex(unsigned int i,
-		std::vector<LoadBalanceData>& LoadBalanceDS, int& SymStateIndex,
+		std::vector<LoadBalanceData>& LoadBalanceDS,unsigned int& SymStateIndex,
 		unsigned int& dirsIndex) {
 	unsigned int tot = 0;
-	for (int id = 0; id < LoadBalanceDS.size(); id++) {
+	for (unsigned int id = 0; id < LoadBalanceDS.size(); id++) {
 		unsigned int siz = LoadBalanceDS[id].List_dir_U.size1(); //returns the number
 		tot = tot + siz;
 		if (i < tot) { //Note <= is incorrect as ==tot will fall in the next symbolic_state, due to 0-indexing

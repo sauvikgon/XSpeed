@@ -10,7 +10,7 @@
 #include <omp.h>
 #include "Utilities/testPolytopePlotting.h"
 #include "boost/timer/timer.hpp"
-#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
+//#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
@@ -399,7 +399,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
 
 
 	if (!aggregation){//OFF for each Omega that intersected it is push into the polys list. Expensive Operation
-		std::cout<<"Aggregation is Switched-OFF\n";
+		//std::cout<<"Aggregation is Switched-OFF\n";
 		for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end(); range_it++) {
 			unsigned int start = (*range_it).first, end=(*range_it).second;
 			for (int i = start; i <= end; i++) {//push in polys every polytope/Omega from start to end
@@ -458,7 +458,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
  * Use PPL library to implement convex_hull of the flowpipe-guard intersection
  */
 
-std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type_choosen){
+/*std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type_choosen){
 
 	// debug
 //	if(guard->getIsUniverse()){
@@ -487,9 +487,6 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_con
 
 		std::cout << "START=" << start << ", END=" << end << std::endl;
 
-		/*
-		 * Starting poly
-		 */
 		polytope::ptr start_poly;
 		start_poly = this->getPolytope(start);
 		if (this->getInvariantDirections().size1() != 0){
@@ -542,7 +539,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_con
 
 	//cout<<"polys.size = "<<polys.size()<<"\n";
 	return polys;
-}
+}*/
 
 
 

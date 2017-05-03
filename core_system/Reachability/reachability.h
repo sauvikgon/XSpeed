@@ -29,6 +29,8 @@
 #include "Utilities/testPolytopePlotting.h"
 #include "Utilities/Post_Assignment.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp> //string comparison
+
 #include "core_system/Reachability/reachabilitySequential.h"
 #include "core_system/Reachability/reachParallelExplore.h"
 #include "core_system/Reachability/reachabilityParallel_Process.h"
@@ -47,7 +49,7 @@
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
 
-#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
+//#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
 
 //***************** End Sequential BFS *****************************
 
@@ -55,12 +57,15 @@ using namespace std;
 
 class reachability {
 public:
-	void setReachParameter(hybrid_automata& H, std::list<initial_state::ptr>& I,
+	/*void setReachParameter(hybrid_automata& H, std::list<initial_state::ptr>& I,
 			ReachabilityParameters& reach_parameters, int bound,
 			unsigned int Algorithm_Type, unsigned int Total_Partition,
 			int lp_solver_type_choosen, unsigned int number_of_streams,
 			int Solver_GLPK_Gurobi_GPU,
-			std::pair<int, polytope::ptr> forbidden_set);
+			std::pair<int, polytope::ptr> forbidden_set);*/
+
+	void setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
+			int lp_solver_type, int solver_GLPK_Gurobi_for_GPU, std::pair<int, polytope::ptr> forbidden, userOptions& user_options);
 
 	//bound is the maximum number of transitions or jumps permitted.
 	//reach_parameters includes the different parameters needed in the computation of reachability.
@@ -96,7 +101,7 @@ public:
  * Otherwise returns False
  * This interface is NOT threadSafe but it has exact computed result AND SEQUENTIAL algorithm has no issue with threadSafety
  */
-	bool isContained(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+//	bool isContained(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
 	/*
 	 * Uses the templated (an over-approximated) newShiftedPolytope to check for containment in the Omegas of the flowpipe
@@ -104,11 +109,16 @@ public:
 	 */
 	bool templated_isContained(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
+	const std::string& getSetAggregation() const;
+	void setSetAggregation(const std::string& setAggregation);
+
 private:
 	//initial_state::ptr I;
 	unsigned int Algorithm_Type;
 	unsigned int Total_Partition;
 	unsigned int number_of_streams;
+
+	std::string set_aggregation; // The aggregation options thull(default), none
 
 	void parallelReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);

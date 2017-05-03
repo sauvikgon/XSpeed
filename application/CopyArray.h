@@ -33,10 +33,10 @@
 inline std::vector<double> CopyVector(std::vector<double> src) {
 
 	std::vector<double> dest;
-	int length = src.size();
+	unsigned int length = src.size();
 
 	dest.resize(length);
-	for (int i = 0; i < length; i++)
+	for (unsigned int i = 0; i < length; i++)
 		dest[i] = src[i];
 	return dest;
 }

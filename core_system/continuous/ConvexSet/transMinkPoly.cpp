@@ -21,7 +21,11 @@ transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU,
 transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU, std::vector<double> c,
 			math::matrix<double> myTRANS, math::matrix<double> myB_TRANS, double mytime, double mybeta){
 	X0 = myX0;
-	U = myU;
+	if (myU==NULL)
+		U=polytope::ptr(new polytope(true));
+	else
+		U = myU;
+
 	TRANS = myTRANS;
 	B_TRANS = myB_TRANS;
 	time = mytime;

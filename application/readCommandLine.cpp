@@ -6,6 +6,7 @@
  */
 
 #include <application/readCommandLine.h>
+
 namespace po = boost::program_options;
 
 int readCommandLine(int argc, char *argv[], userOptions& user_options,
@@ -53,6 +54,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("time-horizon", po::value<double>(), "Set the local time horizon of flowpipe computation.")
 	("time-step", po::value<double>(), "Set the sampling time of flowpipe computation.")
 	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking (0 for only postC)")
+	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - none : consider each convex set as successor sets for the next depth")
 
 	("algo,a",po::value<int>()->default_value(1), "Set the algorithm\n"
 			"1/seq-SF -- Sequential Algorithm (both PostC and PostD are sequential) (Set to default)\n"
@@ -94,9 +96,9 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				input.append(argv[i]);	//-F
 				input.append(" ");
 				i++; //move next arg ie options for -F
-				input.append("\"");
+				input.append("\""); //starting quote
 				input.append(argv[i]);
-				input.append("\" ");
+				input.append("\" "); //ending quote
 			}else{
 				input.append(argv[i]);
 				input.append(" ");
@@ -191,7 +193,8 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			system(st); //calling hyst interface to generate the XSpeed model file
 			// Amit's machine
 			system("g++ -c -I./include/ user_model.cpp -o user_model.o");
-			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
+			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
+			//Removed for distribution without PPL library -lppl -lgmp
 
 			// My machine
 //			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
@@ -247,6 +250,19 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			std::cout << "Missing depth option\n";
 			return 0;
 		}
+
+
+		if (vm.count("aggregate")) { //Compulsory Options but set to thull by default
+			user_options.setSetAggregation((vm["aggregate"].as<std::string>()));
+			if (boost::iequals(user_options.getSetAggregation(),"none")==false) {
+				if (boost::iequals(user_options.getSetAggregation(),"thull")==false){
+					std::cout << "\nError: Invalid aggregation option specified\n";
+					return 0;
+				}
+			}
+		}
+
+
 		if ((user_options.get_model() == 3 || user_options.get_model() == 4) && user_options.get_bfs_level() != 0){
 			std::cout << "Invalid depth. Only depth 0 permitted \n";
 			exit(0);

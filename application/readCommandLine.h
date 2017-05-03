@@ -9,12 +9,11 @@
 
 // *********** Command Line Boost Program Options ********
 #include <boost/program_options/config.hpp>
-
 #include "boost/program_options.hpp"
 #include <boost/config.hpp>
 #include <boost/program_options/detail/config_file.hpp>
-
 #include <boost/program_options/parsers.hpp>
+#include <boost/algorithm/string.hpp> //string comparison
 // *********** Command Line Boost Program Options ********
 #include "plotter_utility.h"
 // *********** User Selected Model ***************

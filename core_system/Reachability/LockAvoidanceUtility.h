@@ -32,20 +32,20 @@ void getCountTotal(std::vector<LoadBalanceData>& LoadBalanceDS,
 //Given the index i, returns "the index of the Symbolic State" and
 // "the index of the direction for listDir_X0 within the symbolic state" as a reference variable
 void search_SymState_dirsX0Index(unsigned int i,
-		std::vector<LoadBalanceData>& LoadBalanceDS, int& SymStateIndex,
+		std::vector<LoadBalanceData>& LoadBalanceDS, unsigned int& SymStateIndex,
 		unsigned int& dirsIndex);
 
 
 //Given the index i, returns "the index of the SFM" and
 // "the index of the SFM's column within each SFM" as a reference variable
 void search_sfmIndex_colIndex(unsigned int i,
-		std::vector<LoadBalanceData_PostD>& LD_post_D, int& sfmIndex,
+		std::vector<LoadBalanceData_PostD>& LD_post_D, unsigned int& sfmIndex,
 		unsigned int& colIndex);
 
 //Given the index i, returns "the index of the Symbolic State" and
 // "the index of the direction for listDir_U within the symbolic state" as a reference variable
 void search_SymState_dirsUIndex(unsigned int i,
-		std::vector<LoadBalanceData>& LoadBalanceDS, int& SymStateIndex,
+		std::vector<LoadBalanceData>& LoadBalanceDS,unsigned int& SymStateIndex,
 		unsigned int& dirsIndex);
 
 #endif /* LOCKAVOIDANCEUTILITY_H_ */

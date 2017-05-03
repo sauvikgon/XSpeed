@@ -72,6 +72,8 @@ struct AsyncBFSData{
 	std::pair<int, polytope::ptr> forbidden_set;
 	int Solver_GLPK_Gurobi_GPU;
 
+	std::string set_aggregation; // The aggregation options thull(default), none
+
 };
 
 #endif /* REACHDATASTRUCTURE_H_ */

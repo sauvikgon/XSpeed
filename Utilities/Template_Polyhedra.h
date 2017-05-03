@@ -91,7 +91,7 @@ public:
 	/*
 	 * using PPL library returns a list of polytopes with each polytopes as the convex_hull approximation of the intersected region of guard with the flowpipe
 	 */
-	std::list<polytope::ptr> flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type_choosen);
+	//std::list<polytope::ptr> flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type_choosen);
 
 	/*
 	 * From the calling TEMPLATE_POLYHEDRA a SINGLE POLYTOPE is returned.

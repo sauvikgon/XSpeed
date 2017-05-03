@@ -58,7 +58,7 @@ const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIterat
 		//std::cout<<"\n eachDirection = "<<eachDirection<<"\n";
 		//std::cout<<"\n Inner threadID = "<<omp_get_thread_num()<<"\n";
 		//std::cout<<"\n Inner thread omp_get_nested() = "<<omp_get_nested()<<"\n";
-		double res1, result, term2, result1, term1;
+		double res1, result, term2=0.0, result1, term1;
 		std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 
 		lp_solver s_per_thread_I(type), s_per_thread_U(type), s_per_thread_inv(
@@ -70,9 +70,8 @@ const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIterat
 					ReachParameters.X0->getInEqualitySign());
 		}
 		s_per_thread_U.setMin_Or_Max(2);
-		if (SystemDynamics.U->getIsEmpty()) { //empty polytope
-			//Polytope is empty so no glpk object constraints to be set
-		} else {
+		if (SystemDynamics.U != NULL && !SystemDynamics.U->getIsEmpty()) { //empty polytope
+
 			s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
 					SystemDynamics.U->getColumnVector(),
 					SystemDynamics.U->getInEqualitySign());
@@ -272,16 +271,21 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 		y_matrix.transpose(y_trans);
 //(phi_trans . X0 + y_trans . U)
 //		std::cout << "\ncomputing initial object\n";
+		polytope::ptr u;
+		if (SystemDynamics.U==NULL)
+			u=polytope::ptr(new polytope(true));
+		else
+			u = SystemDynamics.U;
 
 		supportFunctionProvider::ptr Initial;
 		if (!SystemDynamics.isEmptyC){
-			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,SystemDynamics.C ,phi_trans, y_trans, 1, 0));
+			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, u,SystemDynamics.C ,phi_trans, y_trans, 1, 0));
 		}else{
-			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,phi_trans, y_trans, 1, 0));
+			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, u,phi_trans, y_trans, 1, 0));
 		}
 
 
-//		cout<<"Done TransMinkPoly \n";
+//		cout<<"Done TransMinkPoly invariantExists="<<invariantExists<<std::endl;
 		//Calling Sequential algorithm here and later can mix with parallel for direction
 		if (Algorithm_Type == TIME_SLICE) {
 			//std::cout << "\nFrom Parallel Only Iterations BEFORE\n";

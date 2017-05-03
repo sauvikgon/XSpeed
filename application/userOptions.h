@@ -17,6 +17,9 @@ class userOptions {
 	std::string forbidden_state; // the string of forbidden state description
 	std::string out_filename; // The output filename
 	std::string output_format_type; // the string of output format description
+
+	std::string set_aggregation; // The aggregation options thull(default), none
+
 	unsigned int output_var_X; // first  dimension for plotting
 	unsigned int output_var_Y; // second dimension for plotting
 	unsigned int output_var_Z; // third dimension for plotting
@@ -78,6 +81,8 @@ public:
 	void setOutputFormatType(const std::string& outputFormatType);
 	const std::string& getOutFilename() const;
 	void setOutFilename(const std::string& outFilename);
+	const std::string& getSetAggregation() const;
+	void setSetAggregation(const std::string& setAggregation);
 };
 
 #endif /* USEROPTIONS_H_ */

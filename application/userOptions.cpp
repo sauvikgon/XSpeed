@@ -169,6 +169,14 @@ const std::string& userOptions::getOutFilename() const {
 	return out_filename;
 }
 
+const std::string& userOptions::getSetAggregation() const {
+	return set_aggregation;
+}
+
+void userOptions::setSetAggregation(const std::string& setAggregation) {
+	set_aggregation = setAggregation;
+}
+
 void userOptions::setOutFilename(const std::string& outFilename) {
 	out_filename = outFilename;
 }

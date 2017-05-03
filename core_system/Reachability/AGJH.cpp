@@ -283,6 +283,13 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			bool clusted=false;
 			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
 			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
+			if (boost::iequals(this->getSetAggregation(),"thull")){
+				aggregation=true;
+				//std::cout<<"set-aggregation=thull\n";
+			} else if (boost::iequals(this->getSetAggregation(),"none")){
+				aggregation=false;
+				//std::cout<<"set-aggregation=none\n";
+			}
 
 			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
 			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);

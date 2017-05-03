@@ -381,7 +381,7 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 	if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 		B_trans = ReachParameters.B_trans;
 	// *******************************************************************************************************************
-	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
+	//std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
 	int type = lp_solver_type_choosen;
 
 
@@ -394,7 +394,7 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 
 	double term3a_minus, res2_minus;
 
-
+//std::cout<<"before loop: ";
 // Iteration = 0 for eachInvariantDirection
 	for (int invDir = 0; invDir < numberOfInvariants; invDir++) {
 		AllInvData[invDir].r_minus.resize(dimension);
@@ -461,7 +461,7 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 		/*if (invDir==0)
 			std::cout<<"TempOmega = "<< AllInvData[invDir].TempOmega_min<<"\t";*/
 	}
-
+	//std::cout<<"After loop: ";
 //  **************  Omega Function Over  ********************
 // ******************************************* Negative Direction Ends *******************************************
 	loopIteration++;	//needed for returning 1 for Omega_0

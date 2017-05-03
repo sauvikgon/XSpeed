@@ -267,7 +267,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 				ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
 
 	s_per_thread_U.setMin_Or_Max(2);
-	if (!SystemDynamics.U->getIsEmpty()) { //empty polytope
+	if (SystemDynamics.U != NULL && !SystemDynamics.U->getIsEmpty()) { //empty polytope
 		s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
 				SystemDynamics.U->getColumnVector(), SystemDynamics.U->getInEqualitySign());
 	}
@@ -305,7 +305,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 			B_trans.mult_vector(rVariable, Btrans_dir);
 
-		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
+		if (SystemDynamics.U != NULL && !SystemDynamics.U->getIsEmpty())
 			term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = (double) support_unitball_infnorm(rVariable);

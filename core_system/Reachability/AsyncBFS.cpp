@@ -25,7 +25,7 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 	reachData.H = H;
 	reachData.reach_parameters = reach_parameters;
 	reachData.lp_solver_type_choosen = lp_solver_type_choosen;
-
+	reachData.set_aggregation = this->getSetAggregation();
 	// ****************** End of Duplicating the Data *************
 // ******** Required Results *****************
 	int level=0;
@@ -225,6 +225,13 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 
 			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
 			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
+			if (boost::iequals(myData.set_aggregation,"thull")){
+				aggregation=true;
+				//std::cout<<"set-aggregation=thull\n";
+			} else if (boost::iequals(myData.set_aggregation,"none")){
+				aggregation=false;
+				//std::cout<<"set-aggregation=none\n";
+			}
 
 
 			std::list<polytope::ptr> polys;
@@ -382,6 +389,8 @@ return contained;
 /*
  * This is NOT ThreadSafe interface as it uses PPL library however it computes with exact shifted polytope
  */
+/*
+
 bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
 
 	bool contained = false;
@@ -428,3 +437,4 @@ bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> 
 	}
 return contained;
 }
+*/

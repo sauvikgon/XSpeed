@@ -81,15 +81,16 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 	unsigned int total_list_X0 = list_X0.size1(); //total number of directions for X0 is [ numDirs * (iters + 1) ]
 	unsigned int total_list_U = list_U.size1(); //total number of directions for U is [ numDirs * iters ]
 
-	int cores;
+	/*int cores;
 	if (numVectors >= numCoresAvail)
 		cores = numVectors;
 	else
-		cores = numCoresAvail;
+		cores = numCoresAvail;*/
 
 //	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
 //#pragma omp parallel for num_threads(cores)
-	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
+	//std::cout<<"Before Loop DirCalled";
+	for (unsigned int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 		unsigned int index_X, indexU; //making the index suitable for parallelizing
 		if (!U_empty) {
 			indexU = eachDirection * newiters;
@@ -179,7 +180,7 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 		} //end of iteration for each direction
 		  //std::cout<<"Over eachDirection = "<< eachDirection<<std::endl;
 	} //end of all directions
-	  //std::cout<<"what is the Problem?"<<std::endl;
+	//  std::cout<<"what is the Problem?"<<std::endl;
 	  //std::cout<<std::endl;
 	  //return Direction_List;
 }

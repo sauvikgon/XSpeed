@@ -9,22 +9,19 @@
 using namespace std;
 
 
-void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i,
-		ReachabilityParameters& reach_param, int bound_limit,
-		unsigned int algorithm_type, unsigned int total_partition,
-		int lp_solver_type, unsigned int streams_size,
-		int solver_GLPK_Gurobi_for_GPU,
-		std::pair<int, polytope::ptr> forbidden) {
+void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
+		int lp_solver_type, int solver_GLPK_Gurobi_for_GPU, std::pair<int, polytope::ptr> forbidden, userOptions& user_options) {
 	H = h;
 	I = i;
 	reach_parameters = reach_param;
-	bound = bound_limit;	//bfs_level
-	Algorithm_Type = algorithm_type;	//Important parameter to decide to select an algorithm to execute
-	Total_Partition = total_partition; //slice size
+	bound = user_options.get_bfs_level();	//bfs_level
+	Algorithm_Type = user_options.get_algorithm();	//Important parameter to decide to select an algorithm to execute
+	Total_Partition = user_options.getTotalSliceSize(); //slice size
 	lp_solver_type_choosen = lp_solver_type;
-	number_of_streams = streams_size;
+	number_of_streams = user_options.getStreamSize();
 	Solver_GLPK_Gurobi_GPU = solver_GLPK_Gurobi_for_GPU; //todo:: used for comparing GLPK solver vs GPU. Can be removed
 	forbidden_set = forbidden;
+	set_aggregation = user_options.getSetAggregation();
 }
 
 
@@ -273,6 +270,14 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 				int cluster = 100; // Sets the percentage of clustering, 10 is for 10 percent. 100 is a single cluster, 0 no clustering indicate invididual omegas
 				bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
+				if (boost::iequals(this->getSetAggregation(),"thull")){
+					aggregation=true;
+					//std::cout<<"set-aggregation=thull\n";
+				} else if (boost::iequals(this->getSetAggregation(),"none")){
+					aggregation=false;
+					//std::cout<<"set-aggregation=none\n";
+				}
+
 				//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
 
 				if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty()){	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
@@ -284,9 +289,9 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					 * into the polys. Guard intersection is done in the following steps below for each of these Omegas
 					 */
 
-					if (!aggregation){//ON use thull //OFF is expensive: for each Omega a new symbolic state is pushed in the Wlist
+					/*if (!aggregation){//ON use thull //OFF is expensive: for each Omega a new symbolic state is pushed in the Wlist
 						std::cout<<"Aggregation is OFF: going to create many symbolic states\n";
-					}
+					}*/
 					//std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
 					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);//Todo::debug PPL
 					polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
@@ -451,7 +456,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return_Time1 = wall_clock1 / (double) 1000;
 		std::cout << "\nFlowpipe:Time:Wall(Seconds) = " << return_Time1 << std::endl;*/
-		//	std::cout << "Parallel Done\n";
+	//		std::cout << "Parallel Done\n";
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
 
@@ -1383,7 +1388,7 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 	int dimension = LoadBalanceDS[0].List_dir_X0.size2();
 	unsigned int countTotal_X = 0, countTotal_U = 0;
 	//cout <<"erro 1\n";
-	for (int i = 0; i < LoadBalanceDS.size(); i++) { //for each symbolic-states
+	for (unsigned int i = 0; i < LoadBalanceDS.size(); i++) { //for each symbolic-states
 		countTotal_X = countTotal_X + LoadBalanceDS[i].List_dir_X0.size1();
 	//	cout<<"   = "<<LoadBalanceDS[i].List_dir_X0.size1()<<std::endl;
 		countTotal_U = countTotal_U + LoadBalanceDS[i].List_dir_U.size1();
@@ -1399,14 +1404,14 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 	myfile.open("./sf_X.txt");
 	myfile2.open("./dir_X.txt");*/
 //#pragma omp parallel for
-	for (int i = 0; i < countTotal_X; i++) {
-		int index;
+	for (unsigned int i = 0; i < countTotal_X; i++) {
+		unsigned int index;
 		unsigned int j;
 		//cout <<"erro 3\n";
 		search_SymState_dirsX0Index(i, LoadBalanceDS, index, j);
 		//	cout <<"erro index = "<<index <<"  j = "<<j<<"\n";
 		std::vector<double> dirs(dimension);
-		for (int ind = 0; ind < dimension; ind++) {
+		for (unsigned int ind = 0; ind < dimension; ind++) {
 			dirs[ind] = LoadBalanceDS[index].List_dir_X0(j, ind);
 		//	myfile2<<dirs[ind]<< "\t";
 		}
@@ -1431,8 +1436,8 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 	if (!U_empty) {
 		cout<<"polytope U is NOT empty!!!!\n";
 #pragma omp parallel for
-		for (int i = 0; i < countTotal_U; i++) {
-			int index;
+		for (unsigned int i = 0; i < countTotal_U; i++) {
+			unsigned int index;
 			unsigned int j;
 			search_SymState_dirsUIndex(i, LoadBalanceDS, index, j);
 			std::vector<double> dirs(dimension);
@@ -1444,6 +1449,13 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 	}
 }
 
+const std::string& reachability::getSetAggregation() const {
+	return set_aggregation;
+}
+
+void reachability::setSetAggregation(const std::string& setAggregation) {
+	set_aggregation = setAggregation;
+}
 
 double reachability::LPSolver(polytope::ptr poly, std::vector<double> dirs) {
 	double res;
@@ -1494,7 +1506,7 @@ double reachability::boxLPSolver(polytope::ptr poly, std::vector<double> dir) {
 /*
  * This is NOT thread-safe but uses PPL library with exact computation
  */
-bool reachability::isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
+/*bool reachability::isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
 
 	bool contained = false;
 	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
@@ -1539,7 +1551,7 @@ bool reachability::isContained(int locID, polytope::ptr poly, std::list<symbolic
 		}
 	}
 	return contained;
-}
+}*/
 
 
 /*
