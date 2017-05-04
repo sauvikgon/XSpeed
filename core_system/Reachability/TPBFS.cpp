@@ -438,8 +438,8 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		} else { //
 			index_X0 = eachDirection * LoadBalanceDS.newIteration + eachDirection; //only X0(list_X0) has 2 directions for first-iteration
 		}
-		//bool U_empty = LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty();
-		bool U_empty;// = LoadBalanceDS.U->getIsEmpty();
+		bool U_empty = LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty();
+		//bool U_empty;// = LoadBalanceDS.U->getIsEmpty();
 		if (LoadBalanceDS.U->getIsEmpty() || LoadBalanceDS.U==NULL)
 			U_empty = true;
 		if (!U_empty) {
@@ -698,11 +698,9 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 //	std::cout<<"Done on X!!!!\n";
 	//bool U_empty;
 	//U_empty = LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();//assuming all symbolic states has same setup for polytope U
-	/*if (LoadBalanceDS[0].current_location->getSystem_Dynamics().U != NULL && !LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty()) {
-	//if (LoadBalanceDS[0].current_location->getSystem_Dynamics().U == NULL && !LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty()) {
-			cout<<"polytope U is Empty!!!!\n";
-	}else {*/
-	if (LoadBalanceDS[0].U != NULL && !(LoadBalanceDS[0].U->getIsEmpty()) ){
+
+//	if (LoadBalanceDS[0].U != NULL && !(LoadBalanceDS[0].U->getIsEmpty()) ){
+	if (LoadBalanceDS[0].current_location->getSystem_Dynamics().U != NULL && !(LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty())) {
 // ************* Chunk_approach for polytope U ******************************
 	//	cout<<"polytope U is NOT empty!!!!\n";
 		if (countTotal_X <= numCores)

@@ -18,6 +18,7 @@
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
 #include "application/userOptions.h"
+#include "core_system/HybridAutomata/Location.h"
 
 
 //void user_model(hybrid_automata& Hybrid_Automata,initial_state::ptr& init_state,ReachabilityParameters& reach_parameters);
