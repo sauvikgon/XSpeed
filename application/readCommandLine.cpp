@@ -251,7 +251,6 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			return 0;
 		}
 
-
 		if (vm.count("aggregate")) { //Compulsory Options but set to thull by default
 			user_options.setSetAggregation((vm["aggregate"].as<std::string>()));
 			if (boost::iequals(user_options.getSetAggregation(),"none")==false) {

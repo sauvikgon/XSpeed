@@ -388,6 +388,21 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 				}
 				deriv[p.seq_no*dim+j] += I_dist_grad_j;
 			}
+			// derivative wrt dwell time
+			std::vector<double> Axplusb;
+
+			A.mult_vector(v,Axplusb);
+			for (unsigned int j = 0; j < dim; j++) {
+				Axplusb[j] = Axplusb[j] + d.C[j];
+			}
+
+			double dist_gradt = 0;
+			for(unsigned int j=0;j<dim;j++)
+			{
+				dist_gradt +=  I_dist_grad[j] * Axplusb[j];
+			}
+
+			deriv[N*dim + p.seq_no] += dist_gradt;
 		}
 	}
 #endif
@@ -407,14 +422,15 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		}
 		deriv[(N-1)*dim+j] += dist_gradx_j;
 	}
-//	// add the cost gradient w.r.t last traj segment's dwell time
+
+	//	add the cost gradient w.r.t last traj segment's dwell time
+
 	double dist_gradt = 0;
 	for(unsigned int j=0;j<dim;j++)
 	{
 		dist_gradt +=  badpoly_dist_grad[j] * Axplusb[j];
 	}
-
-	deriv[N*dim + N-1] += dist_gradt;
+	deriv[N*dim + N - 1] += dist_gradt;
 
 	// Analytic gradients
 	if(!grad.empty())

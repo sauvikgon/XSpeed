@@ -255,7 +255,7 @@ bool aggregation=true;//default is ON
 			if(polys.size()>1)
 				P = get_template_hull(S->getContinuousSetptr(),0,S->getContinuousSetptr()->getTotalIterations()-1); // 100% clustering
 			else
-				P=polys.front();
+				P=  polys.front();
 
 			P = P->GetPolytope_Intersection(bad_poly);
 		}
@@ -318,49 +318,6 @@ bool aggregation=true;//default is ON
 
 
 	std::cout << "Computed initial dwell times and added dwell time constraints\n";
-
-//	Constraints over C_i added to the optimization problem
-
-//	polytope::ptr C[N];
-//	math::matrix<double> A;
-//	std::vector<double> b;
-//
-
-//	polytope::ptr Inv;
-//	unsigned int size=0;
-//	for(unsigned int i=0;i<N;i++){
-//		C[i] = get_symbolic_state(i)->getInitialPolytope();
-//		size += C[i]->getCoeffMatrix().size1();
-//	}
-//	polyConstraints I[size];
-//	unsigned int index = 0;
-//
-//	for (unsigned int i = 0; i < N; i++) {
-//		A = C[i]->getCoeffMatrix();
-//		b = C[i]->getColumnVector();
-//
-//// 		We assume that the polytope is expressed as Ax<=b
-//
-//		assert(C[i]->getInEqualitySign() == 1);
-//		assert(A.size2() == dim);
-//		assert(b.size() == A.size1());
-//		assert(size > index);
-//
-//		for (unsigned int j = 0; j < A.size1(); j++) {
-//			I[index].sstate_index = i;
-//			I[index].a.resize(A.size2());
-//
-//			for(unsigned int k=0;k<dim;k++){
-//				I[index].a[k] = A(j,k);
-//			}
-//			I[index].b = b[j];
-//			myopt.add_inequality_constraint(myconstraint, &I[index], 1e-8);
-//			index++;
-//		}
-//	}
-//	assert(index==size);
-//	std::cout << "added constraints on starting point of each trajectory segment.\n";
-
 
 	double minf;
 	try {
@@ -840,21 +797,17 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 		val_res = cexample->valid(pt);
 
 		if(!val_res){
-			std::cout << "FAILED VALIDATION\n";
-			break;
 			if(NLP_HA_algo_flag){
 				std::cout << "Splice Trace NOT VALID\n";
 				return cexample = concreteCE::ptr(new concreteCE());
 			}
-//			refinements.push_back(pt);
-//			ref_count++;
+			refinements.push_back(pt);
+			ref_count++;
 		}
 		else{
 			std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
 			return cexample;
 		}
-		//debug
-//		break;
 	}while(!val_res && ref_count< max_refinements);
 
 //	throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");

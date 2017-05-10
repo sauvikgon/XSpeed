@@ -249,8 +249,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		//  ******************************** Safety Verification section Ends********************************
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 
-	//	std::cout<<"\nreach_region->getTotalIterations() = " <<reach_region->getTotalIterations();
-
 		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) {
 			//computed reach_region is empty and optimize transition BreadthLevel-wise
 			for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
@@ -1070,8 +1068,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 		//cout << "\nnumber_times = " << number_times << "  Bound = " << bound << "\n";
 		// ************************* BFS Ends *************************************
 	} //end of while loop checking waiting_list != empty
-	cout
-			<< "\n ***************************************************************************\n";
+	cout << "\n ***************************************************************************\n";
 	cout << "\nMaximum Iterations Completed = " << iter_max << "\n";
 	cout
 			<< "\n ***************************************************************************\n";
@@ -1335,11 +1332,11 @@ void reachability::computeBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS) 
 		lp_solver lp(this->lp_solver_type_choosen), lp_U(
 				this->lp_solver_type_choosen);
 		lp.setMin_Or_Max(2); //2 for Maximization
-		//cout << "Testing A1\n";
+
 		lp.setConstraints(LoadBalanceDS[i].reach_param.X0->getCoeffMatrix(),
 				LoadBalanceDS[i].reach_param.X0->getColumnVector(),
 				LoadBalanceDS[i].reach_param.X0->getInEqualitySign());
-		//cout << "Testing A2\n";
+
 		lp_U.setMin_Or_Max(2);
 		bool U_empty;
 		U_empty =
@@ -1372,9 +1369,9 @@ void reachability::computeBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS) 
 			for (int index = 0; index < dimension; index++) {
 				dirs[index] = LoadBalanceDS[i].List_dir_X0(j, index);
 			}
-			//cout << "Testing A4\n";
+
 			LoadBalanceDS[i].sf_X0[j] = lp.Compute_LLP(dirs);
-			//cout << "Testing A5\n";
+
 			// ******DotProduction and Support Function of UnitBall  *******
 			LoadBalanceDS[i].sf_dotProduct[j] = dot_product(LoadBalanceDS[i].current_location->getSystem_Dynamics().C, dirs);
 			LoadBalanceDS[i].sf_UnitBall[j] = support_unitball_infnorm(dirs);

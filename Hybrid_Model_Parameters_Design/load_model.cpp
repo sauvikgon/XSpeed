@@ -95,9 +95,10 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
 		//setplatoon(ha, init_state, reach_parameters);
-		setFisher_Star(ha,init_state,reach_parameters);		std::cout<<"Model Fisher Model Successful\n";
+		//setFisher_Star(ha,init_state,reach_parameters);		std::cout<<"Model Fisher Model Successful\n";
 		//setMotorcar(ha,init_state,reach_parameters);		std::cout<<"Motorcade-5 Model parsing Successful!!!\n";
 		//std::cout <<"Test Model Assigned"<<std::endl;
+
 	}
 	unsigned int dims=0;
 	for (std::list<initial_state::ptr>::iterator it=init_state.begin();it!=init_state.end();it++){
