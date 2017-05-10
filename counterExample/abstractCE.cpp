@@ -100,6 +100,31 @@ symbolic_states::const_ptr abstractCE::get_symbolic_state(unsigned int i) const 
 	return *it;
 }
 
+bool abstractCE::filter(std::vector<unsigned int> template_seq){
+
+	// length must match the template sequence length
+	if(template_seq.size()==0)
+		return true;
+
+	if(template_seq.size()!=this->length)
+		return false;
+
+	unsigned int locid;
+	std::list<symbolic_states::ptr>::iterator iter = this->sym_states.begin();
+
+	for(unsigned int i=0;i<template_seq.size();i++){
+		symbolic_states::ptr symb_state = *iter;
+		//ensure that the symbolic state has just one discrete location
+		assert(symb_state->getDiscreteSet().getDiscreteElements().size()==1);
+
+		locid = *(symb_state->getDiscreteSet().getDiscreteElements().begin());
+		if(template_seq[i] != locid){
+			return false;
+		}
+		iter++;
+	}
+	return true;
+}
 //void abstractCE::plot(unsigned int i, unsigned int j) {
 //	/** Plotting the abstract counter example in a tracefile */
 //	std::ofstream tracefile;

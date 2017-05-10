@@ -199,7 +199,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 			// My machine
 			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
-			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chdrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
+			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
 
 			std::cout<<"Model Parsed Successfully!! Calling XSpeed"<<std::endl;
 

@@ -126,6 +126,14 @@ public:
 	 */
 //	void plot(unsigned int i, unsigned int j);
 
+	/**
+	 * Filter function to filter abstract CEs not the specified one in the parameter.
+	 * The specified abstract CE is given by the list of location ids (template_sequence)
+	 * An empty template will not filter any ce
+	 */
+	bool filter(std::vector<unsigned int> template_sequence);
+
+
 private:
 	/**
 	 * The first symbolic state is the initial symbolic state and the last one
