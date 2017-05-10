@@ -87,8 +87,10 @@ public:
 	 * Validates the trajectory for invariant satisfaction.
 	 * Returns the violating CE if non-valid, otherwise returns the
 	 * violating_CE with the flag element of the object as true.
+	 * The tolerance mentions than violating the invariant is tolerated
+	 * when error < tol.
 	 */
-	bool valid(struct refinement_point&);
+	bool valid(struct refinement_point&, double tolerance);
 
 	concreteCE();
 	virtual ~concreteCE();

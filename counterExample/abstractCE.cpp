@@ -45,6 +45,7 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 	std::vector<double> y;
 //	If trace validation is enabled.
 //	y = s->bounded_simulation(x0, time, Inv); // validated trace generation
+
 	distance = 0;
 	for(unsigned int i=0;i<grad.size();i++){
 		grad[i] = 0;
@@ -794,7 +795,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 		if(cexample->is_empty())
 			return cexample;
 
-		val_res = cexample->valid(pt);
+		val_res = cexample->valid(pt,tolerance);
 
 		if(!val_res){
 			if(NLP_HA_algo_flag){

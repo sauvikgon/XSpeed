@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
 	dump_abstractCE_list(ce_candidates);
 	/** End of debug */
 	bool real_ce = false;
-	double error_tol = 1e-6;
+	double error_tol = 1e-6; // splicing error tolerance
 
 	std::cout << "Number of abstract paths to the bad set:" << ce_candidates.size() <<std::endl;
 

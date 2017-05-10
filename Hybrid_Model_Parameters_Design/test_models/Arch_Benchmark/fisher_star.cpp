@@ -4,6 +4,7 @@
 // Command Line arguments: -t xspeed "" -o ./user_model.cpp -i Arch-Competition/TakeReading/HBMC/benchmark/fisher_star/fisher_star_3u.xml Arch-Competition/TakeReading/HBMC/benchmark/fisher_star/fisher_star_3u.cfg
 
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fisher_star.h"
+
 void setFisher_Star(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {

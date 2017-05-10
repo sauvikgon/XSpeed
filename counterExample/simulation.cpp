@@ -185,15 +185,13 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
  * Bounded simulation. Simulation bounded within a polytope.
  * Sets status to false if invariant violated. Otherwise,
  * status is set to true.
- *
+ * If the Inv is violated with distance < tol, tolerate the
+ * violation.
  */
 
-bound_sim simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I, bool& status)
+bound_sim simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I, bool& status, double tol)
 {
 	int flag;
-	// tolerance for crossing invariant bound
-	double tolerance = 1e-12;
-
 	realtype T0 = 0;
 	realtype Tfinal = time;
 	realtype t=0;
@@ -201,11 +199,13 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	bound_sim b;
 	N_Vector u = NULL;
 
+	// testing. should not not modify tol ideally
+	tol = 1e-5;
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
 
 	double dist = math::abs(I->point_distance(x));
-	if(dist > tolerance ){
+	if(dist > tol ){
 		throw std::runtime_error("bounded simulation: initial point outside invariant. NLP problem constrains not set correctly\n");
 	}
 	for(unsigned int i=0;i<dimension;i++)
@@ -291,7 +291,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 				v[i] = NV_Ith_S(u,i);
 			double dist = I->point_distance(v);
 
-			if(math::abs(dist) > tolerance){
+			if(math::abs(dist) > tol){
 //				std::cout << "time:" << t << " ";
 				std::cout << "distance = " << dist << std::endl;
 				status = false;
@@ -301,8 +301,10 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 				prev_v = v;
 		}
 	}
+
 	b.v = v;
 	b.cross_over_time = t;
+
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);
 	return b;
