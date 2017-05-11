@@ -9,7 +9,7 @@
 #include "Utilities/flowpipe_cluster.h"
 
 // Holzmann algorithm adaption
-std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
+std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>& ce_candidates){
 	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
 	int t = 0; //0 for Read and 1 for Write
 	int N = omp_get_num_procs(); //get the number of cores // Number of cores in the machine
@@ -67,7 +67,22 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(){
 					passed_count = passed_count + 1;
 				}
 					//----end of postC on s
+
+
 				//Currently removed the Safety Check Section from here
+
+				//  ******************************** Safety Verification section ********************************
+				safetyViolated = checkSafety(R, s, R1, ce_candidates);
+				//  ******************************** Safety Verification section ********************************
+				//		if (safetyViolated) {
+				//			#pragma omp critical
+				//			{
+				//				done=true;
+				//			}
+				//			break; //no need to compute rest of the locations
+				//		}
+
+
 					std::list<initial_state::ptr> R2;
 					if (level < bound){	//Check level to avoid last PostD computation
 					//	std::cout<<"Before PostD called\n";
@@ -437,4 +452,78 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 	return res;
 
 } //end of while loop checking waiting_list != empty
+
+bool agjh::checkSafety(template_polyhedra::ptr reach_region, initial_state::ptr s, symbolic_states::ptr S, std::list<abstractCE::ptr>& ce_candidates) {
+
+	//  ******************************** Safety Verification section ********************************
+		std::list < symbolic_states::ptr > list_sym_states;
+		std::list < transition::ptr > list_transitions; // list of transitions leading to the unsafe set
+		bool saftey_violated = false;
+
+
+		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe exists
+				//so perform intersection with forbidden set provided locID matches
+
+		//	int locID = current_location->getLocId();
+			int locID =s->getLocationId();
+			cout<<"Running Safety Check for Loc = "<<locID<<std::endl;
+			if (forbidden_set.first==-1 || locID == forbidden_set.first) { //forbidden locID matches
+				polytope::ptr forbid_poly = forbidden_set.second;
+				std::list < template_polyhedra::ptr > forbid_intersects;
+				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
+
+				if (forbid_intersects.size() == 0) {
+					std::cout << "\nThe model does NOT violate SAFETY property!!!\n";
+				} else {
+					symbolic_states::ptr current_forbidden_state;
+					current_forbidden_state = S;
+					int cc = 0;
+					do {
+						int locationID2;
+						discrete_set ds2;
+						// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
+						int transID = current_forbidden_state->getTransitionId(); //a)
+						list_sym_states.push_front(current_forbidden_state); //pushing the bad symbolic_state first(at the top)
+
+						if (current_forbidden_state->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
+
+							//current_forbidden_state = searchSymbolic_state(Reachability_Region, current_forbidden_state->getParentPtrSymbolicState());
+							current_forbidden_state = current_forbidden_state->getParentPtrSymbolicState();
+							//2) ******************* list_transitions ********************
+							ds2 = current_forbidden_state->getDiscreteSet(); //c)
+							for (std::set<int>::iterator it = ds2.getDiscreteElements().begin(); it != ds2.getDiscreteElements().end(); ++it)
+								locationID2 = (*it); //c)
+							location::ptr object_location;
+							object_location = H.getLocation(locationID2); //d)
+							transition::ptr temp = object_location->getTransition(transID); //e)
+							list_transitions.push_front(temp); //pushing the transition in the stack
+							//2) ******************* list_transitions Ends ********************
+						}
+						cc++;
+					} while (current_forbidden_state->getParentPtrSymbolicState()!= NULL);
+					if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState()== NULL)) { //root is missed
+						int transID = current_forbidden_state->getTransitionId();
+						list_sym_states.push_front(current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
+					}
+					saftey_violated = true;
+
+#pragma omp critical
+					{
+						abstractCE::ptr ce = abstractCE::ptr(new abstractCE());
+						ce->set_length(cc);
+						ce->set_sym_states(list_sym_states);
+						ce->set_transitions(list_transitions);
+						hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
+						ce->set_automaton(ha);
+						ce->set_forbid_poly(forbidden_set.second);
+						ce_candidates.push_back(ce); // ce added to the abstract ce candidates list.
+					}
+				} // end of condition when forbidden state intersects with the flowpipe set
+			} //end of condition when forbidden state loc id matches with flowpipe loc id
+		} //computed flowpipe is not empty
+
+		//  ******************************** Safety Verification section Ends********************************
+	return saftey_violated;
+}
+
 

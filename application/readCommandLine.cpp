@@ -192,7 +192,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
 			// Amit's machine
-			system("g++ -D_GLIBCXX_USE_CXX11_ABI=0 -c -std=gnu++11 -I./include/ user_model.cpp -o user_model.o");	//compiler option -D__GLIB.. is required to support running in g++ Version 5
+			system("g++ -D_GLIBCXX_USE_CXX11_ABI=0 -w -c -std=gnu++11 -I./include/ user_model.cpp -o user_model.o");	//compiler option -D__GLIB.. is required to support running in g++ Version 5
 			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
 			//Removed for distribution without PPL library -lppl -lgmp. Also removed -pthread, since it works by just adding -std=gnu++11
 
