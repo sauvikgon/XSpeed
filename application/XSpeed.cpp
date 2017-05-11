@@ -229,9 +229,13 @@ int main(int argc, char *argv[]) {
 	 * counterExample utility. Plot the location sequence of every abstract CE in a file
 	 */
 	dump_abstractCE_list(ce_candidates);
+	// create a template abstract ce to filter
+	std::vector<unsigned int> template_seq(0);
+	// create a filter template here
+
 	/** End of debug */
 	bool real_ce = false;
-	double error_tol = 1e-6;
+	double error_tol = 1e-6; // splicing error tolerance
 
 	std::cout << "Number of abstract paths to the bad set:" << ce_candidates.size() <<std::endl;
 
@@ -239,17 +243,22 @@ int main(int argc, char *argv[]) {
 	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
 
 		cout << "******** Safety Property Violated ********\n";
-		abstractCE::ptr ce = *(it);
-		concreteCE::ptr bad_trace = ce->get_validated_CE(error_tol);
-		if(bad_trace->is_empty()){
-			std::cout << "Cannot Splice Trajectories within Accepted Error Tolerance\n";
+		abstractCE::ptr abs_ce = *(it);
+		concreteCE::ptr ce;
+		// add a filter function to search for concrete ce only in a specific abstract trace
+		bool search_ce = abs_ce->filter(template_seq);
+		if(search_ce)
+			ce = abs_ce->get_validated_CE(error_tol);
+		else continue;
 
+		if(ce->is_empty()){
+			std::cout << "Cannot Splice Trajectories within Accepted Error Tolerance\n";
 			std::cout << "Looking for Other paths to Bad Set\n";
 			continue;
 		} else {
-			bad_trace->set_automaton(ce->get_automaton());
+			ce->set_automaton(abs_ce->get_automaton());
 			std::string tracefile = "./bad_trace.o";
-			bad_trace->plot_ce(tracefile,
+			ce->plot_ce(tracefile,
 					user_options.get_first_plot_dimension(),
 					user_options.get_second_plot_dimension());
 			real_ce = true;

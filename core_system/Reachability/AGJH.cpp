@@ -51,7 +51,6 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 				for(std::list<initial_state::ptr>::iterator it = Wlist[t][i][q].begin(); it!=Wlist[t][i][q].end();it++){
 					initial_state::ptr s = (*it);
 					template_polyhedra::ptr R;
-				//	std::cout<<"Before PostC called\n";
 					R = postC(s);
 					symbolic_states::ptr R1 = symbolic_states::ptr(new symbolic_states());
 
@@ -292,18 +291,14 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			string locName = current_destination->getName();
 			gaurd_polytope = (*t)->getGaurd();//	GeneratePolytopePlotter(gaurd_polytope);
 
-		//cout<<"2\n";
-			//std::cout<<"Before Flowpipe intersection called\n";
 			std::list<polytope::ptr> polys;
 			bool clusted=false;
 			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
 			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
 			if (boost::iequals(this->getSetAggregation(),"thull")){
 				aggregation=true;
-				//std::cout<<"set-aggregation=thull\n";
 			} else if (boost::iequals(this->getSetAggregation(),"none")){
 				aggregation=false;
-				//std::cout<<"set-aggregation=none\n";
 			}
 
 			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
@@ -351,30 +346,10 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
 					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0)){
 
-//				//--Arch-Competition: Implemented for Motorcade_5 Benchmark
-//				if (polys.size()!=0){	//Guard set intersected
-//					#pragma omp critical
-//					{
-//						//std::cout<<"polys.size() = "<<polys.size()<<"\n UnSafe Location Reached!!!\n";
-//						unsafe=true;
-//					}
-//					//std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
-//					return res;//Safety Violated. Returning sym_state list passed so far.
-//
-//				//continue;//do not push into the waitingList
-//				}
-//				//-----
+
 				continue;//Guard set NOT intersected but these location not pushed in the waitingList
 			}
 
-//			//--Arch-Competition: Implemented for Fisher_Star Benchmark
-//			//Forbidden:: loc(process1)==s4 & loc(sv)==s3 & loc(process2)==s4 & loc(process3)==s4
-//			// Location this "s4_s4_s4_s3" should not reach (most probably Hyst-XSpeed translation)
-//			if (locName.compare("s4_s4_s4_s3") == 0){
-//				std::cout<<"\nREACHED FORBIDDEN Location s4_s4_s4_s3!!!\n"<<std::endl;
-//				exit(0);
-//			}
-//			//-------
 			current_assignment = (*t)->getAssignT();
 			// *** interesected_polyhedra included with invariant_directions also ******
 		//cout<<"size = "<< intersected_polyhedra.size();

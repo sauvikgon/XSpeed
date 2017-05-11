@@ -112,9 +112,10 @@ public:
 	 * The time instant, within the simulation time, when the polytope I is
 	 * violated by the trace is returned and with the first lsimulation point
 	 * that violated I, as a struct object. status is set to false if invariant
-	 * is violated.
+	 * is violated. If the Inv violation distance is < tol, then it is tolerated.
+	 *
 	 */
-	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I, bool &status);
+	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I, bool &status, double tol);
 
 	/**
 	 * Simulate and also compute the distance of the trajectory with a polytope,

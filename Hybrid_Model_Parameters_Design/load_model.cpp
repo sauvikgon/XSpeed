@@ -75,7 +75,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	if (HybridSystem_Model_Type == 14) {
 
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
-		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
 
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
@@ -95,9 +95,11 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
 		//setplatoon(ha, init_state, reach_parameters);
-		setFisher_Star(ha,init_state,reach_parameters);		std::cout<<"Model Fisher Model Successful\n";
-		//setMotorcar(ha,init_state,reach_parameters);		std::cout<<"Motorcade-5 Model parsing Successful!!!\n";
+
+		//setFisher_Star(ha,init_state,reach_parameters);		
+		//setMotorcar(ha,init_state,reach_parameters);
 		//std::cout <<"Test Model Assigned"<<std::endl;
+
 	}
 	unsigned int dims=0;
 	for (std::list<initial_state::ptr>::iterator it=init_state.begin();it!=init_state.end();it++){
