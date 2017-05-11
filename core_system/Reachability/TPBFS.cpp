@@ -50,7 +50,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 
 		boost::timer::cpu_timer jump_time;
 		jump_time.start();	//Start recording the entire time for jump
-	//	cout<<"Breadth - Level === "<<number_times<<"\n";
+//		cout<<"Breadth - Level === "<<number_times<<"\n";
 //		boost::timer::cpu_timer t73;
 //		t73.start();
 		unsigned int count = getSize_Qpw_list(Qpw_list[t]); //get the size of PWList
@@ -193,7 +193,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 		//std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 
 
-//	std::cout<<" :: before flowpipe pre-reach compute ";
+//	std::cout<<" :: Before flowpipe pre-reach compute ";
 //		omp_set_dynamic(0);     // Explicitly disable dynamic teams
 //		omp_set_num_threads(numCoreAvail);
 #pragma omp parallel for //num_threads(count)
@@ -205,17 +205,17 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 		} //END of count FOR-LOOP
 
 		LoadBalanceDataSF LoadBalanceData_sf;
-//		std::cout<<" :: before flowpipe LoadBalance Task compute"<<std::endl;
+//		std::cout<<" :: Before flowpipe LoadBalance Task compute"<<std::endl;
 		parallelLoadBalance_Task(LoadBalanceDS, LoadBalanceData_sf);//Step 2:  An appropriate combination of parallel with sequential GLPK object is used.
 	//	omp_set_nested(1); //enable nested parallelism
-//	std::cout<<" :: After flowpipe reach compute ";
+//	std::cout<<" :: After flowpipe reach compute "<<std::endl;
 //	omp_set_dynamic(0);     // Explicitly disable dynamic teams
 //	omp_set_num_threads(numCoreAvail);
 #pragma omp parallel for //num_threads(numCoreAvail) // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) {
 			S[id]->setContinuousSetptr(substitute_in_ReachAlgorithm(LoadBalanceDS[id], numCoreAvail, LoadBalanceData_sf, id)); // Step 3
 		}
-//		std::cout<<" :: After flowpipe substitute ";
+//		std::cout<<" :: After flowpipe substitute "<<std::endl;;
 //  ********************* POST_C computation Done ********************
 		sym_passed = sym_passed + count;
 
@@ -234,14 +234,14 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 		/*if (levelcompleted || foundUnSafe) { //any true
 			break; //OUT FROM WHILE LOOP 	//no need to compute rest of the locations
 		}*/
-//		std::cout<<":: before PostD computation ";
+//		std::cout<<":: Before PostD computation "<<std::endl;
 
 std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 //  ***************** Load Balanced POST_D computation Begins::Has 3 Steps ***********************************
 	if (!levelcompleted && !foundUnSafe){	//no need to compute rest of the locations
 
 	//Step--1 :: Pre-Load Balancing Task to populate guard, assign, etc in Data Structure
-	//cout<<"done 1\n";
+//	cout<<"done 1\n"<<std::endl;
 //	omp_set_dynamic(0);     // Explicitly disable dynamic teams
 //	omp_set_num_threads(numCoreAvail);
 	#pragma omp parallel for // num_threads(count)
@@ -415,7 +415,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 
 
 	if (LoadBalanceDS.newIteration < 1) {	//MOdified due to error on nav04.xml (from <= to < like in algo 4,7 etc)
-		template_polyhedra::ptr poly_emptyp;
+		template_polyhedra::ptr poly_emptyp=template_polyhedra::ptr(new template_polyhedra());
 		return poly_emptyp;
 	}
 	int dimension = LoadBalanceDS.X0->getSystemDimension();
@@ -438,6 +438,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		} else { //
 			index_X0 = eachDirection * LoadBalanceDS.newIteration + eachDirection; //only X0(list_X0) has 2 directions for first-iteration
 		}
+	//std::cout<<"before U empty check"<<std::endl;
 		bool U_empty = LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty();
 		//bool U_empty;// = LoadBalanceDS.U->getIsEmpty();
 		if (LoadBalanceDS.U->getIsEmpty() || LoadBalanceDS.U==NULL)
@@ -529,7 +530,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 			loopIteration++; //for the next Omega-iteration or Time-bound
 		} //end of all Iterations of each vector/direction
 	} //end of for each vector/directions
-//std::cout<<"Before Invariant accesing"<<std::endl;
+//std::cout<<"Before Invariant accessing"<<std::endl;
 	/*std::cout << std::fixed;
 	std::cout.precision(10);*/  //Main Cause of Race condition
 	if (LoadBalanceDS.current_location->getInvariant() != NULL && LoadBalanceDS.current_location->isInvariantExists() == true) { //if invariant exist. Computing
