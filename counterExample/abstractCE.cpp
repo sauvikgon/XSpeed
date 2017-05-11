@@ -222,8 +222,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		P = S->getInitialPolytope();
 
 		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-				P->getInEqualitySign());
+		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 
 // 		we add bound constraints on the position parameters, which are required to run global opt routines.
 		std::vector<double> dir(dim,0);
