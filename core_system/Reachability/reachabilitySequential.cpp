@@ -254,7 +254,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 	} //End of Invariant Directions
 	//cout<<"shm_NewTotalIteration = " <<shm_NewTotalIteration<<std::endl;
 	if (shm_NewTotalIteration < 1) {
-		template_polyhedra::ptr poly_emptyp;
+		template_polyhedra::ptr poly_emptyp=template_polyhedra::ptr(new template_polyhedra());
 		return poly_emptyp;
 	}
 	int solver_type = lp_solver_type_choosen;

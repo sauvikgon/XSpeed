@@ -249,7 +249,7 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 #pragma omp parallel for
 	for (int i = 0; i < CORES; i++) { //for (double i = 0; i < T; i += newTimeBound) {
 
-		template_polyhedra::ptr Tpoly;
+		template_polyhedra::ptr Tpoly=template_polyhedra::ptr(new template_polyhedra());
 		math::matrix<double> phi, phi_trans, A_inv_phi, y_matrix, y_trans;
 		double START_TIME = i * newTimeBound; //first iteration START_TIME = i = 0 which make beta = 0
 

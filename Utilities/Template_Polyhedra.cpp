@@ -627,11 +627,13 @@ void template_polyhedra::resize_matrix_SupportFunction(int dir_nums,
 template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 		template_polyhedra::ptr& Tpoly) {
 
-	if (this->total_iterations == 0)	//if the calling polyhedra is empty
-		return template_polyhedra::ptr(
-				new template_polyhedra(Tpoly->getMatrixSupportFunction(),
-						Tpoly->getTemplateDirections()));
-
+	if (this->total_iterations == 0){	//if the calling polyhedra is empty
+		if (Tpoly->total_iterations==0){
+			return template_polyhedra::ptr(new template_polyhedra());
+		} else{
+			return template_polyhedra::ptr(new template_polyhedra(Tpoly->getMatrixSupportFunction(), Tpoly->getTemplateDirections()));
+		}
+	}
 	//std::cout<<"\nEntered inside Union_templatePolytope\n";
 	size_type rows = Tpoly->getMatrixSupportFunction().size1();	//rows will not change only column size will increase
 	unsigned int k;
