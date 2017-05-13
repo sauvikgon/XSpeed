@@ -51,8 +51,17 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 				for(std::list<initial_state::ptr>::iterator it = Wlist[t][i][q].begin(); it!=Wlist[t][i][q].end();it++){
 					initial_state::ptr s = (*it);
 					template_polyhedra::ptr R;
-					R = postC(s);
+
 					symbolic_states::ptr R1 = symbolic_states::ptr(new symbolic_states());
+
+					discrete_set discrete_state;
+					discrete_state.insert_element(s->getLocationId()); //creating discrete_state
+					R1->setDiscreteSet(discrete_state);
+					R1->setInitialPolytope(s->getInitialSet());
+					//R1->setParentPtrSymbolicState(s->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
+					R1->setTransitionId(s->getTransitionId()); //keeps track of originating transition_ID
+
+					R = postC(s);
 
 					R1->setParentPtrSymbolicState(s->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 
@@ -71,7 +80,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 				//Currently removed the Safety Check Section from here
 
 				//  ******************************** Safety Verification section ********************************
-				safetyViolated = checkSafety(R, s, R1, ce_candidates);
+				safetyViolated = checkSafety(R, s, R1, ce_candidates); //R, s, R1 are all local variables per thread
 				//  ******************************** Safety Verification section ********************************
 				//		if (safetyViolated) {
 				//			#pragma omp critical
@@ -135,6 +144,9 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 //				}
 //			}
 		}//for-loop no 1
+
+
+
 		// barrier synchronization
 //		if (!safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
 			for(unsigned int i=0;i<N;i++){
@@ -192,7 +204,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	reach_parameters = this->reach_parameters;
 //	cout<<"No error 2222!!!!\n";
 	reach_parameters.X0 = continuous_initial_polytope;
-	symbolic_states::ptr S;
+
 
 	location::ptr current_location;
 
@@ -428,7 +440,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 
 } //end of while loop checking waiting_list != empty
 
-bool agjh::checkSafety(template_polyhedra::ptr reach_region, initial_state::ptr s, symbolic_states::ptr S, std::list<abstractCE::ptr>& ce_candidates) {
+bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr& s, symbolic_states::ptr& S, std::list<abstractCE::ptr>& ce_candidates) {
 
 	//  ******************************** Safety Verification section ********************************
 		std::list < symbolic_states::ptr > list_sym_states;
@@ -438,8 +450,6 @@ bool agjh::checkSafety(template_polyhedra::ptr reach_region, initial_state::ptr 
 
 		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe exists
 				//so perform intersection with forbidden set provided locID matches
-
-		//	int locID = current_location->getLocId();
 			int locID =s->getLocationId();
 			cout<<"Running Safety Check for Loc = "<<locID<<std::endl;
 			if (forbidden_set.first==-1 || locID == forbidden_set.first) { //forbidden locID matches
@@ -482,15 +492,15 @@ bool agjh::checkSafety(template_polyhedra::ptr reach_region, initial_state::ptr 
 					}
 					saftey_violated = true;
 
+					abstractCE::ptr ce = abstractCE::ptr(new abstractCE());
+					ce->set_length(cc);
+					ce->set_sym_states(list_sym_states);
+					ce->set_transitions(list_transitions);
+					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
+					ce->set_automaton(ha);
+					ce->set_forbid_poly(forbidden_set.second);
 #pragma omp critical
 					{
-						abstractCE::ptr ce = abstractCE::ptr(new abstractCE());
-						ce->set_length(cc);
-						ce->set_sym_states(list_sym_states);
-						ce->set_transitions(list_transitions);
-						hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
-						ce->set_automaton(ha);
-						ce->set_forbid_poly(forbidden_set.second);
 						ce_candidates.push_back(ce); // ce added to the abstract ce candidates list.
 					}
 				} // end of condition when forbidden state intersects with the flowpipe set

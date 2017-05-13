@@ -28,7 +28,7 @@ private:
 
 	std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED, bool& unsafe);
 
-	bool checkSafety(template_polyhedra::ptr reach_region, initial_state::ptr s, symbolic_states::ptr S, std::list<abstractCE::ptr>& ce_candidates);
+	bool checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr& s, symbolic_states::ptr& S, std::list<abstractCE::ptr>& ce_candidates);
 };
 
 
