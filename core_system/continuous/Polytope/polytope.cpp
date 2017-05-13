@@ -689,7 +689,6 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			tok_iter++;
 			i = p->get_index(varname);
 			std::vector<double> cons(p->map_size(),0);
-			std::cout << "dimension obtained from string to poly: " << cons.size() << std::endl;
 			cons[i] = 1;
 			double bound = std::atof((*tok_iter).c_str());
 			p->setMoreConstraints(cons,bound);
