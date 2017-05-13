@@ -196,6 +196,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	unsigned int optD = N * dim + N;
 	std::cout << "nlopt problem dimension = " << optD << std::endl;
 //	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
+//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
@@ -220,7 +221,12 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	{
 		S = get_symbolic_state(i);
 		P = S->getInitialPolytope();
-
+		//debug--
+//		if(i==0)
+//			P->print2file("./symb_state0.txt", 9, 0);
+//		else
+//			P->print2file("./symb_state1.txt", 9, 0);
+		//--
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
 				P->getInEqualitySign());
@@ -270,7 +276,9 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
+
 bool aggregation=true;//default is ON
+
 	for (unsigned int i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		if(i==N-1){
@@ -281,7 +289,7 @@ bool aggregation=true;//default is ON
 			if(polys.size()>1)
 				P = get_template_hull(S->getContinuousSetptr(),0,S->getContinuousSetptr()->getTotalIterations()-1); // 100% clustering
 			else
-				P=  polys.front();
+				P = polys.front();
 
 			P = P->GetPolytope_Intersection(bad_poly);
 		}
@@ -325,7 +333,6 @@ bool aggregation=true;//default is ON
 
 		// We may choose to take the average time as the initial dwell time
 		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
-
 
 		if(it!=transList.end())
 			it++;
@@ -676,84 +683,6 @@ bool aggregation=true;//default is ON
 //	// adding constraints over start points
 //	assert(index==size);
 //
-//	// adding time constraints
-///*	boundConstraint B[N],B1[N];
-//	for (unsigned int i = 0; i < N; i++) {
-//
-//		B[i].var_index = N*dim + i;
-//		B[i].bound = 100;
-//		B[i].is_ge = false;
-//		myopt.add_inequality_constraint(myBoundConstraint, &B[i], 1e-8);
-//		B1[i].var_index = B[i].var_index;
-//		B1[i].is_ge=true;
-//		B1[i].bound = 0;
-//		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
-//		// We may choose to take the max-min as the initial dwell time
-//		x[N * dim + i] = 0.1;
-//	} */
-////// TEST CODE
-////	unsigned int t_index =
-////		get_first_symbolic_state()->getContinuousSet()->get_index("t");
-////
-////	assert((t_index >= 0) && (t_index < dim));
-////
-////	boundConstraint B[N],B1[N];
-////	std::vector<double> dmin(dim, 0), dmax(dim, 0);
-////	dmax[t_index] = 1;
-////	dmin[t_index] = -1;
-////	it = transList.begin();
-//////	transition::ptr T;
-////	double max,min,start_min;
-////	for (unsigned int i = 0; i < N; i++) {
-////		S = get_symbolic_state(i);
-////		P = S->getContinuousSet();
-////		if(i==N-1){
-////			// If last abst sym state, then take time projection of flowpipe \cap bad_poly
-////			P=P->GetPolytope_Intersection(bad_poly);
-//////			std::ofstream myfile;
-//////			myfile.open("./polyBad");
-//////			P->print2file("./polyBad",0,1);
-////		}
-////		else{
-////			// Take time projection of flowpipe \cap transition guard
-////			T = *(it);
-////			P=P->GetPolytope_Intersection(T->getGaurd());
-////		}
-//////		To get a point from the polytope, we create a random obj function and
-//////		solve the lp. The solution point is taken as an initial value.
-////
-////		lp_solver lp(GLPK_SOLVER);
-////		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-////				P->getInEqualitySign());
-////		max = lp.Compute_LLP(dmax);
-////		min = -1 * lp.Compute_LLP(dmin);
-////		// we add the bounds as constraints in the nlopt
-////
-////		// Get the min and max time projection of start set
-////		lp_solver lp1(GLPK_SOLVER);
-////		P=S->getInitialSet();
-////		lp1.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-////				P->getInEqualitySign());
-////
-////		start_min = -1 * lp1.Compute_LLP(dmin);
-////
-////		B[i].var_index = N*dim + i;
-////		B[i].bound = max - start_min;
-////		B[i].is_ge = false;
-////		myopt.add_inequality_constraint(myBoundConstraint, &B[i], 1e-8);
-////		B1[i].var_index = B[i].var_index;
-////		B1[i].is_ge=true;
-////		B1[i].bound = min-start_min;
-////		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
-////		// We may choose to take the max-min as the initial dwell time
-////		x[N * dim + i] = (max -start_min + min - start_min)/2;
-////		if(it!=transList.end())
-////			it++;
-////
-////	}
-//
-////---------------
-//
 //	double minf;
 //	try {
 //
@@ -766,7 +695,6 @@ bool aggregation=true;//default is ON
 //	}
 //	std::cout << "nlopt returned min : " << minf << "\n";
 //	std::cout << "Length of abstract counter example:" << N <<"\n";
-////	std::cout << "Number of samples by NLopt: " << samples << "\n";
 //
 //	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 //	cexample->set_automaton(HA);
@@ -801,6 +729,7 @@ bool aggregation=true;//default is ON
 //
 //	return cexample;
 //}
+
 concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 {
 	// call to genCE func with no refining trajectory

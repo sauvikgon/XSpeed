@@ -210,6 +210,9 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	math::matrix<double> A, expAt, mapExpAt;
 	std::vector<double> Axplusb(dim), mapAxplusb;
 
+	std::ofstream myfile;
+	myfile.open("./endpoints");
+
 	for (unsigned int i = 0; i < N; i++) {
 
 		std::vector<double> v(dim, 0);
@@ -298,6 +301,12 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //				std::cout << "Inside g condition\n";
 				assert(y[i].size() == R.Map.size2());
 				std::vector<double> transform(y[i].size(),0);
+//				//debug
+//				std::cout << "transition assignment map:" << R.Map << std::endl;
+//				std::cout << "transition w: ";
+//				for(unsigned int i=0;i<R.b.size();i++)
+//					 std::cout << R.b[i] << std::endl;
+//				//---
 				R.Map.mult_vector(y[i],transform);
 				for(unsigned int j=0;j<transform.size();j++)
 					y[i][j] = transform[j] + R.b[j];
@@ -312,6 +321,11 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //			}
 			if(T_iter!=transList.end())
 				T_iter++;
+
+			//debug
+			myfile << y[i][9] << " " << y[i][0] << std::endl;
+			myfile << x[(i+1)*dim + 9] << x[(i+1)*dim + 0] << std::endl;
+			//---
 
 			//compute the Euclidean distance between the next start point and the simulated end point
 			for (unsigned int j = 0; j < dim; j++) {
@@ -406,6 +420,11 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		}
 	}
 #endif
+	//debug
+	myfile << y[N-1][9] << " " << y[N-1][0] << std::endl;
+	//---
+	myfile.close();
+	//---
 
 	// compute the distance of this endpoint with the forbidden polytope
 	cost+= bad_poly->point_distance(y[N-1]);

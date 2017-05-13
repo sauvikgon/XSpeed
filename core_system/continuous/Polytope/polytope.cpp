@@ -134,6 +134,10 @@ void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 
 void polytope::setMoreConstraints(math::matrix<double> coeff_constraints,
 		std::vector<double> bound_values) {
+	// check if non-empty matrix passed. if empty, then return by doing nothing
+	if(coeff_constraints.size1()==0 || coeff_constraints.size2()==0)
+		return;
+
 	this->setSystemDimension(coeff_constraints.size2());
 	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
 
@@ -548,7 +552,6 @@ void polytope::printPoly_parm(){
 	for(unsigned int j=0;j<columnVector.size();j++)
 		std::cout << this->columnVector[j] << "    " ;
 	std::cout << "\n";
-
 }
 
 
@@ -686,6 +689,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			tok_iter++;
 			i = p->get_index(varname);
 			std::vector<double> cons(p->map_size(),0);
+			std::cout << "dimension obtained from string to poly: " << cons.size() << std::endl;
 			cons[i] = 1;
 			double bound = std::atof((*tok_iter).c_str());
 			p->setMoreConstraints(cons,bound);
