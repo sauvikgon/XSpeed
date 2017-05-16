@@ -103,6 +103,10 @@ symbolic_states::const_ptr abstractCE::get_symbolic_state(unsigned int i) const 
 bool abstractCE::filter(std::vector<unsigned int> template_seq){
 
 	// length must match the template sequence length
+	//debug
+//	if(this->get_length()!=20)
+//		return false;
+	//--
 	if(template_seq.size()==0)
 		return true;
 
@@ -599,7 +603,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 	// 	local optimization routine
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(4000);
+	myopt.set_maxeval(8000);
 	myopt.set_stopval(1e-6);
 	//myopt.set_initial_step(0.001);
 
@@ -616,31 +620,57 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
 	{
-		Inv = HA->getLocation(locIdList[i])->getInvariant();
-		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
-
-// 		we add bound constraints on the position parameters, which are required to run global opt routines.
-		std::vector<double> dir(dim,0);
-		double min, max;
-		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
+		if(i==0)// Initial polytope is given
 		{
-			dir[j] = -1;
-			min = -1 * lp.Compute_LLP(dir);
-			dir[j] = 1;
-			max = lp.Compute_LLP(dir);
-			unsigned int index = i*dim+j;
-			if(min>max) // swap min and max
-			{
-				min = min+max;
-				max = min-max;
-				min = min-max;
-			}
-			lb[index] = min;
-			ub[index] = max;
+			Inv = this->get_first_symbolic_state()->getInitialPolytope();
+		}
+		else{
+			Inv = HA->getLocation(locIdList[i])->getInvariant();
+		}
 
-			dir[j] = 0;
-			x[index] = (lb[index] + ub[index])/2;
+		if(Inv->getIsEmpty()){
+
+			for (unsigned int j = 0; j < dim; j++){
+				unsigned int index = i*dim+j;
+				lb[index] = 0;
+				ub[index] = 0;
+			}
+		}
+		else if (Inv->getIsUniverse())
+		{
+			for (unsigned int j = 0; j < dim; j++){
+
+				unsigned int index = i*dim+j;
+				lb[index] = -DBL_MAX;
+				ub[index] = DBL_MAX;
+			}
+		}
+		else{
+			lp_solver lp(GLPK_SOLVER);
+			lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
+
+			//we add bound constraints on the position parameters, which are required to run global opt routines.
+			std::vector<double> dir(dim,0);
+			double min, max;
+			for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
+			{
+				dir[j] = -1;
+				min = -1 * lp.Compute_LLP(dir);
+				dir[j] = 1;
+				max = lp.Compute_LLP(dir);
+				unsigned int index = i*dim+j;
+				if(min>max) // swap min and max
+				{
+					min = min+max;
+					max = min-max;
+					min = min-max;
+				}
+				lb[index] = min;
+				ub[index] = max;
+
+				dir[j] = 0;
+				x[index] = (lb[index] + ub[index])/2;
+			}
 		}
 	}
 
@@ -672,39 +702,53 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 		Inv = HA->getLocation(locIdList[i])->getInvariant();
 
-		if(i==N-1){
+		if(i==N-1) {
 			// If last abst sym state, then take time projection of Inv \cap bad_poly
 			Inv = Inv->GetPolytope_Intersection(bad_poly);
 		}
-		else{
+		else {
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
 			guard = T->getGaurd();
 			if(!guard->getIsUniverse())
 				Inv = Inv->GetPolytope_Intersection(guard);
 		}
+		// Inv now is the intersected poly with guard/bad_poly
 
-		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
-		// ensure that time is always positive
-		max = lp.Compute_LLP(dmax);
-		min = -1 * lp.Compute_LLP(dmin);
+		if(Inv->getIsEmpty())
+		{
+			lb[N*dim+i]=0;
+			ub[N*dim+i]=0;
+			continue;
+		}
+		else if(Inv->getIsUniverse()){
+			lb[N*dim+i] = -DBL_MAX;
+			ub[N*dim+i] = DBL_MAX;
+			continue;
+		}
+		else{
+			lp_solver lp(GLPK_SOLVER);
+			lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
+			// ensure that time is always positive
+			max = lp.Compute_LLP(dmax);
+			min = -1 * lp.Compute_LLP(dmin);
 
-		// we add the bounds as constraints in the nlopt
+			// we add the bounds as constraints in the nlopt
 
-		// Get the min and max time projection of start set
-		lp_solver lp1(GLPK_SOLVER);
+			// Get the min and max time projection of start set
+			lp_solver lp1(GLPK_SOLVER);
 
-		lp1.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(),
-				Inv->getInEqualitySign());
-		// Ensure that the time is positive
-		start_min = -1 * lp1.Compute_LLP(dmin);
-		start_max = lp1.Compute_LLP(dmax);
-		ub[N*dim+i] = max - start_min;
-		if(min<=start_max)
-			lb[N*dim+i] = 0;
-		else
-			lb[N*dim+i] = min-start_max;
+			lp1.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(),
+					Inv->getInEqualitySign());
+			// Ensure that the time is positive
+			start_min = -1 * lp1.Compute_LLP(dmin);
+			start_max = lp1.Compute_LLP(dmax);
+			ub[N*dim+i] = max - start_min;
+			if(min<=start_max)
+				lb[N*dim+i] = 0;
+			else
+				lb[N*dim+i] = min-start_max;
+		}
 
 		// We may choose to take the average time as the initial dwell time
 		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
@@ -780,7 +824,8 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 		struct refinement_point pt;
 
 		//cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
-		cexample = gen_concreteCE(tolerance,refinements);
+		//cexample = gen_concreteCE(tolerance,refinements);
+		cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
 		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
 		if(cexample->is_empty())
 			return cexample;
