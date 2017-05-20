@@ -221,8 +221,7 @@ int main(int argc, char *argv[]) {
 //		interval_generator(Symbolic_states_list,user_options);
 //	}
 	vertex_generator(Symbolic_states_list,user_options);
-	std::cout<<"Vertex Generation Completed"<<std::endl;
-	print_all_intervals(Symbolic_states_list);
+//	print_all_intervals(Symbolic_states_list);
 	//std::cout<<"Interval Generation Completed"<<std::endl;
 
 	/*
@@ -231,29 +230,31 @@ int main(int argc, char *argv[]) {
 	dump_abstractCE_list(ce_candidates);
 	// create a template abstract ce to filter
 	std::vector<unsigned int> template_seq(0);
+	template_seq = {3,4,2,1,3,4,2,1,3,4};
+
 	// create a filter template here
 
 	/** End of debug */
 	bool real_ce = false;
 	double error_tol = 1e-6; // splicing error tolerance
 
-	std::cout << "Number of abstract paths to the bad set:" << ce_candidates.size() <<std::endl;
-
 	tt1.start(); // start time
 	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
 
-		cout << "******** Safety Property Violated ********\n";
 		abstractCE::ptr abs_ce = *(it);
 		concreteCE::ptr ce;
 		// add a filter function to search for concrete ce only in a specific abstract trace
 		bool search_ce = abs_ce->filter(template_seq);
-		if(search_ce)
+		if(search_ce){
+			//tt1.start(); // start time
 			ce = abs_ce->get_validated_CE(error_tol);
+			//tt1.stop(); //stop time
+		}
 		else continue;
 
 		if(ce->is_empty()){
-			std::cout << "Cannot Splice Trajectories within Accepted Error Tolerance\n";
-			std::cout << "Looking for Other paths to Bad Set\n";
+			std::cout << "Cannot Splice Trajectories with Accepted Error Tolerance\n";
+			std::cout << "Looking for Other Abstract CE to Unsafe Set\n";
 			continue;
 		} else {
 			ce->set_automaton(abs_ce->get_automaton());
@@ -266,6 +267,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	tt1.stop(); //stop time
+
 	//timers
 	double wall_clock, user_clock, system_clock;
 	wall_clock = tt1.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
@@ -274,13 +276,12 @@ int main(int argc, char *argv[]) {
 
 	//--end of timers
 	if (!real_ce) {
-		cout << "******** Does NOT Violate Safety Property ********\n";
-		std::cout << "Time to search concrete counter-examples (milliseconds):"
-				<< user_clock << std::endl;
+		std::cout << "******** No Violation of Safety Property ********\n";
+		std::cout << "Time to search concrete counter-examples (milliseconds):" << user_clock << std::endl;
 	} else {
+		std::cout << "******** Detected Violation of Safety Property  ********\n";
 		std::cout << "Counter Example Trace Plotted in the file bad_trace.o\n";
-		std::cout << "Time to get counter-example (milliseconds):" << user_clock
-				<< std::endl;
+		std::cout << "Time to search counter-example (milliseconds):" << user_clock << std::endl;
 	}
 	cout << "\n******** Summary of XSpeed ********\n";
 	return 0; //returning only the Wall time taken to execute the Hybrid System

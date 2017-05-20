@@ -59,6 +59,7 @@ public:
 	 * Returns true if identity, false othwerwise
 	 */
 	bool isIdentity();
+
 	/*private:
 	 ublas_matrix_impl my_matrix;*/
 

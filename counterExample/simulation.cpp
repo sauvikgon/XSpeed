@@ -7,6 +7,7 @@
 
 #include "counterExample/simulation.h"
 #include <fstream>
+#include <iomanip>
 #include "../core_system/continuous/Polytope/Polytope.h"
 
 simulation::simulation() {
@@ -206,7 +207,12 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 	double dist = math::abs(I->point_distance(x));
 	if(dist > tol ){
-		throw std::runtime_error("bounded simulation: initial point outside invariant. NLP problem constrains not set correctly\n");
+		//throw std::runtime_error("bounded simulation: initial point outside invariant. NLP problem constrains not set correctly\n");
+		bound_sim b;
+		b.v = x;
+		b.cross_over_time = 0;
+		status = false;
+		return b;
 	}
 	for(unsigned int i=0;i<dimension;i++)
 		NV_Ith_S(u,i) = x[i];
@@ -290,10 +296,10 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 			for(unsigned int i=0;i<dimension;i++)
 				v[i] = NV_Ith_S(u,i);
 			double dist = I->point_distance(v);
-
-			if(math::abs(dist) > tol){
+			if(math::abs(dist) > tol) {
 //				std::cout << "time:" << t << " ";
-				std::cout << "distance = " << dist << std::endl;
+				std::cout << "DISTANCE TO INV= " << std::setprecision(10) << dist << std::endl;
+				std::cout << "tol = " << std::setprecision(10) << tol << std::endl;
 				status = false;
 				break;
 			}

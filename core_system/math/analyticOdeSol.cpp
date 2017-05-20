@@ -11,6 +11,9 @@
 
 std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double time)
 {
+	if(!D.isEmptyMatrixB)
+		throw std::runtime_error("File-analyticODEsol: Method-ODESol: Cannot solve ODE for dynamics with input\n");
+
 	if(D.isEmptyMatrixA && D.isEmptyMatrixB)
 	{
 		assert(!D.isEmptyC);

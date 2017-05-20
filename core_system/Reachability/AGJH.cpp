@@ -455,7 +455,7 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
 
 				if (forbid_intersects.size() == 0) {
-					std::cout << "\nThe model does NOT violate SAFETY property!!!\n";
+					//std::cout << "\nThe model does NOT violate SAFETY property!!!\n";
 				} else {
 					symbolic_states::ptr current_forbidden_state;
 					current_forbidden_state = S;

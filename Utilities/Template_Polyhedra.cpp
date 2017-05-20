@@ -333,6 +333,27 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 }
 
 std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_intersectionSequential_optimize(polytope::ptr G, int lp_solver_type_choosen) {
+
+	// Check special case:  G is empty
+	if(G->getIsEmpty()){
+		std::pair<unsigned int, unsigned int> range;
+		range.first = 0;
+		range.second = 0;
+		std::list<std::pair<unsigned int, unsigned int> > rangeList;
+		rangeList.push_back(range);
+		return rangeList;
+	}
+
+	// check special case: G is universe
+	if(G->getIsUniverse()){
+		std::pair<unsigned int, unsigned int> range;
+		range.first = 0;
+		range.second = this->total_iterations-1;
+		std::list<std::pair<unsigned int, unsigned int> > rangeList;
+		rangeList.push_back(range);
+		return rangeList;
+	}
+
 	size_type row = 0;
 	size_type col = 0;
 
@@ -355,7 +376,6 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 	} //end of parallel-loop :: we have the list of intersected polys
 
 	std::list<std::pair<unsigned int, unsigned int> > intersected_range;
-//	cout << "Is This Big = " << this->Matrix_SupportFunction.size2() << "\n";
 
 	std::pair<unsigned int, unsigned int> inte_range;
 	for (unsigned int i = 0; i < this->Matrix_SupportFunction.size2(); i++) { //sequential reading of an boolean_array that tells intersected polys
