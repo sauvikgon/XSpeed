@@ -364,7 +364,6 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 
 	std::vector<bool> intersects(this->Matrix_SupportFunction.size2(), false); //all false initially
 	for (unsigned int i = 0; i < this->Matrix_SupportFunction.size2(); i++) {
-		//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
 		polytope::ptr p;
 		p = this->getPolytope(i);
 		if (this->invariant_Directions.size1() != 0){
