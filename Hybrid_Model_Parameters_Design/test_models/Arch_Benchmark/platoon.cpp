@@ -9,7 +9,9 @@
 
 void setplatoon(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
-		ReachabilityParameters& reach_parameters) {
+		ReachabilityParameters& reach_parameters, userOptions& op)
+
+	{
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -36,76 +38,77 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	Assign assignment;
 	math::matrix<double> R;
 
-	// The mode name is  communication_communication_loc1
+	// The mode name is  communication_communication
 
 	row = 11;
 	col = 11;
 	Amatrix.resize(row, col);
 	Amatrix.clear();
-	Amatrix(1 , 2) = 1.0;
-	Amatrix(2 , 3) = -1.0;
-	Amatrix(3 , 1) = 1.605;
-	Amatrix(3 , 2) = 4.868;
-	Amatrix(3 , 3) = -3.5754;
-	Amatrix(3 , 4) = -0.8198;
-	Amatrix(3 , 5) = 0.427;
-	Amatrix(3 , 6) = -0.045;
-	Amatrix(3 , 7) = -0.1942;
-	Amatrix(3 , 8) = 0.3626;
-	Amatrix(3 , 9) = -0.0946;
-	Amatrix(4 , 5) = 1.0;
-	Amatrix(5 , 3) = 1.0;
-	Amatrix(5 , 6) = -1.0;
-	Amatrix(6 , 1) = 0.8718;
-	Amatrix(6 , 2) = 3.814;
-	Amatrix(6 , 3) = -0.0754;
-	Amatrix(6 , 4) = 1.1936;
-	Amatrix(6 , 5) = 3.6258;
-	Amatrix(6 , 6) = -3.2396;
-	Amatrix(6 , 7) = -0.595;
-	Amatrix(6 , 8) = 0.1294;
-	Amatrix(6 , 9) = -0.0796;
-	Amatrix(7 , 8) = 1.0;
-	Amatrix(8 , 6) = 1.0;
-	Amatrix(8 , 9) = -1.0;
-	Amatrix(9 , 1) = 0.7132;
-	Amatrix(9 , 2) = 3.573;
-	Amatrix(9 , 3) = -0.0964;
-	Amatrix(9 , 4) = 0.8472;
-	Amatrix(9 , 5) = 3.2568;
-	Amatrix(9 , 6) = -0.0876;
-	Amatrix(9 , 7) = 1.2726;
-	Amatrix(9 , 8) = 3.072;
-	Amatrix(9 , 9) = -3.1356;
+	Amatrix(0 , 1) = 1.0;
+	Amatrix(1 , 2) = -1.0;
+	Amatrix(2 , 0) = 1.605;
+	Amatrix(2 , 1) = 4.868;
+	Amatrix(2 , 2) = -3.5754;
+	Amatrix(2 , 3) = -0.8198;
+	Amatrix(2 , 4) = 0.427;
+	Amatrix(2 , 5) = -0.045;
+	Amatrix(2 , 6) = -0.1942;
+	Amatrix(2 , 7) = 0.3626;
+	Amatrix(2 , 8) = -0.0946;
+	Amatrix(3 , 4) = 1.0;
+	Amatrix(4 , 2) = 1.0;
+	Amatrix(4 , 5) = -1.0;
+	Amatrix(5 , 0) = 0.8718;
+	Amatrix(5 , 1) = 3.814;
+	Amatrix(5 , 2) = -0.0754;
+	Amatrix(5 , 3) = 1.1936;
+	Amatrix(5 , 4) = 3.6258;
+	Amatrix(5 , 5) = -3.2396;
+	Amatrix(5 , 6) = -0.595;
+	Amatrix(5 , 7) = 0.1294;
+	Amatrix(5 , 8) = -0.0796;
+	Amatrix(6 , 7) = 1.0;
+	Amatrix(7 , 5) = 1.0;
+	Amatrix(7 , 8) = -1.0;
+	Amatrix(8 , 0) = 0.7132;
+	Amatrix(8 , 1) = 3.573;
+	Amatrix(8 , 2) = -0.0964;
+	Amatrix(8 , 3) = 0.8472;
+	Amatrix(8 , 4) = 3.2568;
+	Amatrix(8 , 5) = -0.0876;
+	Amatrix(8 , 6) = 1.2726;
+	Amatrix(8 , 7) = 3.072;
+	Amatrix(8 , 8) = -3.1356;
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
 	col = 1;
 	Bmatrix.resize(row, col);
 	Bmatrix.clear();
-	Bmatrix(2 , 0) = 1.0;
+	Bmatrix(1 , 0) = 1.0;
 	system_dynamics.isEmptyMatrixB = false;
 	system_dynamics.MatrixB = Bmatrix;
 
 	C.resize(row );
 	C.assign(row,0);
-	C[0] = 1.0;
+	C[9] = 1.0;
 	C[10] = 1.0;
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = C;
 
 
-	row = 2;
+	row = 3;
 	col = 11;
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix.clear();
-	invariantConstraintsMatrix(0,0)= 1.0;
-	invariantConstraintsMatrix(1,10)= 1.0;
+	invariantConstraintsMatrix(0,9)= -1.0;
+	invariantConstraintsMatrix(1,9)= 1.0;
+	invariantConstraintsMatrix(2,10)= 1.0;
 
 	invariantBoundValue.resize(row);
 	invariantBoundValue.assign(row,0);
-	invariantBoundValue[0] = 20.0;
 	invariantBoundValue[1] = 20.0;
+	invariantBoundValue[2] = 5.0;
 	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign));
 
 	row = 2;
@@ -120,21 +123,22 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 
 
-	std::list<transition::ptr> Out_Going_Trans_fromcommunication_communication_loc1;
+	std::list<transition::ptr> Out_Going_Trans_fromcommunication_communication;
 
 	// The transition label is breaking
 
-	// Original guard: break_pattern_t >= 0
+	// Original guard: down_patt_1_t >= 5
 
 	row = 1;
 	col = 11;
 
 	guardConstraintsMatrix.resize(row, col);
 	guardConstraintsMatrix.clear();
-	guardConstraintsMatrix(0,0) = -1.0;
+	guardConstraintsMatrix(0,10) = -1.0;
 
 	guardBoundValue.resize(row);
 	guardBoundValue.assign(row,0);
+	guardBoundValue[0] = -5.0;
 	guard_polytope = polytope::ptr(new polytope(guardConstraintsMatrix, guardBoundValue, guardBoundSign));
 
 
@@ -142,6 +146,7 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	col = 11;
 	R.resize(row, col);
 	R.clear();
+	R(0,0) =  1.0;
 	R(1,1) =  1.0;
 	R(2,2) =  1.0;
 	R(3,3) =  1.0;
@@ -151,7 +156,6 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	R(7,7) =  1.0;
 	R(8,8) =  1.0;
 	R(9,9) =  1.0;
-	R(10,10) =  1.0;
 	std::vector<double> w(row);
 	w.assign(row,0);
 
@@ -161,55 +165,55 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 
 	t = transition::ptr(new transition(1,"breaking",1,2,guard_polytope,assignment));
 
-	Out_Going_Trans_fromcommunication_communication_loc1.push_back(t);
-	l = location::ptr(new location(1, "communication_communication_loc1", system_dynamics, invariant, true, Out_Going_Trans_fromcommunication_communication_loc1));
+	Out_Going_Trans_fromcommunication_communication.push_back(t);
+	l = location::ptr(new location(1, "communication_communication", system_dynamics, invariant, true, Out_Going_Trans_fromcommunication_communication));
 
 	Hybrid_Automata.addInitial_Location(l);
 	Hybrid_Automata.addLocation(l);
 
 
-	// The mode name is  no_communication_no_communication_loc1
+	// The mode name is  no_communication_no_communication
 
 	row = 11;
 	col = 11;
 	Amatrix.resize(row, col);
 	Amatrix.clear();
-	Amatrix(1 , 2) = 1.0;
-	Amatrix(2 , 3) = -1.0;
-	Amatrix(3 , 1) = 1.605;
-	Amatrix(3 , 2) = 4.868;
-	Amatrix(3 , 3) = -3.5754;
-	Amatrix(4 , 5) = 1.0;
-	Amatrix(5 , 3) = 1.0;
-	Amatrix(5 , 6) = -1.0;
-	Amatrix(6 , 4) = 1.1936;
-	Amatrix(6 , 5) = 3.6258;
-	Amatrix(6 , 6) = -3.2396;
-	Amatrix(7 , 8) = 1.0;
-	Amatrix(8 , 6) = 1.0;
-	Amatrix(8 , 9) = -1.0;
-	Amatrix(9 , 1) = 0.7132;
-	Amatrix(9 , 2) = 3.573;
-	Amatrix(9 , 3) = -0.0964;
-	Amatrix(9 , 4) = 0.8472;
-	Amatrix(9 , 5) = 3.2568;
-	Amatrix(9 , 6) = -0.0876;
-	Amatrix(9 , 7) = 1.2726;
-	Amatrix(9 , 8) = 3.072;
-	Amatrix(9 , 9) = -3.1356;
+	Amatrix(0 , 1) = 1.0;
+	Amatrix(1 , 2) = -1.0;
+	Amatrix(2 , 0) = 1.605;
+	Amatrix(2 , 1) = 4.868;
+	Amatrix(2 , 2) = -3.5754;
+	Amatrix(3 , 4) = 1.0;
+	Amatrix(4 , 2) = 1.0;
+	Amatrix(4 , 5) = -1.0;
+	Amatrix(5 , 3) = 1.1936;
+	Amatrix(5 , 4) = 3.6258;
+	Amatrix(5 , 5) = -3.2396;
+	Amatrix(6 , 7) = 1.0;
+	Amatrix(7 , 5) = 1.0;
+	Amatrix(7 , 8) = -1.0;
+	Amatrix(8 , 0) = 0.7132;
+	Amatrix(8 , 1) = 3.573;
+	Amatrix(8 , 2) = -0.0964;
+	Amatrix(8 , 3) = 0.8472;
+	Amatrix(8 , 4) = 3.2568;
+	Amatrix(8 , 5) = -0.0876;
+	Amatrix(8 , 6) = 1.2726;
+	Amatrix(8 , 7) = 3.072;
+	Amatrix(8 , 8) = -3.1356;
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
 	col = 1;
 	Bmatrix.resize(row, col);
 	Bmatrix.clear();
-	Bmatrix(2 , 0) = 1.0;
+	Bmatrix(1 , 0) = 1.0;
 	system_dynamics.isEmptyMatrixB = false;
 	system_dynamics.MatrixB = Bmatrix;
 
 	C.resize(row );
 	C.assign(row,0);
-	C[0] = 1.0;
+	C[9] = 1.0;
 	C[10] = 1.0;
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = C;
@@ -219,13 +223,13 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	col = 11;
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix.clear();
-	invariantConstraintsMatrix(0,0)= 1.0;
+	invariantConstraintsMatrix(0,9)= 1.0;
 	invariantConstraintsMatrix(1,10)= 1.0;
 
 	invariantBoundValue.resize(row);
 	invariantBoundValue.assign(row,0);
 	invariantBoundValue[0] = 20.0;
-	invariantBoundValue[1] = 20.0;
+	invariantBoundValue[1] = 5.0;
 	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign));
 
 	row = 2;
@@ -240,18 +244,30 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 
 
-	std::list<transition::ptr> Out_Going_Trans_fromno_communication_no_communication_loc1;
+	std::list<transition::ptr> Out_Going_Trans_fromno_communication_no_communication;
 
 	// The transition label is restoring
 
-	guard_polytope = polytope::ptr(new polytope());
-	guard_polytope -> setIsUniverse(true);
+	// Original guard: down_patt_1_t >= 5
+
+	row = 1;
+	col = 11;
+
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix.clear();
+	guardConstraintsMatrix(0,10) = -1.0;
+
+	guardBoundValue.resize(row);
+	guardBoundValue.assign(row,0);
+	guardBoundValue[0] = -5.0;
+	guard_polytope = polytope::ptr(new polytope(guardConstraintsMatrix, guardBoundValue, guardBoundSign));
 
 
 	row = 11;
 	col = 11;
 	R.resize(row, col);
 	R.clear();
+	R(0,0) =  1.0;
 	R(1,1) =  1.0;
 	R(2,2) =  1.0;
 	R(3,3) =  1.0;
@@ -261,7 +277,6 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	R(7,7) =  1.0;
 	R(8,8) =  1.0;
 	R(9,9) =  1.0;
-	R(10,10) =  1.0;
 	w.assign(row,0);
 
 
@@ -270,8 +285,8 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 
 	t = transition::ptr(new transition(2,"restoring",2,1,guard_polytope,assignment));
 
-	Out_Going_Trans_fromno_communication_no_communication_loc1.push_back(t);
-	l = location::ptr(new location(2, "no_communication_no_communication_loc1", system_dynamics, invariant, true, Out_Going_Trans_fromno_communication_no_communication_loc1));
+	Out_Going_Trans_fromno_communication_no_communication.push_back(t);
+	l = location::ptr(new location(2, "no_communication_no_communication", system_dynamics, invariant, true, Out_Going_Trans_fromno_communication_no_communication));
 	Hybrid_Automata.addLocation(l);
 
 
@@ -320,17 +335,58 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 
 
 
-	Hybrid_Automata.insert_to_map("break_pattern_t",0);
-	Hybrid_Automata.insert_to_map("e1",1);
-	Hybrid_Automata.insert_to_map("v1",2);
-	Hybrid_Automata.insert_to_map("a1",3);
-	Hybrid_Automata.insert_to_map("e2",4);
-	Hybrid_Automata.insert_to_map("v2",5);
-	Hybrid_Automata.insert_to_map("a2",6);
-	Hybrid_Automata.insert_to_map("e3",7);
-	Hybrid_Automata.insert_to_map("v3",8);
-	Hybrid_Automata.insert_to_map("a3",9);
-	Hybrid_Automata.insert_to_map("t",10);
+	Hybrid_Automata.insert_to_map("e1",0);
+	Hybrid_Automata.insert_to_map("v1",1);
+	Hybrid_Automata.insert_to_map("a1",2);
+	Hybrid_Automata.insert_to_map("e2",3);
+	Hybrid_Automata.insert_to_map("v2",4);
+	Hybrid_Automata.insert_to_map("a2",5);
+	Hybrid_Automata.insert_to_map("e3",6);
+	Hybrid_Automata.insert_to_map("v3",7);
+	Hybrid_Automata.insert_to_map("a3",8);
+	Hybrid_Automata.insert_to_map("t",9);
+	Hybrid_Automata.insert_to_map("down_patt_1_t",10);
 
+	// ************* Section required for setting Reach Parameters & User Options *************
+	unsigned int Directions_Type = 1;
+	unsigned int iter_max = 100;
+	double time_horizon = 5.0;
+	double sampling_time = 1.0E-4;
+	std::vector<std::string> output_variables;
+	output_variables.push_back("t");
+	output_variables.push_back("e1");
 
+	op.set_timeStep(sampling_time);
+	op.set_timeHorizon(time_horizon);
+	op.set_bfs_level(iter_max);
+	op.set_directionTemplate(Directions_Type);
+
+	int x1 = Hybrid_Automata.get_index(output_variables[0]);
+	int x2 = Hybrid_Automata.get_index(output_variables[1]);
+	op.set_first_plot_dimension(x1);
+	op.set_second_plot_dimension(x2);
+	reach_parameters.TimeBound = op.get_timeHorizon();
+	reach_parameters.Iterations = (unsigned int) op.get_timeHorizon()/ op.get_timeStep();
+	reach_parameters.time_step = op.get_timeStep();
+
+	std::vector<std::vector<double> > newDirections;
+	math::matrix<double> Real_Directions;
+	unsigned int dir_nums;
+	if (Directions_Type == BOX) {
+		 dir_nums = 2 * dim;
+		 newDirections = generate_axis_directions(dim);
+	}
+	if (Directions_Type == OCT) {
+		 dir_nums = 2 * dim * dim;
+		 newDirections = get_octagonal_directions(dim);
+	}
+	if (Directions_Type > 2) {
+		 dir_nums = Directions_Type;
+		 newDirections = math::uni_sphere(dir_nums, dim, 100, 0.0005);
+	}
+	get_ublas_matrix(newDirections, Real_Directions);
+	row = dir_nums;
+	col = dim;
+	reach_parameters.Directions.resize(row, col);
+	reach_parameters.Directions = Real_Directions;
 }

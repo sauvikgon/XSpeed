@@ -1,5 +1,4 @@
 /*
- * AGJH.cpp
  *
  *  Created on: 28-Oct-2016
  *      Author: amit
@@ -407,7 +406,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				}else
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
-				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
+				int is_ContainmentCheckRequired = 0;	//1 will Make it Slow; 0 will skip so Fast
 
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;

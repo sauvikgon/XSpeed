@@ -79,7 +79,7 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//user_model(ha, init_state,reach_parameters);
 
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
-		SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
+		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
@@ -94,13 +94,20 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
-		//setplatoon(ha, init_state, reach_parameters);
+		setplatoon(ha, init_state, reach_parameters, op);
 
-		//setFisher_Star(ha,init_state,reach_parameters);		
+		//setFisher_Star(ha,init_state,reach_parameters);
 		//setMotorcar(ha,init_state,reach_parameters);
 		//std::cout <<"Test Model Assigned"<<std::endl;
 
 	}
+	if(HybridSystem_Model_Type == 16){
+		setMotorcar(ha,init_state,reach_parameters,op);
+	}
+	if(HybridSystem_Model_Type == 17){
+		setNav3u(ha,init_state,reach_parameters, op);
+	}
+
 	unsigned int dims=0;
 	for (std::list<initial_state::ptr>::iterator it=init_state.begin();it!=init_state.end();it++){
 		dims = (*it)->getInitialSet()->getSystemDimension();

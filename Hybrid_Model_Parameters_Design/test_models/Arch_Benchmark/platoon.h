@@ -15,6 +15,12 @@
 #include "core_system/symbolic_states/symbolic_states.h"
 #include "core_system/symbolic_states/initial_state.h"
 #include "core_system/math/matrix.h"
+#include "application/userOptions.h"
+#include "application/All_PP_Definition.h"
+#include "application/sf_directions.h"
+#include "application/sf_utility.h"
+#include "core_system/math/uni_sphere.h"
+
 
 /*
  * * Reference for model is http://cps-vo.org/node/26546
@@ -23,8 +29,7 @@
  */
 void setplatoon(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
-		ReachabilityParameters& reach_parameters);
-
+		ReachabilityParameters& reach_parameters, userOptions& op);
 
 
 
