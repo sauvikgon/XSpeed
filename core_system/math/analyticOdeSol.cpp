@@ -35,6 +35,8 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 	math::matrix<double> A(D.MatrixA);
 	math::matrix<double> At(A);
 
+	// debug
+	//std::cout << "time passed for ODE solve:" << time << std::endl;
 	At.scalar_multiply(time);
 
 	At.matrix_exponentiation(expAt);

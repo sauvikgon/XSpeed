@@ -102,11 +102,6 @@ symbolic_states::const_ptr abstractCE::get_symbolic_state(unsigned int i) const 
 
 bool abstractCE::filter(std::vector<unsigned int> template_seq){
 
-	// length must match the template sequence length
-	//debug
-//	if(this->get_length()!=20)
-//		return false;
-	//--
 	if(template_seq.size()==0)
 		return true;
 
@@ -623,9 +618,15 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 		if(i==0)// Initial polytope is given
 		{
 			Inv = this->get_first_symbolic_state()->getInitialPolytope();
+			lb[N*dim] = 0;
+			ub[N*dim] = 10000;
+
 		}
 		else{
-			Inv = HA->getLocation(locIdList[i])->getInvariant();
+			//Inv = HA->getLocation(locIdList[i])->getInvariant();
+			lb[N*dim+i] = 0;
+			ub[N*dim+i] = 10000;
+			continue;
 		}
 
 		if(Inv->getIsEmpty()){
@@ -681,82 +682,82 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 //	We assume that the time variable is named as 't' in the model.
 //	We find out the min,max components of the time variable
 
-	unsigned int t_index =
-		get_first_symbolic_state()->getInitialPolytope()->get_index("t");
+//	unsigned int t_index =
+//		get_first_symbolic_state()->getInitialPolytope()->get_index("t");
+//
+//	assert((t_index >= 0) && (t_index < dim));
 
-	assert((t_index >= 0) && (t_index < dim));
+//	std::vector<double> dmin(dim, 0), dmax(dim, 0);
+//	dmax[t_index] = 1;
+//	dmin[t_index] = -1;
+//
+//	std::list<polytope::ptr> polys;
+//	polytope::ptr guard;
+//
+//	std::list<transition::ptr>::iterator it = transList.begin();
+//	transition::ptr T;
+//
+//	bool aggregation=true;//default is ON
 
-	std::vector<double> dmin(dim, 0), dmax(dim, 0);
-	dmax[t_index] = 1;
-	dmin[t_index] = -1;
-
-	std::list<polytope::ptr> polys;
-	polytope::ptr guard;
-
-	std::list<transition::ptr>::iterator it = transList.begin();
-	transition::ptr T;
-
-	bool aggregation=true;//default is ON
-
-	for (unsigned int i = 0; i < N; i++) {
-
-		Inv = HA->getLocation(locIdList[i])->getInvariant();
-
-		if(i==N-1) {
-			// If last abst sym state, then take time projection of Inv \cap bad_poly
-			Inv = Inv->GetPolytope_Intersection(bad_poly);
-		}
-		else {
-			// Take time projection of flowpipe \cap transition guard
-			T = *(it);
-			guard = T->getGaurd();
-			if(!guard->getIsUniverse())
-				Inv = Inv->GetPolytope_Intersection(guard);
-		}
-		// Inv now is the intersected poly with guard/bad_poly
-
-		if(Inv->getIsEmpty())
-		{
-			lb[N*dim+i]=0;
-			ub[N*dim+i]=0;
-			continue;
-		}
-		else if(Inv->getIsUniverse()){
-			lb[N*dim+i] = -DBL_MAX;
-			ub[N*dim+i] = DBL_MAX;
-			continue;
-		}
-		else{
-			lp_solver lp(GLPK_SOLVER);
-			lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
-			// ensure that time is always positive
-			max = lp.Compute_LLP(dmax);
-			min = -1 * lp.Compute_LLP(dmin);
-
-			// we add the bounds as constraints in the nlopt
-
-			// Get the min and max time projection of start set
-			lp_solver lp1(GLPK_SOLVER);
-
-			lp1.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(),
-					Inv->getInEqualitySign());
-			// Ensure that the time is positive
-			start_min = -1 * lp1.Compute_LLP(dmin);
-			start_max = lp1.Compute_LLP(dmax);
-			ub[N*dim+i] = max - start_min;
-			if(min<=start_max)
-				lb[N*dim+i] = 0;
-			else
-				lb[N*dim+i] = min-start_max;
-		}
+//	for (unsigned int i = 0; i < N; i++) {
+//
+//		Inv = HA->getLocation(locIdList[i])->getInvariant();
+//
+//		if(i==N-1) {
+//			// If last abst sym state, then take time projection of Inv \cap bad_poly
+//			Inv = Inv->GetPolytope_Intersection(bad_poly);
+//		}
+//		else {
+//			// Take time projection of flowpipe \cap transition guard
+//			T = *(it);
+//			guard = T->getGaurd();
+//			if(!guard->getIsUniverse())
+//				Inv = Inv->GetPolytope_Intersection(guard);
+//		}
+//		// Inv now is the intersected poly with guard/bad_poly
+//
+//		if(Inv->getIsEmpty())
+//		{
+//			lb[N*dim+i]=0;
+//			ub[N*dim+i]=0;
+//			continue;
+//		}
+//		else if(Inv->getIsUniverse()){
+//			lb[N*dim+i] = -DBL_MAX;
+//			ub[N*dim+i] = DBL_MAX;
+//			continue;
+//		}
+//		else{
+//			lp_solver lp(GLPK_SOLVER);
+//			lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
+//			// ensure that time is always positive
+//			max = lp.Compute_LLP(dmax);
+//			min = -1 * lp.Compute_LLP(dmin);
+//
+//			// we add the bounds as constraints in the nlopt
+//
+//			// Get the min and max time projection of start set
+//			lp_solver lp1(GLPK_SOLVER);
+//
+//			lp1.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(),
+//					Inv->getInEqualitySign());
+//			// Ensure that the time is positive
+//			start_min = -1 * lp1.Compute_LLP(dmin);
+//			start_max = lp1.Compute_LLP(dmax);
+//			ub[N*dim+i] = max - start_min;
+//			if(min<=start_max)
+//				lb[N*dim+i] = 0;
+//			else
+//				lb[N*dim+i] = min-start_max;
+//		}
 
 		// We may choose to take the average time as the initial dwell time
-		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
-
-		if(it!=transList.end())
-			it++;
-
-	}
+//		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
+//
+//		if(it!=transList.end())
+//			it++;
+//
+//	}
 
 	myopt.set_lower_bounds(lb);
 	myopt.set_upper_bounds(ub);
