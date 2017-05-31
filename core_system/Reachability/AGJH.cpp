@@ -57,7 +57,6 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 					discrete_state.insert_element(s->getLocationId()); //creating discrete_state
 					R1->setDiscreteSet(discrete_state);
 					R1->setInitialPolytope(s->getInitialSet());
-					//R1->setParentPtrSymbolicState(s->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 					R1->setTransitionId(s->getTransitionId()); //keeps track of originating transition_ID
 
 					R = postC(s);
@@ -143,8 +142,6 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 //				}
 //			}
 		}//for-loop no 1
-
-
 
 		// barrier synchronization
 //		if (!safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
