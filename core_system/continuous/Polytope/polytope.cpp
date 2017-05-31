@@ -111,7 +111,8 @@ void polytope::setCoeffMatrix(const math::matrix<double> coeffMatrix) {
 }
 void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 		double bound_value) {
-	this->setSystemDimension(coeff_constraint.size());	//or can be obtained from the map_size()
+	//this->setSystemDimension(coeff_constraint.size());	//or can be obtained from the map_size()
+	this->setSystemDimension(this->map_size());
 	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
 	this->InEqualitySign = 1; // assuming that always less than ineq cons is added.
 	// todo: make the impl to accept ineq sign as param or
@@ -138,13 +139,16 @@ void polytope::setMoreConstraints(math::matrix<double> coeff_constraints,
 	if(coeff_constraints.size1()==0 || coeff_constraints.size2()==0)
 		return;
 
-	this->setSystemDimension(coeff_constraints.size2());
+	this->setSystemDimension(this->map_size());
 	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
 
 	unsigned int row_size, dim_size, rows_new;
 	row_size = this->getCoeffMatrix().size1();
 	dim_size = this->getCoeffMatrix().size2(); //dimension of the polytope
 	rows_new = coeff_constraints.size1();
+
+	std::cout << "The dimension of the coeff_constraints:" << coeff_constraints.size2() <<std::endl;
+	std::cout << "dim_size" << dim_size <<std::endl;
 
 	assert(dim_size == coeff_constraints.size2());
 
