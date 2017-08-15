@@ -147,9 +147,6 @@ void polytope::setMoreConstraints(math::matrix<double> coeff_constraints,
 	dim_size = this->getCoeffMatrix().size2(); //dimension of the polytope
 	rows_new = coeff_constraints.size1();
 
-	std::cout << "The dimension of the coeff_constraints:" << coeff_constraints.size2() <<std::endl;
-	std::cout << "dim_size" << dim_size <<std::endl;
-
 	assert(dim_size == coeff_constraints.size2());
 
 	unsigned int new_total_rows = row_size + rows_new;

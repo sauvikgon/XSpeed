@@ -207,8 +207,6 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 	//todo:: Redundant invariant directional constraints to be removed
 
 	if (isInvariantExist == true) { //if invariant exist. Computing
-		//debug
-		std::cout << "Invariant dimension:" << invariant->getSystemDimension() << std::endl;
 		math::matrix<double> inv_sfm;
 		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constraints
 		inv_sfm.resize(num_inv, shm_NewTotalIteration);

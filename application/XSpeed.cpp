@@ -97,15 +97,18 @@ unsigned int Uniform_Directions_Size;
 int main(int argc, char *argv[]) {
 
 	int status;
-	status = readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters);
+	try{
+		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters);
+	}catch(...){
+		std::cout<<"\nTerminating XSpeed, caused due to error in command-line inputs.\n";
+		std::cout << "Try XSpeed --help to see the command-line options\n";
+		exit(0);
+	}
 
 	// Parse the forbidden state string to make a polytope
 	if (!user_options.get_forbidden_set().empty()) {
 		string_to_poly(user_options.get_forbidden_set(), forbidden_set);
 	}
-	if (status==0)
-		return 0;	//unsatisfied commandLine options
-
 
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
@@ -175,8 +178,6 @@ int main(int argc, char *argv[]) {
 	double return_Time = Avg_wall_clock / (double) 1000;
 
 	if (argc > 1) { //running from command Line for output generation
-		//std::cout << return_Time; //running from command Line for output generation
-		//----Disabling the console Output to Generate the Data using Shell Script
 
 		std::cout << "\nCPU Usage:(%) = " << Avg_cpu_use << std::endl;
 		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
@@ -207,7 +208,7 @@ int main(int argc, char *argv[]) {
 
 	std::list<symbolic_states::ptr>::iterator it;
 	/*
-	 * Generating Vertices as output which can be plotted using gnuplot utilites
+	 * Generating Vertices as output which can be plotted using gnuplot utility
 	 */
 
 	/**
@@ -283,6 +284,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "Counter Example Trace Plotted in the file bad_trace.o\n";
 		std::cout << "Time to search counter-example (milliseconds):" << user_clock << std::endl;
 	}
+
 	cout << "\n******** Summary of XSpeed ********\n";
 	return 0; //returning only the Wall time taken to execute the Hybrid System
 }

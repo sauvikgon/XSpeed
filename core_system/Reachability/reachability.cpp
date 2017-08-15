@@ -62,7 +62,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 		int location_id;
 		location_id = U->getLocationId();
-
 		discrete_set discrete_state;
 		discrete_state.insert_element(location_id); //creating discrete_state
 

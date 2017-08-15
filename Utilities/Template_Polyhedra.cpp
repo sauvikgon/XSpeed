@@ -203,7 +203,6 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 		templateDirs.matrix_join(invDirs, directions);
 
 		intersected_region.push_back(template_polyhedra::ptr(new template_polyhedra(mat_sf, directions)));//intersected_region.push_back(template_polyhedra(mat_sf, p.getCoeffMatrix()));
-		//	cout << "\nIntersection did not End = " << i2 << "\n";
 	}
 
 	/*	if (foundIntersection == 0)
@@ -296,7 +295,6 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 			col = 0;
 			intersection_started = false;
 			intersection_ended = false;
-			//cout << "\nIntersection Ended at = " << i << "\n";
 		}
 		//	i2 = i;
 	}	//end of parallel for-loop
@@ -307,8 +305,6 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 		invDirs = this->getInvariantDirections();
 		templateDirs.matrix_join(invDirs, directions);
 		intersected_region.push_back(template_polyhedra::ptr(new template_polyhedra(mat_sf, directions)));//intersected_region.push_back(template_polyhedra(mat_sf, p.getCoeffMatrix()));
-		//cout<< "   polys = "<<mat_sf.size2() <<std::endl;
-		//	cout << "\nIntersection did not End = " << i2 << "\n";
 	}
 	t101.stop();
 	double clock101;

@@ -9,7 +9,7 @@
 
 namespace po = boost::program_options;
 
-int readCommandLine(int argc, char *argv[], userOptions& user_options,
+void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters) {
@@ -26,8 +26,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 	if (argc == 1) { //No argument:: When Running directly from the Eclipse Editor
 		std::cout << "Missing arguments!\n";
-		std::cout << "Try XSpeed --help to see the command-line options\n";
-		return 0;
+		throw(new exception());
 	}
 
 	desc.add_options()
@@ -86,13 +85,12 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 	std::string input;
 	for (int i = 1; i < argc; i++) {
-		//std::cout<<"1..argv[i] = " <<argv[i]<<std::endl;
+
 		if (std::string(argv[i]).find("-o") != string::npos || std::string(argv[i]).find("--output-file") != string::npos || std::string(argv[i]).find("-m") != string::npos || std::string(argv[i]).find("-c") != string::npos ||
 				std::string(argv[i]).find("--model-file") != string::npos || std::string(argv[i]).find("--config-file") != string::npos )
 			i++;
 		else {
 			if (std::string(argv[i]).find("-F") != string::npos){
-				//std::cout<<"argv[i] = " <<argv[i]<<std::endl;
 				input.append(argv[i]);	//-F
 				input.append(" ");
 				i++; //move next arg ie options for -F
@@ -132,7 +130,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 			if (user_options.get_model() < 0 || user_options.get_model() > 20) {
 				std::cout << "Invalid Model option specified\n";
-				return 0;
+				throw(new exception());
 			}
 		}
 
@@ -168,7 +166,7 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				&& (user_options.get_model()!=0) ) { // model=0 default to no model specified
 			std::cout
 					<< "Invalid inputs (Either a model file or a pre-loaded model to be specified, but not both.)\n";
-			return 0;
+			throw(new exception());
 		}
 
 		if (vm.count("model-file") && vm.count("config-file")
@@ -192,29 +190,23 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
 			// Amit's machine
-			system("g++ -D_GLIBCXX_USE_CXX11_ABI=0 -w -c -std=gnu++11 -I./include/ user_model.cpp -o user_model.o");	//compiler option -D__GLIB.. is required to support running in g++ Version 5
-			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
+//			system("g++ -D_GLIBCXX_USE_CXX11_ABI=0 -w -c -std=gnu++11 -I./include/ user_model.cpp -o user_model.o");	//compiler option -D__GLIB.. is required to support running in g++ Version 5
+//			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
 			//Removed for distribution without PPL library -lppl -lgmp. Also removed -pthread, since it works by just adding -std=gnu++11
 
 			// My machine
-//			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
-//			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
+			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
+			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
 
-			std::cout<<"Model Parsed Successfully!! Calling XSpeed"<<std::endl;
+			std::cout<<"Model Parsed Successfully!! Calling XSpeed ..."<<std::endl;
 
 			string cmdStr1;
 			cmdStr1.append("./XSpeed --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(stFileNameWithPath);
 			cmdStr1.append(SingleSpace);
-//			cmdStr1.append("-F ");
-//			cmdStr1.append("\"");
-//			forbidden_string = user_options.get_forbidden_set();
-//			cmdStr1.append(forbidden_string);
-//			cmdStr1.append("\"");
-//			std::cout << "the command string is:" << cmdStr1 << std::endl;
 			cmdStr1.append(input);
-		//	std::cout << "the command string is:" << cmdStr1 << std::endl;
+
 			system(cmdStr1.c_str());
 			exit(0);
 		}
@@ -236,36 +228,34 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_directionTemplate(vm["directions"].as<int>());
 			if (user_options.get_directionTemplate() <= 0) {
-				std::cout << "Invalid Directions option specified\n";
-				return 0;
+				std::cout << "Invalid Directions option specified. Expected 1 for BOX, 2 for OCT, N for uniform directions.\n";
+				throw(new exception());
 			}
 		}
 		if (vm.count("depth") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_bfs_level(vm["depth"].as<int>());
 			if (user_options.get_bfs_level() < 0) {
-				std::cout<< "Invalid bfs level specified, a positive number expected\n";
-				return 0;
+				std::cout<< "Invalid bfs level specified. A positive number expected.\n";
+				throw(new exception());
 			}
 		} else if (user_options.get_model() != 15) {
-			std::cout << "Missing depth option\n";
-			return 0;
+			std::cout << "Missing value for parameter \"depth\"\n";
+			throw(new exception());
 		}
-
 
 		if (vm.count("aggregate")) { //Compulsory Options but set to thull by default
 			user_options.setSetAggregation((vm["aggregate"].as<std::string>()));
 			if (boost::iequals(user_options.getSetAggregation(),"none")==false) {
 				if (boost::iequals(user_options.getSetAggregation(),"thull")==false){
-					std::cout << "\nError: Invalid aggregation option specified\n";
-					return 0;
+					std::cout << "Invalid aggregation option specified. Expected \"none\" or \"thull\".\n";
+					throw(new exception());
 				}
 			}
 		}
 
-
 		if ((user_options.get_model() == 3 || user_options.get_model() == 4) && user_options.get_bfs_level() != 0){
-			std::cout << "Invalid depth. Only depth 0 permitted \n";
-			exit(0);
+			std::cout << "Invalid depth. Only depth 0 permitted on continuous models.\n";
+			throw(new exception());
 		}
 		if (vm.count("output-variable")) {
 			std::string VarStr;
@@ -289,36 +279,34 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeHorizon(vm["time-horizon"].as<double>());
 			if (user_options.get_timeHorizon() <= 0) { //for 0 or negative time-bound
-				std::cout << "Invalid time-horizon option specified, A positive non zero bound expected\n";
-				return 0;
+				std::cout << "Invalid time-horizon option specified. A positive non-zero value expected.\n";
+				throw(new exception());
 			}
 		} else if (user_options.get_model() != 15) {
-			std::cout << "Missing time-horizon option\n";
-			return 0;
+			std::cout << "Missing value for parameter \"time-horizon\"\n";
+			throw(new exception());
 		}
 		if (vm.count("time-step") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeStep(vm["time-step"].as<double>());
-			if (user_options.get_timeStep() > 0) {
-				//std::cout << "\niterations_size = " << iterations_size;
-			} else { //for 0 or negative sampling-time
-				std::cout << "Invalid time-step option specified\n";
-				return 0;
+			if (user_options.get_timeStep() <= 0) {
+				std::cout << "Invalid time-step option specified. A positive non-zero time-step expected.\n";
+				throw(new exception());
 			}
 		} // else if (isConfigFileAssigned == false) {
 		else if (user_options.get_model() != 15) {
-			std::cout << "Missing time-step option\n";
-			return 0;
+			std::cout << "Missing value for parameter \"time-step\". \n";
+			throw(new exception());
 		}
 		//Algorithm Preference
 		if (vm.count("algo")) {
 			user_options.set_algorithm(vm["algo"].as<int>());
 			if (user_options.get_algorithm()< 0|| user_options.get_algorithm() > MAX_ALGO) {
-				std::cout << "Invalid algorithm option specified\n";
-				return 0;
+				std::cout << "Invalid algorithm option specified.\n";
+				throw(new exception());
 			}
 		} else if (user_options.get_model() != 15) {
-			std::cout << "Missing --algo option\n";
-			return 0;
+			std::cout << "Missing value for parameter \"algo\". \n";
+			throw(new exception());
 		}
 		if (user_options.get_algorithm() == 3) { //this argument will be set only if algorithm==time-slice or PAR_ITER
 			if (vm.count("time-slice")) { //Compulsory Options if algorithm-type==Time-Slice(4)
@@ -326,23 +314,22 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 				if (partition_size > 0) {
 					user_options.setTotalSliceSize(partition_size);
 				} else { //for 0 or negative time-slice
-					std::cout << "Invalid time-slice option specified\n";
-					return 0;
+					std::cout << "Invalid time-slice option specified\n. A positive integer value expected.\n";
+					throw(new exception());
 				}
 			} else {
-				std::cout << "Missing time-slice option\n";
-				return 0;
+				std::cout << "Missing value for parameter \"time-slice\" \n";
+				throw(new exception());
 			}
 		}
 		if (user_options.get_algorithm() == 6) { //if gpu enabled then
 			if (vm.count("number-of-streams")) { //Compulsory Options but set 1 by default
 				int no_streams = vm["number-of-streams"].as<int>(); //default value ==1
 				if (no_streams >= 1) {
-					//number_of_streams = no_streams; //Number of GPU-Streams selected
 					user_options.setStreamSize(no_streams);
 				} else {
-					std::cout << "Invalid number_of_streams option specified\n";
-					return 0;
+					std::cout << "Invalid number_of_streams option specified. An integral value larger of equal to 1 expected.\n";
+					throw(new exception());
 				}
 			}
 		}
@@ -352,15 +339,12 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
 		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
 				forbidden_set);
-		//std::cout<<"Model loaded successfully\n";
+
 		if(output_vars[0].empty() && output_vars[1].empty())
 		{
-			std::cout<<"Output variables not specified.\n"<<std::endl;
-			exit(0);
+			std::cout<<"Output variables not specified. Two variables of the system expected.\n"<<std::endl;
+			throw(new exception());
 		}
-		//std::cout<<"Output varaible not empty\n";
-		//Here check if they are specified but wrong vars, this also returns error
-		//if(Hybrid_Automata.get_index(output_vars[0]) ==-1)
 
 		unsigned int x1 = Hybrid_Automata.get_index(output_vars[0]);
 		unsigned int x2 = Hybrid_Automata.get_index(output_vars[1]);
@@ -373,5 +357,4 @@ int readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (!user_options.get_forbidden_set().empty())
 			forbidden_set.second->print2file("./bad_poly", x1, x2);
 	}
-	return 1;
 }

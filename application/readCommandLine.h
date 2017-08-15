@@ -30,7 +30,7 @@
 #ifndef APPLICATION_READCOMMANDLINE_H_
 #define APPLICATION_READCOMMANDLINE_H_
 
-int readCommandLine(int argc, char *argv[], userOptions& user_options,
+void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters);
