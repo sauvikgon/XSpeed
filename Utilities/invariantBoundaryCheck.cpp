@@ -996,7 +996,6 @@ supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParame
 
 	math::matrix<double> phi, phi_trans;
 
-
 	if (!SystemDynamics.isEmptyMatrixA && (SystemDynamics.isEmptyMatrixB || SystemDynamics.U->getIsEmpty()) && SystemDynamics.isEmptyC){	//both B and C is empty but not A, so we have x'(t) = Ax(t)
 		//cout <<"Matrix B and Vector C is Empty!!, Dynamics is x'(t) = Ax(t)\n";
 		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
@@ -1430,11 +1429,12 @@ void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvide
 
 	//-- get the time-horizon and time-step and discritization_factor=10 times
 	// compute the iteration using this new time-step
-	double widening_Factor = 5;	//10 times
+	double widening_Factor = 10; //5;	//10 times
 	double time_step = ReachParameters.time_step * widening_Factor;
 	double time_horizon = ReachParameters.TimeBound;
 	double start_time = 0, time_crossed, next_search_time, actual_time_bound;//last time when it is still inside //cout<<"test 1\n";
-std::string filename="./coarse.out";
+
+	std::string filename="./coarse.out";
 
 	//time_crossed = invariantCrossingCheck(start_time, time_step, time_horizon, Initial, ReachParameters, invariant, SystemDynamics, lp_solver_type_choosen);
 	time_crossed = invariantCrossingCheck1(start_time, time_step, time_horizon, Initial, ReachParameters, invariant,

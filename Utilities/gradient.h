@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <cmath>
-#include <gsl/gsl_deriv.h>
+#include "gsl/gsl_deriv.h"
 
 #include "../core_system/continuous/Polytope/Polytope.h"
 #include "core_system/math/analyticODESol.h"
