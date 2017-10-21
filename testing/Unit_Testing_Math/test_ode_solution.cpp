@@ -1,4 +1,4 @@
-#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 #include "core_system/math/matrix.h"
 #include "counterExample/simulation.h"
 #include "application/DataStructureDirections.h"

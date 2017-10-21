@@ -19,11 +19,12 @@
 #include <boost/tokenizer.hpp>
 
 using namespace std;
+
 /*
  * If a polytope is represented using intersections of halfspaces then it is of the form Ax<=b
  * where A is the coefficients Matrix of the variables 'x' and b is the columnVector
  *
- * coeffMatrix : 	All facets of the Polytope in Matrix form (i.e. the coefficients of the variables).
+ * coeffMatrix : All facets of the Polytope in Matrix form (i.e. the coefficients of the variables).
  * number_facets : Number of faces of the defined polytope.
  * dimension :  Number of variables of the system.
  * columnVector :	The values b for each facets.
@@ -171,7 +172,6 @@ public:
 	void print2file(std::string fname, unsigned int dim1, unsigned int dim2);
 
 };
-
 
 /**
  * Creates a pair of <loc_id, poly> from the user given bad state string

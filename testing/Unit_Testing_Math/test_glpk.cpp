@@ -6,7 +6,7 @@
  */
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
+#include "UnitTest++.h"
 #include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 #include "core_system/math/matrix.h"
 #include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions

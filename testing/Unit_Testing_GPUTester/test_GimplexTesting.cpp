@@ -1,8 +1,8 @@
 #include <sstream>
 #include <iostream>
 
-#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+//#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 
 #include "core_system/math/Gimplex/simplex.cuh"
 #include "core_system/math/matrix.h"

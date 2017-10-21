@@ -1,4 +1,4 @@
-#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+#include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 #include <nlopt.hpp>
 #include <iostream>
 #include <sstream>

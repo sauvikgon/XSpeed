@@ -211,7 +211,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			exit(0);
 		}
 		if (user_options.get_model() == 15) { //This condition specifies Recursive call of XSpeed
-			user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
+//			user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
 			unsigned int x1,x2;
 			x1 = user_options.get_first_plot_dimension();
 			x2 = user_options.get_second_plot_dimension();
@@ -337,8 +337,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
-		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
-				forbidden_set);
+//		load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
 
 		if(output_vars[0].empty() && output_vars[1].empty())
 		{

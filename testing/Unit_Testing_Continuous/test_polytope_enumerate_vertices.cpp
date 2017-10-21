@@ -7,7 +7,7 @@
 
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h"
+#include "UnitTest++.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/math/matrix.h"
 #include "Utilities/vector_operations.h"

@@ -8,8 +8,8 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+//#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "application/DataStructureDirections.h"
 #include "core_system/HybridAutomata/Transition.h"
 #include "core_system/HybridAutomata/Location.h"

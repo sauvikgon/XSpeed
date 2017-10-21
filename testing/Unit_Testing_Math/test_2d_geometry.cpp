@@ -8,7 +8,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "UnitTest++/UnitTest++.h"
+#include "UnitTest++.h"
 #include "core_system/math/2d_geometry.h"
 #include <string>
 using namespace std;

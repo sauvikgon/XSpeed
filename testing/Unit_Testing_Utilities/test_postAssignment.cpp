@@ -7,8 +7,8 @@
 
 #include <sstream>
 #include <iostream>
-#include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "unittest++/UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
+#include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
+//#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <vector>
 #include "Utilities/StandardVector.h"
 #include "core_system/math/matrix.h"

@@ -131,7 +131,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	double time_offset = x[get_index("t")];
 
-	bool print_flag = false;
+	bool print_flag = true; // makes the trace printed in the  outfile
 	std::ofstream myfile;
 	if(!filename.empty()){
 		myfile.open(this->filename.c_str(),std::fstream::app);

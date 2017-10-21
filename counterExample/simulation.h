@@ -2,11 +2,12 @@
  * simulation.h
  *
  *  Created on: 12-Feb-2016
- *      Author: rajarshi
+ *      Author: Rajarshi
  */
 
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
+
 #include <vector>
 #include <cvode/cvode.h>
 #include <nvector/nvector_serial.h>
