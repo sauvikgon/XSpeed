@@ -654,7 +654,6 @@ void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
 
 	init_state_list.push_back(I);	//pushing 1st initial set object
 
-std::cout<<"Ist initial Set created\n";
 	//2nd initial set
 
 	symbolic_states::ptr S2; //null_pointer as there is no instantiation
@@ -695,6 +694,5 @@ std::cout<<"Ist initial Set created\n";
 			new initial_state(initial_location_id, initial_polytope_I2, S2,
 					transition_id));
 	init_state_list.push_back(I2); //pushing 2nd initial set object
-	std::cout<<"2nd initial Set created\n";
 }
 

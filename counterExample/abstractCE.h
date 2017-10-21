@@ -34,15 +34,15 @@
  *
  * @author: Rajarshi
  */
-//using NEWMAT::ColumnVector;
+
 extern unsigned int N;
 extern unsigned int dim;
 extern hybrid_automata::ptr HA;
 extern std::vector<int> locIdList;
 extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
-extern std::list<refinement_point> ref_pts; // a list of invariant violating points to refine the search and obtained a validated trajectory
-extern std::vector<std::vector<double> > X0; // list of start point of the trajectory segments. Used only in the NLP-LP mixed program
+extern std::list<refinement_point> ref_pts; // a list of invariant violating points to refine the search and obtain a valid trajectory
+extern std::vector<std::vector<double> > X0; // list of start points of the trajectory segments. Used only in the NLP-LP mixed program
 extern std::list<symbolic_states::ptr> ce_sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
 
 class abstractCE
@@ -116,7 +116,7 @@ public:
 		return H;
 	}
 	/**
-	 * returns a validated counterexample trace, a trace that satisfies the invariant
+	 * returns a validated counterexample trace, a trace that satisfies the HA constraints
 	 */
 	concreteCE::ptr get_validated_CE(double tolerance);
 
@@ -124,12 +124,13 @@ public:
 	 * Plot the counter example projected along dimensions passed
 	 * as parameters
 	 */
-//	void plot(unsigned int i, unsigned int j);
+	void plot(unsigned int i, unsigned int j);
 
 	/**
-	 * Filter function to filter abstract CEs not the specified one in the parameter.
-	 * The specified abstract CE is given by the list of location ids (template_sequence)
-	 * An empty template will not filter any ce
+	 * Filter function to filter abstract CEs, not the one specified in the parameter.
+	 * The specified abstract CE is given by the list of location ids
+	 * An empty template will not filter any ce.
+	 * Returns true when the CE matches the filter template in the argument. False otherwise.
 	 */
 	bool filter(std::vector<unsigned int> template_sequence);
 
@@ -162,16 +163,16 @@ private:
 	polytope::ptr forbid_poly;
 
 	/**
-	 * Returns an instance of the concrete counter-example from the abstract using NLP and flowpipe constraints
+	 * Returns an instance of the concrete counter-example from the abstract one, using NLP with flowpipe given constraints
 	 */
 	concreteCE::ptr gen_concreteCE(double tolerance, const std::list<refinement_point>& refinements);
 
 	/**
-	 * Returns an instance of the concrete counter-example, if it exists, using mixed NLP-LP
+	 * Returns an instance of the concrete counter-example, if it exists, using mixed NLP-LP problem
 	 */
 	concreteCE::ptr gen_concreteCE_NLP_LP(double tolerance, const std::list<refinement_point>& refinements);
 	/**
-	 * Returns an instance of the concrete counter-example, if it exists, using NLP and limited HA constraints
+	 * Returns an instance of the concrete counter-example, if it exists, using NLP and HA given constraints
 	 */
 	concreteCE::ptr gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements);
 };

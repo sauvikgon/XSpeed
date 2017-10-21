@@ -130,7 +130,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			user_options.set_model(vm["model"].as<int>());
 
 			if (user_options.get_model() < 0 || user_options.get_model() > 20) {
-				std::cout << "Invalid Model option specified\n";
+				std::cout << "Invalid Model specified\n";
 				throw(new exception());
 			}
 		}
@@ -165,8 +165,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 		if (vm.count("model-file") && vm.count("config-file")
 				&& (user_options.get_model()!=0) ) { // model=0 default to no model specified
-			std::cout
-					<< "Invalid inputs (Either a model file or a pre-loaded model to be specified, but not both.)\n";
+			std::cout << "Invalid inputs (Either a model file or a pre-loaded model to be specified, but not both.)\n";
 			throw(new exception());
 		}
 
@@ -242,7 +241,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("depth") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_bfs_level(vm["depth"].as<int>());
 			if (user_options.get_bfs_level() < 0) {
-				std::cout<< "Invalid bfs level specified. A positive number expected.\n";
+				std::cout<< "Invalid bfs level specified. A positive integer expected.\n";
 				throw(new exception());
 			}
 		} else if (user_options.get_model() != 15) {
@@ -347,20 +346,17 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
-		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
-				forbidden_set);
+		load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
 
 		if(output_vars[0].empty() && output_vars[1].empty())
 		{
 			std::cout<<"Output variables not specified. Two variables of the system expected.\n"<<std::endl;
 			throw(new exception());
 		}
-		//std::cout<<"Output varaible not empty\n";
-		//Here check if they are specified but wrong vars, this also returns error
-		//if(Hybrid_Automata.get_index(output_vars[0]) ==-1)
 
 		unsigned int x1 = Hybrid_Automata.get_index(output_vars[0]);
 		unsigned int x2 = Hybrid_Automata.get_index(output_vars[1]);
+
 		user_options.set_first_plot_dimension(x1);
 		user_options.set_second_plot_dimension(x2);
 		if (!(output_vars[2].empty())) {

@@ -96,7 +96,6 @@ unsigned int Uniform_Directions_Size;
 
 int main(int argc, char *argv[]) {
 
-	int status;
 	try{
 		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters);
 	}catch(...){
@@ -109,9 +108,6 @@ int main(int argc, char *argv[]) {
 	if (!user_options.get_forbidden_set().empty()) {
 		string_to_poly(user_options.get_forbidden_set(), forbidden_set);
 	}
-	if (status==0)
-		return 0;	//unsatisfied commandLine options
-
 
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
@@ -275,11 +271,8 @@ int main(int argc, char *argv[]) {
 	tt1.stop(); //stop time
 
 	//timers
-	double wall_clock, user_clock, system_clock;
-	wall_clock = tt1.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+	double user_clock;
 	user_clock = tt1.elapsed().user / 1000000;
-	system_clock = tt1.elapsed().system / 1000000;
-
 	//--end of timers
 	if (!real_ce) {
 		std::cout << "******** No Violation of Safety Property ********\n";
