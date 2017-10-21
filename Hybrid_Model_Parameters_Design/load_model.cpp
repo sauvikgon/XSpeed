@@ -27,8 +27,8 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		SetBouncingBall_Parameters(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == TBBALL) {
-		//SetTimedBouncingBall_ParametersHystOutput(ha, init_state,	reach_parameters);
-		SetTimedBouncingBall_2initSet(ha, init_state, reach_parameters);
+		SetTimedBouncingBall_ParametersHystOutput(ha, init_state,	reach_parameters);
+		//SetTimedBouncingBall_2initSet(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {
 		SetHelicopter_Parameters3(ha, init_state, reach_parameters);
