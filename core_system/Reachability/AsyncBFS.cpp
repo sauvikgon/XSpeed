@@ -103,6 +103,7 @@ void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_sta
 			RecursiveWorkers[i].join();
 		}
 	}
+	return ; //return from this thread:: This has no effect in performance
 }
 
 
@@ -161,18 +162,23 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 		 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
 		 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
 		 * and also avoid B (and poly U) for similar reason. However, C here is a constant vector.
+		 *
+		 *
+		 * ToDo:: This jumpInvariantBoundaryCheck() need to be modified for check Omega crossing all Invariant's boundary
+		 * 	at the same time instead of checking each invariant for the whole time horizon as implemented in InvariantBoundaryCheckNewLPSolver()
+		 * 	For submitting the reading in STT Journal we did not included jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
 		 */
-		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
-			//Approach of Coarse-time-step and Fine-time-step
-			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-				current_location->getInvariant(), myData.lp_solver_type_choosen, NewTotalIteration);
-		}else{
+//		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
+//			//Approach of Coarse-time-step and Fine-time-step
+//			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
+//				current_location->getInvariant(), myData.lp_solver_type_choosen, NewTotalIteration);
+//		}else{
 			//Approach of Sequential invariant check will work for all case
 			//InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
 			//	reach_parameters, current_location->getInvariant(), myData.lp_solver_type_choosen, NewTotalIteration);//Old implementation
 			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
 				reach_parameters, current_location->getInvariant(), myData.lp_solver_type_choosen, NewTotalIteration);
-		}
+//		}
 
 		/*jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
 						current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);*/
@@ -319,7 +325,8 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 				/*
 				 * Now perform containment check similar to sequential algorithm.
 				 */
-				int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
+
+				int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make Slow; 0 will disable so Fast
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";

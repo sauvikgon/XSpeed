@@ -56,4 +56,8 @@ double myconstraintH(const std::vector<double> &x, std::vector<double> &grad, vo
  */
 double HausdorffDistance(polytope::ptr X, polytope::ptr Y);
 
+void printStatus2(nlopt::result status);
+
+
 #endif /* HOUSDORFFDISTANCE_H_ */
+

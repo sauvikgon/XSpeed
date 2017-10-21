@@ -91,6 +91,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			i++;
 		else {
 			if (std::string(argv[i]).find("-F") != string::npos){
+				//std::cout<<"argv[i] = " <<argv[i]<<std::endl;
 				input.append(argv[i]);	//-F
 				input.append(" ");
 				i++; //move next arg ie options for -F
@@ -205,6 +206,12 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(stFileNameWithPath);
 			cmdStr1.append(SingleSpace);
+//			cmdStr1.append("-F ");
+//			cmdStr1.append("\"");
+//			forbidden_string = user_options.get_forbidden_set();
+//			cmdStr1.append(forbidden_string);
+//			cmdStr1.append("\"");
+//			std::cout << "the command string is:" << cmdStr1 << std::endl;
 			cmdStr1.append(input);
 
 			system(cmdStr1.c_str());
@@ -243,6 +250,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			throw(new exception());
 		}
 
+
 		if (vm.count("aggregate")) { //Compulsory Options but set to thull by default
 			user_options.setSetAggregation((vm["aggregate"].as<std::string>()));
 			if (boost::iequals(user_options.getSetAggregation(),"none")==false) {
@@ -252,6 +260,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				}
 			}
 		}
+
 
 		if ((user_options.get_model() == 3 || user_options.get_model() == 4) && user_options.get_bfs_level() != 0){
 			std::cout << "Invalid depth. Only depth 0 permitted on continuous models.\n";
@@ -326,6 +335,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			if (vm.count("number-of-streams")) { //Compulsory Options but set 1 by default
 				int no_streams = vm["number-of-streams"].as<int>(); //default value ==1
 				if (no_streams >= 1) {
+					//number_of_streams = no_streams; //Number of GPU-Streams selected
 					user_options.setStreamSize(no_streams);
 				} else {
 					std::cout << "Invalid number_of_streams option specified. An integral value larger of equal to 1 expected.\n";
@@ -337,13 +347,17 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
 	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
-//		load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
+		load_model(init_state, Hybrid_Automata, user_options, reach_parameters,
+				forbidden_set);
 
 		if(output_vars[0].empty() && output_vars[1].empty())
 		{
 			std::cout<<"Output variables not specified. Two variables of the system expected.\n"<<std::endl;
 			throw(new exception());
 		}
+		//std::cout<<"Output varaible not empty\n";
+		//Here check if they are specified but wrong vars, this also returns error
+		//if(Hybrid_Automata.get_index(output_vars[0]) ==-1)
 
 		unsigned int x1 = Hybrid_Automata.get_index(output_vars[0]);
 		unsigned int x2 = Hybrid_Automata.get_index(output_vars[1]);
@@ -356,4 +370,5 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (!user_options.get_forbidden_set().empty())
 			forbidden_set.second->print2file("./bad_poly", x1, x2);
 	}
+	//return 1;
 }

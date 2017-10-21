@@ -108,7 +108,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
 
-	//	std::cout<<"alfa = "<<result_alfa<<"   beta = "<<result_beta;
+	//	std::cout<<"alfa = "<<result_alfa<<"   beta = "<<result_beta<<std::endl;
 
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
@@ -136,23 +136,29 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 			 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
 			 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
 			 * and also avoid B (and poly U) for similar reason. However, C here is a constant vector.
+			 *
+			 * ToDo:: This jumpInvariantBoundaryCheck() need to be modified for check Omega crossing all Invariant's boundary
+			 * 	at the same time instead of checking each invariant for the whole time horizon as implemented in InvariantBoundaryCheckNewLPSolver()
+			 * 	For submitting the reading in STT Journal we did not included jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
 			 */
-			if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
-				//Approach of Coarse-time-step and Fine-time-step
-				jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-					current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
-				//cout<<"Running Approach of Coarse-time-step and Fine-time-step\n";
-			}else{
+
+//			if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
+//				//Approach of Coarse-time-step and Fine-time-step
+//				cout<<"Running Approach of Coarse-time-step and Fine-time-step\n";
+//				jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
+//					current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+//
+//			}else{
 				//Approach of Sequential invariant check will work for all case
 				InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
 					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
-			}
+//			}
 		}
 		//std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 
-		//std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<"\n";
+		//std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<std::endl;
 		num_flowpipe_computed++;//computed one Flowpipe
 		//	*********************************************** Reach or Flowpipe Computed ************************************
 		if (previous_level != levelDeleted) {
@@ -308,8 +314,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					 * and the transition assignment is an identity. *Take only the last polytope from the flowpipe and pass as the new
 					 * symbolic state in the waiting list. The 'continuation' principle will ensure that no reachable state is missed.
 					 */
-					bool continuation = check_continuation(current_location, current_destination, *t);
 
+					bool continuation = check_continuation(current_location, current_destination, *t);
 					if(continuation){
 						// get the last polytope from the plowpipe
 						std::cout << "Continuation Condition Satisfied\n";
@@ -327,7 +333,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					continue;
 				}
 
-				//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
+				//Todo to make it even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 				if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
 						|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0))
 					continue; //do not push into the waitingList
@@ -363,7 +369,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					//debug
 					//newShiftedPolytope->print2file("./nextpoly",0,10);
 					//---
-					int is_ContainmentCheckRequired = 1;	//1 will Make it Slow; 0 will skip so Fast
+					int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make Slow; 0 will disable so Fast
 					if (is_ContainmentCheckRequired){	//Containtment Checking required
 						bool isContain=false;
 						/*

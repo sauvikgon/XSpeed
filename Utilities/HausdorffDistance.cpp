@@ -1,3 +1,4 @@
+
 #include "Utilities/HausdorffDistance.h"
 
 nlopt::opt minopt; // nlopt object to solve the distance Inf over Y
@@ -5,6 +6,32 @@ nlopt::opt minopt; // nlopt object to solve the distance Inf over Y
 /**
  * A linear constraint represented as ax+b ≤ 0
  */
+
+void printStatus2(int status) {
+
+	if (status == -1)
+		std::cout << "nlopt::result:=status =  FAILURE "<<std::endl;
+	if (status == -2)
+		std::cout << "nlopt::result:=status = INVALID_ARGS "<<std::endl;
+	if (status == -3)
+		std::cout << "nlopt::result:=status = OUT_OF_MEMORY "<<std::endl;
+	if (status == -4)
+		std::cout << "nlopt::result:=status = ROUNDOFF_LIMITED "<<std::endl;
+	if (status == -5)
+		std::cout << "nlopt::result:=status = FORCED_STOP "<<std::endl;
+	if (status == 1)
+		std::cout << "nlopt::result:=status = SUCCESS "<<std::endl;
+	if (status == 2)
+		std::cout << "nlopt::result:=status = STOPVAL_REACHED "<<std::endl;
+	if (status == 3)
+		std::cout << "nlopt::result:=status = FTOL_REACHED "<<std::endl;
+	if (status == 4)
+		std::cout << "nlopt::result:=status = XTOL_REACHED "<<std::endl;
+	if (status == 5)
+		std::cout << "nlopt::result:=status = MAXEVAL_REACHED "<<std::endl;
+	if (status == 6)
+		std::cout << "nlopt::result:=status = MAXTIME_REACHED "<<std::endl;
+}
 
 double myconstraintH(const std::vector<double> &x, std::vector<double> &grad, void *data) {
 
@@ -41,14 +68,14 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
 	std::vector<double>& x_nonconst = const_cast<std::vector<double>& >(x);
 
 	minopt.set_min_objective(myobjfunc3, &x_nonconst);
-	double tolerance = 1e-4;
+	double tolerance = 1e-8;
 
 	std::vector<double> v(x.size(), 0);
 	try {
 //		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
-		minopt.set_maxeval(4000); // Max Iterations to converge to maxima
+		minopt.set_maxeval(100); // Max Iterations to converge to maxima
 
-		minopt.set_stopval(tolerance);
+//@Amit		minopt.set_stopval(tolerance);
 		int status = minopt.optimize(v, minf);
 		if(status<0)
 				throw std::runtime_error("Nlopt returned error\n");
@@ -65,7 +92,7 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
  */
 double getDistance(polytope::ptr X, polytope::ptr Y)
 {
-	double tolerance = 1e-4;
+	double tolerance = 1e-8;
 
 	unsigned int dim_X = X->getSystemDimension();
 	unsigned int dim_Y = Y->getSystemDimension();
@@ -101,8 +128,8 @@ double getDistance(polytope::ptr X, polytope::ptr Y)
 //	std::cout<<"constraint of Min NLP set successful!!"<<std::endl;
 	// create the nlopt object to solve the max of mins problem over X
 	myopt.set_max_objective(myobjfunc1, &data_Y);
-	myopt.set_maxeval(4000); // Max Iterations to converge to maxima
-	myopt.set_stopval(tolerance);
+	myopt.set_maxeval(100); // Max Iterations to converge to maxima
+	//myopt.set_stopval(tolerance);
 
 
 	// Set the initial value of the search
@@ -110,7 +137,7 @@ double getDistance(polytope::ptr X, polytope::ptr Y)
 	/*
 	 * Testing with a point inside the polytope
 	 */
-	x[0] = 10; x[1]=10;
+//	x[0] = 10; x[1]=10;
 
 
 	double maxf;
@@ -130,8 +157,9 @@ double getDistance(polytope::ptr X, polytope::ptr Y)
 	try {
 //		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
 
-		myopt.set_stopval(tolerance);
+//@Amit		myopt.set_stopval(tolerance);
 		int status = myopt.optimize(x, maxf);
+		printStatus2(status);
 		if(status<0)
 				throw std::runtime_error("Nlopt returned error\n");
 
@@ -142,6 +170,7 @@ double getDistance(polytope::ptr X, polytope::ptr Y)
 	return maxf;
 
 }
+
 
 /**
  *  H_D(X,Y) = max{sup_{x \in X} inf_{y \in Y} d(x,y), sup_{y \in Y} inf_{x \in X} d(X,Y)}
@@ -155,3 +184,4 @@ double HausdorffDistance(polytope::ptr X, polytope::ptr Y)
 
 	return d1>d2?d1:d2;
 }
+

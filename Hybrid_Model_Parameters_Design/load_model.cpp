@@ -75,17 +75,11 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	if (HybridSystem_Model_Type == 14) {
 
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
-		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
 
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
-
-		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
-
-
-		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
-
-		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
+	//	SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
@@ -100,9 +94,9 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
-		setplatoon(ha, init_state, reach_parameters, op);
+		//setplatoon(ha, init_state, reach_parameters);
 
-		//setFisher_Star(ha,init_state,reach_parameters);
+		//setFisher_Star(ha,init_state,reach_parameters);		
 		//setMotorcar(ha,init_state,reach_parameters);
 		//std::cout <<"Test Model Assigned"<<std::endl;
 

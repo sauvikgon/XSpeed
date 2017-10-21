@@ -1,4 +1,5 @@
 /*
+ * AGJH.cpp
  *
  *  Created on: 28-Oct-2016
  *      Author: amit
@@ -78,30 +79,22 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 				//Currently removed the Safety Check Section from here
 
 				//  ******************************** Safety Verification section ********************************
-				safetyViolated = checkSafety(R, s, R1, ce_candidates); //R, s, R1 are all local variables per thread
+//				safetyViolated = checkSafety(R, s, R1, ce_candidates); //R, s, R1 are all local variables per thread
 				//  ******************************** Safety Verification section ********************************
-				//		if (safetyViolated) {
-				//			#pragma omp critical
-				//			{
-				//				done=true;
-				//			}
-				//			break; //no need to compute rest of the locations
-				//		}
-
-
+				
 					std::list<initial_state::ptr> R2;
 					if (level < bound){	//Check level to avoid last PostD computation
 					//	std::cout<<"Before PostD called\n";
 						R2 = postD(R1, PASSED, safetyViolated);
-//						//--------New Safety Check for Arch-Competition
-//						if (safetyViolated){//Safety Violated For Motorcade-5 and Fisher_star model
-//							#pragma omp critical
-//							{
-//								done=true;
-//							}
-//							break;
-//						}
-//						//--------
+						//--------New Safety Check for Arch-Competition
+						if (safetyViolated){//Safety Violated For Motorcade-5 and Fisher_star model
+							#pragma omp critical
+							{
+								done=true;
+							}
+							break; //no need to compute rest of the locations
+						}
+						//--------
 #pragma omp critical
 					{
 						waiting_count = waiting_count + R2.size();
@@ -127,24 +120,24 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 					// call postD with res of prev step
 				}//for-loop no 3
 					Wlist[t][i][q].clear();
-//					if (safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
-//						#pragma omp critical
-//						{
-//							done=true;
-//						}
-//					}
+					if (safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
+						#pragma omp critical
+						{
+							done=true;
+						}
+					}
 
 			}//for-loop no 2
-//			if (safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
-//				#pragma omp critical
-//				{
-//					done=true;
-//				}
-//			}
+			if (safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
+				#pragma omp critical
+				{
+					done=true;
+				}
+			}
 		}//for-loop no 1
 
 		// barrier synchronization
-//		if (!safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
+		if (!safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
 			for(unsigned int i=0;i<N;i++){
 				for(unsigned int j=0;j<N;j++){
 					if(!Wlist[1-t][i][j].empty()){
@@ -155,7 +148,7 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 				if(!done)
 					break;
 			}
-//		}
+		}
 		level++;
 		t = 1 - t;
 
@@ -238,19 +231,24 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 		 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
 		 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
 		 * and also avoid B (and poly U) for similar reason. However, C here is a constant vector.
+		 *
+		 * ToDo:: This jumpInvariantBoundaryCheck() need to be modified for check Omega crossing all Invariant's boundary
+		 * 	at the same time instead of checking each invariant for the whole time horizon as implemented in InvariantBoundaryCheckNewLPSolver()
+		 * 	For submitting the reading in STT Journal we did not included jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
+
 		 */
-		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
-			//Approach of Coarse-time-step and Fine-time-step
-			//std::cout<<"Coarse-time-step and Fine-time-step Flowpipe \n";
-			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-				current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
-		}else{
-			//Approach of Sequential invariant check will work for all case
+//		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
+//			//Approach of Coarse-time-step and Fine-time-step
+//			//std::cout<<"Coarse-time-step and Fine-time-step Flowpipe \n";
+//			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
+//				current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+//		}else{
+//			//Approach of Sequential invariant check will work for all case
 			//InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
 			//	reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);	//OLD implementation
 			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
 				reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
-		}
+//		}
 
 		/*jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
 						current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);*/
@@ -353,7 +351,16 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
 					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0)){
-
+				//--Arch-Competition: Implemented for Motorcade_5 Benchmark
+//				if (polys.size()!=0){//Guard set intersected
+//					#pragma omp critical
+//					{
+//						//std::cout<<"polys.size() = "<<polys.size()<<"\n UnSafe Location Reached!!!\n";
+//						unsafe=true;
+//					}
+//					std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
+//					return res;//Safety Violated. Returning sym_state list passed so far.
+//				}
 
 				continue;//Guard set NOT intersected but these location not pushed in the waitingList
 			}
@@ -403,8 +410,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				}else
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
-				int is_ContainmentCheckRequired = 0;	//1 will Make it Slow; 0 will skip so Fast
-
+				int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make Slow; 0 will disable so Fast
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
 
