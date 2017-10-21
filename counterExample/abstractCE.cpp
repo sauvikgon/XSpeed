@@ -611,7 +611,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	std::vector<double> v(dim);
 
 	std::vector<double> lb(optD), ub(optD);
-	double max,min,start_min,start_max;
 
 	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
 	{

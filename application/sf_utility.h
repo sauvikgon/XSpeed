@@ -42,7 +42,7 @@ scalar_type dot_product(std::vector<scalar_type> vector1,
 		std::vector<scalar_type> vector2) {
 	scalar_type res = 0;
 	assert(vector1.size()==vector2.size());
-	for (int i = 0; i < vector1.size(); i++) {
+	for (unsigned int i = 0; i < vector1.size(); i++) {
 		res = res + vector1[i] * vector2[i];
 	}
 	return res;

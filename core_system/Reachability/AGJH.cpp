@@ -12,7 +12,7 @@
 std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>& ce_candidates){
 	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
 	int t = 0; //0 for Read and 1 for Write
-	int N = omp_get_num_procs(); //get the number of cores // Number of cores in the machine
+	unsigned int N = omp_get_num_procs(); //get the number of cores // Number of cores in the machine
 	//std::cout<<"Number of Cores = "<<N<<std::endl;
 	std::list<initial_state::ptr> Wlist[2][N][N];
 	for(unsigned int i=0;i<2;i++){
@@ -101,10 +101,10 @@ std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>&
 					}
 						//cout <<"postD size = " <<R2.size()<<std::endl;
 						std::vector<int> ArrCores(N);	//If this is done only once outside time saved but race-condition?
-						for (int id=0;id<N;id++){
+						for (unsigned int id=0;id<N;id++){
 							ArrCores[id] = id;	//sequential insertion into the array
 						}
-						int startVal=0;
+						unsigned int startVal=0;
 						std::random_shuffle(ArrCores.begin(), ArrCores.end());
 						for(std::list<initial_state::ptr>::iterator its = R2.begin();its != R2.end();its++){
 							initial_state::ptr next_s = (*its);
@@ -298,7 +298,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			gaurd_polytope = (*t)->getGaurd();//	GeneratePolytopePlotter(gaurd_polytope);
 
 			std::list<polytope::ptr> polys;
-			bool clusted=false;
+
 			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
 			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
 			if (boost::iequals(this->getSetAggregation(),"thull")){
@@ -466,7 +466,7 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 					current_forbidden_state = S;
 					int cc = 0;
 					do {
-						int locationID2;
+						int locationID2=0;
 						discrete_set ds2;
 						// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 						int transID = current_forbidden_state->getTransitionId(); //a)
@@ -477,11 +477,15 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 							//current_forbidden_state = searchSymbolic_state(Reachability_Region, current_forbidden_state->getParentPtrSymbolicState());
 							current_forbidden_state = current_forbidden_state->getParentPtrSymbolicState();
 							//2) ******************* list_transitions ********************
-							ds2 = current_forbidden_state->getDiscreteSet(); //c)
+							ds2 = current_forbidden_state->getDiscreteSet();
+							assert(ds2.getDiscreteElements().size()!=0); //
+
 							for (std::set<int>::iterator it = ds2.getDiscreteElements().begin(); it != ds2.getDiscreteElements().end(); ++it)
-								locationID2 = (*it); //c)
+								locationID2 = (*it);
+
 							location::ptr object_location;
-							object_location = H.getLocation(locationID2); //d)
+
+							object_location = H.getLocation(locationID2);
 							transition::ptr temp = object_location->getTransition(transID); //e)
 							list_transitions.push_front(temp); //pushing the transition in the stack
 							//2) ******************* list_transitions Ends ********************
@@ -489,7 +493,6 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 						cc++;
 					} while (current_forbidden_state->getParentPtrSymbolicState()!= NULL);
 					if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState()== NULL)) { //root is missed
-						int transID = current_forbidden_state->getTransitionId();
 						list_sym_states.push_front(current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
 					}
 					saftey_violated = true;

@@ -14,11 +14,9 @@ void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::p
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	//std::cout<<"\nTotal is "<<shm_NewTotalIteration <<std::endl;
 	int dimension = Initial->getSystemDimension();
-	int Min_Or_Max = 2;
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
 	// ******************* Probable race condition variables:: can be  placed inside for-loop *******************
-	int foundStart = 0, intersection_start, intersection_end;
-	//bool invariantCrossed = false;
+
 	// *************************** For Negative ************************************
 	double res1_minus, term2_minus = 0.0, result1_minus, term1_minus = 0.0, result_minus;
 	std::vector<double> Btrans_dir_minus, phi_trans_dir_minus, phi_trans_dir1_minus;
@@ -110,7 +108,6 @@ int type = lp_solver_type_choosen;
 		for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
 
 			if ((-1 * TempOmega_min) > invariant_SupportFunction) { // Should have been correct
-				intersection_end = loopIteration;
 				boundaryIterations[eachInvariantDirection] = loopIteration; //Made Changes here due to circle
 				break;//no need to compute reachable set anymore due to out of invariant boundary
 			}
@@ -381,16 +378,12 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 	if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 		B_trans = ReachParameters.B_trans;
 	// *******************************************************************************************************************
-	//std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
-	int type = lp_solver_type_choosen;
-
 
 	std::vector<InvariantCheckData> AllInvData(numberOfInvariants);
 	bool invariantCrossed = false;
 
 	double zI_min = 0.0, zV_min = 0.0;
 	unsigned int loopIteration = 0;
-
 
 	double term3a_minus, res2_minus;
 
@@ -559,15 +552,13 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 //	cout<<"shm_NewTotalIteration = "<<shm_NewTotalIteration<<"OK\n";
 	int dimension = Initial->getSystemDimension();
-	int Min_Or_Max = 2;
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
 	/*cout <<"invariant->getCoeffMatrix() = "<<invariant->getCoeffMatrix()<<"\n";
 	 for (int i=0;i<invariant->getColumnVector().size();i++)
 	 cout<<invariant->getColumnVector()[i]<<"\t";*/
 
 	// ******************* Probable race condition variables:: can be  placed inside for-loop *******************
-	int foundStart = 0, intersection_start, intersection_end;
-	//bool invariantCrossed = false;
+
 	// *************************** For Positive ************************************
 	double res1, term2 = 0.0, result1, term1 = 0.0, result;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
@@ -748,15 +739,8 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 			// ******************************************* Intersection Detection Section Starts *****************************************
 			if (((-1 * TempOmega_min) < invariant_SupportFunction)
 					&& (invariant_SupportFunction < TempOmega)) { //Should have been correct
-				intersection_start = loopIteration; //Partially inside the region
-				//	cout<<"\nINTERSECTION_start = "<<intersection_start <<endl;
-				//}
 			}
 			if ((-1 * TempOmega_min) > invariant_SupportFunction) { // Should have been correct
-				//if ( ((-1 * TempOmega_min) < invariant_SupportFunction) && (TempOmega < invariant_SupportFunction)) {
-				intersection_end = loopIteration;
-				//	cout << "\nIntersection_End = " << intersection_end << endl;
-				//	cout<<"TempOmega_min = "<<TempOmega_min<< " and TempOmega = "<<TempOmega<<"\t";
 				boundaryIterations[eachInvariantDirection] = loopIteration; //Made Changes here due to circle
 				//	invariantCrossed = true;//Omega is out of the invariant's boundary
 				break;//no need to compute reachable set anymore due to out of invariant boundary
@@ -809,14 +793,12 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 // ************************************************   Positive Direction Ends *******************************************
 // ************************************************  For Negative Direction Starts *******************************************
 			//double TempOmega_min;
-			double term3_minus, term3a_minus, res2_minus, beta_minus,
-					res_beta_minus;
+			double term3_minus, term3a_minus, res2_minus;
 
 			//	zV = W_Support(ReachParameters, SystemDynamics, rVariable,s_per_thread_U, Min_Or_Max);
 			//  **************    W_Support Function   ********************
 			result1_minus = term2_minus;
-			beta_minus = ReachParameters.result_beta;
-			res_beta_minus = beta_minus * term3b_minus; //Replacing term3b from previous step
+
 			result_minus = result1_minus + res_beta + term3c_minus;
 			zV_min = result_minus;
 			//  **************  W_Support Function Over  ********************
@@ -902,7 +884,7 @@ void quickInvariantBoundaryCheck(Dynamics& SystemDynamics,
 		// ******** Lamda Computation for each invariant's directions/constraints **********
 		//Todo:: just get the boundvalue for the invariant direction without using LP_Solver
 
-		double invariant_SupportFunction;
+		double invariant_SupportFunction=0;
 		lp_solver lpSolver(lp_solver_type_choosen);
 		//	cout<<"Test 2 \n";
 		lpSolver.setMin_Or_Max(2);
@@ -949,28 +931,25 @@ unsigned int invariantCheck(std::vector<double>& pos_dir, std::vector<double>& n
 			SystemDynamics);	//initial set at time = timeBound
 	double pos_val = p->computeSupportFunction(pos_dir, pos_lp);
 	double neg_val = p->computeSupportFunction(neg_dir, neg_lp);
-	cout << "pos_val = " << pos_val << "\t";
-	cout << "neg_val = " << -1 * neg_val << "\t";
-	cout << "SearchKey = " << SearchKey << std::endl;
+
 	if (pos_val <= SearchKey && (-1 * neg_val) <= SearchKey) { //Last Omega completely inside the invariant
-		cout << "Flowpipe completely inside Invariant!!" << std::endl;
+		// Flowpipe completely inside Invariant!!
 		return ReachParameters.Iterations;//total iterations supplied by the user
 	}
-	//cout <<"Not coming here"<<std::endl;
+
 	//other wise perform binary Search to find out the actual iterations that just crosses the invariant
 	// *******************************************   Quick Check  *******************************************
 	int searchSteps = 0;
 	while (start_iter <= end_iter) {
 		searchSteps++;
 		unsigned int mid = (start_iter + end_iter - 1) / 2;	//iterations to be returned
-		cout << "mid = " << mid << "\t";
+
 		double timeBound = mid * ReachParameters.time_step;	//computing the timebound at that point
 		p = getInitialSet(timeBound, ReachParameters, SystemDynamics);//initial set at time = timeBound
 		double pos_val = p->computeSupportFunction(pos_dir, pos_lp);
 
 		double neg_val = -1 * p->computeSupportFunction(neg_dir, neg_lp);
-		cout << "pos_val = " << pos_val << "\t";
-		cout << "neg_val = " << neg_val << "\t";
+
 		if (pos_val > SearchKey && neg_val == SearchKey) {//fortunate Condition. May not occur always
 			cout << "Search stopped at = " << searchSteps << " steps" << std::endl;
 			//return (mid - 1);	//iterations found where neg_dir is just out on the line of invariant
@@ -983,13 +962,13 @@ unsigned int invariantCheck(std::vector<double>& pos_dir, std::vector<double>& n
 		if (neg_val < SearchKey) {		//  && pos_val > SearchKey){
 			start_iter = mid + 1;
 		}
-		int diff = end_iter - start_iter;//when they both converge close to eachother near the invariant bound
+		int diff = end_iter - start_iter;//when they both converge close to each other near the invariant bound
 		if (abs(diff) <= 1) {//sufficiently closed to the boundValue and log(N) iterations over
 			cout << "Search crossed at = " << searchSteps << " steps" << std::endl;
 			return end_iter;	//or start_iter
 		}
 	}	//endwhile
-	cout << "Complete Search Steps = " << searchSteps << std::endl;
+	return end_iter;
 }
 
 supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics) {
@@ -1066,14 +1045,14 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	//	cout<<"shm_NewTotalIteration = "<<shm_NewTotalIteration<<"OK\n";
 	int dimension = Initial->getSystemDimension();
-	int Min_Or_Max = 2;
+
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
 	/*cout <<"invariant->getCoeffMatrix() = "<<invariant->getCoeffMatrix()<<"\n";
 	 for (int i=0;i<invariant->getColumnVector().size();i++)
 	 cout<<invariant->getColumnVector()[i]<<"\t";*/
 
 	// ******************* Probable race condition variables:: can be  placed inside for-loop *******************
-	int foundStart = 0, intersection_start, intersection_end;
+
 	//bool invariantCrossed = false;
 	// *************************** For Positive ************************************
 	double res1, term2 = 0.0, result1, term1 = 0.0, result;
@@ -1101,7 +1080,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 
 		bool TimeBoundFound = false;//final result or actual flowpipe_cost found
 
-		double zIInitial, zIInitial_minus, zI = 0.0, zV = 0.0;
+		double zI = 0.0, zV = 0.0;
 		double zI_min = 0.0, zV_min = 0.0;
 		double sVariable, s1Variable;
 		double sVariable_min, s1Variable_min; //For Minimization of First Vector only
@@ -1181,7 +1160,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 		sVariable_min = 0.0;
 		// ************************************************  For Positive Direction Starts *******************************************
 		//zIInitial = Omega_Support(ReachParameters, rVariable, Initial,SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
-		double term3, term3a, term3b, res2, term3c = 0.0;
+		double term3b, term3c = 0.0;
 		//  **************    Omega Function   ********************
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
@@ -1195,26 +1174,19 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 			term2 = ReachParameters.time_step
 					* SystemDynamics.U->computeSupportFunction(Btrans_dir,
 							s_per_thread_U);
-		term3a = ReachParameters.result_alfa;
+
 		term3b = (double) support_unitball_infnorm(rVariable);
 		if (!SystemDynamics.isEmptyC) {
 			term3c = ReachParameters.time_step
 					* dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
 		}
-		term3 = term3a * term3b;
-		res2 = term1 + term2 + term3 + term3c; //term3c Added
-		if (res1 > res2)
-			zIInitial = res1;
-		else
-			zIInitial = res2;
-		//	cout<<"res2 = "<<res2<<" and ";
+
 		//  **************  Omega Function Over  ********************
 		// ************************************************   Positive Direction Ends *******************************************
 
 		// ******************************************* For Negative Direction Starts *******************************************
 		//zIInitial = Omega_Support(ReachParameters, rVariable_minus, Initial,SystemDynamics, s_per_thread_I_minus, s_per_thread_U_minus, Min_Or_Max);
-		double term3_minus, term3a_minus, term3b_minus, res2_minus,
-				term3c_minus = 0.0;
+		double  term3b_minus,term3c_minus = 0.0;
 		//  **************    Omega Function   ********************
 		res1_minus = Initial->computeSupportFunction(rVariable_minus,
 				s_per_thread_I_minus);
@@ -1229,29 +1201,21 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 			term2_minus = ReachParameters.time_step
 					* SystemDynamics.U->computeSupportFunction(Btrans_dir_minus,
 							s_per_thread_U_minus);
-		term3a_minus = ReachParameters.result_alfa;
 		term3b_minus = (double) support_unitball_infnorm(rVariable_minus);
 		if (!SystemDynamics.isEmptyC) {
 			term3c_minus = ReachParameters.time_step
 					* dot_product(SystemDynamics.C, rVariable_minus); //Added +tau* sf_C(l) 8/11/2015
 		}
-		term3_minus = term3a_minus * term3b_minus;
-		res2_minus = term1_minus + term2_minus + term3_minus + term3c_minus;
-		if (res1_minus > res2_minus)
-			zIInitial_minus = res1_minus;
-		else
-			zIInitial_minus = res2_minus;
-		//	cout<<"res2_minus = "<<res2_minus<<"\n";
+
 //  **************  Omega Function Over  ********************
 // ******************************************* Negative Direction Ends *******************************************
 		loopIteration++;
 		//for (; loopIteration < shm_NewTotalIteration ;) { //Now stopping condition is NOT only "shm_NewTotalIteration"
 
-		double time_stepBeforeCrossing, time_stepAfterCrossing;	//time_step is used to determine the crossing
+		double time_stepBeforeCrossing=0;	//time_step is used to determine the crossing
 		int foundIntersectionEnd_After_jump = 0;
 
-		for (;
-				ReachParameters.time_step <= ReachParametersOld.TimeBound
+		for (;ReachParameters.time_step <= ReachParametersOld.TimeBound
 						&& TimeBoundFound != true;) {
 			//Now stopping condition is the omega that actually cross.  Trick is dealing with time-step
 // ************************************************  For Positive Direction Starts *******************************************
@@ -1295,16 +1259,14 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 			//  **************  Omega Function Over  ********************
 
 			TempOmega = zI + s1Variable; //Y1
-			cout << "TempOmega = " << TempOmega << "\t";
+
 // ************************************************   Positive Direction Ends *******************************************
 // ************************************************  For Negative Direction Starts *******************************************
-			double TempOmega_min, term3_minus, term3a_minus, res2_minus,
-					beta_minus, res_beta_minus;
+			double TempOmega_min, term3_minus, term3a_minus, res2_minus;
 			//	zV = W_Support(ReachParameters, SystemDynamics, rVariable,s_per_thread_U, Min_Or_Max);
 			//  **************    W_Support Function   ********************
 			result1_minus = term2_minus;
-			beta_minus = ReachParameters.result_beta;
-			res_beta_minus = beta_minus * term3b_minus; //Replacing term3b from previous step
+
 			result_minus = result1_minus + res_beta + term3c_minus;
 			zV_min = result_minus;
 			//  **************  W_Support Function Over  ********************
@@ -1339,34 +1301,18 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 				zI_min = res2_minus;
 			//  **************  Omega Function Over  ********************
 			TempOmega_min = zI_min + s1Variable_min; //Y1
-			cout << "TempOmega_min = " << TempOmega_min << "\t";
+
 			// ************************************************   Negative Direction Ends *******************************************
 			loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
 // ******************************************* Intersection Detection Section Starts *******************************************
-			if (((-1 * TempOmega_min) < invariant_SupportFunction)
-					&& (invariant_SupportFunction < TempOmega)) { //Should have been correct
-				intersection_start = loopIteration; //Partially inside the region
-				//	cout<<"\nINTERSECTION_start = "<<intersection_start <<endl;
-				//}
-			}
 			bool foundIntersectionEnd_jump = false;
-			cout << "\time_stepBeforeCrossing = " << time_stepBeforeCrossing
-					<< " ReachParameters.time_step = "
-					<< ReachParameters.time_step << "\n";
+
 			if ((-1 * TempOmega_min) > invariant_SupportFunction) { // Should have been correct
 				//if ( ((-1 * TempOmega_min) < invariant_SupportFunction) && (TempOmega < invariant_SupportFunction)) {
-				intersection_end = loopIteration;
 				foundIntersectionEnd_jump = true;
-				time_stepAfterCrossing = ReachParameters.time_step;	//the time_step at which it crossed
-				foundIntersectionEnd_After_jump++;//1st found == 1, 2nd found is sequential found
-				cout << "\nIntersection_End = " << intersection_end
-						<< " foundIntersectionEnd_After_jump = "
-						<< foundIntersectionEnd_After_jump << endl;
 
-				//	cout<<"TempOmega_min = "<<TempOmega_min<< " and TempOmega = "<<TempOmega<<"\t";
-				//????	boundaryIterations[eachInvariantDirection] = loopIteration; //Made Changes here due to circle
-				//	invariantCrossed = true;//Omega is out of the invariant's boundary
-				//????	break; //no need to compute reachable set anymore due to out of invariant boundary
+				foundIntersectionEnd_After_jump++;//1st found == 1, 2nd found is sequential found
+
 			}
 
 			if (foundIntersectionEnd_jump) {
@@ -1393,11 +1339,9 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 				if (ReachParameters.time_step >= ReachParametersOld.TimeBound)//increment cross the given timeBound
 					ReachParameters.time_step = ReachParametersOld.TimeBound;//so handle it by assigning the given timeBound
 			} else { //slow start has stopped so time-step to be set as original
-				cout << "NOOOOOOOTTTT Entered!!! === ";
+
 				ReachParameters.time_step = time_stepBeforeCrossing
 						+ ReachParametersOld.time_step;
-				cout << " ReachParameters.time_step = "
-						<< ReachParameters.time_step << "\n";
 
 				//Method 1) it is increasing sequentially
 			}
@@ -1459,10 +1403,7 @@ void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvide
 					//But if we do not use math::ceil() then normal division on double data type gives in-correct result in g++/gcc.
 				//So we use math::ceil() as an extra iterations or over-approximation returned is acceptable in our case.
 		//---
-		//cout << "actual_time_bound = " << actual_time_bound << " ReachParameters.time_step = " << ReachParameters.time_step;
-		//cout << "  actual_time_bound = " << (actual_time_bound + time_step);
 		newTotIters = math::ceil((actual_time_bound + time_step)/ ReachParameters.time_step);
-		//cout << "  Iterations = " << newTotIters << "\n";
 	}
 }
 
@@ -1524,22 +1465,7 @@ double invariantCrossingCheck1(double START_TIME, double time_step, double time_
 				break;	//return t;
 			}
 		}
-		/*
-		//Not required at runtime only for Printing and Debugging
-		polytope::ptr bound_poly;
-		bound_poly = getBoundedConvexSet(p,ReachParameters);	//creating boundedPolytope over template directions using convex set
 
-		math::matrix<double> vertices_list = bound_poly->get_2dVertices(0, 1); // 1 and 2 are the output variables
-		// ------------- Printing the vertices on the Output File -------------
-		for (int i = 0; i < vertices_list.size1(); i++) {
-			for (int j = 0; j < vertices_list.size2(); j++) {
-				outFile << vertices_list(i, j) << " ";
-			}
-			outFile << std::endl;
-		}
-		outFile << std::endl; // 1 gap after each polytope plotted
-		// ------------- Printing the vertices on the Output File -------------
-		 */
 		if (flag){	//this condition is created only to be able to print the crossing convex set
 			//outFile.close();//Not required at runtime only for Printing and Debugging
 			return t;
@@ -1561,8 +1487,8 @@ polytope::ptr getBoundedConvexSet(supportFunctionProvider::ptr& p, ReachabilityP
 		lp.setConstraints(ReachParameters.X0->getCoeffMatrix(),ReachParameters.X0->getColumnVector(),ReachParameters.X0->getInEqualitySign());
 	}
 	std::vector<double> dir(ReachParameters.Directions.size2());
-	for (int d = 0; d < tempDirs.size1(); d++) {
-		for (int j = 0; j < tempDirs.size2(); j++){
+	for (unsigned int d = 0; d < tempDirs.size1(); d++) {
+		for (unsigned int j = 0; j < tempDirs.size2(); j++){
 			dir[j] = ReachParameters.Directions(d, j);
 			//cout<<"  "<<dir[j]<<"\t";
 		}

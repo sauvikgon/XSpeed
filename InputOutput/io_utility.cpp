@@ -40,13 +40,13 @@ polytope::ptr get_template_hull(template_polyhedra::ptr sfm, unsigned int start,
 	//boundingPolytope->setCoeffMatrix(directional_constraints);
 	boundingPolytope->setCoeffMatrix(all_dirs);
 
-	double max_value;
 	int Totaldirs = each_sfm.size1();
 
 	unsigned int num_columns = end - start + 1;
 
 	std::vector<double> polytope_bounds(Totaldirs);
 
+	double max_value=each_sfm(0, start);
 	for (int i = 0; i < Totaldirs; i++) { //i==row_number
 		for (unsigned int k = start; k < start+num_columns; k++) { //k==col_number
 			double sfm_value = each_sfm(i, k);

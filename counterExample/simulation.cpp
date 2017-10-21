@@ -21,7 +21,7 @@ simulation::~simulation() {
 
 /* Private function to check function return values */
 
-static int check_flag(void *flagvalue, char *funcname, int opt);
+static int check_flag(void *flagvalue, const char *funcname, int opt);
 
 static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data)
 {
@@ -74,8 +74,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	realtype t=0;
 	Dynamics *data = &D;
 
-
-	N_Vector y = NULL;
 	N_Vector u = NULL;
 
 	assert(x.size() == dimension);
@@ -128,8 +126,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	/* In loop over output points: call CVode, print results, test for errors */
 
 	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
-
-	double time_offset = x[get_index("t")];
 
 	bool print_flag = true; // makes the trace printed in the  outfile
 	std::ofstream myfile;
@@ -403,7 +399,7 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
      opt == 2 means function allocates memory so check if returned
               NULL pointer */
 
-static int check_flag(void *flagvalue, char *funcname, int opt)
+static int check_flag(void *flagvalue, const char* funcname, int opt)
 {
   int *errflag;
 

@@ -78,20 +78,9 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 	if (!SystemDynamics.isEmptyMatrixA) //if Matrix A is not Empty
 		phi_tau_Transpose = ReachParameters.phi_trans;
 
-	unsigned int total_list_X0 = list_X0.size1(); //total number of directions for X0 is [ numDirs * (iters + 1) ]
-	unsigned int total_list_U = list_U.size1(); //total number of directions for U is [ numDirs * iters ]
 
-	/*int cores;
-	if (numVectors >= numCoresAvail)
-		cores = numVectors;
-	else
-		cores = numCoresAvail;*/
-
-//	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
-//#pragma omp parallel for num_threads(cores)
-	//std::cout<<"Before Loop DirCalled";
-	for (unsigned int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
-		unsigned int index_X, indexU; //making the index suitable for parallelizing
+	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
+		unsigned int index_X, indexU=0; //making the index suitable for parallelizing
 		if (!U_empty) {
 			indexU = eachDirection * newiters;
 		}
@@ -116,7 +105,7 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 		if (!SystemDynamics.isEmptyMatrixB) { //if not only than will be required to multiply
 			B_trans.mult_vector(rVariable, B_trans_dir);
 		}
-		//std::cout << index_X0 << " ";
+
 		for (unsigned int x = 0; x < list_X0.size2(); x++) { //dimension of direction
 			if (!SystemDynamics.isEmptyMatrixA){ //if Matrix A is not Empty
 				list_X0(index_X, x) = (float) phi_trans_dir[x]; //X0 and U both has the same dimension
@@ -178,11 +167,8 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 			rVariable = CopyVector(r1Variable); //source to destination
 			loopIteration++; //for the next iteration
 		} //end of iteration for each direction
-		  //std::cout<<"Over eachDirection = "<< eachDirection<<std::endl;
+
 	} //end of all directions
-	//  std::cout<<"what is the Problem?"<<std::endl;
-	  //std::cout<<std::endl;
-	  //return Direction_List;
 }
 
 //Only for profiling GLPK solver Time for comparison with boundary value implementation
@@ -203,8 +189,6 @@ void getDirectionList_X0_and_U_OnlyForGLPK(
 
 //	unsigned int total_list_X0 = list_X0.size(); //total number of directions for X0 is [ numDirs * (iters+1) ]
 //	unsigned int total_list_U = list_U.size(); //total number of directions for U is [ numDirs * iters ]
-	unsigned int total_list_X0 = numVectors * (newiters + 1); //1 extra for loop1
-	unsigned int total_list_U = numVectors * newiters; //'n' dirs for each 'n' loops
 
 	std::list<std::vector<double> >::iterator index_X;
 	std::list<std::vector<double> >::iterator indexU;

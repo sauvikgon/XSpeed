@@ -24,9 +24,9 @@ std::vector<double> b;
 A = poly->getCoeffMatrix();
 b = poly->getColumnVector();
 
-		for (int i = 0; i < A.size1(); i++)
+		for (unsigned int i = 0; i < A.size1(); i++)
 		{
-			for (int j = 0; j < A.size2(); j++)
+			for (unsigned int j = 0; j < A.size2(); j++)
 			{
 				MatLabfile << A(i, j) << " ";
 			}

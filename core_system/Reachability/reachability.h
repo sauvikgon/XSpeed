@@ -85,7 +85,7 @@ public:
 	 * List of private variables now converted into public due to class inheritance framework
 	 */
 	std::list<initial_state::ptr> I; //converted to a list of initial state
-	int bound;
+	unsigned int bound;
 	ReachabilityParameters reach_parameters;
 	hybrid_automata H; //todo:: have to change it to boost::ptr
 	int lp_solver_type_choosen;
