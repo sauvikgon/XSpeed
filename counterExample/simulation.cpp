@@ -30,7 +30,7 @@ static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data)
 
 	if(D->isEmptyMatrixA)
 	{
-		assert(!D->isEmptyC);
+		assert(!D->isEmptyC); // The assumption is that this function is called with non-zero dynamics.
 		unsigned int dim = D->C.size();
 		A = math::matrix<double>(D->C.size(),D->C.size());
 		for(unsigned int i=0;i<dim;i++)
@@ -75,6 +75,9 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	Dynamics *data = &D;
 
 	N_Vector u = NULL;
+
+	if(data->isEmptyMatrixA && data->isEmptyC) // zero dynamics
+		return x; // return same initial point
 
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
@@ -196,6 +199,13 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	bound_sim b;
 	N_Vector u = NULL;
 
+	if(data->isEmptyMatrixA && data->isEmptyC){ // zero dynamics
+		bound_sim b;
+		b.v=x;
+		b.cross_over_time = time; // The point remains inside the invariant for the entire time horizon
+		return b; // return the initial point, time horizon
+
+	}
 	// testing. should not not modify tol ideally
 	tol = 1e-5;
 	assert(x.size() == dimension);
@@ -322,6 +332,9 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 	Dynamics *data = &D;
 
 	N_Vector u = NULL;
+
+	if(data->isEmptyMatrixA && data->isEmptyC) // zero dynamics
+		return x; // return same initial point
 
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);

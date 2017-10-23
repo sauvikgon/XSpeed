@@ -61,7 +61,6 @@ struct ReachabilityParameters {
 };
 
 struct Dynamics {
-	//std::vector<std::vector <double> > MatrixA;
 	math::matrix<double> MatrixA;
 	bool isEmptyMatrixA;	//True if empty otherwise False
 	/** The transformation matrix of the input convex set U */
@@ -80,7 +79,6 @@ struct TransitionDynamics {			//May not be used
 
 struct Optimize_Omega_Support{
 	std::vector<double> dir1;
-	//std::vector<double> dir2;	//similar directions
 	double supp_X0;
 	double phi_trans_supp_X0;
 	double Btrans_supp_U;

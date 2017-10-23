@@ -70,7 +70,7 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 
 }
 
-bool concreteCE::valid(struct refinement_point& ref_pt, double tol)
+bool concreteCE::valid(struct refinement_point& ref_pt, double valid_tol)
 {
 	traj_segment seg;
 	unsigned int locId;
@@ -90,7 +90,7 @@ bool concreteCE::valid(struct refinement_point& ref_pt, double tol)
 
 		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
 		bound_sim b; bool status=true;
-		b =  sim->bounded_simulation(simulation_sample.first,simulation_sample.second, Inv, status, tol);
+		b =  sim->bounded_simulation(simulation_sample.first,simulation_sample.second, Inv, status, valid_tol);
 
 		if(!status){
 			std::cout << "Inv violated in location id:" << locId << std::endl;

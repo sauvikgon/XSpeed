@@ -820,17 +820,20 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	bool val_res=true;
 	bool NLP_HA_algo_flag = false;
 	unsigned int max_refinements = 100, ref_count = 0; // maximum limit to refinement points to be added.
+
+	double valid_tol = 1e-3; // validation error tolerance, on invariant crossing.
+
 	do{
 		struct refinement_point pt;
 
 		//cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
-		//cexample = gen_concreteCE(tolerance,refinements);
-		cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
+		cexample = gen_concreteCE(tolerance,refinements);
+		//cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
 		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
 		if(cexample->is_empty())
 			return cexample;
 
-		val_res = cexample->valid(pt,tolerance);
+		val_res = cexample->valid(pt,valid_tol);
 
 		if(!val_res){
 			if(NLP_HA_algo_flag){
