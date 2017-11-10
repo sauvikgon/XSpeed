@@ -52,19 +52,19 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 					"n. 'n' uniform Directions \n")
 	("time-horizon", po::value<double>(), "Set the local time horizon of flowpipe computation.")
 	("time-step", po::value<double>(), "Set the sampling time of flowpipe computation.")
+	("algo,a",po::value<int>()->default_value(1), "Set the algorithm\n"
+			"1 -- Sequential Algorithm (Set to default)\n"
+			"2 -- ParSup, Parallel Sampling of Template Directions, PostC in parallel\n"
+			"3 -- Time-sliced Parallel Algorithm, PostC in parallel\n"
+			"4 -- A-GJH, Adaptation of Gerard J. Holzmann Algorithm\n"
+			"5 -- TP-BFS, Task-parallel Algorithm\n"
+			"6 -- Lazy Evaluation Algorithm, PostC in GPU\n"
+			"7 -- AsyncBFS, Asynchronous Parallel BFS Algorithm\n")
+	("number-of-streams", po::value<int>()->default_value(1), "Set the number of GPU-streams (Set to 1 by default).")
+	("time-slice", po::value<int>(), "Set the number of Time Slice or partitions for the Time-sliced Algorithm")
 	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking (0 for only postC)")
 	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - none : consider each convex set as successor sets for the next depth")
 
-	("algo,a",po::value<int>()->default_value(1), "Set the algorithm\n"
-			"1/seq-SF -- Sequential Algorithm (both PostC and PostD are sequential) (Set to default)\n"
-			"2/par-SF -- Lazy evaluation algorithm (Parallel PostC but Sequential PostD/BFS)\n"
-			"3/time-slice-SF -- Time slicing algorithm (Parallel PostC but Sequential PostD/BFS)\n"
-			"4/AGJH -- Adaptation of Gerard J. Holzmann\n"
-			"5/TPBFS -- Load Balancing Algorithm\n"
-			"6/gpu-postc -- Bounded input sets (PostC in GPU but Sequential PostD/BFS)\n"
-			"7/AsyncBFS -- Asynchronous parallel BFS state-space exploration\n")
-	("number-of-streams", po::value<int>()->default_value(1), "Set the maximum number of GPU-streams (Set to 1 by default).")
-	("time-slice", po::value<int>(), "Set the maximum number of Time Sliced(or partitions)for algo=time-slice-SF")
 	//("internal", "called internally when running hyst-xspeed model")
 	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst
 	("include-path,I", po::value<std::string>(), "include file path")
@@ -190,13 +190,13 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
 			// Amit's machine
-//			system("g++ -D_GLIBCXX_USE_CXX11_ABI=0 -w -c -std=gnu++11 -I./include/ user_model.cpp -o user_model.o");	//compiler option -D__GLIB.. is required to support running in g++ Version 5
-//			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
+			system("g++ -D_GLIBCXX_USE_CXX11_ABI=0 -w -c -std=gnu++11 -I./include/ user_model.cpp -o user_model.o");	//compiler option -D__GLIB.. is required to support running in g++ Version 5
+			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
 			//Removed for distribution without PPL library -lppl -lgmp. Also removed -pthread, since it works by just adding -std=gnu++11
 
 			// My machine
-			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
-			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
+//			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
+//			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
 
 			std::cout<<"Model Parsed Successfully!! Calling XSpeed ..."<<std::endl;
 
