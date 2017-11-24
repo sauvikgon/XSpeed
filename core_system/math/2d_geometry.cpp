@@ -51,9 +51,23 @@ double angle_uv(std::vector<double> u, std::vector<double> v) {
 	return angle_res;
 }
 
-std::pair<double,double> angle_to_vector(double angle){
+/*std::pair<double,double> angle_to_vector(double angle){
 	std::pair<double,double> u;
 	u.first = cos(angle * PI /180);
 	u.second = sin(angle * PI /180);
+	return u;
+}*/
+
+std::vector<double> angle_to_vector(double angle){
+	std::vector<double> u(2);
+	u[0] = cos(angle * PI /180);
+	u[1]= sin(angle * PI /180);
+	return u;
+}
+
+std::vector<double> radian_to_vector(double radian){
+	std::vector<double> u(2);
+	u[0] = cos(radian);
+	u[1]= sin(radian);
 	return u;
 }

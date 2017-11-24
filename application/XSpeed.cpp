@@ -208,23 +208,21 @@ int main(int argc, char *argv[]) {
 			<< (double) (total_mem_used / 1024.0) / number_of_times << " MB\n";
 
 	std::list<symbolic_states::ptr>::iterator it;
-	/*
-	 * Generating Vertices as output which can be plotted using gnuplot utilites
-	 */
+	/** Choosing from the output format options	 */
+	if(user_options.getOutputFormatType().compare("GEN")==0) {
+		//Vertex-Enumeration using old algorithm of recursively searching in quadrants
+		vertex_generator(Symbolic_states_list,user_options); //Generating Vertices as output which can be plotted using gnuplot utilites
+		SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Vertices as output which can be plotted using gnuplot utilites
+		//Sequential sampling of Hough Space
 
-	/**
-	 * Choosing from the output format options
-	 */
-
-//	if(user_options.getOutputFormatType().compare("GEN")==0)
-//		vertex_generator(Symbolic_states_list,user_options);
-//	else if(user_options.getOutputFormatType().compare("INTV")==0)
-//	{
-//		interval_generator(Symbolic_states_list,user_options);
-//	}
-	vertex_generator(Symbolic_states_list,user_options);
-//	print_all_intervals(Symbolic_states_list);
-	//std::cout<<"Interval Generation Completed"<<std::endl;
+		/* Running gnuplotutil to plot output */
+		string cmdStr1;
+		cmdStr1.append("graph -TX -BC ");
+		cmdStr1.append(user_options.getOutFilename().c_str());
+		system(cmdStr1.c_str());
+	} else if(user_options.getOutputFormatType().compare("INTV")==0) {
+		print_all_intervals(Symbolic_states_list);
+	}
 
 	/*
 	 * counterExample utility. Plot the location sequence of every abstract CE in a file

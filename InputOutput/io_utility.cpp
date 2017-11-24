@@ -138,6 +138,11 @@ void print_all_intervals(std::list<symbolic_states::ptr>& symbolic_states_list)
 	}
 
 }
+
+/*
+ * Calling XSpeed's Frist thought vertex enumeration Algorithm.
+ * The idea is recursively search in quadrants for unique vertices
+ */
 void vertex_generator(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options)
 {
 	std::list<symbolic_states::ptr>::iterator it;
@@ -145,8 +150,7 @@ void vertex_generator(std::list<symbolic_states::ptr>& symbolic_states_list, use
 	std::ofstream outFile;
 	outFile.open(user_options.getOutFilename().c_str());
 
-	for (it = symbolic_states_list.begin(); it != symbolic_states_list.end();
-				it++) {
+	for (it = symbolic_states_list.begin(); it != symbolic_states_list.end(); it++) {
 			template_polyhedra::ptr temp_polyhedra;
 			temp_polyhedra = (*it)->getContinuousSetptr();
 
@@ -191,4 +195,154 @@ void vertex_generator(std::list<symbolic_states::ptr>& symbolic_states_list, use
 			}
 		}
 		outFile.close();
+}
+
+/*
+ * XSpeed's new vertex enumeration Algorithm using Hough space.
+ * The idea is Sequential sample the Hough space by delta sampling step.
+ */
+std::list<MyPoint::ptr> enumBySequentialSampling(math::matrix<double>& A, std::vector<double>& b, int dim1, int dim2, double delta){
+
+	std::list<MyPoint::ptr> V;
+		double theta, start = 0, end = 360, result;
+		unsigned int count_iter=0;
+		glpk_lp_solver lp;
+		lp.setMin_Or_Max(2);
+		lp.setConstraints(A, b, 1);
+		std::vector<double> v, sv(2);
+		theta = start;
+		v = normalize_vector(angle_to_vector(theta));	//Computing objective function or VECTOR for the FIRST TWO (x,y) variables
+		std::vector<double> obj_fun(A.size2(), 0);	//initialized to zero
+		obj_fun[dim1] = v[0];
+		obj_fun[dim2] = v[1];
+		result = lp.Compute_LLP(obj_fun);
+		sv = lp.getMaximizing_Variables(); //Support Vector our first point
+
+		MyPoint::ptr p1, p2;
+		p1 = MyPoint::ptr(new MyPoint(sv));
+		//firstVertex = MyPoint::ptr(new MyPoint(sv)); //keeping a copy of the First Vertex
+		V.push_back(p1);
+		//V.insert(p1);
+		//std::cout<<"\nTheta = "<<theta<<"\n";	//p1->printPoint();
+
+		theta = theta + delta; //next sampling directions or angle
+		while (theta <= end) {
+			v = normalize_vector(angle_to_vector(theta));
+			//std::vector<double> obj_fun(A.size2(), 0);	//initialized to zero
+			obj_fun[dim1] = v[0];
+			obj_fun[dim2] = v[1];
+			result = lp.Compute_LLP(obj_fun);
+			count_iter++;
+			//result = lp.Compute_LLP(normalize_vector(v));
+			sv = lp.getMaximizing_Variables(); //Support Vector our point
+			p2 = MyPoint::ptr(new MyPoint(sv));
+			//	std::cout<<"\nend = "<<end<<"\n";	//	p2->printPoint();
+			if (!(p1->isEqual(p2))) {
+				V.push_back(p2);
+				p1 = p2;
+			}
+			theta = theta + delta; //next sampling directions or angle
+		} //end of While-Loop
+	//	std::cout<<"\nTotal LPs solved = "<<count_iter<<"\n";	//	p2->printPoint();
+		return V;
+}
+
+/*
+ * Calling XSpeed's Our new vertex enumeration Algorithm using Hough space.
+ * The idea is Sequential sample the Hough space by delta sampling step.
+ */
+void vertex_generator_HoughTransformation(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options){
+	std::list<symbolic_states::ptr>::iterator it;
+	math::matrix<double> vertices_list;
+	std::ofstream outFile;
+	outFile.open(user_options.getOutFilename().c_str());
+	double delta=1;//1 degree approximation error[critical point above delta angle will be missed
+
+	for (it = symbolic_states_list.begin(); it != symbolic_states_list.end(); it++) {
+		template_polyhedra::ptr temp_polyhedra;
+		temp_polyhedra = (*it)->getContinuousSetptr();
+
+		math::matrix<double> A, template_directions, invariant_directions;
+		math::matrix<double> big_b, sfm, invariant_bound_values;
+
+		template_directions = temp_polyhedra->getTemplateDirections();
+		invariant_directions = temp_polyhedra->getInvariantDirections(); //invariant_directions
+
+		sfm = temp_polyhedra->getMatrixSupportFunction(); //total number of columns of SFM
+		invariant_bound_values = temp_polyhedra->getMatrix_InvariantBound(); //invariant_bound_matrix
+
+		if (invariant_directions.size1() == 0) { //indicate no invariants exists
+			A = template_directions;
+			big_b = sfm;
+		} else {
+			template_directions.matrix_join(invariant_directions, A); //creating matrix A
+			sfm.matrix_join(invariant_bound_values, big_b);
+		}
+		std::vector<double> b(big_b.size1()); //rows of big_b
+		for (unsigned int i = 0; i < big_b.size2(); i++) { //all the columns of new formed sfm
+			for (unsigned int j = 0; j < big_b.size1(); j++) { //value of all the rows
+				b[j] = big_b(j, i);
+			} //creating vector 'b'
+
+			std::list<MyPoint::ptr> vert_V;
+			vert_V = enumBySequentialSampling(A, b, user_options.get_first_plot_dimension(),
+				user_options.get_second_plot_dimension(), delta);
+
+			std::vector<double> vert;
+			//std::list<std::vector<double> > vert_list;
+			// ------------- Printing the vertices on the Output File -------------
+			for (std::list<MyPoint::ptr>::iterator i = vert_V.begin(); i != vert_V.end(); i++) {
+				vert = (*i)->getPoint_asVector();
+				//vert_list.push_back(vert);
+				outFile << vert[0] << " " << vert[1] << std::endl;	//Writing the vertices to the output file
+			}
+			outFile << std::endl; // 1 gap after each polytope plotted
+			// ------------- Printing the vertices on the Output File -------------
+		}
+	}
+	outFile.close();
+}
+
+/*
+ * This is temporary function required for generating SFM (support function matrix) output for MatLab projection
+ */
+void SFM_for_MatLab(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options){
+	std::list<symbolic_states::ptr>::iterator it;
+	math::matrix<double> vertices_list;
+	std::ofstream outFile_dirs, outFile_sfm;
+	outFile_dirs.open("dirs.txt");
+	outFile_sfm.open("sfm.txt");
+/*
+ * /NOTE this is only for a continuous System like the Helicopter benchmark. So only one location and so loop-size is one
+ */
+	for (it = symbolic_states_list.begin(); it != symbolic_states_list.end(); it++) {
+		template_polyhedra::ptr temp_polyhedra;
+		temp_polyhedra = (*it)->getContinuousSetptr();
+		math::matrix<double> A, template_directions, invariant_directions;
+		math::matrix<double> big_b, sfm, invariant_bound_values;
+		template_directions = temp_polyhedra->getTemplateDirections();
+		invariant_directions = temp_polyhedra->getInvariantDirections(); //invariant_directions
+		sfm = temp_polyhedra->getMatrixSupportFunction(); //total number of columns of SFM
+		invariant_bound_values = temp_polyhedra->getMatrix_InvariantBound(); //invariant_bound_matrix
+		if (invariant_directions.size1() == 0) { //indicate no invariants exists
+			A = template_directions;
+			big_b = sfm;
+		} else {
+			template_directions.matrix_join(invariant_directions, A); //creating matrix A
+			sfm.matrix_join(invariant_bound_values, big_b);
+		}
+		for (unsigned int i = 0; i < A.size1(); i++) { //all the rows of new formed directions
+			for (unsigned int j = 0; j < A.size2(); j++) { //value of all the columns
+				outFile_dirs << A(i,j)<<" ";
+			}
+			outFile_dirs << std::endl;
+
+			for (unsigned int j = 0; j < big_b.size2(); j++) { //value of all the columns
+				outFile_sfm << big_b(i,j)<<" ";
+			}
+			outFile_sfm << std::endl;
+		}
+	}
+	outFile_dirs.close();
+	outFile_sfm.close();
 }

@@ -19,6 +19,15 @@
 #include "application/userOptions.h"
 #include <fstream>
 
+#include <iostream>
+#include "core_system/math/point/point.h"
+#include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
+#include "core_system/math/2d_geometry.h"
+#include "Utilities/vector_operations.h"
+
+
+
+
 typedef std::vector<std::pair<double, double> > Intervals;
 
 /**
@@ -41,6 +50,14 @@ polytope::ptr get_template_hull(template_polyhedra::ptr sfm, unsigned int start,
  */
 void print_all_intervals(std::list<symbolic_states::ptr>& symbolic_states_list);
 
+std::list<MyPoint::ptr> enumBySequentialSampling(math::matrix<double>& A, std::vector<double>& b, int dim1, int dim2, double delta);
+
+/*
+ * Outputs the result in vertex enumerated form using our new algorithm using Hough Transformation
+ */
+void vertex_generator_HoughTransformation(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_ops);
+
+void SFM_for_MatLab(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options);
 
 #endif /* IO_UTILITY_H_ */
 

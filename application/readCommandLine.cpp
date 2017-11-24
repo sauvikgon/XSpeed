@@ -72,7 +72,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("config-file,c", po::value<std::string>(), "include configuration file")
 	("output-file,o", po::value<std::string>(), "output file name for redirecting the outputs")
 	("output-variable,v", po::value<std::string>(), "projecting variables for e.g., 'x,v' for Bouncing Ball") //better to be handled by hyst
-	("output-format", po::value<std::string>(), "The type of output format, either GEN or INTV. GEN prints the vertices of the reach set and INTV prints the global bounds on the output variables (Set to GEN by default)")
+	("output-format", po::value<std::string>()->default_value("GEN"), "The type of output format, either GEN or INTV. GEN prints the vertices of the reach set and INTV prints the global bounds on the output variables (Set to GEN by default)")
 ;
 
 	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -217,7 +217,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			exit(0);
 		}
 		if (user_options.get_model() == 15) { //This condition specifies Recursive call of XSpeed
-//			user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
+			user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
 			unsigned int x1,x2;
 			x1 = user_options.get_first_plot_dimension();
 			x2 = user_options.get_second_plot_dimension();
