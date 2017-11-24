@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
 	/** Choosing from the output format options	 */
 	if(user_options.getOutputFormatType().compare("GEN")==0) {
 		//Vertex-Enumeration using old algorithm of recursively searching in quadrants
-		vertex_generator(Symbolic_states_list,user_options); //Generating Vertices as output which can be plotted using gnuplot utilites
+		vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices as output which can be plotted using gnuplot utilites
 		SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Vertices as output which can be plotted using gnuplot utilites
 		//Sequential sampling of Hough Space
 

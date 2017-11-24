@@ -220,12 +220,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	{
 		S = get_symbolic_state(i);
 		P = S->getInitialPolytope();
-		//debug--
-//		if(i==0)
-//			P->print2file("./symb_state0.txt", 9, 0);
-//		else
-//			P->print2file("./symb_state1.txt", 9, 0);
-		//--
+
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 

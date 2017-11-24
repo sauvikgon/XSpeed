@@ -209,7 +209,7 @@ std::list<MyPoint::ptr> enumBySequentialSampling(math::matrix<double>& A, std::v
 		glpk_lp_solver lp;
 		lp.setMin_Or_Max(2);
 		lp.setConstraints(A, b, 1);
-		std::vector<double> v, sv(2);
+		std::vector<double> v, sv(A.size2());
 		theta = start;
 		v = normalize_vector(angle_to_vector(theta));	//Computing objective function or VECTOR for the FIRST TWO (x,y) variables
 		std::vector<double> obj_fun(A.size2(), 0);	//initialized to zero
@@ -219,7 +219,11 @@ std::list<MyPoint::ptr> enumBySequentialSampling(math::matrix<double>& A, std::v
 		sv = lp.getMaximizing_Variables(); //Support Vector our first point
 
 		MyPoint::ptr p1, p2;
-		p1 = MyPoint::ptr(new MyPoint(sv));
+		std::vector<double> my_vertex(2);
+		my_vertex[0]=sv[dim1];
+		my_vertex[1]=sv[dim2];
+		p1 = MyPoint::ptr(new MyPoint(my_vertex));
+
 		//firstVertex = MyPoint::ptr(new MyPoint(sv)); //keeping a copy of the First Vertex
 		V.push_back(p1);
 		//V.insert(p1);
@@ -235,7 +239,10 @@ std::list<MyPoint::ptr> enumBySequentialSampling(math::matrix<double>& A, std::v
 			count_iter++;
 			//result = lp.Compute_LLP(normalize_vector(v));
 			sv = lp.getMaximizing_Variables(); //Support Vector our point
-			p2 = MyPoint::ptr(new MyPoint(sv));
+			std::vector<double> my_vertex(2);
+			my_vertex[0]=sv[dim1];
+			my_vertex[1]=sv[dim2];
+			p2 = MyPoint::ptr(new MyPoint(my_vertex));
 			//	std::cout<<"\nend = "<<end<<"\n";	//	p2->printPoint();
 			if (!(p1->isEqual(p2))) {
 				V.push_back(p2);
