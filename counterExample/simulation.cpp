@@ -72,6 +72,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	realtype T0 = 0;
 	realtype Tfinal = time;
 	realtype t=0;
+	N=time/time_step;
 	Dynamics *data = &D;
 
 	N_Vector u = NULL;
@@ -81,9 +82,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
-
-	// return the same initial point if the simulation time is smaller than the simulation time_step
-	double time_step = Tfinal/N;
 
 	for(unsigned int i=0;i<dimension;i++)
 		NV_Ith_S(u,i) = x[i];
@@ -128,46 +126,25 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	/* In loop over output points: call CVode, print results, test for errors */
 
-	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
-
-	bool print_flag = true; // makes the trace printed in the  outfile
-	std::ofstream myfile;
-	if(!filename.empty()){
-		myfile.open(this->filename.c_str(),std::fstream::app);
-		print_flag = true;
-	}
-
 	std::vector<double> last(dimension);
 
-	if(print_flag){
-		// We plot the initial point also
-		myfile << x[this->x1] << "  " << x[this->x2];
-		myfile << "\n";
+	trace_point simpoint;
+	simpoint.first = 0;
+	simpoint.second = x;
+	sim_trace.push_back(simpoint); // adding the starting simpoint in the sim_trace data-structure.
 
-		for(unsigned int k=1;k<=N;k++) {
-			double tout = k*time_step;
-			// remember this point in the last vector
-			for(unsigned int i=0;i<dimension;i++)
-				last[i] = NV_Ith_S(u,i);
-			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-			if(check_flag(&flag, "CVode", 1)) break;
-			//myfile << NV_Ith_S(u,this->x) << "  " << NV_Ith_S(u,this->y);
-			//myfile << time_offset + t << "  " << NV_Ith_S(u,this->x);
-			myfile << NV_Ith_S(u,this->x1) << "  " << NV_Ith_S(u,this->x2);
-			myfile << "\n";
-		}
-		myfile << "\n";
-		myfile.close();
-	}
-	else { // no printing the simulation points to file
-		for(unsigned int k=1;k<=N;k++) {
-			double tout = (k*Tfinal)/N;
-			// remember this point in the last vector
-			for(unsigned int i=0;i<dimension;i++)
-				last[i] = NV_Ith_S(u,i);
-			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-			if(check_flag(&flag, "CVode", 1)) break;
-		}
+	for(unsigned int k=1;k<=N;k++) {
+		double tout = (k*Tfinal)/N;
+		// remember this point in the last vector
+		for(unsigned int i=0;i<dimension;i++)
+			last[i] = NV_Ith_S(u,i);
+		trace_point simpoint;
+		simpoint.first = tout;
+		simpoint.second = last;
+		sim_trace.push_back(simpoint); // adding the simpoint in the sim_trace data-structure.
+
+		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
+		if(check_flag(&flag, "CVode", 1)) break;
 	}
 
 	std::vector<double> res(dimension);
@@ -198,6 +175,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	Dynamics *data = &D;
 	bound_sim b;
 	N_Vector u = NULL;
+	N = Tfinal/time_step;
 
 	if(data->isEmptyMatrixA && data->isEmptyC){ // zero dynamics
 		bound_sim b;
@@ -206,8 +184,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 		return b; // return the initial point, time horizon
 
 	}
-	// testing. should not not modify tol ideally
-	tol = 1e-5;
+
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
 
@@ -220,6 +197,12 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 		status = false;
 		return b;
 	}
+	// Add the starting point to the sim_trace otherwise here
+	trace_point simpoint;
+	simpoint.first = 0;
+	simpoint.second = x;
+	sim_trace.push_back(simpoint); // adding the starting simpoint in the sim_trace data-structure.
+
 	for(unsigned int i=0;i<dimension;i++)
 		NV_Ith_S(u,i) = x[i];
 
@@ -260,60 +243,33 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
-
-
-	bool print_flag = false;
-
-	std::ofstream myfile;
-	if(!filename.empty()){
-		myfile.open(this->filename.c_str(),std::fstream::app);
-		print_flag = true;
-	}
-
 	std::vector<double> v(dimension),prev_v(dimension);
 	prev_v = x;
 
-	double time_step = Tfinal/N;
-//	std::cout << "Total simulation time:" << time << std::endl;
-	status = true;
-	if(print_flag){
-		// We plot the initial point also
-		myfile << x[this->x1] << "  " << x[this->x2];
-		myfile << "\n";
+	for(unsigned int k=1;k<=N;k++) {
+		double tout = (k*Tfinal)/N;
+		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
+		if(check_flag(&flag, "CVode", 1)) break;
+		// check polytope satisfaction
+		for(unsigned int i=0;i<dimension;i++)
+			v[i] = NV_Ith_S(u,i);
 
-		for(unsigned int k=1;k<=N;k++) {
-			double tout = k*time_step;
-			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-			if(check_flag(&flag, "CVode", 1)) break;
-			myfile << NV_Ith_S(u,this->x1) << "  " << NV_Ith_S(u,this->x2);
-			myfile << "\n";
-
-		}
-		myfile << "\n";
-		myfile.close();
-	}
-	else { // no printing the simulation points to file
-		for(unsigned int k=1;k<=N;k++) {
-			double tout = (k*Tfinal)/N;
-			flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-			if(check_flag(&flag, "CVode", 1)) break;
-			// check polytope satisfaction
-			for(unsigned int i=0;i<dimension;i++)
-				v[i] = NV_Ith_S(u,i);
-			double dist = I->point_distance(v);
-			if(math::abs(dist) > tol) {
+		double dist = I->point_distance(v);
+		if(math::abs(dist) > tol) {
 //				std::cout << "time:" << t << " ";
-				std::cout << "DISTANCE TO INV= " << std::setprecision(10) << dist << std::endl;
-				std::cout << "tol = " << std::setprecision(10) << tol << std::endl;
-				status = false;
-				break;
-			}
-			else
-				prev_v = v;
+			std::cout << "DISTANCE TO INV= " << std::setprecision(10) << dist << std::endl;
+			std::cout << "tol = " << std::setprecision(10) << tol << std::endl;
+			status = false;
+			break;
+		}
+		else{
+			trace_point simpoint;
+			simpoint.first = tout;
+			simpoint.second = v;
+			sim_trace.push_back(simpoint); // adding the simpoint in the sim_trace data-structure.
+			prev_v = v;
 		}
 	}
-
 	b.v = v;
 	b.cross_over_time = t;
 
@@ -330,6 +286,7 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 	realtype Tfinal = time;
 	realtype t=0;
 	Dynamics *data = &D;
+	N=Tfinal/time_step;
 
 	N_Vector u = NULL;
 
@@ -397,12 +354,337 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 		// check polytope satisfaction
 		for(unsigned int i=0;i<dimension;i++)
 			v[i] = NV_Ith_S(u,i);
+
+		trace_point simpoint;
+		simpoint.first = tout;
+		simpoint.second = v;
+		sim_trace.push_back(simpoint); // adding the simpoint in the sim_trace data-structure.
+
 		distance += I->point_distance(v);
 	}
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);
 	return v;
 }
+
+/**
+ * Computes the simulation trace inside the location of a ha, from the given start point and for the give time duration.
+ * Returns the set of new start points which are valid for starting new simulation from the new location of the ha.
+ */
+std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha)
+{
+	int flag;
+	realtype t=start_time, T0 = 0;
+	realtype Tfinal = tot_time - start_time;
+	N = Tfinal/time_step;
+	double tout1 = start_time;  //New Start Time for new simulation
+
+	Dynamics Dyn = start_point.locptr->getSystem_Dynamics();
+
+	std::vector<double> x = start_point.start_point;
+
+	// Check if zero dynamics. No need to simulate then.
+	if (Dyn.isEmptyMatrixA && Dyn.isEmptyC) {
+		std::cout << "A location with empty dynamics reached\n";
+		std::vector<sim_start_point> emptylist;
+		return emptylist;
+	}
+
+	std::vector<sim_start_point> new_start_points;
+
+	//List of intersected polytope
+	std::list<eligibleTransition> etrans_list;
+
+
+	location::ptr loc = start_point.locptr;
+	polytope::ptr inv = loc->getInvariant();
+
+	//Computing guard-invariant intersection and bloating the set with time-step
+
+	std::list<transition::ptr> outgoingtrans;
+	outgoingtrans = loc->getOut_Going_Transitions();
+	for (std::list<transition::ptr>::iterator it = outgoingtrans.begin();
+			it != outgoingtrans.end(); it++) {
+
+		eligibleTransition trans;
+		polytope::ptr g = (*it)->getGaurd();
+		polytope::ptr inv_g_intersection = inv->GetPolytope_Intersection(g);
+		std::vector<double> poly_bounds = inv_g_intersection->getColumnVector();
+
+		for (unsigned int i = 0; i < inv_g_intersection->getColumnVector().size(); i++) {
+			poly_bounds[i] = poly_bounds[i] + this->time_step; // minkowski sum for bloating the guard \cap invariant set. Does not solve the purpose rightly
+		}
+
+		inv_g_intersection->setColumnVector(poly_bounds);
+
+		trans.inv_g_intersection = inv_g_intersection;
+		trans.trans = *it;
+
+		etrans_list.push_back(trans);
+	}
+
+	double tol_inv = 1e-10;
+
+	dimension = x.size();
+	//cout << "Iteration Remaining" << N << "\n";
+
+	reltol = 1e-8;
+	abstol = 1e-8;
+
+	assert(x.size() == dimension);
+
+	N_Vector u = N_VNew_Serial(dimension);
+
+	double dist = math::abs(inv->point_distance(x));
+	if (dist > tol_inv) {
+		std::vector<sim_start_point> emptylist;
+		return emptylist;
+	};
+
+	for (unsigned int i = 0; i < dimension; i++)
+		NV_Ith_S(u,i) = x[i];
+
+	void *cvode_mem;
+	cvode_mem = NULL;
+
+	// Call CVodeCreate to create the solver memory and specify the
+	// Backward Differentiation Formula and the use of a Newton iteration
+	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+	if (check_flag((void *) cvode_mem, "CVodeCreate", 0)) {
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+	// Input user data
+	CVodeSetUserData(cvode_mem, (void *) &Dyn);
+
+	// Call CVodeInit to initialize the integrator memory and specify the
+	// user's right hand side function in u'=f(t,u), the inital time T0, and
+	// the initial dependent variable vector u.
+	flag = CVodeInit(cvode_mem, f, T0, u);
+
+	if (check_flag(&flag, "CVodeInit", 1)) {
+		throw std::runtime_error("CVODE failed\n");
+	}
+	flag = CVDense(cvode_mem, dimension);
+	if (check_flag(&flag, "CVDense", 1)) {
+		throw std::runtime_error("CVODE failed\n");
+	}
+	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
+	if (check_flag(&flag, "CVodeSStolerances", 1)) {
+		throw std::runtime_error("CVODE failed\n");
+	}
+
+
+	std::vector<double> v(dimension);
+	v = x;
+
+	// add the initial point to to the trace:
+	trace_point simpoint;
+	simpoint.first = 0;
+	simpoint.second = x;
+	sim_trace.push_back(simpoint); // adding the simpoint in the sim_trace data-structure.
+	//-------------------
+
+	for (unsigned int k = 1; k <= N; k++) {
+
+		double tout = k * (Tfinal / N);
+		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
+		if (check_flag(&flag, "CVode", 1)){
+			cout<<"Start time = "<< t <<"  Total Time = "<<Tfinal<<" Value of tout = "<<tout<<endl;
+			break;
+		}
+
+		for (unsigned int i = 0; i < dimension; i++)
+			v[i] = NV_Ith_S(u, i);
+
+		for (std::list<eligibleTransition>::iterator it = etrans_list.begin();
+				it != etrans_list.end(); it++) {
+			polytope::ptr p = it->inv_g_intersection;
+			double dist = p->point_distance(v);
+
+			if (dist == 0) { //just intersected the guard
+				sim_start_point w;
+				int locID = it->trans->getDestination_Location_Id();
+				location::ptr loc = ha.getLocation(locID);
+
+				w.locptr = loc;
+				w.cross_over_time = tout1 + tout;
+
+				//Now assignment operation of the transition to be performed
+				std::vector<double> mapped_point;
+
+				mapped_point = it->trans->applyTransitionMap(v);
+				w.start_point = mapped_point;
+				polytope::ptr new_inv = w.locptr->getInvariant();
+
+				double dist1 = new_inv->point_distance(w.start_point);
+				if (dist1==0) // the new point is within the invariant of the new location
+				{
+					// In the urgent semantics, only the first guard intersecting point is added for further simulation
+					new_start_points.push_back(w);
+					break;
+				}
+			}
+		} // end of for loop
+
+		// Add the point to the sim_trace because it does not intersect with the guard yet
+		if(new_start_points.size()>0) // stop simulation since the next simulation point is found.
+			break;
+		else{
+			trace_point simpoint;
+			simpoint.first = tout;
+			simpoint.second = v;
+			sim_trace.push_back(simpoint);
+		}
+
+		//Checking validity of the trace
+		double dist = inv->point_distance(v);
+
+		if (math::abs(dist) > tol_inv)
+			break;
+	}
+
+	N_VDestroy_Serial(u);
+	CVodeFree(&cvode_mem);
+	return new_start_points;
+}
+
+/**
+ * Routine to print the simulation trace to a output file.
+ */
+void simulation::print_trace_to_outfile(std::string s){
+	std::ofstream myoutfile;
+	myoutfile.open(s.c_str());
+	for(std::list<trace_point>::const_iterator it = sim_trace.begin(); it!=sim_trace.end(); it++)
+	{
+		myoutfile << (*it).second[this->x1] << "  " << (*it).second[this->x2] << "\n";
+	}
+	myoutfile.close();
+}
+
+/*
+//Golbal Simulation of Hybrid automaton
+
+//Random Points
+
+void simulation::randassign(double Minf, double Maxf, double *randarray,
+		int randnumber, int boundnumber) {
+	int i = 0, j = 0, k, Min, Max, count = 0;
+	double Number;
+	Min = (int) (ceil(Minf * 50000.0));
+	Max = (int) (ceil(Maxf * 50000.0));
+	while (i < randnumber) {
+		srand(time(NULL)+i);
+		Number = std::rand() % (Max + 1 - Min) + Min;
+		Number = (double) (Number / 50000.0);
+		randarray[i] = Number;
+		i++;
+	}
+}
+*/
+/**
+ * Returns a set of random simulation start points from the given initial set.
+ */
+/*
+std::vector<sim_start_point> simulation::get_random_starts(polytope::ptr initialset, double gtime, hybrid_automata& ha) {
+
+	int i, j, rowSize, columnSize, boundSize, randnumber;
+	math::matrix<double> Matrix;
+
+
+	Matrix = initialset->getCoeffMatrix();
+	rowSize = Matrix.size1();
+	columnSize = Matrix.size2();
+	boundSize = initialset->getColumnVector().size();
+
+	double coefficient[rowSize][columnSize], bound[boundSize];
+	for (i = 0; i < rowSize; i++) //Assign Coefficient Matrix
+			{
+		for (j = 0; j < columnSize; j++) {
+			coefficient[i][j] = Matrix(i, j);
+		}
+	}
+
+	for (i = 0; i < boundSize; i++) //Assign bound Matrix
+			{
+		bound[i] = initialset->getColumnVector()[i];
+	}
+	int countmatrix[columnSize];
+	for (i = 0; i < columnSize; i++) {
+		countmatrix[i] = 0;
+	}
+	for (i = 0; i < rowSize; i++) {
+		for (j = 0; j < columnSize; j++) {
+			if (coefficient[i][j] != 0) {
+				countmatrix[j] = countmatrix[j] + 1;
+			}
+		}
+	}
+
+	double A[boundSize][3];
+	for (i = 0; i < rowSize; i++) {
+		for (j = 0; j < columnSize; j++) {
+			if (coefficient[i][j] != 0) {
+				A[i][0] = coefficient[i][j];
+			}
+		}
+		A[i][1] = bound[i];
+		A[i][2] = 1;
+	}
+	for (i = 0; i < boundSize; i++) {
+		for (j = 0; j < 3; j++) {
+			if (A[i][0] < 0) {
+				A[i][0] = A[i][0] * (-1);
+				A[i][1] = A[i][1] * (-1);
+				A[i][2] = 0;
+			}
+		}
+	}
+	cout << "Enter number of random points" << endl;
+	cin >> randnumber;
+	//randnumber=5;
+	double random[randnumber][columnSize], Minf, Maxf, randarray[randnumber];
+	int count = 0;
+	for (i = 0; i < columnSize; i++) {
+		if (countmatrix[i] == 2) {
+			if (A[count][2] == 0 && A[count + 1][2] == 1) {
+				Minf = A[count][1];
+				Maxf = A[count + 1][1];
+			}
+			if (A[count][2] == 1 && A[count + 1][2] == 0) {
+				Minf = A[count + 1][1];
+				Maxf = A[count][1];
+			}
+			count = count + 2;
+			randassign(Minf, Maxf, randarray, randnumber, i);
+		}
+		for (j = 0; j < randnumber; j++) {
+			random[j][i] = randarray[j];
+		}
+	}
+	for (i = 0; i < randnumber; i++) {
+		for (j = 0; j < columnSize; j++) {
+			cout << random[i][j] << " ";
+		}
+		cout << endl;
+	}
+	std::vector<double> v(columnSize);
+	std::vector<waitingList_sim> newLoctionList;
+	for (i = 0; i < randnumber; i++) {
+		for (j = 0; j < columnSize; j++) {
+			v[j] = random[i][j];
+			//cout << v[j] << " ";
+		}
+		waitingList_sim w;
+		w.newLoc = loc;
+		w.time_NewPoint.cross_over_time = 0;
+		w.time_NewPoint.v = v;
+		w.gtime = gtime;
+		newLoctionList.push_back(w);
+	}
+	return newLoctionList;
+}
+*/
 
 /* Check function return value...
      opt == 0 means SUNDIALS function allocates memory so check if
@@ -430,7 +712,8 @@ static int check_flag(void *flagvalue, const char* funcname, int opt)
     if (*errflag < 0) {
       fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n",
               funcname, *errflag);
-      return(1); }
+      return(1);
+    }
   }
 
   /* Check if function returned NULL pointer - no memory allocated */

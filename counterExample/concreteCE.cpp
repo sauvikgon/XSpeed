@@ -43,14 +43,6 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 	simulation::ptr sim;
 	std::cout << "Inside concrete trace plotter, no. of trajectory segs:" << T.size() << std::endl;
 	double steps = 100;
-	//debug
-	//printing the trace start point in a different file for plotting with distinguishible symbol
-	std::ofstream myfile;
-	// truncate the contents of the bad_trace.o file
-	myfile.open(filename.c_str(),ofstream::trunc);
-	myfile.close();
-
-	myfile.open("./start_pts");
 
 	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
 		seg = *it;
@@ -58,15 +50,11 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 		std::cout << "plotCE: loc id = " << locId << std::endl;
 		simulation_sample = seg.second;
 		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
-		sim->set_outfile(filename);
 		sim->set_out_dimension(x1, x2);
-	//	for(unsigned int i=0;i<sim->get_system_dimension();i++)
-		myfile << simulation_sample.first[x1] << " " << simulation_sample.first[x2];
 
-	//  std::cout << "simulation: dwell time:" << simulation_sample.second;
 		sim->simulate(simulation_sample.first, simulation_sample.second);
+		sim->print_trace_to_outfile(filename); // Prints the computed simulated trace to a file
 	}
-	myfile.close();
 
 }
 

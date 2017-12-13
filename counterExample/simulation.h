@@ -16,6 +16,9 @@
 #include <sundials/sundials_types.h>
 #include "application/DataStructureDirections.h"
 #include "Utilities/gradient.h"
+#include "core_system/HybridAutomata/Hybrid_Automata.h"
+#include "core_system/HybridAutomata/Transition.h"
+#include "core_system/HybridAutomata/Location.h"
 
 /*
  * A structure to return the last point in Invariant and the
@@ -26,6 +29,25 @@ struct bound_sim
 	std::vector<double> v;
 	double cross_over_time;
 };
+/**
+ * A structure to hold the ha location and the start point for simulation
+ */
+typedef struct sim_start_point
+{
+	location::ptr locptr;
+	std::vector<double> start_point;
+	double cross_over_time; // the time when this new start point was created. The remaining time to simulate is Time_horizon-cross_over_time
+
+}sim_start_point;
+
+/**
+ * A structure to hold the attributes of a ha transition which is eligible to trigger during a simulation.
+ */
+typedef struct eligibleTransition
+{
+	polytope::ptr inv_g_intersection; //Guard with Invariant intersected region, bloated with time_step
+	transition::ptr trans;// the pointer to the transition
+}eligibleTransition;
 
 /**
  * This class provides methods to simulate an ODE equation for a given
@@ -48,6 +70,10 @@ class simulation : public var_to_index_map {
 	string filename;
 	unsigned int x1; // the first output dimension for plotting.
 	unsigned int x2; // the second output dimension for plotting.
+	typedef std::pair<double,std::vector<double>> trace_point; // A trace point is a (time,vector) pair, specifying the system state at the time instance.
+	std::list< trace_point> sim_trace; // The d.s. storing the computed simulation trace
+
+	double time_step; //the supplied time-step
 
 public:
 	typedef boost::shared_ptr<simulation> ptr;
@@ -72,14 +98,13 @@ public:
 	}
 	virtual ~simulation();
 	/**
-	 * Sets the name of the output file to the parameter string.
+	 * Prints the computed simulation trace to a file.
 	 * The parameter string should be the absolute path.
 	 * The simulation shall be printed to this file if filename is not
 	 * empty
 	 */
-	void set_outfile(std::string s){
-		filename = s;
-	}
+	void print_trace_to_outfile(std::string s);
+
 	/**
 	 * Returns the dimension of the simulation object.
 	 */
@@ -95,16 +120,25 @@ public:
 		x1 = i;
 		x2 = j;
 	}
-	/*
-	 * Set the number of simulation samplings or steps
+	/**
+	 * Set the simulation time_step. Overrides the step parameter, when set.
 	 */
-	void set_steps(unsigned int n)
+	void set_time_step(double delta)
 	{
-		N = n;
+		this->time_step = delta;
 	}
 	/**
+	 * Get the simulation time_step. Overrides the step parameter, when set.
+	 */
+	double get_time_step(double delta)
+	{
+		return this->time_step;
+	}
+
+	/**
 	 * Generates a simulation trace for time duration, starting at start_time.
-	 * The initial state is given by the first parameter
+	 * The initial state is given by the first parameter. The last point of the
+	 * simulation trace is returned.
 	 */
 	std::vector<double> simulate(std::vector<double>, double time);
 
@@ -114,7 +148,7 @@ public:
 	 * violated by the trace is returned and with the first lsimulation point
 	 * that violated I, as a struct object. status is set to false if invariant
 	 * is violated. If the Inv violation distance is < tol, then it is tolerated.
-	 *
+	 * Returns the last point of the simulation trace.
 	 */
 	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I, bool &status, double tol);
 
@@ -122,10 +156,16 @@ public:
 	 * Simulate and also compute the distance of the trajectory with a polytope,
 	 * gradient of the distance of the trace to the given polytope invariant I w.r.t
 	 * the trace end point and the gradient of the distance of the trace
-	 * to the invariant w.r.t time.
+	 * to the invariant w.r.t time. Returns the last point of the simulation trace.
 	 */
 	std::vector<double> metric_simulate(std::vector<double> x, double time, double& distance, polytope::ptr Inv,
 			std::vector<double>& grad);
+
+	/**
+	 * Simulate the hybrid automata for the initial point passed in the parameter.
+	 * Returns a collection of valid new start points for further simulation of ha.
+	 */
+	std::vector<sim_start_point> simulateHaLocation(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha);
 
 };
 

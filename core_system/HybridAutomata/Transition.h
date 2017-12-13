@@ -36,6 +36,12 @@ public:
 	void setSource_Location_Id(int source_loc_id);
 	int getTransitionId() const;
 	void setTransitionId(int transId);
+	/**
+	 * Applies the map of the transition to a start vector
+	 * Returns the new mapped vector
+	 */
+	std::vector<double> applyTransitionMap(std::vector<double> x);
+
 };
 
 #endif /* TRANSITION_H_ */
