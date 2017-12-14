@@ -3421,7 +3421,7 @@ void SetNavigationBenchMark4Var(hybrid_automata& Hybrid_Automata,
 					Out_Going_Trans_fromloc2));
 
 	dim = initial_polytope_I->getSystemDimension();
-	Hybrid_Automata.addInitial_Location(l1);
+	Hybrid_Automata.addInitial_Location(l4);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.addLocation(l2);
 	Hybrid_Automata.addLocation(l3);
