@@ -28,7 +28,7 @@ struct Example {
 
 };
 
-TEST_FIXTURE(Example, HybridGlobalTimeSimulationTestCircle) {
+TEST_FIXTURE(Example, SimulationTestCircle) {
 	hybrid_automata ha;
 	std::list<initial_state::ptr> init_state;
 	ReachabilityParameters reach_parameters;
@@ -54,7 +54,7 @@ TEST_FIXTURE(Example, HybridGlobalTimeSimulationTestCircle) {
 	w.start_point = x0;
 
 	sim->simulateHaLocation(w,0,reach_parameters.TimeBound,ha);
-	sim->print_trace_to_outfile("rotation_trace");
+	//sim->print_trace_to_outfile("rotation_trace");
 }
 
 

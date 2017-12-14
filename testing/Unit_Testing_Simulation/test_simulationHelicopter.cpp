@@ -65,7 +65,7 @@ TEST_FIXTURE(Example, TestHelicopterSimulation) {
 	w.start_point = x0;
 
 	sim->simulateHaLocation(w,0,reach_parameters.TimeBound,ha);
-	sim->print_trace_to_outfile("helicopter_trace");
+	//sim->print_trace_to_outfile("helicopter_trace");
 }
 
 }

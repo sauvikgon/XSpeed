@@ -72,7 +72,7 @@ TEST_FIXTURE(Example, HybridGlobalTimeSimulationTestTimedBBall) {
 	w.start_point = x0;
 
 	sim->simulateHaLocation(w,0,reach_parameters.TimeBound,ha);
-	sim->print_trace_to_outfile("timedBball_trace");
+	//sim->print_trace_to_outfile("timedBball_trace");
 }
 
 }

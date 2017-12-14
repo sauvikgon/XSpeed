@@ -30,7 +30,7 @@ struct Example {
 };
 
 
-TEST_FIXTURE(Example, HybridGlobalTimeSimulationTestNAV9x9) {
+TEST_FIXTURE(Example, SimulationTestNAV9x9) {
 
 	hybrid_automata ha;
 	std::list<initial_state::ptr> init_state;
@@ -58,7 +58,7 @@ TEST_FIXTURE(Example, HybridGlobalTimeSimulationTestNAV9x9) {
 	w.start_point = x0;
 
 	sim->simulateHaLocation(w,0,reach_parameters.TimeBound,ha);
-	sim->print_trace_to_outfile("navigation9x9_trace");
+	//sim->print_trace_to_outfile("navigation9x9_trace");
 
 }
 

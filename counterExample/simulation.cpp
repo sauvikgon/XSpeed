@@ -565,26 +565,10 @@ void simulation::print_trace_to_outfile(std::string s){
 /*
 //Golbal Simulation of Hybrid automaton
 
-//Random Points
-
-void simulation::randassign(double Minf, double Maxf, double *randarray,
-		int randnumber, int boundnumber) {
-	int i = 0, j = 0, k, Min, Max, count = 0;
-	double Number;
-	Min = (int) (ceil(Minf * 50000.0));
-	Max = (int) (ceil(Maxf * 50000.0));
-	while (i < randnumber) {
-		srand(time(NULL)+i);
-		Number = std::rand() % (Max + 1 - Min) + Min;
-		Number = (double) (Number / 50000.0);
-		randarray[i] = Number;
-		i++;
-	}
-}
-*/
 /**
- * Returns a set of random simulation start points from the given initial set.
+ * Returns a set of random simulation start points from the given initial set (hyperbox)
  */
+
 /*
 std::vector<sim_start_point> simulation::get_random_starts(polytope::ptr initialset, double gtime, hybrid_automata& ha) {
 

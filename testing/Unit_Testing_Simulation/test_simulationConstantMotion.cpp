@@ -57,7 +57,7 @@ TEST_FIXTURE(Example, HybridGlobalTimeSimulationConstantMotion) {
 	w.start_point = x0;
 
 	sim->simulateHaLocation(w,0,reach_parameters.TimeBound,ha);
-	sim->print_trace_to_outfile("constant_motion");
+	//sim->print_trace_to_outfile("constant_motion");
 
 }
 
