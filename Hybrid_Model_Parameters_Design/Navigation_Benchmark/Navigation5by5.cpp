@@ -6,7 +6,7 @@
 
 #include "NavigationBenchmark.h"
 
-void SetNavigationModel5by5Timed(hybrid_automata& Hybrid_Automata, initial_state::ptr& init_state, ReachabilityParameters& reach_parameters) {
+void SetNavigationModel5by5Timed(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state, ReachabilityParameters& reach_parameters) {
 
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -429,7 +429,6 @@ transition::ptr t3 = transition::ptr(new transition(3,"t7",1,4,guard_polytope2,a
 Out_Going_Trans_fromloc3.push_back(t3);
 location::ptr l1 = location::ptr(new location(1, "loc3", system_dynamics, invariant0, true, Out_Going_Trans_fromloc3));
 
-Hybrid_Automata.addInitial_Location(l1);
 Hybrid_Automata.addLocation(l1);
 
 
@@ -6485,6 +6484,7 @@ transition::ptr t49 = transition::ptr(new transition(49,"t56",17,19,guard_polyto
 Out_Going_Trans_fromloc19.push_back(t49);
 location::ptr l17 = location::ptr(new location(17, "loc19", system_dynamics, invariant16, true, Out_Going_Trans_fromloc19));
 Hybrid_Automata.addLocation(l17);
+Hybrid_Automata.addInitial_Location(l17);
 
 
 // The mode name is  loc17
@@ -9687,6 +9687,6 @@ unsigned int initial_location_id =17;
 symbolic_states::ptr S;
 int transition_id = 0;
 initial_state::ptr I = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I, S, transition_id));
-init_state = I;
+init_state.push_back(I);
 
 }

@@ -92,8 +92,10 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata,
 	system_dynamics.C = vector_c;
 
 	system_dynamics.U = polytope::ptr(new polytope(true));//system_dynamics.U->setIsEmpty(true); //set empty
-//	Dynamics Initalised ---------------------
-//Location 'loc1' has Transition 't1' with guard is x==0 & y + 0.714268*x >= 0 and No Assignment so its identity i.e., x'=x and y'=y
+
+	//	Dynamics Initalised ---------------------
+	//Location 'loc1' has Transition 't1' with guard is x==0 & y + 0.714268*x >= 0 and No Assignment so its identity i.e., x'=x and y'=y
+
 	row = 3;
 	col = 2;
 	gaurdConstraintsMatrix.resize(row, col);
@@ -361,7 +363,7 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata,
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.setDimension(dim);
-	Hybrid_Automata.addInitial_Location(l1);
+	Hybrid_Automata.addInitial_Location(l3);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.addLocation(l2);
 	Hybrid_Automata.addLocation(l3);

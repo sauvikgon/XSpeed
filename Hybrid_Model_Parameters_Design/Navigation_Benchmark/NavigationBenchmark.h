@@ -48,7 +48,7 @@ void SetNavigationModel4(hybrid_automata& Hybrid_Automata,
 		ReachabilityParameters& reach_parameters);
 
 void SetNavigationModel5by5Timed(hybrid_automata& Hybrid_Automata,
-		std::list<initial_state::ptr>& init_state_list,
+		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters);
 //Model (5 x 5) containing 81-Locations with 280 transitions
 
