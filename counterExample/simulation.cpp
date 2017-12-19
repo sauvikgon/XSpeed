@@ -497,6 +497,11 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 		for (unsigned int i = 0; i < dimension; i++)
 			v[i] = NV_Ith_S(u, i);
 
+		trace_point simpoint;
+		simpoint.first = tout;
+		simpoint.second = v;
+		sim_trace.push_back(simpoint);
+
 		for (std::list<eligibleTransition>::iterator it = etrans_list.begin();
 				it != etrans_list.end(); it++) {
 			polytope::ptr p = it->inv_g_intersection;
@@ -530,12 +535,6 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 		// Add the point to the sim_trace because it does not intersect with the guard yet
 		if(new_start_points.size()>0) // stop simulation since the next simulation point is found.
 			break;
-		else{
-			trace_point simpoint;
-			simpoint.first = tout;
-			simpoint.second = v;
-			sim_trace.push_back(simpoint);
-		}
 
 		//Checking validity of the trace
 		double dist = inv->point_distance(v);
@@ -562,113 +561,115 @@ void simulation::print_trace_to_outfile(std::string s){
 	myoutfile.close();
 }
 
-/*
-//Golbal Simulation of Hybrid automaton
-
 /**
- * Returns a set of random simulation start points from the given initial set (hyperbox)
+ * Returns a set of random simulation start points from the given as Hyperbox as initial set.
  */
-
-/*
-std::vector<sim_start_point> simulation::get_random_starts(polytope::ptr initialset, double gtime, hybrid_automata& ha) {
-
-	int i, j, rowSize, columnSize, boundSize, randnumber;
-	math::matrix<double> Matrix;
-
-
-	Matrix = initialset->getCoeffMatrix();
-	rowSize = Matrix.size1();
-	columnSize = Matrix.size2();
-	boundSize = initialset->getColumnVector().size();
-
-	double coefficient[rowSize][columnSize], bound[boundSize];
-	for (i = 0; i < rowSize; i++) //Assign Coefficient Matrix
-			{
-		for (j = 0; j < columnSize; j++) {
-			coefficient[i][j] = Matrix(i, j);
-		}
+std::vector<sim_start_point> simulation::get_start_points(unsigned int n, hyperbox<double>::ptr hbox, location::ptr locptr)
+{
+	std::vector<sim_start_point> my_start_points;
+	for(unsigned int i=0;i<n;i++){
+		std::vector<double> point = hbox->get_internal_point();
+		sim_start_point s;
+		s.start_point = point;
+		s.locptr = locptr;
+		s.cross_over_time=0;
+		my_start_points.push_back(s);
 	}
+	return my_start_points;
+};
 
-	for (i = 0; i < boundSize; i++) //Assign bound Matrix
-			{
-		bound[i] = initialset->getColumnVector()[i];
-	}
+std::vector<sim_start_point> simulation::get_start_points(unsigned int n, polytope::ptr initialset, location::ptr locptr)
+{
+	/**
+	 * Check if the polytope is a hyperbox. If so, convert it into hyperbox and
+	 * get random start points using the hyperbox class routine
+	 */
+
+	unsigned int i, j, rowSize, columnSize, randnumber;
+	math::matrix<double> matrix;
+	std::vector<sim_start_point> res;
+
+	matrix = initialset->getCoeffMatrix();
+	rowSize = matrix.size1();
+	columnSize = matrix.size2();
+	unsigned int boundSize = initialset->getColumnVector().size();
+
 	int countmatrix[columnSize];
+
 	for (i = 0; i < columnSize; i++) {
 		countmatrix[i] = 0;
 	}
+	bool is_hyperbox = true;
 	for (i = 0; i < rowSize; i++) {
 		for (j = 0; j < columnSize; j++) {
-			if (coefficient[i][j] != 0) {
+			if (matrix(i,j) != 0) {
 				countmatrix[j] = countmatrix[j] + 1;
 			}
 		}
+		if(j<columnSize && countmatrix[j] != 1){
+			is_hyperbox = false;
+			break;
+		}
 	}
 
-	double A[boundSize][3];
-	for (i = 0; i < rowSize; i++) {
-		for (j = 0; j < columnSize; j++) {
-			if (coefficient[i][j] != 0) {
-				A[i][0] = coefficient[i][j];
+//	std::cout << "A matrix is:\n";
+//	for(unsigned int i=0;i<rowSize;i++){
+//		for(unsigned int j=0;j<columnSize;j++){
+//			std::cout << matrix(i,j) << " ";
+//		}
+//		std::cout << std::endl;
+//	}
+
+	typename hyperbox<double>::ptr hbox_ptr;
+
+	/**
+	 * The following conversion works only for polytopes represented in Ax<=b form.
+	 * In addition, it assumes that A is in a certain form, that is, the lower and upper
+	 * bound on any dimension is mentioned as consecutive constraints in A, first the
+	 * constraint on the upper bound and followed by the constraint on the lower bound.
+	 */
+	if(is_hyperbox)
+	{
+		// convert this poytope into hyperbox object
+
+		hbox_ptr= hyperbox<double>::ptr(new hyperbox<double>());
+		hbox_ptr->set_dimension(columnSize);
+
+
+		for(unsigned int i=0;i<rowSize;)
+		{
+			for(unsigned int j=0;j<columnSize;j++)
+			{
+				if(matrix(i,j)==0) continue;
+				else{
+					//double upper_bound = initialset->getColumnVector()[i];
+					double upper_bound = initialset->getColumnVector()[i];
+					double lower_bound = -1 * initialset->getColumnVector()[i+1];
+					hbox_ptr->set_bounds_on_dimension(j, lower_bound, upper_bound);
+					//std::cout << "hbox set bounds called with params:" << "j=" << j << ", lower_bound = " << lower_bound << ", upper_bound:" << upper_bound << std::endl;
+					i+=2; break;
+				}
 			}
+
 		}
-		A[i][1] = bound[i];
-		A[i][2] = 1;
-	}
-	for (i = 0; i < boundSize; i++) {
-		for (j = 0; j < 3; j++) {
-			if (A[i][0] < 0) {
-				A[i][0] = A[i][0] * (-1);
-				A[i][1] = A[i][1] * (-1);
-				A[i][2] = 0;
-			}
-		}
-	}
-	cout << "Enter number of random points" << endl;
-	cin >> randnumber;
-	//randnumber=5;
-	double random[randnumber][columnSize], Minf, Maxf, randarray[randnumber];
-	int count = 0;
-	for (i = 0; i < columnSize; i++) {
-		if (countmatrix[i] == 2) {
-			if (A[count][2] == 0 && A[count + 1][2] == 1) {
-				Minf = A[count][1];
-				Maxf = A[count + 1][1];
-			}
-			if (A[count][2] == 1 && A[count + 1][2] == 0) {
-				Minf = A[count + 1][1];
-				Maxf = A[count][1];
-			}
-			count = count + 2;
-			randassign(Minf, Maxf, randarray, randnumber, i);
-		}
-		for (j = 0; j < randnumber; j++) {
-			random[j][i] = randarray[j];
+
+		// generate the points
+		for(unsigned int i=0;i<n;i++)
+		{
+			sim_start_point s;
+			s.start_point = hbox_ptr->get_internal_point();
+			s.cross_over_time = 0;
+			s.locptr = locptr;
+			res.push_back(s);
 		}
 	}
-	for (i = 0; i < randnumber; i++) {
-		for (j = 0; j < columnSize; j++) {
-			cout << random[i][j] << " ";
-		}
-		cout << endl;
-	}
-	std::vector<double> v(columnSize);
-	std::vector<waitingList_sim> newLoctionList;
-	for (i = 0; i < randnumber; i++) {
-		for (j = 0; j < columnSize; j++) {
-			v[j] = random[i][j];
-			//cout << v[j] << " ";
-		}
-		waitingList_sim w;
-		w.newLoc = loc;
-		w.time_NewPoint.cross_over_time = 0;
-		w.time_NewPoint.v = v;
-		w.gtime = gtime;
-		newLoctionList.push_back(w);
-	}
-	return newLoctionList;
+	/**
+	 * If polytope is general than a hyperbox, do the following
+	 */
+
+	// code goes here
+	return res;
 }
-*/
 
 /* Check function return value...
      opt == 0 means SUNDIALS function allocates memory so check if

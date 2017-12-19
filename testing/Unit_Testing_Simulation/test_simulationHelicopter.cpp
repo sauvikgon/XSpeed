@@ -30,8 +30,6 @@ struct Example {
 };
 
 
-
-
 TEST_FIXTURE(Example, TestHelicopterSimulation) {
 
 	hybrid_automata ha;
@@ -66,6 +64,45 @@ TEST_FIXTURE(Example, TestHelicopterSimulation) {
 
 	sim->simulateHaLocation(w,0,reach_parameters.TimeBound,ha);
 	//sim->print_trace_to_outfile("helicopter_trace");
+}
+
+TEST_FIXTURE(Example, TestManyHelicopterSimulation) {
+
+	hybrid_automata ha;
+	std::list<initial_state::ptr> init_state;
+	ReachabilityParameters reach_parameters;
+
+	reach_parameters.TimeBound = 100; //Total Time Interval
+	reach_parameters.time_step = 0.1;
+	reach_parameters.Iterations = reach_parameters.TimeBound/reach_parameters.time_step; // number of iterations
+
+	simulation::ptr sim = simulation::ptr(new simulation());
+
+	sim->set_out_dimension(0,1); //output dimensions
+	sim->set_time_step(reach_parameters.time_step);
+
+	std::vector<double> x0(29,0);
+	x0[8]=0.1;
+	x0[5]=0.1;
+
+	SetHelicopter_Parameters3InCorrect(ha, init_state, reach_parameters);
+
+	std::list<initial_state::ptr>::iterator it;
+	it=init_state.begin();
+	polytope::ptr initialset=(*it)->getInitialSet();
+
+
+		// testing HA location simulation
+		unsigned int n=10; // the number of start points
+		std::vector<sim_start_point> start_pts = sim->get_start_points(n, initialset, ha.getInitial_Location());
+
+		assert(start_pts.size() == n);
+
+		for(unsigned int i=0;i<n;i++)
+		{
+			sim->simulateHaLocation(start_pts[i],0,reach_parameters.TimeBound,ha);
+			sim->print_trace_to_outfile("helicopter_trace");
+		}
 }
 
 }

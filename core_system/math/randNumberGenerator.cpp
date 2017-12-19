@@ -16,16 +16,14 @@
  * Ruturns an array of random numbers in randarray
  */
 
-void randNumberGenerator(double minf, double maxf, int numrands, double* res) {
+std::vector<double> randNumberGenerator::getRands(double minf, double maxf, unsigned int n) {
 
-	 std::default_random_engine generator;
-	 std::uniform_real_distribution<double> distribution(minf,maxf);
+	 distribution = std::uniform_real_distribution<double>(minf,maxf);
+	 std::vector<double> numbers(n);
 
-	 for(unsigned int i=0;i<numrands;i++){
+	 for(unsigned int i=0;i<n;i++)
+		 numbers[i] = distribution(generator);
 
-		 double number = distribution(generator);
-		 res[i] = number;
-	 }
-}
-
+	 return numbers;
+};
 

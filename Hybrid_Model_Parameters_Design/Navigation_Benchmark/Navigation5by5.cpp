@@ -9658,6 +9658,17 @@ ConstraintsMatrixI(7 , 1) = 0;
 ConstraintsMatrixI(7 , 2) = 0;
 ConstraintsMatrixI(7 , 3) = -1;
 ConstraintsMatrixI(7 , 4) = 0;
+ConstraintsMatrixI(8 , 0) = 0;
+ConstraintsMatrixI(8 , 1) = 0;
+ConstraintsMatrixI(8 , 2) = 0;
+ConstraintsMatrixI(8 , 3) = 0;
+ConstraintsMatrixI(8 , 4) = 1;
+ConstraintsMatrixI(9 , 0) = 0;
+ConstraintsMatrixI(9 , 1) = 0;
+ConstraintsMatrixI(9 , 2) = 0;
+ConstraintsMatrixI(9 , 3) = 0;
+ConstraintsMatrixI(9 , 4) = -1;
+
 boundValueI.resize(row );
 boundValueI[0]=3.4;
 boundValueI[1]=-3.1;

@@ -8,6 +8,7 @@
 #include <iostream>
 #include "UnitTest++.h"
 #include "core_system/math/randNumberGenerator.h"
+#include <vector>
 
 SUITE(randon_number_generator_TestSuite) {
 struct randGen {
@@ -20,14 +21,15 @@ struct randGen {
 
 TEST_FIXTURE(randGen, randNumberGeneratorTest) {
 
-	double random[10];
-	randNumberGenerator(0,20,10,random);
-	std::cout << "Printing the uniformly distributed random numbers:\n";
+	std::vector<double> random;
+	randNumberGenerator randgen;
+	random = randgen.getRands(10,20,10);
 
-	for(unsigned int i=0;i<10;i++)
-	{
-		std::cout << random[i] << std::endl;
-	}
+//	for(unsigned int i=0;i<10;i++)
+//	{
+//		std::cout << random[i] << std::endl;
+//	}
+
 }
 
 }
