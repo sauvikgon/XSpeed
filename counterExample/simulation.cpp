@@ -385,7 +385,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 
 	// Check if zero dynamics. No need to simulate then.
 	if (Dyn.isEmptyMatrixA && Dyn.isEmptyC) {
-		std::cout << "A location with empty dynamics reached\n";
+		//std::cout << "A location with empty dynamics reached\n";
 		std::vector<sim_start_point> emptylist;
 		return emptylist;
 	}
@@ -574,6 +574,7 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n, hyperb
 		s.locptr = locptr;
 		s.cross_over_time=0;
 		my_start_points.push_back(s);
+
 	}
 	return my_start_points;
 };
@@ -669,6 +670,26 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n, polyto
 
 	// code goes here
 	return res;
+}
+
+
+void simulation::simulateHa(sim_start_point start, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps)
+{
+	std::list<sim_start_point> wlist;
+	wlist.push_back(start);
+
+	unsigned int jumps_taken=0;
+
+	while(wlist.size()!=0 && jumps_taken<=max_jumps)
+	{
+		sim_start_point s = wlist.front();
+		wlist.pop_front();
+		std::vector<sim_start_point> next_pts;
+		next_pts = simulateHaLocation(s,start_time,tot_time,ha);
+		for(unsigned int i=0;i<next_pts.size();i++)
+			wlist.push_back(next_pts[i]);
+		jumps_taken++;
+	}
 }
 
 /* Check function return value...

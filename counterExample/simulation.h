@@ -172,11 +172,18 @@ public:
 			std::vector<double>& grad);
 
 	/**
-	 * Simulate the hybrid automata for the initial point passed in the parameter.
+	 * Simulate the location dynamics mentioned in the start_point (symbolic initial point), for the initial point passed in the parameter.
 	 * Returns a collection of valid new start points for further simulation of ha.
 	 */
 	std::vector<sim_start_point> simulateHaLocation(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha);
 
+	/**
+	 * Simulates the Hybrid Automaton from the given start point for the time_duration.
+	 * The result is stored in the sim_trace data-structure. The simulation follows "urgent"
+	 * semantics of HA. According to this, a transition is taken as soon as the transition
+	 * guard constraint is satisfied. A simulation with "max_jumps" transitions is computed
+	 */
+	void simulateHa(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps=10);
 	/**
 	 * Returns a vector of start points for initiating simulation from the given location of a ha.
 	 * The parameter n is the number of start points to get, the initial_set specifies the region from
