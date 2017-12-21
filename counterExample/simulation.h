@@ -20,6 +20,7 @@
 #include "core_system/HybridAutomata/Transition.h"
 #include "core_system/HybridAutomata/Location.h"
 #include "core_system/continuous/Hyperbox/Hyperbox.h"
+#include <omp.h>
 
 /*
  * A structure to return the last point in Invariant and the
@@ -153,6 +154,14 @@ public:
 	std::vector<double> simulate(std::vector<double>, double time);
 
 	/**
+	 * Returns the computed simulation trace. This should be called after calling one of the
+	 * simulate methods of the class where the member is initialized.
+	 */
+	std::list< trace_point> get_sim_trace(){
+		return sim_trace;
+	}
+
+	/**
 	 * Generates a simulation trace for time duration, starting at start_time.
 	 * The time instant, within the simulation time, when the polytope I is
 	 * violated by the trace is returned and with the first lsimulation point
@@ -185,11 +194,18 @@ public:
 	 */
 	void simulateHa(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps=10);
 	/**
+	 * Parallel Simulation of Ha with N unifomrly distributed random start points from the initial set.
+	 */
+	void parSimulateHa(unsigned int N, polytope::ptr initial_set, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps=10);
+
+	/**
 	 * Returns a vector of start points for initiating simulation from the given location of a ha.
 	 * The parameter n is the number of start points to get, the initial_set specifies the region from
 	 * where to create the initial points (assumption is initial_set is subsumed by the location invariant) and locptr
 	 * is the ha location to start simulations. The initial_set is assumed to be of type polytope
 	 */
+	std::vector<sim_start_point> get_start_points(unsigned int n, hyperbox<double>::ptr hbox, location::ptr locptr);
+
 	std::vector<sim_start_point> get_start_points(unsigned int n, polytope::ptr initialset, location::ptr locptr);
 
 	/**
@@ -198,7 +214,8 @@ public:
 	 * where to create the initial points (assumption is initial_set is subsumed by the location invariant) and locptr
 	 * is the ha location to start simulations. The initial_set is assumped to be type hyperbox
 	 */
-	std::vector<sim_start_point> get_start_points(unsigned int n, hyperbox<double>::ptr hbox, location::ptr locptr);
+
+	//
 };
 
 #endif /* SIMULATION_H_ */

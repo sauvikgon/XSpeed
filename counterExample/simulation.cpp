@@ -692,6 +692,87 @@ void simulation::simulateHa(sim_start_point start, double start_time, double tot
 	}
 }
 
+void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps)
+{
+
+	std::vector<sim_start_point> start_points = get_start_points(n,initial_set,ha.getInitial_Location());
+
+	unsigned int t = 0, point_count = 0;
+	int N_cores = omp_get_num_procs();
+	std::vector<sim_start_point> wlist[2][N_cores][N_cores];
+
+	for(int i=0; i<N_cores; i++)
+	{
+		for(int j=0; j<N_cores; j++)
+		{
+			while(wlist[t][i][j].size() <= ceil(start_points.size()/(N_cores*N_cores)) && point_count < start_points.size())
+			{
+				wlist[t][i][j].push_back(start_points[point_count]);
+				point_count++;
+			}
+		}
+	}
+
+	std::list<std::list< trace_point> > simtraces[N_cores];
+
+	bool wlistNotEmpty = true;
+	unsigned int jumps_taken = 0;
+	while (wlistNotEmpty == true && jumps_taken<=max_jumps) {
+		int newpointsCount = 0;
+
+		#pragma omp parallel for
+
+		for (int w = 0; w < N_cores; w++) {
+			for(int q = 0; q< N_cores; q++){
+				while (wlist[t][w][q].size() != 0)
+				{
+					sim_start_point s = wlist[t][w][q][0];
+					wlist[t][w][q].erase(wlist[t][w][q].begin());
+					unsigned int sys_dimension = s.start_point.size();
+					simulation myobj(sys_dimension, tot_time/this->time_step, s.locptr->getSystem_Dynamics());
+					myobj.set_time_step(this->time_step);
+					//myobj.set_out_dimension(a1,a2);
+
+					std::vector<sim_start_point> newpoints = myobj.simulateHaLocation(s, s.cross_over_time, tot_time, ha);
+
+					simtraces[w].push_back(myobj.get_sim_trace());
+
+					//myobj.print_trace_to_outfile("navigation3x3_trace_par");
+
+
+					for(unsigned int j=0; j<newpoints.size(); j++)
+					{
+						wlist[1-t][q][w].push_back(newpoints[j]);
+						newpointsCount++;
+					}
+				}
+				wlist[t][w][q].erase(wlist[t][w][q].begin(), wlist[t][w][q].begin()+wlist[t][w][q].size());
+			}
+		}
+		t = 1 - t;
+		if(newpointsCount == 0)
+			wlistNotEmpty = false;
+	}
+
+
+	sim_trace.clear();
+
+	// dump the simtraces list into this->sim_trace
+
+	for(unsigned int i=0;i<N_cores;i++){
+		for(std::list<std::list< trace_point> >::iterator it = simtraces[i].begin(); it!=simtraces[i].end();it++)
+		{
+			std::list< trace_point> s = *it;
+
+			for(std::list<trace_point>::const_iterator it = s.begin(); it!=s.end(); it++)
+			{
+				sim_trace.push_back(*it);
+			}
+		}
+	}
+
+}
+
 /* Check function return value...
      opt == 0 means SUNDIALS function allocates memory so check if
               returned NULL pointer

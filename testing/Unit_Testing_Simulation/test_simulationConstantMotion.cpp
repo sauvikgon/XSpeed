@@ -126,8 +126,35 @@ TEST_FIXTURE(Example, TestHaSimulationConstantMotion) {
 	for(unsigned int i=0;i<n;i++)
 	{
 		sim->simulateHa(start_pts[i],0,reach_parameters.TimeBound,ha);
-		sim->print_trace_to_outfile("constant_motion_trace");
+//		sim->print_trace_to_outfile("constant_motion_trace");
 	}
+}
+
+TEST_FIXTURE(Example, ParTestHaConstantMotion) {
+
+	hybrid_automata ha;
+	initial_state::ptr init_state;
+	ReachabilityParameters reach_parameters;
+
+	reach_parameters.TimeBound = 100; //Total Time Interval
+	reach_parameters.time_step = 0.1;
+	reach_parameters.Iterations = reach_parameters.TimeBound/reach_parameters.time_step; // number of iterations
+
+	simulation::ptr sim = simulation::ptr(new simulation());
+
+	sim->set_out_dimension(0,2); //output dimensions
+	sim->set_time_step(reach_parameters.time_step);
+
+
+	SetConstantMotion(ha,init_state,reach_parameters);
+
+
+	polytope::ptr initialset=init_state->getInitialSet();
+
+	unsigned int n=10; // the number of start points
+
+	sim->parSimulateHa(n,initialset, 0,reach_parameters.TimeBound,ha);
+	sim->print_trace_to_outfile("constant_motion_trace");
 }
 
 }
