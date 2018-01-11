@@ -50,7 +50,8 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 
 	}
 	if (HybridSystem_Model_Type == NAVIGATION_4) {
-//		SetNavigationModel5by5(ha, init_state, reach_parameters); //My own testing Model NAV_5by5
+		//SetNavigationModel5by5(ha, init_state, reach_parameters); //Sir this is the time Model NAV_5by5
+		SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //Sir this is without time Model NAV_5by5
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) {

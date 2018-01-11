@@ -16,6 +16,9 @@ public:
 	 * Adaption of GH algorithm for parallel Breadth first search
 	 */
 	std::list<symbolic_states::ptr> ParallelBFS_GH(std::list<abstractCE::ptr>& ce_candidates);
+
+	//Adapted Holzmann Algorithm with separate  postC and postD from the containment check to avoid locking on passed list
+	std::list<symbolic_states::ptr> AGJH(std::list<abstractCE::ptr>& ce_candidates);
 private:
 	/**
 	 * Computes postC from sym state s.

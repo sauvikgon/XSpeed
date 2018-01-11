@@ -32,7 +32,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	desc.add_options()
 	("help", "produce help message")
 	("model", po::value<int>()->default_value(0), "set model for reachability analysis\n"
-					"1.  Bouncing Ball Model: Variables{x,v}"
+					"1.  Bouncing Ball Model: Variables{x,v}\n"
 					"2.  Timed Bouncing Ball Model: Variables{x,v,t}\n"
 					"3.  28-Dimensional Helicopter Controller Model: Variables{x1..x28}\n"
 					"4.  Five dimensional Benchmark Model: Variables{x1..x5} \n"

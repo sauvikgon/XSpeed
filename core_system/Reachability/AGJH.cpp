@@ -176,6 +176,159 @@ cout<<"******************************************************************\n";
 
 }
 
+//Adapted Holzmann Algorithm with separate  postC and postD from the containment check to avoid locking on passed list
+std::list<symbolic_states::ptr> agjh::AGJH(std::list<abstractCE::ptr>& ce_candidates){
+	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
+	int t = 0; //0 for Read and 1 for Write
+	unsigned int N = omp_get_num_procs(); //get the number of cores // Number of cores in the machine
+	//std::cout<<"Number of Cores = "<<N<<std::endl;
+	std::list<initial_state::ptr> Wlist[2][N][N];
+	for(unsigned int i=0;i<2;i++){
+		for(unsigned int j=0;j<N;j++){
+			for(unsigned int k=0;k<N;k++){
+				std::list<initial_state::ptr> l;
+				Wlist[i][j][k] = l;
+			}
+		}
+	}
+	int initialState_index = 0; // first initial state
+	for (std::list<initial_state::ptr>::iterator i = I.begin(); i != I.end(); i++) {
+
+		Wlist[t][initialState_index][0].push_back(*(i));
+
+		initialState_index++; //next initial state
+	}	//Wlist[t][0][0].push_back(this->I); //old implementation
+
+
+	std::list<symbolic_states::ptr> PASSED;
+	unsigned int level = 0;
+	bool done, safetyViolated=false;
+	//srand(time(NULL));
+
+	int waiting_count=0;	//number of waiting symbolic state
+	unsigned int passed_count=0; //total number of passed list
+	//cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << count<< "\n";
+
+	do {
+		boost::timer::cpu_timer jump_time;
+		jump_time.start();	//Start recording the entire time for jump
+		done = true;
+		std::list<symbolic_states::ptr> R1PerBreadth[N][N];	//shared per breadth
+#pragma omp parallel for
+		for(unsigned int i=0;i<N;i++){
+			for(unsigned int q=0;q<N;q++){
+				for(std::list<initial_state::ptr>::iterator it = Wlist[t][i][q].begin(); it!=Wlist[t][i][q].end();it++){
+					initial_state::ptr s = (*it);
+					template_polyhedra::ptr R;
+
+					symbolic_states::ptr R1 = symbolic_states::ptr(new symbolic_states());
+
+					discrete_set discrete_state;
+					discrete_state.insert_element(s->getLocationId()); //creating discrete_state
+					R1->setDiscreteSet(discrete_state);
+					R1->setInitialPolytope(s->getInitialSet());
+					R1->setTransitionId(s->getTransitionId()); //keeps track of originating transition_ID
+
+					R = postC(s);
+
+					R1->setParentPtrSymbolicState(s->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
+
+					R1->setContinuousSetptr(R);
+					discrete_set d;
+					d.insert_element(s->getLocationId());
+					R1->setDiscreteSet(d);
+					R1PerBreadth[i][q].push_back(R1); //contention free
+#pragma omp critical
+				{
+					PASSED.push_back(R1);
+					passed_count = passed_count + 1;
+				}
+					//----end of postC on s
+				//Currently removed the Safety Check Section from here
+
+				//  ******************************** Safety Verification section ********************************
+//				safetyViolated = checkSafety(R, s, R1, ce_candidates); //R, s, R1 are all local variables per thread
+				//  ******************************** Safety Verification section ********************************
+				}
+				Wlist[t][i][q].clear();
+			}
+		}
+
+#pragma omp parallel for
+		for(unsigned int i=0;i<N;i++){
+			for(unsigned int q=0;q<N;q++){
+				std::list<initial_state::ptr> R2;
+				if (level < bound){	//Check level to avoid last PostD computation
+				//	std::cout<<"Before PostD called\n";
+					for(std::list<symbolic_states::ptr>::iterator it = R1PerBreadth[i][q].begin(); it!=R1PerBreadth[i][q].end();it++){
+						symbolic_states::ptr R1 = (*it);
+						R2 = postD(R1, PASSED, safetyViolated);
+						#pragma omp critical
+						{
+							waiting_count = waiting_count + R2.size();
+						}
+						//cout <<"postD size = " <<R2.size()<<std::endl;
+						std::vector<int> ArrCores(N);	//If this is done only once outside time saved but race-condition?
+						for (unsigned int id=0;id<N;id++){
+							ArrCores[id] = id;	//sequential insertion into the array
+						}
+						unsigned int startVal=0;
+						std::random_shuffle(ArrCores.begin(), ArrCores.end());
+						for(std::list<initial_state::ptr>::iterator its = R2.begin();its != R2.end();its++){
+							initial_state::ptr next_s = (*its);
+							/* generate a random number between 1 and N: */
+							int w_rand = ArrCores[startVal];	//ArrCores.pop_back();	//Removes from the back
+							startVal++;	//sequentially traversing the shuffed arrary
+							if (startVal==N) //traversing reached end this occurs if sym_states more than the available cores
+								startVal = 0; //so start traversing again from the beginning of the shuffed arrary.
+							//std::cout << "Selected Core = " << w_rand << std::endl;
+							Wlist[1-t][w_rand][i].push_back(next_s);
+						}
+					}	//end of level check
+					R1PerBreadth[i][q].clear();
+				}//for-loop no 3
+			}//for-loop no 2
+		}//for-loop no 1
+
+		// barrier synchronization
+		if (!safetyViolated){	//Safety Violated For Motorcade-5 and Fisher_star model
+			for(unsigned int i=0;i<N;i++){
+				for(unsigned int j=0;j<N;j++){
+					if(!Wlist[1-t][i][j].empty()){
+						done = false;
+						break;
+					}
+				}
+				if(!done)
+					break;
+			}
+		}
+		level++;
+		t = 1 - t;
+
+		jump_time.stop();
+		/*
+		 * Stop recording the entire time for the jump/iteration
+		 * This time include time taken for flowpipe computation, "safety verification", postD computation and containment check
+		*/
+		double wall_clock;
+		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
+
+		std::cout << "\nJump " << level - 1 << "..."<< passed_count<< " Symbolic States Passed, " << waiting_count << " waiting ..."<< wall_clock <<" seconds";
+		waiting_count = 0; //reset to 0 for next level waiting list
+
+	}while(level<=bound && !done);
+
+	if (level <= bound) {	//did not reach to the assigned bound
+		std::cout << "\n\nFound Fix-point after " << level - 1 << " Jumps!!!\n";
+	}
+cout<<"\n******************************************************************\n";
+cout <<"Maximum number of Symbolic states Passed = " <<passed_count<<"\n";
+cout<<"******************************************************************\n";
+	return PASSED;
+
+}
 
 template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	int location_id;
@@ -418,6 +571,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 					newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
 					isContain = templated_isContained(destination_locID, newPoly, PASSED, lp_solver_type_choosen);//over-approximated but threadSafe
+					//isContain = isContained_withLock(destination_locID, newPoly, PASSED, lp_solver_type_choosen);
 
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));

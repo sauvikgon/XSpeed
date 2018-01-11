@@ -109,6 +109,12 @@ public:
 	 */
 	bool templated_isContained(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
 
+	/*
+	 * This is thread-safe but uses template_Hull over-approximated technique.
+	 * This is locking on the reach set
+	 */
+	bool isContained_withLock(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr>& PASSED, int lp_solver_type_choosen);
+
 	const std::string& getSetAggregation() const;
 	void setSetAggregation(const std::string& setAggregation);
 

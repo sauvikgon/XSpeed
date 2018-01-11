@@ -1556,8 +1556,10 @@ double reachability::boxLPSolver(polytope::ptr poly, std::vector<double> dir) {
 }*/
 
 
+
+
 /*
- * This is thread-safe but uses template_Hull over-approximated technique
+ * This is called from Sequential Algorithm, uses template_Hull over-approximated technique
  */
 bool reachability::templated_isContained(int locID, polytope::ptr poly,
 		std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen) {
@@ -1604,3 +1606,49 @@ bool reachability::templated_isContained(int locID, polytope::ptr poly,
 	}
 	return contained;
 }
+
+/*
+ * This is thread-safe but uses template_Hull over-approximated technique.
+ * This is locking on the passed list
+ */
+bool reachability::isContained_withLock(int locID, polytope::ptr poly,
+		std::list<symbolic_states::ptr>& PASSED, int lp_solver_type_choosen) {
+	bool contained = false;
+#pragma omp critical
+{
+	for (std::list <symbolic_states::ptr>::iterator it = PASSED.begin(); it !=PASSED.end();it++){
+		discrete_set ds;
+		ds = (*it)->getDiscreteSet();
+		int locationID;
+		for (std::set<int>::iterator i = ds.getDiscreteElements().begin();i != ds.getDiscreteElements().end(); ++i)
+			locationID = (*i);
+		if (locationID == locID){	//found Location matching so perform containment check with the flowpipe
+
+			template_polyhedra::ptr flowpipe;
+			flowpipe = (*it)->getContinuousSetptr();
+			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
+			bool intersects=false;
+			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
+				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
+				polytope::ptr p;
+				p = flowpipe->getPolytope(i);
+				/*std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());	//Need to avoid adding this otherwise assertion of constraints fails
+				constraint_bound_values = flowpipe->getInvariantBoundValue(i);
+				p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);*/
+				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				if (intersects){
+					//todo:: if Contained in a union of Omegas
+					//std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
+					contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+					if (contained){
+						//std::cout<<"\n\nFound Fixed-point!!!\n";
+						break;	//No need to check the rest if contained in a single Omega
+					}
+				}
+			}
+		}
+	}
+}
+	return contained;
+}
+

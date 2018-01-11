@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 	double Avg_cpu_use = 0.0;
 	long total_mem_used = 0;
 	double cpu_usage;
-	boost::timer::cpu_timer tt1;
+	boost::timer::cpu_timer tt1, plottime;
 	unsigned int number_of_times = 1;	//Taking Average of 5 readings
 
 	for (unsigned int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
@@ -209,11 +209,13 @@ int main(int argc, char *argv[]) {
 
 	std::list<symbolic_states::ptr>::iterator it;
 	/** Choosing from the output format options	 */
+	plottime.start();
 	if(user_options.getOutputFormatType().compare("GEN")==0) {
 		//Vertex-Enumeration using old algorithm of recursively searching in quadrants
-		vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices as output which can be plotted using gnuplot utilites
-		SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Vertices as output which can be plotted using gnuplot utilites
-		//Sequential sampling of Hough Space
+		//vertex_generator(Symbolic_states_list,user_options); //Generating Vertices using recursive-quadrant-search algorithm, can be plotted using GNU plotutil
+		//SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Matrices (dir and SFM) as file output, which can be used in MatLab by ESP algorithm
+
+		vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices using Sequential sampling of Hough Space, can be plotted using GNU plotutil
 
 		/* Running gnuplotutil to plot output */
 		string cmdStr1;
@@ -223,6 +225,12 @@ int main(int argc, char *argv[]) {
 	} else if(user_options.getOutputFormatType().compare("INTV")==0) {
 		print_all_intervals(Symbolic_states_list);
 	}
+	plottime.stop();
+
+	double wall_clockPlot;
+	wall_clockPlot = plottime.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+	double plotTime = wall_clockPlot / (double) 1000;	//convert milliseconds to Seconds
+	std::cout << "\nBoost Wall Time for Plotting (in Seconds) = " << plotTime << std::endl;
 
 	/*
 	 * counterExample utility. Plot the location sequence of every abstract CE in a file
