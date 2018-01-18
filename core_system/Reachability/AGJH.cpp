@@ -238,11 +238,11 @@ std::list<symbolic_states::ptr> agjh::AGJH(std::list<abstractCE::ptr>& ce_candid
 					d.insert_element(s->getLocationId());
 					R1->setDiscreteSet(d);
 					R1PerBreadth[i][q].push_back(R1); //contention free
-#pragma omp critical
-				{
-					PASSED.push_back(R1);
-					passed_count = passed_count + 1;
-				}
+//#pragma omp critical
+//				{
+				//	PASSED.push_back(R1); // this loop can be outside to avoid lock using sequential push from R1PerBreadth
+				//	passed_count = passed_count + 1;
+//				}
 					//----end of postC on s
 				//Currently removed the Safety Check Section from here
 
@@ -251,6 +251,16 @@ std::list<symbolic_states::ptr> agjh::AGJH(std::list<abstractCE::ptr>& ce_candid
 				//  ******************************** Safety Verification section ********************************
 				}
 				Wlist[t][i][q].clear();
+			}
+		}
+//Sequential to avoid locking on passed list
+		for(unsigned int i=0;i<N;i++){
+			for(unsigned int q=0;q<N;q++){
+				for(std::list<symbolic_states::ptr>::iterator it = R1PerBreadth[i][q].begin(); it!=R1PerBreadth[i][q].end();it++){
+						symbolic_states::ptr R1 = (*it);
+					PASSED.push_back(R1);
+					passed_count = passed_count + 1;
+				}
 			}
 		}
 

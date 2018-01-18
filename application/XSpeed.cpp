@@ -211,11 +211,12 @@ int main(int argc, char *argv[]) {
 	/** Choosing from the output format options	 */
 	plottime.start();
 	if(user_options.getOutputFormatType().compare("GEN")==0) {
-		//Vertex-Enumeration using old algorithm of recursively searching in quadrants
-		//vertex_generator(Symbolic_states_list,user_options); //Generating Vertices using recursive-quadrant-search algorithm, can be plotted using GNU plotutil
+		//Vertex-Enumeration using old algorithm of recursively searching in quadrants But Faster than HoughTransformation
+		vertex_generator(Symbolic_states_list,user_options); //Generating Vertices using recursive-quadrant-search algorithm, can be plotted using GNU plotutil
 		//SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Matrices (dir and SFM) as file output, which can be used in MatLab by ESP algorithm
 
-		vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices using Sequential sampling of Hough Space, can be plotted using GNU plotutil
+		//Our paper's Algorithm but slower than vertex_generator()
+		//vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices using Sequential sampling of Hough Space, can be plotted using GNU plotutil
 
 		/* Running gnuplotutil to plot output */
 		string cmdStr1;

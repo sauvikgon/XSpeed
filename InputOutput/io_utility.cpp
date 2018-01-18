@@ -140,7 +140,7 @@ void print_all_intervals(std::list<symbolic_states::ptr>& symbolic_states_list)
 }
 
 /*
- * Calling XSpeed's Frist thought vertex enumeration Algorithm.
+ * Calling XSpeed's First thought vertex enumeration Algorithm.
  * The idea is recursively search in quadrants for unique vertices
  */
 void vertex_generator(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options)

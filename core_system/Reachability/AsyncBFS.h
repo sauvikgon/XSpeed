@@ -11,6 +11,10 @@
 #include <mutex>
 #include <thread>
 #include "reachability.h"
+#include "reachDataStructure.h"
+#include <atomic>  //used for std::atomic<int> data type
+#include <iostream>  //used for std::atomic<int> data type
+
 
 using namespace std;
 
@@ -30,9 +34,11 @@ private:
 
 };
 
-void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED,
-		initial_state::ptr s, int level, AsyncBFSData& reachData,
-		long& totalSymStates, int& levelCompleted);
+/*
+ * All these function below are normal functions and not members of the class AsyncBFS
+ */
+void AsyncBFS_recursiveFunc(LocklessDS L[], initial_state::ptr s, int level, AsyncBFSData& reachData, long& totalSymStates, int& levelCompleted);
+
 
 /*
  *	This functions utilities has been implemented due to fast and ease of implementation.
@@ -47,7 +53,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData);
 /**
  * computes postD from a template polyhedra computed by postC
  */
-std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED, AsyncBFSData reachData);
+std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], AsyncBFSData reachData);
 
 /*
  * Returns True if the newShiftedPolytope is containted in the symbolic_states denoted by Reachability_Region in the location
@@ -60,6 +66,13 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 /*
  * This is thread-safe but uses template_Hull of poly an over-approximated technique
  */
-bool templated_isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+//bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int totalLocations, int lp_solver_type_choosen);
+bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int lp_solver_type_choosen);
+
+void initializeLocklessDS(LocklessDS L[], int ha_size);
+void printLocklessDS(LocklessDS L[], int ha_size);
+
+void lock(LocklessDS L[], int locID);
+void unlock(LocklessDS L[], int locID);
 
 #endif /* ASYNCBFS_H_ */

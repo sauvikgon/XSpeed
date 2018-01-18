@@ -14,6 +14,20 @@ std::recursive_mutex mu;
 
 std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstractCE::ptr>& ce){
 
+//	std::cout<<"Total number of Locations in an HA ="<<H.getTotalLocations()<<std::endl;
+
+	LocklessDS L[H.getTotalLocations()];	//Creating an array of Lockless data structure of size total number of locations
+	//struct LocklessDS L[H.getTotalLocations()];
+
+	initializeLocklessDS(L,H.getTotalLocations()); //initialize all flags to unlocked initially
+
+//Testing print
+ 	//lock(L,6);
+	printLocklessDS(L, H.getTotalLocations());
+	//unlock(L,6);
+	//std::cout<<"After unlock on location ID =6\n";
+	//printLocklessDS(L, H.getTotalLocations());
+
 	std::list<symbolic_states::ptr> PASSED;	//List of all flowpipes computed
 
 //	std::cout<<"Testing printing\n";
@@ -36,7 +50,7 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 	for (std::list<initial_state::ptr>::iterator i = I.begin(); i != I.end(); i++) {
 		initial_state::ptr s;	//A symbolic state
 		s =*(i);	//	initialState_index++; //next initial state
-		workers.push_back(std::thread(AsyncBFS_recursiveFunc, std::ref(PASSED), s, level, std::ref(reachData),std::ref(totalSymStates),std::ref(levelCompleted)));	//thread called
+		workers.push_back(std::thread(AsyncBFS_recursiveFunc, &L[0], s, level, std::ref(reachData),std::ref(totalSymStates),std::ref(levelCompleted)));	//thread called
 	}
 	for (int i=0;i<workers.size();i++){
 		if (i==(workers.size() - 1)){	//increasing level only once
@@ -54,14 +68,22 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 	std::cout <<"Maximum number of Symbolic states Passed = " <<totalSymStates<<"\n";
 	std::cout<<"******************************************************************\n";
 
+	//printLocklessDS(L, H.getTotalLocations());
 	//Reachability Computation Over
+	/* ******This may or may not be expensive have to verify, If possible avoid recording time for this operation*********** */
+
+	for (int i=0;i<H.getTotalLocations();i++){
+		PASSED.insert(PASSED.end(),L[i].PASSED.begin(),L[i].PASSED.end());
+		//PASSED.push_back(L[i].PASSED); //have to verify if this concatenation works
+	}
+
 	return PASSED;
 }
 
 
 
-void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_state::ptr s, int level, AsyncBFSData& reachData, long& totalSymStates, int& levelCompleted) {
-
+void AsyncBFS_recursiveFunc(LocklessDS L[], initial_state::ptr s, int level, AsyncBFSData& reachData, long& totalSymStates, int& levelCompleted) {
+//std::list<symbolic_states::ptr>& PASSED
 	//std::cout<<"Printing From Thread\n";
 	template_polyhedra::ptr R;
 	R = postC(s, reachData);
@@ -73,12 +95,14 @@ void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_sta
 	discrete_set d;
 	d.insert_element(s->getLocationId());
 	R1->setDiscreteSet(d);
+	int locID = s->getLocationId();
 	//#pragma omp critical
 	//				{
-	mu.lock();
+	lock(L,locID); //mu.lock(); after this function lock is obtained successfully
 	totalSymStates++;	//for each symbolic states when processed (ie postC)
-	PASSED.push_back(R1);	//todo::try mutex for locking this shared resource
-	mu.unlock();
+	//PASSED.push_back(R1);	//todo::try mutex for locking this shared resource
+	L[locID - 1].PASSED.push_back(R1);
+	unlock(L,locID); //mu.unlock();
 	std::cout<<"Jump "<<level<<"..."<<totalSymStates<<" Symbolic States Passed ..."<<std::endl;
 	//				}
 	//----end of postC on s
@@ -88,7 +112,7 @@ void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_sta
 	//increased value some other previous branch may not spun child threads.
 	if (level < reachData.bound) {	//Check level to avoid last PostD computation
 //		std::cout<<"reachData.bound ="<<reachData.bound<<" and level="<<level<<std::endl;
-		R2 = postD(R1, PASSED, reachData);
+		R2 = postD(R1, L, reachData);
 		std::vector<std::thread> RecursiveWorkers;
 		level++;// ***** increased locally and send this for all recursive thread ****
 		mu.lock();
@@ -97,7 +121,7 @@ void AsyncBFS_recursiveFunc(std::list<symbolic_states::ptr>& PASSED, initial_sta
 		for (std::list<initial_state::ptr>::iterator i = R2.begin(); i != R2.end(); i++) {
 			initial_state::ptr s;	//A symbolic state
 			s =*(i);	//	initialState_index++; //next initial state
-			RecursiveWorkers.push_back(std::thread(AsyncBFS_recursiveFunc, std::ref(PASSED), s, level, std::ref(reachData),std::ref(totalSymStates),std::ref(levelCompleted)));	//thread called
+			RecursiveWorkers.push_back(std::thread(AsyncBFS_recursiveFunc, &L[0], s, level, std::ref(reachData),std::ref(totalSymStates),std::ref(levelCompleted)));	//thread called
 		}
 		 for (int i=0;i<RecursiveWorkers.size();i++){
 			RecursiveWorkers[i].join();
@@ -204,7 +228,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 	return reach_region;
 }
 
-std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symbolic_states::ptr> PASSED, AsyncBFSData myData)
+std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], AsyncBFSData myData)
 {
 	template_polyhedra::ptr reach_region= symb->getContinuousSetptr();
 	int locId = *(symb->getDiscreteSet().getDiscreteElements().begin());
@@ -331,7 +355,8 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 					bool isContain=false;
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 					newShiftedPolytope->templatedDirectionHull(myData.reach_parameters.Directions, newPoly, myData.lp_solver_type_choosen);
-					isContain = templated_isContained(destination_locID, newPoly, PASSED, myData.lp_solver_type_choosen);//over-approximated but threadSafe
+					//isContain = AsyncBFS_isContained(destination_locID, newPoly, L, myData.H.getTotalLocations(), myData.lp_solver_type_choosen);//over-approximated but threadSafe
+					isContain = AsyncBFS_isContained(destination_locID, newPoly, L, myData.lp_solver_type_choosen);//over-approximated but threadSafe
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 						newState->setTransitionId(transition_id); // keeps track of the transition_ID
@@ -356,19 +381,24 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, std::list<symboli
 /*
  * This is thread-safe but uses template_Hull of poly an over-approximated technique
  */
-bool templated_isContained(int locID, polytope::ptr poly,
-		std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen) {
+
+//bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int totalLocations, int lp_solver_type_choosen) {
+bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int lp_solver_type_choosen) {
 	bool contained = false;
 	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
+	//int ha_size = totalLocations;// no need to search in all locations only on locID
+	//for (int l=1;l<=ha_size;l++){// no need to search in all locations only on locID
 
-	for (std::list <symbolic_states::ptr>::iterator it = Reachability_Region.begin(); it !=Reachability_Region.end();it++){
+	std::list<symbolic_states::ptr> PASSED = L[locID-1].PASSED; //get only the passed list with locationID = locID
+	//Todo:: acquire lock and then do containment check
+	lock(L,locID);	//After this function, lock is obtained successfully
+	for (std::list <symbolic_states::ptr>::iterator it = PASSED.begin(); it !=PASSED.end();it++){
 		discrete_set ds;
 		ds = (*it)->getDiscreteSet();
 		int locationID;
 		for (std::set<int>::iterator i = ds.getDiscreteElements().begin();i != ds.getDiscreteElements().end(); ++i)
 			locationID = (*i);
 		if (locationID == locID){	//found Location matching so perform containment check with the flowpipe
-
 			template_polyhedra::ptr flowpipe;
 			flowpipe = (*it)->getContinuousSetptr();
 			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
@@ -390,6 +420,8 @@ bool templated_isContained(int locID, polytope::ptr poly,
 			}
 		}
 	}
+	//}
+	unlock(L,locID); //unlock after containment check
 return contained;
 }
 
@@ -445,3 +477,54 @@ bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> 
 return contained;
 }
 */
+
+void initializeLocklessDS(LocklessDS L[], int ha_size){
+
+	for (int i=1;i<=ha_size;i++){
+		L[i-1].locID = i;
+		L[i-1].flag = 0;
+	}
+}
+
+void printLocklessDS(LocklessDS L[], int ha_size){
+	for (int i=1;i<=ha_size;i++){
+		std::cout<<"LocID = "<<L[i-1].locID <<" flag = "<<L[i-1].flag<<std::endl;
+	}
+}
+
+/* This is version without using CAS.
+void lock(LocklessDS L[], int locID){
+	if (L[locID-1].flag == 0){
+		L[locID-1].flag = 1; //indicate it is locked
+	} else {
+		while (L[locID-1].flag != 0)
+			;
+	}
+} */
+
+/* * Here flag is set using CAS. Otherwise use spinloop */
+void lock(LocklessDS L[], int locID){
+
+	//first argument is the test-value and the second argument is the new-modified-value
+	//Returns second arg if success else first.
+/*
+	while (!(L[locID-1].flag.compare_exchange_strong(L[locID-1].flag, 1, std::memory_order_release)))
+		;
+*/
+
+	while (!(std::atomic_exchange_explicit(&L[locID-1].flag, 1, std::memory_order_acquire)))
+		;
+
+	/*while(std::atomic_exchange_explicit(&lock, true, std::memory_order_acquire))
+	             ; // spin until acquired*/
+
+}
+
+
+
+
+
+
+void unlock(LocklessDS L[], int locID){
+	L[locID-1].flag = 0;	//unlock is simple, simply set locID's flag to 0
+}

@@ -21,16 +21,16 @@
 
 
 
-void module1(hybrid_automata& ha,
+void module1MotorCar(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters, userOptions& op);
-void module2(hybrid_automata& ha,
+void module2MotorCar(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters, userOptions& op);
-void module3(hybrid_automata& ha,
+void module3MotorCar(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters, userOptions& op);
-void module4(hybrid_automata& ha,
+void module4MotorCar(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters, userOptions& op);
 

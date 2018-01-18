@@ -10,6 +10,8 @@
 
 #include "core_system/HybridAutomata/Location.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
+#include <atomic>  //used for std::atomic<int> data type
+#include <iostream>  //used for std::atomic<int> data type
 
 //Data structure used for POST_C computation in Load Balancing Algorithm
 struct LoadBalanceData{
@@ -74,6 +76,16 @@ struct AsyncBFSData{
 
 	std::string set_aggregation; // The aggregation options thull(default), none
 
+};
+
+/*
+ * Data structure required to implement lockless hash table on the passed list
+ */
+struct LocklessDS{
+	int locID; //Unique for each location starts from 1 to N, the size of the locations in the HA
+	//int flag; //0 for data is unlocked, 1 for data is locked, more can be added later with values 2,3 etc
+	std::atomic<int>  flag;
+	std::list<symbolic_states::ptr> PASSED;	//List of all computed flowpipes for the corresponding locID
 };
 
 #endif /* REACHDATASTRUCTURE_H_ */

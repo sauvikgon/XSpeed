@@ -37,6 +37,13 @@ public:
 	void addLocation(location::ptr& loc);	//inserts location into its correctly mapped key
 	int getDimension() const;
 	void setDimension(int dimension);
+
+	/*
+	 * Returns the total number of Locations in the hybrid automata with ID = 1 to returned size
+	 */
+	int getTotalLocations(){
+		return list_locations.size();
+	}
 };
 
 #endif /* HYBRID_AUTOMATA_H_ */

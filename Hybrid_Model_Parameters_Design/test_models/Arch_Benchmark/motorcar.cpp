@@ -375,10 +375,10 @@ void setMotorcar(hybrid_automata& Hybrid_Automata,
 	l = location::ptr(new location(2, "v2", system_dynamics, invariant, true, Out_Going_Trans_fromv2));
 	Hybrid_Automata.addLocation(l);
 
-	module1(Hybrid_Automata,init_state_list,reach_parameters,op);
-	module2(Hybrid_Automata,init_state_list,reach_parameters,op);
-	module3(Hybrid_Automata,init_state_list,reach_parameters,op);
-	module4(Hybrid_Automata,init_state_list,reach_parameters,op);
+	module1MotorCar(Hybrid_Automata,init_state_list,reach_parameters,op);
+	module2MotorCar(Hybrid_Automata,init_state_list,reach_parameters,op);
+	module3MotorCar(Hybrid_Automata,init_state_list,reach_parameters,op);
+	module4MotorCar(Hybrid_Automata,init_state_list,reach_parameters,op);
 
 	row = 10;
 	col = 5;
@@ -473,7 +473,7 @@ void setMotorcar(hybrid_automata& Hybrid_Automata,
 	reach_parameters.Directions = Real_Directions;
 	}
 
-	void module1(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
+	void module1MotorCar(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -629,7 +629,7 @@ void setMotorcar(hybrid_automata& Hybrid_Automata,
 
 	}
 
-	void module2(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
+	void module2MotorCar(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -785,7 +785,7 @@ void setMotorcar(hybrid_automata& Hybrid_Automata,
 
 	}
 
-	void module3(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
+	void module3MotorCar(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -941,7 +941,7 @@ void setMotorcar(hybrid_automata& Hybrid_Automata,
 
 	}
 
-	void module4(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
+	void module4MotorCar(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions& op) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
