@@ -37,6 +37,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 		std::cout << "\nRunning adaptation of Gerard J. Holzmann's algorithm.\n";
 		//Symbolic_states_list = reach_AGJH.ParallelBFS_GH(ce_candidates); // Holzmann algorithm adaptation
 		Symbolic_states_list = reach_AGJH.AGJH(ce_candidates); // Holzmann algorithm adaptation without lock for containment check
+
 	} else if (user_options.get_algorithm() == 5) { // TPBFS -- Task parallel BFS (Load Balancing Algorithm)
 		tpbfs reach;
 		reach.setReachParameter(Hybrid_Automata, init_state, reach_parameters, lp_solver_type_choosen,
@@ -44,7 +45,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 		std::cout<< "\nRunning Task parallel (Load Balancing) BFS algorithm.\n";
 		Symbolic_states_list = reach.LoadBalanceAll(
 				ce_candidates);
-	} else if (user_options.get_algorithm() == 7) { // AsyncBFS -- Asynchronous parallel BFS (Does not synchronous like in BFS Algorithm)
+	} else if (user_options.get_algorithm() == 7) { // AsyncBFS -- Asynchronous parallel BFS (Does not synchronize like in BFS Algorithm)
 		AsyncBFS reach;
 		reach.setReachParameter(Hybrid_Automata, init_state, reach_parameters,
 				lp_solver_type_choosen, Solver_GLPK_Gurobi_GPU, forbidden_set, user_options);

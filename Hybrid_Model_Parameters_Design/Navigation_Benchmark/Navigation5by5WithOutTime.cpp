@@ -11,6 +11,7 @@ void SetNavigationNav5by5WithOutTime(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 
+	std::cout << "putting this to recompile the course through make";
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
 	unsigned int dim;

@@ -19,11 +19,8 @@
 #include "counterExample/abstract_symbolic_state.h"
 #include "counterExample/concreteCE.h"
 #include "nlpFunctions.h"
-
-
 #include <fstream>
 #include <string>
-
 
 
 /**
