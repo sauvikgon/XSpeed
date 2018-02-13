@@ -61,6 +61,7 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 //constructor method
 abstractCE::abstractCE(std::list<symbolic_states::ptr> s_states,
 		std::list<transition::ptr> ts, hybrid_automata::ptr h, polytope::ptr fpoly) {
+
 	//Assertion to check that the length of the counter-example is one minus
 	// the number of sym states in the CE.
 	assert(sym_states.size() == trans.size() - 1);
