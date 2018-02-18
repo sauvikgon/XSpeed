@@ -46,6 +46,10 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 					"12. Circle with FOUR locations model: Variables{x,y} \n"
 					"13. Oscillator model without any filters: Variables{x,y}\n"
 					"14. Testing Model: Variables{depends on the model in test}\n")
+	("engine,e", po::value<std::string>()->default_value("supp"), "set the running engine (default supp): \n - supp : Reachability Computation using Support Functions Algorithm \n - simu : Trajectory Simulation\n")
+	("simu-algo",po::value<int>()->default_value(1), "Set the Simulation algorithm\n"
+				"1 -- Sequential Algorithm (Set to default)\n"
+				"2 -- A-GJH, Adaptation of Gerard J. Holzmann Algorithm\n")
 	("directions", po::value<int>()->default_value(1), "Set the directions for template polyhedra:\n"
 					"1. Box Directions (Set to default)\n"
 					"2. Octagonal Directions \n"
@@ -249,6 +253,23 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			throw(new exception());
 		}
 
+		if (vm.count("engine")) { //Compulsory Options but set to thull by default
+			user_options.setEngine((vm["engine"].as<std::string>()));
+			if (boost::iequals(user_options.getEngine(),"simu")==false) {
+				if (boost::iequals(user_options.getEngine(),"supp")==false){
+					std::cout << "Invalid engine option specified. Expected \"supp\" or \"simu\".\n";
+					throw(new exception());
+				}
+			}
+		}
+		//Simulation Algorithm Preference
+		if (vm.count("simu-algo")) {
+			user_options.set_simu_algo(vm["simu-algo"].as<int>());
+			if (user_options.get_simu_algo()< 0|| user_options.get_simu_algo() > 2) {
+				std::cout << "Invalid Simulation algorithm (--simu-algo) option specified.\n";
+				throw(new exception());
+			}
+		}
 
 		if (vm.count("aggregate")) { //Compulsory Options but set to thull by default
 			user_options.setSetAggregation((vm["aggregate"].as<std::string>()));
@@ -259,7 +280,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				}
 			}
 		}
-
 
 		if ((user_options.get_model() == 3 || user_options.get_model() == 4) && user_options.get_bfs_level() != 0){
 			std::cout << "Invalid depth. Only depth 0 permitted on continuous models.\n";

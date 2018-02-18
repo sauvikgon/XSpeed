@@ -19,6 +19,9 @@ class userOptions {
 	std::string output_format_type; // the string of output format description
 
 	std::string set_aggregation; // The aggregation options thull(default), none
+	std::string Engine; // The Engine options supp(default), simu
+	unsigned int simu_algo;	//Algorithm choice for running Trajectory Simulation
+
 
 	unsigned int output_var_X; // first  dimension for plotting
 	unsigned int output_var_Y; // second dimension for plotting
@@ -73,6 +76,10 @@ public:
 
 	unsigned int get_algorithm();	//returns the selected Algorithm
 	void set_algorithm(unsigned int alg);	//assigns the Algorithm selected by the user
+
+	unsigned int get_simu_algo();	//returns the selected simulation Algorithm
+	void set_simu_algo(unsigned int alg);	//assigns the simulation Algorithm selected by the user
+
 	unsigned int getStreamSize() const;
 	void setStreamSize(unsigned int streamSize);
 	unsigned int getTotalSliceSize() const;
@@ -82,7 +89,9 @@ public:
 	const std::string& getOutFilename() const;
 	void setOutFilename(const std::string& outFilename);
 	const std::string& getSetAggregation() const;
-	void setSetAggregation(const std::string& setAggregation);
+	void setSetAggregation(const std::string& engine);
+	const std::string& getEngine() const;
+	void setEngine(const std::string& engine);
 };
 
 #endif /* USEROPTIONS_H_ */

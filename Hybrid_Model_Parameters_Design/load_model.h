@@ -37,6 +37,10 @@
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fisher_star.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/setNav3u.h"
 
+#include "Hybrid_Model_Parameters_Design/Billiard/Billiard.h"
+
+
+
 // **************************************************************************************
 /*
  * Only ONE out of these headers should be declared at a time

@@ -141,6 +141,14 @@ void userOptions::set_algorithm(unsigned int alg) {
 	algo =alg;	//assigns the Algorithm selected by the user
 }
 
+unsigned int userOptions::get_simu_algo() {
+	return simu_algo;	//returns the selected simulation Algorithm
+}
+
+void userOptions::set_simu_algo(unsigned int alg) {
+	simu_algo =alg;	//assigns the simulation Algorithm selected by the user
+}
+
 unsigned int userOptions::getStreamSize() const {
 	return stream_size;
 }
@@ -176,6 +184,15 @@ const std::string& userOptions::getSetAggregation() const {
 void userOptions::setSetAggregation(const std::string& setAggregation) {
 	set_aggregation = setAggregation;
 }
+
+const std::string& userOptions::getEngine() const {
+	return Engine;
+}
+
+void userOptions::setEngine(const std::string& engine) {
+	Engine = engine;
+}
+
 
 void userOptions::setOutFilename(const std::string& outFilename) {
 	out_filename = outFilename;

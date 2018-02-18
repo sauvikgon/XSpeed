@@ -109,6 +109,16 @@ int main(int argc, char *argv[]) {
 		string_to_poly(user_options.get_forbidden_set(), forbidden_set);
 	}
 
+// ----Section for Trajectory Simulation
+	if (boost::iequals(user_options.getEngine(),"simu")==true) {
+		std::cout<<"Trajectory Simulation is selected!!!\n";
+
+		return 0; //Only Trajectory Simulation is done
+	}
+
+
+
+// ----Section below consists of Reachability Analysis including counter-example generation.
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
 	double Avg_wall_clock = 0.0, Avg_user_clock = 0.0, Avg_system_clock = 0.0;
