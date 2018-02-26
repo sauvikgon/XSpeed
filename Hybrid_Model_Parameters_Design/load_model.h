@@ -39,8 +39,6 @@
 
 #include "Hybrid_Model_Parameters_Design/Billiard/Billiard.h"
 
-
-
 // **************************************************************************************
 /*
  * Only ONE out of these headers should be declared at a time
@@ -57,5 +55,8 @@
 void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		userOptions& op, ReachabilityParameters& reach_parameters,
 		std::pair<int, polytope::ptr>& forbidden_set);
+
+void load_ha_models(std::list<initial_state::ptr>& init_state,
+		hybrid_automata& ha, ReachabilityParameters& reach_parameters, userOptions& op);
 
 #endif

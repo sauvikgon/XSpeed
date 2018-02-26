@@ -194,7 +194,7 @@ public:
 	 */
 	void simulateHa(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps=10);
 	/**
-	 * Parallel Simulation of Ha with N unifomrly distributed random start points from the initial set.
+	 * Parallel Simulation of Ha with N uniformly distributed random start points from the initial set.
 	 */
 	void parSimulateHa(unsigned int N, polytope::ptr initial_set, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps=10);
 

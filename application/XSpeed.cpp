@@ -56,7 +56,7 @@
 
 #include "application/reachabilityCaller.h"
 #include "application/readCommandLine.h"
-
+#include "application/simulationCaller.h"
 
 namespace po = boost::program_options;
 
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
 // ----Section for Trajectory Simulation
 	if (boost::iequals(user_options.getEngine(),"simu")==true) {
 		std::cout<<"Trajectory Simulation is selected!!!\n";
-
+		simulationCaller(reach_parameters, Hybrid_Automata, init_state, user_options);
 		return 0; //Only Trajectory Simulation is done
 	}
 

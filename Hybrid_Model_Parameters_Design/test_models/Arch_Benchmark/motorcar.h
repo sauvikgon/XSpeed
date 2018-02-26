@@ -23,18 +23,18 @@
 
 void module1MotorCar(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
-		ReachabilityParameters& reach_parameters, userOptions& op);
+		ReachabilityParameters& reach_parameters);
 void module2MotorCar(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
-		ReachabilityParameters& reach_parameters, userOptions& op);
+		ReachabilityParameters& reach_parameters);
 void module3MotorCar(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
-		ReachabilityParameters& reach_parameters, userOptions& op);
+		ReachabilityParameters& reach_parameters);
 void module4MotorCar(hybrid_automata& ha,
 		std::list<initial_state::ptr>& init_state,
-		ReachabilityParameters& reach_parameters, userOptions& op);
+		ReachabilityParameters& reach_parameters);
 
-void setMotorcar(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters, userOptions op);
+void setMotorcar(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters);
 
 
 #endif /* HYBRID_MODEL_PARAMETERS_DESIGN_TEST_MODELS_ARCH_BENCHMARK_MOTORCAR_H_ */

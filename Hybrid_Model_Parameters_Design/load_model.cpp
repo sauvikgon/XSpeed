@@ -7,21 +7,17 @@
 
 #include "Hybrid_Model_Parameters_Design/load_model.h"
 
-void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
-		userOptions& op, ReachabilityParameters& reach_parameters,
-		std::pair<int, polytope::ptr>& forbidden_set) {
-	unsigned int row, col;
+void load_ha_models(std::list<initial_state::ptr>& init_state,
+		hybrid_automata& ha, ReachabilityParameters& reach_parameters, userOptions& op){
 
 	reach_parameters.TimeBound = op.get_timeHorizon(); //Total Time Interval
-	reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
 	reach_parameters.time_step = op.get_timeStep();
+	reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
 
-//Assigning the Model of the Hybrid System
-//	(1,2,3,4,5,6,7) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE, CIRCLE_FOUR_LOC)
+	//Assigning the Model of the Hybrid System
+	//	(1,2,3,4,5,6,7) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE, CIRCLE_FOUR_LOC)
 	unsigned int HybridSystem_Model_Type = op.get_model();
 
-//Assigning Directions
-	unsigned int Directions_Type = op.get_directionTemplate(); //(1,2,>2) = (BOX, OCT, UNIFORM)
 
 	if (HybridSystem_Model_Type == BBALL) {
 		SetBouncingBall_Parameters(ha, init_state, reach_parameters);
@@ -105,11 +101,24 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 
 	}
 	if(HybridSystem_Model_Type == 16){
-		setMotorcar(ha,init_state,reach_parameters,op);
+		setMotorcar(ha,init_state,reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 17){
-		setNav3u(ha,init_state,reach_parameters, op);
+		setNav3u(ha,init_state,reach_parameters);
 	}
+	//Todo:: later we may think of keeping here even the forbidden parsing (string to poly)
+}
+
+void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
+		userOptions& op, ReachabilityParameters& reach_parameters,
+		std::pair<int, polytope::ptr>& forbidden_set) {
+	unsigned int row, col;
+
+	//Loads the HA models and set the reach_parameters from user-options
+	load_ha_models(init_state, ha, reach_parameters,op); //function re-used
+
+//Assigning Directions
+	unsigned int Directions_Type = op.get_directionTemplate(); //(1,2,>2) = (BOX, OCT, UNIFORM)
 
 	unsigned int dims=0;
 	for (std::list<initial_state::ptr>::iterator it=init_state.begin();it!=init_state.end();it++){

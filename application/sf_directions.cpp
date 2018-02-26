@@ -54,7 +54,6 @@ std::vector<std::vector<double> > get_octagonal_directions(unsigned int dim) {
 				v4[j] = -1;
 				mydirs.push_back(v4);
 			}
-
 		}
 	}
 	return mydirs;

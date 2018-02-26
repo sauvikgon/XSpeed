@@ -50,6 +50,8 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("simu-algo",po::value<int>()->default_value(1), "Set the Simulation algorithm\n"
 				"1 -- Sequential Algorithm (Set to default)\n"
 				"2 -- A-GJH, Adaptation of Gerard J. Holzmann Algorithm\n")
+	("simu-init-sampling-points",po::value<int>()->default_value(1), "(default 1) Sets the number of points "
+                "chosen for sampling the initial states, counted per initial set.") //Todo:: If one, takes the center of the bounding box.")
 	("directions", po::value<int>()->default_value(1), "Set the directions for template polyhedra:\n"
 					"1. Box Directions (Set to default)\n"
 					"2. Octagonal Directions \n"
@@ -245,7 +247,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("depth") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_bfs_level(vm["depth"].as<int>());
 			if (user_options.get_bfs_level() < 0) {
-				std::cout<< "Invalid bfs level specified. A positive integer expected.\n";
+				std::cout<< "Invalid bfs level specified. A zero or a positive integer is expected.\n";
 				throw(new exception());
 			}
 		} else if (user_options.get_model() != 15) {
@@ -269,6 +271,10 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout << "Invalid Simulation algorithm (--simu-algo) option specified.\n";
 				throw(new exception());
 			}
+		}
+		//Simulation initial choice for the number of sampling-start-points
+		if (vm.count("simu-init-sampling-points")) {
+			user_options.set_simu_init_sampling_points(vm["simu-init-sampling-points"].as<int>());
 		}
 
 		if (vm.count("aggregate")) { //Compulsory Options but set to thull by default

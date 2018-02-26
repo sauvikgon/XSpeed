@@ -193,6 +193,13 @@ void userOptions::setEngine(const std::string& engine) {
 	Engine = engine;
 }
 
+unsigned int userOptions::get_simu_init_sampling_points(){
+	return simu_init_sampling_points;
+}
+void userOptions::set_simu_init_sampling_points(unsigned int sampling_points){
+	simu_init_sampling_points= sampling_points;
+}
+
 
 void userOptions::setOutFilename(const std::string& outFilename) {
 	out_filename = outFilename;

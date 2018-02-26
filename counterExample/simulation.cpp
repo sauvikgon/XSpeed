@@ -23,21 +23,18 @@ simulation::~simulation() {
 
 static int check_flag(void *flagvalue, const char *funcname, int opt);
 
-static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data)
-{
-	Dynamics* D = (Dynamics *)(f_data);
+static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data) {
+	Dynamics* D = (Dynamics *) (f_data);
 	math::matrix<double> A;
 
-	if(D->isEmptyMatrixA)
-	{
+	if (D->isEmptyMatrixA) {
 		assert(!D->isEmptyC); // The assumption is that this function is called with non-zero dynamics.
 		unsigned int dim = D->C.size();
-		A = math::matrix<double>(D->C.size(),D->C.size());
-		for(unsigned int i=0;i<dim;i++)
-			for(unsigned int j=0;j<dim;j++)
-				A(i,j)=0;
-	}
-	else
+		A = math::matrix<double>(D->C.size(), D->C.size());
+		for (unsigned int i = 0; i < dim; i++)
+			for (unsigned int j = 0; j < dim; j++)
+				A(i, j) = 0;
+	} else
 		A = math::matrix<double>(D->MatrixA);
 
 	std::vector<double> C(A.size1());
@@ -48,42 +45,41 @@ static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data)
 	double sum;
 	// Input set not included in the dynamics.
 
-	for(unsigned int i=0;i<A.size1();i++){
-		sum=0;
-		for(unsigned int j=0;j<A.size2();j++){
-			sum += A(i,j)*NV_Ith_S(y,j);
+	for (unsigned int i = 0; i < A.size1(); i++) {
+		sum = 0;
+		for (unsigned int j = 0; j < A.size2(); j++) {
+			sum += A(i, j) * NV_Ith_S(y,j) ;
 		}
 		NV_Ith_S(ydot,i) = sum + C[i];
 	}
 	return 0;
 }
 
-std::vector<double> lin_interpolate(std::vector<double> x_l2, std::vector<double> x_l1, double factor)
-{
+std::vector<double> lin_interpolate(std::vector<double> x_l2,
+		std::vector<double> x_l1, double factor) {
 	assert(x_l1.size() == x_l2.size());
 	std::vector<double> res(x_l1.size());
-	for(unsigned int i=0;i<x_l1.size();i++)
-		res[i] = factor*x_l2[i] + x_l1[i]*(1-factor);
+	for (unsigned int i = 0; i < x_l1.size(); i++)
+		res[i] = factor * x_l2[i] + x_l1[i] * (1 - factor);
 	return res;
 }
-std::vector<double> simulation::simulate(std::vector<double> x, double time)
-{
+std::vector<double> simulation::simulate(std::vector<double> x, double time) {
 	int flag;
 	realtype T0 = 0;
 	realtype Tfinal = time;
-	realtype t=0;
-	N=time/time_step;
+	realtype t = 0;
+	N = time / time_step;
 	Dynamics *data = &D;
 
 	N_Vector u = NULL;
 
-	if(data->isEmptyMatrixA && data->isEmptyC) // zero dynamics
+	if (data->isEmptyMatrixA && data->isEmptyC) // zero dynamics
 		return x; // return same initial point
 
 	assert(x.size() == dimension);
 	u = N_VNew_Serial(dimension);
 
-	for(unsigned int i=0;i<dimension;i++)
+	for (unsigned int i = 0; i < dimension; i++)
 		NV_Ith_S(u,i) = x[i];
 
 	void *cvode_mem;
@@ -93,34 +89,31 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 
 	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
 
-	if( check_flag((void *)cvode_mem, "CVodeCreate", 0))
-	{
+	if (check_flag((void *) cvode_mem, "CVodeCreate", 0)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
 	/** Input user data */
-	CVodeSetUserData(cvode_mem, (void *)data);
+	CVodeSetUserData(cvode_mem, (void *) data);
 	/* Call CVodeInit to initialize the integrator memory and specify the
-	* user's right hand side function in u'=f(t,u), the inital time T0, and
-	* the initial dependent variable vector u. */
+	 * user's right hand side function in u'=f(t,u), the inital time T0, and
+	 * the initial dependent variable vector u. */
 
 	flag = CVodeInit(cvode_mem, f, T0, u);
 
-	if(check_flag(&flag, "CVodeInit", 1)){
+	if (check_flag(&flag, "CVodeInit", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
 	flag = CVDense(cvode_mem, dimension);
-	if (check_flag(&flag, "CVDense", 1))
-	{
+	if (check_flag(&flag, "CVDense", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-	 /* Call CVodeSStolerances to specify the scalar relative tolerance
-	  * and scalar absolute tolerance */
+	/* Call CVodeSStolerances to specify the scalar relative tolerance
+	 * and scalar absolute tolerance */
 	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
-	if (check_flag(&flag, "CVodeSStolerances", 1))
-	{
+	if (check_flag(&flag, "CVodeSStolerances", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
@@ -133,24 +126,24 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
 	simpoint.second = x;
 	sim_trace.push_back(simpoint); // adding the starting simpoint in the sim_trace data-structure.
 
-	for(unsigned int k=1;k<=N;k++) {
-		double tout = (k*Tfinal)/N;
+	for (unsigned int k = 1; k <= N; k++) {
+		double tout = (k * Tfinal) / N;
 		// remember this point in the last vector
-		for(unsigned int i=0;i<dimension;i++)
-			last[i] = NV_Ith_S(u,i);
+		for (unsigned int i = 0; i < dimension; i++)
+			last[i] = NV_Ith_S(u,i) ;
 		trace_point simpoint;
 		simpoint.first = tout;
 		simpoint.second = last;
 		sim_trace.push_back(simpoint); // adding the simpoint in the sim_trace data-structure.
 
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-		if(check_flag(&flag, "CVode", 1)) break;
+		if (check_flag(&flag, "CVode", 1))
+			break;
 	}
 
 	std::vector<double> res(dimension);
-	for(unsigned int i=0;i<dimension;i++)
-	{
-		res[i] = NV_Ith_S(u,i);
+	for (unsigned int i = 0; i < dimension; i++) {
+		res[i] = NV_Ith_S(u,i) ;
 	}
 	N_VDestroy_Serial(u); /* Free u vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
@@ -166,20 +159,20 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time)
  * violation.
  */
 
-bound_sim simulation::bounded_simulation(std::vector<double> x, double time, polytope::ptr I, bool& status, double tol)
-{
+bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
+		polytope::ptr I, bool& status, double tol) {
 	int flag;
 	realtype T0 = 0;
 	realtype Tfinal = time;
-	realtype t=0;
+	realtype t = 0;
 	Dynamics *data = &D;
 	bound_sim b;
 	N_Vector u = NULL;
-	N = Tfinal/time_step;
+	N = Tfinal / time_step;
 
-	if(data->isEmptyMatrixA && data->isEmptyC){ // zero dynamics
+	if (data->isEmptyMatrixA && data->isEmptyC) { // zero dynamics
 		bound_sim b;
-		b.v=x;
+		b.v = x;
 		b.cross_over_time = time; // The point remains inside the invariant for the entire time horizon
 		return b; // return the initial point, time horizon
 
@@ -189,7 +182,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	u = N_VNew_Serial(dimension);
 
 	double dist = math::abs(I->point_distance(x));
-	if(dist > tol ){
+	if (dist > tol) {
 		//throw std::runtime_error("bounded simulation: initial point outside invariant. NLP problem constrains not set correctly\n");
 		bound_sim b;
 		b.v = x;
@@ -203,7 +196,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	simpoint.second = x;
 	sim_trace.push_back(simpoint); // adding the starting simpoint in the sim_trace data-structure.
 
-	for(unsigned int i=0;i<dimension;i++)
+	for (unsigned int i = 0; i < dimension; i++)
 		NV_Ith_S(u,i) = x[i];
 
 	void *cvode_mem;
@@ -213,13 +206,12 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
 
-	if( check_flag((void *)cvode_mem, "CVodeCreate", 0))
-	{
+	if (check_flag((void *) cvode_mem, "CVodeCreate", 0)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
 	// Input user data
-	CVodeSetUserData(cvode_mem, (void *)data);
+	CVodeSetUserData(cvode_mem, (void *) data);
 
 	// Call CVodeInit to initialize the integrator memory and specify the
 	//ser's right hand side function in u'=f(t,u), the inital time T0, and
@@ -227,42 +219,41 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 
 	flag = CVodeInit(cvode_mem, f, T0, u);
 
-	if(check_flag(&flag, "CVodeInit", 1)){
+	if (check_flag(&flag, "CVodeInit", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
 	flag = CVDense(cvode_mem, dimension);
-	if (check_flag(&flag, "CVDense", 1))
-	{
+	if (check_flag(&flag, "CVDense", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
 	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
-	if (check_flag(&flag, "CVodeSStolerances", 1))
-	{
+	if (check_flag(&flag, "CVodeSStolerances", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-	std::vector<double> v(dimension),prev_v(dimension);
+	std::vector<double> v(dimension), prev_v(dimension);
 	prev_v = x;
 
-	for(unsigned int k=1;k<=N;k++) {
-		double tout = (k*Tfinal)/N;
+	for (unsigned int k = 1; k <= N; k++) {
+		double tout = (k * Tfinal) / N;
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-		if(check_flag(&flag, "CVode", 1)) break;
+		if (check_flag(&flag, "CVode", 1))
+			break;
 		// check polytope satisfaction
-		for(unsigned int i=0;i<dimension;i++)
-			v[i] = NV_Ith_S(u,i);
+		for (unsigned int i = 0; i < dimension; i++)
+			v[i] = NV_Ith_S(u,i) ;
 
 		double dist = I->point_distance(v);
-		if(math::abs(dist) > tol) {
+		if (math::abs(dist) > tol) {
 //				std::cout << "time:" << t << " ";
-			std::cout << "DISTANCE TO INV= " << std::setprecision(10) << dist << std::endl;
+			std::cout << "DISTANCE TO INV= " << std::setprecision(10) << dist
+					<< std::endl;
 			std::cout << "tol = " << std::setprecision(10) << tol << std::endl;
 			status = false;
 			break;
-		}
-		else{
+		} else {
 			trace_point simpoint;
 			simpoint.first = tout;
 			simpoint.second = v;
@@ -278,19 +269,19 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time, pol
 	return b;
 }
 
-std::vector<double> simulation::metric_simulate(std::vector<double> x, double time,
-		double& distance, polytope::ptr I, std::vector<double>& grad)
-{
+std::vector<double> simulation::metric_simulate(std::vector<double> x,
+		double time, double& distance, polytope::ptr I,
+		std::vector<double>& grad) {
 	int flag;
 	realtype T0 = 0;
 	realtype Tfinal = time;
-	realtype t=0;
+	realtype t = 0;
 	Dynamics *data = &D;
-	N=Tfinal/time_step;
+	N = Tfinal / time_step;
 
 	N_Vector u = NULL;
 
-	if(data->isEmptyMatrixA && data->isEmptyC) // zero dynamics
+	if (data->isEmptyMatrixA && data->isEmptyC) // zero dynamics
 		return x; // return same initial point
 
 	assert(x.size() == dimension);
@@ -299,7 +290,7 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 	assert(grad.size() == dimension);
 	// initialize
 
-	for(unsigned int i=0;i<dimension;i++){
+	for (unsigned int i = 0; i < dimension; i++) {
 		NV_Ith_S(u,i) = x[i];
 		grad[i] = 0;
 	}
@@ -310,13 +301,12 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 
 	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
 
-	if( check_flag((void *)cvode_mem, "CVodeCreate", 0))
-	{
+	if (check_flag((void *) cvode_mem, "CVodeCreate", 0)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
 	// Input user data
-	CVodeSetUserData(cvode_mem, (void *)data);
+	CVodeSetUserData(cvode_mem, (void *) data);
 
 	// Call CVodeInit to initialize the integrator memory and specify the
 	//ser's right hand side function in u'=f(t,u), the inital time T0, and
@@ -324,19 +314,17 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 
 	flag = CVodeInit(cvode_mem, f, T0, u);
 
-	if(check_flag(&flag, "CVodeInit", 1)){
+	if (check_flag(&flag, "CVodeInit", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
 	flag = CVDense(cvode_mem, dimension);
-	if (check_flag(&flag, "CVDense", 1))
-	{
+	if (check_flag(&flag, "CVDense", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
 	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
-	if (check_flag(&flag, "CVodeSStolerances", 1))
-	{
+	if (check_flag(&flag, "CVodeSStolerances", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
@@ -346,14 +334,15 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
 
 	math::matrix<double> expAt;
 	std::vector<double> g(dimension);
-	distance=0;
-	for(unsigned int k=1;k<=N;k++) {
-		double tout = (k*Tfinal)/N;
+	distance = 0;
+	for (unsigned int k = 1; k <= N; k++) {
+		double tout = (k * Tfinal) / N;
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-		if(check_flag(&flag, "CVode", 1)) break;
+		if (check_flag(&flag, "CVode", 1))
+			break;
 		// check polytope satisfaction
-		for(unsigned int i=0;i<dimension;i++)
-			v[i] = NV_Ith_S(u,i);
+		for (unsigned int i = 0; i < dimension; i++)
+			v[i] = NV_Ith_S(u,i) ;
 
 		trace_point simpoint;
 		simpoint.first = tout;
@@ -371,12 +360,13 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x, double ti
  * Computes the simulation trace inside the location of a ha, from the given start point and for the give time duration.
  * Returns the set of new start points which are valid for starting new simulation from the new location of the ha.
  */
-std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha)
-{
+std::vector<sim_start_point> simulation::simulateHaLocation(
+		sim_start_point start_point, double start_time, double tot_time,
+		hybrid_automata& ha) {
 	int flag;
-	realtype t=start_time, T0 = 0;
+	realtype t = start_time, T0 = 0;
 	realtype Tfinal = tot_time - start_time;
-	N = Tfinal/time_step;
+	N = Tfinal / time_step;
 	double tout1 = start_time;  //New Start Time for new simulation
 
 	Dynamics Dyn = start_point.locptr->getSystem_Dynamics();
@@ -395,7 +385,6 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 	//List of intersected polytope
 	std::list<eligibleTransition> etrans_list;
 
-
 	location::ptr loc = start_point.locptr;
 	polytope::ptr inv = loc->getInvariant();
 
@@ -411,7 +400,8 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 		polytope::ptr inv_g_intersection = inv->GetPolytope_Intersection(g);
 		std::vector<double> poly_bounds = inv_g_intersection->getColumnVector();
 
-		for (unsigned int i = 0; i < inv_g_intersection->getColumnVector().size(); i++) {
+		for (unsigned int i = 0;
+				i < inv_g_intersection->getColumnVector().size(); i++) {
 			poly_bounds[i] = poly_bounds[i] + this->time_step; // minkowski sum for bloating the guard \cap invariant set. Does not solve the purpose rightly
 		}
 
@@ -474,7 +464,6 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-
 	std::vector<double> v(dimension);
 	v = x;
 
@@ -489,13 +478,14 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 
 		double tout = k * (Tfinal / N);
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-		if (check_flag(&flag, "CVode", 1)){
-			cout<<"Start time = "<< t <<"  Total Time = "<<Tfinal<<" Value of tout = "<<tout<<endl;
+		if (check_flag(&flag, "CVode", 1)) {
+			cout << "Start time = " << t << "  Total Time = " << Tfinal
+					<< " Value of tout = " << tout << endl;
 			break;
 		}
 
 		for (unsigned int i = 0; i < dimension; i++)
-			v[i] = NV_Ith_S(u, i);
+			v[i] = NV_Ith_S(u, i) ;
 
 		trace_point simpoint;
 		simpoint.first = tout;
@@ -523,8 +513,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 				polytope::ptr new_inv = w.locptr->getInvariant();
 
 				double dist1 = new_inv->point_distance(w.start_point);
-				if (dist1==0) // the new point is within the invariant of the new location
-				{
+				if (dist1 == 0){ // the new point is within the invariant of the new location
 					// In the urgent semantics, only the first guard intersecting point is added for further simulation
 					new_start_points.push_back(w);
 					break;
@@ -533,7 +522,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 		} // end of for loop
 
 		// Add the point to the sim_trace because it does not intersect with the guard yet
-		if(new_start_points.size()>0) // stop simulation since the next simulation point is found.
+		if (new_start_points.size() > 0) // stop simulation since the next simulation point is found.
 			break;
 
 		//Checking validity of the trace
@@ -551,12 +540,13 @@ std::vector<sim_start_point> simulation::simulateHaLocation(sim_start_point star
 /**
  * Routine to print the simulation trace to a output file.
  */
-void simulation::print_trace_to_outfile(std::string s){
+void simulation::print_trace_to_outfile(std::string s) {
 	std::ofstream myoutfile;
 	myoutfile.open(s.c_str());
-	for(std::list<trace_point>::const_iterator it = sim_trace.begin(); it!=sim_trace.end(); it++)
-	{
-		myoutfile << (*it).second[this->x1] << "  " << (*it).second[this->x2] << "\n";
+	for (std::list<trace_point>::const_iterator it = sim_trace.begin();
+			it != sim_trace.end(); it++) {
+		myoutfile << (*it).second[this->x1] << "  " << (*it).second[this->x2]
+				<< "\n";
 	}
 	myoutfile.close();
 }
@@ -564,23 +554,24 @@ void simulation::print_trace_to_outfile(std::string s){
 /**
  * Returns a set of random simulation start points from the given as Hyperbox as initial set.
  */
-std::vector<sim_start_point> simulation::get_start_points(unsigned int n, hyperbox<double>::ptr hbox, location::ptr locptr)
-{
+std::vector<sim_start_point> simulation::get_start_points(unsigned int n,
+		hyperbox<double>::ptr hbox, location::ptr locptr) {
 	std::vector<sim_start_point> my_start_points;
-	for(unsigned int i=0;i<n;i++){
+	for (unsigned int i = 0; i < n; i++) {
 		std::vector<double> point = hbox->get_internal_point();
 		sim_start_point s;
 		s.start_point = point;
 		s.locptr = locptr;
-		s.cross_over_time=0;
+		s.cross_over_time = 0;
 		my_start_points.push_back(s);
 
 	}
 	return my_start_points;
-};
+}
+;
 
-std::vector<sim_start_point> simulation::get_start_points(unsigned int n, polytope::ptr initialset, location::ptr locptr)
-{
+std::vector<sim_start_point> simulation::get_start_points(unsigned int n,
+		polytope::ptr initialset, location::ptr locptr) {
 	/**
 	 * Check if the polytope is a hyperbox. If so, convert it into hyperbox and
 	 * get random start points using the hyperbox class routine
@@ -603,11 +594,11 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n, polyto
 	bool is_hyperbox = true;
 	for (i = 0; i < rowSize; i++) {
 		for (j = 0; j < columnSize; j++) {
-			if (matrix(i,j) != 0) {
+			if (matrix(i, j) != 0) {
 				countmatrix[j] = countmatrix[j] + 1;
 			}
 		}
-		if(j<columnSize && countmatrix[j] != 1){
+		if (j < columnSize && countmatrix[j] != 1) {
 			is_hyperbox = false;
 			break;
 		}
@@ -629,34 +620,32 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n, polyto
 	 * bound on any dimension is mentioned as consecutive constraints in A, first the
 	 * constraint on the upper bound and followed by the constraint on the lower bound.
 	 */
-	if(is_hyperbox)
-	{
+	if (is_hyperbox) {
 		// convert this poytope into hyperbox object
 
-		hbox_ptr= hyperbox<double>::ptr(new hyperbox<double>());
+		hbox_ptr = hyperbox<double>::ptr(new hyperbox<double>());
 		hbox_ptr->set_dimension(columnSize);
 
-
-		for(unsigned int i=0;i<rowSize;)
-		{
-			for(unsigned int j=0;j<columnSize;j++)
-			{
-				if(matrix(i,j)==0) continue;
-				else{
+		for (unsigned int i = 0; i < rowSize;) {
+			for (unsigned int j = 0; j < columnSize; j++) {
+				if (matrix(i, j) == 0)
+					continue;
+				else {
 					//double upper_bound = initialset->getColumnVector()[i];
 					double upper_bound = initialset->getColumnVector()[i];
-					double lower_bound = -1 * initialset->getColumnVector()[i+1];
-					hbox_ptr->set_bounds_on_dimension(j, lower_bound, upper_bound);
+					double lower_bound = -1
+							* initialset->getColumnVector()[i + 1];
+					hbox_ptr->set_bounds_on_dimension(j, lower_bound,
+							upper_bound);
 					//std::cout << "hbox set bounds called with params:" << "j=" << j << ", lower_bound = " << lower_bound << ", upper_bound:" << upper_bound << std::endl;
-					i+=2; break;
+					i += 2;
+					break;
 				}
 			}
-
 		}
 
 		// generate the points
-		for(unsigned int i=0;i<n;i++)
-		{
+		for (unsigned int i = 0; i < n; i++) {
 			sim_start_point s;
 			s.start_point = hbox_ptr->get_internal_point();
 			s.cross_over_time = 0;
@@ -672,100 +661,97 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n, polyto
 	return res;
 }
 
-
-void simulation::simulateHa(sim_start_point start, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps)
-{
+void simulation::simulateHa(sim_start_point start, double start_time,
+		double tot_time, hybrid_automata& ha, unsigned int max_jumps) {
 	std::list<sim_start_point> wlist;
 	wlist.push_back(start);
 
-	unsigned int jumps_taken=0;
+	unsigned int jumps_taken = 0;
 
-	while(wlist.size()!=0 && jumps_taken<=max_jumps)
-	{
+	while (wlist.size() != 0 && jumps_taken <= max_jumps) {
 		sim_start_point s = wlist.front();
 		wlist.pop_front();
 		std::vector<sim_start_point> next_pts;
-		next_pts = simulateHaLocation(s,start_time,tot_time,ha);
-		for(unsigned int i=0;i<next_pts.size();i++)
+		next_pts = simulateHaLocation(s, start_time, tot_time, ha);
+		for (unsigned int i = 0; i < next_pts.size(); i++)
 			wlist.push_back(next_pts[i]);
 		jumps_taken++;
 	}
 }
 
-void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps)
-{
+void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
+		double start_time, double tot_time, hybrid_automata& ha,
+		unsigned int max_jumps) {
 
-	std::vector<sim_start_point> start_points = get_start_points(n,initial_set,ha.getInitial_Location());
+	std::vector<sim_start_point> start_points = get_start_points(n, initial_set,
+			ha.getInitial_Location());
 
 	unsigned int t = 0, point_count = 0;
 	int N_cores = omp_get_num_procs();
 	std::vector<sim_start_point> wlist[2][N_cores][N_cores];
 
-	for(int i=0; i<N_cores; i++)
-	{
-		for(int j=0; j<N_cores; j++)
-		{
-			while(wlist[t][i][j].size() <= ceil(start_points.size()/(N_cores*N_cores)) && point_count < start_points.size())
-			{
+	for (int i = 0; i < N_cores; i++) {
+		for (int j = 0; j < N_cores; j++) {
+			while (wlist[t][i][j].size()
+					<= ceil(start_points.size() / (N_cores * N_cores))
+					&& point_count < start_points.size()) {
 				wlist[t][i][j].push_back(start_points[point_count]);
 				point_count++;
 			}
 		}
 	}
 
-	std::list<std::list< trace_point> > simtraces[N_cores];
+	std::list<std::list<trace_point> > simtraces[N_cores];
 
 	bool wlistNotEmpty = true;
 	unsigned int jumps_taken = 0;
-	while (wlistNotEmpty == true && jumps_taken<=max_jumps) {
+	while (wlistNotEmpty == true && jumps_taken <= max_jumps) {
 		int newpointsCount = 0;
-
 		#pragma omp parallel for
-
 		for (int w = 0; w < N_cores; w++) {
-			for(int q = 0; q< N_cores; q++){
-				while (wlist[t][w][q].size() != 0)
-				{
+			for (int q = 0; q < N_cores; q++) {
+				while (wlist[t][w][q].size() != 0) {
 					sim_start_point s = wlist[t][w][q][0];
 					wlist[t][w][q].erase(wlist[t][w][q].begin());
 					unsigned int sys_dimension = s.start_point.size();
-					simulation myobj(sys_dimension, tot_time/this->time_step, s.locptr->getSystem_Dynamics());
+					simulation myobj(sys_dimension, tot_time / this->time_step,
+							s.locptr->getSystem_Dynamics());
 					myobj.set_time_step(this->time_step);
 					//myobj.set_out_dimension(a1,a2);
 
-					std::vector<sim_start_point> newpoints = myobj.simulateHaLocation(s, s.cross_over_time, tot_time, ha);
+					std::vector<sim_start_point> newpoints =
+							myobj.simulateHaLocation(s, s.cross_over_time,
+									tot_time, ha);
 
-					simtraces[w].push_back(myobj.get_sim_trace());
+					simtraces[w].push_back(myobj.get_sim_trace()); //TODO::Let us see if we can use pointer here to improve performance-time
 
 					//myobj.print_trace_to_outfile("navigation3x3_trace_par");
 
-
-					for(unsigned int j=0; j<newpoints.size(); j++)
-					{
-						wlist[1-t][q][w].push_back(newpoints[j]);
-						newpointsCount++;
+					for (unsigned int j = 0; j < newpoints.size(); j++) {
+						wlist[1 - t][q][w].push_back(newpoints[j]);//TODO:: if newpoints is more than 1 points then, q need to be selected randomly
+						newpointsCount++; //TODO:: take care of Race condition
 					}
 				}
-				wlist[t][w][q].erase(wlist[t][w][q].begin(), wlist[t][w][q].begin()+wlist[t][w][q].size());
+				wlist[t][w][q].erase(wlist[t][w][q].begin(),
+					wlist[t][w][q].begin() + wlist[t][w][q].size()); //why is this repeated?
 			}
 		}
 		t = 1 - t;
-		if(newpointsCount == 0)
+		if (newpointsCount == 0)
 			wlistNotEmpty = false;
 	}
-
 
 	sim_trace.clear();
 
 	// dump the simtraces list into this->sim_trace
+//TODO:: Let us note the time if expensive then better return "list <list<trace_point>> sim_traces"
+	for (unsigned int i = 0; i < N_cores; i++) {
+		for (std::list<std::list<trace_point> >::iterator it =
+				simtraces[i].begin(); it != simtraces[i].end(); it++) {
+			std::list<trace_point> s = *it;
 
-	for(unsigned int i=0;i<N_cores;i++){
-		for(std::list<std::list< trace_point> >::iterator it = simtraces[i].begin(); it!=simtraces[i].end();it++)
-		{
-			std::list< trace_point> s = *it;
-
-			for(std::list<trace_point>::const_iterator it = s.begin(); it!=s.end(); it++)
-			{
+			for (std::list<trace_point>::const_iterator it = s.begin();
+					it != s.end(); it++) {
 				sim_trace.push_back(*it);
 			}
 		}
@@ -774,42 +760,44 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set, double
 }
 
 /* Check function return value...
-     opt == 0 means SUNDIALS function allocates memory so check if
-              returned NULL pointer
-     opt == 1 means SUNDIALS function returns a flag so check if
-              flag >= 0
-     opt == 2 means function allocates memory so check if returned
-              NULL pointer */
+ opt == 0 means SUNDIALS function allocates memory so check if
+ returned NULL pointer
+ opt == 1 means SUNDIALS function returns a flag so check if
+ flag >= 0
+ opt == 2 means function allocates memory so check if returned
+ NULL pointer */
 
-static int check_flag(void *flagvalue, const char* funcname, int opt)
-{
-  int *errflag;
+static int check_flag(void *flagvalue, const char* funcname, int opt) {
+	int *errflag;
 
-  /* Check if SUNDIALS function returned NULL pointer - no memory allocated */
+	/* Check if SUNDIALS function returned NULL pointer - no memory allocated */
 
-  if (opt == 0 && flagvalue == NULL) {
-    fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed - returned NULL pointer\n\n",
-            funcname);
-    return(1); }
+	if (opt == 0 && flagvalue == NULL) {
+		fprintf(stderr,
+				"\nSUNDIALS_ERROR: %s() failed - returned NULL pointer\n\n",
+				funcname);
+		return (1);
+	}
 
-  /* Check if flag < 0 */
+	/* Check if flag < 0 */
 
-  else if (opt == 1) {
-    errflag = (int *) flagvalue;
-    if (*errflag < 0) {
-      fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n",
-              funcname, *errflag);
-      return(1);
-    }
-  }
+	else if (opt == 1) {
+		errflag = (int *) flagvalue;
+		if (*errflag < 0) {
+			fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n",
+					funcname, *errflag);
+			return (1);
+		}
+	}
 
-  /* Check if function returned NULL pointer - no memory allocated */
+	/* Check if function returned NULL pointer - no memory allocated */
 
-  else if (opt == 2 && flagvalue == NULL) {
-    fprintf(stderr, "\nMEMORY_ERROR: %s() failed - returned NULL pointer\n\n",
-            funcname);
-    return(1);
-  }
+	else if (opt == 2 && flagvalue == NULL) {
+		fprintf(stderr,
+				"\nMEMORY_ERROR: %s() failed - returned NULL pointer\n\n",
+				funcname);
+		return (1);
+	}
 
-  return(0);
+	return (0);
 }
