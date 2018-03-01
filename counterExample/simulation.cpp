@@ -673,6 +673,8 @@ void simulation::simulateHa(sim_start_point start, double start_time,
 		wlist.pop_front();
 		std::vector<sim_start_point> next_pts;
 		next_pts = simulateHaLocation(s, start_time, tot_time, ha);
+		//simulateHaLocation also creates a sim_trace per location per start_point and concatenates
+
 		for (unsigned int i = 0; i < next_pts.size(); i++)
 			wlist.push_back(next_pts[i]);
 		jumps_taken++;
@@ -736,6 +738,7 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 					wlist[t][w][q].begin() + wlist[t][w][q].size()); //why is this repeated?
 			}
 		}
+		jumps_taken++;
 		t = 1 - t;
 		if (newpointsCount == 0)
 			wlistNotEmpty = false;
@@ -744,7 +747,7 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 	sim_trace.clear();
 
 	// dump the simtraces list into this->sim_trace
-//TODO:: Let us note the time if expensive then better return "list <list<trace_point>> sim_traces"
+//TODO:: Let us note the time if expensive then better return "list <list<trace_point>> simtraces"
 	for (unsigned int i = 0; i < N_cores; i++) {
 		for (std::list<std::list<trace_point> >::iterator it =
 				simtraces[i].begin(); it != simtraces[i].end(); it++) {
