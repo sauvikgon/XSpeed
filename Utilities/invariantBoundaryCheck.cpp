@@ -539,6 +539,7 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 			break;
 		}
 	} //end of iterations
+	//std::cout<<"Breaking at "<<loopIteration<<std::endl;
 	//return value is modified by this point
 }
 

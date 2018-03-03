@@ -339,9 +339,12 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	system_dynamics0.isEmptyMatrixB = true;
 
 	C0.resize(row);
+//	C0[0] = 0.0;
+//	C0[1] = -1.0;
+//	C0[2] = 1.0;
 	C0[0] = 0.0;
-	C0[1] = -1.0;
-	C0[2] = 1.0;
+	C0[1] = -9.81;	//value of g: gravity
+	C0[2] = 1;		//timed bball
 	system_dynamics0.isEmptyC = false;
 	system_dynamics0.C = C0;
 
@@ -407,7 +410,8 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	gaurdConstraintsMatrix0(1, 2) = 0.0;
 
 	gaurdBoundValue0.resize(row);
-	gaurdBoundValue0[0] = 0.1;
+	//gaurdBoundValue0[0] = 0.1; //Value for eps: epsilon
+	gaurdBoundValue0[0] = 0.0;  //Value for eps set to 0
 	gaurdBoundValue0[1] = 0.0;
 	gaurdBoundSign = 1;
 	gaurd_polytope0 = polytope::ptr(
@@ -425,7 +429,7 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	R0(0, 2) = 0.0;
 
 	R0(1, 0) = 0.0;
-	R0(1, 1) = -0.75;
+	R0(1, 1) = -0.75;	//value of c
 	R0(1, 2) = 0.0;
 
 	R0(2, 0) = 0.0;

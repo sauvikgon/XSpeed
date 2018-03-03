@@ -214,10 +214,31 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matri
 
 /**
  * returns the infinity norm of the matrix. inf norm of a matrix m is defined as
- * inf_norm = max(a_{i,j}), 0<=i<r, 0<=j<c
+ * maximum absolute row sum
  *
  */
 template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf() {
+	scalar_type norm = 0;
+	double sum=0;
+	for (size_type i = 0; i < this->size1(); i++) {
+		sum=0;
+		for (size_type j = 0; j < this->size2(); j++) {
+			sum = sum + abs(this->at_element(i,j));
+		}
+		if (sum > norm)
+			norm = sum;
+	}
+//	std::cout<<"math norm = "<<norm<<std::endl;
+	return norm;
+}
+
+
+/**
+ * returns the Max norm of the matrix. Max norm of a matrix m is defined as
+ * max_norm = max(a_{i,j}), 0<=i<r, 0<=j<c
+ *
+ */
+template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_max() {
 	scalar_type norm = 0;
 	for (size_type i = 0; i < this->size1(); i++) {
 		for (size_type j = 0; j < this->size2(); j++) {

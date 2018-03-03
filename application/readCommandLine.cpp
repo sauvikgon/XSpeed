@@ -134,7 +134,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 		if (vm.count("model")) { //Compulsory Options but set to 0 by default
 			user_options.set_model(vm["model"].as<int>());
-
 			if (user_options.get_model() < 0 || user_options.get_model() > 20) {
 				std::cout << "Invalid Model specified\n";
 				throw(new exception());
@@ -236,7 +235,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			isModelParsed = true;
 		}
 
-
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_directionTemplate(vm["directions"].as<int>());
 			if (user_options.get_directionTemplate() <= 0) {
@@ -254,7 +252,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			std::cout << "Missing value for parameter \"depth\"\n";
 			throw(new exception());
 		}
-
 		if (vm.count("engine")) { //Compulsory Options but set to thull by default
 			user_options.setEngine((vm["engine"].as<std::string>()));
 			if (boost::iequals(user_options.getEngine(),"simu")==false) {
@@ -286,7 +283,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				}
 			}
 		}
-
 		if ((user_options.get_model() == 3 || user_options.get_model() == 4) && user_options.get_bfs_level() != 0){
 			std::cout << "Invalid depth. Only depth 0 permitted on continuous models.\n";
 			throw(new exception());
@@ -305,7 +301,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				index++;
 			}
 		}
-
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_forbidden_set(vm["forbidden"].as<std::string>());
 		}

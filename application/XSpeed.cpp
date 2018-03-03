@@ -133,7 +133,6 @@ int main(int argc, char *argv[]) {
 		tt1.start();
 
 		//unsigned int transition_iters = user_options.get_bfs_level();
-
 		reachabilityCaller(Hybrid_Automata, init_state, reach_parameters,
 				user_options, lp_solver_type_choosen, Solver_GLPK_Gurobi_GPU, forbidden_set,
 				Symbolic_states_list, ce_candidates);
@@ -165,7 +164,6 @@ int main(int argc, char *argv[]) {
 			Avg_user_clock = Avg_user_clock + user_clock;
 			Avg_system_clock = Avg_system_clock + system_clock;
 		}
-
 	}
 	Avg_cpu_use = Avg_cpu_use / number_of_times;
 	total_mem_used = getCurrentProcess_PhysicalMemoryUsed();

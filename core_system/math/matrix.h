@@ -45,6 +45,9 @@ public:
 	 */
 //	void addColumn(std::vector <scalar_type> columnVector, math::matrix<scalar_type>& resized_matrix);
 	scalar_type norm_inf();
+
+	scalar_type norm_max();
+
 	void matrix_copy(math::matrix<scalar_type>& destination);
 	void matrix_join(math::matrix<scalar_type> mat2,
 			math::matrix<scalar_type>& joined_matrix);
