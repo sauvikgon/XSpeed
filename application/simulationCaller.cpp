@@ -60,7 +60,7 @@ void simulationCaller(ReachabilityParameters& reach_parameters,
 	std::cout << "\nSIMULATION Plotting TIME::Boost Time taken:Wall  (in Seconds) = " << plot_Time << std::endl;
 
 	string cmdStr1;
-	cmdStr1.append("graph -TX -BC ");
+	cmdStr1.append("graph -TX -BC -m 0 ");
 	cmdStr1.append(op.getOutFilename().c_str());
 	system(cmdStr1.c_str());
 }
