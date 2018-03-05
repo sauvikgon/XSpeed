@@ -219,7 +219,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 //	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
 //	Dynamics Initalised ---------------------
 
-	transition::ptr trans = transition::ptr(new transition()); //empty transition
+//	transition::ptr trans = transition::ptr(new transition()); //empty transition
 
 	location::ptr source;
 	source = location::ptr(new location());
@@ -228,7 +228,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	source->setSystem_Dynamics(system_dynamics);
 	source->setInvariant(invariant);
 	source->setInvariantExists(false); //no invariant available
-	source->add_Out_Going_Transition(trans);
+//	source->add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
 
