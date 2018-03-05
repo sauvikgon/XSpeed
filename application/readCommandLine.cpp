@@ -375,8 +375,17 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			throw(new exception());
 		}
 
-		unsigned int x1 = Hybrid_Automata.get_index(output_vars[0]);
-		unsigned int x2 = Hybrid_Automata.get_index(output_vars[1]);
+		unsigned int x1, x2;
+		try{
+			x1 = Hybrid_Automata.get_index(output_vars[0]);
+			x2 = Hybrid_Automata.get_index(output_vars[1]);
+		}catch(const std::out_of_range& oor)
+		{
+			std::cerr << "Output variables not defined in the model: " << oor.what() << '\n';
+			std::cerr << "Please use two output variables from the following list of model variables\n";
+			Hybrid_Automata.print_var_index_map();
+			exit(0);
+		}
 
 		user_options.set_first_plot_dimension(x1);
 		user_options.set_second_plot_dimension(x2);
