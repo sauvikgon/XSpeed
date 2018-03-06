@@ -145,20 +145,6 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 			cout << t << " -- Error converting the Model Matrix_U\n";
 		}
 	}
-	/*
-	 for (int j = 0; j < col - 1; j++)
-	 Bmatrix(28, j) = 0.000000000000;	//Last row for t==0
-	 //Bmatrix(28, col - 1) = 1;		//try = 0 also
-	 Bmatrix(28, col - 1) = 0.000000000000;		//try = 0 also
-	 */
-
-	/*	cout << "\nPrinting The B matrix\n";
-	 for (unsigned int i = 0; i < row; i++) {
-	 for (unsigned int j = 0; j < col; j++) {
-	 cout << Bmatrix(i, j) << "\t";
-	 }
-	 cout << endl << endl << endl;
-	 }*/
 
 	/*
 	 string matrix_au(
@@ -233,7 +219,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 //	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
 //	Dynamics Initalised ---------------------
 
-	transition::ptr trans = transition::ptr(new transition()); //empty transition
+//	transition::ptr trans = transition::ptr(new transition()); //empty transition
 
 	location::ptr source;
 	source = location::ptr(new location());
@@ -242,7 +228,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	source->setSystem_Dynamics(system_dynamics);
 	source->setInvariant(invariant);
 	source->setInvariantExists(false); //no invariant available
-	source->add_Out_Going_Transition(trans);
+//	source->add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
 
@@ -259,7 +245,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.insert_to_map("x7", 6);
 	Hybrid_Automata.insert_to_map("x8", 7);
 	Hybrid_Automata.insert_to_map("x9", 8);
-	Hybrid_Automata.insert_to_map("x10", 10);
+	Hybrid_Automata.insert_to_map("x10", 9);
 	Hybrid_Automata.insert_to_map("x11", 10);
 	Hybrid_Automata.insert_to_map("x12", 11);
 	Hybrid_Automata.insert_to_map("x13", 12);

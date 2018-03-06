@@ -245,7 +245,6 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 //	Dynamics Initalised ---------------------
 
-	transition::ptr trans = transition::ptr(new transition()); //empty transition
 
 	location::ptr source;
 	source = location::ptr(new location());
@@ -254,7 +253,6 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	source->setSystem_Dynamics(system_dynamics);
 	source->setInvariant(invariant);
 	source->setInvariantExists(false); //no invariant available
-	source->add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
 
