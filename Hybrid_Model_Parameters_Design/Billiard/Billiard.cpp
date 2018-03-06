@@ -400,14 +400,23 @@ void SetBilliardModel(hybrid_automata& Hybrid_Automata,
 	ConstraintsMatrixI(7, 3) = -1;
 	boundValueI.resize(row);
 	boundValueI.assign(row, 0);
-	boundValueI[0] = 5;
+	/*boundValueI[0] = 5;
 	boundValueI[1] = -5;
 	boundValueI[2] = 5;
 	boundValueI[3] = -5;
 	boundValueI[4] = 0.2;
 	boundValueI[5] = -0.2;
 	boundValueI[6] = 1;
+	boundValueI[7] = -1;*/
+	boundValueI[0] = 5.1;
+	boundValueI[1] = -5;
+	boundValueI[2] = 5.1;
+	boundValueI[3] = -5;
+	boundValueI[4] = 1;
+	boundValueI[5] = -1;
+	boundValueI[6] = 1;
 	boundValueI[7] = -1;
+
 
 	initial_polytope_I0 = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));

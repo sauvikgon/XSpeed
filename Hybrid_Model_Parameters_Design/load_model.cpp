@@ -18,7 +18,6 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	//	(1,2,3,4,5,6,7) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE, CIRCLE_FOUR_LOC)
 	unsigned int HybridSystem_Model_Type = op.get_model();
 
-
 	if (HybridSystem_Model_Type == BBALL) {
 		SetBouncingBall_Parameters(ha, init_state, reach_parameters);
 	}

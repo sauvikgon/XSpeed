@@ -366,7 +366,8 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	int flag;
 	realtype t = start_time, T0 = 0;
 	realtype Tfinal = tot_time - start_time;
-	N = Tfinal / time_step;
+	//N = Tfinal / time_step; deleted
+	double timestep = this->time_step; //added
 	double tout1 = start_time;  //New Start Time for new simulation
 
 	Dynamics Dyn = start_point.locptr->getSystem_Dynamics();
@@ -421,6 +422,12 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	reltol = 1e-8;
 	abstol = 1e-8;
 
+	//***** new *************
+	repeat: Tfinal = tot_time - start_time;
+	N = Tfinal/timestep;
+	t=start_time;
+	//***** new *************
+
 	assert(x.size() == dimension);
 
 	N_Vector u = N_VNew_Serial(dimension);
@@ -473,10 +480,10 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	simpoint.second = x;
 	sim_trace.push_back(simpoint); // adding the simpoint in the sim_trace data-structure.
 	//-------------------
-
+	double tout; // ****** add
 	for (unsigned int k = 1; k <= N; k++) {
-
-		double tout = k * (Tfinal / N);
+		//double tout = k * (Tfinal / N); deleted
+		tout = tout + Tfinal/N;
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
 		if (check_flag(&flag, "CVode", 1)) {
 			cout << "Start time = " << t << "  Total Time = " << Tfinal
@@ -524,7 +531,15 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 		// Add the point to the sim_trace because it does not intersect with the guard yet
 		if (new_start_points.size() > 0) // stop simulation since the next simulation point is found.
 			break;
-
+//*************** New added *******************
+		if(new_start_points.size() == 0 && inv->point_distance(v)>0){ //reduce time step if trace cross invariant without hitting
+			tout = tout-(Tfinal/N);
+			start_time = start_time + tout - timestep;
+			timestep = timestep/5;
+			sim_trace.pop_back();
+			goto repeat;
+		}
+//*************** New added *******************
 		//Checking validity of the trace
 		double dist = inv->point_distance(v);
 

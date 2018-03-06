@@ -244,8 +244,6 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 
 //use g++ -fopenmp for compiling #pragma omp
 
-
-
 #pragma omp parallel for
 	for (int i = 0; i < CORES; i++) { //for (double i = 0; i < T; i += newTimeBound) {
 
@@ -258,8 +256,7 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 		phi.transpose(phi_trans); //phi_trans computed
 
 		if (SystemDynamics.MatrixA.isInvertible()){//if A inverse exist
-
-			math::matrix<double> A_inv(SystemDynamics.MatrixA.size1(),SystemDynamics.MatrixA.size2());
+			math::matrix<double> A_inv(SystemDynamics.MatrixA.size1(), SystemDynamics.MatrixA.size2());
 			bool flag = SystemDynamics.MatrixA.inverse(A_inv); //size of A_inv must be declared else error
 			//A_inv = ReachParameters.A_inv;
 			A_inv.multiply(phi, A_inv_phi);
@@ -279,11 +276,12 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 
 		supportFunctionProvider::ptr Initial;
 		if (!SystemDynamics.isEmptyC){
+			std::cout<<"C is NOT empty\n";
 			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, u,SystemDynamics.C ,phi_trans, y_trans, 1, 0));
 		}else{
+			std::cout<<"C is empty\n";
 			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, u,phi_trans, y_trans, 1, 0));
 		}
-
 
 //		cout<<"Done TransMinkPoly invariantExists="<<invariantExists<<std::endl;
 		//Calling Sequential algorithm here and later can mix with parallel for direction
