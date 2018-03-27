@@ -245,7 +245,6 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 //	Dynamics Initalised ---------------------
 
-
 	location::ptr source;
 	source = location::ptr(new location());
 	source->setLocId(1);

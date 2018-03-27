@@ -108,7 +108,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
 
-	//	std::cout<<"alfa = "<<result_alfa<<"   beta = "<<result_beta<<std::endl;
+		//std::cout<<"alfa = "<<result_alfa<<"   beta = "<<result_beta<<std::endl;
 
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
@@ -158,7 +158,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		// ************ Compute flowpipe_cost:: estimation Ends **********************************
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 
-		//std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<std::endl;
+		//	std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<std::endl;
 		num_flowpipe_computed++;//computed one Flowpipe
 		//	*********************************************** Reach or Flowpipe Computed ************************************
 		if (previous_level != levelDeleted) {

@@ -11,8 +11,9 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		hybrid_automata& ha, ReachabilityParameters& reach_parameters, userOptions& op){
 
 	reach_parameters.TimeBound = op.get_timeHorizon(); //Total Time Interval
-	reach_parameters.time_step = op.get_timeStep();
 	reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
+	reach_parameters.time_step = op.get_timeStep();
+	//reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
 
 	//Assigning the Model of the Hybrid System
 	//	(1,2,3,4,5,6,7) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE, CIRCLE_FOUR_LOC)

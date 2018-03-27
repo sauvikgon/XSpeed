@@ -199,17 +199,6 @@ const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIterat
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
 const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool invariantExists, int CORES,
 		unsigned int Algorithm_Type, int lp_solver_type_choosen) {
@@ -234,7 +223,7 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 	ReachParameters.Iterations = ReachParameters.Iterations / CORES; //required in Invarian_Boundary_Check
 	//Todo::: please handle when the value of this expression is in Fraction
 	// ******** New Change ***************
-//	cout << "partition_iterations" << ReachParameters.Iterations << "\n";
+	//cout << "partition_iterations" << ReachParameters.Iterations << "\n";
 //ReachParameters.time_step = newTimeBound/ partition_iterations;	//computed for 1st partition
 	template_polyhedra::ptr reachability_region;
 	reachability_region = template_polyhedra::ptr(new template_polyhedra());
@@ -250,20 +239,19 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 		template_polyhedra::ptr Tpoly=template_polyhedra::ptr(new template_polyhedra());
 		math::matrix<double> phi, phi_trans, A_inv_phi, y_matrix, y_trans;
 		double START_TIME = i * newTimeBound; //first iteration START_TIME = i = 0 which make beta = 0
-
 		//std::cout<<"i and START_TIME are = "<<i<< "    "<< START_TIME<<"\n";
 		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
 		phi.transpose(phi_trans); //phi_trans computed
 
-		if (SystemDynamics.MatrixA.isInvertible()){//if A inverse exist
+		if (SystemDynamics.MatrixA.isInvertible()){ //if A inverse exist
 			math::matrix<double> A_inv(SystemDynamics.MatrixA.size1(), SystemDynamics.MatrixA.size2());
 			bool flag = SystemDynamics.MatrixA.inverse(A_inv); //size of A_inv must be declared else error
 			//A_inv = ReachParameters.A_inv;
 			A_inv.multiply(phi, A_inv_phi);
 			A_inv_phi.minus(A_inv, y_matrix);
+			//std::cout<<"A_inv_phi="<<A_inv_phi<<std::endl;
 		}else {
 			y_matrix = time_slice_component(SystemDynamics.MatrixA, START_TIME);
-			//std::cout<<"y_matrix = "<<y_matrix;
 		}
 		y_matrix.transpose(y_trans);
 //(phi_trans . X0 + y_trans . U)
@@ -276,10 +264,8 @@ const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteratio
 
 		supportFunctionProvider::ptr Initial;
 		if (!SystemDynamics.isEmptyC){
-			std::cout<<"C is NOT empty\n";
 			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, u,SystemDynamics.C ,phi_trans, y_trans, 1, 0));
 		}else{
-			std::cout<<"C is empty\n";
 			Initial= transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, u,phi_trans, y_trans, 1, 0));
 		}
 

@@ -142,6 +142,7 @@ polytope::ptr template_polyhedra::getPolytope(unsigned int Iterations_Number) {
  */
 
 const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionSequential(polytope::ptr G, int lp_solver_type_choosen) { //need testing due to modification
+
 	size_type row = 0;
 	size_type col = 0;
 	math::matrix<double> mat_sf(row, col);

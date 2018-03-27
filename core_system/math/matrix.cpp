@@ -232,7 +232,6 @@ template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf()
 	return norm;
 }
 
-
 /**
  * returns the Max norm of the matrix. Max norm of a matrix m is defined as
  * max_norm = max(a_{i,j}), 0<=i<r, 0<=j<c
@@ -272,10 +271,12 @@ bool math::matrix<scalar_type>::inverse(math::matrix<scalar_type>& inverse) {
 	inverse.assign(identity_matrix<scalar_type>(this->size1()));
 	ublas_matrix_impl A(this->size1(), this->size2(), this->data());
 	pmatrix pm(A.size1());
+	int res = lu_factorize(A, pm);
 	// backsubstitute to get the inverse
 	lu_substitute(A, pm, inverse);
 	return true;	//	NonSingular=true;
 }
+
 template<typename scalar_type>
 bool math::matrix<scalar_type>::isInvertible()
 {

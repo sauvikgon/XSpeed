@@ -194,6 +194,10 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 			else
 				zI = res2;
 
+
+
+
+
 			//  **************  Omega Function Over  ********************
 			TempOmega = zI + s1Variable; //Y1
 		//	std::cout<<"TempOmega = "<< TempOmega<<std::endl;
