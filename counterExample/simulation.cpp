@@ -692,6 +692,7 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 	int N_cores = omp_get_num_procs();
 	std::vector<sim_start_point> wlist[2][N_cores][N_cores];
 
+	/* Distribute the N start points in the waiting list data-structure. */
 	for (int i = 0; i < N_cores; i++) {
 		for (int j = 0; j < N_cores; j++) {
 			while (wlist[t][i][j].size()
@@ -727,7 +728,6 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 
 					simtraces[w].push_back(myobj.get_sim_trace()); //TODO::Let us see if we can use pointer here to improve performance-time
 
-					//myobj.print_trace_to_outfile("navigation3x3_trace_par");
 
 					for (unsigned int j = 0; j < newpoints.size(); j++) {
 						wlist[1 - t][q][w].push_back(newpoints[j]);//TODO:: if newpoints is more than 1 points then, q need to be selected randomly

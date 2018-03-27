@@ -4,7 +4,7 @@ abstract_symbolic_state::abstract_symbolic_state() {
 	;
 }
 abstract_symbolic_state::abstract_symbolic_state(discrete_set& discreteSet,
-		polytope::ptr continuousSet, polytope::ptr polyI) {
+	polytope::ptr continuousSet, polytope::ptr polyI) {
 	DiscreteSet = discreteSet;
 	ContinuousSet = continuousSet;
 	I = polyI;

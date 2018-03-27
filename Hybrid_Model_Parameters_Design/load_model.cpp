@@ -71,7 +71,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 //std::cout <<"HybridSystem_Model_Type = "<<HybridSystem_Model_Type <<std::endl;
 	if (HybridSystem_Model_Type == 14) {
 
-		SetBilliardModel(ha, init_state, reach_parameters);
+		//SetBilliardModel(ha, init_state, reach_parameters);
 
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
@@ -96,7 +96,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setplatoon(ha, init_state, reach_parameters);
 
 		//setFisher_Star(ha,init_state,reach_parameters);		
-		//setMotorcar(ha,init_state,reach_parameters);
+		setMotorcar(ha,init_state,reach_parameters);
 		//std::cout <<"Test Model Assigned"<<std::endl;
 
 	}
