@@ -207,6 +207,7 @@ public:
 	std::vector<sim_start_point> get_start_points(unsigned int n, hyperbox<double>::ptr hbox, location::ptr locptr);
 
 	std::vector<sim_start_point> get_start_points(unsigned int n, polytope::ptr initialset, location::ptr locptr);
+	void Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<double>& Bounds, std::vector<double> x);
 
 	/**
 	 * Returns a vector of start points for initiating simulation from the given location of a ha.
