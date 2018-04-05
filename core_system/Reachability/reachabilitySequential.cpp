@@ -31,11 +31,12 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 		return poly_emptyp;
 	}
 
-	col = shm_NewTotalIteration; //if invariant exist col will be resized
+	col = shm_NewTotalIteration; //if invariant exists, col will be resized
 	MatrixValue.resize(row, col);
 	int solver_type = lp_solver_type_choosen;
 	lp_solver s_per_thread_I(solver_type), s_per_thread_U(solver_type), s_per_thread_inv(solver_type);
 	s_per_thread_I.setMin_Or_Max(2);
+
 	if (!ReachParameters.X0->getIsEmpty()) //set glpk constraints If not an empty polytope
 		s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
 				ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());

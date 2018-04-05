@@ -49,6 +49,21 @@ scalar_type dot_product(std::vector<scalar_type> vector1,
 }
 
 /**
+ * Returns infinity norm of a stl vector
+ */
+template<typename scalar_type>
+scalar_type get_infinity_norm(std::vector<scalar_type> v)
+{
+	assert(v.size()!=0); // V is not a zero vector
+	scalar_type value = v[0];
+	for(unsigned int i=0;i<v.size();i++){
+		scalar_type abs_element = fabs(v[i]);
+		if(value < abs_element)
+			value = abs_element;
+	}
+	return value;
+}
+/**
  * Returns the support function of the unit ball with infinity norm in a passed direction
  */
 template<typename scalar_type>
@@ -68,6 +83,7 @@ scalar_type support_unitball_infnorm(std::vector<scalar_type> dir) {
 template<typename scalar_type>
 scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		int lp_solver_type_choosen) {
+
 	scalar_type norm_A = 0.0, result;
 	unsigned int dim_for_Max_norm;
 	if (!SysD.isEmptyMatrixA){ //if Not Empty
@@ -84,6 +100,10 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
 	}
 
+//	if(!SysD.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
+//		V_max_norm = get_infinity_norm(SysD.C);
+//	}
+
 	if (SysD.isEmptyMatrixA){ //if A is Empty
 		result = 0;	//norm_A will be zero and which is common term
 	}else {
@@ -92,7 +112,6 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		if (std::isinf(tt1)){	//todo:: need to handle for infinity value
 			throw std::runtime_error("infinity in compute beta\n");
 		}
-
 		//result = (exp(tau * norm_A) - 1 - tau * norm_A) * (V_max_norm / norm_A);
 		result = (tt1 - 1 - tau * norm_A) * (V_max_norm / norm_A);
 	}
@@ -109,17 +128,18 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 template<typename scalar_type>
 scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		supportFunctionProvider::ptr I, int lp_solver_type_choosen) // polytope V
-		{
+{
+
 	scalar_type norm_A = 0.0, result;
 	unsigned int dim_for_Max_norm=0;
 	double V_max_norm = 0.0, I_max_norm = 0.0;
 	if (!system_dynamics.isEmptyMatrixA){ //if Not Empty
 		norm_A = system_dynamics.MatrixA.norm_inf();
 	}
-	//cout<<"\nInside compute alpha Matrix A's max norm = "<< norm_A << endl;
+
+
 	dim_for_Max_norm = I->getSystemDimension();	//I is initial polytope
 	I_max_norm = I->max_norm(lp_solver_type_choosen, dim_for_Max_norm); //R_X_o ie max_norm of the Initial polytope
-
 
 	math::matrix<scalar_type> Btrans;
 	system_dynamics.MatrixB.transpose(Btrans);
@@ -130,26 +150,27 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 				new transMinkPoly(system_dynamics.U, Btrans));
 
 		dim_for_Max_norm = system_dynamics.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
-	//	cout <<"dim_for_Max_norm = "<<dim_for_Max_norm<<"\n";
+
 		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
 
 	}
 
+//	if(!system_dynamics.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
+//		V_max_norm = get_infinity_norm(system_dynamics.C);
+//	}
 
-	//double V_max_norm = system_dynamics.U->max_norm();	incorrect as V=B.U
-	//cout<<"\nInside Testing V_max_norm = "<<V_max_norm <<endl;
 	if (system_dynamics.isEmptyMatrixA){ //if A is Empty
 		result = 0;	//norm_A will be zero and which is common term
-	}else {
+	}else{
 
 		double tt1 = exp(tau * norm_A);
 		if (std::isinf(tt1)){	//todo:: need to handle for infinity value, temporary fix
 			throw std::runtime_error("infinity in compute alpha\n");
 		}
-		//	result = (exp(tau * norm_A) - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
+	//	result = (exp(tau * norm_A) - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
 
 		result = (tt1 - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
-	}
+		}
 	return result;
 }
 
