@@ -100,9 +100,9 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
 	}
 
-//	if(!SysD.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
-//		V_max_norm = get_infinity_norm(SysD.C);
-//	}
+	if(!SysD.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
+		V_max_norm = get_infinity_norm(SysD.C);
+	}
 
 	if (SysD.isEmptyMatrixA){ //if A is Empty
 		result = 0;	//norm_A will be zero and which is common term
@@ -155,9 +155,9 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 
 	}
 
-//	if(!system_dynamics.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
-//		V_max_norm = get_infinity_norm(system_dynamics.C);
-//	}
+	if(!system_dynamics.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
+		V_max_norm = get_infinity_norm(system_dynamics.C);
+	}
 
 	if (system_dynamics.isEmptyMatrixA){ //if A is Empty
 		result = 0;	//norm_A will be zero and which is common term
@@ -167,10 +167,8 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		if (std::isinf(tt1)){	//todo:: need to handle for infinity value, temporary fix
 			throw std::runtime_error("infinity in compute alpha\n");
 		}
-	//	result = (exp(tau * norm_A) - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
-
 		result = (tt1 - 1 - tau * norm_A) * (I_max_norm + (V_max_norm / norm_A));
-		}
+	}
 	return result;
 }
 
@@ -182,8 +180,8 @@ void get_ublas_matrix(std::vector<std::vector<scalar_type> > std_Matrix,
 	typedef typename math::matrix<scalar_type>::size_type size_type;
 	size_type row = r;
 	size_type col = c;
-	//math::matrix<scalar_type> m = math::matrix<scalar_type>(r, c, std_Matrix.data());
-	math::matrix<scalar_type> m(row, col); //, std_Matrix.data());
+
+	math::matrix<scalar_type> m(row, col);
 	for (int i = 0; i < r; i++)
 		for (int j = 0; j < c; j++)
 			m(i, j) = std_Matrix[i][j];

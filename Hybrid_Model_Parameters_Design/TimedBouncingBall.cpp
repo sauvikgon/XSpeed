@@ -213,20 +213,9 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	//system_dynamics.U->setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);
 	system_dynamics.U = polytope::ptr(
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
-//	Dynamics Initalised ---------------------
+	//	Dynamics Initalised ---------------------
 
-	/*
-	 // ******** Testing U **********
-	 std::vector<double> d(3);
-	 d[0]=0;
-	 d[1]=0;
-	 d[2]=1;
-	 glpk_lp_solver lp;
-	 lp.setMin_Or_Max(2);
-	 lp.setConstraints(ConstraintsMatrixV, boundValueV, boundSignV);
-	 double res=system_dynamics.U.computeSupportFunction(d,lp,2);
-	 cout<<"Result U = "<<res<<endl;
-	 */
+
 
 	// Initial Polytope is initialised
 	initial_polytope_I = polytope::ptr(
@@ -241,8 +230,6 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 
-	/*transitions t;
-	 t=NULL;*/
 	transition::ptr trans = transition::ptr(
 			new transition(1, "hop", 1, 1, gaurd_polytope, assignment));
 
@@ -254,20 +241,6 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	source->setInvariantExists(true);
 	source->add_Out_Going_Transition(trans);
 
-//transitions &trans;
-//transitions trans("hop",source,destination,gaurd_polytope,assignment);
-
-	/*
-	 trans.setLabel("hop");
-	 trans.setSource(source);
-	 trans.setDestination(destination);
-	 trans.setGaurd(gaurd_polytope);
-	 trans.setAssignT(assignment);
-	 source.add_Adj_Transitions(trans);
-
-	 std::list<transitions> trans_list;
-	 trans_list.push_back(trans);*/
-
 	int dim = initial_polytope_I->getSystemDimension();
 
 	Hybrid_Automata.addInitial_Location(source);
@@ -276,11 +249,6 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.insert_to_map("x", 0);
 	Hybrid_Automata.insert_to_map("v", 1);
 	Hybrid_Automata.insert_to_map("t", 2);
-	/*
-	 Hybrid_Automata.addInitLoc(source);
-	 Hybrid_Automata.addTransition(trans_list);
-	 Hybrid_Automata.setDimension(dim);
-	 */
 
 	unsigned int initial_location_id = 1; //the initial Location ID
 	symbolic_states::ptr S; //null_pointer as there is no instantiation
@@ -339,12 +307,9 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	system_dynamics0.isEmptyMatrixB = true;
 
 	C0.resize(row);
-//	C0[0] = 0.0;
-//	C0[1] = -1.0;
-//	C0[2] = 1.0;
 	C0[0] = 0.0;
-	C0[1] = -9.81;	//value of g: gravity
-	C0[2] = 1;		//timed bball
+	C0[1] = -1;	//value of g: acceleration due to gravity
+	C0[2] = 1;	//timed bball: Rate of change of time = 1
 	system_dynamics0.isEmptyC = false;
 	system_dynamics0.C = C0;
 
@@ -410,7 +375,6 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	gaurdConstraintsMatrix0(1, 2) = 0.0;
 
 	gaurdBoundValue0.resize(row);
-	//gaurdBoundValue0[0] = 0.1; //Value for eps: epsilon
 	gaurdBoundValue0[0] = 0.0;  //Value for eps set to 0
 	gaurdBoundValue0[1] = 0.0;
 	gaurdBoundSign = 1;
@@ -527,7 +491,7 @@ void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
 
 	C0.resize(row);
 	C0[0] = 0.0;
-	C0[1] = -1.0;
+	C0[1] = -1.0;	// acceleraion due to gravity
 	C0[2] = 1.0;
 	system_dynamics0.isEmptyC = false;
 	system_dynamics0.C = C0;
