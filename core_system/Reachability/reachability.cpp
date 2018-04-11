@@ -42,7 +42,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		queue.push_back(BreadthLevel); //insert at REAR, first Location
 	}
 
-	//queue.push_back(BreadthLevel); //insert at REAR, first Location
+
 	bool starting_location = true;
 	bool saftey_violated = false;
 
@@ -58,14 +58,13 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		int levelDeleted = queue.front(); //get FRONT element
 		queue.pop_front(); //delete from FRONT
 		if (levelDeleted > bound)
-			break; //stopping due to number of transitions exceeds the bound
+			break; //stopping since the number of transitions exceeds the number of bound
 
 		int location_id;
 		location_id = U->getLocationId();
 		discrete_set discrete_state;
 		discrete_state.insert_element(location_id); //creating discrete_state
 
-		//continuous_initial_polytope = U.getInitial_ContinousSetptr();
 		continuous_initial_polytope = U->getInitialSet();
 		reach_parameters.X0 = continuous_initial_polytope;
 
@@ -83,10 +82,12 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 		if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
 				|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0))
-			continue; //do not compute the continuous reachability algorithm
+			continue; //do not compute the reachable set
+
 		bool foundSkippingLocation = false;
 		for (int StopLoc = 0; StopLoc < reach_parameters.Stop_locID.size();
 				StopLoc++) {
+
 			if (location_id == reach_parameters.Stop_locID[StopLoc]) {
 				foundSkippingLocation = true;
 			}
@@ -108,7 +109,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
 
-		//std::cout<<"alfa = "<<result_alfa<<"   beta = "<<result_beta<<std::endl;
 
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
@@ -142,23 +142,17 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 			 * 	For submitting the reading in STT Journal we did not included jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
 			 */
 
-//			if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
-//				//Approach of Coarse-time-step and Fine-time-step
-//				cout<<"Running Approach of Coarse-time-step and Fine-time-step\n";
-//				jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-//					current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
-//
-//			}else{
-				//Approach of Sequential invariant check will work for all case
-				InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
-					reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
-//			}
+			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 		}
-		//std::cout<<"NewTotalIteration = "<<NewTotalIteration<<std::endl;
-		// ************ Compute flowpipe_cost:: estimation Ends **********************************
+
+		 /*********** Compute flowpipe_cost:: estimation Ends **********************************
+		 * This method selects the correct reachability computation routine based on the user option.
+		 * This selection is only for purely continuous models.
+		 */
+
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 
-		//	std::cout<<"Flowpipe Omegs length = "<< reach_region->getTotalIterations()<<std::endl;
+
 		num_flowpipe_computed++;//computed one Flowpipe
 		//	*********************************************** Reach or Flowpipe Computed ************************************
 		if (previous_level != levelDeleted) {
@@ -269,7 +263,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 
-				//	std::cout<<"Before flowpipe Guard intersection\n";
 
 				int cluster = 100; // Sets the percentage of clustering, 10 is for 10 percent. 100 is a single cluster, 0 no clustering indicate invididual omegas
 				bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
@@ -278,7 +271,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					//std::cout<<"set-aggregation=thull\n";
 				} else if (boost::iequals(this->getSetAggregation(),"none")){
 					aggregation=false;
-					//std::cout<<"set-aggregation=none\n";
 				}
 
 				//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
@@ -295,7 +287,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					/*if (!aggregation){//ON use thull //OFF is expensive: for each Omega a new symbolic state is pushed in the Wlist
 						std::cout<<"Aggregation is OFF: going to create many symbolic states\n";
 					}*/
-					//std::cout<<"\nNew convex hull implementation for guard-flowpipe intersection\n";
+
 					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);//Todo::debug PPL
 					polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
 
@@ -430,57 +422,35 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		template_polyhedra::ptr& reach_region) {
 
 	if (Algorithm_Type == SEQ_SF) { //Continuous Sequential Algorithm
-		/*boost::timer::cpu_timer AllReach_time;
-		AllReach_time.start();*/
-		//std::cout << "\nGoing to compute Flowpipe" << std::endl;
+		// Sequential reachability computation
+		std::cout << "\nRunning sequential BFS.\n";
 		reach_region = reachabilitySequential(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
 				current_location->isInvariantExists(), lp_solver_type_choosen);
-		//std::cout << "\nFlowpipe computed" << std::endl;
-		/*AllReach_time.stop();
-		double wall_clock1;
-		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nFlowpipe:Time:Wall(Seconds) = " << return_Time1 << std::endl;*/
 	}
 
 	if (Algorithm_Type == PAR_SF) {
-		//Parallel implementation using OMP parallel			//	double wall_timer = omp_get_wtime();
-		//	cout << "\nRunning Parallel Using OMP Thread\n";
-		/*boost::timer::cpu_timer AllReach_time;
-		AllReach_time.start();*/
+
+		//Parallel PostC using Lazy SF algorithm and Sequential PostD
+		std::cout << "\nRunning parallel PostC using lazy SF algorithm and sequential PostD.\n";
 		reach_region = reachabilityParallel(NewTotalIteration,
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(),
 				current_location->isInvariantExists(), lp_solver_type_choosen);
-		/*AllReach_time.stop();
-		double wall_clock1;
-		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nFlowpipe:Time:Wall(Seconds) = " << return_Time1 << std::endl;*/
-	//		std::cout << "Parallel Done\n";
-		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
 
 
 	if (Algorithm_Type == TIME_SLICE) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
-		cout << "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
-		/*math::matrix<double> A_inv(current_location->getSystem_Dynamics().MatrixA.size1(),
-							current_location->getSystem_Dynamics().MatrixA.size2());
-		bool flag = current_location->getSystem_Dynamics().MatrixA.inverse(A_inv); //size of A_inv must be declared else error
-
-		reach_parameters.A_inv = A_inv;*/
+		std::cout << "\nRunning parallel PostC using Time-Slice algorithm and sequential PostD.\n";
 		int NCores = Total_Partition; //Number of Partitions (number of threads)
 		reach_region = reachParallelExplore(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
 				current_location->isInvariantExists(), NCores, TIME_SLICE, lp_solver_type_choosen);
-		//std::cout << "Finished computing reachable states\n";
-
 	}
 
 	/*if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
-			cout << "\nRunning GPU Sequential\n";
+			std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
 			boost::timer::cpu_timer AllReachGPU_time;
 			AllReachGPU_time.start();
 			reachabilitySequential_GPU(NewTotalIteration, current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,

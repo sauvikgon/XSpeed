@@ -83,7 +83,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//---------------Not working models-------------
-		//setbuild48(ha, init_state, reach_parameters);
+		setbuild48(ha, init_state, reach_parameters);
 		//setfwr(ha, init_state, reach_parameters);
 		//setpllConv(ha, init_state, reach_parameters);
 		//setheart(ha, init_state, reach_parameters);
@@ -96,7 +96,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setplatoon(ha, init_state, reach_parameters);
 
 		//setFisher_Star(ha,init_state,reach_parameters);		
-		setMotorcar(ha,init_state,reach_parameters);
+		//setMotorcar(ha,init_state,reach_parameters);
 		//std::cout <<"Test Model Assigned"<<std::endl;
 
 	}

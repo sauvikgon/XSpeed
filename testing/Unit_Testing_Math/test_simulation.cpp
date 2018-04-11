@@ -58,7 +58,7 @@ TEST_FIXTURE(Example, ContinuousSimulationTest) {
 
 	double sim_time = 5;
 
-	sim->set_outfile("kamalTest.out");
+	sim->set_outfile("Test.out");
 	sim->set_out_dimension(2,0);
 	sim->simulate(x0,sim_time);
 

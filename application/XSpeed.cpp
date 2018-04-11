@@ -116,8 +116,6 @@ int main(int argc, char *argv[]) {
 		return 0; //Only Trajectory Simulation is done
 	}
 
-
-
 // ----Section below consists of Reachability Analysis including counter-example generation.
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 
@@ -132,11 +130,12 @@ int main(int argc, char *argv[]) {
 		init_cpu_usage(); //initializing the CPU Usage utility to start recording usages
 		tt1.start();
 
-		//unsigned int transition_iters = user_options.get_bfs_level();
+		// Calls the reachability computation routine.
 		reachabilityCaller(Hybrid_Automata, init_state, reach_parameters,
 				user_options, lp_solver_type_choosen, Solver_GLPK_Gurobi_GPU, forbidden_set,
 				Symbolic_states_list, ce_candidates);
 		tt1.stop();
+
 		// printing the first initial polytope in the init_poly file
 		polytope::ptr init_poly = (*init_state.begin())->getInitialSet();
 		init_poly->print2file("./init_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());

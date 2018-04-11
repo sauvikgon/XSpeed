@@ -25,7 +25,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 		shm_NewTotalIteration = boundedTotIteration;
 
 	} //End of Invariant Directions
-	//cout << "\nNew shm_NewTotalIteration = " << shm_NewTotalIteration << "\n";
+
 	if (shm_NewTotalIteration < 1) {
 		template_polyhedra::ptr poly_emptyp;
 		return poly_emptyp;
@@ -40,7 +40,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 	if (!ReachParameters.X0->getIsEmpty()) //set glpk constraints If not an empty polytope
 		s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
 				ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
-	//cout<<"After accessing X0\n";
+
 	s_per_thread_U.setMin_Or_Max(2);
 
 	if (SystemDynamics.U != NULL && !SystemDynamics.U->getIsEmpty()) { //empty polytope
@@ -48,7 +48,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 				SystemDynamics.U->getColumnVector(),
 				SystemDynamics.U->getInEqualitySign());
 	}
-	//cout<<"After accessing U set\n";
+
 	double res1, result, term2 = 0.0, result1, term1 = 0.0;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 	math::matrix<double> B_trans, phi_tau_Transpose;
@@ -86,27 +86,12 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 			term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = (double) support_unitball_infnorm(rVariable);
-	//	cout<<"term3b = "<<term3b<<"\n";
 
 		if (!SystemDynamics.isEmptyC) {
 			term3c = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
-		//	cout<<"term3c = "<<term3c<<"\n";
-		//	cout<<"dot_product(SystemDynamics.C, rVariable) = "<<dot_product(SystemDynamics.C, rVariable)<<"\n";
 		}
 		term3 = term3a * term3b;
 		res2 = term1 + term2 + term3 + term3c; //term3c Added
-		//cout<<"res2 = "<<res2<<"\n";
-		/*if (res1<0 && res2 < 0){	//if both negative
-			if (res1 < res2)
-				zIInitial = res1;
-			else
-				zIInitial = res2;
-		}else{	//otherwise normal convention
-			if (res1 > res2)
-				zIInitial = res1;
-			else
-				zIInitial = res2;
-		}*/
 
 		if (res1 > res2)
 			zIInitial = res1;
@@ -116,17 +101,13 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 
 		//  **************  Omega Function Over  ********************
 		MatrixValue(eachDirection, loopIteration) = zIInitial;
-		//cout<<"zIInitial = "<< zIInitial<<std::endl;
+
 		loopIteration++;
 		for (; loopIteration < shm_NewTotalIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
 			double TempOmega;
-			//  **************    W_Support Function   ********************
-			//	std::vector<double> trans_dir;
-			//	B_trans.mult_vector(rVariable, Btrans_dir);
-			//res1 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,	s_per_thread_U, s_per_thread_U, Min_Or_Max);
 			result1 = term2;
 			double beta = ReachParameters.result_beta;
-			//double res_beta = beta * (double) support_unitball_infnorm(rVariable);
+
 			double res_beta = beta * term3b; //Replacing term3b from previous step
 			result = result1 + res_beta + term3c; //Added term3c
 			zV = result;
@@ -143,9 +124,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 
 
 			//  **************    Omega Function   ********************
-			//res1 = Initial->computeSupportFunction(r1Variable, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 
-			//res1 = term1;
 			if (SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
 				//res1 = res1; //A is empty than r1Variable is NOT computable and so is term1. Hence res1 is previous  res1
 			} else {
@@ -166,42 +145,23 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 
 			term3a = ReachParameters.result_alfa;
 			term3b = support_unitball_infnorm(r1Variable);
-			//cout<<"term3b = "<<term3b<<"\n";
+
 			if (!SystemDynamics.isEmptyC) {
 				term3c = ReachParameters.time_step
 						* dot_product(SystemDynamics.C, r1Variable); //Added +tau* sf_C(l) 8/11/2015
-			//	cout<<"dot_product(SystemDynamics.C, r1Variable) = "<<dot_product(SystemDynamics.C, r1Variable)<<"\n";
+
 			}
 			term3 = term3a * term3b;
 			res2 = term1 + term2 + term3 + term3c;
-
-
-
-			/*if (res1<0 && res2 < 0){	//if both negative
-				if (res1 < res2)
-					zI = res1;
-				else
-					zI = res2;
-			}else{	//otherwise normal convention
-				if (res1 > res2)
-					zI = res1;
-				else
-					zI = res2;
-			}*/
-
 
 			if (res1 > res2)
 				zI = res1;
 			else
 				zI = res2;
 
-
-
-
-
 			//  **************  Omega Function Over  ********************
 			TempOmega = zI + s1Variable; //Y1
-		//	std::cout<<"TempOmega = "<< TempOmega<<std::endl;
+
 			MatrixValue(eachDirection, loopIteration) = TempOmega; //Y1
 			rVariable = CopyVector(r1Variable); //source to destination
 			sVariable = s1Variable;
@@ -292,10 +252,10 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 		unsigned int loopIteration = 0;
 		double term3, term3a = 0.0, term3b = 0.0, res2, term3c = 0.0;
 		sVariable = 0.0; //initialize s0
-//		cout<<"OK 3 \n";
+
 		//  **************    Omega Function   ********************
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
-//		cout<<"OK 4 \n";
+
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
 			term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
@@ -310,7 +270,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 			term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = (double) support_unitball_infnorm(rVariable);
-		//	cout<<"term3b = "<<term3b<<"\n";
+
 
 		if (!SystemDynamics.isEmptyC) {
 			term3c = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
@@ -329,20 +289,15 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 			double TempOmega;
 
 			//  **************    W_Support Function   ********************
-			//	std::vector<double> trans_dir;
-			//	B_trans.mult_vector(rVariable, Btrans_dir);
-			//res1 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,	s_per_thread_U, s_per_thread_U, Min_Or_Max);
 			result1 = term2;
 			double beta = ReachParameters.result_beta;
-			//double res_beta = beta	* (double) support_unitball_infnorm(rVariable);
+
 			double res_beta = beta * term3b; //replace from previous steps UnitBall
 			result = result1 + res_beta + term3c; //Added term3c
 			zV = result;
 			//  **************  W_Support Function Over  ********************
 			s1Variable = sVariable + zV;
 
-			//phi_tau_Transpose.mult_vector(rVariable, r1Variable);
-			//r1Variable = phi_trans_dir; //replacement
 
 			if (SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
 				r1Variable = rVariable;
@@ -350,8 +305,6 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 				r1Variable = phi_trans_dir;
 			}
 			//  **************    Omega Function   ********************
-			//res1 = Initial->computeSupportFunction(r1Variable, s_per_thread_I, s_per_thread_U, Min_Or_Max);
-			//res1 = term1; //replacement
 			if (SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
 				//res1 = res1; //A is empty than r1Variable is NOT computable and so is term1. Hence res1 is previous  res1
 			} else {
@@ -391,7 +344,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 			loopIteration++; //for the next Omega-iteration or Time-bound
 		} //end of for each iteration
 	} //end of for all directions
-	//cout<<"OK 3 \n";
+
 	template_polyhedra::ptr tpolys;
 	tpolys = template_polyhedra::ptr(new template_polyhedra());
 #pragma omp critical

@@ -228,7 +228,6 @@ template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf()
 		if (sum > norm)
 			norm = sum;
 	}
-//	std::cout<<"math norm = "<<norm<<std::endl;
 	return norm;
 }
 

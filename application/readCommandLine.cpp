@@ -115,7 +115,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("help")) {
 			cout << desc << "\n";
 			exit(0);
-			//return 0; //Just displaying the Help options and terminating the Project
 		}
 
 		// Setting the model and the cfg file
@@ -184,7 +183,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			java_exeFile = "java -jar";
 			cmdStr.append(java_exeFile);
 			cmdStr.append(SingleSpace);
-			cmdStr.append("./bin/Hyst-XSpeed.jar -t xspeed \"\" -o");
+			cmdStr.append("../Hyst-XSpeed.jar -t xspeed \"\" -o");
 			cmdStr.append(SingleSpace);
 			cmdStr.append(replacingFile);
 			cmdStr.append(" -i ");
@@ -194,19 +193,15 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			const char *st, *st2, *st3, *st4, *st5;
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
-			// Amit's machine
-			system("g++ -D_GLIBCXX_USE_CXX11_ABI=0 -w -c -std=gnu++11 -I./include/ user_model.cpp -o user_model.o");	//compiler option -D__GLIB.. is required to support running in g++ Version 5
-			system("g++ -L./lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -o ./XSpeed");
-			//Removed for distribution without PPL library -lppl -lgmp. Also removed -pthread, since it works by just adding -std=gnu++11
 
-			// My machine
-//			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/XSpeed/ user_model.cpp -o user_model.o");
-//			system("g++ -L/usr/local/lib/ user_model.o -lXSpeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./XSpeed");
+
+			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/xspeed/ user_model.cpp -o user_model.o");
+			system("g++ -L/usr/local/lib/ user_model.o -lxspeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./xspeed");
 
 			std::cout<<"Model Parsed Successfully!! Calling XSpeed ..."<<std::endl;
 
 			string cmdStr1;
-			cmdStr1.append("./XSpeed --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
+			cmdStr1.append("./xspeed --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(stFileNameWithPath);
 			cmdStr1.append(SingleSpace);

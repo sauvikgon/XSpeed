@@ -171,57 +171,6 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters,
 
 	int i = 0, j = 0;
 
-	/*
-	 boost::char_separator<char> sep(", ");//, and " " a single space is the separator
-	 boost::tokenizer<boost::char_separator<char> > tok(s, sep);
-	 //   tokenizer<> tok(s);
-	 //   for(tokenizer<boost::char_separator<double> >::iterator beg=tok.begin(); beg!=tok.end();++beg){
-	 row = 28;
-	 col = 6;
-	 Amatrix.resize(row, col);
-	 BOOST_FOREACH (const string& t, tok) {
-	 try {
-	 double value = boost::lexical_cast<double>(t);
-	 Amatrix(i, j) = value;
-	 j++;
-	 if (j == col) {
-	 j = 0;
-	 i++;
-	 }
-	 if (i == row)
-	 break;
-	 } catch (boost::bad_lexical_cast&) {
-	 cout << "Error converting the Model Matrix u\n";	//Do your errormagic
-	 }
-	 }
-
-	 //this is Code is Tested and is working for matrix AU of dimension 28 x 34
-	 *
-	 //Initialize matrix au
-	 row = 28;	col = 34;
-	 AUmatrix.resize(row, col);
-	 i = 0;	j = 0;
-	 boost::char_separator<char> delimet(", ");//, and " " a single space is the separator
-	 boost::tokenizer<boost::char_separator<char> > token(matrix_au, delimet);
-	 BOOST_FOREACH (const string& tex, token) {
-	 //string::size_type sz;
-	 //double sum = std::stod(t, &sz);
-	 try {
-	 double val = boost::lexical_cast<double>(tex);
-	 AUmatrix(i, j) = val;
-	 j++;
-	 if (j == col) {
-	 j = 0;
-	 i++;
-	 }
-	 if (i == row)
-	 break;
-	 } catch (bad_lexical_cast&) {
-	 cout << "Error converting the Model Matrix\n";	//Do your errormagic
-	 }
-	 }
-	 */
-
 	AUmatrix.resize(35, 35);
 	//Initialize matrix au
 	row = 28;
@@ -253,13 +202,6 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters,
 		}
 	}
 
-	/*	cout << "\nPrinting The AU matrix\n";
-	 for (int i = 0; i < row; i++) {
-	 for (int j = 0; j < col; j++) {
-	 cout << AUmatrix(i, j) << "\t";
-	 }
-	 cout << endl << endl << endl;
-	 }*/
 
 	//now we run the loop to create zeros for row 'u1...u6' and row 't' for 35 columns
 	row = 35;		//row + 7;	//28 + 6 + 1;
@@ -273,15 +215,6 @@ void SetHelicopter_Parameters(ReachabilityParameters& reach_parameters,
 
 // matrix AUt has been Initialized
 
-	/*
-	 cout << "\nPrinting The AU matrix\n";
-	 for (int i = 0; i < row; i++) {
-	 for (int j = 0; j < col; j++) {
-	 cout << AUmatrix(i, j) << "\t";
-	 }
-	 cout << endl << endl << endl;
-	 }
-	 */
 
 //Initialization of Identity Matrix B
 	row = 35;
