@@ -449,6 +449,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 				current_location->isInvariantExists(), NCores, TIME_SLICE, lp_solver_type_choosen);
 	}
 
+
 	/*if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 			std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
 			boost::timer::cpu_timer AllReachGPU_time;
