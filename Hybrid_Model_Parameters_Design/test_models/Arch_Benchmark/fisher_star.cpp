@@ -11,7 +11,6 @@ void setFisher_Star(hybrid_automata& Hybrid_Automata,
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-	unsigned int dim;
 	size_type row, col;
 
 	polytope::ptr initial_polytope_I0, forbid_polytope;
@@ -30,7 +29,7 @@ void setFisher_Star(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1;
+	int  invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;
@@ -2493,10 +2492,11 @@ void setFisher_Star(hybrid_automata& Hybrid_Automata,
 	boundValueI.resize(row);
 	boundValueI.assign(row, 0);
 
+	int boundSignI = 1;
 	initial_polytope_I0 = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	dim = initial_polytope_I0->getSystemDimension();
+	unsigned int dim = initial_polytope_I0->getSystemDimension();
 	int transition_id = 0;
 	unsigned int initial_location_id = 1;
 
@@ -2523,7 +2523,6 @@ void FStarModule1(hybrid_automata& Hybrid_Automata,
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-	unsigned int dim;
 	size_type row, col;
 
 	polytope::ptr initial_polytope_I0, forbid_polytope;
@@ -2542,8 +2541,7 @@ void FStarModule1(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1, boundSignV =
-			1;
+	int invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;
@@ -5516,7 +5514,6 @@ void FStarModule2(hybrid_automata& Hybrid_Automata,
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-	unsigned int dim;
 	size_type row, col;
 
 	polytope::ptr initial_polytope_I0, forbid_polytope;
@@ -5535,8 +5532,7 @@ void FStarModule2(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1, boundSignV =
-			1;
+	int invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;
@@ -8266,7 +8262,6 @@ void FStarModule3(hybrid_automata& Hybrid_Automata,
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-	unsigned int dim;
 	size_type row, col;
 
 	polytope::ptr initial_polytope_I0, forbid_polytope;
@@ -8285,8 +8280,7 @@ void FStarModule3(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1, boundSignV =
-			1;
+	int invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;
@@ -10898,7 +10892,7 @@ void FStarModule4(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1;
+	int invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;

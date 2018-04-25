@@ -41,8 +41,8 @@ void plot_output(std::list<symbolic_states::ptr>& Symbolic_states) {
 		std::list<polytope> polytope_list;
 		std::vector<double> column_vector(SupportFunction_Values.size1()); //total rows
 
-		for (int i = 0; i < SupportFunction_Values.size2(); i++) { //each column
-			for (int j = 0; j < SupportFunction_Values.size1(); j++) {
+		for (unsigned int i = 0; i < SupportFunction_Values.size2(); i++) { //each column
+			for (unsigned int j = 0; j < SupportFunction_Values.size1(); j++) {
 				column_vector[j] = SupportFunction_Values(j, i); //retrives column by column
 			}
 			polytope_list.push_back(polytope(All_Directions, column_vector, 1)); //1 for <= sign
@@ -57,11 +57,11 @@ void plot_output(std::list<symbolic_states::ptr>& Symbolic_states) {
 			A = (*poly).getCoeffMatrix();
 			b = (*poly).getColumnVector();
 
-			for (int i = 0; i < A.size1(); i++) {
+			for (unsigned int i = 0; i < A.size1(); i++) {
 				if (i > 0)
 					str_lin_constraints.append(" & ");
 				bool found_var_before = false;
-				for (int j = 0; j < A.size2(); j++) {
+				for (unsigned int j = 0; j < A.size2(); j++) {
 
 					if (A(i, j) == 1) {
 						if (j == 0) {

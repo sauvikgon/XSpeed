@@ -59,8 +59,8 @@ polytope::polytope(bool empty) {
 polytope::polytope(math::matrix<double> coeffMatrix,
 		std::vector<double> columnVector, int InEqualitySign) {
 
-	this->setNumberFacets(coeffMatrix.size1());
-	this->setSystemDimension(coeffMatrix.size2());
+	this->number_facets = coeffMatrix.size1();
+	this->system_dimension = coeffMatrix.size2();
 	this->coeffMatrix = coeffMatrix;
 	this->columnVector.resize(this->number_facets);
 	this->columnVector = columnVector;
@@ -68,8 +68,8 @@ polytope::polytope(math::matrix<double> coeffMatrix,
 	//Since constraints are set So it is not empty and is Universe but 'bounded'
 	this->setIsEmpty(false); //Not an empty Polytope
 	this->setIsUniverse(false); //Not a universe Polytope and is now a 'Bounded' polytope
-
-	//lp.setConstraints(coeffMatrix, columnVector,InEqualitySign);
+	this->IsUniverse = false; // Assuming that the constraints passed as matrix, vector are meaningful
+	this->IsEmpty = false; // assuming that the constraints are not unsatiafiable.
 }
 
 void polytope::setPolytope(math::matrix<double> coeffMatrix,
@@ -342,9 +342,9 @@ void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytop
 	lp.setMin_Or_Max(2);//Maximization
 	lp.setConstraints(this->getCoeffMatrix(), this->getColumnVector(),this->getInEqualitySign());
 
-	for (int i=0;i<templatedDir.size1();i++){
+	for (unsigned int i=0;i<templatedDir.size1();i++){
 		std::vector<double> dir(templatedDir.size2());
-		for (int j=0;j<templatedDir.size2();j++)
+		for (unsigned int j=0;j<templatedDir.size2();j++)
 			dir[j] = templatedDir(i,j);
 
 		colVector[i] = lp.Compute_LLP(dir);
@@ -362,9 +362,9 @@ bool polytope::contains(polytope::ptr poly, int lp_solver_type_choosen){
 	lp2.setConstraints(poly->getCoeffMatrix(), poly->getColumnVector(),poly->getInEqualitySign());
 	double val1, val2;
 	bool is_inside=false;
-	for (int i=0;i<this->getCoeffMatrix().size2();i++){
+	for (unsigned int i=0;i<this->getCoeffMatrix().size2();i++){
 		std::vector<double> dir(this->getCoeffMatrix().size2());
-		for (int j=0;j<this->getCoeffMatrix().size2();j++){
+		for (unsigned int j=0;j<this->getCoeffMatrix().size2();j++){
 			dir[j]=this->getCoeffMatrix()(i,j);
 		}
 		val1 = lp1.Compute_LLP(dir);

@@ -17,7 +17,6 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 	int dimension = Initial->getSystemDimension();
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 
-	int Min_Or_Max = 2;
 
 	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 	size_type row = numVectors, col = shm_NewTotalIteration;
@@ -203,7 +202,6 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
-	int Min_Or_Max = 2;
 
 	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 	size_type row = numVectors, col = shm_NewTotalIteration;

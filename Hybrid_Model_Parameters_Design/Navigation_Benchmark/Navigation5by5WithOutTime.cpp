@@ -33,8 +33,7 @@ void SetNavigationNav5by5WithOutTime(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1, boundSignV =
-			1;
+	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;
@@ -1073,7 +1072,6 @@ void Nav5Module1(hybrid_automata& Hybrid_Automata,
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-	unsigned int dim;
 	size_type row, col;
 
 	polytope::ptr initial_polytope_I0, forbid_polytope;
@@ -1092,8 +1090,7 @@ void Nav5Module1(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1, boundSignV =
-			1;
+	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;
@@ -3016,7 +3013,6 @@ void Nav5Module3(hybrid_automata& Hybrid_Automata,
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-	unsigned int dim;
 	size_type row, col;
 
 	polytope::ptr initial_polytope_I0, forbid_polytope;
@@ -3035,8 +3031,7 @@ void Nav5Module3(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1, boundSignV =
-			1;
+	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;
@@ -4194,7 +4189,6 @@ void Nav5Module4(hybrid_automata& Hybrid_Automata,
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-	unsigned int dim;
 	size_type row, col;
 
 	polytope::ptr initial_polytope_I0, forbid_polytope;
@@ -4213,8 +4207,7 @@ void Nav5Module4(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1, boundSignV =
-			1;
+	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;

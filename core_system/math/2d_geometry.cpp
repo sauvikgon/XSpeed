@@ -25,9 +25,9 @@ bool is_collinear(point p1, point p2, point p3) {
 }
 
 double angle_uv(std::vector<double> u, std::vector<double> v) {
-	double angle_res, dot_prod = 0.0, dot_prod_u = 0.0, dot_prod_v = 0.0;
+	double angle_res, dot_prod = 0.0;
 	assert(u.size() == v.size());
-	for (int i = 0; i < u.size(); i++) {
+	for (unsigned int i = 0; i < u.size(); i++) {
 		dot_prod = dot_prod + u[i] * v[i];
 	}
 
@@ -35,7 +35,7 @@ double angle_uv(std::vector<double> u, std::vector<double> v) {
 	double vector_magitude_u = 0.0, vector_magitude_v = 0.0, vector_sum_u = 0.0,
 			vector_sum_v = 0.0;
 
-	for (int i = 0; i < v.size(); i++) {
+	for (unsigned int i = 0; i < v.size(); i++) {
 		vector_sum_u = vector_sum_u + u[i] * u[i];
 		vector_sum_v = vector_sum_v + v[i] * v[i];
 	}
@@ -51,12 +51,6 @@ double angle_uv(std::vector<double> u, std::vector<double> v) {
 	return angle_res;
 }
 
-/*std::pair<double,double> angle_to_vector(double angle){
-	std::pair<double,double> u;
-	u.first = cos(angle * PI /180);
-	u.second = sin(angle * PI /180);
-	return u;
-}*/
 
 std::vector<double> angle_to_vector(double angle){
 	std::vector<double> u(2);

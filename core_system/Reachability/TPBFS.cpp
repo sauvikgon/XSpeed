@@ -577,7 +577,7 @@ template_polyhedra::ptr tpbfs::polytopeTo_templatepolyhedra(LoadBalanceData Load
 
 	math::matrix<double> MatrixValue(LoadBalanceDS.reach_param.Directions.size1(), 1); //only 1 Omega
 
-	for (int Direction = 0; Direction < LoadBalanceDS.reach_param.Directions.size1(); Direction++) {
+	for (unsigned int Direction = 0; Direction < LoadBalanceDS.reach_param.Directions.size1(); Direction++) {
 		std::vector<double> dir(LoadBalanceDS.X0->getSystemDimension());
 		for (unsigned int i = 0; i < LoadBalanceDS.reach_param.Directions.size2(); i++) {
 			dir[i] = LoadBalanceDS.reach_param.Directions(Direction, i);
@@ -596,7 +596,7 @@ template_polyhedra::ptr tpbfs::polytopeTo_templatepolyhedra(LoadBalanceData Load
 		reachableRegion->setMatrixSupportFunction(MatrixValue);
 		reachableRegion->setTemplateDirections(LoadBalanceDS.reach_param.Directions);
 
-		for (int eachInvDirection = 0; eachInvDirection < inv_directions.size1(); eachInvDirection++) {
+		for (unsigned int eachInvDirection = 0; eachInvDirection < inv_directions.size1(); eachInvDirection++) {
 			std::vector<double> dir(LoadBalanceDS.X0->getSystemDimension());
 			for (unsigned int i = 0; i < inv_directions.size2(); i++) {
 				dir[i] = inv_directions(eachInvDirection, i);
@@ -623,7 +623,7 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 //	int numSymStates = LoadBalanceDS.size(); //get the number of symbolic states i.e. number of polytopes X0
 //	cout<<"numSymStates = "<<numSymStates<<std::endl;
 	unsigned int seq_LP;
-	unsigned int size, chunk_size;
+	unsigned int chunk_size;
 	/*if (numCores > numSymStates)
 		size = numCores;
 	else
@@ -765,7 +765,7 @@ unsigned int NewTotalIteration;
 	if (LoadBalanceDS.current_location->getSystem_Dynamics().U == NULL || LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set
 		U_empty = true;
 	}
-	int Solver = Solver_GLPK_Gurobi_GPU; //1 for CPU solver(GLPK); //2 for CPU solver(Gurobi); //3 for GPU solver(Gimplex)
+
 //  ************* Generation of Directions Begins ***************
 	unsigned int numVectors = LoadBalanceDS.reach_param.Directions.size1();
 	unsigned int totalDirList1 = numVectors * (NewTotalIteration + 1); //1 extra for loop1
@@ -873,7 +873,7 @@ void tpbfs::intersectionRangeDetection(std::vector<LoadBalanceData_PostD>& loadB
 
 
 void tpbfs::templateApproximation(bool aggregation, std::vector<LoadBalanceData_PostD>& loadBalPostD){
-int count = loadBalPostD.size();
+unsigned int count = loadBalPostD.size();
 
 #pragma omp parallel for
 	for (unsigned int id=0;id<count;id++){

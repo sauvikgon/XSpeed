@@ -12,6 +12,8 @@ using namespace std;
 transition::transition() {
 	trans_id = -1;	//indicates Empty Transition
 	label = "";
+	source_location_id = -1; // default null value
+	destination_location_id = -1; // default null value
 	math::matrix<double> m;
 	Gaurd = polytope::ptr(new polytope()); // universal guard, always true
 	unsigned int dim = Gaurd->map_size();

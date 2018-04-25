@@ -169,8 +169,7 @@ void Simplex_CPU::setConstratint_CPU(math::matrix<double> &A,
 	NB = c;
 	f = 0;
 
-	/*Sel = (int *) malloc(N_S * sizeof(int));
-	 R = (float*) malloc(N_S * sizeof(float));*/
+
 	MAT = (float *) malloc(N_S * M * N * sizeof(float));	//Paged Memory
 	orig_MAT = (float *) malloc(N_S * M * N * sizeof(float));	//Paged Memory
 	for (int s = 0; s < N_S; s++) {
@@ -235,7 +234,7 @@ float Simplex_CPU::ComputeLP_CPU(std::vector<double> &C) {
 
 	int No_C = orig_CoefficientMatrix.size1();
 	float res;
-	int i, j, k, count = 0, basen, base;
+	int i, j, k, count = 0;
 
 	int No_O = C.size();
 	M = No_C + 1, N = No_O + 3 + No_C;

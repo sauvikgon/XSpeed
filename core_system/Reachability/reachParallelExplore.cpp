@@ -9,14 +9,13 @@
 
 
 //Parallel sf sampling  using OMP
-const template_polyhedra::ptr reachabilityParallel(unsigned int boundedTotIteration, Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachParallelSampling(unsigned int boundedTotIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		bool InvariantExist, int lp_solver_type_choosen) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
-	int Min_Or_Max = 2;
 
 	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 
@@ -222,8 +221,6 @@ const template_polyhedra::ptr reachTimeSlice(unsigned int NewTotalIteration, Dyn
 
 		if (SystemDynamics.MatrixA.isInvertible()){ //if A inverse exist
 			math::matrix<double> A_inv(SystemDynamics.MatrixA.size1(), SystemDynamics.MatrixA.size2());
-			bool flag = SystemDynamics.MatrixA.inverse(A_inv); //size of A_inv must be declared else error
-
 			A_inv.multiply(phi, A_inv_phi);
 			A_inv_phi.minus(A_inv, y_matrix);
 

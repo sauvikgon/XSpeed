@@ -62,40 +62,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	}
 
 	boundSignI = 1;
-// Trying to give an universe invariant
-//
-//	row = 28;
-//	col = 28;
-//	invariantConstraintsMatrix.resize(row, col);
-//	invariantBoundValue.resize(row);
-//	for (int i = 0; i < row; i++) {
-//		for (int j = 0; j < col; j++) {
-//			invariantConstraintsMatrix(i, j) = 0.0;			//for xi
-//		}
-//		invariantBoundValue[i] = 0;
-//	}
-//	invariantBoundSign = 1;
-//		invariant.setPolytope(invariantConstraintsMatrix, invariantBoundValue,
-//				invariantBoundSign);
 
-//	invariant.setIsUniverse(true);
-
-	/*
-	 invariantConstraintsMatrix(28, 28) = 1;
-	 invariantBoundValue[28] = reach_parameters.TimeBound;	//<= timebound
-	 */
-
-	/*
-	 cout << "\nPrinting The Invariant matrix A <= b\n";
-	 for (int i = 0; i < row; i++) {
-	 for (int j = 0; j < col; j++) {
-	 cout << invariantConstraintsMatrix(i, j) << "\t";
-	 }
-	 cout << invariantBoundValue[i] << endl<<endl;
-	 }
-	 */
-	//invariant.setIsUniverse(true);	//
-	// Invariant Initialised above
 	std::ofstream MatLabfile, MatLabfile2;
 	//file for making matrix 'A' for MatLab output function con2vert(A,b) to be executed from plotoutput.m
 	MatLabfile.open("/home/amit/matlabTest/ProjectOutput/MatrixA_file.txt");
@@ -177,30 +144,6 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 		}
 	}
 
-	/*
-	 for (int j = 0; j < col; j++)
-	 Amatrix(28, j) = 0.000000000000;	//Last row for t==0
-	 */
-
-	/*
-	 cout << "\nPrinting The A matrix\n";
-	 for (unsigned int i = 0; i < row; i++) {
-	 for (unsigned int j = 0; j < col; j++) {
-	 cout << Amatrix(i, j) << "\t";
-	 }
-	 cout << endl;
-	 }
-	 */
-
-	/*
-	 cout << "\nPrinting The AU matrix\n";
-	 for (int i = 0; i < row; i++) {
-	 for (int j = 0; j < col; j++) {
-	 cout << AUmatrix(i, j) << "\t";
-	 }
-	 cout << endl << endl << endl;
-	 }
-	 */
 
 	invariant = polytope::ptr(new polytope()); //creating an universe polytope
 	invariant->setIsEmpty(true);
@@ -216,10 +159,6 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	system_dynamics.U = polytope::ptr(new polytope()); //empty polytope is set by default
 	system_dynamics.U->setIsEmpty(true); //set empty = true which is by default
 
-//	system_dynamics.U.setPolytope(ConstraintsMatrixV, boundValueV, boundSignV);	//set empty = true which is by default
-//	Dynamics Initalised ---------------------
-
-//	transition::ptr trans = transition::ptr(new transition()); //empty transition
 
 	location::ptr source;
 	source = location::ptr(new location());
@@ -228,7 +167,6 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	source->setSystem_Dynamics(system_dynamics);
 	source->setInvariant(invariant);
 	source->setInvariantExist(false); //no invariant available
-//	source->add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();
 
@@ -271,7 +209,6 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	initial_state::ptr I = initial_state::ptr(
 			new initial_state(initial_location_id, initial_polytope_I, S,
 					transition_id));
-
 	init_state_list.push_back(I);
 }
 
@@ -297,7 +234,7 @@ void SetHelicopter_Parameters3InCorrect(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV0, C0, invariantBoundValue0,
 			gaurdBoundValue0;
 
-	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
+	int boundSignI, boundSignV;
 
 	size_type row, col;
 
@@ -1361,8 +1298,6 @@ void SetHelicopter_Parameters3InCorrect(hybrid_automata& Hybrid_Automata,
 	C0[28] = 0.0;
 	system_dynamics0.isEmptyC = false;
 	system_dynamics0.C = C0;
-
-	invariantBoundSign = 1;
 
 	invariant0 = polytope::ptr(new polytope());
 

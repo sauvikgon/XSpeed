@@ -14,23 +14,17 @@ std::recursive_mutex mu;
 
 std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstractCE::ptr>& ce){
 
-//	std::cout<<"Total number of Locations in an HA ="<<H.getTotalLocations()<<std::endl;
+
 
 	LocklessDS L[H.getTotalLocations()];	//Creating an array of Lockless data structure of size total number of locations
-	//struct LocklessDS L[H.getTotalLocations()];
+
 
 	initializeLocklessDS(L,H.getTotalLocations()); //initialize all flags to unlocked initially
 
-//Testing print
- 	//lock(L,6);
 	printLocklessDS(L, H.getTotalLocations());
-	//unlock(L,6);
-	//std::cout<<"After unlock on location ID =6\n";
-	//printLocklessDS(L, H.getTotalLocations());
 
 	std::list<symbolic_states::ptr> PASSED;	//List of all flowpipes computed
 
-//	std::cout<<"Testing printing\n";
 
 	//Reachability Computation Started
 	AsyncBFSData reachData;
@@ -41,26 +35,23 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 	reachData.lp_solver_type_choosen = lp_solver_type_choosen;
 	reachData.set_aggregation = this->getSetAggregation();
 	// ****************** End of Duplicating the Data *************
-// ******** Required Results *****************
+
 	int level=0;
 	long totalSymStates=0;
 	int levelCompleted=0;
-// ******** Required Results *****************
+
 	std::vector<std::thread> workers;
 	for (std::list<initial_state::ptr>::iterator i = I.begin(); i != I.end(); i++) {
 		initial_state::ptr s;	//A symbolic state
 		s =*(i);	//	initialState_index++; //next initial state
 		workers.push_back(std::thread(AsyncBFS_recursiveFunc, &L[0], s, level, std::ref(reachData),std::ref(totalSymStates),std::ref(levelCompleted)));	//thread called
 	}
-	for (int i=0;i<workers.size();i++){
-		if (i==(workers.size() - 1)){	//increasing level only once
-		  //std::cout<<"Breadth-Level "<<level<<" Processed"<<" and reachData.bound ="<<reachData.bound<<std::endl;
-		  //std::cout<<"Breadth-Level "<<level<<" Processed... Symbolic states processed so far "<<totalSymStates<<" ..."<<std::endl;
-		}
+	for (unsigned int i=0;i<workers.size();i++){
+
 		workers[i].join();
 	}
 
-	if (levelCompleted< bound){
+	if (levelCompleted< (int)bound){
 		std::cout<<"\n\nFound Fixed-point after "<<levelCompleted -1 <<" jumps!!!\n";
 	}
 
@@ -68,13 +59,11 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 	std::cout <<"Maximum number of Symbolic states Passed = " <<totalSymStates<<"\n";
 	std::cout<<"******************************************************************\n";
 
-	//printLocklessDS(L, H.getTotalLocations());
-	//Reachability Computation Over
-	/* ******This may or may not be expensive have to verify, If possible avoid recording time for this operation*********** */
+
+	/*******This may or may not be expensive have to verify, If possible avoid recording time for this operation*********** */
 
 	for (int i=0;i<H.getTotalLocations();i++){
 		PASSED.insert(PASSED.end(),L[i].PASSED.begin(),L[i].PASSED.end());
-		//PASSED.push_back(L[i].PASSED); //have to verify if this concatenation works
 	}
 
 	return PASSED;
@@ -123,7 +112,7 @@ void AsyncBFS_recursiveFunc(LocklessDS L[], initial_state::ptr s, int level, Asy
 			s =*(i);	//	initialState_index++; //next initial state
 			RecursiveWorkers.push_back(std::thread(AsyncBFS_recursiveFunc, &L[0], s, level, std::ref(reachData),std::ref(totalSymStates),std::ref(levelCompleted)));	//thread called
 		}
-		 for (int i=0;i<RecursiveWorkers.size();i++){
+		 for (unsigned int i=0;i<RecursiveWorkers.size();i++){
 			RecursiveWorkers[i].join();
 		}
 	}
@@ -395,7 +384,7 @@ bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int lp_
 	for (std::list <symbolic_states::ptr>::iterator it = PASSED.begin(); it !=PASSED.end();it++){
 		discrete_set ds;
 		ds = (*it)->getDiscreteSet();
-		int locationID;
+		int locationID=0;
 		for (std::set<int>::iterator i = ds.getDiscreteElements().begin();i != ds.getDiscreteElements().end(); ++i)
 			locationID = (*i);
 		if (locationID == locID){	//found Location matching so perform containment check with the flowpipe

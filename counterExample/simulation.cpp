@@ -776,8 +776,8 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 	while (wlistNotEmpty == true && jumps_taken <= max_jumps) {
 		int newpointsCount = 0;
 #pragma omp parallel for
-		for (int w = 0; w < N_cores; w++) {
-			for (int q = 0; q < N_cores; q++) {
+		for (unsigned int w = 0; w < N_cores; w++) {
+			for (unsigned int q = 0; q < N_cores; q++) {
 				while (wlist[t][w][q].size() != 0) {
 					sim_start_point s = wlist[t][w][q][0];
 					wlist[t][w][q].erase(wlist[t][w][q].begin());

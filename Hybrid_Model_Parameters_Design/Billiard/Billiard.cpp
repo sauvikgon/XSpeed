@@ -32,8 +32,7 @@ void SetBilliardModel(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
-	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1, boundSignV =
-			1;
+	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1;
 
 	Assign assignment;
 	math::matrix<double> R;

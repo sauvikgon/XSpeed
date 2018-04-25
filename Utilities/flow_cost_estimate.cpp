@@ -74,8 +74,7 @@ double flow_cost_estimate_invFace(polytope::ptr X0, polytope::ptr I, Dynamics d,
 	lp.Compute_LLP(obj);
 	x0 = lp.get_sv();
 
-	// Choose a coarse time-step for efficiency
-	unsigned int granularity_index = 100;
+
 	//double time_step = time_horizon/granularity_index;
 	double time_step = fine_time_step;
 

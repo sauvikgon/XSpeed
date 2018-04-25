@@ -15,9 +15,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		ReachabilityParameters& reach_parameters) {
 
 	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)}
-	//int number_of_times = 1; //Make this 1 for Memory Profiling
-	unsigned int number_of_streams = 1;
-	unsigned int Total_Partition; //for Parallel Iterations Algorithm :: number of partitions/threads
 
 	bool isConfigFileAssigned = false, isModelParsed = false;
 

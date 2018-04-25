@@ -14,7 +14,7 @@ long double dist_pt_pt(const vector<double> &v1, const vector<double> &v2) {
 
 	long double res = 0.;
 
-	for (int i = 0; i < v1.size(); i++)
+	for (unsigned int i = 0; i < v1.size(); i++)
 		res += (v1[i] - v2[i]) * (v1[i] - v2[i]);
 
 	return std::sqrt(res);
@@ -23,12 +23,11 @@ long double dist_pt_pt(const vector<double> &v1, const vector<double> &v2) {
 double dist_pt_vec(const vector<double> &v,
 		const std::vector<vector<double> > &vv, int &idx) {
 
-	int i = 0;
 	idx = 0;
 	double d;
 	double dmin = INF;
 
-	for (i = 0; i < vv.size(); i++) {
+	for (unsigned i = 0; i < vv.size(); i++) {
 		d = dist_pt_pt(v, vv[i]);
 		if ((d < dmin) && (d != 0)) {
 			dmin = d;
@@ -42,12 +41,11 @@ double dist_pt_vec(const vector<double> &v,
 double dist_pt_vec2(const vector<double> &v,
 		const std::vector<vector<double> > &vv, int &index1, int & index2) {
 
-	int i = 0; //, imin=0;
 	double d;
 	double dmin1 = INF;
 	double dmin2 = INF;
 
-	for (i = 0; i < vv.size(); i++) {
+	for (unsigned i = 0; i < vv.size(); i++) {
 		d = dist_pt_pt(v, vv[i]);
 		if ((d < dmin2)) {
 			if (d < dmin1) {
@@ -115,7 +113,7 @@ std::vector<vector<double> > uni_sphere(int N, int dim, int max_iter,
 
 	//std::cout << "\n\n Starting optimization \n----------------\n";
 	//std::cout << "tol: "<< tol << endl; // DEBUG__
-	int idx1, idx2;
+	int idx1=0, idx2=0;
 	double d2;
 	int nb_iter = 0;
 	double err1 = 1., err2 = 1., curr_err = 1., simp = 1;

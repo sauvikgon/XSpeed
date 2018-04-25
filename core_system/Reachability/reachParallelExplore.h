@@ -27,7 +27,7 @@
 #include "Utilities/computeInitialPolytope.h"
 
 
-const template_polyhedra::ptr reachabilityParallel(
+const template_polyhedra::ptr reachParallelSampling(
 			unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 			supportFunctionProvider::ptr Initial,
 			ReachabilityParameters& ReachParameters, polytope::ptr invariant,

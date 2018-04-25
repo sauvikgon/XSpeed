@@ -68,7 +68,6 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
 	std::vector<double>& x_nonconst = const_cast<std::vector<double>& >(x);
 
 	minopt.set_min_objective(myobjfunc3, &x_nonconst);
-	double tolerance = 1e-8;
 
 	std::vector<double> v(x.size(), 0);
 	try {
@@ -92,8 +91,6 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
  */
 double getDistance(polytope::ptr X, polytope::ptr Y)
 {
-	double tolerance = 1e-8;
-
 	unsigned int dim_X = X->getSystemDimension();
 	unsigned int dim_Y = Y->getSystemDimension();
 
@@ -115,9 +112,9 @@ double getDistance(polytope::ptr X, polytope::ptr Y)
 	// Set the constraint of this problem to be Y
 
 	polyConstraints data[Y->getColumnVector().size()]; //total constraints
-	for (int i=0;i<Y->getCoeffMatrix().size1();i++){
+	for (unsigned int i=0;i<Y->getCoeffMatrix().size1();i++){
 		std::vector<double> coeff(Y->getCoeffMatrix().size2());
-		for(int j=0;j<Y->getCoeffMatrix().size2();j++){
+		for(unsigned int j=0;j<Y->getCoeffMatrix().size2();j++){
 			coeff[j] = Y->getCoeffMatrix()(i,j);
 		}
 		(data[i].a).assign(coeff.begin(),coeff.end());
@@ -144,9 +141,9 @@ double getDistance(polytope::ptr X, polytope::ptr Y)
 	// Set the constraint of this NLP to be X
 
 	polyConstraints data1[X->getColumnVector().size()]; //total constraints
-	for (int i=0;i<X->getCoeffMatrix().size1();i++){
+	for (unsigned int i=0;i<X->getCoeffMatrix().size1();i++){
 		std::vector<double> coeff(X->getCoeffMatrix().size2()); // dimension of X
-		for(int j=0;j<X->getCoeffMatrix().size2();j++){
+		for(unsigned int j=0;j<X->getCoeffMatrix().size2();j++){
 			coeff[j] = X->getCoeffMatrix()(i,j);
 		}
 		(data1[i].a).assign(coeff.begin(),coeff.end());
