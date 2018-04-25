@@ -12,7 +12,7 @@
 
 #include <list>
 #include "Utilities/invariantBoundaryCheck.h"
-#include "core_system/Reachability/reachParallelExplore.h"
+#include "core_system/Reachability/reachPostCParallel.h"
 #include "Utilities/Template_Polyhedra.h"
 #include "Utilities/testPolytopePlotting.h"
 #include "core_system/continuous/Polytope/Polytope.h"

@@ -8,9 +8,19 @@
 #ifndef TRANSITION_H_
 #define TRANSITION_H_
 
-#include "core_system/HybridAutomata/DataStructureHybridAutomata.h"
+
 #include <boost/shared_ptr.hpp>
 #include "../continuous/Polytope/Polytope.h"
+
+
+/*
+ * Assignment of X' = M x + b
+ * X' = R X + w
+ */
+struct Assign {
+	math::matrix<double> Map;
+	std::vector<double> b;
+};
 
 class transition {
 	int trans_id;

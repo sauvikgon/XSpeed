@@ -11,13 +11,12 @@
 #include <list>
 #include <map>
 #include <boost/shared_ptr.hpp>
-//#include "Transition.h"
-#include "Location.h"
+#include "core_system/HybridAutomata/Location.h"
+
 
 using namespace std;
 
 class hybrid_automata : public var_to_index_map {
-	//std::list<location> list_locations;
 	std::map<int, location::ptr> list_locations;		//mapping a list of locations based on the key=loc_id
 	location::ptr initial_loc;
 	int dimension;

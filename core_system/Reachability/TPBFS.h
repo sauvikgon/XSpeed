@@ -20,7 +20,7 @@ public:
 private:
 
 	template_polyhedra::ptr substitute_in_ReachAlgorithm(
-			LoadBalanceData& LoadBalanceDS, int numCoreAvail,
+			LoadBalanceData& LoadBalanceDS, unsigned int numCoreAvail,
 			LoadBalanceDataSF& LoadBalanceData_sf, unsigned int id);
 
 		void parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS, LoadBalanceDataSF& LoadBalanceData_sf);
@@ -28,7 +28,7 @@ private:
 		/*void preLoadBalanceReachCompute(ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics,
 				supportFunctionProvider::ptr Initial, polytope::ptr invariant, bool isInvariantExist, math::matrix<float>& List_dir_X0,
 				math::matrix<float>& List_dir_U, unsigned int& newIteration);*/
-		void preLoadBalanceReachCompute(LoadBalanceData& LoadBalanceDS, int numCoresAvail);
+		void preLoadBalanceReachCompute(LoadBalanceData& LoadBalanceDS, unsigned int numCoresAvail);
 
 
 		/*

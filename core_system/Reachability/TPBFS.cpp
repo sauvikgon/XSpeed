@@ -18,10 +18,6 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 
 	std::vector < std::vector<pwlist::ptr> > Qpw_list(2); // QpwList[0] for read and QpwList[1] for write 	//cout << "Test 1\n";
 
-	/*Qpw_list[t].resize(1); //resize for the first symbolic_state 	//cout << "Test 2\n";
-	Qpw_list[t][0] = pwlist::ptr(new pwlist()); //have to instantiate it
-	Qpw_list[t][0]->WaitingList_insert(I); //cout << "Test 3\n";*/
-
 	unsigned int nos_initial_states=1;
 	nos_initial_states=I.size();	//retrieve the size of the number of initial states supplied by the user/model
 
@@ -38,46 +34,32 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 
 	pwlist::ptr allPassedList; //so we create a permanent pwlist for storing only the passedList;
 	allPassedList = pwlist::ptr(new pwlist()); //have to instantiate it
-	int number_times = 0;
+	unsigned int number_times = 0;
 	bool levelcompleted = false;
 	unsigned int iter_max = 1, sym_passed=0;
-	int numCores = omp_get_num_procs(); //get the number of cores
-
-	/*boost::timer::cpu_timer t70;
-	t70.start();*/
+	unsigned int numCores = omp_get_num_procs(); //get the number of cores
 
 	while (!isEmpty_Qpw_list(Qpw_list[t]) && (number_times <= bound)) { //	cout << "Test 5\n";
 
 		boost::timer::cpu_timer jump_time;
 		jump_time.start();	//Start recording the entire time for jump
-//		cout<<"Breadth - Level === "<<number_times<<"\n";
-//		boost::timer::cpu_timer t73;
-//		t73.start();
 		unsigned int count = getSize_Qpw_list(Qpw_list[t]); //get the size of PWList
-		//cout << "\nNumber of Flowpipes to be Computed (per Breadths) = " << count << "\n";
+
 		std::vector < symbolic_states::ptr > S(count);
 		vector < initial_state::ptr > list_U(count); //SubList for parallel		//	cout << "Test 6\n";
 		list_U = getAllpw_list(Qpw_list, t, count, allPassedList); //All initial_state have been deleted //cout<<"Identifed pwList Done\n";
-		//cout<<"list_U = "<<list_U.size();
 
 		Qpw_list[t].resize(0);
-		//cout<<"Qpw_list[t].size() = "<<Qpw_list[t].size()<<std::endl;
 
 		Qpw_list[1 - t].resize(count); //resize to accommodate
-		for (int i = 0; i < count; i++) {
+		for (unsigned int i = 0; i < count; i++) {
 			Qpw_list[1 - t][i] = pwlist::ptr(new pwlist()); //have to instantiate it
 		}
-//		t73.stop();
-//		double clock73;
-//		clock73 = t73.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-//		double return73 = clock73 / (double) 1000;
-//		std::cout << "\nHow Much queue delete  Time:Wall(Seconds) = "<< return73 << std::endl;
 
 		// ********************************* BFS Starts **********************************************************
-		//	cout << "Test 7\n";
+
 // ***************** DIRECTION and BIG_Task CREATION:: per breadth-level *****************
-		/*boost::timer::cpu_timer t705;
-		t705.start();*/
+
 		std::vector < LoadBalanceData > LoadBalanceDS(count);
 // ***************** DIRECTION and BIG_Task CREATION *****************
 		int numCoreAvail = 1;
@@ -94,7 +76,6 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 //		omp_set_num_threads(numCoreAvail);
 #pragma omp parallel for //num_threads(numCoreAvail)
 		for (unsigned int id = 0; id < count; id++) {
-		//	std::cout<<"id ="<<id<<"\n";
 			initial_state::ptr U; //local
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
@@ -117,13 +98,13 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 					|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0))
 				continue; //do not compute the continuous reachability algorithm
 			// ******************* Computing Parameters ************************ //current_location:: parameters alfa, beta and phi_trans
-			//cout<<"\nBefore Compute Alfa";
+
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
 					current_location->getSystem_Dynamics(), continuous_initial_polytope, lp_solver_type_choosen); //cout<<"\nCompute Alfa Done";
-			//cout<<"\nCompute alfa  = " << result_alfa;
+
 			double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 					reach_parameter_local.time_step, lp_solver_type_choosen); // NO glpk object created here
-			//	cout<<"\nCompute Beta  = " << result_beta;
+
 			reach_parameter_local.result_alfa = result_alfa;
 			reach_parameter_local.result_beta = result_beta;
 			math::matrix<double> phi_matrix, phi_trans;
@@ -140,16 +121,9 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			// ******************* Computing Parameters Done *******************************
 // *************** POST_C computation ********** in 3 steps ***************
 
-			//std::cout<<"\nbefore Accessing U\n";
-			/*bool U_empty = false;
-			if (current_location->getSystem_Dynamics().U == NULL || current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set
-				U_empty = true;
-			}*/
 			LoadBalanceDS[id].X0 = continuous_initial_polytope;
-		//	std::cout<<"\nBefore Accessing U\n";
-			//if (current_location->getSystem_Dynamics().U != NULL && !current_location->getSystem_Dynamics().U->getIsEmpty()){
+
 			if (current_location->getSystem_Dynamics().U == NULL){
-				//std::cout<<"\nInput set U is empty\n";
 				LoadBalanceDS[id].U =polytope::ptr(new polytope(true));
 			}else{
 				LoadBalanceDS[id].U = current_location->getSystem_Dynamics().U;
@@ -157,11 +131,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			LoadBalanceDS[id].current_location = current_location;
 			LoadBalanceDS[id].symState_ID = id;
 			LoadBalanceDS[id].reach_param = reach_parameter_local;
-		//	std::cout<<"\nEnd of One symbolic state assignment\n";
 		}	//END of count FOR-LOOP  -- reach parameters computed
-//	std::cout<<"\nEnd of symbolic state assignment\n";
-//	omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//	omp_set_num_threads(numCoreAvail);
 #pragma omp parallel for //num_threads(numCoreAvail) // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) { //separate parameters assignment with Invariant check and preLoadBalanceReachCompute task
 			unsigned int NewTotalIteration = LoadBalanceDS[id].reach_param.Iterations;
@@ -409,7 +379,7 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 
 
 template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
-		LoadBalanceData& LoadBalanceDS, int numCoreAvail, LoadBalanceDataSF& LoadBalanceData_sf, unsigned int id) {
+		LoadBalanceData& LoadBalanceDS, unsigned int numCoreAvail, LoadBalanceDataSF& LoadBalanceData_sf, unsigned int id) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -423,18 +393,12 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		return poly_emptyp;
 	}
 	int dimension = LoadBalanceDS.X0->getSystemDimension();
-	int Min_Or_Max = 2;
 	size_type row = numVectors, col = LoadBalanceDS.newIteration;
 	math::matrix<double> MatrixValue(row, col);
 
-	unsigned int cores;
-	if (numVectors >= numCoreAvail)
-		cores = numVectors;
-	else
-		cores = numCoreAvail;
 
 	for (unsigned int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
-		unsigned int index_X0, index_U; //making the index suitable for parallelizing
+		unsigned int index_X0, index_U=0; //making the index suitable for parallelizing
 		//unsigned int index; 	//index = eachDirection * NewTotalIteration;
 		//here i have a list of result of Supp_fun_Of_UnitBall_infinity_norm
 		if (eachDirection == 0) { //only starting loop begins with 0
@@ -450,7 +414,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		if (!U_empty) {
 			index_U = eachDirection * LoadBalanceDS.newIteration;
 		}
-		double res1, result1;
+		double res1, result1=0;
 		double term1, term2, term3, term3a, term3b, res2, term3c = 0.0;
 		double zIInitial = 0.0, zI = 0.0, zV = 0.0;
 		double sVariable = 0.0, s1Variable; //initialize s0
@@ -487,7 +451,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		loopIteration++;
 		for (; loopIteration < LoadBalanceDS.newIteration;) { //Now stopping condition is only "shm_NewTotalIteration"
 			//  ************** W_Support Function   ********************
-			double result, res_sup;
+			double result;
 			if (!U_empty) {
 				result1 = term2;
 			}
@@ -539,7 +503,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 	std::cout.precision(10);*/  //Main Cause of Race condition
 	if (LoadBalanceDS.current_location->getInvariant() != NULL && LoadBalanceDS.current_location->getInvariantExist() == true) { //if invariant exist. Computing
 
-		int num_inv = LoadBalanceDS.current_location->getInvariant()->getColumnVector().size(); //number of Invariant's constriants
+		unsigned int num_inv = LoadBalanceDS.current_location->getInvariant()->getColumnVector().size(); //number of Invariant's constriants
 		math::matrix<double> inv_directions;
 		inv_directions = LoadBalanceDS.current_location->getInvariant()->getCoeffMatrix();
 		std::vector<double> inv_bounds(num_inv);
@@ -750,7 +714,7 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 
 
 
-void tpbfs::preLoadBalanceReachCompute(LoadBalanceData& LoadBalanceDS, int numCoresAvail){
+void tpbfs::preLoadBalanceReachCompute(LoadBalanceData& LoadBalanceDS, unsigned int numCoresAvail){
 
 unsigned int NewTotalIteration;
 

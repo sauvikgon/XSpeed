@@ -29,13 +29,11 @@
 #include "Utilities/testPolytopePlotting.h"
 #include "Utilities/Post_Assignment.h"
 #include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp> //string comparison
+#include <boost/algorithm/string.hpp>
 
 #include "core_system/Reachability/reachabilitySequential.h"
-#include "core_system/Reachability/reachParallelExplore.h"
-#include "core_system/Reachability/NewApproach/SameDirections_Avoid_SuppFunction.h"
+#include "core_system/Reachability/reachPostCParallel.h"
 #include "Utilities/computeInitialPolytope.h"
-//#include "core_system/math/gurobi_lp_solver/gurobi_lp_solver.h"
 #include "application/All_PP_Definition.h"
 //#include "core_system/Reachability/reachabilitySequential_GPU_MatrixVector_Multiply.cuh"
 #include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
