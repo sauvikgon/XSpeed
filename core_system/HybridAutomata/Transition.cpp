@@ -88,9 +88,9 @@ std::vector<double> transition::applyTransitionMap(std::vector<double> x)
 	assert(x.size() == R.size2());
 	assert(x.size() == w.size());
 
-	for (int i = 0; i < R.size1(); i++) {
+	for (unsigned int i = 0; i < R.size1(); i++) {
 		double row_sum = 0.0;
-		for (int j = 0; j < R.size2(); j++) {
+		for (unsigned int j = 0; j < R.size2(); j++) {
 			row_sum = row_sum + R(i, j) * x[j];
 		}
 		x_prime[i] = row_sum + w[i];

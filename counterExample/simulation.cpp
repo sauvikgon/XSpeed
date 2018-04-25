@@ -755,11 +755,11 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 			ha.getInitial_Location());
 
 	unsigned int t = 0, point_count = 0;
-	int N_cores = omp_get_num_procs();
+	unsigned int N_cores = omp_get_num_procs();
 	std::vector<sim_start_point> wlist[2][N_cores][N_cores];
 
-	for (int i = 0; i < N_cores; i++) {
-		for (int j = 0; j < N_cores; j++) {
+	for (unsigned int i = 0; i < N_cores; i++) {
+		for (unsigned int j = 0; j < N_cores; j++) {
 			while (wlist[t][i][j].size()
 					<= ceil(start_points.size() / (N_cores * N_cores))
 					&& point_count < start_points.size()) {

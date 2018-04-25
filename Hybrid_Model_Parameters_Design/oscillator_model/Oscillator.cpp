@@ -31,12 +31,9 @@ void SetOscillatorParameters(hybrid_automata& Hybrid_Automata,
 			gaurdBoundValue;
 
 	std::vector<double> vector_c;
-	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
+	int boundSignI, invariantBoundSign, gaurdBoundSign;
 
 	size_type row, col;
-	// ********* constants Declaration **********
-	double a1 = -2.0, a2 = -1.0, c = 0.5, x0 = 0.7, y0 = 0.7;
-	// ********* constants Declaration Done **********
 
 	unsigned int initial_location_id = 3; //the initial Location ID
 // ********************* Initial Set Assignment **********************
@@ -406,7 +403,7 @@ void SetParametersOscillator1(hybrid_automata& Hybrid_Automata,
 			gaurdBoundValue;
 
 	std::vector<double> vector_c;
-	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
+	int boundSignI, invariantBoundSign, gaurdBoundSign;
 
 	size_type row, col;
 	// ********* constants Declaration **********

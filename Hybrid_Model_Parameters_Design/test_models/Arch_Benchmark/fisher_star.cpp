@@ -10880,7 +10880,6 @@ void FStarModule4(hybrid_automata& Hybrid_Automata,
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
-	unsigned int dim;
 	size_type row, col;
 
 	polytope::ptr initial_polytope_I0, forbid_polytope;

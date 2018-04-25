@@ -34,17 +34,15 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 	std::list < symbolic_states::ptr > Reachability_Region;
 	template_polyhedra::ptr reach_region;
 
-	int number_times = 0, BreadthLevel = 0, previous_level = -1;
+	unsigned int bfslevel = 0;
 	std::list<int> queue; // data structure to keep track of the number of transitions
 	pwlist pw_list; //list of initial_state
 	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++){
 		pw_list.WaitingList_insert(*(i));
-		queue.push_back(BreadthLevel); //insert at REAR, first Location
+		queue.push_back(bfslevel); //insert at REAR, first Location
 	}
 
-
-	bool starting_location = true;
-	bool saftey_violated = false;
+	bool safety_violation = false;
 
 	polytope::ptr continuous_initial_polytope;
 
@@ -55,10 +53,11 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states()); //required to be pushed into the Reachability_Region
 		initial_state::ptr U;
 		U = pw_list.WaitingList_delete_front();
-		int levelDeleted = queue.front(); //get FRONT element
+		bfslevel = queue.front(); //get FRONT element
 		queue.pop_front(); //delete from FRONT
-		if (levelDeleted > bound)
-			break; //stopping since the number of transitions exceeds the number of bound
+
+		if (bfslevel > bound)
+			break; //stopping since the number of jumps exceeds the number of bound
 
 		int location_id;
 		location_id = U->getLocationId();
@@ -85,7 +84,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 			continue; //do not compute the reachable set
 
 		bool foundSkippingLocation = false;
-		for (int StopLoc = 0; StopLoc < reach_parameters.Stop_locID.size();
+		for (unsigned int StopLoc = 0; StopLoc < reach_parameters.Stop_locID.size();
 				StopLoc++) {
 
 			if (location_id == reach_parameters.Stop_locID[StopLoc]) {
@@ -151,19 +150,15 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		 */
 
 		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
-
-
 		num_flowpipe_computed++;//computed one Flowpipe
-		//	*********************************************** Reach or Flowpipe Computed ************************************
-		if (previous_level != levelDeleted) {
-			previous_level = levelDeleted;
-			BreadthLevel++;
-		}
+
+		//	************************************ Reach or Flowpipe Computed *********************
+
 		if (reach_region->getTotalIterations() != 0) {
 			S->setContinuousSetptr(reach_region);
 			Reachability_Region.push_back(S);
 		}
-		//  ******************************** Safety Verification section ********************************
+		//  ******************************** Safety Verification section ************************
 		std::list < symbolic_states::ptr > list_sym_states;
 		polytope::ptr polyI; //initial polytope of the abstract flowpipe
 		std::list < transition::ptr > list_transitions; // list of transitions leading to the unsafe set
@@ -184,13 +179,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					current_forbidden_state = S;
 					int cc = 0;
 					do {
-						int locationID, locationID2;
+						int locationID2;
 						discrete_set ds, ds2;
 						// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
-						for (std::set<int>::iterator it =
-								ds.getDiscreteElements().begin();
-								it != ds.getDiscreteElements().end(); ++it)
-							locationID = (*it); //Assuming only a single element exist in the discrete_set
+
 						int transID = current_forbidden_state->getTransitionId(); //a)
 						//   **********************************************************
 						//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
@@ -228,7 +220,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						int transID = current_forbidden_state->getTransitionId();
 						list_sym_states.push_front(current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
 					}
-					saftey_violated = true;
+					safety_violation = true;
 					abstractCE::ptr ce = abstractCE::ptr(new abstractCE());
 					ce->set_length(cc);
 					ce->set_sym_states(list_sym_states);
@@ -248,7 +240,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		//  ******************************** Safety Verification section Ends********************************
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 
-		if (reach_region->getTotalIterations() != 0 && BreadthLevel <= bound) {
+		if (reach_region->getTotalIterations() != 0 && bfslevel <= bound) {
 			//computed reach_region is empty and optimize transition BreadthLevel-wise
 			for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
 					t != current_location->getOut_Going_Transitions().end(); t++) {
@@ -361,8 +353,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					//debug
 					//newShiftedPolytope->print2file("./nextpoly",0,10);
 					//---
-					int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make Slow; 0 will disable so Fast
-					if (is_ContainmentCheckRequired){	//Containtment Checking required
+					int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make the code slow; 0 will disable and will make it fast
+					if (is_ContainmentCheckRequired){	//Containment Checking required
 						bool isContain=false;
 						/*
 						 * The function tempaltedDirectionHull() need not be done if we are using
@@ -380,14 +372,14 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 							newState->setTransitionId(transition_id); // keeps track of the transition_ID
 							newState->setParentPtrSymbolicState(S);
 							pw_list.WaitingList_insert(newState);
-							queue.push_back(BreadthLevel); //insert at REAR first Location
+							queue.push_back(bfslevel+1);
 						}
 					}else{	//Containment Checking NOT Formed
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 						newState->setTransitionId(transition_id); // keeps track of the transition_ID
 						newState->setParentPtrSymbolicState(S);
 						pw_list.WaitingList_insert(newState);
-						queue.push_back(BreadthLevel); //insert at REAR first Location
+						queue.push_back(bfslevel+1);
 					}
 				}
 			} //end of transition iterator
@@ -402,11 +394,11 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
 
-		std::cout << "\nJump " << BreadthLevel - 1 << "..." << num_flowpipe_computed << " Symbolic States Passed, "
+		std::cout << "\nJump " << bfslevel  << "..." << num_flowpipe_computed << " Symbolic States Passed, "
 				<< pw_list.getWaitingList().size() << " waiting ..."<< wall_clock <<" seconds";
 	} //end of while loop checking waiting_list != empty
-	if (BreadthLevel<=bound){	//did not reach to the assigned bound
-		std::cout<<"\n\nFound Fix-point after "<<BreadthLevel - 1<<" Jumps!!!\n";
+	if (bfslevel<bound){	//did not reach to the assigned bound
+		std::cout<<"\n\nFound Fix-point after "<<bfslevel <<" Jumps!!!\n";
 	}
 	cout << "\n ***************************************************************************\n";
 	cout << "\nMaximum Iterations Completed = " << num_flowpipe_computed << "\n";
@@ -488,13 +480,12 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++)
 		pw_list.WaitingList_insert(*(i));
 		//pw_list.WaitingList_insert(I);
-	int number_times = 0;
+	unsigned int number_times = 0;
 	unsigned int iter_max = 1;
-
-	bool stop_loop = false;
 
 	bool saftey_violated = false;
 
+	bool foundUnSafe = true;
 	while (!pw_list.isEmpty_WaitingList()) {
 
 		//To avoid write-contention for reach_region, Vector/List of reach_region_list created for each threads
@@ -508,7 +499,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 
 		vector < initial_state::ptr > list_U(count); //SubList for parallel
 
-		for (int i = 0; i < count; i++) {
+		for (unsigned int i = 0; i < count; i++) {
 			list_U[i] = pw_list.WaitingList_delete_front();
 			pw_list.PassedList_insert(list_U[i]);
 		}
@@ -686,7 +677,6 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 		// ************************* BFS Ends *************************************
 
 		//Creating a list of objects of "Reachability Set"/Symbolic_states
-		bool foundUnSafe = false;
 		for (unsigned int index = 0; index < count; index++) {
 
 			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0) //computed reach_region is NOT empty

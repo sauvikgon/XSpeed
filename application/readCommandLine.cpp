@@ -191,7 +191,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			cmdStr.append(user_options.get_modelFile()); //cmdStr.append(modelFile);
 			cmdStr.append(" ");
 			cmdStr.append(user_options.get_configFile()); //cmdStr.append(configFile);
-			const char *st, *st2, *st3, *st4, *st5;
+			const char *st;
 			st = cmdStr.c_str();
 			system(st); //calling hyst interface to generate the XSpeed model file
 
