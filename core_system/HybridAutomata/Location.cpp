@@ -19,7 +19,7 @@ location::location(int Loc_ID, string name, Dynamics system_dynamics, polytope::
 	Name = name;
 	System_Dynamics = system_dynamics;
 	Invariant = invariant;
-	InvariantExists = inv_exists;
+	InvariantExist = inv_exists;
 	Out_Going_Transitions = Out_Going_Trans;
 }
 
@@ -75,12 +75,12 @@ transition::ptr location::getTransition(int trans_id){
 	return temp;
 }
 
-bool location::isInvariantExists() const {
-	return InvariantExists;
+bool location::getInvariantExist() const {
+	return InvariantExist;
 }
 
-void location::setInvariantExists(bool invariantExists) {
-	InvariantExists = invariantExists;
+void location::setInvariantExist(bool invariantExist) {
+	this->InvariantExist = invariantExist;
 }
 
 

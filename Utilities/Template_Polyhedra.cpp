@@ -146,9 +146,8 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 	size_type row = 0;
 	size_type col = 0;
 	math::matrix<double> mat_sf(row, col);
-	bool is_intersected = false, intersection_started = false, immediate_false =
-			false, intersection_ended = false;
-	int foundIntersection = 0, intersection_start;
+	bool is_intersected = false, intersection_started = false, intersection_ended = false;
+
 	std::list<template_polyhedra::ptr> intersected_region;
 	for (unsigned int i = 0; i < this->Matrix_SupportFunction.size2(); i++) {
 		//		cout<<"3 INSIDE .....LOOP no = "<<i<<endl;
@@ -227,10 +226,9 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 	size_type row = 0;
 	size_type col = 0;
 	math::matrix<double> mat_sf(row, col);
-	bool is_intersected = false, intersection_started = false, immediate_false =false, intersection_ended = false;
-	int foundIntersection = 0, intersection_start;
+	bool is_intersected = false, intersection_started = false, intersection_ended = false;
+
 	std::list<template_polyhedra::ptr> intersected_region;
-	//intersected_region = template_polyhedra::ptr(new template_polyhedra());
 
 	std::vector<bool> intersects(this->Matrix_SupportFunction.size2(), false);//all false initially
 //	omp_set_dynamic(0);	//handles dynamic adjustment of the number of threads within a team
@@ -355,8 +353,8 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 	size_type col = 0;
 
 	math::matrix<double> mat_sf(row, col);
-	bool is_intersected = false, intersection_started = false, immediate_false = false, intersection_ended = false;
-	int foundIntersection = 0, intersection_start;
+	bool is_intersected = false, intersection_started = false, intersection_ended = false;
+	int foundIntersection = 0;
 	std::list<template_polyhedra::ptr> intersected_region;
 
 	std::vector<bool> intersects(this->Matrix_SupportFunction.size2(), false); //all false initially
@@ -418,7 +416,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
 		//std::cout<<"Aggregation is Switched-OFF\n";
 		for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end(); range_it++) {
 			unsigned int start = (*range_it).first, end=(*range_it).second;
-			for (int i = start; i <= end; i++) {//push in polys every polytope/Omega from start to end
+			for (unsigned int i = start; i <= end; i++) {//push in polys every polytope/Omega from start to end
 
 				polytope::ptr p=this->getPolytope(i);//gets only the polytope with out invariant of this templeted_polyhedra
 				math::matrix<double> invDirs;
@@ -441,7 +439,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
 			for (unsigned int eachTemplateDir=0;eachTemplateDir<this->template_Directions.size1();eachTemplateDir++){
 
 				double Max_sf=this->Matrix_SupportFunction(eachTemplateDir,start);
-				for (int i = start+1; i <= end; i++) {
+				for (unsigned int i = start+1; i <= end; i++) {
 					double sf = this->Matrix_SupportFunction(eachTemplateDir,i);
 					if (sf > Max_sf)
 						Max_sf = sf;
@@ -451,7 +449,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
 			unsigned int total_dir = this->template_Directions.size1();
 			for (unsigned int eachInvDir=0;eachInvDir<this->invariant_Directions.size1();eachInvDir++){
 				double Max_sf=this->Matrix_InvariantBound(eachInvDir,start);
-				for (int i = start + 1; i <= end; i++) {
+				for (unsigned int i = start + 1; i <= end; i++) {
 					double sf = this->Matrix_InvariantBound(eachInvDir, i);
 					if (sf > Max_sf)
 						Max_sf = sf;
@@ -566,7 +564,7 @@ const polytope::ptr template_polyhedra::getTemplate_approx(int lp_solver_type_ch
 	 * Get the number of directions as rows for each rows compute sf of all omega's and take the maximum of
 	 these sf and add it as column vector then return the polytop p as p(direction, columnvector);
 	 */
-	unsigned int rows, max_or_min = 2;	//Maximizing
+	unsigned int rows;	//Maximizing
 	double Max_sf, sf;
 	int type = lp_solver_type_choosen;
 	rows = this->getTotalTemplateDirections();//cout << "\nrows here = " << rows << endl;

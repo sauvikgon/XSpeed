@@ -203,9 +203,9 @@ double getSolution(polytope::ptr X, std::list<std::vector<double> > X2) {
 	optProb1 = nlopt::opt(nlopt::LN_COBYLA, X->getSystemDimension()); // derivative free
 	// Set the constraint of this problem
 	polyConstraints data[X->getColumnVector().size()]; //total constraints
-	for (int i = 0; i < X->getCoeffMatrix().size1(); i++) {
+	for (unsigned int i = 0; i < X->getCoeffMatrix().size1(); i++) {
 		std::vector<double> coeff(X->getCoeffMatrix().size2());
-		for (int j = 0; j < X->getCoeffMatrix().size2(); j++) {
+		for (unsigned int j = 0; j < X->getCoeffMatrix().size2(); j++) {
 			coeff[j] = X->getCoeffMatrix()(i, j);
 		}
 		(data[i].a).assign(coeff.begin(), coeff.end());

@@ -14,7 +14,9 @@
 #define TIME_SLICE	 	3	//Parallel Reachability Algorithm using OpenMP Thread Creation, using parallelizing over Iterations
 #define AGJH_BFS		4	//Parallel Breadth First Search Algorithm using Gerard J. Holzmann Algorithm
 #define TPBFS			5	//Parallel Breadth First Search Algorithm using Load Balancing Algorithm
-#define GPU_SF			6	//PostC using GPU with Sequential BFS
+#define ASYNC_BFS 		6	//Parallel Asynchronous Breadth First Search Algorithm
+#define GPU_SF			7	//PostC using GPU with Sequential BFS
+#define FORWARD			8	//PostC using forward approximation model
 
 
 
@@ -50,7 +52,7 @@
 #define OCT			2
 //#define UNIFORM		//values > 3
 
-#define MAX_ALGO 	7	//Total number of existing Algorithm. This value need to be increased for new Algorithm when implemented
+#define MAX_ALGO 	8	//Total number of existing Algorithm. This value need to be increased for new Algorithm when implemented
 
 
 #endif /* ALL_PP_DEFINITION_H_ */

@@ -181,7 +181,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 	// ******************* Computing Parameters *******************************
 
 	unsigned int NewTotalIteration = reach_parameters.Iterations;
-	if (current_location->isInvariantExists()) {
+	if (current_location->getInvariantExist()) {
 		/*
 		 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
 		 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
@@ -221,7 +221,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 					current_location->getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(),
-					current_location->isInvariantExists(), myData.lp_solver_type_choosen);
+					current_location->getInvariantExist(), myData.lp_solver_type_choosen);
 	/*sequentialReachSelection(NewTotalIteration, current_location,
 			continuous_initial_polytope, reach_region);*/
 
@@ -519,11 +519,6 @@ void lock(LocklessDS L[], int locID){
 	             ; // spin until acquired*/
 
 }
-
-
-
-
-
 
 void unlock(LocklessDS L[], int locID){
 	L[locID-1].flag = 0;	//unlock is simple, simply set locID's flag to 0

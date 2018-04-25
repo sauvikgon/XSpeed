@@ -1056,7 +1056,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 
 	//bool invariantCrossed = false;
 	// *************************** For Positive ************************************
-	double res1, term2 = 0.0, result1, term1 = 0.0, result;
+	double term2 = 0.0, result1, result;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 	// *************************** For Negative ************************************
 	double res1_minus, term2_minus = 0.0, result1_minus, term1_minus = 0.0,
@@ -1081,7 +1081,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 
 		bool TimeBoundFound = false;//final result or actual flowpipe_cost found
 
-		double zI = 0.0, zV = 0.0;
+		double zV = 0.0;
 		double zI_min = 0.0, zV_min = 0.0;
 		double sVariable, s1Variable;
 		double sVariable_min, s1Variable_min; //For Minimization of First Vector only
@@ -1101,7 +1101,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 					* invariant->getCoeffMatrix()(eachInvariantDirection, i); //Second vector negative of First vector
 		}
 		// ******** Lamda Computation for each invariant's directions/constraints **********
-		double invariant_SupportFunction;
+		double invariant_SupportFunction = 0; // Initialized to 0, only to satisfy the compiler. @Todo: see an appropriate initial value
 		int type = lp_solver_type_choosen;
 		lp_solver lpSolver(type), lp_U_dummy(type);
 		//	cout<<"Test 2 \n";
@@ -1163,11 +1163,9 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 		//zIInitial = Omega_Support(ReachParameters, rVariable, Initial,SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 		double term3b, term3c = 0.0;
 		//  **************    Omega Function   ********************
-		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
+		Initial->computeSupportFunction(rVariable, s_per_thread_I);
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
-			term1 = Initial->computeSupportFunction(phi_trans_dir,
-					s_per_thread_I);
 		}
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
 			B_trans.mult_vector(rVariable, Btrans_dir);
@@ -1220,7 +1218,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 						&& TimeBoundFound != true;) {
 			//Now stopping condition is the omega that actually cross.  Trick is dealing with time-step
 // ************************************************  For Positive Direction Starts *******************************************
-			double TempOmega, term3, term3a, res2, beta, res_beta;
+			double beta, res_beta;
 			//	zV = W_Support(ReachParameters, SystemDynamics, rVariable,s_per_thread_U, Min_Or_Max);
 			//  **************    W_Support Function   ********************
 			result1 = term2;
@@ -1233,11 +1231,8 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 			r1Variable = phi_trans_dir;
 			//zI = Omega_Support(ReachParameters, r1Variable, Initial,SystemDynamics, s_per_thread_I, s_per_thread_U, Min_Or_Max);
 			//  **************    Omega Function   ********************
-			res1 = term1;
 			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 				phi_tau_Transpose.mult_vector(r1Variable, phi_trans_dir);
-				term1 = Initial->computeSupportFunction(phi_trans_dir,
-						s_per_thread_I);
 			}
 			if (!SystemDynamics.isEmptyMatrixB) { //current_location's SystemDynamics's or ReachParameters
 				B_trans.mult_vector(r1Variable, Btrans_dir);
@@ -1245,21 +1240,15 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 						* SystemDynamics.U->computeSupportFunction(Btrans_dir,
 								s_per_thread_U);
 			}
-			term3a = ReachParameters.result_alfa;
+
 			term3b = support_unitball_infnorm(r1Variable);
 			if (!SystemDynamics.isEmptyC) {
 				term3c = ReachParameters.time_step
 						* dot_product(SystemDynamics.C, r1Variable); //Added +tau* sf_C(l) 8/11/2015
 			}
-			term3 = term3a * term3b;
-			res2 = term1 + term2 + term3 + term3c;
-			if (res1 > res2)
-				zI = res1;
-			else
-				zI = res2;
-			//  **************  Omega Function Over  ********************
 
-			TempOmega = zI + s1Variable; //Y1
+
+			//  **************  Omega Function Over  ********************
 
 // ************************************************   Positive Direction Ends *******************************************
 // ************************************************  For Negative Direction Starts *******************************************

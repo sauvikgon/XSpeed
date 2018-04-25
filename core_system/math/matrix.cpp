@@ -270,7 +270,7 @@ bool math::matrix<scalar_type>::inverse(math::matrix<scalar_type>& inverse) {
 	inverse.assign(identity_matrix<scalar_type>(this->size1()));
 	ublas_matrix_impl A(this->size1(), this->size2(), this->data());
 	pmatrix pm(A.size1());
-	int res = lu_factorize(A, pm);
+	lu_factorize(A, pm);
 	// backsubstitute to get the inverse
 	lu_substitute(A, pm, inverse);
 	return true;	//	NonSingular=true;

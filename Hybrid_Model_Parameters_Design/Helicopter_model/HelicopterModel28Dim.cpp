@@ -227,7 +227,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	source->setName("Flying");
 	source->setSystem_Dynamics(system_dynamics);
 	source->setInvariant(invariant);
-	source->setInvariantExists(false); //no invariant available
+	source->setInvariantExist(false); //no invariant available
 //	source->add_Out_Going_Transition(trans);
 
 	int dim = initial_polytope_I->getSystemDimension();

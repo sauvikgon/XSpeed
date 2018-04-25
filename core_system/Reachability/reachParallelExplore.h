@@ -43,7 +43,7 @@ const template_polyhedra::ptr reachabilityParallel(
  *
  * CORES: Its the number of parallel compute cores available in the hardware architecture.
  */
-const template_polyhedra::ptr reachParallelExplore(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
+const template_polyhedra::ptr reachTimeSlice(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, const polytope::ptr invariant,
 		bool isInvariantExist, int CORES, unsigned int Algorithm_Type,

@@ -389,7 +389,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	// ******************* Computing Parameters *******************************
 
 	unsigned int NewTotalIteration = reach_parameters.Iterations;
-	if (current_location->isInvariantExists()) {
+	if (current_location->getInvariantExist()) {
 		/*
 		 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
 		 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
@@ -430,7 +430,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 					current_location->getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(),
-					current_location->isInvariantExists(), lp_solver_type_choosen);
+					current_location->getInvariantExist(), lp_solver_type_choosen);
 	/*sequentialReachSelection(NewTotalIteration, current_location,
 			continuous_initial_polytope, reach_region);*/
 

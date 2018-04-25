@@ -14,12 +14,12 @@ std::vector<double> normalize_vector(std::vector<double> v) {
 
 	double vector_magitude = 0, vector_sum = 0.0;
 
-	for (int i = 0; i < v.size(); i++) {
+	for (unsigned int i = 0; i < v.size(); i++) {
 		vector_sum = vector_sum + v[i] * v[i];
 	}
 	vector_magitude = sqrt(vector_sum);
 	if (vector_magitude != 0) {
-		for (int i = 0; i < v.size(); i++) {
+		for (unsigned int i = 0; i < v.size(); i++) {
 			normal_vector[i] = v[i] / vector_magitude;
 		}
 	}
@@ -32,7 +32,7 @@ std::vector<double> bisect_vector(std::vector<double> u,
 	std::vector<double> z(u.size());
 
 	assert(u.size() == v.size()); //checking if u and v are of same dimension
-	for (int i = 0; i < u.size(); i++) {
+	for (unsigned int i = 0; i < u.size(); i++) {
 		z[i] = (u[i] + v[i]) / 2;
 	}
 	return z;
@@ -42,7 +42,7 @@ std::vector<double> bisect_vector(std::vector<double> u,
 bool isEqual_Vectors(std::vector<double> u, std::vector<double> v) {
 	bool isEqual = true;
 	assert(u.size() == v.size()); //checking if u and v are of same dimension
-	for (int i = 0; i < u.size(); i++) {
+	for (unsigned int i = 0; i < u.size(); i++) {
 		if (u[i] != v[i]) {
 			isEqual = false;
 		}

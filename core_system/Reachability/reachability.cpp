@@ -131,7 +131,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		// ******************* Computing Parameters *******************************
 		// ************ Compute flowpipe_cost:: estimation Starts **********************************
 		unsigned int NewTotalIteration = reach_parameters.Iterations;
-		if (current_location->isInvariantExists()){
+		if (current_location->getInvariantExist()){
 			/*
 			 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
 			 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
@@ -426,7 +426,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		std::cout << "\nRunning sequential BFS.\n";
 		reach_region = reachabilitySequential(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
-				current_location->isInvariantExists(), lp_solver_type_choosen);
+				current_location->getInvariantExist(), lp_solver_type_choosen);
 	}
 
 	if (Algorithm_Type == PAR_SF) {
@@ -437,18 +437,25 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(),
-				current_location->isInvariantExists(), lp_solver_type_choosen);
+				current_location->getInvariantExist(), lp_solver_type_choosen);
 	}
 
 
 	if (Algorithm_Type == TIME_SLICE) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		std::cout << "\nRunning parallel PostC using Time-Slice algorithm and sequential PostD.\n";
 		int NCores = Total_Partition; //Number of Partitions (number of threads)
-		reach_region = reachParallelExplore(NewTotalIteration, current_location->getSystem_Dynamics(),
+		reach_region = reachTimeSlice(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
-				current_location->isInvariantExists(), NCores, TIME_SLICE, lp_solver_type_choosen);
+				current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type_choosen);
 	}
 
+	if(Algorithm_Type == FORWARD){
+		std::cout << "\nRunning PostC using forward approximation model and sequential exploration of symbolic states.\n";
+
+		reach_region = reachForwardApprox(NewTotalIteration, current_location->getSystem_Dynamics(),
+						continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
+						current_location->getInvariantExist(), lp_solver_type_choosen);
+	}
 
 	/*if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
 			std::cout << "\nRunning PostC in GPU and Sequential BFS.\n";
@@ -565,7 +572,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 			}
 			// ******************* Computing Parameters Done *******************************
 			unsigned int NewTotalIteration;
-			if (current_location->isInvariantExists()) {
+			if (current_location->getInvariantExist()) {
 				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
 						reach_parameter_local, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 				std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
@@ -847,7 +854,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 			boost::timer::cpu_timer boundCheck;
 			boundCheck.start();
 			unsigned int NewTotalIteration;
-			if (current_location->isInvariantExists()){
+			if (current_location->getInvariantExist()){
 				InvariantBoundaryCheck(SymDataStruct[id].current_location->getSystem_Dynamics(), continuous_initial_polytope,
 						SymDataStruct[id].reach_param, SymDataStruct[id].current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 				std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
@@ -1069,7 +1076,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(),
-				current_location->isInvariantExists(), lp_solver_type_choosen);
+				current_location->getInvariantExist(), lp_solver_type_choosen);
 		S[id]->setContinuousSetptr(reach_region);
 
 		AllReach_time.stop();
@@ -1088,7 +1095,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(),
-				current_location->isInvariantExists(), lp_solver_type_choosen);
+				current_location->getInvariantExist(), lp_solver_type_choosen);
 		AllReach_time.stop();
 		S[id]->setContinuousSetptr(reach_region);
 		double wall_clock1;
@@ -1131,9 +1138,9 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 			else
 				reach_parameters.A_inv = A_inv;
 			int NCores = Total_Partition; //Number of Partitions (number of threads)
-			reach_region = reachParallelExplore(NewTotalIteration, current_location->getSystem_Dynamics(),
+			reach_region = reachTimeSlice(NewTotalIteration, current_location->getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
-					current_location->isInvariantExists(), NCores, TIME_SLICE, lp_solver_type_choosen);
+					current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type_choosen);
 			S[id]->setContinuousSetptr(reach_region);
 			//		std::cout << "Finished computing reachable states\n";
 		} else {
@@ -1371,28 +1378,21 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 		LoadBalanceDS[i].sf_UnitBall.resize(LoadBalanceDS[i].List_dir_X0.size1()); // resize
 		LoadBalanceDS[i].sf_dotProduct.resize(LoadBalanceDS[i].List_dir_X0.size1()); // resize
 	} //getCountTotal(LoadBalanceDS, countTotal_X, countTotal_U);
-	//cout << "countTotal_X = " << countTotal_X << std::endl;
-//cout <<"erro 2\n";
-/*	std::ofstream myfile,myfile2;
-	myfile.open("./sf_X.txt");
-	myfile2.open("./dir_X.txt");*/
-//#pragma omp parallel for
+
 	for (unsigned int i = 0; i < countTotal_X; i++) {
 		unsigned int index;
 		unsigned int j;
-		//cout <<"erro 3\n";
+
 		search_SymState_dirsX0Index(i, LoadBalanceDS, index, j);
-		//	cout <<"erro index = "<<index <<"  j = "<<j<<"\n";
+
 		std::vector<double> dirs(dimension);
 		for (unsigned int ind = 0; ind < dimension; ind++) {
 			dirs[ind] = LoadBalanceDS[index].List_dir_X0(j, ind);
-		//	myfile2<<dirs[ind]<< "\t";
+
 		}
-		//myfile2<< "\n";
+
 		LoadBalanceDS[index].sf_X0[j] = LPSolver(LoadBalanceDS[index].X0, dirs);
-	//	myfile <<"i = "<<i<<"   ";
-	//	myfile <<LoadBalanceDS[index].sf_X0[j]<<"\n";
-		//LoadBalanceDS[index].sf_X0[j] = boxLPSolver(LoadBalanceDS[index].X0, dirs);
+
 		// ******DotProduction and Support Function of UnitBall  *******
 		if (!LoadBalanceDS[index].current_location->getSystem_Dynamics().isEmptyC) {
 			LoadBalanceDS[index].sf_dotProduct[j] = dot_product(LoadBalanceDS[index].current_location->getSystem_Dynamics().C,dirs);
@@ -1400,9 +1400,7 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 		LoadBalanceDS[index].sf_UnitBall[j] = support_unitball_infnorm(dirs);
 		// ******DotProduction and Support Function of UnitBall  *******
 	}
-	//myfile.close();
-	//myfile2.close();
-	//cout <<"erro 3\n";
+
 	bool U_empty;
 	U_empty = LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();
 	//todo:: assuming all symbolic states has same setup for polytope U
@@ -1550,25 +1548,21 @@ bool reachability::templated_isContained(int locID, polytope::ptr poly,
 			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
 			bool intersects=false;
 			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
-				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
+
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
 
-				/*std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());	//Need to avoid adding this otherwise assertion of constraints fails
-				constraint_bound_values = flowpipe->getInvariantBoundValue(i);
-				p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);*/
+
 
 				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
-					//std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
+
 					contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
-					/*PPL_Polyhedron::ptr p1=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
-					PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(poly->getCoeffMatrix(),poly->getColumnVector(),poly->getInEqualitySign()));
-					contained = p1->is_contained(p2);*/
+
 
 					if (contained){
-						//std::cout<<"\n\nFound Fixed-point!!!\n";
+
 						break;	//No need to check the rest if contained in a single Omega
 					}
 				}
@@ -1600,19 +1594,15 @@ bool reachability::isContained_withLock(int locID, polytope::ptr poly,
 			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
 			bool intersects=false;
 			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
-				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
+
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
-				/*std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());	//Need to avoid adding this otherwise assertion of constraints fails
-				constraint_bound_values = flowpipe->getInvariantBoundValue(i);
-				p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);*/
+
 				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
-					//std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
 					contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
 					if (contained){
-						//std::cout<<"\n\nFound Fixed-point!!!\n";
 						break;	//No need to check the rest if contained in a single Omega
 					}
 				}

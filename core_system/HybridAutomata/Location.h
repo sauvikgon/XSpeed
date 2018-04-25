@@ -22,7 +22,7 @@ private:
 	string Name;
 	Dynamics System_Dynamics;
 	polytope::ptr Invariant;
-	bool InvariantExists;		//True If invariant exists otherwise False
+	bool InvariantExist;		//True If invariant exists otherwise False
 	std::list<transition::ptr> Out_Going_Transitions;
 public:
 	typedef boost::shared_ptr<location> ptr;
@@ -42,8 +42,8 @@ public:
 	std::list<transition::ptr>& getOut_Going_Transitions();
 	int getLocId() const;
 	void setLocId(int locId);
-	bool isInvariantExists() const;
-	void setInvariantExists(bool invariantExists);
+	bool getInvariantExist() const;
+	void setInvariantExist(bool invariantExist);
 };
 
 #endif /* LOCATION_H_ */

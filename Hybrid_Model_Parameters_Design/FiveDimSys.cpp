@@ -251,7 +251,7 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	source->setName("Round_Figure");
 	source->setSystem_Dynamics(system_dynamics);
 	source->setInvariant(invariant);
-	source->setInvariantExists(false); //no invariant available
+	source->setInvariantExist(false); //no invariant available
 
 	int dim = initial_polytope_I->getSystemDimension();
 

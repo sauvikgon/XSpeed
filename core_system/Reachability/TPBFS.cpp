@@ -166,7 +166,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 		for (unsigned int id = 0; id < count; id++) { //separate parameters assignment with Invariant check and preLoadBalanceReachCompute task
 			unsigned int NewTotalIteration = LoadBalanceDS[id].reach_param.Iterations;
 
-			if (LoadBalanceDS[id].current_location->isInvariantExists()) {
+			if (LoadBalanceDS[id].current_location->getInvariantExist()) {
 				/*
 				 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
 				 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
@@ -537,7 +537,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 //std::cout<<"Before Invariant accessing"<<std::endl;
 	/*std::cout << std::fixed;
 	std::cout.precision(10);*/  //Main Cause of Race condition
-	if (LoadBalanceDS.current_location->getInvariant() != NULL && LoadBalanceDS.current_location->isInvariantExists() == true) { //if invariant exist. Computing
+	if (LoadBalanceDS.current_location->getInvariant() != NULL && LoadBalanceDS.current_location->getInvariantExist() == true) { //if invariant exist. Computing
 
 		int num_inv = LoadBalanceDS.current_location->getInvariant()->getColumnVector().size(); //number of Invariant's constriants
 		math::matrix<double> inv_directions;
@@ -585,7 +585,7 @@ template_polyhedra::ptr tpbfs::polytopeTo_templatepolyhedra(LoadBalanceData Load
 		MatrixValue(Direction, 0) = lp.Compute_LLP(dir);
 	}
 
-	if (LoadBalanceDS.current_location->isInvariantExists() == true) { //if invariant exist. Computing
+	if (LoadBalanceDS.current_location->getInvariantExist() == true) { //if invariant exist. Computing
 		math::matrix<double> inv_directions;
 		inv_directions = LoadBalanceDS.current_location->getInvariant()->getCoeffMatrix();
 		int num_inv = LoadBalanceDS.current_location->getInvariant()->getColumnVector().size(); //number of Invariant's constriants
@@ -746,7 +746,6 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 		} //end of parallel
 // ************* Chunk_approach for polytope U ******************************
 	} //end-if of empty check
-//	std::cout<<"Done on U as well"<<std::endl;
 }
 
 

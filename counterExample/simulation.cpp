@@ -363,10 +363,10 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x,
 
 void simulation::Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<double>& Bounds, std::vector<double> x){
 
-	for(int i = 0; i<M.size1()-1; i++){
+	for(unsigned int i = 0; i<M.size1()-1; i++){
 		int count = 0;
 		double sum1 = 0, sum2 = 0;
-		for(int j=0; j<M.size2(); j++){
+		for(unsigned int j=0; j<M.size2(); j++){
 			if(abs(M(i,j)) != abs(M(i+1,j))){
 				count++; // if count = 0, i^th row is half-space otherwise i^th and i+1^th row is line or region
 			}
@@ -375,7 +375,7 @@ void simulation::Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<do
 		}
 		if(count == 0 && (abs(Bounds[i]) == abs(Bounds[i+1])) && (Bounds[i] != Bounds[i+1] || (Bounds[i] == 0 && Bounds[i+1] == 0))){ // start line to half-space
 			if(sum1 <= Bounds[i]){
-				for(int j=0; j<M.size2(); j++){
+				for(unsigned int j=0; j<M.size2(); j++){
 					if(M(i,j) != 0){
 						M(i,j) = M(i,j) * (-1);
 					}
@@ -383,7 +383,7 @@ void simulation::Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<do
 				Bounds[i] = Bounds[i] * (-1);
 			}
 			else if(sum2 <= Bounds[i+1]){
-				for(int j=0; j<M.size2(); j++){
+				for(unsigned int j=0; j<M.size2(); j++){
 					if(M(i+1,j) != 0){
 						M(i+1,j) = M(i+1,j) * (-1);
 					}
@@ -651,14 +651,14 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n,
 	 * get random start points using the hyperbox class routine
 	 */
 
-	unsigned int i, j, rowSize, columnSize, randnumber;
+	unsigned int i, j, rowSize, columnSize;
 	math::matrix<double> matrix;
 	std::vector<sim_start_point> res;
 
 	matrix = initialset->getCoeffMatrix();
 	rowSize = matrix.size1();
 	columnSize = matrix.size2();
-	unsigned int boundSize = initialset->getColumnVector().size();
+
 
 	int countmatrix[columnSize];
 
@@ -677,14 +677,6 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n,
 			break;
 		}
 	}
-
-//	std::cout << "A matrix is:\n";
-//	for(unsigned int i=0;i<rowSize;i++){
-//		for(unsigned int j=0;j<columnSize;j++){
-//			std::cout << matrix(i,j) << " ";
-//		}
-//		std::cout << std::endl;
-//	}
 
 	typename hyperbox<double>::ptr hbox_ptr;
 

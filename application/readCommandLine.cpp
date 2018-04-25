@@ -60,12 +60,13 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("time-step", po::value<double>(), "Set the sampling time of flowpipe computation.")
 	("algo,a",po::value<int>()->default_value(1), "Set the algorithm\n"
 			"1 -- Sequential Algorithm (Set to default)\n"
-			"2 -- ParSup, Parallel Sampling of Template Directions, PostC in parallel\n"
-			"3 -- Time-sliced Parallel Algorithm, PostC in parallel\n"
-			"4 -- A-GJH, Adaptation of Gerard J. Holzmann Algorithm\n"
-			"5 -- TP-BFS, Task-parallel Algorithm\n"
+			"2 -- ParSup, Parallel Sampling of Template Directions (Parallellism in PostC) \n"
+			"3 -- Time-sliced Parallel Algorithm (Parallellism in PostC)\n"
+			"4 -- A-GJH, Adaptation of Gerard J. Holzmann Algorithm (Parallel exploration of symbolic states)\n"
+			"5 -- TP-BFS, Task-parallel Algorithm (Parallel exploration of symbolic states)\n"
 			"6 -- Lazy Evaluation Algorithm, PostC in GPU\n"
-			"7 -- AsyncBFS, Asynchronous Parallel BFS Algorithm\n")
+			"7 -- AsyncBFS, Asynchronous Parallel BFS Algorithm (Parallel exploration of symbolic states)\n"
+			"8 -- Sequential algorithm (Forward approximation model)\n")
 	("number-of-streams", po::value<int>()->default_value(1), "Set the number of GPU-streams (Set to 1 by default).")
 	("time-slice", po::value<int>(), "Set the number of Time Slice or partitions for the Time-sliced Algorithm")
 	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking (0 for only postC)")

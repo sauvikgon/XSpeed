@@ -204,7 +204,7 @@ void vertex_generator(std::list<symbolic_states::ptr>& symbolic_states_list, use
 std::list<MyPoint::ptr> enumBySequentialSampling(math::matrix<double>& A, std::vector<double>& b, int dim1, int dim2, double delta){
 
 	std::list<MyPoint::ptr> V;
-		double theta, start = 0, end = 360, result;
+		double theta, start = 0, end = 360;
 		unsigned int count_iter=0;
 		glpk_lp_solver lp;
 		lp.setMin_Or_Max(2);
@@ -215,7 +215,7 @@ std::list<MyPoint::ptr> enumBySequentialSampling(math::matrix<double>& A, std::v
 		std::vector<double> obj_fun(A.size2(), 0);	//initialized to zero
 		obj_fun[dim1] = v[0];
 		obj_fun[dim2] = v[1];
-		result = lp.Compute_LLP(obj_fun);
+		lp.Compute_LLP(obj_fun);
 		sv = lp.getMaximizing_Variables(); //Support Vector our first point
 
 		MyPoint::ptr p1, p2;
@@ -235,7 +235,7 @@ std::list<MyPoint::ptr> enumBySequentialSampling(math::matrix<double>& A, std::v
 			//std::vector<double> obj_fun(A.size2(), 0);	//initialized to zero
 			obj_fun[dim1] = v[0];
 			obj_fun[dim2] = v[1];
-			result = lp.Compute_LLP(obj_fun);
+			lp.Compute_LLP(obj_fun);
 			count_iter++;
 			//result = lp.Compute_LLP(normalize_vector(v));
 			sv = lp.getMaximizing_Variables(); //Support Vector our point

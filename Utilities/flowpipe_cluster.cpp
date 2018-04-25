@@ -21,8 +21,8 @@ poly_list flowpipe_cluster(template_polyhedra::ptr template_poly, int cluster)
 	}
 
 	unsigned int template_size = template_poly->getTotalIterations();
-	int cluster_size = std::ceil ((template_size * cluster)/100 ); // size of one cluster
-	int num_clusters = std::ceil (template_size/cluster_size);
+	unsigned int cluster_size = std::ceil ((template_size * cluster)/100 ); // size of one cluster
+	unsigned int num_clusters = std::ceil (template_size/cluster_size);
 
 //	std::cout << "Number of clusters:" << num_clusters << std::endl;
 //	std::cout << "Cluster Size:" << cluster_size << std::endl;
