@@ -54,16 +54,16 @@ bool transMinkPoly::getIsEmpty() const {
 		return false;
 }
 
-double transMinkPoly::computeSupportFunction(std::vector<double> direction, lp_solver &lp) {
+double transMinkPoly::computeSupportFunction(const std::vector<double>& direction, lp_solver &lp) const {
 //this function is also called from compute_beta, compute_alfa, etc
 	std::vector<double> dprime;
-//	cout << "\nCalling transMinkPoly ComputerSupportFunction\n";
+
 	TRANS.mult_vector(direction, dprime);
 	double res1 = 0;
 	if (!X0->getIsEmpty()) {
 		res1 = X0->computeSupportFunction(dprime, lp);
 	}
-//	cout << "\t res1 = " << res1;
+
 	double res2 = 0.0;
 	if (!U->getIsEmpty()) {
 		lp_solver lp_U(GLPK_SOLVER);
@@ -73,15 +73,14 @@ double transMinkPoly::computeSupportFunction(std::vector<double> direction, lp_s
 		B_TRANS.mult_vector(direction, dprime);
 		res2 = U->computeSupportFunction(dprime, lp_U);
 	}
-//	cout << "\t  res2 = " << res2;
+
 	double res3 = 0.0;	//for C
 	if (!Cempty){
-		//cout<<"B_Trans = "<<B_TRANS<<std::endl;
+
 		B_TRANS.mult_vector(direction,dprime);
 		res3 = dot_product(dprime, C);
 	}
 	double res = res1 + time * res2 + time * res3;
-	//cout<<"\t res3 = "<<res3<<std::endl;
 
 	if (beta != 0) {
 		double dir_norm = support_unitball_infnorm(direction);
