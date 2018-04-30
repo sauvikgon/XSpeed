@@ -7,7 +7,7 @@
 
 
 #include "core_system/Reachability/reachabilitySequential.h"
-
+#include "core_system/continuous/omega_model/omega_abstract_model.h"
 
 //Reachability Algorithm after optimization of the duplicate support function computation
 template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
@@ -20,7 +20,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 
 	math::matrix<double> MatrixValue; //Shared Matrix for all child thread
 	size_type row = numVectors, col = shm_NewTotalIteration;
-	if (InvariantExist == true) { //if invariant exist. Computing
+	if (InvariantExist == true) { //if invariant exist.
 		shm_NewTotalIteration = boundedTotIteration;
 
 	} //End of Invariant Directions
@@ -57,6 +57,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 		B_trans = ReachParameters.B_trans;
 
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
+
 		double zIInitial = 0.0, zI = 0.0, zV = 0.0;
 		double sVariable, s1Variable;
 		std::vector<double> r1Variable(dimension), rVariable(dimension);
@@ -68,13 +69,12 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 		sVariable = 0.0; //initialize s0
 		//  **************    Omega Function   ********************
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
-		//cout<<"res1 = "<<res1 <<"\n";
 
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_tau_Transpose.mult_vector(rVariable, phi_trans_dir);
 			term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
 		}else if (SystemDynamics.isEmptyMatrixA) { //if A is empty :: {tau.A}' reduces to zero so, e^{tau.A}' reduces to 1
-													// so, 1 * rVariable give only rVariable
+												   // so, 1 * rVariable give only rVariable.
 			term1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
 		}//handling constant dynamics
 
@@ -120,7 +120,6 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 			} else {
 				r1Variable = phi_trans_dir;
 			}
-
 
 			//  **************    Omega Function   ********************
 
@@ -211,7 +210,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 		//shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial, ReachParameters, invariant, lp_solver_type_choosen);
 		shm_NewTotalIteration = boundedTotIteration;
 	} //End of Invariant Directions
-	//cout<<"shm_NewTotalIteration = " <<shm_NewTotalIteration<<std::endl;
+
 	if (shm_NewTotalIteration < 1) {
 		template_polyhedra::ptr poly_emptyp=template_polyhedra::ptr(new template_polyhedra());
 		return poly_emptyp;
@@ -230,7 +229,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 		s_per_thread_U.setConstraints(SystemDynamics.U->getCoeffMatrix(),
 				SystemDynamics.U->getColumnVector(), SystemDynamics.U->getInEqualitySign());
 	}
-//	cout<<"OK 2 \n";
+
 	double res1, result, term2=0.0, result1, term1=0.0;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
 	math::matrix<double> B_trans, phi_tau_Transpose;
@@ -378,7 +377,41 @@ template_polyhedra::ptr reachForwardApprox(unsigned int boundedTotIteration, Dyn
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type_choosen) {
 
 	std::cout << "Forward Approximation Model not yet implemented\n";
+
+	Omega::ptr approx_model;
+
+	unsigned int num_directions = ReachParameters.Directions.size1();
+	unsigned int dimension = Initial->getSystemDimension();
+	math::matrix<double> SFM; // The data structure to store the template polytopes
+
+	for (unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
+		std::vector<double> direction(dimension);
+
+		for (unsigned int i = 0; i < dimension; i++) {
+			direction[i] = ReachParameters.Directions(eachDirection, i);
+		}
+		for(unsigned int iters = 0; iters < ReachParameters.Iterations; iters++)
+		{
+			// Do some more logic to change the Omega to match with the iters
+			double res = approx_model->Omega_support(direction);
+			SFM(eachDirection,iters) = res;
+		}
+	}
 	template_polyhedra::ptr polys;
-	return polys;
+	unsigned int total_iters = ReachParameters.Iterations;
+	if (InvariantExist == true) { //if invariant exist. Computing
+		math::matrix<double> inv_sfm;
+		unsigned int num_inv_constr = invariant->getColumnVector().size(); //number of Invariant's constraints
+		inv_sfm.resize(num_inv_constr, total_iters);
+		for (unsigned int eachInvDirection = 0; eachInvDirection < num_inv_constr;eachInvDirection++) {
+			for (unsigned int i = 0; i < total_iters; i++) {
+				inv_sfm(eachInvDirection, i) =
+						invariant->getColumnVector()[eachInvDirection];
+			}
+		}
+		return template_polyhedra::ptr( new template_polyhedra(SFM, inv_sfm, ReachParameters.Directions, invariant->getCoeffMatrix()));
+	} else {
+		return template_polyhedra::ptr( new template_polyhedra(SFM, ReachParameters.Directions));
+	}
 
 }

@@ -274,7 +274,7 @@ unsigned int glpk_lp_solver::TestConstraints() {
 	return getStatus();
 }
 
-double glpk_lp_solver::Compute_LLP(std::vector<double> coeff_function) {//Here argument is a Vector
+double glpk_lp_solver::Compute_LLP(const std::vector<double> coeff_function) {//Here argument is a Vector
 
 	for (int i = 0; i < dimension; i++) {
 		glp_set_obj_coef(mylp, i + 1, coeff_function[i]);

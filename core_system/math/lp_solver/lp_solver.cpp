@@ -142,7 +142,7 @@ void lp_solver::join_poly_constraints(math::matrix<double> coeff_constraints,
 
 }
 
-double lp_solver::Compute_LLP(std::vector<double> coeff_function) {
+double lp_solver::Compute_LLP(const std::vector<double> coeff_function) {
 	double res = 0.0;
 	if (lp_solver_type == GLPK_SOLVER) {
 		res = glpk_lp_problem->Compute_LLP(coeff_function);

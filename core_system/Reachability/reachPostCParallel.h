@@ -5,8 +5,8 @@
  *      Author: amit
  */
 
-#ifndef REACHPARALLELEXPLORE_H_
-#define REACHPARALLELEXPLORE_H_
+#ifndef REACH_POSTC_PARALLEL_H_
+#define REACH_POSTC_PARALLEL_H_
 
 #include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
 //#include "matrixOperation.h"
@@ -18,7 +18,6 @@
 #include "application/DataStructureDirections.h"
 #include "core_system/math/analyticODESol.h"
 #include "core_system/Reachability/reachabilitySequential.h"
-#include "core_system/Reachability/NewApproach/Partition_BoundingPolytope.h"
 #include "Utilities/invariantBoundaryCheck.h"
 #include "application/sf_utility.h"
 #include "Utilities/testPolytopePlotting.h"
@@ -50,4 +49,4 @@ const template_polyhedra::ptr reachTimeSlice(unsigned int NewTotalIteration, Dyn
 		int lp_solver_type_choosen);
 
 
-#endif /* REACHPARALLELEXPLORE_H_ */
+#endif /* REACH_POSTC_PARALLEL_H_ */

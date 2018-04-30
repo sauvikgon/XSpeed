@@ -27,14 +27,14 @@ using namespace std;
  * coeffMatrix : All facets of the Polytope in Matrix form (i.e. the coefficients of the variables).
  * number_facets : Number of faces of the defined polytope.
  * dimension :  Number of variables of the system.
- * columnVector :	The values b for each facets.
+ * columnVector :	The values b for each facet.
  * InEqualitySign :	The in equalities sign of the bound values 'b'. Possible values are
  * 					0 :	for  Ax = b (b Equals to)
  * 					1 :	for  Ax <= b (b is Greater Than or Equals to)
  * 					2 :	for  Ax >= b (b is Less Than or Equals to)
  *
- * Also include function to compute Support Function for any given direction w.r.t. the defined polytope.
- * Also include function to return the Dimension of the defined polytope.
+ * Also include the function to compute Support Function of the defined polytope in any given direction.
+ * Also include the function to return the Dimension of the defined polytope.
  */
 
 class polytope: public supportFunctionProvider {
@@ -46,7 +46,6 @@ private:
 	int InEqualitySign;
 	unsigned int number_facets;
 	unsigned int system_dimension;
-	//bool lp_init;
 	bool IsEmpty;
 	bool IsUniverse;
 
@@ -59,7 +58,7 @@ public:
 	void setIsEmpty(bool empty);
 	bool getIsEmpty() const;
 	void setIsUniverse(bool universe);
-	bool getIsUniverse();
+	bool getIsUniverse() const;
 
 	void setPolytope(math::matrix<double> coeffMatrix,
 			std::vector<double> columnVector, int inEqualitySign);
@@ -91,7 +90,7 @@ public:
 	unsigned int getNumberFacets() const;
 	void setNumberFacets(unsigned int numberFacets);
 
-	double computeSupportFunction(std::vector<double> direction, lp_solver &lp);
+	double computeSupportFunction(const std::vector<double>& direction, lp_solver &lp) const;
 
 	/*
 	 * Returns Max norm of the polytope

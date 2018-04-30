@@ -92,7 +92,7 @@ bool polytope::getIsEmpty() const {
 void polytope::setIsUniverse(bool universe) {
 	this->IsUniverse = universe;
 }
-bool polytope::getIsUniverse() {
+bool polytope::getIsUniverse() const {
 	return this->IsUniverse;
 }
 math::matrix<double>& polytope::getCoeffMatrix() {
@@ -175,24 +175,21 @@ std::vector<double> polytope::getColumnVector() {
 	return columnVector;
 }
 
-double polytope::computeSupportFunction(std::vector<double> direction,
-		lp_solver &lp) {
+double polytope::computeSupportFunction(const std::vector<double>& direction,
+		lp_solver &lp) const {
 
 	assert(direction.size()>0);
 	double sf;
 
-//	std::cout<<"Entered inside ComputeSupportFunction 1 !!\n";
 	if (this->getIsEmpty()){
 	//	throw std::runtime_error("\nCompute Support Function called for an Empty Polytope.\n");
 		sf = 0; //returns zero for empty polytope
 	}
 	else if (this->getIsUniverse())
-		throw std::runtime_error("\n Cannot Compute Support Function of a Universe Polytope.\n");
+		throw std::runtime_error("\n Cannot Compute Support Function of a Universe (un-constrained) Polytope.\n");
 	else{
-//		std::cout<<"Before Compute_LLP !!\n";
 		sf = lp.Compute_LLP(direction); //since lp has already been created and set
-	}								//with constraints at the time of creation
-
+	}									//with constraints at the time of creation
 	return sf;
 }
 
@@ -707,11 +704,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			throw std::runtime_error("forbidden state string improper: <= or >= constraint expected\n");
 		}
 	}
-//	cout<<"constraints = "<<p->getCoeffMatrix()<<"\n";
-//	cout << "forbidden location id: " << f_set.first << std::endl;
-//	for (int i=0;i<p->getColumnVector().size();i++)
-//		cout<<p->getColumnVector()[i]<<"\t";
-//	cout<<endl;
+
 	f_set.second=p;
 };
 

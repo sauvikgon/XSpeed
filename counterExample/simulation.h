@@ -215,8 +215,6 @@ public:
 	 * where to create the initial points (assumption is initial_set is subsumed by the location invariant) and locptr
 	 * is the ha location to start simulations. The initial_set is assumped to be type hyperbox
 	 */
-
-	//
 };
 
 #endif /* SIMULATION_H_ */

@@ -230,7 +230,7 @@ void Simplex_CPU::setConstratint_CPU(math::matrix<double> &A,
 	}
 }	//setting constraints of simplex
 
-float Simplex_CPU::ComputeLP_CPU(std::vector<double> &C) {
+float Simplex_CPU::ComputeLP_CPU(const std::vector<double> &C) {
 
 	int No_C = orig_CoefficientMatrix.size1();
 	float res;

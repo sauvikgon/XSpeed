@@ -7,6 +7,7 @@
 
 #include "counterExample/abstractCE.h"
 #include "counterExample/simulation.h"
+#include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include "Utilities/gradient.h"
 #include "core_system/math/analyticODESol.h"

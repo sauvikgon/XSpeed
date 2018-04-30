@@ -43,7 +43,7 @@ public:
 	Simplex_CPU();
 
 	void setConstratint_CPU(math::matrix<double> &A1, std::vector<double> &B1);	//setting constraints of simplex
-	float ComputeLP_CPU(std::vector<double> &C1);	//GPU computations
+	float ComputeLP_CPU(const std::vector<double> &C1);	//GPU computations
 	~Simplex_CPU() {
 	}
 
