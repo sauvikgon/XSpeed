@@ -1322,6 +1322,7 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 		LoadBalanceDS[i].sf_dotProduct.resize(LoadBalanceDS[i].List_dir_X0.size1()); // resize
 	}
 
+
 	for (unsigned int i = 0; i < countTotal_X; i++) {
 		unsigned int index;
 		unsigned int j;

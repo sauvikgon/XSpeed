@@ -168,6 +168,7 @@ void SetHelicopter_Parameters3(hybrid_automata& Hybrid_Automata,
 	source->setInvariant(invariant);
 	source->setInvariantExist(false); //no invariant available
 
+
 	int dim = initial_polytope_I->getSystemDimension();
 
 	Hybrid_Automata.addInitial_Location(source);

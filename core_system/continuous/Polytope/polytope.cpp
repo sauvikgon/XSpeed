@@ -8,10 +8,6 @@
  */
 
 #include "core_system/continuous/Polytope/Polytope.h"
-//#include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
-//#include "math/lp_gurobi_simplex.h"
-
-//#include <stdlib.h>
 #include "core_system/math/basic_functions.h"
 #include "core_system/math/matrix.h"
 #include "Utilities/StandardVector.h"
@@ -70,10 +66,11 @@ polytope::polytope(math::matrix<double> coeffMatrix,
 	this->setIsUniverse(false); //Not a universe Polytope and is now a 'Bounded' polytope
 	this->IsUniverse = false; // Assuming that the constraints passed as matrix, vector are meaningful
 	this->IsEmpty = false; // assuming that the constraints are not unsatiafiable.
+
 }
 
 void polytope::setPolytope(math::matrix<double> coeffMatrix,
-		std::vector<double> columnVector, int inEqualitySign) {
+	std::vector<double> columnVector, int inEqualitySign) {
 	this->setNumberFacets(coeffMatrix.size1());
 	this->setSystemDimension(coeffMatrix.size2());
 	this->coeffMatrix = coeffMatrix;

@@ -16,6 +16,10 @@
 
 #include <list>
 
+<<<<<<< local
+#include "core_system/Reachability/SequentialSF.h"
+=======
+>>>>>>> other
 #include "core_system/Reachability/AGJH.h"
 #include "core_system/Reachability/TPBFS.h"
 #include "core_system/Reachability/AsyncBFS.h"
