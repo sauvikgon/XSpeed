@@ -441,10 +441,11 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 
 	if(Algorithm_Type == FORWARD){
 		std::cout << "\nRunning PostC using forward approximation model and sequential exploration of symbolic states.\n";
-
-		reach_region = reachForwardApprox(NewTotalIteration, current_location->getSystem_Dynamics(),
+		exit(0);
+		/*reach_region = reachForwardApprox(NewTotalIteration, current_location->getSystem_Dynamics(),
 						continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
 						current_location->getInvariantExist(), lp_solver_type_choosen);
+		*/
 	}
 
 	/*if (Algorithm_Type == GPU_SF) { //computing all support function in GPU

@@ -43,7 +43,10 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 	simulation::ptr sim;
 	std::cout << "Inside concrete trace plotter, no. of trajectory segs:" << T.size() << std::endl;
 	double steps = 100;
-
+	// cleaning the old contents of the file now:
+	std::ofstream myoutfile;
+	myoutfile.open(filename.c_str(),std::fstream::out);
+	myoutfile.close();
 	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
 		seg = *it;
 		locId = seg.first;

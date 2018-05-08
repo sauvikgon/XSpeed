@@ -373,6 +373,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 /**
  * This method computes the postC flowpipe using the forward approximation model in SpaceEx
  */
+/*
 template_polyhedra::ptr reachForwardApprox(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type_choosen) {
 
@@ -415,3 +416,4 @@ template_polyhedra::ptr reachForwardApprox(unsigned int boundedTotIteration, Dyn
 	}
 
 }
+*/

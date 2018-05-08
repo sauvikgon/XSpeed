@@ -73,18 +73,9 @@ class simulation : public var_to_index_map {
 	unsigned int x1; // the first output dimension for plotting.
 	unsigned int x2; // the second output dimension for plotting.
 	typedef std::pair<double,std::vector<double>> trace_point; // A trace point is a (time,vector) pair, specifying the system state at the time instance.
-	std::list< trace_point> sim_trace; // The d.s. storing the computed simulation trace
+	std::list<trace_point> sim_trace; // The d.s. storing the computed simulation trace
 
 	double time_step; //the supplied time-step
-	/**
-	 * Returns a collection of n start points for simulating a ha, given its initial location and initial set as a hyperbox
-	 */
-//	std::vector<sim_start_point> get_start_points(unsigned int n, hyperbox<double>::ptr hbox, location::ptr locptr);
-
-	/**
-	 * Returns a collection of n start points for simulating a ha, given its initial location and initial set as a polytope
-	 */
-//	std::vector<sim_start_point> get_start_points(unsigned int n, polytope::ptr p, location::ptr locptr);
 
 public:
 	typedef boost::shared_ptr<simulation> ptr;

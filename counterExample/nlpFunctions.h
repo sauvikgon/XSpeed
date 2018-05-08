@@ -9,6 +9,7 @@
 #ifndef NLP_FUNC_H
 #define NLP_FUNC_H
 
+
 #include "core_system/math/matrix.h"
 
 #define VALIDATION
@@ -32,12 +33,13 @@ struct boundConstriant {
 double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
 /**
- * Objective function for splicing with Flowpipe constraints only. (Sergiy's Idea)
+ * Objective function for splicing with Flowpipe constraints
+ *  only. (Sergiy's Idea)
  */
 double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
 /**
- * Objective function for splicing with mixed NLP-LP . (Goran's Idea)
+ * Objective function for splicing with iterative NLP-LP. (Goran's Idea)
  */
 double myobjfunc3(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 

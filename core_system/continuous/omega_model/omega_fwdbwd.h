@@ -21,7 +21,7 @@ class Omega_fwdbwd: public Omega
 	/** Empty Constructor */
 	Omega_fwdbwd();
 
-	Omega_fwdbwd(math::matrix<double> my_A, const polytope::ptr X0, const polytope::ptr U, const double delta)
+	Omega_fwdbwd(const math::matrix<double> my_A, const polytope::ptr X0, const polytope::ptr U, const double delta)
 	{
 		this->Omega(my_A, X0, U, delta);
 
@@ -34,7 +34,7 @@ class Omega_fwdbwd: public Omega
 
 	/** Computes the support function of Psi w.r.t l */
 	virtual double Psi_support(const std::vector<double>& l);
-}
+};
 
 double Omega_fwdbwd::Omega_support(const std::vector<double>& l)
 {

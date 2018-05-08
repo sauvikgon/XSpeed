@@ -46,7 +46,7 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 	return sum;
 }
 
-/** Objective function for mixed NLP-LP instance
+/** Objective function for an iterative NLP-LP (Goran's Idea)
  * @ Rajarshi
  */
 //double myobjfunc3(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data)
@@ -197,6 +197,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	// Computes the L2 norm or Euclidean distances between the trace end points.
 	//-----------------------------------------
 
+	/*This is the vector of end-points of N trajectory segments */
 	std::vector<std::vector<double> > y(N);
 
 	double cost = 0;
@@ -253,7 +254,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			Axplusb[j] = Axplusb[j] + d.C[j];
 		}
 
-//		For validation, add the distance of trace end points to the invariant
+//		For validation, the distance of trace end points from the invariant is
+//		added to the cost
 
 		std::vector<double> inv_dist_grad(dim,0);
 		cost+= I->point_distance(y[i]); // end point distance to invariant added to cost

@@ -616,8 +616,8 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
  */
 void simulation::print_trace_to_outfile(std::string s) {
 	std::ofstream myoutfile;
-	myoutfile.open(s.c_str());
-	for (std::list<trace_point>::const_iterator it = sim_trace.begin();
+	myoutfile.open(s.c_str(),std::fstream::app);
+	for(std::list<trace_point>::const_iterator it = sim_trace.begin();
 			it != sim_trace.end(); it++) {
 		myoutfile << (*it).second[this->x1] << "  " << (*it).second[this->x2]
 				<< "\n";

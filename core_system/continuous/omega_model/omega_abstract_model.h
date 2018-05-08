@@ -34,8 +34,6 @@ class Omega
 public:
 
 	typedef boost::shared_ptr<Omega> ptr;
-	/** Empty constructor*/
-	Omega();
 
 	/** Initializing constructor */
 	Omega(const math::matrix<double> my_A, const polytope::ptr X0, const polytope::ptr U, const double delta){
@@ -67,17 +65,17 @@ public:
 
 private:
 	math::matrix<double> my_A;
-	const double my_delta;
-	const polytope::ptr my_X0;
-	const polytope::ptr my_U;
-	double my_rho_X0;
-	double my_rho_U;
-	double my_rho_X0_next;
-	std::vector<double> my_l;
-	std::vector<double> my_l_next;
+	double my_delta;
+	polytope::ptr my_X0;
+	polytope::ptr my_U;
+//	double my_rho_X0;
+//	double my_rho_U;
+//	double my_rho_X0_next;
+//	std::vector<double> my_l;
+//	std::vector<double> my_l_next;
 };
 
-Omega::Omega()
+
 double Omega::rho_X0(const std::vector<double>& l)
 {
 	lp_solver lpsol;
