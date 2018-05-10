@@ -29,7 +29,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 //bound is the maximum number of transitions or jumps permitted.
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
-std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::list<abstractCE::ptr>& ce_candidates){
+std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::list<abstractCE::ptr>& symbolic_ce_list){
 
 	std::list < symbolic_states::ptr > Reachability_Region;
 	template_polyhedra::ptr reach_region;
@@ -57,7 +57,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		queue.pop_front(); //delete from FRONT
 
 		if (bfslevel > bound)
-			break; //stopping since the number of jumps exceeds the number of bound
+			break; //stopping since the number of jumps exceeds the bound
 
 		int location_id;
 		location_id = U->getLocationId();
@@ -167,28 +167,29 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				//so perform intersection with forbidden set provided locID matches
 			int locID = current_location->getLocId();
 			cout<<"Running Safety Check for Loc = "<<locID<<std::endl;
-			if (forbidden_set.first==-1 || locID == forbidden_set.first) { //forbidden locID matches
+			if (forbidden_set.first==-1 || locID == forbidden_set.first) { // forbidden locID matches. loc id of -1 means any location
 				polytope::ptr forbid_poly = forbidden_set.second;
 				std::list < template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
 
 				if (forbid_intersects.size() == 0) {
 					//std::cout << "\nThe model does NOT violate SAFETY property!!!\n";
-				} else {
-					symbolic_states::ptr current_forbidden_state;
-					current_forbidden_state = S;
-					int cc = 0;
+				}
+				else {
+					symbolic_states::ptr symb_state_in_abst_ce; // This is a pointer to the current symblic state in the abstract ce.
+					symb_state_in_abst_ce = S;
+					int symbolic_ce_length = 0;
 					do {
 						int locationID2=0;
 						discrete_set ds, ds2;
 						// ***********insert bounding_box_polytope as continuousSet in the abstract_symbolic_state***********
 
-						int transID = current_forbidden_state->getTransitionId(); //a)
+						int transID = symb_state_in_abst_ce->getTransitionId(); //a)
 						//   **********************************************************
 						//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
 						//1) ******************** list_of_symbolic_states ********************
 
-						list_sym_states.push_front(current_forbidden_state); //pushing the bad symbolic_state first(at the top)
+						list_sym_states.push_front(symb_state_in_abst_ce); //pushing the unsafe symbolic_state first (at the top)
 
 						//2) list_of_transition
 						//a) current sym_state only have trans_ID but to retrieve this transition I have to
@@ -200,12 +201,12 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						//3) length: number of transitions
 						//   **********************************************************
 
-						if (current_forbidden_state->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
+						if (symb_state_in_abst_ce->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
 
 							//current_forbidden_state = searchSymbolic_state(Reachability_Region, current_forbidden_state->getParentPtrSymbolicState());
-							current_forbidden_state = current_forbidden_state->getParentPtrSymbolicState();
+							symb_state_in_abst_ce = symb_state_in_abst_ce->getParentPtrSymbolicState();
 							//2) ******************* list_transitions ********************
-							ds2 = current_forbidden_state->getDiscreteSet(); //c)
+							ds2 = symb_state_in_abst_ce->getDiscreteSet(); //c)
 							for (std::set<int>::iterator it = ds2.getDiscreteElements().begin(); it != ds2.getDiscreteElements().end(); ++it)
 								locationID2 = (*it); //c)
 							location::ptr object_location;
@@ -214,28 +215,30 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 							list_transitions.push_front(temp); //pushing the transition in the stack
 							//2) ******************* list_transitions Ends ********************
 						}
-						cc++;
-					} while (current_forbidden_state->getParentPtrSymbolicState()!= NULL);
-					if ((cc >= 1) && (current_forbidden_state->getParentPtrSymbolicState()== NULL)) { //root is missed
-						list_sym_states.push_front(current_forbidden_state); //1) pushing the initial/root bad symbolic_state at the top
+						symbolic_ce_length++;
+					} while (symb_state_in_abst_ce->getParentPtrSymbolicState()!= NULL);
+					if ((symbolic_ce_length >= 1) && (symb_state_in_abst_ce->getParentPtrSymbolicState()== NULL)) { //root is missed
+						list_sym_states.push_front(symb_state_in_abst_ce); //1) pushing this new symb state at the beginning
 					}
 					safety_violation = true;
-					abstractCE::ptr ce = abstractCE::ptr(new abstractCE());
-					ce->set_length(cc);
-					ce->set_sym_states(list_sym_states);
-					ce->set_transitions(list_transitions);
+					abstractCE::ptr abst_ce = abstractCE::ptr(new abstractCE());
+					abst_ce->set_length(symbolic_ce_length);
+					abst_ce->set_sym_states(list_sym_states);
+					abst_ce->set_transitions(list_transitions);
 					hybrid_automata::ptr ha = hybrid_automata::ptr(
 							new hybrid_automata(H));
-					ce->set_automaton(ha);
-					ce->set_forbid_poly(forbidden_set.second);
-					ce_candidates.push_back(ce); // ce added to the abstract ce candidates list.
+					abst_ce->set_automaton(ha);
+					abst_ce->set_forbid_poly(forbidden_set.second);
+					symbolic_ce_list.push_back(abst_ce); // the symbolic (abstract) ce is added to the list.
 				} // end of condition when forbidden state intersects with the flowpipe set
 			} //end of condition when forbidden state loc id matches with flowpipe loc id
 		} //computed flowpipe is not empty
 
-		if (safety_violation) {
-			break; //no need to compute rest of the locations
-		}
+
+//		if (safety_violation) {
+//			break; //no need to compute rest of the locations
+//		}
+
 		//  ******************************** Safety Verification section Ends********************************
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 
@@ -470,7 +473,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 //I is the initial symbolic state
 
 std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
-		std::list<abstractCE::ptr>& ce_candidates) {
+		std::list<abstractCE::ptr>& symbolic_ce_list) {
 
 	std::list < symbolic_states::ptr > Reachability_Region;
 	//	template_polyhedra::ptr reach_region;
@@ -679,7 +682,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0) //computed reach_region is NOT empty
 				Reachability_Region.push_back(S[index]);
 			//  ******************************** Safety Verification section ********************************
-			safety_violation = safetyVerify(S[index], Reachability_Region, ce_candidates);
+			safety_violation = safetyVerify(S[index], Reachability_Region, symbolic_ce_list);
 
 			//  ******************************** Safety Verification section ********************************
 		} //end-for pushing all computed flowpipe
@@ -701,7 +704,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 
 //Lock Avoidance:: Parallel Breadth First Search for Discrete Jumps
 //separate Read and Write Queue (pwlist.WaitingList)
-std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(std::list<abstractCE::ptr>& ce_candidates) {
+std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(std::list<abstractCE::ptr>& symbolic_ce_list) {
 
 	std::list < symbolic_states::ptr > Reachability_Region;
 	//	template_polyhedra::ptr reach_region;
@@ -992,7 +995,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 #pragma omp parallel for
 		for (unsigned int index = 0; index < count; index++) {
 			//  ******************************** Safety Verification section ********************************
-			safety_violation = safetyVerify(S[index], Reachability_Region, ce_candidates);
+			safety_violation = safetyVerify(S[index], Reachability_Region, symbolic_ce_list);
 			//  ******************************** Safety Verification section ********************************
 		} //end-for pushing all computed flowpipe
 
@@ -1106,7 +1109,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 
 bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 		std::list<symbolic_states::ptr>& Reachability_Region,
-		std::list<abstractCE::ptr>& ce_candidates) {
+		std::list<abstractCE::ptr>& symbolic_ce_list) {
 
 	std::list < symbolic_states::ptr > list_sym_states;
 	std::list < abstract_symbolic_state::ptr > list_abstract_sym_states;
@@ -1244,7 +1247,7 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 							new hybrid_automata(H));
 					ce->set_automaton(h);
 					ce->set_forbid_poly(forbid_poly);
-					ce_candidates.push_back(ce); // ce added to the candidates list
+					symbolic_ce_list.push_back(ce); // ce added to the candidates list
 				}
 			} // end of condition when forbidden state intersects with the flowpipe set
 		} //end of condition when forbidden state loc id matches with flowpipe loc id

@@ -169,7 +169,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 
 	//todo:: Redundant invariant directional constraints to be removed
 
-	if (InvariantExist == true) { //if invariant exist. Computing
+	if (InvariantExist == true) {
 		math::matrix<double> inv_sfm;
 		int num_inv = invariant->getColumnVector().size(); //number of Invariant's constraints
 		inv_sfm.resize(num_inv, shm_NewTotalIteration);
@@ -370,6 +370,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 	} //end of the Critical Section
 	return tpolys;
 }
+
 /**
  * This method computes the postC flowpipe using the forward approximation model in SpaceEx
  */

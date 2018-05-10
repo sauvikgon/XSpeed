@@ -60,8 +60,8 @@ std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 }
 
 //constructor method
-abstractCE::abstractCE(std::list<symbolic_states::ptr> s_states,
-		std::list<transition::ptr> ts, hybrid_automata::ptr h, polytope::ptr fpoly) {
+abstractCE::abstractCE(std::list<symbolic_states::ptr> s_states, std::list<transition::ptr> ts, hybrid_automata::ptr h, polytope::ptr fpoly)
+{
 
 	//Assertion to check that the length of the counter-example is one minus
 	// the number of sym states in the CE.
@@ -176,9 +176,9 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	//assert that the number of transitions equals 1 less than the length of the abstract CE path
 
-	std::cout << "Length of the CE, N=" << N << std::endl;
+	std::cout << "Length of the symbolic CE = " << N << std::endl;
 	assert(transList.size() == N-1);
-	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
+	std::cout << "gen_concreteCE: dimension =" << dim << std::endl;
 	// initialize the global locIdList
 	locIdList.resize(N);
       
@@ -211,14 +211,18 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
 
-// A random objective function created for lp solving
 
 	std::vector<double> v(dim);
 
 	std::vector<double> lb(optD), ub(optD);
 	double max,min,start_min,start_max;
-
-	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
+	/**
+	 * Initialize the start vectors of the trajectory segments from the symbolic states.
+	 * Let x be a start vector of a trajectory segment. We initialize x by:
+	 * x_i = (max_x_i + min_x_i)/2.
+	 * The initialized point is guaranteed to be inside the initial polytope. Why?
+	 */
+	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the symbolic counter-example
 	{
 		S = get_symbolic_state(i);
 		P = S->getInitialPolytope();
