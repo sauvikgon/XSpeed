@@ -218,8 +218,12 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	std::vector<double> lb(optD), ub(optD);
 	double max,min,start_min,start_max;
 
+	// dxli: 1. generate bounds for each variable; also initialize
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
+		// dxli: the whole flowpipe is a sequence of sub-flowpipes, each of which
+		// denotes \omega in each location.
+		// S is the sub-flowpipe in i-th sequence; P is the first \omega in S.
 		S = get_symbolic_state(i);
 		P = S->getInitialPolytope();
 
@@ -246,6 +250,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			ub[index] = max;
 
 			dir[j] = 0;
+			// dxli: using the (min+max)/2 to initialize variables.
 			x[index] = (lb[index] + ub[index])/2;
 		}
 	}
@@ -277,7 +282,7 @@ bool aggregation=true;//default is ON
 	for (unsigned int i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		if(i==N-1){
-			// If last abst sym state, then take time projection of flowpipe \cap bad_poly
+			// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation,bad_poly,1);
 			assert(polys.size()>=0); // The last sym state of an abstract CE must intersect with the bad set
 

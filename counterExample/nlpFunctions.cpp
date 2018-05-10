@@ -216,6 +216,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 	for (unsigned int i = 0; i < N; i++) {
 
+		// dxli: v is a copy of state variables. (Get the N start vectors)
 		std::vector<double> v(dim, 0);
 		for (unsigned int j = 0; j < dim; j++) {
 			v[j] = x[i * dim + j];
@@ -228,6 +229,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 		std::vector<double> traj_dist_grad(dim,0); // holds the grads of the trajectories distance to invariant
 
+		// dxli: simulate the starting point in the current location (v), for some time (x[N*dim + i]) over some dynamics (d)
 		y[i] = ODESol(v,d,x[N*dim + i]);
 		// patch for constant dynamics
 
@@ -245,6 +247,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 		assert(d.C.size() == dim);
 
+		// dxli: TODO question
 		math::matrix<double> At(A);
 		At.scalar_multiply(x[N*dim+i]);
 		At.matrix_exponentiation(expAt);
