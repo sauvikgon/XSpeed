@@ -140,8 +140,8 @@ private:
 	std::list<symbolic_states::ptr> sym_states;
 
 	/**
-	 * The list of transitions taken from the initial abstract_symbolic_state to the
-	 * final abstract_symbolic_state.
+	 * The list of transitions taken from the initial symbolic_state to the
+	 * final symbolic_state.
 	 */
 	std::list<transition::ptr> trans;
 	/**
@@ -151,7 +151,7 @@ private:
 	unsigned int length;
 
 	/**
-	 * The reference to the automaton to which this is a counter example
+	 * The reference to the automaton to which this is an abstract counter example
 	 */
 	hybrid_automata::ptr H;
 	/**
@@ -160,7 +160,7 @@ private:
 	polytope::ptr forbid_poly;
 
 	/**
-	 * Returns an instance of the concrete counter-example from the abstract one, using NLP with flowpipe given constraints
+	 * Returns an instance of a concrete counter-example from the abstract one, using NLP with flowpipe given constraints
 	 */
 	concreteCE::ptr gen_concreteCE(double tolerance, const std::list<refinement_point>& refinements);
 

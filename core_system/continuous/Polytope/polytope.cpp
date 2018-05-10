@@ -482,7 +482,7 @@ double polytope::point_distance(std::vector<double> v){
 	if(this->IsUniverse)
 		return 0;
 	if(this->IsEmpty){
-		std::cout << "distance of a point from am empty polytope asked\n";
+		std::cout << "distance of a point from an empty polytope asked\n";
 		exit(0);
 	}
 

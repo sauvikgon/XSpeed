@@ -26,6 +26,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 
 		// The right algorithm is selected within the following function
 		Symbolic_states_list = reach_SEQ_BFS.computeSequentialBFSReach(ce_candidates);
+		std::cout << "number of symbolic ce candidates for exploration: " << ce_candidates.size() << std::endl;
 
 	} else if (user_options.get_algorithm() == AGJH_BFS) { //Adaptation of Gerard J. Holzmann's algorithm (Seq PostC and PBFS)
 		agjh reach_AGJH;
