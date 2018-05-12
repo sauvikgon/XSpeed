@@ -21,7 +21,7 @@ class userOptions {
 	std::string set_aggregation; // The aggregation options thull(default), none
 	std::string Engine; // The Engine options supp(default), simu
 	unsigned int simu_algo;	//Algorithm choice for running Trajectory Simulation
-	unsigned int simu_init_sampling_points; //Number of sampling-start-points for Simulation Algorithm
+	unsigned int simu_init_points; //Number of start-points for Simulation Algorithm
 
 	unsigned int output_var_X; // first  dimension for plotting
 	unsigned int output_var_Y; // second dimension for plotting
@@ -93,8 +93,8 @@ public:
 	const std::string& getEngine() const;
 	void setEngine(const std::string& engine);
 
-	unsigned int get_simu_init_sampling_points();
-	void set_simu_init_sampling_points(unsigned int sampling_points);
+	unsigned int get_simu_init_points();
+	void set_simu_init_points(unsigned int sampling_points);
 
 
 };

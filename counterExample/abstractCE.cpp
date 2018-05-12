@@ -554,262 +554,262 @@ bool aggregation=true;//default is ON
 /**
  * Generate concrete trajectory using splicing with NLP problem (Zutchi, Sankaranarayanan's  Idea)
  */
-concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements) {
-	//	 Generate an nlopt object with the constraints defined by the Abstract
-	//	 counter example
-
-	//	 1. Get the dimension of the optimization problem by
-	//	 getting the dimension of the continuous set of the abstract counter example
-
-	symbolic_states::const_ptr S = get_first_symbolic_state();
-	dim = S->getContinuousSetptr()->get_dimension();
-	N = get_length(); // the length of the counter example
-	HA = this->get_automaton();
-	transList = this->get_CE_transitions();
-	bad_poly = this->forbid_poly;
-	ref_pts = refinements;
-
-
-	//assert that the number of transitions equals 1 less than the length of the abstract CE path
-
-	std::cout << "Length of the CE, N=" << N << std::endl;
-	assert(transList.size() == N-1);
-	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
-	// initialize the global locIdList
-	locIdList.resize(N);
-
-	std::set<int> d;
-	for(unsigned int i=0;i<N;i++){
-		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
-		assert(d.size() == 1);
-		locIdList[i] = *(d.begin());
-	}
-
-	//	 2. The dimensionality of the opt problem is N vectors, one starting point
-	//	 for each of the abstract sym state of the CE + N dwell times. Moreover,
-	//	 each starting vector is of dimension dim. Therefore, the total number of
-	//	 variables of the optimization problem are dim*N + N
-
-		unsigned int optD = N * dim + N;
-		std::cout << "nlopt problem dimension = " << optD << std::endl;
-	//	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
-	//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
-		nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
-	//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
-
-	// 	local optimization routine
-	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(8000);
-	myopt.set_stopval(1e-6);
-	//myopt.set_initial_step(0.001);
-
-	//Set Initial value to the optimization problem
-	std::vector<double> x(optD, 0);
-	polytope::ptr Inv;
-
-	// A random objective function created for lp solving
-
-	std::vector<double> v(dim);
-
-	std::vector<double> lb(optD), ub(optD);
-
-	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
-	{
-		if(i==0)// Initial polytope is given
-		{
-			Inv = this->get_first_symbolic_state()->getInitialPolytope();
-			lb[N*dim] = 0;
-			ub[N*dim] = 10000;
-
-		}
-		else{
-			//Inv = HA->getLocation(locIdList[i])->getInvariant();
-			lb[N*dim+i] = 0;
-			ub[N*dim+i] = 10000;
-			continue;
-		}
-
-		if(Inv->getIsEmpty()){
-
-			for (unsigned int j = 0; j < dim; j++){
-				unsigned int index = i*dim+j;
-				lb[index] = 0;
-				ub[index] = 0;
-			}
-		}
-		else if (Inv->getIsUniverse())
-		{
-			for (unsigned int j = 0; j < dim; j++){
-
-				unsigned int index = i*dim+j;
-				lb[index] = -DBL_MAX;
-				ub[index] = DBL_MAX;
-			}
-		}
-		else{
-			lp_solver lp(GLPK_SOLVER);
-			lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
-
-			//we add bound constraints on the position parameters, which are required to run global opt routines.
-			std::vector<double> dir(dim,0);
-			double min, max;
-			for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
-			{
-				dir[j] = -1;
-				min = -1 * lp.Compute_LLP(dir);
-				dir[j] = 1;
-				max = lp.Compute_LLP(dir);
-				unsigned int index = i*dim+j;
-				if(min>max) // swap min and max
-				{
-					min = min+max;
-					max = min-max;
-					min = min-max;
-				}
-				lb[index] = min;
-				ub[index] = max;
-
-				dir[j] = 0;
-				x[index] = (lb[index] + ub[index])/2;
-			}
-		}
-	}
-
-//	std::cout << "generated initial points\n";
-//	Set initial value to the time variables
-//	Restrict dwell time within the projections of C_i in time variable
-
-//	We assume that the time variable is named as 't' in the model.
-//	We find out the min,max components of the time variable
-
-//	unsigned int t_index =
-//		get_first_symbolic_state()->getInitialPolytope()->get_index("t");
+//concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements) {
+//	//	 Generate an nlopt object with the constraints defined by the Abstract
+//	//	 counter example
 //
-//	assert((t_index >= 0) && (t_index < dim));
-
-//	std::vector<double> dmin(dim, 0), dmax(dim, 0);
-//	dmax[t_index] = 1;
-//	dmin[t_index] = -1;
+//	//	 1. Get the dimension of the optimization problem by
+//	//	 getting the dimension of the continuous set of the abstract counter example
 //
-//	std::list<polytope::ptr> polys;
-//	polytope::ptr guard;
+//	symbolic_states::const_ptr S = get_first_symbolic_state();
+//	dim = S->getContinuousSetptr()->get_dimension();
+//	N = get_length(); // the length of the counter example
+//	HA = this->get_automaton();
+//	transList = this->get_CE_transitions();
+//	bad_poly = this->forbid_poly;
+//	ref_pts = refinements;
 //
-//	std::list<transition::ptr>::iterator it = transList.begin();
-//	transition::ptr T;
 //
-//	bool aggregation=true;//default is ON
-
-//	for (unsigned int i = 0; i < N; i++) {
+//	//assert that the number of transitions equals 1 less than the length of the abstract CE path
 //
-//		Inv = HA->getLocation(locIdList[i])->getInvariant();
+//	std::cout << "Length of the CE, N=" << N << std::endl;
+//	assert(transList.size() == N-1);
+//	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
+//	// initialize the global locIdList
+//	locIdList.resize(N);
 //
-//		if(i==N-1) {
-//			// If last abst sym state, then take time projection of Inv \cap bad_poly
-//			Inv = Inv->GetPolytope_Intersection(bad_poly);
-//		}
-//		else {
-//			// Take time projection of flowpipe \cap transition guard
-//			T = *(it);
-//			guard = T->getGaurd();
-//			if(!guard->getIsUniverse())
-//				Inv = Inv->GetPolytope_Intersection(guard);
-//		}
-//		// Inv now is the intersected poly with guard/bad_poly
+//	std::set<int> d;
+//	for(unsigned int i=0;i<N;i++){
+//		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
+//		assert(d.size() == 1);
+//		locIdList[i] = *(d.begin());
+//	}
 //
-//		if(Inv->getIsEmpty())
+//	//	 2. The dimensionality of the opt problem is N vectors, one starting point
+//	//	 for each of the abstract sym state of the CE + N dwell times. Moreover,
+//	//	 each starting vector is of dimension dim. Therefore, the total number of
+//	//	 variables of the optimization problem are dim*N + N
+//
+//		unsigned int optD = N * dim + N;
+//		std::cout << "nlopt problem dimension = " << optD << std::endl;
+//	//	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
+//	//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+//		nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
+//	//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
+//
+//	// 	local optimization routine
+//	myopt.set_min_objective(myobjfunc2, NULL);
+//	myopt.set_maxeval(8000);
+//	myopt.set_stopval(1e-6);
+//	//myopt.set_initial_step(0.001);
+//
+//	//Set Initial value to the optimization problem
+//	std::vector<double> x(optD, 0);
+//	polytope::ptr Inv;
+//
+//	// A random objective function created for lp solving
+//
+//	std::vector<double> v(dim);
+//
+//	std::vector<double> lb(optD), ub(optD);
+//
+//	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
+//	{
+//		if(i==0)// Initial polytope is given
 //		{
-//			lb[N*dim+i]=0;
-//			ub[N*dim+i]=0;
+//			Inv = this->get_first_symbolic_state()->getInitialPolytope();
+//			lb[N*dim] = 0;
+//			ub[N*dim] = 10000;
+//
+//		}
+//		else{
+//			//Inv = HA->getLocation(locIdList[i])->getInvariant();
+//			lb[N*dim+i] = 0;
+//			ub[N*dim+i] = 10000;
 //			continue;
 //		}
-//		else if(Inv->getIsUniverse()){
-//			lb[N*dim+i] = -DBL_MAX;
-//			ub[N*dim+i] = DBL_MAX;
-//			continue;
+//
+//		if(Inv->getIsEmpty()){
+//
+//			for (unsigned int j = 0; j < dim; j++){
+//				unsigned int index = i*dim+j;
+//				lb[index] = 0;
+//				ub[index] = 0;
+//			}
+//		}
+//		else if (Inv->getIsUniverse())
+//		{
+//			for (unsigned int j = 0; j < dim; j++){
+//
+//				unsigned int index = i*dim+j;
+//				lb[index] = -DBL_MAX;
+//				ub[index] = DBL_MAX;
+//			}
 //		}
 //		else{
 //			lp_solver lp(GLPK_SOLVER);
 //			lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
-//			// ensure that time is always positive
-//			max = lp.Compute_LLP(dmax);
-//			min = -1 * lp.Compute_LLP(dmin);
 //
-//			// we add the bounds as constraints in the nlopt
+//			//we add bound constraints on the position parameters, which are required to run global opt routines.
+//			std::vector<double> dir(dim,0);
+//			double min, max;
+//			for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
+//			{
+//				dir[j] = -1;
+//				min = -1 * lp.Compute_LLP(dir);
+//				dir[j] = 1;
+//				max = lp.Compute_LLP(dir);
+//				unsigned int index = i*dim+j;
+//				if(min>max) // swap min and max
+//				{
+//					min = min+max;
+//					max = min-max;
+//					min = min-max;
+//				}
+//				lb[index] = min;
+//				ub[index] = max;
 //
-//			// Get the min and max time projection of start set
-//			lp_solver lp1(GLPK_SOLVER);
-//
-//			lp1.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(),
-//					Inv->getInEqualitySign());
-//			// Ensure that the time is positive
-//			start_min = -1 * lp1.Compute_LLP(dmin);
-//			start_max = lp1.Compute_LLP(dmax);
-//			ub[N*dim+i] = max - start_min;
-//			if(min<=start_max)
-//				lb[N*dim+i] = 0;
-//			else
-//				lb[N*dim+i] = min-start_max;
+//				dir[j] = 0;
+//				x[index] = (lb[index] + ub[index])/2;
+//			}
 //		}
-
-		// We may choose to take the average time as the initial dwell time
-//		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
-//
-//		if(it!=transList.end())
-//			it++;
-//
 //	}
-
-	myopt.set_lower_bounds(lb);
-	myopt.set_upper_bounds(ub);
-
-
-	std::cout << "Computed initial dwell times and added dwell time constraints\n";
-
-	double minf;
-	try {
-		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
-		myopt.set_stopval(tolerance);
-		myopt.optimize(x, minf);
-	} catch (std::exception& e) {
-		std::cout << e.what() << std::endl;
-	}
-	std::cout << "nlopt returned min : " << minf << "\n";
-	std::cout << "Length of abstract counter example:" << N <<"\n";
-
-	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
-	cexample->set_automaton(HA);
-	if (minf > tolerance) {
-		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
-		return cexample;
-	} else {
-		std::ofstream ce_trace;
-		// one trajectory per symbolic state to be added in the concreteCE
-		for (unsigned int i = 0; i < N; i++) {
-			// create the sample
-			concreteCE::sample s;
-			std::set<int>::iterator dset_iter =
-					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
-			unsigned int locId = *dset_iter;
-
-			std::vector<double> y(dim);
-			for (unsigned int j = 0; j < dim; j++) {
-				y[j] = x[i * dim + j];
-			}
-
-			double time = x[N * dim + i];
-			s.first = y;
-			//s.second = y[dim-1];
-			s.second = time;
-			concreteCE::traj_segment traj;
-			traj.first = locId;
-			traj.second = s;
-			cexample->push_back(traj);
-		}
-	}
-
-	return cexample;
-
-}
+//
+////	std::cout << "generated initial points\n";
+////	Set initial value to the time variables
+////	Restrict dwell time within the projections of C_i in time variable
+//
+////	We assume that the time variable is named as 't' in the model.
+////	We find out the min,max components of the time variable
+//
+////	unsigned int t_index =
+////		get_first_symbolic_state()->getInitialPolytope()->get_index("t");
+////
+////	assert((t_index >= 0) && (t_index < dim));
+//
+////	std::vector<double> dmin(dim, 0), dmax(dim, 0);
+////	dmax[t_index] = 1;
+////	dmin[t_index] = -1;
+////
+////	std::list<polytope::ptr> polys;
+////	polytope::ptr guard;
+////
+////	std::list<transition::ptr>::iterator it = transList.begin();
+////	transition::ptr T;
+////
+////	bool aggregation=true;//default is ON
+//
+////	for (unsigned int i = 0; i < N; i++) {
+////
+////		Inv = HA->getLocation(locIdList[i])->getInvariant();
+////
+////		if(i==N-1) {
+////			// If last abst sym state, then take time projection of Inv \cap bad_poly
+////			Inv = Inv->GetPolytope_Intersection(bad_poly);
+////		}
+////		else {
+////			// Take time projection of flowpipe \cap transition guard
+////			T = *(it);
+////			guard = T->getGaurd();
+////			if(!guard->getIsUniverse())
+////				Inv = Inv->GetPolytope_Intersection(guard);
+////		}
+////		// Inv now is the intersected poly with guard/bad_poly
+////
+////		if(Inv->getIsEmpty())
+////		{
+////			lb[N*dim+i]=0;
+////			ub[N*dim+i]=0;
+////			continue;
+////		}
+////		else if(Inv->getIsUniverse()){
+////			lb[N*dim+i] = -DBL_MAX;
+////			ub[N*dim+i] = DBL_MAX;
+////			continue;
+////		}
+////		else{
+////			lp_solver lp(GLPK_SOLVER);
+////			lp.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(), Inv->getInEqualitySign());
+////			// ensure that time is always positive
+////			max = lp.Compute_LLP(dmax);
+////			min = -1 * lp.Compute_LLP(dmin);
+////
+////			// we add the bounds as constraints in the nlopt
+////
+////			// Get the min and max time projection of start set
+////			lp_solver lp1(GLPK_SOLVER);
+////
+////			lp1.setConstraints(Inv->getCoeffMatrix(), Inv->getColumnVector(),
+////					Inv->getInEqualitySign());
+////			// Ensure that the time is positive
+////			start_min = -1 * lp1.Compute_LLP(dmin);
+////			start_max = lp1.Compute_LLP(dmax);
+////			ub[N*dim+i] = max - start_min;
+////			if(min<=start_max)
+////				lb[N*dim+i] = 0;
+////			else
+////				lb[N*dim+i] = min-start_max;
+////		}
+//
+//		// We may choose to take the average time as the initial dwell time
+////		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
+////
+////		if(it!=transList.end())
+////			it++;
+////
+////	}
+//
+//	myopt.set_lower_bounds(lb);
+//	myopt.set_upper_bounds(ub);
+//
+//
+//	std::cout << "Computed initial dwell times and added dwell time constraints\n";
+//
+//	double minf;
+//	try {
+//		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
+//		myopt.set_stopval(tolerance);
+//		myopt.optimize(x, minf);
+//	} catch (std::exception& e) {
+//		std::cout << e.what() << std::endl;
+//	}
+//	std::cout << "nlopt returned min : " << minf << "\n";
+//	std::cout << "Length of abstract counter example:" << N <<"\n";
+//
+//	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
+//	cexample->set_automaton(HA);
+//	if (minf > tolerance) {
+//		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
+//		return cexample;
+//	} else {
+//		std::ofstream ce_trace;
+//		// one trajectory per symbolic state to be added in the concreteCE
+//		for (unsigned int i = 0; i < N; i++) {
+//			// create the sample
+//			concreteCE::sample s;
+//			std::set<int>::iterator dset_iter =
+//					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
+//			unsigned int locId = *dset_iter;
+//
+//			std::vector<double> y(dim);
+//			for (unsigned int j = 0; j < dim; j++) {
+//				y[j] = x[i * dim + j];
+//			}
+//
+//			double time = x[N * dim + i];
+//			s.first = y;
+//			//s.second = y[dim-1];
+//			s.second = time;
+//			concreteCE::traj_segment traj;
+//			traj.first = locId;
+//			traj.second = s;
+//			cexample->push_back(traj);
+//		}
+//	}
+//
+//	return cexample;
+//
+//}
 
 concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 {

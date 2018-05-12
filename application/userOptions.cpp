@@ -14,7 +14,7 @@ userOptions::userOptions() {
 	output_var_X = 0; // default first dimension of plot
 	output_var_Y = 1; // default second dimension of plot
 	output_var_Z = 0; //default third plot dimension
-
+	simu_init_points = 1; // Number of initial points set to 1 by default.
 //	automata_exploration_algorithm = 12; // sequential BFS
 //	flow_algorithm = 1;	// SEQ
 
@@ -193,11 +193,11 @@ void userOptions::setEngine(const std::string& engine) {
 	Engine = engine;
 }
 
-unsigned int userOptions::get_simu_init_sampling_points(){
-	return simu_init_sampling_points;
+unsigned int userOptions::get_simu_init_points(){
+	return simu_init_points;
 }
-void userOptions::set_simu_init_sampling_points(unsigned int sampling_points){
-	simu_init_sampling_points= sampling_points;
+void userOptions::set_simu_init_points(unsigned int sampling_points){
+	simu_init_points = sampling_points;
 }
 
 

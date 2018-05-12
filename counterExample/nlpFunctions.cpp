@@ -10,7 +10,6 @@
 
 #include "nlpFunctions.h"
 #include "vector"
-
 #include "../core_system/continuous/Polytope/Polytope.h"
 #include "application/DataStructureDirections.h"
 #include "abstractCE.h"

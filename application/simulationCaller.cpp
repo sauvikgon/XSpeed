@@ -26,14 +26,15 @@ void simulationCaller(ReachabilityParameters& reach_parameters,
 	polytope::ptr initialset = (*it)->getInitialSet();
 
 	// testing HA location simulation
-	unsigned int n = op.get_simu_init_sampling_points(); // the number of start points
+	unsigned int n = op.get_simu_init_points(); // the number of start points
+
 	unsigned int max_jump = op.get_bfs_level(); //level 0 means only first breadth, 1 means the next level bfs
-	std::cout<<"Testing the number of point n= <<"<< n<<std::endl;
+	std::cout<<"Generating " << n << " trajectories" << std::endl;
 
 	boost::timer::cpu_timer tsim, plottime;
 	tsim.start();
 	if (op.get_simu_algo() == 1) { //Sequential Simulation with 'n' initial sampling-start-points
-		std::cout << "\nRunning Sequential BFS Simulation Algorithm.\n";
+		std::cout << "\nComputing trajectories Sequentially.\n";
 		//Computation time of n sampling start_points is to be recorded for a fair comparison with parSimulateHa()
 		std::vector<sim_start_point> start_pts = sim->get_start_points(n, initialset, ha.getInitial_Location());
 		assert(start_pts.size() == n);
@@ -41,17 +42,21 @@ void simulationCaller(ReachabilityParameters& reach_parameters,
 			sim->simulateHa(start_pts[i],0,reach_parameters.TimeBound,ha, max_jump);
 		}
 	} else if (op.get_simu_algo() == 2) { //Adaptation of Gerard J. Holzmann's algorithm for Simulation
-		std::cout << "\nRunning Parallel Simulation using adaptation of Gerard J. Holzmann's algorithm.\n";
+		std::cout << "\nComputing trajectories in parallel using an adaptation of Gerard J. Holzmann's algorithm.\n";
 		//Take time recording here
 		sim->parSimulateHa(n, initialset, 0, reach_parameters.TimeBound, ha, max_jump); // Holzmann algorithm adaptation without lock for containment check
 		//stop reading time
 	}
 	tsim.stop();
+
 	double wall_clock, plotTime_clock;
 	wall_clock = tsim.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 	double sim_Time = wall_clock / (double) 1000;
 	std::cout << "\nSIMULATION TIME::Boost Time taken:Wall  (in Seconds) = " << sim_Time << std::endl;
-	//TODO:: if parSimulateHa generates "list <list<trace_points>>" then can call function to merge list-list traces into one list of traces.
+	//TODO:: if parSimulateHa generates "list <list<trace_points>>" then can call function to merge list-list traces into one list of trac
+	std::ofstream myfile;
+	myfile.open(op.getOutFilename().c_str(),std::ofstream::out);
+	myfile.close();
 	plottime.start();
 	sim->print_trace_to_outfile(op.getOutFilename());
 	plottime.stop();
