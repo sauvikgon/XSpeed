@@ -687,7 +687,7 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n,
 	 * constraint on the upper bound and followed by the constraint on the lower bound.
 	 */
 	if (is_hyperbox) {
-		// convert this poytope into hyperbox object
+		// convert this polytope into hyperbox object
 
 		hbox_ptr = hyperbox<double>::ptr(new hyperbox<double>());
 		hbox_ptr->set_dimension(columnSize);
