@@ -230,6 +230,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		std::vector<double> traj_dist_grad(dim,0); // holds the grads of the trajectories distance to invariant
 
 		// dxli: simulate the starting point in the current location (v), for some time (x[N*dim + i]) over some dynamics (d)
+		// dxli: analytic solution, rather ODE solver call. This closed form is true only when the input set is singular.
 		y[i] = ODESol(v,d,x[N*dim + i]);
 		// patch for constant dynamics
 
@@ -247,7 +248,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 		assert(d.C.size() == dim);
 
-		// dxli: TODO question
+		// dxli: some initialization for calculating derivatives
 		math::matrix<double> At(A);
 		At.scalar_multiply(x[N*dim+i]);
 		At.matrix_exponentiation(expAt);
@@ -298,6 +299,32 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			g = Tptr->getGaurd();
 
 			std::vector<double> mapderiv(Axplusb);
+
+			// dxli: guard distance, to address Eq. (12) in CDC 13' paper
+			double guard_dist = g->point_distance(y[i]);
+			cost += guard_dist;
+
+			std::vector<double> guard_dist_grad(dim,0);
+			guard_dist_grad = dist_grad(y[i],g);
+
+			for(unsigned int j=0;j<dim;j++) {
+				double dist_gradx_j = 0;
+				for(unsigned int k=0;k<dim;k++)
+				{
+					dist_gradx_j +=  guard_dist_grad[k] * expAt(k,j);
+				}
+				deriv[i*dim+j] += dist_gradx_j;
+
+			}
+
+			// dxli: add derivative of guard wrt dwell time
+			// dxli: todo need to double check the formula correct or not
+			double dist_gradt = 0;
+			for(unsigned int j=0;j<dim;j++)
+			{
+				dist_gradt +=  guard_dist_grad[j] * Axplusb[j];
+			}
+			deriv[N*dim + i] += dist_gradt;
 
 			// If traj end point inside guard, then apply map.
 //			double guard_dist = g->point_distance(y[i]);
@@ -463,7 +490,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			grad[i] = deriv[i];
 		}
 	}
-//	std::cout << "current cost=" << cost << std::endl;
+	std::cout << "current cost=" << cost << std::endl;
 
 	return cost;
 }

@@ -502,13 +502,18 @@ double polytope::point_distance(std::vector<double> v){
 			coef_sq_sum += C(i,j)*C(i,j);
 		}
 		facet_distance -=b[i];
+
 		if(facet_distance > 0){
+			// dxli: square the facet distance
+			facet_distance *= facet_distance;
 			distance += facet_distance/coef_sq_sum;
 		}
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
-	return distance*distance; // square of the distance is returned.
+	// dxli: return distance
+	return distance;
+	// return distance*distance; // square of the distance is returned.
 }
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)

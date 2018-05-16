@@ -215,10 +215,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	std::vector<double> v(dim);
 
+	std::cout << "Debugging: abstractCE.cpp Line 218" << std::endl;
 	std::vector<double> lb(optD), ub(optD);
 	double max,min,start_min,start_max;
 
-	// dxli: 1. generate bounds for each variable; also initialize
+	// dxli: 1. generate bounds for each variable; also initialize each variable as the average of min and max
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
 		// dxli: the whole flowpipe is a sequence of sub-flowpipes, each of which
@@ -227,6 +228,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		S = get_symbolic_state(i);
 		P = S->getInitialPolytope();
 
+		//		ub[N*dim+i] = 99;
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 
@@ -255,6 +257,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		}
 	}
 
+
+	std::cout << "Debugging: abstractCE.cpp Line 260" << std::endl;
 //	std::cout << "generated initial points\n";
 //	Set initial value to the time variables
 //	Restrict dwell time within the projections of C_i in time variable
@@ -262,8 +266,12 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	We assume that the time variable is named as 't' in the model.
 //	We find out the min,max components of the time variable
 
+	get_first_symbolic_state()->getInitialPolytope();
+	std::cout << "Debugging: abstractCE.cpp Line 269" << std::endl;
 	unsigned int t_index =
 		get_first_symbolic_state()->getInitialPolytope()->get_index("t");
+
+	std::cout << "Debugging: abstractCE.cpp Line 271" << std::endl;
 
 	assert((t_index >= 0) && (t_index < dim));
 
@@ -279,6 +287,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 bool aggregation=true;//default is ON
 
+	std::cout << "Debugging: abstractCE.cpp Line 284" << std::endl;
 	for (unsigned int i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
 		if(i==N-1){
@@ -331,8 +340,14 @@ bool aggregation=true;//default is ON
 		else
 			lb[N*dim+i] = min-start_max;
 
+		// dxli debug: remove contraint on time
+//		lb[N*dim+i] = 0;
+//		ub[N*dim+i] = 99;
+
 		// We may choose to take the average time as the initial dwell time
 		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
+//		x[N * dim + i] = lb[N*dim+i];
+//		x[N * dim + i] = 300  * ub[N*dim+i];
 
 		if(it!=transList.end())
 			it++;
@@ -600,9 +615,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 	// 	local optimization routine
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(8000);
+	myopt.set_maxeval(4000);
 	myopt.set_stopval(1e-6);
 	//myopt.set_initial_step(0.001);
+
+	std::cout << "Debugging: abstractCE.cpp Line 624" << std::endl;
 
 	//Set Initial value to the optimization problem
 	std::vector<double> x(optD, 0);
@@ -613,6 +630,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	std::vector<double> v(dim);
 
 	std::vector<double> lb(optD), ub(optD);
+
+	std::cout << "Debugging: abstractCE.cpp Line 624" << std::endl;
 
 	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
 	{
@@ -629,6 +648,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 			ub[N*dim+i] = 10000;
 			continue;
 		}
+
+		std::cout << "Debugging: abstractCE.cpp Line 639" << std::endl;
 
 		if(Inv->getIsEmpty()){
 
@@ -675,6 +696,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 			}
 		}
 	}
+
+	std::cout << "Debugging: abstractCE.cpp Line 687" << std::endl;
 
 //	std::cout << "generated initial points\n";
 //	Set initial value to the time variables
