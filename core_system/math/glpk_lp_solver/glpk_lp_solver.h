@@ -12,7 +12,7 @@
 #include <vector>
 #include <glpk.h>
 #include <boost/shared_ptr.hpp>
-
+#include <limits.h>
 #include "core_system/math/matrix.h"
 
 /* solution status:

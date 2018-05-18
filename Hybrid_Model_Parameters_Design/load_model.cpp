@@ -34,7 +34,8 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-		SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
+		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+		//SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_2) {
@@ -46,6 +47,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 	}
 	if (HybridSystem_Model_Type == NAVIGATION_4) {
+		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}

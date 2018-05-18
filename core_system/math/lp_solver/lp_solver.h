@@ -89,7 +89,6 @@ public:
 
 private:
 	int lp_solver_type;		//typename glpk_lp_solver::glpk_ptr glpk_lp_problem;
-
 	glpk_lp_solver::glpk_ptr glpk_lp_problem;
 //	gurobi_lp_solver::gurobi_ptr gurobi_lp_problem;
 	Simplex_CPU::simplex_ptr simplex_cpu_lp_problem;

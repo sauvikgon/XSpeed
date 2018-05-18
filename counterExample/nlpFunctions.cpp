@@ -300,30 +300,30 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			std::vector<double> mapderiv(Axplusb);
 
 			// dxli: guard distance, to address Eq. (12) in CDC 13' paper
-			double guard_dist = g->point_distance(y[i]);
-			cost += guard_dist;
-
-			std::vector<double> guard_dist_grad(dim,0);
-			guard_dist_grad = dist_grad(y[i],g);
-
-			for(unsigned int j=0;j<dim;j++) {
-				double dist_gradx_j = 0;
-				for(unsigned int k=0;k<dim;k++)
-				{
-					dist_gradx_j +=  guard_dist_grad[k] * expAt(k,j);
-				}
-				deriv[i*dim+j] += dist_gradx_j;
-
-			}
+//			double guard_dist = g->point_distance(y[i]);
+//			cost += guard_dist;
+//
+//			std::vector<double> guard_dist_grad(dim,0);
+//			guard_dist_grad = dist_grad(y[i],g);
+//
+//			for(unsigned int j=0;j<dim;j++) {
+//				double dist_gradx_j = 0;
+//				for(unsigned int k=0;k<dim;k++)
+//				{
+//					dist_gradx_j +=  guard_dist_grad[k] * expAt(k,j);
+//				}
+//				deriv[i*dim+j] += dist_gradx_j;
+//
+//			}
 
 			// dxli: add derivative of guard wrt dwell time
 			// dxli: todo need to double check the formula correct or not
-			double dist_gradt = 0;
-			for(unsigned int j=0;j<dim;j++)
-			{
-				dist_gradt +=  guard_dist_grad[j] * Axplusb[j];
-			}
-			deriv[N*dim + i] += dist_gradt;
+//			double dist_gradt = 0;
+//			for(unsigned int j=0;j<dim;j++)
+//			{
+//				dist_gradt +=  guard_dist_grad[j] * Axplusb[j];
+//			}
+//			deriv[N*dim + i] += dist_gradt;
 
 			// If traj end point inside guard, then apply map.
 //			double guard_dist = g->point_distance(y[i]);

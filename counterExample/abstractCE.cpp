@@ -199,6 +199,9 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
+//	nlopt::opt myopt(nlopt::LD_SLSQP, optD); // derivative based
+
+//	nlopt::opt myopt(nlopt::LD_AUGLAG, optD);
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	local optimization routine
@@ -340,13 +343,13 @@ bool aggregation=true;//default is ON
 		else
 			lb[N*dim+i] = min-start_max;
 
-		// dxli debug: remove contraint on time
-//		lb[N*dim+i] = 0;
-//		ub[N*dim+i] = 99;
+		// dxli debug: remove constraint on time
+		lb[N*dim+i] = 0;
+		ub[N*dim+i] = 9999;
 
 		// We may choose to take the average time as the initial dwell time
-		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
-//		x[N * dim + i] = lb[N*dim+i];
+//		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
+		x[N * dim + i] = lb[N*dim+i];
 //		x[N * dim + i] = 300  * ub[N*dim+i];
 
 		if(it!=transList.end())
@@ -494,7 +497,7 @@ bool aggregation=true;//default is ON
 //			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(guard,1);
 //		}
 ////		To get a point from the polytope, we create a random obj function and
-////		solve the lp. The solution point is taken as an initial value.
+////		solve the lp. The solution point is taken as an initial valu./hg_xspeed --model 2 --direction 1 --time-horizon 10 --time-step 0.01 --depth 5 -v t,x -o test.o -F "loc==-1 & x>=2 & x<=4 & t>=15 & t<=16"e.
 //
 //		// we keep this assert to first handle the simple case when flowpipe intersects the guard only at one place
 //		assert(polys.size()==1);
@@ -513,8 +516,8 @@ bool aggregation=true;//default is ON
 //		B1[i].var_index = B[i].var_index;
 //		B1[i].is_ge=true;
 //		B1[i].bound = min;
-//		myopt.add_inequality_constraint(myBoundConstraint, &B1[i], 1e-8);
-//		// We may choose to take the max-min as the initial dwell time
+//		myopt.add_inequalit./hg_xspeed --model 2 --direction 1 --time-horizon 10 --time-step 0.01 --depth 5 -v t,x -o test.o -F "loc==-1 & x>=2 & x<=4 & t>=15 & t<=16"y_constraint(myBoundConstraint, &B1[i], 1e-8);
+//		// We DBL_MAXmay choose to take the max-min as the initial dwell time
 //		x[i] = (max + min)/2;
 //		if(it!=transList.end())
 //			it++;
@@ -639,27 +642,18 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 		{
 			Inv = this->get_first_symbolic_state()->getInitialPolytope();
 			lb[N*dim] = 0;
-			ub[N*dim] = 10000;
+			ub[N*dim] = 999;
 
 		}
 		else{
-			//Inv = HA->getLocation(locIdList[i])->getInvariant();
+			Inv = HA->getLocation(locIdList[i])->getInvariant();
 			lb[N*dim+i] = 0;
-			ub[N*dim+i] = 10000;
-			continue;
+			ub[N*dim+i] = 999;
 		}
 
 		std::cout << "Debugging: abstractCE.cpp Line 639" << std::endl;
 
-		if(Inv->getIsEmpty()){
-
-			for (unsigned int j = 0; j < dim; j++){
-				unsigned int index = i*dim+j;
-				lb[index] = 0;
-				ub[index] = 0;
-			}
-		}
-		else if (Inv->getIsUniverse())
+		if (Inv->getIsUniverse() || Inv->getIsEmpty())
 		{
 			for (unsigned int j = 0; j < dim; j++){
 
@@ -690,7 +684,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 				}
 				lb[index] = min;
 				ub[index] = max;
-
 				dir[j] = 0;
 				x[index] = (lb[index] + ub[index])/2;
 			}
@@ -852,8 +845,8 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 		struct refinement_point pt;
 
 		//cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
-		cexample = gen_concreteCE(tolerance,refinements);
-		//cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
+		//cexample = gen_concreteCE(tolerance,refinements);
+		cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
 		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
 		if(cexample->is_empty())
 			return cexample;

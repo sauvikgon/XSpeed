@@ -23,7 +23,6 @@ lp_solver::lp_solver() {
 	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
 		simplex_cpu_lp_problem = Simplex_CPU::simplex_ptr(new Simplex_CPU());
 	}
-
 	// ******* More can be added later  **************
 }
 

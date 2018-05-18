@@ -93,7 +93,7 @@ public:
 		D = Dyn;
 		filename=std::string();
 		// default plotting dimension
-		time_step = 0.1; //Default time step
+		time_step = 0.001; //Default time step
 		x1 = 0; // The default plotting of this dimension
 		x2 = 1; // The default plotting of this dimension
 

@@ -42,7 +42,7 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 	sample simulation_sample;
 	simulation::ptr sim;
 	std::cout << "Inside concrete trace plotter, no. of trajectory segs:" << T.size() << std::endl;
-	double steps = 100;
+	double steps = 10000;
 	// cleaning the old contents of the file now:
 	std::ofstream myoutfile;
 	myoutfile.open(filename.c_str(),std::fstream::out);

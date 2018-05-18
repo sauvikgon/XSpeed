@@ -266,7 +266,7 @@ unsigned int glpk_lp_solver::TestConstraints() {
 	glp_term_out(GLP_OFF);
 	glp_simplex(mylp, &param);
 	/*result = glp_get_obj_val(mylp);
-	 Maximizing_Variables.resize(dimension, 0.0);
+	 Maximizing_VariablesINT_MAX.resize(dimension, 0.0);
 	 for (int i = 0; i < dimension; i++)
 	 Maximizing_Variables[i] = glp_get_col_prim(mylp, i + 1);
 	 return result;
@@ -288,6 +288,11 @@ double glpk_lp_solver::Compute_LLP(const std::vector<double> coeff_function) {//
 	glp_simplex(mylp, &param);
 	//glp_simplex(mylp, NULL);
 	double result = glp_get_obj_val(mylp);
+	int status = glp_get_status(mylp);
+	if(status==GLP_UNBND)
+	{
+		return 999; // todo: Need to return large value
+	}
 	sv.resize(dimension, 0.0);
 	for (int i = 0; i < dimension; i++)
 		sv[i] = glp_get_col_prim(mylp, i + 1);
