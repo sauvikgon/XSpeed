@@ -283,7 +283,7 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	std::vector<double> boundValueI, boundValueV0, C0, invariantBoundValue0,
 			gaurdBoundValue0;
 
-	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
+	int boundSignI, invariantBoundSign, gaurdBoundSign;
 
 	size_type row, col;
 

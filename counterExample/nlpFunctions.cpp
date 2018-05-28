@@ -205,7 +205,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 	std::list<transition::ptr>::iterator T_iter = transList.begin();
 	transition::ptr Tptr = *(T_iter);
-	assert(transList.size() == N-1);
 
 	math::matrix<double> A, expAt, mapExpAt;
 	std::vector<double> Axplusb(dim), mapAxplusb;
@@ -375,8 +374,10 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 	} // End of for-loop over i
 
-	for(unsigned int j=0;j<dim;j++)
-		deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]);
+	if(N!=1){ // The abstract CE has at least one discrete jump, and therefore at least one splicing point.
+		for(unsigned int j=0;j<dim;j++)
+			deriv[(N-1)*dim+j] = -2*(y[N-2][j] - x[(N-1)*dim+j]);
+	}
 
 
 #ifdef VALIDATION
@@ -451,11 +452,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		}
 	}
 #endif
-	//debug
-	myfile << y[N-1][9] << " " << y[N-1][0] << std::endl;
-	//---
-	myfile.close();
-	//---
 
 	// compute the distance of this endpoint with the forbidden polytope
 	cost+= bad_poly->point_distance(y[N-1]);
