@@ -178,16 +178,23 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	//assert that the number of transitions equals 1 less than the length of the abstract CE path
 
 	std::cout << "Length of the CE, N=" << N << std::endl;
+<<<<<<< local
+	assert(transList.size() == N-1);
+=======
 	std::cout << "gen_concreteCE: dimension =" << dim <<", length of CE=" << N << std::endl;
+>>>>>>> other
 	// initialize the global locIdList
 	locIdList.resize(N);
       
+	std::cout << "Location ID sequence in symbolic CE: ";
 	std::set<int> d;
 	for(unsigned int i=0;i<N;i++){
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
+		std::cout << locIdList[i] << " | " ;
 	}
+	std::cout << "\n";
 
 //	 2. The dimensionality of the opt problem is N vectors, one starting point
 //	 for each of the abstract sym state of the CE + N dwell times. Moreover,
@@ -205,7 +212,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	// 	local optimization routine
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(4000);
+	myopt.set_maxeval(3000);
 	myopt.set_stopval(1e-6);
 	//myopt.set_initial_step(0.001);
 
@@ -217,7 +224,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	std::vector<double> v(dim);
 
-	std::cout << "Debugging: abstractCE.cpp Line 218" << std::endl;
 	std::vector<double> lb(optD), ub(optD);
 	double max,min,start_min,start_max;
 
@@ -271,6 +277,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	unsigned int t_index =
 		get_first_symbolic_state()->getInitialPolytope()->get_index("t");
 
+<<<<<<< local
+
+
+=======
+>>>>>>> other
 	assert((t_index >= 0) && (t_index < dim));
 
 	std::vector<double> dmin(dim, 0), dmax(dim, 0);
@@ -338,7 +349,11 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			lb[N*dim+i] = min-start_max;
 
 		// We may choose to take the average time as the initial dwell time
+<<<<<<< local
+		x[N * dim + i] = (lb[N*dim+i] + ub[N*dim+i])/2;
+=======
 		x[N * dim + i] = lb[N*dim+i];
+>>>>>>> other
 
 		if(it!=transList.end())
 			it++;

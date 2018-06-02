@@ -207,7 +207,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	transition::ptr Tptr = *(T_iter);
 
 	math::matrix<double> A, expAt, mapExpAt;
-	std::vector<double> Axplusb(dim), mapAxplusb;
+	math::matrix<double> AexpAt;
+	std::vector<double> AexpAt_x, expAt_c, dy_dt(dim), M_dy_dt(dim);
 
 	std::ofstream myfile;
 	myfile.open("./endpoints");
@@ -251,9 +252,11 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		At.scalar_multiply(x[N*dim+i]);
 		At.matrix_exponentiation(expAt);
 
-		A.mult_vector(y[i],Axplusb);
-		for (unsigned int j = 0; j < dim; j++) {
-			Axplusb[j] = Axplusb[j] + d.C[j];
+		//initialize dy_dt. dy_dt = A.y[i] + C;
+
+		A.mult_vector(y[i],dy_dt);
+		for(unsigned int k=0;k<dim;k++){
+			dy_dt[k] = dy_dt[k] + d.C[k];
 		}
 
 //		For validation, the distance of trace end points from the invariant is
@@ -277,7 +280,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		double dist_gradt = 0;
 		for(unsigned int j=0;j<dim;j++)
 		{
-			dist_gradt +=  inv_dist_grad[j] * Axplusb[j];
+			dist_gradt +=  inv_dist_grad[j] * dy_dt[j];
 		}
 		deriv[N*dim + i] += dist_gradt;
 
@@ -293,11 +296,35 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 			R = Tptr->getAssignT();
 			//guard as a polytope
-			// This matrix is require to compute the derivative
 			g = Tptr->getGaurd();
 
-			std::vector<double> mapderiv(Axplusb);
+			// dxli: guard distance, to address Eq. (12) in CDC 13' paper
+//			double guard_dist = g->point_distance(y[i]);
+//			cost += guard_dist;
+//
+//			std::vector<double> guard_dist_grad(dim,0);
+//			guard_dist_grad = dist_grad(y[i],g);
+//
+//			for(unsigned int j=0;j<dim;j++) {
+//				double dist_gradx_j = 0;
+//				for(unsigned int k=0;k<dim;k++)
+//				{
+//					dist_gradx_j +=  guard_dist_grad[k] * expAt(k,j);
+//				}
+//				deriv[i*dim+j] += dist_gradx_j;
+//
+//			}
 
+<<<<<<< local
+			// dxli: add derivative of distance of traj. endpt to guard wrt dwell time
+
+//			double dist_gradt = 0;
+//			for(unsigned int j=0;j<dim;j++)
+//			{
+//				dist_gradt +=  guard_dist_grad[j] * dy_dt[j];
+//			}
+//			deriv[N*dim + i] += dist_gradt;
+=======
 			// dxli: guard distance, to address Eq. (12) in CDC 13' paper
 //			double guard_dist = g->point_distance(y[i]);
 //			cost += guard_dist;
@@ -323,6 +350,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //				dist_gradt +=  guard_dist_grad[j] * Axplusb[j];
 //			}
 //			deriv[N*dim + i] += dist_gradt;
+>>>>>>> other
 
 			// If traj end point inside guard, then apply map.
 //			double guard_dist = g->point_distance(y[i]);
@@ -342,8 +370,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 					y[i][j] = transform[j] + R.b[j];
 
 				R.Map.multiply(expAt,mapExpAt);
-				R.Map.mult_vector(Axplusb,mapAxplusb);
-				// add vectors
+				R.Map.mult_vector(dy_dt,M_dy_dt); // M_dy_dt = M * dy/dt = M * (A*y + C)
+
 				assert(y[i].size() == R.b.size());
 
 //			}
@@ -351,11 +379,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //			}
 			if(T_iter!=transList.end())
 				T_iter++;
-
-			//debug
-			myfile << y[i][9] << " " << y[i][0] << std::endl;
-			myfile << x[(i+1)*dim + 9] << x[(i+1)*dim + 0] << std::endl;
-			//---
 
 			//compute the Euclidean distance between the next start point and the simulated end point
 			for (unsigned int j = 0; j < dim; j++) {
@@ -368,7 +391,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 				if(i!=0){
 					deriv[i*dim+j] +=  - 2*(y[(i-1)][j] - x[i*dim+j]);
 				}
-				deriv[N*dim+i] += 2*(y[i][j] - x[(i+1)*dim + j]) * mapAxplusb[j];
+				deriv[N*dim+i] += 2*(y[i][j] - x[(i+1)*dim + j]) * M_dy_dt[j];
 			}
 		}
 
@@ -474,7 +497,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	double dist_gradt = 0;
 	for(unsigned int j=0;j<dim;j++)
 	{
-		dist_gradt +=  badpoly_dist_grad[j] * Axplusb[j];
+		dist_gradt +=  badpoly_dist_grad[j] * dy_dt[j];
 	}
 	deriv[N*dim + N - 1] += dist_gradt;
 
@@ -485,7 +508,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			grad[i] = deriv[i];
 		}
 	}
-	std::cout << "current cost=" << cost << std::endl;
+//	std::cout << "current cost=" << cost << std::endl;
 
 	return cost;
 }

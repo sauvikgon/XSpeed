@@ -53,7 +53,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) {
-//		SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
+		SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
 	}
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
