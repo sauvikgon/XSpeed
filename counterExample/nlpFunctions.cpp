@@ -207,8 +207,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	transition::ptr Tptr = *(T_iter);
 
 	math::matrix<double> A, expAt, mapExpAt;
-	math::matrix<double> AexpAt;
-	std::vector<double> AexpAt_x, expAt_c, dy_dt(dim), M_dy_dt(dim);
+	std::vector<double> Axplusb(dim), mapAxplusb;
 
 	std::ofstream myfile;
 	myfile.open("./endpoints");
@@ -254,11 +253,9 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		At.scalar_multiply(x[N*dim+i]);
 		At.matrix_exponentiation(expAt);
 
-		//initialize dy_dt. dy_dt = A.y[i] + C;
-
-		A.mult_vector(y[i],dy_dt);
-		for(unsigned int k=0;k<dim;k++){
-			dy_dt[k] = dy_dt[k] + d.C[k];
+		A.mult_vector(y[i],Axplusb);
+		for (unsigned int j = 0; j < dim; j++) {
+			Axplusb[j] = Axplusb[j] + d.C[j];
 		}
 
 //		For validation, the distance of trace end points from the guard \cap invariant is
@@ -330,6 +327,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			//guard as a polytope
 			g = Tptr->getGaurd();
 
+			std::vector<double> mapderiv(Axplusb);
 
 			// guard \cap invariant distance, to address Eq. (12) in CDC 13' paper
 			polytope::ptr guard_intersect_inv;
@@ -383,7 +381,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 				if(i!=0){
 					deriv[i*dim+j] +=  - 2*(y[(i-1)][j] - x[i*dim+j]);
 				}
-				deriv[N*dim+i] += 2*(y[i][j] - x[(i+1)*dim + j]) * M_dy_dt[j];
+				deriv[N*dim+i] += 2*(y[i][j] - x[(i+1)*dim + j]) * mapAxplusb[j];
 			}
 		}
 
