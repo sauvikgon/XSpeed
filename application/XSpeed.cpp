@@ -251,14 +251,15 @@ int main(int argc, char *argv[]) {
 	// create a filter template here
 
 	/** End of debug */
+	concreteCE::ptr ce;
+	abstractCE::ptr abs_ce;
 	bool real_ce = false;
 	double error_tol = 1e-6; // splicing error tolerance
 
 	tt1.start(); // start time
 	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
 
-		abstractCE::ptr abs_ce = *(it);
-		concreteCE::ptr ce;
+		abs_ce = *(it);
 		// add a filter function to search for concrete ce only in a specific abstract trace
 		bool search_ce = abs_ce->filter(template_seq);
 		if(search_ce){
@@ -273,16 +274,16 @@ int main(int argc, char *argv[]) {
 			std::cout << "Looking for Other Abstract CE to Unsafe Set\n";
 			continue;
 		} else {
-			ce->set_automaton(abs_ce->get_automaton());
-			std::string tracefile = "./bad_trace.o";
-			ce->plot_ce(tracefile,
-					user_options.get_first_plot_dimension(),
-					user_options.get_second_plot_dimension());
 			real_ce = true;
 			break;
 		}
 	}
 	tt1.stop(); //stop time
+
+	// plot the ce trajectory in a file
+	ce->set_automaton(abs_ce->get_automaton());
+	std::string tracefile = "./bad_trace.o";
+	ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
 
 	//timers
 	double user_clock;

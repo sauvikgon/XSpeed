@@ -29,7 +29,11 @@ void simulationCaller(ReachabilityParameters& reach_parameters,
 	unsigned int n = op.get_simu_init_points(); // the number of start points
 
 	unsigned int max_jump = op.get_bfs_level(); //level 0 means only first breadth, 1 means the next level bfs
-	std::cout<<"Generating " << n << " trajectories" << std::endl;
+
+	if(n==1)
+		std::cout<<"Generating " << n << " trajectory" << std::endl;
+	else
+		std::cout<<"Generating " << n << " trajectories" << std::endl;
 
 	boost::timer::cpu_timer tsim, plottime;
 	tsim.start();

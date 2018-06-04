@@ -196,19 +196,13 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/xspeed/ user_model.cpp -o user_model.o");
 			system("g++ -L/usr/local/lib/ user_model.o -lxspeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./xspeed");
 
-			std::cout<<"Model Parsed Successfully!! Calling XSpeed ..."<<std::endl;
+			std::cout << "Model Parsed Successfully!! Calling XSpeed ... " << std::endl;
 
-			string cmdStr1;
+			string cmdStr1="";
 			cmdStr1.append("./xspeed --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
 			cmdStr1.append(SingleSpace);
 			cmdStr1.append(stFileNameWithPath);
 			cmdStr1.append(SingleSpace);
-//			cmdStr1.append("-F ");
-//			cmdStr1.append("\"");
-//			forbidden_string = user_options.get_forbidden_set();
-//			cmdStr1.append(forbidden_string);
-//			cmdStr1.append("\"");
-//			std::cout << "the command string is:" << cmdStr1 << std::endl;
 			cmdStr1.append(input);
 
 			system(cmdStr1.c_str());
@@ -224,7 +218,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				string_to_poly(user_options.get_forbidden_set(), forbidden_set);
 				forbidden_set.second->print2file("./bad_poly", x1, x2);
 			}
-
 			isModelParsed = true;
 		}
 
