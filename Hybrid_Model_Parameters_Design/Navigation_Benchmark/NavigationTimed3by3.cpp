@@ -80,8 +80,39 @@ void Set_NavTimed_Parameters(hybrid_automata& Hybrid_Automata,
 
 	system_dynamics0.isEmptyC = true;
 
-	invariant0 = polytope::ptr(new polytope());
-	invariant0->setIsUniverse(true);
+	row = 4;
+	col = 5;
+	invariantConstraintsMatrix0.resize(row, col);
+	invariantConstraintsMatrix0(0, 0) = -1.0;
+	invariantConstraintsMatrix0(0, 1) = 0.0;
+	invariantConstraintsMatrix0(0, 2) = 0.0;
+	invariantConstraintsMatrix0(0, 3) = 0.0;
+	invariantConstraintsMatrix0(0, 4) = 0.0;
+	invariantConstraintsMatrix0(1, 0) = 1.0;
+	invariantConstraintsMatrix0(1, 1) = 0.0;
+	invariantConstraintsMatrix0(1, 2) = 0.0;
+	invariantConstraintsMatrix0(1, 3) = 0.0;
+	invariantConstraintsMatrix0(1, 4) = 0.0;
+	invariantConstraintsMatrix0(2, 0) = 0.0;
+	invariantConstraintsMatrix0(2, 1) = -1.0;
+	invariantConstraintsMatrix0(2, 2) = 0.0;
+	invariantConstraintsMatrix0(2, 3) = 0.0;
+	invariantConstraintsMatrix0(2, 4) = 0.0;
+	invariantConstraintsMatrix0(3, 0) = 0.0;
+	invariantConstraintsMatrix0(3, 1) = 1.0;
+	invariantConstraintsMatrix0(3, 2) = 0.0;
+	invariantConstraintsMatrix0(3, 3) = 0.0;
+	invariantConstraintsMatrix0(3, 4) = 0.0;
+
+	invariantBoundValue0.resize(row);
+	invariantBoundValue0[0] = -0.0;
+	invariantBoundValue0[1] = 1.0;
+	invariantBoundValue0[2] = -2.0;
+	invariantBoundValue0[3] = 3.0;
+	invariantBoundSign = 1;
+	invariant0 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix0, invariantBoundValue0,
+					invariantBoundSign));
 
 	row = 4;
 	col = 5;
@@ -604,8 +635,39 @@ void Set_NavTimed_Parameters(hybrid_automata& Hybrid_Automata,
 
 	system_dynamics7.isEmptyC = true;
 
-	invariant7 = polytope::ptr(new polytope());
-	invariant7->setIsUniverse(true);
+	row = 4;
+	col = 5;
+	invariantConstraintsMatrix7.resize(row, col);
+	invariantConstraintsMatrix7(0, 0) = -1.0;
+	invariantConstraintsMatrix7(0, 1) = 0.0;
+	invariantConstraintsMatrix7(0, 2) = 0.0;
+	invariantConstraintsMatrix7(0, 3) = 0.0;
+	invariantConstraintsMatrix7(0, 4) = 0.0;
+	invariantConstraintsMatrix7(1, 0) = 1.0;
+	invariantConstraintsMatrix7(1, 1) = 0.0;
+	invariantConstraintsMatrix7(1, 2) = 0.0;
+	invariantConstraintsMatrix7(1, 3) = 0.0;
+	invariantConstraintsMatrix7(1, 4) = 0.0;
+	invariantConstraintsMatrix7(2, 0) = 0.0;
+	invariantConstraintsMatrix7(2, 1) = -1.0;
+	invariantConstraintsMatrix7(2, 2) = 0.0;
+	invariantConstraintsMatrix7(2, 3) = 0.0;
+	invariantConstraintsMatrix7(2, 4) = 0.0;
+	invariantConstraintsMatrix7(3, 0) = 0.0;
+	invariantConstraintsMatrix7(3, 1) = 1.0;
+	invariantConstraintsMatrix7(3, 2) = 0.0;
+	invariantConstraintsMatrix7(3, 3) = 0.0;
+	invariantConstraintsMatrix7(3, 4) = 0.0;
+
+	invariantBoundValue7.resize(row);
+	invariantBoundValue7[0] = -2.0;
+	invariantBoundValue7[1] = 3.0;
+	invariantBoundValue7[2] = -0.0;
+	invariantBoundValue7[3] = 1.0;
+	invariantBoundSign = 1;
+	invariant7 = polytope::ptr(
+			new polytope(invariantConstraintsMatrix7, invariantBoundValue7,
+					invariantBoundSign));
 
 	row = 4;
 	col = 5;

@@ -735,6 +735,7 @@ void simulation::simulateHa(sim_start_point start, double start_time,
 	unsigned int jumps_taken = 0;
 
 	while (wlist.size() != 0 && jumps_taken <= max_jumps) {
+		std::cout << "Inside waiting list\n";
 		sim_start_point s = wlist.front();
 		wlist.pop_front();
 		std::vector<sim_start_point> next_pts;

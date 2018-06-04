@@ -42,14 +42,12 @@ polytope::polytope() {
 }
 polytope::polytope(bool empty) {
 
-	// The default polytope inequality sign is <=
-	InEqualitySign = 1;
-	number_facets = 0;
-	system_dimension = 0;
-	// The default polytope inequality sign is <=
-	InEqualitySign = 1;
-	this->IsEmpty = true;
-	this->IsUniverse = false; //It is empty so neither 'bounded' not 'unbounded'
+	polytope();
+	if(empty==true) // make this an empty polytope
+	{
+			this->IsEmpty = true;
+			this->IsUniverse = true;
+	}
 }
 
 polytope::polytope(math::matrix<double> coeffMatrix,
@@ -253,13 +251,20 @@ double polytope::max_norm(int lp_solver_type_choosen,
 }
 
 const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
+
 	assert(gPoly != NULL);
 	if(gPoly->IsUniverse)
 	{
 		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign())); // by default this will be empty
 	}
-	else if(gPoly->IsEmpty)
+	if(gPoly->IsEmpty)
 		return gPoly; // return empty polytope pointer
+
+	if(this->IsUniverse) // This polytope is universe
+		return gPoly; // Intersection of universe polytope with any polytope P results in P
+
+	if(this->IsEmpty) // Intersection of an empty polytope with any polytope will result in an empty polytope.
+		return polytope::ptr(new polytope(true));
 
 	math::matrix<double> total_coeffMatrix, m1;
 	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
@@ -509,7 +514,8 @@ double polytope::point_distance(std::vector<double> v){
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
-	return distance * distance;
+	return distance*distance; // square of the distance is returned.
+
 }
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)

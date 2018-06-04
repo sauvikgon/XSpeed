@@ -217,8 +217,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
 
-// A random objective function created for lp solving
-
 	std::vector<double> v(dim);
 
 	std::vector<double> lb(optD), ub(optD);
@@ -233,11 +231,10 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		S = get_symbolic_state(i);
 		P = S->getInitialPolytope();
 
-		//		ub[N*dim+i] = 99;
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 
-// 		we add bound constraints on the position parameters, which are required to run global opt routines.
+		// 	we add bound constraints on the position parameters, which are required to run global opt routines.
 		std::vector<double> dir(dim,0);
 		double min, max;
 		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
@@ -261,7 +258,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			x[index] = (lb[index] + ub[index])/2;
 		}
 	}
-
 //	std::cout << "generated initial points\n";
 //	Set initial value to the time variables
 //	Restrict dwell time within the projections of C_i in time variable
@@ -751,7 +747,6 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 			return cexample;
 
 		val_res = cexample->valid(pt,valid_tol);
-
 		if(!val_res){
 			if(NLP_HA_algo_flag){
 				std::cout << "Splice Trace NOT VALID\n";
@@ -764,6 +759,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 			std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
 			return cexample;
 		}
+		std::cout << "Restarting Search with added refinement point\n";
 	}while(!val_res && ref_count< max_refinements);
 
 //	throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");

@@ -213,6 +213,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	std::ofstream myfile;
 	myfile.open("./endpoints");
 
+	polytope::ptr I;
+
 	for (unsigned int i = 0; i < N; i++) {
 
 		// dxli: v is a copy of state variables. (Get the N start vectors)
@@ -223,7 +225,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 		int loc_index = locIdList[i];
 		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
-		polytope::ptr I = HA->getLocation(loc_index)->getInvariant();
+		I = HA->getLocation(loc_index)->getInvariant();
 		assert(d.C.size() == dim);
 
 		std::vector<double> traj_dist_grad(dim,0); // holds the grads of the trajectories distance to invariant
@@ -259,35 +261,65 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			dy_dt[k] = dy_dt[k] + d.C[k];
 		}
 
-//		For validation, the distance of trace end points from the invariant is
+//		For validation, the distance of trace end points from the guard \cap invariant is
 //		added to the cost
 
-		std::vector<double> inv_dist_grad(dim,0);
-		cost+= I->point_distance(y[i]); // end point distance to invariant added to cost
-
-		inv_dist_grad = dist_grad(y[i],I);
-
-		for(unsigned int j=0;j<dim;j++) {
-			double dist_gradx_j = 0;
-			for(unsigned int k=0;k<dim;k++)
-			{
-				dist_gradx_j +=  inv_dist_grad[k] * expAt(k,j);
-			}
-			deriv[i*dim+j] += dist_gradx_j;
-
-		}
+//		std::vector<double> inv_dist_grad(dim,0);
+//
+//		cost+= I->point_distance(y[i]); // end point distance to invariant added to cost
+//
+//		inv_dist_grad = dist_grad(y[i],I);
+//
+//		for(unsigned int j=0;j<dim;j++) {
+//			double dist_gradx_j = 0;
+//			for(unsigned int k=0;k<dim;k++)
+//			{
+//				dist_gradx_j +=  inv_dist_grad[k] * expAt(k,j);
+//			}
+//			deriv[i*dim+j] += dist_gradx_j;
+//
+//		}
 		// add the cost gradient w.r.t traj segment's dwell time
-		double dist_gradt = 0;
-		for(unsigned int j=0;j<dim;j++)
-		{
-			dist_gradt +=  inv_dist_grad[j] * dy_dt[j];
-		}
-		deriv[N*dim + i] += dist_gradt;
+//		double dist_gradt = 0;
+//		for(unsigned int j=0;j<dim;j++)
+//		{
+//			dist_gradt +=  inv_dist_grad[j] * Axplusb[j];
+//		}
+//		deriv[N*dim + i] += dist_gradt;
 
 		//end of validation logic
 
-		if(i==N-1)
+		if(i==N-1){
+			// compute the distance of this endpoint with the forbidden polytope \cap invariant (the segment end point must lie
+			// in the intersection of the bad_set and the last location invariant).
+			//bad_poly=bad_poly->GetPolytope_Intersection(I);
+
+			cost+= bad_poly->point_distance(y[N-1]);
+
+			std::vector<double> badpoly_dist_grad(dim,0);
+
+			badpoly_dist_grad = dist_grad(y[N-1], bad_poly);
+
+			for(unsigned int j=0;j<dim;j++) {
+				double dist_gradx_j = 0;
+				for(unsigned int k=0;k<dim;k++)
+				{
+					dist_gradx_j +=  badpoly_dist_grad[k] * expAt(k,j);
+				}
+				deriv[(N-1)*dim+j] += dist_gradx_j;
+			}
+
+			//	add the cost gradient w.r.t last traj segment's dwell time
+
+			double dist_gradt = 0;
+			for(unsigned int j=0;j<dim;j++)
+			{
+				dist_gradt +=  badpoly_dist_grad[j] * Axplusb[j];
+			}
+			deriv[N*dim + N - 1] += dist_gradt;
+
 			break;
+		}
 		else {
 			polytope::ptr g;
 			Assign R;
@@ -299,58 +331,44 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			g = Tptr->getGaurd();
 
 
-			// dxli: guard distance, to address Eq. (12) in CDC 13' paper
-//			double guard_dist = g->point_distance(y[i]);
-//			cost += guard_dist;
-//
-//			std::vector<double> guard_dist_grad(dim,0);
-//			guard_dist_grad = dist_grad(y[i],g);
-//
-//			for(unsigned int j=0;j<dim;j++) {
-//				double dist_gradx_j = 0;
-//				for(unsigned int k=0;k<dim;k++)
-//				{
-//					dist_gradx_j +=  guard_dist_grad[k] * expAt(k,j);
-//				}
-//				deriv[i*dim+j] += dist_gradx_j;
-//
-//			}
+			// guard \cap invariant distance, to address Eq. (12) in CDC 13' paper
+			polytope::ptr guard_intersect_inv;
+			guard_intersect_inv = I->GetPolytope_Intersection(g);
+			double guard_dist = guard_intersect_inv->point_distance(y[i]);
+			cost += guard_dist;
 
-			// dxli: add derivative of guard wrt dwell time
-			// dxli: todo need to double check the formula correct or not
-//			double dist_gradt = 0;
-//			for(unsigned int j=0;j<dim;j++)
-//			{
-//				dist_gradt +=  guard_dist_grad[j] * Axplusb[j];
-//			}
-//			deriv[N*dim + i] += dist_gradt;
+			std::vector<double> guard_dist_grad(dim,0);
+			guard_dist_grad = dist_grad(y[i],guard_intersect_inv);
 
+			for(unsigned int j=0;j<dim;j++) {
+				double dist_gradx_j = 0;
+				for(unsigned int k=0;k<dim;k++)
+				{
+					dist_gradx_j +=  guard_dist_grad[k] * expAt(k,j);
+				}
+				deriv[i*dim+j] += dist_gradx_j;
 
-			// If traj end point inside guard, then apply map.
-//			double guard_dist = g->point_distance(y[i]);
-//			if(guard_dist == 0)
-//			{
-//				std::cout << "Inside g condition\n";
-				assert(y[i].size() == R.Map.size2());
-				std::vector<double> transform(y[i].size(),0);
-//				//debug
-//				std::cout << "transition assignment map:" << R.Map << std::endl;
-//				std::cout << "transition w: ";
-//				for(unsigned int i=0;i<R.b.size();i++)
-//					 std::cout << R.b[i] << std::endl;
-//				//---
-				R.Map.mult_vector(y[i],transform);
-				for(unsigned int j=0;j<transform.size();j++)
-					y[i][j] = transform[j] + R.b[j];
+			}
 
-				R.Map.multiply(expAt,mapExpAt);
-				R.Map.mult_vector(dy_dt,M_dy_dt); // M_dy_dt = M * dy/dt = M * (A*y + C)
+			// dxli: add derivative of guard \cup invariant wrt dwell time
+			double dist_gradt = 0;
+			for(unsigned int j=0;j<dim;j++)
+			{
+				dist_gradt +=  guard_dist_grad[j] * Axplusb[j];
+			}
+			deriv[N*dim + i] += dist_gradt;
 
-				assert(y[i].size() == R.b.size());
+			assert(y[i].size() == R.Map.size2());
+			std::vector<double> transform(y[i].size(),0);
+			R.Map.mult_vector(y[i],transform);
+			for(unsigned int j=0;j<transform.size();j++)
+				y[i][j] = transform[j] + R.b[j];
 
-//			}
-//			else{
-//			}
+			R.Map.multiply(expAt,mapExpAt);
+			R.Map.mult_vector(Axplusb,mapAxplusb);
+
+			assert(y[i].size() == R.b.size());
+
 			if(T_iter!=transList.end())
 				T_iter++;
 
@@ -380,6 +398,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 #ifdef VALIDATION
 // add to cost the distance of refinement points. Modify the derivatives.
 
+	//std::cout << "Running with trajectory validation ON\n";
+
 	for(std::list<refinement_point>::iterator it = ref_pts.begin();it!=ref_pts.end();it++)
 	{
 		refinement_point p = *it;
@@ -388,7 +408,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 		double dwell_time = x[N*dim+p.seq_no];
 		// if the sampled time is less than the time when the refinement point violated the Inv, then ignore this refinement
-		if(dwell_time<p.time)
+		if(dwell_time < p.time)
 			continue;
 		// Compute the new point v at p.time units from the new sampled start point.
 		Dynamics d = HA->getLocation(locID)->getSystem_Dynamics();
@@ -449,31 +469,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		}
 	}
 #endif
-
-	// compute the distance of this endpoint with the forbidden polytope
-	cost+= bad_poly->point_distance(y[N-1]);
-
-	std::vector<double> badpoly_dist_grad(dim,0);
-
-	badpoly_dist_grad = dist_grad(y[N-1], bad_poly);
-
-	for(unsigned int j=0;j<dim;j++) {
-		double dist_gradx_j = 0;
-		for(unsigned int k=0;k<dim;k++)
-		{
-			dist_gradx_j +=  badpoly_dist_grad[k] * expAt(k,j);
-		}
-		deriv[(N-1)*dim+j] += dist_gradx_j;
-	}
-
-	//	add the cost gradient w.r.t last traj segment's dwell time
-
-	double dist_gradt = 0;
-	for(unsigned int j=0;j<dim;j++)
-	{
-		dist_gradt +=  badpoly_dist_grad[j] * dy_dt[j];
-	}
-	deriv[N*dim + N - 1] += dist_gradt;
 
 	// Analytic gradients
 	if(!grad.empty())
