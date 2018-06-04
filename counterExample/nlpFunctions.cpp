@@ -298,33 +298,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			//guard as a polytope
 			g = Tptr->getGaurd();
 
-			// dxli: guard distance, to address Eq. (12) in CDC 13' paper
-//			double guard_dist = g->point_distance(y[i]);
-//			cost += guard_dist;
-//
-//			std::vector<double> guard_dist_grad(dim,0);
-//			guard_dist_grad = dist_grad(y[i],g);
-//
-//			for(unsigned int j=0;j<dim;j++) {
-//				double dist_gradx_j = 0;
-//				for(unsigned int k=0;k<dim;k++)
-//				{
-//					dist_gradx_j +=  guard_dist_grad[k] * expAt(k,j);
-//				}
-//				deriv[i*dim+j] += dist_gradx_j;
-//
-//			}
 
-<<<<<<< local
-			// dxli: add derivative of distance of traj. endpt to guard wrt dwell time
-
-//			double dist_gradt = 0;
-//			for(unsigned int j=0;j<dim;j++)
-//			{
-//				dist_gradt +=  guard_dist_grad[j] * dy_dt[j];
-//			}
-//			deriv[N*dim + i] += dist_gradt;
-=======
 			// dxli: guard distance, to address Eq. (12) in CDC 13' paper
 //			double guard_dist = g->point_distance(y[i]);
 //			cost += guard_dist;
@@ -350,7 +324,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 //				dist_gradt +=  guard_dist_grad[j] * Axplusb[j];
 //			}
 //			deriv[N*dim + i] += dist_gradt;
->>>>>>> other
+
 
 			// If traj end point inside guard, then apply map.
 //			double guard_dist = g->point_distance(y[i]);
