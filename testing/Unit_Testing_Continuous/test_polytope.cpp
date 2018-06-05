@@ -357,5 +357,94 @@ SUITE(sf_utility_TestSuite) {
 			myfile << v[0] << "  " << P2->point_distance(v) << std::endl;
 		}
 		myfile.close();
+		// tester to check point to polytope distance, when polytope is a line
+		// P{ x=10 & 15 <= y <=18
+		boundValueP[0] = -10;
+		boundValueP[1] = 10;
+		boundValueP[2] = 18;
+		boundValueP[3] = -15;
+
+		P2 = polytope::ptr(new polytope(ConstraintsMatrixP, boundValueP, boundSignP));
+
+		v[0] = 10;
+		v[1] = 16;
+		distance = P2->point_distance(v);
+//		std::cout << "The distance of the point from the line =  " << distance << std::endl;
+		out << "";proper << "";
+
+		out << distance;
+		proper << "0";
+		CHECK_EQUAL(proper.str(), out.str());
+
+		v[0] = 10;
+		v[1] = 16;
+		distance = P2->point_distance(v);
+//		std::cout << "The distance of the point from the line =  " << distance << std::endl;
+		out << "";proper << "";
+
+		out << distance;
+		proper << "0";
+		CHECK_EQUAL(proper.str(), out.str());
+
+		v[0] = 11;
+		v[1] = 16;
+		distance = P2->point_distance(v);
+//		std::cout << "The distance of the point from the line =  " << distance << std::endl;
+		out << ""; proper << "";
+
+		out << distance;
+		proper << "1";
+		CHECK_EQUAL(proper.str(), out.str());
+
+		row = 6;
+		col = 3;
+		ConstraintsMatrixP.resize(row, col);
+		ConstraintsMatrixP(0, 0) = -1;
+		ConstraintsMatrixP(0, 1) = 0;
+		ConstraintsMatrixP(0, 2) = 0;
+		ConstraintsMatrixP(1, 0) = 1;
+		ConstraintsMatrixP(1, 1) = 0;
+		ConstraintsMatrixP(1, 2) = 0;
+		ConstraintsMatrixP(2, 0) = 0;
+		ConstraintsMatrixP(2, 1) = 1;
+		ConstraintsMatrixP(2, 2) = 0;
+		ConstraintsMatrixP(3, 0) = 0;
+		ConstraintsMatrixP(3, 1) = -1;
+		ConstraintsMatrixP(3, 2) = 0;
+		ConstraintsMatrixP(4, 0) = 0;
+		ConstraintsMatrixP(4, 1) = 0;
+		ConstraintsMatrixP(4, 2) = -1;
+		ConstraintsMatrixP(5, 0) = 0;
+		ConstraintsMatrixP(5, 1) = 0;
+		ConstraintsMatrixP(5, 2) = 1;
+
+		boundValueP.resize(6);
+
+		boundValueP[0] = -10;
+		boundValueP[1] = 10;
+		boundValueP[2] = 18;
+		boundValueP[3] = -15;
+		boundValueP[4] = -5;
+		boundValueP[5] = 100;
+
+		boundSignP = 1;
+
+		P2 = polytope::ptr(new polytope(ConstraintsMatrixP, boundValueP, boundSignP));
+
+		v.resize(3);
+		v[0] = 10;
+		v[1] = 16;
+		v[2] = 50;
+		distance = P2->point_distance(v);
+
+//		std::cout << "The distance of the point from the line =  " << distance << std::endl;
+
+		out << ""; proper << "";
+
+		out << distance;
+		proper << "0";
+		CHECK_EQUAL(proper.str(), out.str());
+
 	}
 }
+
