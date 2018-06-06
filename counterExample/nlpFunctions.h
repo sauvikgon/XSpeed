@@ -12,7 +12,7 @@
 
 #include "core_system/math/matrix.h"
 
-//#define VALIDATION
+#define VALIDATION
 
 
 struct polyConstraints {

@@ -209,9 +209,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	// 	local optimization routine
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(3000);
-	myopt.set_stopval(1e-6);
-	//myopt.set_initial_step(0.001);
+	myopt.set_maxeval(4000);
 
 	//Set Initial value to the optimization problem
 	std::vector<double> x(optD, 0);
@@ -298,7 +296,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 			P = P->GetPolytope_Intersection(bad_poly);
 		}
-		else{
+		else {
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
 			guard = T->getGaurd();
@@ -606,7 +604,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 	// 	local optimization routine
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(4000);
+	myopt.set_maxeval(6000);
 	myopt.set_stopval(1e-6);
 	//myopt.set_initial_step(0.001);
 	//Set Initial value to the optimization problem
@@ -747,6 +745,9 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 			return cexample;
 
 		val_res = cexample->valid(pt,valid_tol);
+		//putting off validation loop by refinements
+		//val_res = true;
+		//--
 		if(!val_res){
 			if(NLP_HA_algo_flag){
 				std::cout << "Splice Trace NOT VALID\n";
@@ -762,6 +763,6 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 		std::cout << "Restarting Search with added refinement point\n";
 	}while(!val_res && ref_count< max_refinements);
 
-//	throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
+	throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
 	return concreteCE::ptr(new concreteCE());
 }
