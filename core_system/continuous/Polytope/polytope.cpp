@@ -255,7 +255,7 @@ const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
 	assert(gPoly != NULL);
 	if(gPoly->IsUniverse)
 	{
-		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign())); // by default this will be empty
+		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign()));
 	}
 	if(gPoly->IsEmpty)
 		return gPoly; // return empty polytope pointer
@@ -270,8 +270,7 @@ const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
 	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
 	m1.matrix_join(gPoly->getCoeffMatrix(), total_coeffMatrix);
 	std::vector<double> total_columnVector;
-	total_columnVector = vector_join(this->getColumnVector(),
-			gPoly->getColumnVector());
+	total_columnVector = vector_join(this->getColumnVector(), gPoly->getColumnVector());
 
 	polytope::ptr newp = polytope::ptr(
 			new polytope(total_coeffMatrix, total_columnVector, 1));
@@ -508,15 +507,14 @@ double polytope::point_distance(std::vector<double> v){
 		}
 		facet_distance -=b[i];
 
-		if(facet_distance > 0){
-			// dxli: square the facet distance
-//			facet_distance *= facet_distance;
+		if(facet_distance > 1e-10){
 			distance += facet_distance/coef_sq_sum;
 		}
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
 	return distance*distance; // square of the distance is returned.
+
 }
 
 void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)

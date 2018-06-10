@@ -35,19 +35,19 @@ std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::ptr I)
 		}
 		double denom = coef_sq_sum;
 		facet_distance -=b[i];
-		if(facet_distance > 0){
+		if(facet_distance > 1e-8){
 			for(unsigned int k=0;k<grad.size();k++){
 				grad[k] += C(i,k)/denom;
 			}
-			dist += facet_distance/coef_sq_sum;
+			dist += facet_distance/denom;
 		}
 		coef_sq_sum = 0;
 		facet_distance = 0;
 	}
-	// modified gradient after squaring the distance of point to poly
-	for(unsigned int i=0;i<grad.size();i++){
-		grad[i] = grad[i] * 2 * dist;
-	}
+	// for experimenting with squared distance
+	for(unsigned int i=0;i<grad.size();i++)
+			grad[i] = 2*dist*grad[i];
+
 	return grad;
 }
 

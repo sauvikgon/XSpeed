@@ -305,7 +305,6 @@ SUITE(sf_utility_TestSuite) {
 	}
 
 	TEST_FIXTURE(ExamplePolytope, pointDistaceTest) {
-		bool flag;
 
 		row = 4;
 		col = 2;
@@ -342,7 +341,7 @@ SUITE(sf_utility_TestSuite) {
 		v[1] = 16;
 		distance = P2->point_distance(v);
 //		std::cout << "distance of point to polytope:" << distance << std::endl;
-		out << "";proper << "";
+		out << ""; proper << "";
 
 		out << distance;
 		proper << "1";
@@ -357,6 +356,7 @@ SUITE(sf_utility_TestSuite) {
 			myfile << v[0] << "  " << P2->point_distance(v) << std::endl;
 		}
 		myfile.close();
+
 		// tester to check point to polytope distance, when polytope is a line
 		// P{ x=10 & 15 <= y <=18
 		boundValueP[0] = -10;
@@ -445,6 +445,76 @@ SUITE(sf_utility_TestSuite) {
 		proper << "0";
 		CHECK_EQUAL(proper.str(), out.str());
 
+
+		// test case to test the distance function when the polytope is a line.
+
+		// Original guard: x1 = 1 & 1 <= x2 & x2 <= 2 & -1000 <= v1 & v1 <= 1000 & -1000 <= v2 & v2 <= 1000
+
+		row = 8;
+		col = 4;
+
+		math::matrix<double> guardConstraintsMatrix;
+		guardConstraintsMatrix.resize(row, col);
+		guardConstraintsMatrix(0, 0) = -1.0;
+		guardConstraintsMatrix(0, 1) = 0.0;
+		guardConstraintsMatrix(0, 2) = 0.0;
+		guardConstraintsMatrix(0, 3) = 0.0;
+		guardConstraintsMatrix(1, 0) = 1.0;
+		guardConstraintsMatrix(1, 1) = 0.0;
+		guardConstraintsMatrix(1, 2) = 0.0;
+		guardConstraintsMatrix(1, 3) = 0.0;
+		guardConstraintsMatrix(2, 0) = 0.0;
+		guardConstraintsMatrix(2, 1) = -1.0;
+		guardConstraintsMatrix(2, 2) = 0.0;
+		guardConstraintsMatrix(2, 3) = 0.0;
+		guardConstraintsMatrix(3, 0) = 0.0;
+		guardConstraintsMatrix(3, 1) = 1.0;
+		guardConstraintsMatrix(3, 2) = 0.0;
+		guardConstraintsMatrix(3, 3) = 0.0;
+		guardConstraintsMatrix(4, 0) = 0.0;
+		guardConstraintsMatrix(4, 1) = 0.0;
+		guardConstraintsMatrix(4, 2) = -1.0;
+		guardConstraintsMatrix(4, 3) = 0.0;
+		guardConstraintsMatrix(5, 0) = 0.0;
+		guardConstraintsMatrix(5, 1) = 0.0;
+		guardConstraintsMatrix(5, 2) = 1.0;
+		guardConstraintsMatrix(5, 3) = 0.0;
+		guardConstraintsMatrix(6, 0) = 0.0;
+		guardConstraintsMatrix(6, 1) = 0.0;
+		guardConstraintsMatrix(6, 2) = 0.0;
+		guardConstraintsMatrix(6, 3) = -1.0;
+		guardConstraintsMatrix(7, 0) = 0.0;
+		guardConstraintsMatrix(7, 1) = 0.0;
+		guardConstraintsMatrix(7, 2) = 0.0;
+		guardConstraintsMatrix(7, 3) = 1.0;
+
+		std::vector<double> bound;
+		bound.resize(row);
+		bound[0] = -1.0;
+		bound[1] = 1.0;
+		bound[2] = -1.0;
+		bound[3] = 2.0;
+		bound[4] = 1000.0;
+		bound[5] = 1000.0;
+		bound[6] = 1000.0;
+		bound[7] = 1000.0;
+		polytope::ptr linePolytope = polytope::ptr(
+				new polytope(guardConstraintsMatrix, bound,
+						boundSignP));
+
+		v.resize(col);
+		v[0]=1;
+		v[1]=1.5;
+		v[2]=0;
+		v[3]=0;
+
+		distance = linePolytope->point_distance(v);
+		// std::cout << "distance of a point on the line, from the line = " << distance <<  std::endl;
+
+		out << ""; proper << "";
+		out << distance;
+		proper << "0";
+		CHECK_EQUAL(proper.str(), out.str());
 	}
 }
 

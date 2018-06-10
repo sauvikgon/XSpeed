@@ -7,6 +7,7 @@
 
 #ifndef VARTOINDEXMAP_H_
 #define VARTOINDEXMAP_H_
+#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
@@ -34,7 +35,14 @@ public:
 	 * in the varname to dimension index map
 	 */
 	unsigned int get_index(std::string var_name){
-		unsigned int index = var_index_map_ptr->at(var_name);
+		unsigned int index;
+		try{
+			index = var_index_map_ptr->at(var_name);
+		}catch(...)
+		{
+			std::cout << "index of timed variable not found in the variable to index map. Probably the model the not timed\n";
+			exit(0);
+		};
 		return index;
 	}
 	/**

@@ -22,4 +22,8 @@ void Set_NavTimed_Parameters(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
+void Set_NavTimedEpsilonRelaxGuard(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr>& init_state_list,
+		ReachabilityParameters& reach_parameters);
+
 #endif /* NAVIGATIONTIMED3BY3_H_ */

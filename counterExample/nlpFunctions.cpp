@@ -289,7 +289,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		if(i==N-1){
 			// compute the distance of this endpoint with the forbidden polytope \cap invariant (the segment end point must lie
 			// in the intersection of the bad_set and the last location invariant).
-			//bad_poly=bad_poly->GetPolytope_Intersection(I);
 
 			cost+= bad_poly->point_distance(y[N-1]);
 
@@ -321,6 +320,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			polytope::ptr g;
 			Assign R;
 			math::matrix<double> mapExpAt(expAt);
+			// assign the transition pointer
+			Tptr = *(T_iter);
 			// assignment of the form: Rx + w
 
 			R = Tptr->getAssignT();
@@ -332,7 +333,14 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			// guard \cap invariant distance, to address Eq. (12) in CDC 13' paper
 			polytope::ptr guard_intersect_inv;
 			guard_intersect_inv = I->GetPolytope_Intersection(g);
+
+			// plot the guard intersection with location invariant
+//			if(loc_index == 7){
+//				guard_intersect_inv->print2file("./guard_intersect.txt",0,1);
+//			}
+			//-----------------------------------------------------
 			double guard_dist = guard_intersect_inv->point_distance(y[i]);
+//			double guard_dist = I->point_distance(y[i]);
 			cost += guard_dist;
 
 			std::vector<double> guard_dist_grad(dim,0);
@@ -367,8 +375,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 
 			assert(y[i].size() == R.b.size());
 
-			if(T_iter!=transList.end())
-				T_iter++;
+			T_iter++; // Moving to the next transition.
 
 			//compute the Euclidean distance between the next start point and the simulated end point
 			for (unsigned int j = 0; j < dim; j++) {
@@ -476,8 +483,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 		}
 	}
 //	std::cout << "current cost=" << cost << std::endl;
-
 	return cost;
+
 }
 
 //double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data)

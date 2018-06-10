@@ -208,7 +208,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matri
 		joined_matrix = math::matrix<scalar_type>(mat2_temp.size1(),
 				mat2_temp.size2(), mat2_temp.data());
 	} else {
-		cout << "Matices are not of the same dimension:: number of columns do not match!!!";
+		cout << "Matrices are not of the same dimension:: number of columns do not match!!!";
 	}
 }
 

@@ -34,7 +34,8 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+		Set_NavTimedEpsilonRelaxGuard(ha, init_state, reach_parameters);
 		//SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
 	}
 
@@ -47,13 +48,13 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 	}
 	if (HybridSystem_Model_Type == NAVIGATION_4) {
-		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+		//SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) {
-//		SetNavigationModel9by9(ha, init_state, reach_parameters); //My own testing Model NAV_9by9
+		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters); // NAV_9by9 Timed model
 	}
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
