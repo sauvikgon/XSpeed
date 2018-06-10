@@ -67,7 +67,6 @@ abstractCE::abstractCE(std::list<symbolic_states::ptr> s_states,
 	trans = ts;
 	//Assertion to check that the length of the counter-example is one minus
 	// the number of sym states in the CE.
-	assert(sym_states.size() == trans.size() - 1);
 
 	length = sym_states.size();
 	H = h;

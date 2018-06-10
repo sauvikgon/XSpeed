@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.release.1331275037">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.release.1331275037" moduleId="org.eclipse.cdt.core.settings" name="Release">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/xspeed"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/xspeed/Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="xspeed" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.release.1331275037" name="Release" parent="cdt.managedbuild.config.gnu.cross.exe.release.1331275037">
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.1331275037." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.318829428" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base.358378043" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<builder buildPath="${workspace_loc:/XSpeed}/Release" id="cdt.managedbuild.target.gnu.builder.base.1215596763" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base">
+								<outputEntries>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug1"/>
+								</outputEntries>
+							</builder>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.961847996" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool command="g++  -fopenmp -std=c++11" id="cdt.managedbuild.tool.gnu.cpp.compiler.base.526866979" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+								<option id="gnu.cpp.compiler.option.include.paths.1585986787" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.optimization.level.277303253" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.42819424" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.default" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.376738753" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.699078319" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.368300480" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.1335872206" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.1785882046" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.1458120770" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/XSpeed/XSpeed}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/"/>
+								</option>
+								<option id="gnu.c.compiler.option.dialect.std.424055116" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1447755717" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.983201923" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base">
+								<option defaultValue="true" id="gnu.c.link.option.shared.304941930" name="Shared (-shared)" superClass="gnu.c.link.option.shared" valueType="boolean"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.2016946226" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
+								<option id="gnu.cpp.link.option.libs.1055761399" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="gsl"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="gmp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="nlopt"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="gslcblas"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="boost_timer"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="boost_chrono"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="boost_system"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="gomp"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="pthread"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="glpk"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="ppl"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="sundials_cvode"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="sundials_nvecserial"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="boost_program_options"/>
+								</option>
+								<option id="gnu.cpp.link.option.paths.509489904" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/usr/local/lib"/>
+								</option>
+								<option defaultValue="true" id="gnu.cpp.link.option.shared.1433096749" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" value="false" valueType="boolean"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.362089429" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+								<outputType id="cdt.managedbuild.tool.gnu.cpp.linker.output.so.916998007" outputPrefix="" superClass="cdt.managedbuild.tool.gnu.cpp.linker.output.so"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.71099327" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+								<option id="gnu.both.asm.option.include.paths.621868794" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/home/rajarshi/workspace/xspeed/}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.415270027" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="core_system/continuous/omega_model|omega_model|Debug/testing|testing/Unit_Testing_GPUTester|Hybrid_Model_Parameters_Design/ConstantMotion|testing/Unit_Testing_Simulation/test_simulationNavigation5by5.cpp|testing/Unit_Testing_HAModels|testing/Unit_Testing_Simulation/test_simulationTimedBBall.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/heart.cpp|Utilities/GPU_utility|testing/Unit_Testing_HybridAutomata|testing/Unit_Testing_Simulation/test_simulationNavigation3by3.cpp|testing/Unit_Testing_Continuous|testing/Unit_Testing_Simulation|testing/test_runner.cpp|testing/Unit_Testing_Utilities|testing/Unit_Testing_Simulation/test_simulationNavigation.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/pll.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/mesh.cpp|Release/core_system/math/gurobi_lp_solver|testing/Unit_Testing_NewApproach|core_system/math/gurobi_lp_solver|Hybrid_Model_Parameters_Design/Navigation_Benchmark/nav9x9.cpp|testing/Unit_Testing_Simulation/test_simulationRotationCircle.cpp|Hyperbox|testing/Unit_Testing_Simulation/test_simulationOscillatorModel.cpp|testing/Unit_Testing_Simulation/test_simulationHelicopter.cpp|testing/Unit_Testing_Simulation/test_simulationConstantMotion.cpp|testing/Unit_Testing_Simulation/test_simulationNavigation9by9.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fwr.cpp|Hybrid_Model_Parameters_Design/TTEthernet|testing/Unit_Testing_ourSimplex|testing/Unit_Testing_Math|core_system/Reachability/GPU_Reach|core_system/math/GPU|Hybrid_Model_Parameters_Design/Navigation_Benchmark/nav09Timed.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="core_system/continuous/omega_model"/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.release.1331275037.2018657320">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.release.1331275037.2018657320" moduleId="org.eclipse.cdt.core.settings" name="Debug1">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/XSpeed"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/XSpeed/Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="XSpeed" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.release.1331275037.2018657320" name="Debug1" parent="cdt.managedbuild.config.gnu.cross.exe.release.1331275037">
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.1331275037.2018657320." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.776135532" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base.519223762" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<builder buildPath="${workspace_loc:/XSpeed}/Release" id="cdt.managedbuild.target.gnu.builder.base.13953159" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1822598357" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool command="g++  -fopenmp -std=c++11" id="cdt.managedbuild.tool.gnu.cpp.compiler.base.458202839" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+								<option id="gnu.cpp.compiler.option.include.paths.1230855933" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/local/include/UnitTest++/"/>
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.optimization.level.147264360" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1184106091" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.default" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1655712762" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1312079466" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.164027047" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.723521565" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.413746837" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.155736319" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.407418798" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
+								<option id="gnu.cpp.link.option.libs.1033038497" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+									<listOptionValue builtIn="false" value="gmp"/>
+									<listOptionValue builtIn="false" value="UnitTest++"/>
+									<listOptionValue builtIn="false" value="gsl"/>
+									<listOptionValue builtIn="false" value="gslcblas"/>
+									<listOptionValue builtIn="false" value="boost_timer"/>
+									<listOptionValue builtIn="false" value="boost_chrono"/>
+									<listOptionValue builtIn="false" value="boost_system"/>
+									<listOptionValue builtIn="false" value="gomp"/>
+									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="glpk"/>
+									<listOptionValue builtIn="false" value="ppl"/>
+									<listOptionValue builtIn="false" value="sundials_cvode"/>
+									<listOptionValue builtIn="false" value="sundials_nvecserial"/>
+									<listOptionValue builtIn="false" value="nlopt"/>
+									<listOptionValue builtIn="false" value="boost_program_options"/>
+								</option>
+								<option id="gnu.cpp.link.option.paths.1177316089" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/usr/local/lib"/>
+									<listOptionValue builtIn="false" value="/usr/lib"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.183996856" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1390957426" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1759412804" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="core_system/continuous/omega_model|omega_model|testing/Unit_Testing_Math/test_ApproxError_EnumeratedVertices.cpp|testing/Unit_Testing_Simulation|testing/Unit_Testing_Math/test_hausdorffDist.cpp|core_system/continuous/Hyperbox|Hyperbox|testing/Unit_Testing_Math/test_ProjectionDist.cpp|application/readCommandLine.cpp|testing/Unit_Testing_Math/test_simulation.cpp|testing/Unit_Testing_Math/test_simplex.cpp|testing/Unit_Testing_Math/test_ode_solution.cpp|testing/Unit_Testing_Math/test_nlopt.cpp|testing/Unit_Testing_Math/test_glpk.cpp|testing/Unit_Testing_Math/test_2d_geometry.cpp|testing/Unit_Testing_Utilities|testing/Unit_Testing_ourSimplex|testing/Unit_Testing_NewApproach|testing/Unit_Testing_HybridAutomata|testing/Unit_Testing_HAModels|testing/Unit_Testing_GPUTester|application/XSpeed.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/pll.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/mesh.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/heart.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fwr.cpp|Hybrid_Model_Parameters_Design/TTEthernet|Hybrid_Model_Parameters_Design/Navigation_Benchmark/nav09Timed.cpp|core_system/math/GPU|core_system/math/gurobi_lp_solver|Release/core_system/math/gurobi_lp_solver|core_system/Reachability/GPU_Reach|Utilities/GPU_utility|Debug/testing" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="core_system/continuous/Hyperbox"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="core_system/continuous/omega_model"/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="xspeed.cdt.managedbuild.target.gnu.exe.16600756" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug1"/>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/XSpeed"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/XSpeed"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1331275037;cdt.managedbuild.config.gnu.cross.exe.release.1331275037.;cdt.managedbuild.tool.gnu.cpp.compiler.base.526866979;cdt.managedbuild.tool.gnu.cpp.compiler.input.699078319">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.169743845;cdt.managedbuild.config.gnu.exe.release.169743845.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1748304827;cdt.managedbuild.tool.gnu.c.compiler.input.2103919506">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1331275037;cdt.managedbuild.config.gnu.cross.exe.release.1331275037.;cdt.managedbuild.tool.gnu.c.compiler.base.368300480;cdt.managedbuild.tool.gnu.c.compiler.input.1447755717">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.169743845;cdt.managedbuild.config.gnu.exe.release.169743845.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.621772856;cdt.managedbuild.tool.gnu.cpp.compiler.input.1673063100">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.2041763925;cdt.managedbuild.config.gnu.exe.debug.2041763925.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.252110326;cdt.managedbuild.tool.gnu.cpp.compiler.input.345883063">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.2041763925;cdt.managedbuild.config.gnu.exe.debug.2041763925.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1903155495;cdt.managedbuild.tool.gnu.c.compiler.input.1978183037">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+</cproject>
