@@ -104,11 +104,6 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 
-	// Parse the forbidden state string to make a polytope
-	if (!user_options.get_forbidden_set().empty()) {
-		string_to_poly(user_options.get_forbidden_set(), forbidden_set);
-	}
-
 // ----Section for Trajectory Simulation
 	if (boost::iequals(user_options.getEngine(),"simu")==true) {
 		std::cout<<"Trajectory Simulation is selected!!!\n";

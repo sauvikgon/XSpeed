@@ -41,6 +41,7 @@ class userOptions {
 	unsigned int algo;	//Common arg for all types of Algorithm
 	unsigned int total_slice_size;	//total number of partition-size or number of slices
 	unsigned int stream_size;	//total number of streams selected for GPU streaming
+	unsigned int ce_flag; 	// ce_flag=1 means counter-example to forbidden state will be generated.
 
 public:
 	userOptions();
@@ -96,6 +97,8 @@ public:
 	unsigned int get_simu_init_points();
 	void set_simu_init_points(unsigned int sampling_points);
 
+	unsigned int get_ce_flag();
+	void set_ce_flag(unsigned int ce_flag);
 
 };
 

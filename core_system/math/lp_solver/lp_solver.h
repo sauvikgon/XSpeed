@@ -24,6 +24,7 @@ public:
 	lp_solver();	//default constructor with type of lp_solver as glpk
 	lp_solver(int solver_type);	//constructor decide the type of lp_solver to be created glpk/gurobi/par_simplex/Gimplex/etc
 	~lp_solver();
+
 	//  ****** Main Functions **********
 	void setConstraints(math::matrix<double> coeff_constraints,
 			std::vector<double> bounds, int bound_signs);
@@ -49,6 +50,8 @@ public:
 	 * Gets the optimal value of the variable, after solving the lp, having the index passed as parameter
 	 */
 	double get_col_val(int i);
+
+	int get_status();
 	void setMin_Or_Max(int Min_Or_Max);
 
 	/**
@@ -90,6 +93,7 @@ public:
 private:
 	int lp_solver_type;		//typename glpk_lp_solver::glpk_ptr glpk_lp_problem;
 	glpk_lp_solver::glpk_ptr glpk_lp_problem;
+	int status; // status of the problem, like unbounded, feasible or infeasible.
 //	gurobi_lp_solver::gurobi_ptr gurobi_lp_problem;
 	Simplex_CPU::simplex_ptr simplex_cpu_lp_problem;
 

@@ -15,6 +15,7 @@ userOptions::userOptions() {
 	output_var_Y = 1; // default second dimension of plot
 	output_var_Z = 0; //default third plot dimension
 	simu_init_points = 1; // Number of initial points set to 1 by default.
+	ce_flag = 0; // Counter-example generation switched-off by default
 //	automata_exploration_algorithm = 12; // sequential BFS
 //	flow_algorithm = 1;	// SEQ
 
@@ -200,7 +201,15 @@ void userOptions::set_simu_init_points(unsigned int sampling_points){
 	simu_init_points = sampling_points;
 }
 
-
 void userOptions::setOutFilename(const std::string& outFilename) {
 	out_filename = outFilename;
+}
+
+unsigned int userOptions::get_ce_flag(){
+	return this->ce_flag;
+}
+
+void userOptions::set_ce_flag(unsigned int ce_flag)
+{
+	this->ce_flag = ce_flag;
 }

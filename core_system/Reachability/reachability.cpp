@@ -21,6 +21,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	number_of_streams = user_options.getStreamSize();
 	Solver_GLPK_Gurobi_GPU = solver_GLPK_Gurobi_for_GPU; //todo:: used for comparing GLPK solver vs GPU. Can be removed
 	forbidden_set = forbidden;
+	ce_flag = user_options.get_ce_flag();
 	set_aggregation = user_options.getSetAggregation();
 }
 
@@ -172,11 +173,14 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				std::list < template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
 
-				if (forbid_intersects.size() == 0) {
-					//std::cout << "\nThe model does NOT violate SAFETY property!!!\n";
-				}
-				else {
-					symbolic_states::ptr symb_state_in_abst_ce; // This is a pointer to the current symblic state in the abstract ce.
+				if (forbid_intersects.size() != 0)
+					safety_violation = true;
+
+				if (ce_flag == 0) break; // No need to generate CE
+
+				if (safety_violation && ce_flag == 1) // CE Gen is ON
+				{
+					symbolic_states::ptr symb_state_in_abst_ce; // This is a pointer to the current symbolic state in the abstract ce.
 					symb_state_in_abst_ce = S;
 					int symbolic_ce_length = 0;
 					do {
@@ -220,7 +224,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					if ((symbolic_ce_length >= 1) && (symb_state_in_abst_ce->getParentPtrSymbolicState()== NULL)) { //root is missed
 						list_sym_states.push_front(symb_state_in_abst_ce); //1) pushing this new symb state at the beginning
 					}
-					safety_violation = true;
 					abstractCE::ptr abst_ce = abstractCE::ptr(new abstractCE());
 					abst_ce->set_length(symbolic_ce_length);
 					abst_ce->set_sym_states(list_sym_states);
@@ -398,6 +401,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		std::cout << "\nJump " << bfslevel  << "..." << num_flowpipe_computed << " Symbolic States Passed, "
 				<< pw_list.getWaitingList().size() << " waiting ..."<< wall_clock <<" seconds";
 	} //end of while loop checking waiting_list != empty
+	if(safety_violation == true)
+		std::cout << "#############Safety Property is Violated#################3\n";
 	if (bfslevel<bound){	//did not reach to the assigned bound
 		std::cout<<"\n\nFound Fix-point after "<<bfslevel <<" Jumps!!!\n";
 	}

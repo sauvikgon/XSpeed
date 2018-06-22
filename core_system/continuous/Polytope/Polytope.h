@@ -17,6 +17,7 @@
 #include<set>
 #include<utility>
 #include <boost/tokenizer.hpp>
+#include "Utilities/string_parser.h"
 
 using namespace std;
 
@@ -59,6 +60,8 @@ public:
 	bool getIsEmpty() const;
 	void setIsUniverse(bool universe);
 	bool getIsUniverse() const;
+	/* Returns true if the constraints make it bounded, i.e., a polytope */
+	bool isBounded() const;
 
 	void setPolytope(math::matrix<double> coeffMatrix,
 			std::vector<double> columnVector, int inEqualitySign);
@@ -162,7 +165,7 @@ public:
 	void print2StdOut(unsigned int dim1, unsigned int dim2);
 
 	//Prints the coefficient matrix and vector
-	void printPoly_parm();
+	void printPoly();
 	/*
 	 * Prints the vertices of the polytope to a file, passed as parameter.
 	 * The file could be called with any plotting utility.

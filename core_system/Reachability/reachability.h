@@ -87,6 +87,7 @@ public:
 	hybrid_automata H; //todo:: have to change it to boost::ptr
 	int lp_solver_type_choosen;
 	std::pair<int, polytope::ptr> forbidden_set;
+	unsigned int ce_flag; // The flag to swithch ON/OFF CE generation.
 	int Solver_GLPK_Gurobi_GPU;
 
 	void sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,

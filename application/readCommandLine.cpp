@@ -69,8 +69,8 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking (0 for only postC)")
 	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - none : consider each convex set as successor sets for the next depth")
 
-	//("internal", "called internally when running hyst-xspeed model")
 	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst
+	("CE", po::value<unsigned int>()->default_value(0), "Generate counter-example to forbidden-state (default: OFF): \n 0: No CE Generation \n 1: Generate CE \n")
 	("include-path,I", po::value<std::string>(), "include file path")
 	("model-file,m", po::value<std::string>(), "include model file")
 	("config-file,c", po::value<std::string>(), "include configuration file")
@@ -291,6 +291,16 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			user_options.set_forbidden_set(vm["forbidden"].as<std::string>());
 		}
 
+		if(vm.count("CE") && isConfigFileAssigned == false) {
+			user_options.set_ce_flag(vm["CE"].as<unsigned int>());
+			unsigned int ce_flag = user_options.get_ce_flag();
+
+			if(ce_flag!=0 && ce_flag!=1)
+			{
+				std::cout << "Invalid CE Flag value specified. A 0 or 1 is expected.\n";
+				throw(new exception());
+			}
+		}
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeHorizon(vm["time-horizon"].as<double>());
 			if (user_options.get_timeHorizon() <= 0) { //for 0 or negative time-bound
@@ -379,8 +389,13 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
 			user_options.set_third_plot_dimension(x3);
 		}
-		if (!user_options.get_forbidden_set().empty())
-			forbidden_set.second->print2file("./bad_poly", x1, x2);
+		if (!user_options.get_forbidden_set().empty()){
+			try{
+				forbidden_set.second->print2file("./bad_poly", x1, x2);
+			} catch(...){
+				std::cout << "Cannot print the forbidden polytope because it is unbounded in the print dimensions or may be empty\n";
+			}
+		}
 	}
 	//return 1;
 }

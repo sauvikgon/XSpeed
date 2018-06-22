@@ -93,6 +93,16 @@ void polytope::setIsUniverse(bool universe) {
 bool polytope::getIsUniverse() const {
 	return this->IsUniverse;
 }
+bool polytope::isBounded() const
+{
+	if(coeffMatrix.size1()< system_dimension+1)
+		return false;
+	else
+		return true;
+	/* Note that the above is a simple check of boundedness.
+	 * A true algorithm to check for boundeded is to be implemented. later.
+	 */
+}
 math::matrix<double>& polytope::getCoeffMatrix() {
 	return this->coeffMatrix;
 }
@@ -187,6 +197,10 @@ double polytope::computeSupportFunction(const std::vector<double>& direction,
 		throw std::runtime_error("\n Cannot Compute Support Function of a Universe (un-constrained) Polytope.\n");
 	else{
 		sf = lp.Compute_LLP(direction); //since lp has already been created and set
+		if (lp.getStatus() == GLP_UNBND){
+			throw std::runtime_error("Unbounded solution to an LP problem");
+		}
+
 	}									//with constraints at the time of creation
 	return sf;
 }
@@ -448,6 +462,8 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 		throw std::runtime_error("Cannot enumerate vertices of universe polytope\n");
 	if(this->IsEmpty)
 		throw std::runtime_error("Cannot enumerate vertices of an empty polytope\n");
+	if(!this->isBounded())
+		throw std::runtime_error("Cannot enumerate vertices of an unbounded polytope\n");
 
 	std::set < std::pair<double, double> > All_vertices;
 //	std::cout<<"Called enumerateVertices()!!\n";
@@ -546,7 +562,7 @@ void polytope::print2StdOut(unsigned int dim1, unsigned int dim2)
 		std::cout << "\n";
 	}
 }
-void polytope::printPoly_parm(){
+void polytope::printPoly(){
 
 	std::cout<<this->coeffMatrix;
 	std::cout<<"\nVector\n";
@@ -643,10 +659,12 @@ std::cout<<"Arrary output\n";
 
 /*
  * Reads the format " v1 >=2 & v1 <= 3 & v2 >=2 & v2 <=3"
+ * Also, should be able to now read linear constrains of the format " 1*x + 2*y >=10 & 1*x + -1*y <=20"
  */
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
 {
 	std::list<std::string> all_args;
+
 	//polytope::ptr p = polytope::ptr(new polytope());
 	polytope::ptr p = polytope::ptr(new polytope());
 	p->setIsEmpty(false);
@@ -654,7 +672,7 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 
 	//p->setIsUniverse(false); //Not a universe Polytope
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("& ");
+	boost::char_separator<char> sep("&");
 	tokenizer tokens(bad_state, sep);
 
 	for (tokenizer::iterator tok_iter = tokens.begin();
@@ -679,18 +697,22 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 
 	std::string varname;
 	unsigned int i;
+
 	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
 		tokString = *iter;
-
 		if (tokString.find("<=")!=std::string::npos ){ // less than equal to constraint
 			sep = boost::char_separator<char>("<=");
 			tokens = tokenizer(tokString,sep);
-			tok_iter = tokens.begin();
-			varname = *tok_iter;
+			tok_iter = tokens.begin(); // tok_iter contains the lhs of a linear exp
+			std::list<std::pair<double, std::string> > coeff_var_pairs = linexp_parser(*tok_iter);
+			std::vector<double> cons(p->map_size(), 0);
+			for(std::list<std::pair<double, std::string> >::iterator it = coeff_var_pairs.begin(); it!=coeff_var_pairs.end();++it){
+				double coeff = (*it).first;
+				varname = (*it).second;
+ 				i = p->get_index(varname);
+				cons[i] = coeff;
+			}
 			tok_iter++;
-			i = p->get_index(varname);
-			std::vector<double> cons(p->map_size(),0);
-			cons[i] = 1;
 			double bound = std::atof((*tok_iter).c_str());
 			p->setMoreConstraints(cons,bound);
 		}
@@ -698,11 +720,15 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			sep = boost::char_separator<char>(">=");
 			tokens = tokenizer(tokString,sep);
 			tok_iter = tokens.begin();
-			varname = *tok_iter;
+			std::list<std::pair<double, std::string> > coeff_var_pairs = linexp_parser(*tok_iter);
+			std::vector<double> cons(p->map_size(), 0);
+			for(std::list<std::pair<double, std::string> >::iterator it = coeff_var_pairs.begin(); it!=coeff_var_pairs.end();++it){
+				double coeff = (*it).first;
+				varname = (*it).second;
+				i = p->get_index(varname);
+				cons[i] = -coeff;
+			}
 			tok_iter++;
-			i = p->get_index(varname);
-			std::vector<double> cons(p->map_size(),0);
-			cons[i] = -1;
 			double bound = std::atof((*tok_iter).c_str());
 			p->setMoreConstraints(cons,-bound);
 		}
@@ -710,7 +736,6 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			throw std::runtime_error("forbidden state string improper: <= or >= constraint expected\n");
 		}
 	}
-
 	f_set.second=p;
 };
 

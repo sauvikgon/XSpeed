@@ -113,7 +113,6 @@ double lp_solver::solve()
 		throw std::runtime_error("solve objective coeff: Cannot set objective function coefficient in the LP problem with the chosen type of LP Solver\n");
 	}
 }
-
 void lp_solver::setConstraints(math::matrix<double> coeff_constraints,
 		std::vector<double> bounds, int bound_signs) {
 
@@ -145,6 +144,7 @@ double lp_solver::Compute_LLP(const std::vector<double> coeff_function) {
 	double res = 0.0;
 	if (lp_solver_type == GLPK_SOLVER) {
 		res = glpk_lp_problem->Compute_LLP(coeff_function);
+		status = glpk_lp_problem->getStatus();
 	}
 
 	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
@@ -192,21 +192,6 @@ void lp_solver::setInitial_SimplexControlParameters() {
 }
 
 unsigned int lp_solver::getStatus() {
-	unsigned int status = 5, glpk_status = 5;
-
-	// ******* I have to return a uniform meaning for the status returned by Gurobi and GLPK  *****
-	/*
-	 * Meaning					Common_Retun_Code 	GLPK_Code	Gurobi_Code
-	 * Solution is Undefined			1				1
-	 * Solution is feasible				2				2
-	 * Solution is Infeasible			3				3			3
-	 * no feasible Solution Exists		4				4
-	 * Solution is Optimal				5				5			2
-	 * Solution is unbounded			6				6			5
-	 */
-	if (lp_solver_type == GLPK_SOLVER) {
-		status = glpk_status;
-	}
 	return status;
 }
 unsigned int lp_solver::TestConstraints() {
