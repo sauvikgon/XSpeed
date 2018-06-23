@@ -77,8 +77,6 @@ unsigned int HybridSystem_Model_Type;
 unsigned int Directions_Type;
 unsigned int Uniform_Directions_Size;
 
-
-
 	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)}
 	std::string bad_state; // string to capture the bad state description given by the user
 	std::list<abstractCE::ptr> ce_candidates; //object of class counter_example
@@ -97,7 +95,7 @@ unsigned int Uniform_Directions_Size;
 int main(int argc, char *argv[]) {
 
 	try{
-		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters);
+		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters,forbidden_set);
 	}catch(...){
 		std::cout<<"\nTerminating XSpeed, caused due to error in command-line inputs.\n";
 		std::cout << "Try XSpeed --help to see the command-line options\n";
@@ -238,59 +236,63 @@ int main(int argc, char *argv[]) {
 	/*
 	 * counterExample utility. Plot the location sequence of every abstract CE in a file
 	 */
-	dump_abstractCE_list(ce_candidates);
-	// create a template abstract ce to filter
-	std::vector<unsigned int> template_seq(0);
-	//template_seq = {3,4,2,1,3,4,2,1,3,4};
+	if(user_options.get_ce_flag()==1) { // CE Generation is ON
+		dump_abstractCE_list(ce_candidates);
+		// create a template abstract ce to filter
+		std::vector<unsigned int> template_seq(0);
+		//template_seq = {3,4,2,1,3,4,2,1,3,4};
 
-	// create a filter template here
+		// create a filter template here
 
-	/** End of debug */
-	concreteCE::ptr ce;
-	abstractCE::ptr abs_ce;
-	bool real_ce = false;
-	double error_tol = 1e-6; // splicing error tolerance
+		/** End of debug */
+		concreteCE::ptr ce;
+		abstractCE::ptr abs_ce;
+		bool real_ce = false;
+		double error_tol = 1e-6; // splicing error tolerance
 
-	tt1.start(); // start time
-	for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
+		tt1.start(); // start time
+		for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
 
-		abs_ce = *(it);
-		// add a filter function to search for concrete ce only in a specific abstract trace
-		bool search_ce = abs_ce->filter(template_seq);
-		if(search_ce){
-			//tt1.start(); // start time
-			ce = abs_ce->get_validated_CE(error_tol);
-			//tt1.stop(); //stop time
+			abs_ce = *(it);
+			// add a filter function to search for concrete ce only in a specific abstract trace
+			bool search_ce = abs_ce->filter(template_seq);
+			if(search_ce){
+				//tt1.start(); // start time
+				ce = abs_ce->get_validated_CE(error_tol);
+				//tt1.stop(); //stop time
+			}
+			else continue;
+
+			if(ce->is_empty()){
+				std::cout << "Cannot Splice Trajectories with Accepted Error Tolerance\n";
+				std::cout << "Looking for Other Abstract CE to Unsafe Set\n";
+				continue;
+			} else {
+				real_ce = true;
+				break;
+			}
 		}
-		else continue;
+		tt1.stop(); //stop time
 
-		if(ce->is_empty()){
-			std::cout << "Cannot Splice Trajectories with Accepted Error Tolerance\n";
-			std::cout << "Looking for Other Abstract CE to Unsafe Set\n";
-			continue;
+		// plot the ce trajectory in a file
+		if(real_ce){
+			ce->set_automaton(abs_ce->get_automaton());
+			std::string tracefile = "./bad_trace.o";
+			ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+		}
+
+		//timers
+		double user_clock;
+		user_clock = tt1.elapsed().user / 1000000;
+		//--end of timers
+		if (!real_ce) {
+			std::cout << "******** No Violation of Safety Property ********\n";
+			std::cout << "Time to search concrete counter-examples (milliseconds):" << user_clock << std::endl;
 		} else {
-			real_ce = true;
-			break;
+			std::cout << "******** Detected Violation of Safety Property  ********\n";
+			std::cout << "Counter Example Trace Plotted in the file bad_trace.o\n";
+			std::cout << "Time to search counter-example (milliseconds):" << user_clock << std::endl;
 		}
-	}
-	tt1.stop(); //stop time
-
-	// plot the ce trajectory in a file
-	ce->set_automaton(abs_ce->get_automaton());
-	std::string tracefile = "./bad_trace.o";
-	ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-
-	//timers
-	double user_clock;
-	user_clock = tt1.elapsed().user / 1000000;
-	//--end of timers
-	if (!real_ce) {
-		std::cout << "******** No Violation of Safety Property ********\n";
-		std::cout << "Time to search concrete counter-examples (milliseconds):" << user_clock << std::endl;
-	} else {
-		std::cout << "******** Detected Violation of Safety Property  ********\n";
-		std::cout << "Counter Example Trace Plotted in the file bad_trace.o\n";
-		std::cout << "Time to search counter-example (milliseconds):" << user_clock << std::endl;
 	}
 
 	cout << "\n******** Summary of XSpeed ********\n";

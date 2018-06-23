@@ -462,8 +462,6 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 		throw std::runtime_error("Cannot enumerate vertices of universe polytope\n");
 	if(this->IsEmpty)
 		throw std::runtime_error("Cannot enumerate vertices of an empty polytope\n");
-	if(!this->isBounded())
-		throw std::runtime_error("Cannot enumerate vertices of an unbounded polytope\n");
 
 	std::set < std::pair<double, double> > All_vertices;
 //	std::cout<<"Called enumerateVertices()!!\n";

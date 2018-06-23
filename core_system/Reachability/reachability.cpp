@@ -164,8 +164,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		polytope::ptr polyI; //initial polytope of the abstract flowpipe
 		std::list < transition::ptr > list_transitions; // list of transitions leading to the unsafe set
 
+
 		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe exists
 				//so perform intersection with forbidden set provided locID matches
+
 			int locID = current_location->getLocId();
 			cout<<"Running Safety Check for Loc = "<<locID<<std::endl;
 			if (forbidden_set.first==-1 || locID == forbidden_set.first) { // forbidden locID matches. loc id of -1 means any location
@@ -176,7 +178,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				if (forbid_intersects.size() != 0)
 					safety_violation = true;
 
-				if (ce_flag == 0) break; // No need to generate CE
+				if (safety_violation && ce_flag == 0) break; // No need to generate CE
 
 				if (safety_violation && ce_flag == 1) // CE Gen is ON
 				{
@@ -401,8 +403,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		std::cout << "\nJump " << bfslevel  << "..." << num_flowpipe_computed << " Symbolic States Passed, "
 				<< pw_list.getWaitingList().size() << " waiting ..."<< wall_clock <<" seconds";
 	} //end of while loop checking waiting_list != empty
-	if(safety_violation == true)
-		std::cout << "#############Safety Property is Violated#################3\n";
+	if(safety_violation == true){
+		std::cout << "############# Safety Property is Violated #################\n";
+		return Reachability_Region;
+	}
 	if (bfslevel<bound){	//did not reach to the assigned bound
 		std::cout<<"\n\nFound Fix-point after "<<bfslevel <<" Jumps!!!\n";
 	}

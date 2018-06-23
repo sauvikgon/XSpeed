@@ -33,6 +33,8 @@
 void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state,
-		ReachabilityParameters& reach_parameters);
+		ReachabilityParameters& reach_parameters,
+		std::pair<int, polytope::ptr>& forbidden_set);
+
 #endif /* APPLICATION_READCOMMANDLINE_H_ */
 

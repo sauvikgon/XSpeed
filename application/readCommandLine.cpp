@@ -12,9 +12,8 @@ namespace po = boost::program_options;
 void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state,
-		ReachabilityParameters& reach_parameters) {
-
-	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)}
+		ReachabilityParameters& reach_parameters,
+		std::pair<int, polytope::ptr>& forbidden_set) {
 
 	bool isConfigFileAssigned = false, isModelParsed = false;
 
