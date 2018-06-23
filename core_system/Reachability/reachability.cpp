@@ -248,7 +248,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 
 		if (reach_region->getTotalIterations() != 0 && bfslevel <= bound) {
-			//computed reach_region is empty and optimize transition BreadthLevel-wise
+			//computed reach_region is not empty and bounding depth not reached
 			for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
 					t != current_location->getOut_Going_Transitions().end(); t++) {
 				// get each destination_location_id and push into the pwl.waiting_list
@@ -263,7 +263,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 
 
-				bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
+				bool aggregation=true; // TRUE indicates ON, so a full or clustered hulls template hulls are taken
 				if (boost::iequals(this->getSetAggregation(),"thull")){
 					aggregation=true;
 

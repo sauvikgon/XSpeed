@@ -158,19 +158,21 @@ void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
 	gaurdBoundSign = 1;
 
 	/*	Invariant Polytope :
-	 * Invariant Constraint :: position >=0 (x >= 0) conversion into -x <= -0
+	 * Invariant Constraint :: position >=0 (x >= 0) conversion into -x <= 0 & t>=0 (-t<=0)
 	 * Invariant Directions :: L1(-1,0) as positive and L2(1,0) as its negative
 	 */
-	row = 1;
+	row = 2;
 	col = 3;
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix(0, 0) = -1;
 	invariantConstraintsMatrix(0, 1) = 0;
 	invariantConstraintsMatrix(0, 2) = 0;
-
+	invariantConstraintsMatrix(1, 0) = 0;
+	invariantConstraintsMatrix(1, 1) = 0;
+	invariantConstraintsMatrix(1, 2) = -1;
 	invariantBoundValue.resize(row);
-	invariantBoundValue[0] = -0;
-
+	invariantBoundValue[0] = 0;
+	invariantBoundValue[1] = 0;
 	invariantBoundSign = 1;
 	invariant = polytope::ptr(
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
@@ -313,15 +315,19 @@ void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
 	system_dynamics0.isEmptyC = false;
 	system_dynamics0.C = C0;
 
-	row = 1;
+	row = 2;
 	col = 3;
 	invariantConstraintsMatrix0.resize(row, col);
 	invariantConstraintsMatrix0(0, 0) = -1.0;
 	invariantConstraintsMatrix0(0, 1) = 0.0;
 	invariantConstraintsMatrix0(0, 2) = 0.0;
+	invariantConstraintsMatrix0(1, 0) = 0.0;
+	invariantConstraintsMatrix0(1, 1) = 0.0;
+	invariantConstraintsMatrix0(1, 2) = -1.0;
 
 	invariantBoundValue0.resize(row);
-	invariantBoundValue0[0] = -0.0;
+	invariantBoundValue0[0] = 0.0;
+	invariantBoundValue0[1] = 0.0;
 	invariantBoundSign = 1;
 	invariant0 = polytope::ptr(
 			new polytope(invariantConstraintsMatrix0, invariantBoundValue0,

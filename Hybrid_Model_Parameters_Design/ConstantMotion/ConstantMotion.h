@@ -14,7 +14,7 @@
 #include "core_system/symbolic_states/initial_state.h"
 
 void SetConstantMotion(hybrid_automata& Hybrid_Automata,
-		initial_state::ptr& init_state,
+		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters);
 
 #endif /* CONSTANTMOTION_H_ */

@@ -146,7 +146,8 @@ double lp_solver::Compute_LLP(const std::vector<double> coeff_function) {
 		res = glpk_lp_problem->Compute_LLP(coeff_function);
 		status = glpk_lp_problem->getStatus();
 	}
-
+	if(status == GLP_UNBND)
+		throw(new std::exception());
 	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
 		res = simplex_cpu_lp_problem->ComputeLP_CPU(coeff_function);
 	}

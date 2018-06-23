@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
 		dump_abstractCE_list(ce_candidates);
 		// create a template abstract ce to filter
 		std::vector<unsigned int> template_seq(0);
-		//template_seq = {3,4,2,1,3,4,2,1,3,4};
+		//template_seq = {1,1,1,1,1,1,1};
 
 		// create a filter template here
 
