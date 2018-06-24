@@ -1,4 +1,3 @@
-<<<<<<< local
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
@@ -69,8 +68,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="testing/Unit_Testing_Simulation|core_system/math/PPL_Polyhedron|application/XSpeed.cpp|Hybrid_Model_Parameters_Design/Navigation_Benchmark/Navigation5by5.cpp|Hybrid_Model_Parameters_Design/Navigation_Benchmark/Navigation5by5WithOutTime.cpp|Hybrid_Model_Parameters_Design/Navigation_Benchmark/nav9x9.cpp|Hybrid_Model_Parameters_Design/Navigation_Benchmark/nav09Timed.cpp|core_system/Reachability/GPU_Reach|core_system/math/Gimplex|core_system/math/GPU" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-					</sourceEntries>
+						<entry excluding="Hybrid_Model_Parameters_Design/Navigation_Benchmark/nav09Timed.cpp|core_system/continuous/omega_model|omega_model|Debug/testing|testing/Unit_Testing_GPUTester|Hybrid_Model_Parameters_Design/ConstantMotion|testing/Unit_Testing_Simulation/test_simulationNavigation5by5.cpp|testing/Unit_Testing_HAModels|testing/Unit_Testing_Simulation/test_simulationTimedBBall.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/heart.cpp|Utilities/GPU_utility|testing/Unit_Testing_HybridAutomata|testing/Unit_Testing_Simulation/test_simulationNavigation3by3.cpp|testing/Unit_Testing_Continuous|testing/Unit_Testing_Simulation|testing/test_runner.cpp|testing/Unit_Testing_Utilities|testing/Unit_Testing_Simulation/test_simulationNavigation.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/pll.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/mesh.cpp|Release/core_system/math/gurobi_lp_solver|testing/Unit_Testing_NewApproach|core_system/math/gurobi_lp_solver|Hybrid_Model_Parameters_Design/Navigation_Benchmark/nav9x9.cpp|testing/Unit_Testing_Simulation/test_simulationRotationCircle.cpp|Hyperbox|testing/Unit_Testing_Simulation/test_simulationOscillatorModel.cpp|testing/Unit_Testing_Simulation/test_simulationHelicopter.cpp|testing/Unit_Testing_Simulation/test_simulationConstantMotion.cpp|testing/Unit_Testing_Simulation/test_simulationNavigation9by9.cpp|Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fwr.cpp|testing/Unit_Testing_ourSimplex|testing/Unit_Testing_Math|core_system/Reachability/GPU_Reach|core_system/math/GPU" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="core_system/continuous/omega_model"/>
+			</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

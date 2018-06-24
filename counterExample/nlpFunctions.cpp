@@ -482,7 +482,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			grad[i] = deriv[i];
 		}
 	}
-//	std::cout << "current cost=" << cost << std::endl;
+	std::cout << "current cost=" << cost << std::endl;
 	return cost;
 
 }

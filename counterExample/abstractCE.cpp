@@ -598,14 +598,14 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 		unsigned int optD = N * dim + N;
 		std::cout << "nlopt problem dimension = " << optD << std::endl;
 	//	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
-	//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
-		nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
+		nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+	//	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 	//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	local optimization routine
 
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(6000);
+	//myopt.set_maxeval(10000);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
@@ -801,7 +801,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 		struct refinement_point pt;
 
 		//cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
-		cexample = gen_concreteCE(tolerance,refinements);
+		//cexample = gen_concreteCE(tolerance,refinements);
 		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
 		if(cexample->is_empty())
 			return cexample;

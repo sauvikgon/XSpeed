@@ -18,7 +18,7 @@
 /*
  * * Reference for model is http://cps-vo.org/node/26547
  *
- * Model created with Hyst after converting SpaceEx model to flat xml model using Hyst and then to that model to .cpp
+ * Model created with Hyst after converting SpaceEx model to flat xml model using Hyst and then coverting the model to .cpp
  */
 void setTTEthernetModel2(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
