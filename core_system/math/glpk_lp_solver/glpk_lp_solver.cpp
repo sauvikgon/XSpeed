@@ -104,11 +104,11 @@ int glpk_lp_solver::getMin_Or_Max() {
 void glpk_lp_solver::setConstraints(math::matrix<double> coeff_constraints,
 		std::vector<double> bounds, int bound_signs) {//here bound_sign is an Integer value
 
-	dimension = coeff_constraints.size2();	//       .at(0).size();
+	dimension = coeff_constraints.size2();	//
 	number_of_constraints = bounds.size();
 	result = 0.0;
 	glp_set_prob_name(mylp, "Sample");	// eg "sample"
-	glp_set_obj_dir(mylp, Min_Or_Max);//Made change here 3rd June 2014			// GLP_MAX);
+	glp_set_obj_dir(mylp, Min_Or_Max);
 	//std::cout<<"\nMin or max = "<<Min_Or_Max;
 	glp_add_rows(mylp, number_of_constraints);
 

@@ -51,7 +51,7 @@ private:
 	discrete_set DiscreteSet; //locationID
 	//polytope::ptr ContinuousSetptr;	//template_polyhedra
 	template_polyhedra::ptr ContinuousSetptr; //template_polyhedra::ptr
-	polytope::ptr initial_polytope; // the precise initial polytope of the flowpipe (without approximation)
+	polytope::ptr initial_polytope; // the precise initial polytope of the flowpipe (without omega approximation)
 	symbolic_states::ptr parentPtr_symbolic_state; //pointer to its parent symbolic_state
 	int transition_id; //transition_id originating from the parent location to this symb state's location
 };

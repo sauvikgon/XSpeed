@@ -76,14 +76,14 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 		//SetBilliardModel(ha, init_state, reach_parameters);
 
-		SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
+		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
 
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
 	//	SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
 
-		setTTEthernetModel2(ha, init_state, reach_parameters);
+		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//---------------Not working models-------------
 		//setbuild48(ha, init_state, reach_parameters);
@@ -96,7 +96,9 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
+
 		//setplatoon(ha, init_state, reach_parameters);
+		setplatoon_ndt(ha, init_state, reach_parameters);
 
 		//setFisher_Star(ha,init_state,reach_parameters);		
 		//setMotorcar(ha,init_state,reach_parameters);

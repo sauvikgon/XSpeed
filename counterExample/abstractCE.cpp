@@ -214,7 +214,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	//Set Initial value to the optimization problem
 	std::vector<double> x(optD, 0);
-	polytope::ptr P;
 
 	std::vector<double> v(dim);
 
@@ -228,9 +227,14 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		// denotes \omega in each location.
 		// S is the sub-flowpipe in i-th sequence; P is the first \omega in S.
 		S = get_symbolic_state(i);
-		P = S->getInitialPolytope();
+		polytope::ptr P = S->getInitialPolytope();
+
+		if(i==4)
+			P->print2file("./P_file.txt",0,1);
+
 
 		lp_solver lp(GLPK_SOLVER);
+
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 
 		// 	we add bound constraints on the position parameters, which are required to run global opt routines.
@@ -239,9 +243,19 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
 		{
 			dir[j] = -1;
-			min = -1 * lp.Compute_LLP(dir);
+			try{
+				min = -1 * lp.Compute_LLP(dir);
+			}catch(...){
+				// assuming that the exception is caused due to an unbounded solution
+				min = -999;	// an arbitrary value set as solution
+			}
 			dir[j] = 1;
-			max = lp.Compute_LLP(dir);
+			try{
+				max = lp.Compute_LLP(dir);
+			}catch(...){
+				// assuming that the exception is caused due to an unbounded solution
+				max = +999; // an arbitrary value set as solution
+			}
 			unsigned int index = i*dim+j;
 
 			lb[index] = min;
@@ -280,6 +294,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	for (unsigned int i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
+		polytope::ptr P;
 		if(i==N-1){
 			// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation,bad_poly,1);
@@ -314,8 +329,19 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 		// ensure that time is always positive
-		max = lp.Compute_LLP(dmax);
-		min = -1 * lp.Compute_LLP(dmin);
+		try{
+			max = lp.Compute_LLP(dmax);
+		}catch(...){
+			// assuming that the exception is caused due to an unbounded solution
+			max = 999; // an arbitrary large value set as solution
+		}
+		try{
+			min = -1 * lp.Compute_LLP(dmin);
+		}catch(...){
+			// assuming that the exception is caused due to an unbounded solution
+			min = 0; // the min value a time can take is 0.
+
+		}
 
 		// we add the bounds as constraints in the nlopt
 
@@ -598,14 +624,14 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 		unsigned int optD = N * dim + N;
 		std::cout << "nlopt problem dimension = " << optD << std::endl;
 	//	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
-		nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
-	//	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
+	//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+		nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 	//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	local optimization routine
 
 	myopt.set_min_objective(myobjfunc2, NULL);
-	//myopt.set_maxeval(10000);
+	myopt.set_maxeval(6000);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
@@ -669,7 +695,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 			feas_poly = mapped_poly->GetPolytope_Intersection(dest_loc_inv);
 			//P = feas_poly;
-			P = dest_loc_inv; // The feas
+			P = dest_loc_inv; // The feasible region for start point of the traj. segment is taken as the loc invariant
 			assert(P!=NULL);
 
 			// set arbitrarily large but finite time bounds
@@ -800,7 +826,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	do{
 		struct refinement_point pt;
 
-		//cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
+		cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
 		//cexample = gen_concreteCE(tolerance,refinements);
 		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
 		if(cexample->is_empty())
