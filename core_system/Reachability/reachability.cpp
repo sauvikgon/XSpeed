@@ -195,7 +195,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
 						//1) ******************** list_of_symbolic_states ********************
 
-						list_sym_states.push_front(symb_state_in_abst_ce); //pushing the unsafe symbolic_state first (at the top)
+						list_sym_states.push_front(symb_state_in_abst_ce); //pushing the unsafe symbolic_state first
 
 						//2) list_of_transition
 						//a) current sym_state only have trans_ID but to retrieve this transition I have to
@@ -223,7 +223,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						}
 						symbolic_ce_length++;
 					} while (symb_state_in_abst_ce->getParentPtrSymbolicState()!= NULL);
-					if ((symbolic_ce_length >= 1) && (symb_state_in_abst_ce->getParentPtrSymbolicState()== NULL)) { //root is missed
+					if ((symbolic_ce_length >= 1) && (symb_state_in_abst_ce->getParentPtrSymbolicState()== NULL)) {
 						list_sym_states.push_front(symb_state_in_abst_ce); //1) pushing this new symb state at the beginning
 					}
 					abstractCE::ptr abst_ce = abstractCE::ptr(new abstractCE());
@@ -238,11 +238,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				} // end of condition when forbidden state intersects with the flowpipe set
 			} //end of condition when forbidden state loc id matches with flowpipe loc id
 		} //computed flowpipe is not empty
-
-
-//		if (safety_violation) {
-//			break; //no need to compute rest of the locations
-//		}
 
 		//  ******************************** Safety Verification section Ends********************************
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********

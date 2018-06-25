@@ -46,7 +46,7 @@ polytope::polytope(bool empty) {
 	if(empty==true) // make this an empty polytope
 	{
 			this->IsEmpty = true;
-			this->IsUniverse = true;
+			this->IsUniverse = false;
 	}
 }
 

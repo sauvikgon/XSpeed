@@ -47,6 +47,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
 
 	}
+
 	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
 		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5

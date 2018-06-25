@@ -40,7 +40,7 @@ public:
 			index = var_index_map_ptr->at(var_name);
 		}catch(...)
 		{
-			std::cout << "index of timed variable not found in the variable to index map. Probably the model the not timed\n";
+			std::cout << "index of variable not found in the variable to index map. Check the variable name.\n";
 			exit(0);
 		};
 		return index;
