@@ -497,20 +497,19 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 
 		// The transition label is breaking
 
-		// Original guard: down_patt_1_t >= 10 & down_patt_1_t <=20
+		// Original guard: down_patt_1_t >= 10
 
-		row = 2;
+		row = 1;
 		col = 11;
 
 		guardConstraintsMatrix.resize(row, col);
 		guardConstraintsMatrix.clear();
 		guardConstraintsMatrix(0,10) = -1.0;
-		guardConstraintsMatrix(1,10) = 1.0;
 
 		guardBoundValue.resize(row);
 		guardBoundValue.assign(row,0);
 		guardBoundValue[0] = -10.0;
-		guardBoundValue[1] = 20.0;
+
 		guard_polytope = polytope::ptr(new polytope(guardConstraintsMatrix, guardBoundValue, guardBoundSign));
 
 
@@ -621,20 +620,20 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 
 		// The transition label is restoring
 
-		// Original guard: down_patt_1_t >= 0 & down_patt_1_t <=20
+		// Original guard: down_patt_1_t >= 10
 
-		row = 2;
+		row = 1;
 		col = 11;
 
 		guardConstraintsMatrix.resize(row, col);
 		guardConstraintsMatrix.clear();
-		guardConstraintsMatrix(0,10) = 1.0;
-		guardConstraintsMatrix(1,10) = 1.0;
+		guardConstraintsMatrix(0,10) = -1.0;
+
 
 		guardBoundValue.resize(row);
 		guardBoundValue.assign(row,0);
-		guardBoundValue[0] = 0.0;
-		guardBoundValue[1] = 20.0;
+		guardBoundValue[0] = 0;
+
 		guard_polytope = polytope::ptr(new polytope(guardConstraintsMatrix, guardBoundValue, guardBoundSign));
 
 
