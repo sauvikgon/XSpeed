@@ -5382,7 +5382,7 @@ void NAVmodule4(hybrid_automata& Hybrid_Automata,
 
 	Out_Going_Trans_fromL222.push_back(t);
 	l = location::ptr(
-			new location(27, "L222", system_dynamics, invariant, true,
+			new location(27, "BAD", system_dynamics, invariant, true,
 					Out_Going_Trans_fromL222));
 	Hybrid_Automata.addLocation(l);
 

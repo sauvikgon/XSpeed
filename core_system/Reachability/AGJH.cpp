@@ -515,15 +515,15 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
 					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0)){
 				//--Arch-Competition: Implemented for Motorcade_5 Benchmark
-//				if (polys.size()!=0){//Guard set intersected
-//					#pragma omp critical
-//					{
-//						//std::cout<<"polys.size() = "<<polys.size()<<"\n UnSafe Location Reached!!!\n";
-//						unsafe=true;
-//					}
-//					std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
-//					return res;//Safety Violated. Returning sym_state list passed so far.
-//				}
+				if (polys.size()!=0){//Guard set intersected
+					#pragma omp critical
+					{
+						//std::cout<<"polys.size() = "<<polys.size()<<"\n UnSafe Location Reached!!!\n";
+						unsafe=true;
+					}
+					std::cout<< "locName = "<< locName << "  Reached" << res.size()<<std::endl;//
+					return res;//Safety Violated. Returning sym_state list passed so far.
+				}
 
 				continue;//Guard set NOT intersected but these location not pushed in the waitingList
 			}
@@ -573,8 +573,8 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				}else
 					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 
-				int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make Slow; 0 will disable so Fast
-				if (is_ContainmentCheckRequired){	//Containtment Checking required
+				bool is_ContainmentCheckRequired = 0;	//1 will enable Containment Check and Make Slow; 0 will disable so Fast
+				if (is_ContainmentCheckRequired){	//Containment Checking required
 					bool isContain=false;
 
 				//	std::cout<<"Before Containment check called\n";
@@ -590,7 +590,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 						res.push_back(newState);
 					}
 
-				}else{	//Containtment Checking NOT Formed
+				}else{	//Containtment Checking NOT performed
 
 					initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 					newState->setTransitionId(transition_id); // keeps track of the transition_ID

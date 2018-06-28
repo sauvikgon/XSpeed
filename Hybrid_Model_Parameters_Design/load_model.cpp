@@ -93,23 +93,26 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		// --------------------------------------------
 
 
-		//setTTEthernetModel2(ha, init_state, reach_parameters);
+		setTTEthernet5(ha, init_state, reach_parameters);
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
 
 		//setplatoon(ha, init_state, reach_parameters);
-		setplatoon_ndt(ha, init_state, reach_parameters);
+		//setplatoon_ndt(ha, init_state, reach_parameters);
+		//setplatoon_na(ha, init_state, reach_parameters);
 
 		//setFisher_Star(ha,init_state,reach_parameters);		
-		//setMotorcar(ha,init_state,reach_parameters);
-		//std::cout <<"Test Model Assigned"<<std::endl;
+
+		//set_watertank_controller(ha,init_state,reach_parameters);
 
 	}
 	if(HybridSystem_Model_Type == 16){
-		setMotorcar(ha,init_state,reach_parameters);
+		setMotorcade(ha,init_state,reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 17){
-		setNav3u(ha,init_state,reach_parameters);
+		//setNav2u(ha,init_state,reach_parameters);
+		//setNav3u(ha,init_state,reach_parameters);
+		//setNav4u(ha,init_state,reach_parameters);
 	}
 	//Todo:: later we may think of keeping here even the forbidden parsing (string to poly)
 }

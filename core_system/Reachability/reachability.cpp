@@ -81,8 +81,11 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		string name = current_location->getName();
 
 		if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
-				|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0))
+				|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0)){
+
+			std::cout << "unsafe state reached\n";
 			continue; //do not compute the reachable set
+		}
 
 		bool foundSkippingLocation = false;
 		for (unsigned int StopLoc = 0; StopLoc < reach_parameters.Stop_locID.size();
