@@ -136,9 +136,7 @@ polytope::ptr template_polyhedra::getPolytope(unsigned int Iterations_Number) {
 }
 
 /*
- polytope template_polyhedra::getIntersectedRegion(polytope gaurd){
-
- }
+	Rajarshi:
  */
 
 const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionSequential(polytope::ptr G, int lp_solver_type_choosen) { //need testing due to modification
@@ -150,11 +148,11 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 
 	std::list<template_polyhedra::ptr> intersected_region;
 	for (unsigned int i = 0; i < this->Matrix_SupportFunction.size2(); i++) {
-		//		cout<<"3 INSIDE .....LOOP no = "<<i<<endl;
 		polytope::ptr p;
 		p = this->getPolytope(i);
 		std::vector<double> constraint_bound_values(this->getInvariantDirections().size1());
 		constraint_bound_values = this->getInvariantBoundValue(i);
+
 		/* from the reach_region that is the calling template_polyhedra add the invariant constraint and bound_value to p*/
 		p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 		is_intersected = p->check_polytope_intersection(G, lp_solver_type_choosen);	//result of intersection
@@ -163,17 +161,12 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 //#pragma omp critical
 				//		{
 			intersection_started = true;
-			/*if (foundIntersection == 0) {	//Intersection start
-			 foundIntersection++;	//intersection_start = i;	//Intersection started at this position of 'i'
-			 }*/
-			col = col + 1;//		cout<<"5 ... INSIDE .... INTERSECTED .....\n";
+			col = col + 1;//
 			mat_sf.resize(p->getCoeffMatrix().size1(), col, true);//resizing to append the polytope p of the flowpipe that intersects
-			//for (unsigned int j = 0; j < this->getTotalTemplateDirections();j++)
+
 			for (unsigned int j = 0; j < p->getCoeffMatrix().size1(); j++) {
-				mat_sf(j, col - 1) = p->getColumnVector()[j];//	mat_sf.addColumn(p.getColumnVector()); add column in matrix class
+				mat_sf(j, col - 1) = p->getColumnVector()[j];	//	mat_sf.addColumn(p.getColumnVector()); add column in matrix class
 			}
-			//		}
-			//	cout << "\nIntersection Found at = " << i << endl;
 		}
 
 		if (is_intersected == false && intersection_started == true) {
@@ -192,9 +185,8 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 			col = 0;
 			intersection_started = false;
 			intersection_ended = false;
-			//		} 		//cout << "\nIntersection Ended at = " << i << "\n";
+			//		}
 		}
-		//	i2 = i;
 	}	//end of parallel for-loop
 	if (intersection_started == true && intersection_ended == false) {
 		math::matrix<double> directions, templateDirs, invDirs;
@@ -205,18 +197,6 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 		intersected_region.push_back(template_polyhedra::ptr(new template_polyhedra(mat_sf, directions)));//intersected_region.push_back(template_polyhedra(mat_sf, p.getCoeffMatrix()));
 	}
 
-	/*	if (foundIntersection == 0)
-	 cout << "\nSorry Intersection Not Found!!!!!!\n";
-	 else
-	 cout << "\nIntersection Found at = " << intersection_start << endl;
-	 */
-
-	/*
-	 * After checking all elements(Omegas) of the template_polyhedra of the reachable set
-	 * the function returns the point_of_intersection_started with the guard G.
-	 * And only returns the interescted region with the guard G as a new template_polyhedra:::with added invariant_directions
-	 */
-//	point_of_intersection = intersection_start;
 	return intersected_region;
 }
 

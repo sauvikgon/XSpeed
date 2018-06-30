@@ -210,7 +210,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	// 	local optimization routine
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(6000);
+	myopt.set_maxeval(25000);
 
 	//Set Initial value to the optimization problem
 	std::vector<double> x(optD, 0);
@@ -228,10 +228,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		// S is the sub-flowpipe in i-th sequence; P is the first \omega in S.
 		S = get_symbolic_state(i);
 		polytope::ptr P = S->getInitialPolytope();
-
-		if(i==4)
-			P->print2file("./P_file.txt",0,1);
-
 
 		lp_solver lp(GLPK_SOLVER);
 
@@ -631,7 +627,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	// 	local optimization routine
 
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(6000);
+	myopt.set_maxeval(25000);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
@@ -810,7 +806,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 }
 
-concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
+concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo_type)
 {
 	// call to genCE func with no refining trajectory
 	std::list<struct refinement_point> refinements;
@@ -826,9 +822,17 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance)
 	do{
 		struct refinement_point pt;
 
-		cexample = gen_concreteCE_NLP_HA(tolerance,refinements); NLP_HA_algo_flag = true;
-		//cexample = gen_concreteCE(tolerance,refinements);
-		//cexample = gen_concreteCE_NLP_LP(tolerance,refinements);
+		if(algo_type==1)
+			cexample = gen_concreteCE(tolerance,refinements);
+		else if(algo_type==2){
+			cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
+			NLP_HA_algo_flag = true;
+		}
+		else if(algo_type==3)
+			std::cout << "LP-NLP mixed implementation not in place yet\n";
+
+		else{std::cout << "Invalid algo type specified for trajectory splicing\n";}
+
 		if(cexample->is_empty())
 			return cexample;
 

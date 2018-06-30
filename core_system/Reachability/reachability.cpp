@@ -37,7 +37,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 	unsigned int bfslevel = 0;
 	std::list<int> queue; // data structure to keep track of the number of transitions
-	pwlist pw_list; //list of initial_state
+	pwlist pw_list; //list of initial states
+
 	for (std::list<initial_state::ptr>::iterator i=I.begin();i!=I.end();i++){
 		pw_list.WaitingList_insert(*(i));
 		queue.push_back(bfslevel); //insert at REAR, first Location
@@ -48,6 +49,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 	polytope::ptr continuous_initial_polytope;
 
 	unsigned int num_flowpipe_computed=0;	//keeping track of number of flowpipe computed
+
 	while (!pw_list.isEmpty_WaitingList()) {
 		boost::timer::cpu_timer jump_time;
 		jump_time.start();	//Start recording the entire time for jump
@@ -79,24 +81,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 		current_location = H.getLocation(location_id);
 		string name = current_location->getName();
-
-		if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
-				|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0)){
-
-			std::cout << "unsafe state reached\n";
-			continue; //do not compute the reachable set
-		}
-
-		bool foundSkippingLocation = false;
-		for (unsigned int StopLoc = 0; StopLoc < reach_parameters.Stop_locID.size();
-				StopLoc++) {
-
-			if (location_id == reach_parameters.Stop_locID[StopLoc]) {
-				foundSkippingLocation = true;
-			}
-		}
-		if (foundSkippingLocation) //do not compute the continuous reachability algorithm
-			continue;
 
 		// ******************* Computing Parameters *******************************
 		/*
@@ -134,6 +118,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		// ******************* Computing Parameters *******************************
 		// ************ Compute flowpipe_cost:: estimation Starts **********************************
 		unsigned int NewTotalIteration = reach_parameters.Iterations;
+
 		if (current_location->getInvariantExist()){
 			/*
 			 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
@@ -142,7 +127,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 			 *
 			 * ToDo:: This jumpInvariantBoundaryCheck() need to be modified for check Omega crossing all Invariant's boundary
 			 * 	at the same time instead of checking each invariant for the whole time horizon as implemented in InvariantBoundaryCheckNewLPSolver()
-			 * 	For submitting the reading in STT Journal we did not included jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
+			 * 	For submitting the reading in STTT Journal we did not include jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
 			 */
 
 			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
@@ -164,11 +149,11 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		}
 		//  ******************************** Safety Verification section ************************
 		std::list < symbolic_states::ptr > list_sym_states;
-		polytope::ptr polyI; //initial polytope of the abstract flowpipe
+		polytope::ptr polyI; //initial polytope of the flowpipe
 		std::list < transition::ptr > list_transitions; // list of transitions leading to the unsafe set
 
 
-		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe exists
+		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe and forbidden states exists
 				//so perform intersection with forbidden set provided locID matches
 
 			int locID = current_location->getLocId();
@@ -178,13 +163,18 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				std::list < template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
 
-				if (forbid_intersects.size() != 0)
+				if (forbid_intersects.size() != 0){
+					std::cout << "intersection with guard found at location: " << locID << std::endl;
 					safety_violation = true;
+				}
 
 				if (safety_violation && ce_flag == 0) break; // No need to generate CE
 
 				if (safety_violation && ce_flag == 1) // CE Gen is ON
 				{
+
+					safety_violation = false; // This resetting to false will correctly visit the violating paths in the following iterations.
+
 					symbolic_states::ptr symb_state_in_abst_ce; // This is a pointer to the current symbolic state in the abstract ce.
 					symb_state_in_abst_ce = S;
 					int symbolic_ce_length = 0;
@@ -226,6 +216,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						}
 						symbolic_ce_length++;
 					} while (symb_state_in_abst_ce->getParentPtrSymbolicState()!= NULL);
+
 					if ((symbolic_ce_length >= 1) && (symb_state_in_abst_ce->getParentPtrSymbolicState()== NULL)) { //root is missed
 						list_sym_states.push_front(symb_state_in_abst_ce); //1) pushing this new symb state at the beginning
 					}
@@ -233,8 +224,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					abst_ce->set_length(symbolic_ce_length);
 					abst_ce->set_sym_states(list_sym_states);
 					abst_ce->set_transitions(list_transitions);
-					hybrid_automata::ptr ha = hybrid_automata::ptr(
-							new hybrid_automata(H));
+					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
 					abst_ce->set_automaton(ha);
 					abst_ce->set_forbid_poly(forbidden_set.second);
 					symbolic_ce_list.push_back(abst_ce); // the symbolic (abstract) ce is added to the list.
@@ -242,10 +232,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 			} //end of condition when forbidden state loc id matches with flowpipe loc id
 		} //computed flowpipe is not empty
 
-
-//		if (safety_violation) {
-//			break; //no need to compute rest of the locations
-//		}
 
 		//  ******************************** Safety Verification section Ends********************************
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
@@ -266,7 +252,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 
 
-				bool aggregation=true; // TRUE indicates ON, so a full or clustered hulls template hulls are taken
+				bool aggregation=true; // TRUE indicates ON, so the template hull of the polytopes intersecting with the guard is taken
 				if (boost::iequals(this->getSetAggregation(),"thull")){
 					aggregation=true;
 
@@ -322,7 +308,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					}
 
 				} else{ // empty guard
-					std::cout << "Empty guard condition\n";
+					std::cout << "Guard Set is empty. It means that the guard condition is unsatisfiable. \n";
 					continue;
 				}
 
@@ -354,7 +340,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
 								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
 					}
-					// @Rajarshi: the newShifted satisfy the destination location invariant
+					// @Rajarshi: the newShifted must satisfy the destination location invariant
 					if (H.getLocation(destination_locID)->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
 						newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 					}
