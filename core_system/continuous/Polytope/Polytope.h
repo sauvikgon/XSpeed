@@ -41,7 +41,6 @@ using namespace std;
 class polytope: public supportFunctionProvider {
 
 private:
-	//glpk_lp_solver lp;	//Create only one lp at the time of creation of the polytope
 	math::matrix<double> coeffMatrix;
 	std::vector<double> columnVector;
 	int InEqualitySign;

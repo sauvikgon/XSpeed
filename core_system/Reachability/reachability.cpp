@@ -188,7 +188,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
 						//1) ******************** list_of_symbolic_states ********************
 
-						list_sym_states.push_front(symb_state_in_abst_ce); //pushing the unsafe symbolic_state first (at the top)
+						list_sym_states.push_front(symb_state_in_abst_ce); //pushing the unsafe symbolic_state first
 
 						//2) list_of_transition
 						//a) current sym_state only have trans_ID but to retrieve this transition I have to
@@ -217,7 +217,9 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						symbolic_ce_length++;
 					} while (symb_state_in_abst_ce->getParentPtrSymbolicState()!= NULL);
 
+
 					if ((symbolic_ce_length >= 1) && (symb_state_in_abst_ce->getParentPtrSymbolicState()== NULL)) { //root is missed
+
 						list_sym_states.push_front(symb_state_in_abst_ce); //1) pushing this new symb state at the beginning
 					}
 					abstractCE::ptr abst_ce = abstractCE::ptr(new abstractCE());

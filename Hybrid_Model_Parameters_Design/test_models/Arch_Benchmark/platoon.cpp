@@ -419,8 +419,8 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 
 		// The mode name is  communication_communication
 
-		row = 11;
-		col = 11;
+		row = 10;
+		col = 10;
 		Amatrix.resize(row, col);
 		Amatrix.clear();
 		Amatrix(0 , 1) = 1.0;
@@ -471,22 +471,20 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		C.resize(row );
 		C.assign(row,0);
 		C[9] = 1.0;
-		C[10] = 1.0;
+//		C[10] = 1.0;
 		system_dynamics.isEmptyC = false;
 		system_dynamics.C = C;
 
 
-		row = 2;
-		col = 11;
+		row = 1;
+		col = 10;
 		invariantConstraintsMatrix.resize(row, col);
 		invariantConstraintsMatrix.clear();
 		invariantConstraintsMatrix(0,9)= -1.0;
-		invariantConstraintsMatrix(1,10)= 1.0;
 
 		invariantBoundValue.resize(row);
 		invariantBoundValue.assign(row,0);
 		invariantBoundValue[0] = 0;
-		invariantBoundValue[1] = 20;
 		invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign));
 
 		row = 2;
@@ -510,9 +508,11 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		row = 1;
 		col = 11;
 
+
 		guardConstraintsMatrix.resize(row, col);
 		guardConstraintsMatrix.clear();
 		guardConstraintsMatrix(0,10) = -1.0;
+
 
 		guardBoundValue.resize(row);
 		guardBoundValue.assign(row,0);
@@ -522,8 +522,8 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 
 
 		// reset map that sets down_patt_1_t to 0.
-		row = 11;
-		col = 11;
+		row = 10;
+		col = 10;
 		R.resize(row, col);
 		R.clear();
 		R(0,0) =  1.0;
@@ -535,7 +535,6 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		R(6,6) =  1.0;
 		R(7,7) =  1.0;
 		R(8,8) =  1.0;
-		R(9,9) =  1.0;
 		std::vector<double> w(row);
 		w.assign(row,0);
 
@@ -554,8 +553,8 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 
 		// The mode name is no_communication_no_communication
 
-		row = 11;
-		col = 11;
+		row = 10;
+		col = 10;
 		Amatrix.resize(row, col);
 		Amatrix.clear();
 		Amatrix(0 , 1) = 1.0;
@@ -594,22 +593,20 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		C.resize(row );
 		C.assign(row,0);
 		C[9] = 1.0;
-		C[10] = 1.0;
+//		C[10] = 1.0;
 		system_dynamics.isEmptyC = false;
 		system_dynamics.C = C;
 
 
-		row = 2;
-		col = 11;
+		row = 1;
+		col = 10;
 		invariantConstraintsMatrix.resize(row, col);
 		invariantConstraintsMatrix.clear();
 		invariantConstraintsMatrix(0,9)= -1.0;
-		invariantConstraintsMatrix(1,10)= 1.0;
 
 		invariantBoundValue.resize(row);
 		invariantBoundValue.assign(row,0);
 		invariantBoundValue[0] = 0;
-		invariantBoundValue[1] = 20;
 		invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign));
 
 		row = 2;
@@ -633,6 +630,7 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		row = 1;
 		col = 11;
 
+
 		guardConstraintsMatrix.resize(row, col);
 		guardConstraintsMatrix.clear();
 		guardConstraintsMatrix(0,10) = -1.0;
@@ -646,8 +644,8 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 
 
 		// down_patt_1_t is reset to 0
-		row = 11;
-		col = 11;
+		row = 10;
+		col = 10;
 		R.resize(row, col);
 		R.clear();
 		R(0,0) =  1.0;
@@ -659,7 +657,6 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		R(6,6) =  1.0;
 		R(7,7) =  1.0;
 		R(8,8) =  1.0;
-		R(9,9) =  1.0;
 		w.assign(row,0);
 
 
@@ -673,8 +670,8 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		Hybrid_Automata.addLocation(l);
 
 
-		row = 22;
-		col = 11;
+		row = 20;
+		col = 10;
 		ConstraintsMatrixI.resize(row, col);
 		ConstraintsMatrixI.clear();
 		ConstraintsMatrixI(0 , 0) = 1;
@@ -697,8 +694,6 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		ConstraintsMatrixI(17 , 8) = -1;
 		ConstraintsMatrixI(18 , 9) = 1;
 		ConstraintsMatrixI(19 , 9) = -1;
-		ConstraintsMatrixI(20 , 10) = 1;
-		ConstraintsMatrixI(21 , 10) = -1;
 		boundValueI.resize(row );
 		boundValueI.assign(row,0);
 
@@ -727,42 +722,8 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		Hybrid_Automata.insert_to_map("e3",6);
 		Hybrid_Automata.insert_to_map("v3",7);
 		Hybrid_Automata.insert_to_map("a3",8);
-		Hybrid_Automata.insert_to_map("t",9);
-		Hybrid_Automata.insert_to_map("down_patt_1_t",10);
-
-		// ************* Section required for setting Reach Parameters & User Options *************
-		unsigned int Directions_Type = 1;
-		unsigned int iter_max = 1000;
-		double time_horizon = 5.0;
-		double sampling_time = 1.0E-4;
-		std::vector<std::string> output_variables;
-		output_variables.push_back("t");
-		output_variables.push_back("e1");
-
-
-		int x1 = Hybrid_Automata.get_index(output_variables[0]);
-		int x2 = Hybrid_Automata.get_index(output_variables[1]);
-
-		std::vector<std::vector<double> > newDirections;
-		math::matrix<double> Real_Directions;
-		unsigned int dir_nums;
-		if (Directions_Type == BOX) {
-			 dir_nums = 2 * dim;
-			 newDirections = generate_axis_directions(dim);
-		}
-		if (Directions_Type == OCT) {
-			 dir_nums = 2 * dim * dim;
-			 newDirections = get_octagonal_directions(dim);
-		}
-		if (Directions_Type > 2) {
-			 dir_nums = Directions_Type;
-			 newDirections = math::uni_sphere(dir_nums, dim, 100, 0.0005);
-		}
-		get_ublas_matrix(newDirections, Real_Directions);
-		row = dir_nums;
-		col = dim;
-		reach_parameters.Directions.resize(row, col);
-		reach_parameters.Directions = Real_Directions;
+//		Hybrid_Automata.insert_to_map("t",9);
+		Hybrid_Automata.insert_to_map("down_patt_1_t",9);
 
 }
 
