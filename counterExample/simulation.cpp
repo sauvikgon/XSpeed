@@ -732,12 +732,16 @@ void simulation::simulateHa(sim_start_point start, double start_time,
 	std::list<sim_start_point> wlist;
 	wlist.push_back(start);
 
+
 	unsigned int jumps_taken = 0;
 
 	while (wlist.size() != 0 && jumps_taken <= max_jumps) {
-		std::cout << "Inside waiting list\n";
 		sim_start_point s = wlist.front();
 		wlist.pop_front();
+		unsigned int loc_id = s.locptr->getLocId();
+
+		std::cout << "HA location visited:" << loc_id << std::endl;
+
 		std::vector<sim_start_point> next_pts;
 		next_pts = simulateHaLocation(s, s.cross_over_time, tot_time, ha);
 		//simulateHaLocation also creates a sim_trace per location per start_point and concatenates

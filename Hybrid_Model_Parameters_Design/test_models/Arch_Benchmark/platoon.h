@@ -40,4 +40,14 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
+
+/**
+ * @Rajarshi
+ *
+ * Platoon model for arbitrary number of transitions from communicating to non-communicating mode
+ */
+void setplatoon_na(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr>& init_state_list,
+		ReachabilityParameters& reach_parameters);
+
 #endif /* HYBRID_MODEL_PARAMETERS_DESIGN_TEST_MODELS_ARCH_BENCHMARK_PLATOON_H_ */

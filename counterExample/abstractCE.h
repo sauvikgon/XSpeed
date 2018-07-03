@@ -114,8 +114,12 @@ public:
 	}
 	/**
 	 * returns a validated counterexample trace, a trace that satisfies the HA constraints
+	 * @algo_type: mention the splicing algorithm:
+	 * 	1 specifies to call splicing with FC
+	 * 	2 specifies to call splicing witn no FC
+	 *	3 specifies to call LP-NLP mixed procedure for splicing.
 	 */
-	concreteCE::ptr get_validated_CE(double tolerance);
+	concreteCE::ptr get_validated_CE(double tolerance, unsigned int alg_type);
 
 	/**
 	 * Plot the counter example projected along dimensions passed

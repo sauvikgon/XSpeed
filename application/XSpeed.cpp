@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
 		dump_abstractCE_list(ce_candidates);
 		// create a template abstract ce to filter
 		std::vector<unsigned int> template_seq(0);
-		template_seq = {1,2};
+		template_seq = {17,15,14,12,13,10,13,2};
 
 		// create a filter template here
 
@@ -250,16 +250,26 @@ int main(int argc, char *argv[]) {
 		bool real_ce = false;
 		double error_tol = 1e-6; // splicing error tolerance
 
-		tt1.start(); // start time
+		//tt1.start(); // start time
 		for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
 
 			abs_ce = *(it);
 			// add a filter function to search for concrete ce only in a specific abstract trace
 			bool search_ce = abs_ce->filter(template_seq);
 			if(search_ce){
-				//tt1.start(); // start time
-				ce = abs_ce->get_validated_CE(error_tol);
-				//tt1.stop(); //stop time
+				tt1.start(); // start time
+				ce = abs_ce->get_validated_CE(error_tol,2);
+				tt1.stop(); //stop time
+				double user_clock;
+				user_clock = tt1.elapsed().user / 1000000;
+				std::cout << "Time to Splice with NO FC:" << user_clock << std::endl;
+
+				tt1.start(); // start time
+				ce = abs_ce->get_validated_CE(error_tol,1);
+				tt1.stop(); //stop time
+				user_clock;
+				user_clock = tt1.elapsed().user / 1000000;
+				std::cout << "Time to Splice with FC:" << user_clock << std::endl;
 			}
 			else continue;
 
@@ -272,7 +282,7 @@ int main(int argc, char *argv[]) {
 				break;
 			}
 		}
-		tt1.stop(); //stop time
+		//tt1.stop(); //stop time
 
 		// plot the ce trajectory in a file
 		if(real_ce){

@@ -99,9 +99,14 @@ void AsyncBFS_recursiveFunc(LocklessDS L[], initial_state::ptr s, int level, Asy
 	std::list<initial_state::ptr> R2;
 	//ToDo:: this shared level can not be use to check... as if one branch has move ahead it increase level and with this
 	//increased value some other previous branch may not spun child threads.
+	bool unsafe = false;
 	if (level < reachData.bound) {	//Check level to avoid last PostD computation
 //		std::cout<<"reachData.bound ="<<reachData.bound<<" and level="<<level<<std::endl;
-		R2 = postD(R1, L, reachData);
+		R2 = postD(R1, L, reachData, unsafe);
+		if(unsafe){
+			std::cout << "system is unsafe\n";
+			exit(0);
+		}
 		std::vector<std::thread> RecursiveWorkers;
 		level++;// ***** increased locally and send this for all recursive thread ****
 		mu.lock();
@@ -217,7 +222,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 	return reach_region;
 }
 
-std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], AsyncBFSData myData)
+std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], AsyncBFSData myData, bool& unsafe)
 {
 	template_polyhedra::ptr reach_region= symb->getContinuousSetptr();
 	int locId = *(symb->getDiscreteSet().getDiscreteElements().begin());
@@ -226,7 +231,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 	std::list<initial_state::ptr> res;
 
 	if (reach_region->getTotalIterations() != 0) { //computed reach_region is empty && optimize transition BreadthLevel-wise
-	//	cout<<"1\n";
+
 		for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
 				t != current_location->getOut_Going_Transitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
 			int transition_id = (*t)->getTransitionId();
@@ -299,8 +304,20 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 		//cout<<"3\n";
 			//Todo to make is even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
 			if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
-					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0))
+					|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0)){
+				//--Arch-Competition: Implemented for Motorcade_5 Benchmark
+				if (polys.size()!=0){//Guard set intersected
+					#pragma omp critical
+					{
+						//std::cout<<"polys.size() = "<<polys.size()<<"\n UnSafe Location Reached!!!\n";
+						unsafe=true;
+					}
+					std::cout<< "locName = "<< locName << "  Reached" << res.size()<<std::endl;//
+					return res;//Safety Violated. Returning sym_state list passed so far.
+				}
 				continue;//do not push into the waitingList
+			}
+
 
 			current_assignment = (*t)->getAssignT();
 			// *** interesected_polyhedra included with invariant_directions also ******

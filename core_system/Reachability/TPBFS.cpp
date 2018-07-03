@@ -38,10 +38,12 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 	bool levelcompleted = false;
 	unsigned int iter_max = 1, sym_passed=0;
 	unsigned int numCores = omp_get_num_procs(); //get the number of cores
+	bool unsafe = false;
 
 	while (!isEmpty_Qpw_list(Qpw_list[t]) && (number_times <= bound)) { //	cout << "Test 5\n";
 
 		boost::timer::cpu_timer jump_time;
+
 		jump_time.start();	//Start recording the entire time for jump
 		unsigned int count = getSize_Qpw_list(Qpw_list[t]); //get the size of PWList
 
@@ -68,12 +70,6 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 		else
 			numCoreAvail = count;
 
-		//omp_set_nested(1);	//enables nested parallelization
-		/*boost::timer::cpu_timer t702;
-		t702.start();*/
-//		std::cout<<"count ="<<count<<"\n";
-//		omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//		omp_set_num_threads(numCoreAvail);
 #pragma omp parallel for //num_threads(numCoreAvail)
 		for (unsigned int id = 0; id < count; id++) {
 			initial_state::ptr U; //local
@@ -93,10 +89,16 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			location::ptr current_location;
 			current_location = H.getLocation(location_id);
 			string name = current_location->getName();
-		//	cout<<"Location Name = "<< name<<"\n";
 			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
-					|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0))
+					|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0)){
+				//std::cout<< "\nlocName = "<< name << "  Reached" << std::endl;
+				#pragma omp critical
+				{
+					unsafe = true;
+				}
 				continue; //do not compute the continuous reachability algorithm
+			}
+
 			// ******************* Computing Parameters ************************ //current_location:: parameters alfa, beta and phi_trans
 
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
@@ -132,7 +134,11 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			LoadBalanceDS[id].symState_ID = id;
 			LoadBalanceDS[id].reach_param = reach_parameter_local;
 		}	//END of count FOR-LOOP  -- reach parameters computed
-#pragma omp parallel for //num_threads(numCoreAvail) // num_threads(count)
+		if(unsafe){
+			std::cout << "Unsafe state reached\n";
+			return Reachability_Region;
+		}
+		#pragma omp parallel for //num_threads(numCoreAvail) // num_threads(count)
 		for (unsigned int id = 0; id < count; id++) { //separate parameters assignment with Invariant check and preLoadBalanceReachCompute task
 			unsigned int NewTotalIteration = LoadBalanceDS[id].reach_param.Iterations;
 
@@ -158,28 +164,22 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 					InvariantBoundaryCheckNewLPSolver(LoadBalanceDS[id].current_location->getSystem_Dynamics(),LoadBalanceDS[id].X0,
 						LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type_choosen, NewTotalIteration);
 //				}
-			//	std::cout<<"count="<<count<<" and Inv:="<<id<<std::endl;
 				LoadBalanceDS[id].newIteration = NewTotalIteration; //Important to take care
-				//cout<<"Invariant setting Done\n";
 			}else
 				LoadBalanceDS[id].newIteration = LoadBalanceDS[id].reach_param.Iterations; //Important to take care
 		}	//END of count FOR-LOOP  -- invariant boundary check done
-		//std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 
 
-//	std::cout<<" :: Before flowpipe pre-reach compute ";
-//		omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//		omp_set_num_threads(numCoreAvail);
+		//	std::cout<<" :: Before flowpipe pre-reach compute ";
+
 #pragma omp parallel for //num_threads(count)
 		for (unsigned int id = 0; id < count; id++) {
-			//std::cout<<"count="<<count<<" and id:="<<id<<std::endl;
 			math::matrix<float> listX0, listU;
 			//Generation of Directions which can be a nested parallelism
 			preLoadBalanceReachCompute(LoadBalanceDS[id], numCoreAvail);	// Step 1
 		} //END of count FOR-LOOP
 
 		LoadBalanceDataSF LoadBalanceData_sf;
-//		std::cout<<" :: Before flowpipe LoadBalance Task compute"<<std::endl;
 		parallelLoadBalance_Task(LoadBalanceDS, LoadBalanceData_sf);//Step 2:  An appropriate combination of parallel with sequential GLPK object is used.
 	//	omp_set_nested(1); //enable nested parallelism
 //	std::cout<<" :: After flowpipe reach compute "<<std::endl;
@@ -195,29 +195,20 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 
 		bool foundUnSafe = false;
 		for (unsigned int index = 0; index < count; index++) {
-			//std::cout<<"Yes here"<<std::endl;std::cout<<"TotalIterations() = "<<S[index]->getContinuousSetptr()->getTotalIterations()<<std::endl;
 			if (S[index]->getContinuousSetptr()->getTotalIterations() != 0) { //computed reach_region is NOT empty
 				Reachability_Region.push_back(S[index]);
 			}
 		}
 		number_times++; //One Level or one Breadth Search over
-//		std::cout<<":: number_times = "<<number_times;
+
 		if (number_times > bound) {
 			levelcompleted = true; //check to see how many jumps have been made(i.e., number of discrete transitions made)
 		}
-		/*if (levelcompleted || foundUnSafe) { //any true
-			break; //OUT FROM WHILE LOOP 	//no need to compute rest of the locations
-		}*/
-//		std::cout<<":: Before PostD computation "<<std::endl;
 
-std::vector<LoadBalanceData_PostD> loadBalPostD(count);
+	std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 //  ***************** Load Balanced POST_D computation Begins::Has 3 Steps ***********************************
 	if (!levelcompleted && !foundUnSafe){	//no need to compute rest of the locations
 
-	//Step--1 :: Pre-Load Balancing Task to populate guard, assign, etc in Data Structure
-//	cout<<"done 1\n"<<std::endl;
-//	omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//	omp_set_num_threads(numCoreAvail);
 	#pragma omp parallel for // num_threads(count)
 			for (unsigned int id = 0; id < count; id++) {
 				if (S[id]->getContinuousSetptr()->getTotalIterations() != 0) {	//if flowpipe not Empty
@@ -245,18 +236,10 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 					cout<<"This condition Also MET!!!\n";
 				}
 			}
-//			cout<<"done 2\n";
 	//Step--2 :: First Load Balancing computation Task
 			//ToDo:: need to perform optimization: 1) check_continuation and 2) check for universe_guard
-//			omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//			omp_set_num_threads(numCoreAvail);
 			loadBalancedPostD(loadBalPostD);	//returns array of booleans with true or FALSE based on intersected or NOT
-//			cout<<"done 3\n";
-	//Step--3 :: Second Task to detect sequentially
-//			omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//			omp_set_num_threads(numCoreAvail);
 			intersectionRangeDetection(loadBalPostD);	//returns list of range pair indicating Start and End as SFM's columnIndex
-	//		cout<<"done 4\n";
 	//Step--4 :: Third Task to perform Template_Approximation
 			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
 			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
@@ -268,13 +251,8 @@ std::vector<LoadBalanceData_PostD> loadBalPostD(count);
 				//std::cout<<"set-aggregation=none\n";
 			}
 
-//			omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//			omp_set_num_threads(numCoreAvail);
 			templateApproximation(aggregation, loadBalPostD);
-	//		cout<<"done 5\n";
 	//Step--5 :: Finally creating new symbolic states to push in the Qpw_list[1-t]
-//		omp_set_dynamic(0);     // Explicitly disable dynamic teams
-//		omp_set_num_threads(numCoreAvail);
 	#pragma omp parallel for
 			for (unsigned int id = 0; id < count; id++) {
 
@@ -718,10 +696,7 @@ void tpbfs::preLoadBalanceReachCompute(LoadBalanceData& LoadBalanceDS, unsigned 
 
 unsigned int NewTotalIteration;
 
-//	unsigned int NewTotalIteration = ReachParameters.Iterations;
-//	cout <<"Before NewTotalIteration = " <<NewTotalIteration<<"\n";
 	bool U_empty = false;
-	//std::cout<<"Before Declaring Variable";
 	NewTotalIteration = LoadBalanceDS.newIteration;
 	if (NewTotalIteration < 1) {	//Modified from <= 1  to   < 1  for nav04.xml
 		return;
@@ -737,28 +712,12 @@ unsigned int NewTotalIteration;
 	unsigned int totalDirList2 = numVectors * NewTotalIteration; //'n' dirs for each 'n' loops
 	math::matrix<float> List_for_U(totalDirList2, LoadBalanceDS.reach_param.Directions.size2());
 
-//	std::cout<<"Before getDirCalled";
-	/*boost::timer::cpu_timer DirectionsGenerate_time;
-	DirectionsGenerate_time.start();*/
+
 	getDirectionList_X0_and_U(numCoresAvail, LoadBalanceDS.reach_param, NewTotalIteration, List_for_X0,
 			List_for_U, U_empty, LoadBalanceDS.current_location->getSystem_Dynamics()); //Optimized into a single function the 2 Tasks
-	/*DirectionsGenerate_time.stop();
-	double wall_clock1;
-	wall_clock1 = DirectionsGenerate_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-	double return_Time1 = wall_clock1 / (double) 1000;
-	std::cout<< "\nDirections Generation: Boost Time taken:Wall  (in Seconds) = " << return_Time1 << std::endl;*/
-//  ************* Generation of Directions Ends ***************
-	/*boost::timer::cpu_timer dirCopy_time; //just to verify the Time take
-	dirCopy_time.start();*/
 
 	LoadBalanceDS.List_dir_X0 = List_for_X0;
 	LoadBalanceDS.List_dir_U = List_for_U;
-
-	/*dirCopy_time.stop();
-	double wall_clock2;
-	wall_clock2 = dirCopy_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-	double return_Time2 = wall_clock2 / (double) 1000;
-	std::cout << "\nDirections copy: Boost Time taken:Wall  (in Seconds) = "<< return_Time2 << std::endl;*/
 
 }
 
@@ -772,7 +731,7 @@ void tpbfs::loadBalancedPostD(std::vector<LoadBalanceData_PostD>& loadBalPostD){
 		Total_Length += sfm_len;
 		loadBalPostD[i].bool_arr.resize(loadBalPostD[i].trans_size, sfm_len);	//resize(rows,col)
 	}	//total_length Obtainted and bool_arrary resized
-//cout<<"Total_Length = "<<Total_Length<<"\n";
+
 #pragma omp parallel for
 	for (unsigned int i = 0; i < Total_Length; i++) {
 		unsigned int sfmIndex;
@@ -780,7 +739,7 @@ void tpbfs::loadBalancedPostD(std::vector<LoadBalanceData_PostD>& loadBalPostD){
 		search_sfmIndex_colIndex(i, loadBalPostD, sfmIndex, sfmColIndex);
 		polytope::ptr p;
 		p = loadBalPostD[sfmIndex].sfm->getPolytope(sfmColIndex);
-		//std::cout<<"Invariant size = "<<loadBalPostD[sfmIndex].sfm->getInvariantDirections().size1()<<std::endl;
+
 		if (loadBalPostD[sfmIndex].sfm->getInvariantDirections().size1() !=0){
 			std::vector<double> constraint_bound_values(loadBalPostD[sfmIndex].sfm->getInvariantDirections().size1());
 			constraint_bound_values = loadBalPostD[sfmIndex].sfm->getInvariantBoundValue(sfmColIndex);
@@ -848,7 +807,7 @@ unsigned int count = loadBalPostD.size();
 			std::list<polytope::ptr> polys;
 
 			if (!aggregation){//OFF for each Omega that intersected it is push into the polys list. Expensive Operation
-				//std::cout<<"Aggregation is Switched-OFF\n";
+
 				for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end(); range_it++) {
 					unsigned int start = (*range_it).first, end=(*range_it).second;
 					for (unsigned int i = start; i <= end; i++) {//push in polys every polytope/Omega from start to end

@@ -8,7 +8,7 @@
 
 
 
-void setTTEthernetModel2(hybrid_automata& Hybrid_Automata,
+void setTTEthernet5(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters){
 

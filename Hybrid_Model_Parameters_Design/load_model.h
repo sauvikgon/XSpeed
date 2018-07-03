@@ -32,11 +32,14 @@
 
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/mesh.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/platoon.h"
-#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/motorcar.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/motorcade.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fisher_star.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/setNav2u.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/setNav3u.h"
-
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/setNav4u.h"
+#include "Hybrid_Model_Parameters_Design/Watertank_Controller/watertank_controller.h"
 #include "Hybrid_Model_Parameters_Design/Billiard/Billiard.h"
+
 
 // **************************************************************************************
 /*

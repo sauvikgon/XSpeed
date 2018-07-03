@@ -51,9 +51,9 @@ void AsyncBFS_recursiveFunc(LocklessDS L[], initial_state::ptr s, int level, Asy
 template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData);
 
 /**
- * computes postD from a template polyhedra computed by postC
+ * computes postD from a template polyhedra computed by postC. The unsafe flag is set if rechability to unsafe state is detected.
  */
-std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], AsyncBFSData reachData);
+std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], AsyncBFSData reachData, bool& unsafe);
 
 /*
  * Returns True if the newShiftedPolytope is containted in the symbolic_states denoted by Reachability_Region in the location
