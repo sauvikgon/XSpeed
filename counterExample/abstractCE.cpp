@@ -226,13 +226,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		// dxli: the whole flowpipe is a sequence of sub-flowpipes, each of which
 		// denotes \omega in each location.
 		// S is the sub-flowpipe in i-th sequence; P is the first \omega in S.
-		polytope::ptr P;
 		S = get_symbolic_state(i);
 		polytope::ptr P = S->getInitialPolytope();
-
-		if(i==4)
-			P->print2file("./P_file.txt",0,1);
-
 
 		lp_solver lp(GLPK_SOLVER);
 
