@@ -29,6 +29,7 @@
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/build_48.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/fwr.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/pll.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/iss_270.h"
 
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/mesh.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/platoon.h"

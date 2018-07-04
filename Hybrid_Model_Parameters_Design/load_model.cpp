@@ -49,7 +49,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
-		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+		//SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}
@@ -94,7 +94,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		// --------------------------------------------
 
 
-		setTTEthernet5(ha, init_state, reach_parameters);
+		//setTTEthernet5(ha, init_state, reach_parameters);
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
 
@@ -105,6 +105,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setFisher_Star(ha,init_state,reach_parameters);		
 
 		//set_watertank_controller(ha,init_state,reach_parameters);
+		setISS_270(ha,init_state,reach_parameters);
 
 	}
 	if(HybridSystem_Model_Type == 16){
