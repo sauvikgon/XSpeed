@@ -40,6 +40,8 @@
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/setNav4u.h"
 #include "Hybrid_Model_Parameters_Design/Watertank_Controller/watertank_controller.h"
 #include "Hybrid_Model_Parameters_Design/Billiard/Billiard.h"
+#include "Hybrid_Model_Parameters_Design/ConstantMotion/TimedZigZag.h"
+#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/spacecraft.h"
 
 
 // **************************************************************************************

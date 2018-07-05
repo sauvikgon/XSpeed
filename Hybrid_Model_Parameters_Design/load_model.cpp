@@ -105,7 +105,9 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setFisher_Star(ha,init_state,reach_parameters);		
 
 		//set_watertank_controller(ha,init_state,reach_parameters);
-		setISS_270(ha,init_state,reach_parameters);
+		//setISS_270(ha,init_state,reach_parameters); // International Space Station-217 vars, continuous system.
+		//SetTimedZigZag(ha,init_state,reach_parameters);
+		setSpacecraft(ha,init_state,reach_parameters);
 
 	}
 	if(HybridSystem_Model_Type == 16){

@@ -130,7 +130,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 			 * 	For submitting the reading in STTT Journal we did not include jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
 			 */
 
-			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+			//InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
 		}
 
 		 /*********** Compute flowpipe_cost:: estimation Ends **********************************
