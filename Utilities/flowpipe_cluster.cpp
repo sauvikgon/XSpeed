@@ -38,7 +38,7 @@ poly_list flowpipe_cluster(template_polyhedra::ptr template_poly, int cluster)
 
 bool check_continuation(location::ptr src_loc_ptr, location::ptr dest_loc_ptr, transition::ptr trans_ptr)
 {
-	// Check for the dynamics of the destination loc and the source location
+	// Check whether the dynamics of the destination and the source location are the same.
 	Dynamics src_d, dest_d;
 	src_d = src_loc_ptr->getSystem_Dynamics();
 	dest_d = dest_loc_ptr->getSystem_Dynamics();
@@ -48,8 +48,11 @@ bool check_continuation(location::ptr src_loc_ptr, location::ptr dest_loc_ptr, t
 		Assign A = trans_ptr->getAssignT();
 		std::vector<double> zero_vec(A.b.size(),0);
 
-		if (A.Map.isIdentity() && A.b==zero_vec)
-			return true;
+		if (A.Map.isIdentity() && A.b==zero_vec){
+			// finally, check whether the inv of dst loc is a superset of the invariant of the src location
+			bool status = src_loc_ptr->getInvariant()->contains(dest_loc_ptr->getInvariant(),1);
+			return status; // returns true if arh poly is contained in the calling poly.
+		}
 	}
 	return false;
 

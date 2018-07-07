@@ -272,14 +272,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					 * First find out all Omegas that intersects with the gaurd_polytope and then push each Omega
 					 * into the polys. Guard intersection is done in the following steps below for each of these Omegas
 					 */
-
-					/*if (!aggregation){//ON use thull //OFF is expensive: for each Omega a new symbolic state is pushed in the Wlist
-						std::cout<<"Aggregation is OFF: going to create many symbolic states\n";
-					}*/
-
 					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);//Todo::debug PPL
 					polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
-
 
 				} else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings
@@ -287,7 +281,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 					// Another alternative is to consider each omega in the flowpipe as a new symbolic state.
 					// The cost of flowpipe computation shall increase but the precision is likely to be better.
-					// A user may choose the clustering percent to tune the accuracy versus time overhead
+					// A user may choose the clustering percent to tune the accuracy by trading performance.
 
 					std::cout << "Universe Guard intersection found\n";
 
@@ -328,7 +322,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {
 					polytope::ptr intersectedRegion = (*i);
 					polytope::ptr newPolytope, newShiftedPolytope; //created an object here
-
 
 					if(!gaurd_polytope->getIsUniverse()){
 						newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);

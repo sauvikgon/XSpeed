@@ -31,18 +31,6 @@ template_polyhedra::template_polyhedra (
 	this->setTotalInvariantDirections(0);
 }
 
-/*template_polyhedra::template_polyhedra(
- math::matrix<double> matrix_support_function,
- math::matrix<double> all_directions,
- math::matrix<double> template_directions,
- math::matrix<double> invariant_directions) {
- this->setTotalIterations(matrix_support_function.size2());
- this->setMatrixSupportFunction(matrix_support_function);
- this->setAllDirections(all_directions);
- this->setInvariantDirections(invariant_directions);
- this->setTemplateDirections(template_directions);
- }*/
-
 template_polyhedra::template_polyhedra(
 		math::matrix<double> matrix_support_function,
 		math::matrix<double> matrix_invariant_bounds,
@@ -88,14 +76,6 @@ void template_polyhedra::setMatrix_InvariantBound(
 	Matrix_InvariantBound = matrix_invariantBound;
 }
 
-/*
- unsigned int template_polyhedra::getTotalDirections() const {
- return total_Directions;
- }
- void template_polyhedra::setTotalDirections(unsigned int totalDirections) {
- total_Directions = totalDirections;
- }
- */
 unsigned int template_polyhedra::getTotalTemplateDirections() const {
 	return total_template_Directions;
 }
@@ -134,10 +114,6 @@ polytope::ptr template_polyhedra::getPolytope(unsigned int Iterations_Number) {
 	p->setInEqualitySign(1);	//Ax<=b		0 for = sign, 1 for <= sign and 2 for >= sign
 	return p;
 }
-
-/*
-	Rajarshi:
- */
 
 const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionSequential(polytope::ptr G, int lp_solver_type_choosen) { //need testing due to modification
 
