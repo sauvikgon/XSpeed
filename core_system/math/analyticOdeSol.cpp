@@ -11,9 +11,10 @@
 
 std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double time)
 {
-	if(!D.isEmptyMatrixB)
-		throw std::runtime_error("File-analyticODEsol: Method-ODESol: Cannot solve ODE for dynamics with input\n");
-
+	if(!D.isEmptyMatrixB && !D.U->getIsEmpty()){
+		std::cout << "File-analyticODEsol: Method-ODESol: Cannot solve ODE for dynamics with non-det input\n";
+		exit(0);
+	}
 	if(D.isEmptyMatrixA && D.isEmptyMatrixB)
 	{
 		assert(!D.isEmptyC);
@@ -35,8 +36,7 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 	math::matrix<double> A(D.MatrixA);
 	math::matrix<double> At(A);
 
-	// debug
-	//std::cout << "time passed for ODE solve:" << time << std::endl;
+
 	At.scalar_multiply(time);
 
 	At.matrix_exponentiation(expAt);

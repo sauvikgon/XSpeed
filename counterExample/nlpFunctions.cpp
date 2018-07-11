@@ -210,7 +210,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 	std::vector<double> Axplusb(dim), mapAxplusb;
 
 	std::ofstream myfile;
-	myfile.open("./endpoints");
 
 	polytope::ptr I;
 
@@ -482,7 +481,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 			grad[i] = deriv[i];
 		}
 	}
-	//std::cout << "current cost=" << cost << std::endl;
+//	std::cout << "current cost=" << cost << std::endl;
 	return cost;
 
 }

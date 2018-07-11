@@ -5,7 +5,7 @@
  *      Author: Rajarshi
  */
 
-#include "/home/rajarshi/workspace/xspeed/counterExample/abstractCE.h"
+#include "counterExample/abstractCE.h"
 #include "counterExample/simulation.h"
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/HybridAutomata/Hybrid_Automata.h"
@@ -210,7 +210,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	// 	local optimization routine
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(25000);
+	myopt.set_maxeval(4000);
 
 	//Set Initial value to the optimization problem
 	std::vector<double> x(optD, 0);
@@ -307,9 +307,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
 			guard = T->getGaurd();
-			if(guard->getIsUniverse())
-				std::cout << "#Guard is Universe#\n" << std::endl;
-
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation,guard,1);
 
 			assert(polys.size()>=1); // An abstract CE state must have intersection with the trans guard
@@ -335,7 +332,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 			min = -1 * lp.Compute_LLP(dmin);
 		}catch(...){
 			// assuming that the exception is caused due to an unbounded solution
-			min = 0; // the min value a time can take is 0.
+			min = 0; // the min value that time can take is 0.
 
 		}
 
@@ -374,8 +371,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	myopt.set_upper_bounds(ub);
 
 
-	std::cout << "Computed initial dwell times and added dwell time constraints\n";
-
 	double minf;
 	try {
 		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
@@ -390,7 +385,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
-		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
+		std::cout << "Obtained minimum greater than " << tolerance << ", with no. of refined search:" << refinements.size() << std::endl;
 		return cexample;
 	} else {
 		std::ofstream ce_trace;
@@ -475,7 +470,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //
 //	unsigned int t_index = get_first_symbolic_state()->getInitialPolytope()->get_index("t");
 //
-//	assert((t_index >= 0) && (t_index < dim));
+//	assert((t_index >= 0) && (t_index < dim));Trajectories
 //
 //	std::vector<double> dmin(dim, 0), dmax(dim, 0);
 //	dmax[t_index] = 1;
@@ -627,7 +622,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	// 	local optimization routine
 
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(25000);
+	myopt.set_maxeval(4000);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
@@ -741,6 +736,10 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 				dir[j] = 0;
 			}
 		}
+		// Initialize the dwell-time values to 0
+		for(unsigned int i=0;i<N;i++){
+			x[N*dim+i] = 0;
+		}
 		// increment transition iterator
 		if(trans_iter!=transList.end() && i!=0) // do not increment trans iteration at the first iteration
 			trans_iter++;
@@ -755,7 +754,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 //	for(unsigned int i=0;i<ub.size();i++)
 //		std::cout << ub[i] << " ";
 //	std::cout << "\n";
-
 	//---
 
 	myopt.set_lower_bounds(lb);
@@ -775,7 +773,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
-		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
+		std::cout << "Obtained minimum greater than " << tolerance << ", with no. of refined search:" << refinements.size() << std::endl;
 		return cexample;
 	} else {
 		std::ofstream ce_trace;
@@ -815,7 +813,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 	concreteCE::ptr cexample;
 	bool val_res=true;
 	bool NLP_HA_algo_flag = false;
-	unsigned int max_refinements = 100, ref_count = 0; // maximum limit to refinement points to be added.
+	unsigned int max_refinements = 3, ref_count = 0; // maximum limit to refinement points to be added.
 
 	double valid_tol = 1e-3; // validation error tolerance, on invariant crossing.
 
@@ -841,10 +839,6 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 		//val_res = true;
 		//--
 		if(!val_res){
-			if(NLP_HA_algo_flag){
-				std::cout << "Splice Trace NOT VALID\n";
-				return cexample = concreteCE::ptr(new concreteCE());
-			}
 			refinements.push_back(pt);
 			ref_count++;
 		}
@@ -855,6 +849,42 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 		std::cout << "Restarting Search with added refinement point\n";
 	}while(!val_res && ref_count< max_refinements);
 
-	throw std::runtime_error("Validation of counter example FAILED even after MAX Refinements\n");
+	throw std::runtime_error("Validation of counter example FAILED after MAX Refinements\n");
 	return concreteCE::ptr(new concreteCE());
+}
+
+
+concreteCE::ptr abstractCE::search_concreteCE(double tolerance, std::list<abstractCE::ptr> paths, std::vector<unsigned int> path_filter, unsigned int algo_type)
+{
+
+	concreteCE::ptr ce;
+	abstractCE::ptr abs_ce;
+
+	bool real_ce = false;
+	double error_tol = tolerance; // splicing error tolerance
+
+	for (std::list<abstractCE::ptr>::iterator it = paths.begin(); it!=paths.end();it++) {
+
+		abs_ce = *(it);
+		// add a filter function to search for concrete ce only in a specific abstract trace
+
+		bool search_ce = abs_ce->filter(path_filter);
+
+		if(search_ce){
+			ce = abs_ce->get_validated_CE(error_tol,algo_type);
+			if(ce->is_empty()){
+				std::cout << "Cannot splice trajectory segments with the accepted error tolerance\n";
+			}
+			else{
+				real_ce = true;
+				break;
+			}
+		}
+	}
+	if(real_ce)
+		return ce;
+	else{
+		ce = concreteCE::ptr(new concreteCE());
+		return ce;
+	}
 }

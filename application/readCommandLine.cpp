@@ -69,7 +69,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - none : consider each convex set as successor sets for the next depth")
 
 	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst
-	("CE", po::value<unsigned int>()->default_value(0), "Generate counter-example to forbidden-state (default: OFF): \n 0: No CE Generation \n 1: Generate CE \n")
+	("CE",po::value<std::string>(), "Search for counter-example to forbidden-state in the specified path:\n - (all): search in all flowpipe feasible paths \n - search only in the path given as a comma separated list of locations: e.g. 1,2,3 \n")
 	("include-path,I", po::value<std::string>(), "include file path")
 	("model-file,m", po::value<std::string>(), "include model file")
 	("config-file,c", po::value<std::string>(), "include configuration file")
@@ -289,16 +289,9 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_forbidden_set(vm["forbidden"].as<std::string>());
 		}
-
 		if(vm.count("CE") && isConfigFileAssigned == false) {
-			user_options.set_ce_flag(vm["CE"].as<unsigned int>());
-			unsigned int ce_flag = user_options.get_ce_flag();
-
-			if(ce_flag!=0 && ce_flag!=1)
-			{
-				std::cout << "Invalid CE Flag value specified. A 0 or 1 is expected.\n";
-				throw(new exception());
-			}
+			user_options.set_ce_path(vm["CE"].as<std::string>());
+			user_options.set_ce_flag(true);
 		}
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeHorizon(vm["time-horizon"].as<double>());

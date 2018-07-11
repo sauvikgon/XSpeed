@@ -146,15 +146,17 @@ double lp_solver::Compute_LLP(const std::vector<double> coeff_function) {
 		res = glpk_lp_problem->Compute_LLP(coeff_function);
 		status = glpk_lp_problem->getStatus();
 	}
-	if(status == GLP_UNBND)
+	if(status == GLP_UNBND){
+		//std::cout << "lp_solver: Unbounded solution to the objective function\n";
 		throw(new std::exception());
+	}
 	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
 		res = simplex_cpu_lp_problem->ComputeLP_CPU(coeff_function);
 	}
 	return res;
 }
 /**
- * Return the support vector,i.e., the maximimizing/minimizing
+ * Return the support vector,i.e., the maximizing/minimizing
  * vector for the given objection function
  */
 std::vector<double> lp_solver::get_sv() {

@@ -30,18 +30,16 @@ class userOptions {
 	unsigned int model; // name of the pre-defined model to run for reachability.
 	unsigned int direction_template; // template used for approximating support functions
 
-	//OLD VALUE unsigned int time_horizon; // time horizon for reachability
 	double time_horizon; // time horizon for reachability
 
 	double time_step; // the time step of the support function algorithm
 	unsigned int level; // the breadth level in bfs to stop reachability
-//	unsigned int flow_algorithm; // Choice of the reachability algorithm
-//	unsigned int automata_exploration_algorithm; // choice of algorithm for exploration of the graph
 
 	unsigned int algo;	//Common arg for all types of Algorithm
 	unsigned int total_slice_size;	//total number of partition-size or number of slices
 	unsigned int stream_size;	//total number of streams selected for GPU streaming
-	unsigned int ce_flag; 	// ce_flag=1 means counter-example to forbidden state will be generated.
+	bool ce_flag; // This flag is set to true if --CE option is given by the user.
+	std::string ce_path; 	// A counter-example to forbidden state will be searched in the specified path, which is a comma separated list of location ids.
 
 public:
 	userOptions();
@@ -68,10 +66,6 @@ public:
 	void set_directionTemplate(unsigned int d);
 	unsigned int get_bfs_level();
 	void set_bfs_level(unsigned int l);
-/*	unsigned int get_flow_algorithm();
-	void set_flow_algorithm(unsigned int alg);
-	unsigned int get_automata_exploration_algorithm();
-	void set_automata_exploration_algorithm(unsigned int exp_alg);*/
 	std::string get_forbidden_set();
 	void set_forbidden_set(std::string);
 
@@ -97,8 +91,13 @@ public:
 	unsigned int get_simu_init_points();
 	void set_simu_init_points(unsigned int sampling_points);
 
-	unsigned int get_ce_flag();
-	void set_ce_flag(unsigned int ce_flag);
+	/* This is the path to search for a concrete trajectory to a specified forbidden state */
+	std::string get_ce_path();
+	void set_ce_path(std::string path);
+
+	/* This is the flag to trigger a search to a counter-example trajectory to a specified forbidden state */
+	void set_ce_flag(bool value);
+	bool get_ce_flag();
 
 };
 

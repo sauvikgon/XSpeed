@@ -49,7 +49,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
-		//SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}
@@ -80,9 +80,9 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
-
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
-	//	SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
+		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
+		//setNav30(ha,init_state,reach_parameters);
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
@@ -98,9 +98,10 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
 
-		//setplatoon(ha, init_state, reach_parameters);
-		//setplatoon_ndt(ha, init_state, reach_parameters);
-		//setplatoon_na(ha, init_state, reach_parameters);
+		setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
+		//setplatoon(ha, init_state, reach_parameters); // deterministic transitions to communicating (c) and non-communicating modes (nc)
+		//setplatoon_ndt(ha, init_state, reach_parameters); // non-deterministic transitions to c and nc modes.
+		//setplatoon_na(ha, init_state, reach_parameters); // non-deterministic transitios with arbitrary transitions to c and nc modes.
 
 		//setFisher_Star(ha,init_state,reach_parameters);		
 
@@ -108,7 +109,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setISS_270(ha,init_state,reach_parameters); // International Space Station-217 vars, continuous system.
 		//SetTimedZigZag(ha,init_state,reach_parameters);
 		//setSpacecraft(ha,init_state,reach_parameters);
-		setSpacecraftAbort(ha,init_state,reach_parameters);
+		//setSpacecraftAbort(ha,init_state,reach_parameters);
 
 	}
 	if(HybridSystem_Model_Type == 16){
@@ -138,8 +139,8 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		dims = (*it)->getInitialSet()->getSystemDimension();
 	}
 
-//Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
-//todo:: needs to decide that, is this the right place to include Invariant direction
+	//Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
+	//todo:: needs to decide that, is this the right place to include Invariant direction
 	//and also Redundant invariant directional constraints to be removed
 
 	math::matrix<double> Real_Directions; //List of all directions

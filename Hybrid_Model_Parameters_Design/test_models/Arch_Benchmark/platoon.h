@@ -22,11 +22,15 @@
 #include "core_system/math/uni_sphere.h"
 
 
-/*
- * * Reference for model is http://cps-vo.org/node/26546
+/**
+ * @Rajarshi
  *
- * Model created with Hyst
+ * Platoon model with constant input. This model is to test CE searching with trajectory splicing
  */
+void setplatoon_const_input(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr>& init_state_list,
+		ReachabilityParameters& reach_parameters);
+
 void setplatoon(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);

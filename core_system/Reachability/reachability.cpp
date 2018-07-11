@@ -168,9 +168,9 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					safety_violation = true;
 				}
 
-				if (safety_violation && ce_flag == 0) break; // No need to generate CE
+				if (safety_violation && ce_flag == false) break; // No need to generate CE
 
-				if (safety_violation && ce_flag == 1) // CE Gen is ON
+				if (safety_violation && ce_flag == true) // CE Gen is ON
 				{
 
 					safety_violation = false; // This resetting to false will correctly visit the violating paths in the following iterations.

@@ -234,77 +234,48 @@ int main(int argc, char *argv[]) {
 	std::cout << "\nBoost Wall Time for Plotting (in Seconds) = " << plotTime << std::endl;
 
 	/*
-	 * counterExample utility. Plot the location sequence of every abstract CE in a file
+	 * counterExample utility.
 	 */
-	if(user_options.get_ce_flag()==1) { // CE Generation is ON
-		dump_abstractCE_list(ce_candidates);
-		// create a template abstract ce to filter
-		std::vector<unsigned int> template_seq(0);
-		//template_seq = {17,15,14,12,13,10};
 
-		// create a filter template here
+	concreteCE::ptr ce;
 
-		/** End of debug */
-		concreteCE::ptr ce;
-		abstractCE::ptr abs_ce;
-		bool real_ce = false;
-		double error_tol = 1e-6; // splicing error tolerance
+	if(user_options.get_ce_flag()==true) { // CE Generation is ON
 
-		//tt1.start(); // start time
-		for (std::list<abstractCE::ptr>::iterator it = ce_candidates.begin(); it!=ce_candidates.end();it++) {
+		dump_abstractCE_list(ce_candidates); // Plot the location sequence of every abstract CE in a file
 
-			abs_ce = *(it);
-			// add a filter function to search for concrete ce only in a specific abstract trace
-			bool search_ce = abs_ce->filter(template_seq);
-			if(search_ce){
-				tt1.start(); // start time
-				ce = abs_ce->get_validated_CE(error_tol,2);
-				tt1.stop(); //stop time
-				double user_clock;
-				user_clock = tt1.elapsed().user / 1000000;
-				std::cout << "Time to Splice with NO FC:" << user_clock << std::endl;
+		// create a path template to filter search
+		std::vector<unsigned int> path_filter(0);
 
-				tt1.start(); // start time
-				ce = abs_ce->get_validated_CE(error_tol,1);
-				tt1.stop(); //stop time
-				user_clock;
-				user_clock = tt1.elapsed().user / 1000000;
-				std::cout << "Time to Splice with FC:" << user_clock << std::endl;
-			}
-			else continue;
+		if(user_options.get_ce_path().compare("all")!=0) // if not all, then set a CE path filter
+			path_filter = path_parser(user_options.get_ce_path());
 
-			if(ce->is_empty()){
-				std::cout << "Cannot Splice Trajectories with Accepted Error Tolerance\n";
-				std::cout << "Looking for Other Abstract CE to Unsafe Set\n";
-				continue;
-			} else {
-				real_ce = true;
-				break;
-			}
-		}
-		//tt1.stop(); //stop time
+		double splicing_error_tol = 1e-6;
+		tt1.start();
+		ce = abstractCE::search_concreteCE(splicing_error_tol, ce_candidates, path_filter, 1); // calls the ce searching method using flowpipe constraints
+		tt1.stop();
 
-		// plot the ce trajectory in a file
-		if(real_ce){
-			ce->set_automaton(abs_ce->get_automaton());
+		double user_clock = tt1.elapsed().user / 1000000;
+		std::cout << "############## Time (user time) in ms to search ce with FC:" << user_clock << std::endl;
+
+		tt1.start();
+		ce = abstractCE::search_concreteCE(splicing_error_tol, ce_candidates, path_filter, 2); // calls the ce searching method without flowpipe constraints
+		tt1.stop();
+		user_clock = tt1.elapsed().user / 1000000;
+		std::cout << "############# Time (user time) in ms to search ce without FC:" << user_clock << std::endl;
+
+		if(ce->is_empty())
+			std::cout << "\n No feasible counter-example to the forbidden:" << std::endl;
+		else{
+
 			std::string tracefile = "./bad_trace.o";
 			ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-		}
 
-		//timers
-		double user_clock;
-		user_clock = tt1.elapsed().user / 1000000;
-		//--end of timers
-		if (!real_ce) {
-			std::cout << "******** No Violation of Safety Property ********\n";
-			std::cout << "Time to search concrete counter-examples (milliseconds):" << user_clock << std::endl;
-		} else {
-			std::cout << "******** Detected Violation of Safety Property  ********\n";
-			std::cout << "Counter Example Trace Plotted in the file bad_trace.o\n";
-			std::cout << "Time to search counter-example (milliseconds):" << user_clock << std::endl;
+			std::cout << "\n Time taken to search for a counter-example to a forbidden set: " << std::endl;
+			std::cout << "\nWall time (in Seconds) = " << tt1.elapsed().wall / 1000000 << std::endl;
+			std::cout << "\nUser time (in Seconds) = " << tt1.elapsed().user / 1000000 << std::endl;
+			std::cout << "\nWall time (in Seconds) = " << tt1.elapsed().system / 1000000 << std::endl;
 		}
 	}
 
-	cout << "\n******** Summary of XSpeed ********\n";
-	return 0; //returning only the Wall time taken to execute the Hybrid System
+	return 0;
 }

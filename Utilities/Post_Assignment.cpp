@@ -147,8 +147,11 @@ polytope::ptr post_assign_approx_deterministic(polytope::ptr newPolytope, math::
 		for (unsigned int j = 0; j < Directions.size2(); j++)
 			each_direction[j] = Directions(i, j);
 		R_transpose.mult_vector(each_direction, direction_trans);
-
-		b[i] = newPolytope->computeSupportFunction(direction_trans, lp) + dot_product(each_direction, w);
+		try{
+			b[i] = newPolytope->computeSupportFunction(direction_trans, lp) + dot_product(each_direction, w);
+		} catch(...){
+			b[i] = 999; // a large value set as the support function since the solution is unbounded
+		}
 	}
 
 	/*std::cout<<"\nnewShiftedPolytope->getCoeffMatrix()="<<Directions<<"\n columnVector are";

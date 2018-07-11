@@ -135,6 +135,11 @@ public:
 	 */
 	bool filter(std::vector<unsigned int> template_sequence);
 
+	/**
+	 * Returns an instance of the concrete counter-examples, if it exists, by searching the abstract paths in
+	 * the argument. The path-filter argument restricts the search in a unique path.
+	 */
+	static concreteCE::ptr search_concreteCE(double tolerance, std::list<abstractCE::ptr> paths, std::vector<unsigned int> path_filter,unsigned int algo_type);
 
 private:
 	/**
@@ -176,6 +181,8 @@ private:
 	 * Returns an instance of the concrete counter-example, if it exists, using NLP and HA given constraints
 	 */
 	concreteCE::ptr gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements);
+
+
 };
 
 

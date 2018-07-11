@@ -15,7 +15,8 @@ userOptions::userOptions() {
 	output_var_Y = 1; // default second dimension of plot
 	output_var_Z = 0; //default third plot dimension
 	simu_init_points = 1; // Number of initial points set to 1 by default.
-	ce_flag = 0; // Counter-example generation switched-off by default
+	ce_flag = false; // Counter-example generation switched-off by default
+	ce_path = "all"; // all paths set by default. This implies all possible flowpipe defined paths to a forbidden state will be explored
 //	automata_exploration_algorithm = 12; // sequential BFS
 //	flow_algorithm = 1;	// SEQ
 
@@ -205,11 +206,20 @@ void userOptions::setOutFilename(const std::string& outFilename) {
 	out_filename = outFilename;
 }
 
-unsigned int userOptions::get_ce_flag(){
-	return this->ce_flag;
+std::string  userOptions::get_ce_path(){
+	return this->ce_path;
 }
 
-void userOptions::set_ce_flag(unsigned int ce_flag)
+void userOptions::set_ce_path(std::string path)
 {
-	this->ce_flag = ce_flag;
+	this->ce_path = path;
+}
+
+bool userOptions::get_ce_flag()
+{
+	return this->ce_flag;
+}
+void userOptions::set_ce_flag(bool value)
+{
+	this->ce_flag = value;
 }
