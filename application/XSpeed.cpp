@@ -237,45 +237,45 @@ int main(int argc, char *argv[]) {
 	 * counterExample utility.
 	 */
 
-	concreteCE::ptr ce;
-
-	if(user_options.get_ce_flag()==true) { // CE Generation is ON
-
-		dump_abstractCE_list(ce_candidates); // Plot the location sequence of every abstract CE in a file
-
-		// create a path template to filter search
-		std::vector<unsigned int> path_filter(0);
-
-		if(user_options.get_ce_path().compare("all")!=0) // if not all, then set a CE path filter
-			path_filter = path_parser(user_options.get_ce_path());
-
-		double splicing_error_tol = 1e-6;
-		tt1.start();
-		ce = abstractCE::search_concreteCE(splicing_error_tol, ce_candidates, path_filter, 1); // calls the ce searching method using flowpipe constraints
-		tt1.stop();
-
-		double user_clock = tt1.elapsed().user / 1000000;
-		std::cout << "############## Time (user time) in ms to search ce with FC:" << user_clock << std::endl;
-
-		tt1.start();
-		ce = abstractCE::search_concreteCE(splicing_error_tol, ce_candidates, path_filter, 2); // calls the ce searching method without flowpipe constraints
-		tt1.stop();
-		user_clock = tt1.elapsed().user / 1000000;
-		std::cout << "############# Time (user time) in ms to search ce without FC:" << user_clock << std::endl;
-
-		if(ce->is_empty())
-			std::cout << "\n No feasible counter-example to the forbidden:" << std::endl;
-		else{
-
-			std::string tracefile = "./bad_trace.o";
-			ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-
-			std::cout << "\n Time taken to search for a counter-example to a forbidden set: " << std::endl;
-			std::cout << "\nWall time (in Seconds) = " << tt1.elapsed().wall / 1000000 << std::endl;
-			std::cout << "\nUser time (in Seconds) = " << tt1.elapsed().user / 1000000 << std::endl;
-			std::cout << "\nWall time (in Seconds) = " << tt1.elapsed().system / 1000000 << std::endl;
-		}
-	}
+//	concreteCE::ptr ce;
+//
+//	if(user_options.get_ce_flag()==true) { // Counter-Example Generation is ON
+//
+//		dump_abstractCE_list(ce_candidates); // Plot the location sequence of every abstract CE in a file
+//
+//		// create a path template to filter search
+//		std::vector<unsigned int> path_filter(0);
+//
+//		if(user_options.get_ce_path().compare("all")!=0) // if not all, then set a CE path filter
+//			path_filter = path_parser(user_options.get_ce_path());
+//
+//
+//		tt1.start();
+//		ce = abstractCE::search_concreteCE(splicing_error_tol, ce_candidates, path_filter, 1); // calls the ce searching method using flowpipe constraints
+//		tt1.stop();
+//
+//		double user_clock = tt1.elapsed().user / 1000000;
+//		std::cout << "############## Time (user time) in ms to search ce with FC:" << user_clock << std::endl;
+//
+//		tt1.start();
+//		ce = abstractCE::search_concreteCE(splicing_error_tol, ce_candidates, path_filter, 2); // calls the ce searching method without flowpipe constraints
+//		tt1.stop();
+//		user_clock = tt1.elapsed().user / 1000000;
+//		std::cout << "############# Time (user time) in ms to search ce without FC:" << user_clock << std::endl;
+//
+//		if(ce->is_empty())
+//			std::cout << "\n No feasible counter-example to the forbidden:" << std::endl;
+//		else{
+//
+//			std::string tracefile = "./bad_trace.o";
+//			ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+//
+//			std::cout << "\n Time taken to search for a counter-example to a forbidden set: " << std::endl;
+//			std::cout << "\nWall time (in Seconds) = " << tt1.elapsed().wall / 1000000 << std::endl;
+//			std::cout << "\nUser time (in Seconds) = " << tt1.elapsed().user / 1000000 << std::endl;
+//			std::cout << "\nWall time (in Seconds) = " << tt1.elapsed().system / 1000000 << std::endl;
+//		}
+//	}
 
 	return 0;
 }

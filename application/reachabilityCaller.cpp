@@ -26,7 +26,17 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 
 		// The right algorithm is selected within the following function
 		Symbolic_states_list = reach_SEQ_BFS.computeSequentialBFSReach(ce_candidates);
-		std::cout << "number of symbolic ce candidates for exploration: " << ce_candidates.size() << std::endl;
+		std::cout << "number of abstract ce-paths found for exploration: " << ce_candidates.size() << std::endl;
+		std::list<concreteCE::ptr> ce_list = reach_SEQ_BFS.get_counter_examples();
+		std::cout << "number of concrete ce trajectories found: " << ce_list.size() << std::endl;
+
+		// plot the first counter-example trajectory in the list.
+		if(ce_list.size() !=0){
+			concreteCE::ptr first_ce = *(ce_list.begin());
+			std::string tracefile = "./bad_trace.o";
+			first_ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+		}
+
 
 	} else if (user_options.get_algorithm() == AGJH_BFS) { //Adaptation of Gerard J. Holzmann's algorithm (Seq PostC and PBFS)
 		agjh reach_AGJH;

@@ -22,6 +22,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	Solver_GLPK_Gurobi_GPU = solver_GLPK_Gurobi_for_GPU; //todo:: used for comparing GLPK solver vs GPU. Can be removed
 	forbidden_set = forbidden;
 	ce_flag = user_options.get_ce_flag();
+	ce_path = user_options.get_ce_path();
 	set_aggregation = user_options.getSetAggregation();
 }
 
@@ -164,16 +165,16 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
 
 				if (forbid_intersects.size() != 0){
-					std::cout << "intersection with guard found at location: " << locID << std::endl;
+					std::cout << "intersection with forbidden-region found at location: " << locID << std::endl;
 					safety_violation = true;
 				}
 
 				if (safety_violation && ce_flag == false) break; // No need to generate CE
 
-				if (safety_violation && ce_flag == true) // CE Gen is ON
+				if (safety_violation && ce_flag == true) // CE Generation is requested
 				{
 
-					safety_violation = false; // This resetting to false will correctly visit the violating paths in the following iterations.
+					safety_violation = false; // This reseting to false will correctly visit the violating paths in the following iterations.
 
 					symbolic_states::ptr symb_state_in_abst_ce; // This is a pointer to the current symbolic state in the abstract ce.
 					symb_state_in_abst_ce = S;
@@ -229,7 +230,19 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
 					abst_ce->set_automaton(ha);
 					abst_ce->set_forbid_poly(forbidden_set.second);
-					symbolic_ce_list.push_back(abst_ce); // the symbolic (abstract) ce is added to the list.
+					symbolic_ce_list.push_back(abst_ce); // This abstract counter-example path is added to the list of all such identified paths.
+					/*
+					 * Call the generation of counter-example routine of this class. The counter-example(s) are set
+					 * by this routine as per the user-options.
+					 */
+					bool continue_search = this->gen_counter_example(abst_ce);
+
+					if(continue_search == false) { // This status says whether to continue searching for further abstract paths or to stop
+						std::cout << "############# Safety Property is Violated #################\n";
+						return Reachability_Region; // return and report the time to search the counter-example
+					}
+
+
 				} // end of condition when forbidden state intersects with the flowpipe set
 			} //end of condition when forbidden state loc id matches with flowpipe loc id
 		} //computed flowpipe is not empty
@@ -1098,7 +1111,61 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 	}
 }
 
+bool reachability::gen_counter_example(abstractCE::ptr abs_path)
+{
+	double splicing_error_tol = 1e-6; // A parameter particular to counter-example searching
+	unsigned int algo_type = 1; // A parameter particular to mentioning the type of ce search algorithm to use 1 (FC) uses the method using flowpipe constraints and 2 uses the method using flowpipe constraints (WFC)
 
+	if(ce_path.compare("all")==0) // if all paths are to be searched for ce, then return true in order to collect more paths.
+	{
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,algo_type);
+		if(!ce->is_empty())
+			this->ce_list.push_back(ce);
+		return true; // In order to continue searching for further paths during BFS.
+	}
+	if(ce_path.compare("first") == 0) // Stop the BFS search once a concrete ce has been found
+	{
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,algo_type);
+		if(!ce->is_empty()){
+			this->ce_list.push_back(ce);
+			return false; 		// In order to terminate the BFS.
+		}
+		else
+			return true; // continue for searching the first concrete trajectory
+	}
+	// We assume that if the path specified is not "all" and not "first" then it must be a comma separated description of a path
+
+	// create a path template to filter search
+	std::vector<unsigned int> path_filter(0);
+	path_filter = path_parser(ce_path);
+
+	bool search_ce = abs_path->filter(path_filter); // search_ce is true when the abstract path matched with the user requested path
+
+	if(search_ce){
+
+		boost::timer::cpu_timer timer;
+		timer.start();
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,algo_type);
+		timer.stop();
+
+		double wall_time, user_time, system_time;
+
+		wall_time = timer.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		user_time = timer.elapsed().user / 1000000;
+		system_time = timer.elapsed().system / 1000000;
+
+		std::cout << "Time to search a concrete counter-example trajectory from the abstract path (user time in ms):" << user_time << std::endl;
+
+		if(ce->is_empty())
+			std::cout << "Cannot find a counter-example trajectory in the specified path\n";
+		else
+			this->ce_list.push_back(ce);
+		return false;	// In order to terminate the BFS.
+	}
+	else{ // The user specified path is not this abstract path in abs_path. Hence search for other abstract paths during BFS.
+		return true;  // In order to continue searching for further paths during BFS.
+	}
+}
 
 bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 		std::list<symbolic_states::ptr>& Reachability_Region,

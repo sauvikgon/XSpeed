@@ -34,7 +34,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+		set_nav04_timed(ha, init_state, reach_parameters);
 		//Set_NavTimedEpsilonRelaxGuard(ha, init_state, reach_parameters);
 		//SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
 	}
@@ -98,7 +98,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 		//setmesh(ha, init_state, reach_parameters);	//precision issue
 
-		setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
+		//setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
 		//setplatoon(ha, init_state, reach_parameters); // deterministic transitions to communicating (c) and non-communicating modes (nc)
 		//setplatoon_ndt(ha, init_state, reach_parameters); // non-deterministic transitions to c and nc modes.
 		//setplatoon_na(ha, init_state, reach_parameters); // non-deterministic transitios with arbitrary transitions to c and nc modes.
@@ -113,7 +113,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 	}
 	if(HybridSystem_Model_Type == 16){
-		setMotorcade(ha,init_state,reach_parameters);
+		//setMotorcade(ha,init_state,reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 17){
 		//setNav2u(ha,init_state,reach_parameters);

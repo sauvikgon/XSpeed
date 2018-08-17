@@ -69,7 +69,9 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - none : consider each convex set as successor sets for the next depth")
 
 	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst
-	("CE",po::value<std::string>(), "Search for counter-example to forbidden-state in the specified path:\n - (all): search in all flowpipe feasible paths \n - search only in the path given as a comma separated list of locations: e.g. 1,2,3 \n")
+	("CE",po::value<std::string>(), "Search for counter-example to forbidden-region together with state-space exploration:\n - (all): search in all flowpipe feasible paths "
+			"\n - (first): search for counter-example until the first-one (if any) is found."
+			"\n - search only in the path given as a comma separated list of locations: e.g. 1,2,3 \n")
 	("include-path,I", po::value<std::string>(), "include file path")
 	("model-file,m", po::value<std::string>(), "include model file")
 	("config-file,c", po::value<std::string>(), "include configuration file")

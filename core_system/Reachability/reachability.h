@@ -64,6 +64,13 @@ public:
 	void setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
 			int lp_solver_type, int solver_GLPK_Gurobi_for_GPU, std::pair<int, polytope::ptr> forbidden, userOptions& user_options);
 
+	/*
+	 * Get counter-example trajectories found during reachability analysis
+	 */
+	std::list<concreteCE::ptr> get_counter_examples() { // making it inline
+		return ce_list;
+	}
+
 	//bound is the maximum number of transitions or jumps permitted.
 	//reach_parameters includes the different parameters needed in the computation of reachability.
 	//I is the initial symbolic state
@@ -87,7 +94,8 @@ public:
 	hybrid_automata H; //todo:: have to change it to boost::ptr
 	int lp_solver_type_choosen;
 	std::pair<int, polytope::ptr> forbidden_set;
-	bool ce_flag; // The flag to swithch ON/OFF CE generation.
+	bool ce_flag; // The flag to swithch ON/OFF the CE generation functionality.
+	std::string ce_path; // This string can be either "all", "first" or "1,3,4,15,16" type. The last string is a comma separated list of locations to represent a path.
 	int Solver_GLPK_Gurobi_GPU;
 
 	void sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
@@ -121,16 +129,23 @@ private:
 	unsigned int Algorithm_Type;
 	unsigned int Total_Partition;
 	unsigned int number_of_streams;
-
-	std::string set_aggregation; // The aggregation options thull(default), none
+	std::string set_aggregation; // The aggregation options thull (default) and none
+	std::list<concreteCE::ptr> ce_list; // the list of concrete counter-examples in the HA.
 
 	void parallelReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);
 
-/*Returns True, if safety has been violated on the current computed Symbolic States and sets/creates the counterExample class
-	Returns False, if safety not violated the counterExample list remains empty
-*/
-	bool safetyVerify(symbolic_states::ptr& computedSymStates, std::list<symbolic_states::ptr>& Reachability_Region, std::list<abstractCE::ptr>& ce);
+	/*
+	 * Manages the counter-example searching during reachability with BFS. The return status indicates whether the BFS should continue
+	 * to search for further abstract paths or whether to stop. A return value of true indicates the BFS to stop. A false indicates that
+	 * the BFS should continue to further explore for newer abstract counter-example paths.
+	 */
+	bool gen_counter_example(abstractCE::ptr abs_ce_path);
+
+	/**
+	 * A search for counter-example during BFS.
+	 */
+	bool safetyVerify(symbolic_states::ptr& computedSymStates, std::list<symbolic_states::ptr>& Reachability_Region, std::list<abstractCE::ptr>& symbolic_ce_list);
 
 	/*Performs the task of computing support functions on the specified polytopes for the given directions
 		and returns the results of support function computation on the same data-structure as be symbolic-state basis

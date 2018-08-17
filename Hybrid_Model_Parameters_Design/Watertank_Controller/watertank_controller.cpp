@@ -48,6 +48,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 	system_dynamics.isEmptyMatrixA = true;
 
 	system_dynamics.isEmptyMatrixB = true;
+	system_dynamics.U = polytope::ptr(new polytope(true));
 
 	system_dynamics.isEmptyC = true;
 
@@ -102,6 +103,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 	system_dynamics.isEmptyMatrixA = true;
 
 	system_dynamics.isEmptyMatrixB = true;
+	system_dynamics.U = polytope::ptr(new polytope(true));
 
 	C.resize(row );
 	C.assign(row,0);
@@ -111,7 +113,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 	system_dynamics.C = C;
 
 
-	row = 1;
+	row = 2;
 	col = 2;
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix.clear();
@@ -192,7 +194,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 	t = transition::ptr(new transition(3,"e5",2,6,guard_polytope,assignment));
 
 	Out_Going_Trans_fromv1.push_back(t);
-	l =location::ptr(new location(2, "v1", system_dynamics, invariant, false, Out_Going_Trans_fromv1));
+	l = location::ptr(new location(2, "v1", system_dynamics, invariant, true, Out_Going_Trans_fromv1));
 	Hybrid_Automata.addLocation(l);
 
 	module1(Hybrid_Automata,init_state_list,reach_parameters);
@@ -232,9 +234,9 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 	Hybrid_Automata.insert_to_map("x",0);
 	Hybrid_Automata.insert_to_map("y",1);
 
-}
+	}
 
-void module1(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+	void module1(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -268,6 +270,7 @@ void module1(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	system_dynamics.isEmptyMatrixA = true;
 
 	system_dynamics.isEmptyMatrixB = true;
+	system_dynamics.U = polytope::ptr(new polytope(true));
 
 	C.resize(row );
 	C.assign(row,0);
@@ -277,7 +280,7 @@ void module1(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	system_dynamics.C = C;
 
 
-	row = 1;
+	row = 2;
 	col = 2;
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix.clear();
@@ -328,12 +331,12 @@ void module1(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	t = transition::ptr(new transition(4,"e2",3,4,guard_polytope,assignment));
 
 	Out_Going_Trans_fromv2.push_back(t);
-	l =location::ptr(new location(3, "v2", system_dynamics, invariant, false, Out_Going_Trans_fromv2));
+	l = location::ptr(new location(3, "v2", system_dynamics, invariant, true, Out_Going_Trans_fromv2));
 	Hybrid_Automata.addLocation(l);
 
-}
+	}
 
-void module2(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+	void module2(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -367,6 +370,7 @@ void module2(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	system_dynamics.isEmptyMatrixA = true;
 
 	system_dynamics.isEmptyMatrixB = true;
+	system_dynamics.U = polytope::ptr(new polytope(true));
 
 	C.resize(row );
 	C.assign(row,0);
@@ -376,7 +380,7 @@ void module2(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	system_dynamics.C = C;
 
 
-	row = 1;
+	row = 2;
 	col = 2;
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix.clear();
@@ -426,12 +430,12 @@ void module2(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	t = transition::ptr(new transition(5,"e3",4,5,guard_polytope,assignment));
 
 	Out_Going_Trans_fromv3.push_back(t);
-	l =location::ptr(new location(4, "v3", system_dynamics, invariant, false, Out_Going_Trans_fromv3));
+	l = location::ptr(new location(4, "v3", system_dynamics, invariant, true, Out_Going_Trans_fromv3));
 	Hybrid_Automata.addLocation(l);
 
-}
+	}
 
-void module3(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+	void module3(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -465,6 +469,7 @@ void module3(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	system_dynamics.isEmptyMatrixA = true;
 
 	system_dynamics.isEmptyMatrixB = true;
+	system_dynamics.U = polytope::ptr(new polytope(true));
 
 	C.resize(row );
 	C.assign(row,0);
@@ -474,7 +479,7 @@ void module3(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	system_dynamics.C = C;
 
 
-	row = 1;
+	row = 2;
 	col = 2;
 	invariantConstraintsMatrix.resize(row, col);
 	invariantConstraintsMatrix.clear();
@@ -525,12 +530,12 @@ void module3(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	t = transition::ptr(new transition(6,"e4",5,2,guard_polytope,assignment));
 
 	Out_Going_Trans_fromv4.push_back(t);
-	l =location::ptr(new location(5, "v4", system_dynamics, invariant, false, Out_Going_Trans_fromv4));
+	l = location::ptr(new location(5, "v4", system_dynamics, invariant, true, Out_Going_Trans_fromv4));
 	Hybrid_Automata.addLocation(l);
 
-}
+	}
 
-void module4(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+	void module4(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -557,21 +562,22 @@ void module4(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& in
 	Assign assignment;
 	math::matrix<double> R;
 
-	// The mode name is  loc6
+	// The mode name is  v5
 
 	row = 2;
 	col = 2;
 	system_dynamics.isEmptyMatrixA = true;
 
 	system_dynamics.isEmptyMatrixB = true;
+	system_dynamics.U = polytope::ptr(new polytope(true));
 
 	system_dynamics.isEmptyC = true;
 
 
-	std::list<transition::ptr> Out_Going_Trans_fromloc6;
+	std::list<transition::ptr> Out_Going_Trans_fromv5;
 
 
-	l =location::ptr(new location(6, "loc6", system_dynamics, invariant, false, Out_Going_Trans_fromloc6));
+	l =location::ptr(new location(6, "v5", system_dynamics, invariant, false, Out_Going_Trans_fromv5));
 	Hybrid_Automata.addLocation(l);
 
 }
