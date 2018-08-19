@@ -71,6 +71,15 @@ public:
 		return ce_list;
 	}
 
+	/*
+	 * Get the number of refinements performed during the search of a counter-example.
+	 * This parameter has meaning only when the counter-example search is enabled with reachability analysis.
+	 */
+
+	unsigned int get_refinements(){
+		return refinements; // This is set to appropriate value by the gen_counter_examples() method.
+	}
+
 	//bound is the maximum number of transitions or jumps permitted.
 	//reach_parameters includes the different parameters needed in the computation of reachability.
 	//I is the initial symbolic state
@@ -129,6 +138,8 @@ private:
 	unsigned int Algorithm_Type;
 	unsigned int Total_Partition;
 	unsigned int number_of_streams;
+	unsigned int refinements; // The number of refinements during the search of counter-example trajectories. This has meaning only when the counter-example generation function is enabled.
+
 	std::string set_aggregation; // The aggregation options thull (default) and none
 	std::list<concreteCE::ptr> ce_list; // the list of concrete counter-examples in the HA.
 

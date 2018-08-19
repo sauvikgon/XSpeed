@@ -23,6 +23,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	forbidden_set = forbidden;
 	ce_flag = user_options.get_ce_flag();
 	ce_path = user_options.get_ce_path();
+	refinements = 0;
 	set_aggregation = user_options.getSetAggregation();
 }
 
@@ -1121,11 +1122,13 @@ bool reachability::gen_counter_example(abstractCE::ptr abs_path)
 		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,algo_type);
 		if(!ce->is_empty())
 			this->ce_list.push_back(ce);
+		refinements += ce->get_refinements(); // add the number of refinements performed for this ce object (even if it is empty)
 		return true; // In order to continue searching for further paths during BFS.
 	}
 	if(ce_path.compare("first") == 0) // Stop the BFS search once a concrete ce has been found
 	{
 		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,algo_type);
+		refinements += ce->get_refinements();
 		if(!ce->is_empty()){
 			this->ce_list.push_back(ce);
 			return false; 		// In order to terminate the BFS.
@@ -1160,6 +1163,8 @@ bool reachability::gen_counter_example(abstractCE::ptr abs_path)
 			std::cout << "Cannot find a counter-example trajectory in the specified path\n";
 		else
 			this->ce_list.push_back(ce);
+		refinements = ce->get_refinements();
+
 		return false;	// In order to terminate the BFS.
 	}
 	else{ // The user specified path is not this abstract path in abs_path. Hence search for other abstract paths during BFS.

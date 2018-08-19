@@ -30,6 +30,8 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 		std::list<concreteCE::ptr> ce_list = reach_SEQ_BFS.get_counter_examples();
 		std::cout << "number of concrete ce trajectories found: " << ce_list.size() << std::endl;
 
+		std::cout << "total number of refinements performed when searching: " << reach_SEQ_BFS.get_refinements() << std::endl;
+
 		// plot the first counter-example trajectory in the list.
 		if(ce_list.size() !=0){
 			concreteCE::ptr first_ce = *(ce_list.begin());

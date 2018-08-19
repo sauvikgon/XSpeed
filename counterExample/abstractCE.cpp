@@ -832,8 +832,10 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 
 		else{std::cout << "Invalid algo type specified for trajectory splicing\n";}
 
-		if(cexample->is_empty())
+		if(cexample->is_empty()){
+			cexample->set_refinement_count(ref_count);
 			return cexample;
+		}
 
 		val_res = cexample->valid(pt,valid_tol);
 		//putting off validation loop by refinements
@@ -845,6 +847,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 		}
 		else{
 			std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";
+			cexample->set_refinement_count(ref_count);
 			return cexample;
 		}
 		std::cout << "Restarting Search with added refinement point\n";

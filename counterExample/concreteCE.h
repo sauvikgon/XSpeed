@@ -92,7 +92,15 @@ public:
 	 */
 	bool valid(struct refinement_point&, double tolerance);
 
-	concreteCE();
+	void set_refinement_count(unsigned int refs){
+		refinements = refs;
+	};
+	unsigned int get_refinements(){
+		return refinements;
+	}
+	concreteCE(){
+		refinements = 0;
+	}
 	virtual ~concreteCE();
 private:
 	trajectory T;
@@ -107,7 +115,7 @@ private:
 	 * pointer to the hybrid automaton to which this counter example refer
 	 */
 	hybrid_automata::ptr ha;
-
+	unsigned int refinements; // This is the number of refined searches carried out in order to obtain this trajectory. This is initially set to 0.
 };
 
 /*

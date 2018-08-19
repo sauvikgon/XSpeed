@@ -82,7 +82,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//user_model(ha, init_state,reach_parameters);
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
 		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
-		//setNav30(ha,init_state,reach_parameters);
+		setNav30Timed(ha,init_state,reach_parameters);
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
@@ -119,6 +119,9 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setNav2u(ha,init_state,reach_parameters);
 		//setNav3u(ha,init_state,reach_parameters);
 		//setNav4u(ha,init_state,reach_parameters);
+	}
+	if(HybridSystem_Model_Type == 18){ // Platoon Model
+		setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
 	}
 	//Todo:: later we may think of keeping here even the forbidden parsing (string to poly)
 }
