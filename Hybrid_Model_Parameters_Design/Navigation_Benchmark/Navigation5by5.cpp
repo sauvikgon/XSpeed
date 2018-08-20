@@ -9670,14 +9670,14 @@ ConstraintsMatrixI(9 , 3) = 0;
 ConstraintsMatrixI(9 , 4) = -1;
 
 boundValueI.resize(row );
-boundValueI[0]=3.4;
-boundValueI[1]=-3.1;
-boundValueI[2]=3.8;
-boundValueI[3]=-3.6;
-boundValueI[4]=0.1;
-boundValueI[5]=-0.1;
-boundValueI[6]=0.1;
-boundValueI[7]=-0.1;
+boundValueI[0]=4;
+boundValueI[1]=-3.5;
+boundValueI[2]=4;
+boundValueI[3]=-3.5;
+boundValueI[4]=0.5;
+boundValueI[5]=0.5;
+boundValueI[6]=0.5;
+boundValueI[7]=0.5;
 boundValueI[8]=0;
 boundValueI[9]=0;
 
