@@ -9,10 +9,6 @@
 #include <counterExample/abstractCE.h>
 #include <cassert>
 
-concreteCE::concreteCE() {
-	// TODO Auto-generated constructor stub
-
-}
 
 concreteCE::~concreteCE() {
 	// TODO Auto-generated destructor stub

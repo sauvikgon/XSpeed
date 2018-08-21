@@ -210,7 +210,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	// 	local optimization routine
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(12000);
+	myopt.set_maxeval(20000);
 	myopt.set_stopval(1e-6);
 
 	//Set Initial value to the optimization problem
@@ -623,7 +623,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	// 	local optimization routine
 
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(12000);
+	myopt.set_maxeval(20000);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;

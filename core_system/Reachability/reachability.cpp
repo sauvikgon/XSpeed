@@ -357,7 +357,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					//debug
 					//newShiftedPolytope->print2file("./nextpoly",0,10);
 					//---
-					int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make the code slow; 0 will disable and will make it fast
+					int is_ContainmentCheckRequired = 0;	//1 will enable Containment Check and Make the code slow; 0 will disable and will make it fast
 					if (is_ContainmentCheckRequired){	//Containment Checking required
 						bool isContain=false;
 						/*

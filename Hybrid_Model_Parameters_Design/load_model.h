@@ -42,6 +42,7 @@
 #include "Hybrid_Model_Parameters_Design/Billiard/Billiard.h"
 #include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/Spacecraft/spacecraft.h"
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/Nav30Timed.h"
+#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/Nav25Timed.h"
 
 
 // **************************************************************************************

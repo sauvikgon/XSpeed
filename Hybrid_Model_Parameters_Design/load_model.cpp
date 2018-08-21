@@ -123,6 +123,9 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	if(HybridSystem_Model_Type == 18){ // Platoon Model
 		setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
 	}
+	if(HybridSystem_Model_Type == 19){ // Timed Navigation instance 25 (20 x 20 locations)
+		setNav25Timed(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
+	}
 	//Todo:: later we may think of keeping here even the forbidden parsing (string to poly)
 }
 
