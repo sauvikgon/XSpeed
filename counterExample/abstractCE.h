@@ -27,7 +27,7 @@
  * This class is a data structure to store the abstract counter-example generated
  * by XSpeed when given an unsafe symbolic state. An abstract counter example
  * is an ordered list of symbolic states starting from an initial and ending in an
- * unsafe symbolic symbolic state.
+ * unsafe region.
  *
  * @author: Rajarshi
  */
@@ -154,7 +154,7 @@ private:
 	 */
 	std::list<transition::ptr> trans;
 	/**
-	 * length shows how many discrete transitions are present in the abstract counter
+	 * length shows how many locations are present in the abstract counter
 	 * example.
 	 */
 	unsigned int length;

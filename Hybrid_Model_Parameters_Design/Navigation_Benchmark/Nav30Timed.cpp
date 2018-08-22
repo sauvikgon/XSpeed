@@ -156,8 +156,6 @@ t = transition::ptr(new transition(2,"null",1,26,guard_polytope,assignment));
 
 Out_Going_Trans_fromloc_0.push_back(t);
 l = location::ptr(new location(1, "loc_0", system_dynamics, invariant, true, Out_Going_Trans_fromloc_0));
-
-Hybrid_Automata.addInitial_Location(l);
 Hybrid_Automata.addLocation(l);
 
 
@@ -23247,6 +23245,15 @@ boundValueI[4]=0.5;
 boundValueI[5]=-0.2;
 boundValueI[6]=0.5;
 boundValueI[7]=0.5;
+
+/*boundValueI[0]=0.5;
+boundValueI[1]=-0.2;
+boundValueI[2]=0.3;
+boundValueI[3]=-0.2;
+boundValueI[4]=0.5;
+boundValueI[5]=-0.2;
+boundValueI[6]=0.5;
+boundValueI[7]=0.5;*/
 
 
 initial_polytope_I0 = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
@@ -101810,6 +101817,7 @@ t = transition::ptr(new transition(2044,"null",530,555,guard_polytope,assignment
 
 Out_Going_Trans_fromloc_529.push_back(t);
 l = location::ptr(new location(530, "loc_529", system_dynamics, invariant, true, Out_Going_Trans_fromloc_529));
+Hybrid_Automata.addInitial_Location(l);
 Hybrid_Automata.addLocation(l);
 
 

@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
 
 // ----Section for Trajectory Simulation
 	if (boost::iequals(user_options.getEngine(),"simu")==true) {
-		std::cout<<"Trajectory Simulation is selected!!!\n";
+		std::cout<<"Trajectory simulation ... !!!\n";
 		simulationCaller(reach_parameters, Hybrid_Automata, init_state, user_options);
 		return 0; //Only Trajectory Simulation is done
 	}
