@@ -37,6 +37,14 @@ public:
 	int getDimension() const;
 	void setDimension(int dimension);
 
+	/**
+	 * Return the list of all paths in the HA of length at-most depth.
+	 * Many of these paths may not be actually feasible with the HA semantics.
+	 * This routine only returns all structurally possible  paths in the HA
+	 * having a length at-most depth.
+	 */
+	//std::list<abstractCE::ptr> get_structural_paths(unsigned int depth);
+
 	/*
 	 * Returns the total number of Locations in the hybrid automata with ID = 1 to returned size
 	 */
