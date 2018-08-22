@@ -70,8 +70,6 @@ std::list<transition::ptr> Out_Going_Trans_fromloc_0;
 
 
 l = location::ptr(new location(1, "loc_0", system_dynamics, invariant, true, Out_Going_Trans_fromloc_0));
-
-Hybrid_Automata.addInitial_Location(l);
 Hybrid_Automata.addLocation(l);
 
 
@@ -21136,6 +21134,7 @@ t = transition::ptr(new transition(418,"null",113,128,guard_polytope,assignment)
 
 Out_Going_Trans_fromloc_112.push_back(t);
 l = location::ptr(new location(113, "loc_112", system_dynamics, invariant, true, Out_Going_Trans_fromloc_112));
+Hybrid_Automata.addInitial_Location(l);
 Hybrid_Automata.addLocation(l);
 
 
@@ -42174,4 +42173,3 @@ l = location::ptr(new location(225, "loc_224", system_dynamics, invariant, true,
 Hybrid_Automata.addLocation(l);
 
 }
-

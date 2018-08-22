@@ -658,6 +658,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 			polytope::ptr src_loc_inv = src_loc->getInvariant();
 			polytope::ptr dest_loc_inv = dest_loc->getInvariant();
 
+			/*
 			polytope::ptr guard = T->getGaurd();
 
 			assert(guard!=NULL);
@@ -686,7 +687,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 			}
 
 			feas_poly = mapped_poly->GetPolytope_Intersection(dest_loc_inv);
-			//P = feas_poly;
+			//P = feas_poly; */
 			P = dest_loc_inv; // The feasible region for start point of the traj. segment is taken as the loc invariant
 			assert(P!=NULL);
 
