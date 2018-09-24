@@ -209,8 +209,9 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	local optimization routine
+	unsigned int maxeval = 20000;
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(20000);
+	myopt.set_maxeval(maxeval);
 	myopt.set_stopval(1e-6);
 
 	//Set Initial value to the optimization problem
@@ -376,7 +377,15 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 	try {
 		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
 		myopt.set_stopval(tolerance);
-		myopt.optimize(x, minf);
+		unsigned int res = myopt.optimize(x, minf);
+
+		if(res==NLOPT_SUCCESS)
+			std::cout << "Splicing with FC: NLOPT stopped successfully returning the found minimum\n";
+		else if(res == NLOPT_STOPVAL_REACHED)
+			std::cout << "Splicing with FC: NLOPT stopped due to stopping value (1e-6) reached\n";
+		else if (res == NLOPT_MAXEVAL_REACHED)
+			std::cout << "Splicing with FC: NLOPT stopped due to reaching maxeval = " << maxeval << std::endl;
+
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
@@ -622,8 +631,10 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 	// 	local optimization routine
 
+
+	unsigned int maxeval = 20000;
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(20000);
+	myopt.set_maxeval(maxeval);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
@@ -700,7 +711,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 		if (P->getIsUniverse())
 		{
 			// set arbitrarily large but finite bounds on start points
-			std::cout << "Constraints polytope is universe\n";
+			std::cout << "Constraint polytope is universe\n";
 			for (unsigned int j = 0; j < dim; j++){
 				unsigned int index = i*dim+j;
 				lb[index] = -999;
@@ -765,7 +776,15 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	try {
 		std::cout << "Local optimization algorithm called:" << myopt.get_algorithm_name() << std::endl;
 		myopt.set_stopval(tolerance);
-		myopt.optimize(x, minf);
+		unsigned int res = myopt.optimize(x, minf);
+		if(res==NLOPT_SUCCESS)
+			std::cout << "Splicing with HA Constraints: NLOPT stopped successfully returning the found minimum\n";
+		else if(res == NLOPT_STOPVAL_REACHED)
+			std::cout << "Splicing with HA Constraints: NLOPT stopped due to stopping value (1e-6) reached\n";
+		else if (res == NLOPT_MAXEVAL_REACHED)
+			std::cout << "Splicing with HA Constraints: NLOPT stopped due to reaching maxeval = " << maxeval << std::endl;
+
+
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
@@ -842,9 +861,12 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 		//putting off validation loop by refinements
 		//val_res = true;
 		//--
+
 		if(!val_res){
 			refinements.push_back(pt);
 			ref_count++;
+			//debug: print the invalid trajectory in a file, in the first two dimensions
+			cexample->plot_ce("./invalid_traj.txt",0,1);
 		}
 		else{
 			std::cout << "Generated Trace Validated with "<< ref_count << " point Refinements\n";

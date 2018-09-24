@@ -52,13 +52,12 @@ void hybrid_automata::addLocation(location::ptr& loc){
 	list_locations[key] = loc;	//storing the loc with the proper loc_id as the key
 }
 
-/*
-std::list<abstractCE::ptr> get_structural_paths(unsigned int depth){
 
-	std::list<abstractCE::ptr> candidate_paths; // empty here
+std::list<structuralPath::ptr> hybrid_automata::get_structural_paths(unsigned int forbidden_loc_id, unsigned int depth)
+{
+	std::list<structuralPath::ptr> path_list; // It is empty here.
 
-	symbolic_states::ptr init_symb_state;
-	init_symb_state
-
+	//for(unsigned int i)
+	return path_list;
 }
-*/
+

@@ -12,6 +12,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "core_system/HybridAutomata/Location.h"
+#include "counterExample/structuralPath.h"
 
 
 using namespace std;
@@ -37,20 +38,18 @@ public:
 	int getDimension() const;
 	void setDimension(int dimension);
 
-	/**
-	 * Return the list of all paths in the HA of length at-most depth.
-	 * Many of these paths may not be actually feasible with the HA semantics.
-	 * This routine only returns all structurally possible  paths in the HA
-	 * having a length at-most depth.
-	 */
-	//std::list<abstractCE::ptr> get_structural_paths(unsigned int depth);
-
 	/*
 	 * Returns the total number of Locations in the hybrid automata with ID = 1 to returned size
 	 */
 	int getTotalLocations(){
 		return list_locations.size();
 	}
+	/**
+	 * Returns all structural paths in the HA starting from the initial location and ending at the
+	 * forbidden_location (passed as a parameter). The paths of length at-most depth are considered.
+	 *
+	 */
+	std::list<structuralPath::ptr> get_structural_paths(unsigned int forbidden_loc_id, unsigned int depth);
 };
 
 #endif /* HYBRID_AUTOMATA_H_ */

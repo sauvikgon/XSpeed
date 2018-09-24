@@ -252,6 +252,10 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 					<< std::endl;
 			std::cout << "tol = " << std::setprecision(10) << tol << std::endl;
 			status = false;
+			trace_point simpoint;
+			simpoint.first = tout;
+			simpoint.second = v;
+			sim_trace.push_back(simpoint); // adding the simpoint in the sim_trace data-structure.
 			break;
 		} else {
 			trace_point simpoint;

@@ -79,6 +79,10 @@ bool concreteCE::valid(struct refinement_point& ref_pt, double valid_tol)
 		bound_sim b; bool status=true;
 		b =  sim->bounded_simulation(simulation_sample.first,simulation_sample.second, Inv, status, valid_tol);
 
+		//debug
+		if(!status)
+			sim->print_trace_to_outfile("./violating_trajectory");
+		//----
 		if(!status){
 			std::cout << "Inv violated in location id:" << locId << std::endl;
 			std::cout << "Violated point is:\n";
