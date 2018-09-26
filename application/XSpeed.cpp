@@ -176,34 +176,18 @@ int main(int argc, char *argv[]) {
 
 	double return_Time = Avg_wall_clock / (double) 1000;
 
-	if (argc > 1) { //running from command Line for output generation
-		//std::cout << return_Time; //running from command Line for output generation
-		//----Disabling the console Output to Generate the Data using Shell Script
 
-		std::cout << "\nCPU Usage:(%) = " << Avg_cpu_use << std::endl;
-		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
-				<< std::endl;
-		std::cout << "\nBoost Time taken:User  (in Seconds) = "
-				<< Avg_user_clock / (double) 1000 << std::endl;
-		std::cout << "\nBoost Time taken:System  (in Seconds) = "
-				<< Avg_system_clock / (double) 1000 << std::endl;
-		cout << endl << "Number of Vectors = "
-				<< reach_parameters.Directions.size1();
+	std::cout << "-------------Performance and Memory Statistics-----------: " << std::endl;
+	std::cout << "\nCPU Usage:(%) = " << Avg_cpu_use << std::endl;
+	std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
+			<< std::endl;
+	std::cout << "\nBoost Time taken:User  (in Seconds) = "
+			<< Avg_user_clock / (double) 1000 << std::endl;
+	std::cout << "\nBoost Time taken:System  (in Seconds) = "
+			<< Avg_system_clock / (double) 1000 << std::endl;
+	cout << endl << "Number of Vectors = "
+			<< reach_parameters.Directions.size1();
 
-	}
-	if (argc == 1) { //No argument or Running directly from the Eclipse Editor
-
-		//----Disabling the console Output to Generate the Data using Shell Script
-		std::cout << "\nCPU Usage:(%) = " << Avg_cpu_use << std::endl;
-		std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << return_Time
-				<< std::endl;
-		std::cout << "\nBoost Time taken:User  (in Seconds) = "
-				<< Avg_user_clock / (double) 1000 << std::endl;
-		std::cout << "\nBoost Time taken:System  (in Seconds) = "
-				<< Avg_system_clock / (double) 1000 << std::endl;
-		cout << endl << "Number of Vectors = "
-				<< reach_parameters.Directions.size1();
-	}
 	cout << endl << "Memory Usages = "
 			<< (double) (total_mem_used / 1024.0) / number_of_times << " MB\n";
 
@@ -232,50 +216,6 @@ int main(int argc, char *argv[]) {
 	wall_clockPlot = plottime.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 	double plotTime = wall_clockPlot / (double) 1000;	//convert milliseconds to Seconds
 	std::cout << "\nBoost Wall Time for Plotting (in Seconds) = " << plotTime << std::endl;
-
-	/*
-	 * counterExample utility.
-	 */
-
-//	concreteCE::ptr ce;
-//
-//	if(user_options.get_ce_flag()==true) { // Counter-Example Generation is ON
-//
-//		dump_abstractCE_list(ce_candidates); // Plot the location sequence of every abstract CE in a file
-//
-//		// create a path template to filter search
-//		std::vector<unsigned int> path_filter(0);
-//
-//		if(user_options.get_ce_path().compare("all")!=0) // if not all, then set a CE path filter
-//			path_filter = path_parser(user_options.get_ce_path());
-//
-//
-//		tt1.start();
-//		ce = abstractCE::search_concreteCE(splicing_error_tol, ce_candidates, path_filter, 1); // calls the ce searching method using flowpipe constraints
-//		tt1.stop();
-//
-//		double user_clock = tt1.elapsed().user / 1000000;
-//		std::cout << "############## Time (user time) in ms to search ce with FC:" << user_clock << std::endl;
-//
-//		tt1.start();
-//		ce = abstractCE::search_concreteCE(splicing_error_tol, ce_candidates, path_filter, 2); // calls the ce searching method without flowpipe constraints
-//		tt1.stop();
-//		user_clock = tt1.elapsed().user / 1000000;
-//		std::cout << "############# Time (user time) in ms to search ce without FC:" << user_clock << std::endl;
-//
-//		if(ce->is_empty())
-//			std::cout << "\n No feasible counter-example to the forbidden:" << std::endl;
-//		else{
-//
-//			std::string tracefile = "./bad_trace.o";
-//			ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-//
-//			std::cout << "\n Time taken to search for a counter-example to a forbidden set: " << std::endl;
-//			std::cout << "\nWall time (in Seconds) = " << tt1.elapsed().wall / 1000000 << std::endl;
-//			std::cout << "\nUser time (in Seconds) = " << tt1.elapsed().user / 1000000 << std::endl;
-//			std::cout << "\nWall time (in Seconds) = " << tt1.elapsed().system / 1000000 << std::endl;
-//		}
-//	}
 
 	return 0;
 }
