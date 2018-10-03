@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <fstream>
 #include "boost/timer/timer.hpp"
@@ -52,6 +53,8 @@
 #include "InputOutput/io_utility.h"
 // *******counter example **************/
 #include "counterExample/concreteCE.h"
+#include "counterExample/WoFC_counter_example.h"
+
 
 
 #include "application/reachabilityCaller.h"
@@ -107,6 +110,23 @@ int main(int argc, char *argv[]) {
 		std::cout<<"Trajectory simulation ... !!!\n";
 		simulationCaller(reach_parameters, Hybrid_Automata, init_state, user_options);
 		return 0; //Only Trajectory Simulation is done
+	}
+
+// ----Section for Running WoFC.
+int runWoFC = 0;	// To run WoFC
+	if (runWoFC) {
+		std::list<initial_state::ptr>::iterator iit;
+		iit = init_state.begin();
+		int srcLoc = (*iit)->getLocationId();
+		int destLoc = forbidden_set.first;
+		//destLoc = 4;
+		int depthBound = 5;	// < then depthBound
+		std::list<structuralPath::ptr> allPaths =
+				Hybrid_Automata.get_structural_paths(destLoc, depthBound);
+		//std::list<structuralPath::ptr> allPaths = findAllPaths(Hybrid_Automata, srcLoc, destLoc, depthBound);
+		runWoFC_counter_example(allPaths, Hybrid_Automata, init_state,
+				forbidden_set.second, user_options);
+		return 0;
 	}
 
 // ----Section below consists of Reachability Analysis including counter-example generation.

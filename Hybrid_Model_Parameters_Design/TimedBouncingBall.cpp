@@ -661,12 +661,9 @@ void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
 	boundValueI[4] = 0;
 	boundValueI[5] = 0;
 	boundSignI = 1;
-	initial_polytope_I2 = polytope::ptr(
-			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+	initial_polytope_I2 = polytope::ptr( new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-	initial_state::ptr I2 = initial_state::ptr(
-			new initial_state(initial_location_id, initial_polytope_I2, S2,
-					transition_id));
+	initial_state::ptr I2 = initial_state::ptr(new initial_state(initial_location_id, initial_polytope_I2, S2, transition_id));
 	init_state_list.push_back(I2); //pushing 2nd initial set object
 }
 

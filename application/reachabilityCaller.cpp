@@ -10,6 +10,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	/*
 	 * For algorithm (Seq-SF, Par-SF and Time-Slice) only the Algorithm-Type/user_options.get_algorithm decides to execute
 	 */
+	 //Sequential PostC and PostD
 
 
 	if ((user_options.get_algorithm() == SEQ_SF)

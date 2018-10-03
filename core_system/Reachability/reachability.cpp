@@ -98,7 +98,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
 				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
 
-
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
 
@@ -154,7 +153,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		polytope::ptr polyI; //initial polytope of the flowpipe
 		std::list < transition::ptr > list_transitions; // list of transitions leading to the unsafe set
 
-
 		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe and forbidden states exists
 				//so perform intersection with forbidden set provided locID matches
 
@@ -187,7 +185,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 
 						int transID = symb_state_in_abst_ce->getTransitionId(); //a)
 						//   **********************************************************
-						//create an object of abstractCE[1)list_of_symbolic_states 2)list_of_transition and 3) length]
+						//create an object of abstractCE[ 1)list_of_symbolic_states 2)list_of_transition and 3) length]
 						//1) ******************** list_of_symbolic_states ********************
 
 						list_sym_states.push_front(symb_state_in_abst_ce); //pushing the unsafe symbolic_state first
@@ -226,11 +224,14 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					}
 					abstractCE::ptr abst_ce = abstractCE::ptr(new abstractCE());
 					abst_ce->set_length(symbolic_ce_length);
+					std::cout<<"Length of symb_ce_length = "<<symbolic_ce_length<<std::endl;
+					std::cout<<"Length/size of list_sym_states = "<<list_sym_states.size()<<std::endl;
 					abst_ce->set_sym_states(list_sym_states);
 					abst_ce->set_transitions(list_transitions);
 					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
 					abst_ce->set_automaton(ha);
 					abst_ce->set_forbid_poly(forbidden_set.second);
+
 					symbolic_ce_list.push_back(abst_ce); // This abstract counter-example path is added to the list of all such identified paths.
 					/*
 					 * Call the generation of counter-example routine of this class. The counter-example(s) are set
@@ -242,8 +243,6 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						std::cout << "############# Safety Property is Violated #################\n";
 						return Reachability_Region; // return and report the time to search the counter-example
 					}
-
-
 				} // end of condition when forbidden state intersects with the flowpipe set
 			} //end of condition when forbidden state loc id matches with flowpipe loc id
 		} //computed flowpipe is not empty
@@ -1112,8 +1111,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 	}
 }
 
-bool reachability::gen_counter_example(abstractCE::ptr abs_path)
-{
+bool reachability::gen_counter_example(abstractCE::ptr abs_path) {
 	double splicing_error_tol = 1e-6; // A parameter particular to counter-example searching
 	unsigned int algo_type = 2; // A parameter particular to mentioning the type of ce search algorithm to use 1 (FC) uses the method using flowpipe constraints and 2 uses the method using flowpipe constraints (WFC)
 

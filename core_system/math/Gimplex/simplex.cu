@@ -51,7 +51,8 @@ __global__ void bound_simplex(float *bound_value, float *C, float *result,
  * Kernel Launch::
  * 	GridSize:: nos. of LPs to be solved: N_S_for_X
  * 	BlockSize/threads:: is the dimension of the System/Model/direction.size()
- */__global__ void bounded_Solver_for_X_UnitBall(float *bound_value_for_X,
+ */
+__global__ void bounded_Solver_for_X_UnitBall(float *bound_value_for_X,
 		float *C, float *result_for_X, unsigned int N_S_for_X,
 		float *result_for_UnitBall, int offset) {
 	//Each block solves one LP with only one thread working in each block
@@ -93,7 +94,8 @@ __global__ void bound_simplex(float *bound_value, float *C, float *result,
  * 	BlockSize/threads:: is the dimension of the System/Model/direction.size()
  *
  *
- */__global__ void bounded_Solver_for_X_UnitBall_dotProduct(
+ */
+__global__ void bounded_Solver_for_X_UnitBall_dotProduct(
 		float *bound_value_for_X, float *C, float *U_C, float *result_for_X,
 		unsigned int N_S_for_X, float *result_for_UnitBall,
 		float *result_for_dotProduct, int offset) {

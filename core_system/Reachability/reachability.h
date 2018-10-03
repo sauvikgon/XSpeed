@@ -43,7 +43,7 @@
 #include "LockAvoidanceUtility.h"
 #include "reachDataStructure.h"
 #include <vector>
-#include "application/sf_directions.h"
+
 #include "application/sf_utility.h"
 
 //#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"

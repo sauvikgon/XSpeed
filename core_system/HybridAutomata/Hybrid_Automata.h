@@ -13,6 +13,7 @@
 #include <boost/shared_ptr.hpp>
 #include "core_system/HybridAutomata/Location.h"
 #include "counterExample/structuralPath.h"
+#include <bits/stdc++.h>
 
 
 using namespace std;
@@ -50,6 +51,11 @@ public:
 	 *
 	 */
 	std::list<structuralPath::ptr> get_structural_paths(unsigned int forbidden_loc_id, unsigned int depth);
+
+	std::list<structuralPath::ptr> findAllPaths(int src, int dst, int depthBound);
+
+	void printpath(std::vector<int>& path);
+
 };
 
 #endif /* HYBRID_AUTOMATA_H_ */

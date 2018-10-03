@@ -168,7 +168,8 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	 getting the dimension of the continuous set of the abstract counter example
 
 	symbolic_states::const_ptr S = get_first_symbolic_state();
-	dim = S->getContinuousSetptr()->get_dimension();
+	//dim = S->getContinuousSetptr()->get_dimension();	//@Amit modified: Since when called from WoFC, will not have this set
+	dim = S->getInitialPolytope()->getSystemDimension();
 	HA = this->get_automaton();
 	transList = this->get_CE_transitions();
 	N = transList.size()+1; // the length of the counter example
@@ -592,7 +593,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 	//	 getting the dimension of the continuous set of the abstract counter example
 
 	symbolic_states::const_ptr S = get_first_symbolic_state();
-	dim = S->getContinuousSetptr()->get_dimension();
+	//dim = S->getContinuousSetptr()->get_dimension(); //@Amit modified Since when called from WoFC, will not have this set
+	dim = S->getInitialPolytope()->getSystemDimension();
 	N = get_length(); // the length of the counter example
 	HA = this->get_automaton();
 	transList = this->get_CE_transitions();
@@ -849,7 +851,6 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 		}
 		else if(algo_type==3)
 			std::cout << "LP-NLP mixed implementation not in place yet\n";
-
 		else{std::cout << "Invalid algo type specified for trajectory splicing\n";}
 
 		if(cexample->is_empty()){
