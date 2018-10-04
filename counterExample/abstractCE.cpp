@@ -841,9 +841,9 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 	do{
 		struct refinement_point pt;
 
-		if(algo_type==1)
+		if(algo_type==1) // FC called
 			cexample = gen_concreteCE(tolerance,refinements);
-		else if(algo_type==2){
+		else if(algo_type==2){ // WoFC called
 			cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
 			NLP_HA_algo_flag = true;
 		}

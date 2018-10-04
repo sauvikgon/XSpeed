@@ -24,7 +24,9 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	ce_flag = user_options.get_ce_flag();
 	ce_path = user_options.get_ce_path();
 	refinements = 0;
+	traj_splicing_time = 0;
 	set_aggregation = user_options.getSetAggregation();
+	ce_search_algo_type = CE_ALGO_TYPE;
 }
 
 
@@ -1114,20 +1116,31 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 
 bool reachability::gen_counter_example(abstractCE::ptr abs_path)
 {
-	double splicing_error_tol = 1e-6; // A parameter particular to counter-example searching
-	unsigned int algo_type = 2; // A parameter particular to mentioning the type of ce search algorithm to use 1 (FC) uses the method using flowpipe constraints and 2 uses the method using flowpipe constraints (WFC)
+	double splicing_error_tol = 1e-6; // A parameter particular to specify the precision of the search of ce by using trajectory splicing.
 
-	if(ce_path.compare("all")==0) // if all paths are to be searched for ce, then return true in order to collect more paths.
+	boost::timer::cpu_timer clock; // clocks the time taken to splice a trajectory
+
+
+	if(ce_path.compare("all") == 0) // if all paths are to be searched for ce, then return true in order to collect more paths.
 	{
-		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,algo_type);
+		clock.start();
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,this->ce_search_algo_type);
+		clock.stop();
+		traj_splicing_time += clock.elapsed().user /1000000;
+
 		if(!ce->is_empty())
 			this->ce_list.push_back(ce);
+
 		refinements += ce->get_refinements(); // add the number of refinements performed for this ce object (even if it is empty)
 		return true; // In order to continue searching for further paths during BFS.
 	}
 	if(ce_path.compare("first") == 0) // Stop the BFS search once a concrete ce has been found
 	{
-		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,algo_type);
+		clock.start();
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,this->ce_search_algo_type);
+		clock.stop();
+		traj_splicing_time += clock.elapsed().user / 1000000;
+
 		refinements += ce->get_refinements();
 		if(!ce->is_empty()){
 			this->ce_list.push_back(ce);
@@ -1146,18 +1159,10 @@ bool reachability::gen_counter_example(abstractCE::ptr abs_path)
 
 	if(search_ce){
 
-		boost::timer::cpu_timer timer;
-		timer.start();
-		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,algo_type);
-		timer.stop();
-
-		double wall_time, user_time, system_time;
-
-		wall_time = timer.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		user_time = timer.elapsed().user / 1000000;
-		system_time = timer.elapsed().system / 1000000;
-
-		std::cout << "Time to search a concrete counter-example trajectory from the abstract path (user time in ms):" << user_time << std::endl;
+		clock.start();
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,ce_search_algo_type);
+		clock.stop();
+		traj_splicing_time += clock.elapsed().user /1000000;
 
 		if(ce->is_empty())
 			std::cout << "Cannot find a counter-example trajectory in the specified path\n";

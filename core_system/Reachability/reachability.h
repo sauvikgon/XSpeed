@@ -20,7 +20,6 @@
 #include "counterExample/abstract_symbolic_state.h"
 #include "InputOutput/io_utility.h"
 
-//#include "core_system/PWL/pwl.h"
 #include "core_system/PWL/pwlist.h"
 #include "core_system/symbolic_states/initial_state.h"
 #include "core_system/symbolic_states/symbolic_states_utility.h"
@@ -35,7 +34,7 @@
 #include "core_system/Reachability/reachPostCParallel.h"
 #include "Utilities/computeInitialPolytope.h"
 #include "application/All_PP_Definition.h"
-//#include "core_system/Reachability/reachabilitySequential_GPU_MatrixVector_Multiply.cuh"
+
 #include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
 #include "boost/timer/timer.hpp"
 #include "counterExample/abstractCE.h"
@@ -46,9 +45,9 @@
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
 
-//#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"
-
-//***************** End Sequential BFS *****************************
+#define CE_ALGO_TYPE 2 // macro to choose algo_tyoe of ce search.
+						// 1 enables search of ce to forbidden region using flowpipe constraints (FC).
+						// 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
 
 using namespace std;
 
@@ -78,6 +77,13 @@ public:
 
 	unsigned int get_refinements(){
 		return refinements; // This is set to appropriate value by the gen_counter_examples() method.
+	}
+
+	/**
+	 * Returns the time to search counter-example(s) during reachability analysis
+	 */
+	float get_ce_search_time(){
+		return this->traj_splicing_time;
 	}
 
 	//bound is the maximum number of transitions or jumps permitted.
@@ -139,6 +145,8 @@ private:
 	unsigned int Total_Partition;
 	unsigned int number_of_streams;
 	unsigned int refinements; // The number of refinements during the search of counter-example trajectories. This has meaning only when the counter-example generation function is enabled.
+	float traj_splicing_time; // The time taken to concretize/splice abstract path(s)
+	unsigned int ce_search_algo_type; // the type of search algorithm to use in order to search for a counter-example. Options are FC and WoFC
 
 	std::string set_aggregation; // The aggregation options thull (default) and none
 	std::list<concreteCE::ptr> ce_list; // the list of concrete counter-examples in the HA.

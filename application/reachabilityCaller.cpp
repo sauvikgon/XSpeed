@@ -1,5 +1,6 @@
 #include "application/reachabilityCaller.h"
 
+unsigned int ce_search_time;
 
 void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters, userOptions& user_options,
@@ -26,12 +27,22 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 
 		// The right algorithm is selected within the following function
 		Symbolic_states_list = reach_SEQ_BFS.computeSequentialBFSReach(ce_candidates);
+
+		std::cout << "-----Safety Analysis Statistics-----\n" << std::endl;
 		std::cout << "number of abstract ce-paths found for exploration: " << ce_candidates.size() << std::endl;
 		std::list<concreteCE::ptr> ce_list = reach_SEQ_BFS.get_counter_examples();
-		std::cout << "number of concrete ce trajectories found: " << ce_list.size() << std::endl;
+		std::cout << "Number of concrete ce trajectories found: " << ce_list.size() << std::endl;
 
-		std::cout << "total number of refinements performed when searching: " << reach_SEQ_BFS.get_refinements() << std::endl;
+		std::cout << "Number of refinements performed when searching: " << reach_SEQ_BFS.get_refinements() << std::endl;
+		std::cout << "Time to search concrete counter-example(s) from the abstract path(s) (user time in ms):" << reach_SEQ_BFS.get_ce_search_time() << std::endl;
 
+		// recording statistics in a file to include in the paper
+		std::ofstream myfile;
+		myfile.open("statistics.o",ios::out | ios::app);
+
+		myfile << "model number: " << user_options.get_model() << ", #Paths = " << ce_candidates.size() << ", #CEs = " << ce_list.size() << ", #Refs = " << reach_SEQ_BFS.get_refinements() << ", Time to search CEs (in secs) = " << reach_SEQ_BFS.get_ce_search_time()/1000 << ", CE algo used (1=FC, 2=WoFC) = " << CE_ALGO_TYPE << std::endl;
+		myfile.close();
+		ce_search_time = reach_SEQ_BFS.get_ce_search_time();
 		// plot the first counter-example trajectory in the list.
 		if(ce_list.size() !=0){
 			concreteCE::ptr first_ce = *(ce_list.begin());

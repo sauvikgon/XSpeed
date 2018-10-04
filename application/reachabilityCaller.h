@@ -19,6 +19,8 @@
 #include "core_system/Reachability/TPBFS.h"
 #include "core_system/Reachability/AsyncBFS.h"
 
+extern unsigned int ce_search_time;
+
 void reachabilityCaller(hybrid_automata& H, std::list<initial_state::ptr>& I,
 		ReachabilityParameters& reach_parameters, userOptions& user_options,
 		int lp_solver_type_choosen, int Solver_GLPK_Gurobi_GPU, std::pair<int, polytope::ptr> forbidden_set,
