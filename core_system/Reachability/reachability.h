@@ -42,7 +42,7 @@
 #include "LockAvoidanceUtility.h"
 #include "reachDataStructure.h"
 #include <vector>
-#include "application/sf_directions.h"
+
 #include "application/sf_utility.h"
 
 #define CE_ALGO_TYPE 2 // macro to choose algo_tyoe of ce search.

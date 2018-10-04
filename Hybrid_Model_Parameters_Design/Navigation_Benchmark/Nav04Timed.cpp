@@ -733,7 +733,6 @@ void set_nav04_timed(hybrid_automata& Hybrid_Automata, std::list<initial_state::
 	boundValueI[6]=0.25;
 	boundValueI[7]=-0.05;
 
-
 	initial_polytope_I0 = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
 	dim = initial_polytope_I0->getSystemDimension();

@@ -23,11 +23,8 @@ public:
 	 polytope::ptr getContinuousSet();
 	 void setContinuousSet(const polytope::ptr continuousSet);
 	 */
-	symbolic_states(discrete_set DiscreteSet,
-			template_polyhedra::ptr ContinuousSet);
-	symbolic_states(discrete_set DiscreteSet,
-			template_polyhedra::ptr ContinuousSet,
-			symbolic_states::ptr parentPtr_symbolic_state, int transition_id);
+	symbolic_states(discrete_set DiscreteSet, template_polyhedra::ptr ContinuousSet);
+	symbolic_states(discrete_set DiscreteSet, template_polyhedra::ptr ContinuousSet, symbolic_states::ptr parentPtr_symbolic_state, int transition_id);
 
 	const discrete_set& getDiscreteSet() const;
 	void setDiscreteSet(const discrete_set& discreteSet);

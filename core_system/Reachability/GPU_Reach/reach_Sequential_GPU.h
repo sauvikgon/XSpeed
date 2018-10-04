@@ -15,7 +15,8 @@
 #include "application/sf_directions.h"
 #include <omp.h>
 
-void reachabilitySequential_GPU(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool isInvariantExist,
-		int lp_solver_type_choosen, unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU, template_polyhedra::ptr& reachRegion);
+void reachabilitySequential_GPU(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool isInvariantExist, int lp_solver_type_choosen,
+		unsigned int number_of_streams, int Solver_GLPK_Gurobi_GPU, template_polyhedra::ptr& reachRegion);
 
 #endif /* REACH_SEQUENTIAL_GPU_H_ */
