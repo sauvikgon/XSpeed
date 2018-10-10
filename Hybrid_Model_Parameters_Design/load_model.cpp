@@ -139,12 +139,12 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	if(HybridSystem_Model_Type == 23){ // Timed Navigation instance navT04_Timed (25 x 25 locations) used in Int. J of STTT without input set
 		setnavT13_Timedmodel(ha, init_state, reach_parameters);
 	}
-
-
 	if(HybridSystem_Model_Type == 25){ // Timed Navigation instance navT07_Timed (25 x 25 locations) used in Int. J of STTT without input set
 		setnavT07_Timedmodel(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c and nc.
 	}
-
+	if(HybridSystem_Model_Type == 26){ // Filtered Oscillator model with 8 filters called
+		set_f_osc_8_model(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c and nc.
+	}
 }
 
 void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,

@@ -23,6 +23,8 @@
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark.h"
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/Navigation5by5WithOutTime.h"
 #include "Hybrid_Model_Parameters_Design/oscillator_model/Oscillator.h"
+#include "Hybrid_Model_Parameters_Design/oscillator_model/f_osc_8.h"
+
 #include "Hybrid_Model_Parameters_Design/ConstantMotion/ConstantMotion.h"
 
 #include "Hybrid_Model_Parameters_Design/TTEthernet/TTEthernetModel.h"
