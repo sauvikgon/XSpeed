@@ -132,7 +132,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 		if (vm.count("model")) { //Compulsory Options but set to 0 by default
 			user_options.set_model(vm["model"].as<int>());
-			if (user_options.get_model() < 0 || user_options.get_model() > 25) {
+			if (user_options.get_model() < 0 || user_options.get_model() > 100) {
 				std::cout << "Invalid Model specified\n";
 				throw(new exception());
 			}
