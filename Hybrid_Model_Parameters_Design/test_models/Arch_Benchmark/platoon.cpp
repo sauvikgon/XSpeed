@@ -1115,7 +1115,6 @@ void setplatoon_na(hybrid_automata& Hybrid_Automata,
 void setplatoon_const_input(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters)
-
 {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;

@@ -49,6 +49,8 @@
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/navT04_Timed.h"
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/navT07_Timed.h"
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/navT13_Timed.h"
+#include "Hybrid_Model_Parameters_Design/vehicle_platoon/vehicle5_platoon.h"
+#include "Hybrid_Model_Parameters_Design/vehicle_platoon/vehicle10_platoon.h"
 
 
 
@@ -58,6 +60,7 @@
  * since they all include the module1,module2,module3 and module4 declaration
  */
 #include "Navigation_Benchmark/NavigationBenchmark.h"
+
 //#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/heart.h"
 //Todo:: or the user_model which need to be fix if error occurs at runtime as it will be included at runtime
 // **************************************************************************************
