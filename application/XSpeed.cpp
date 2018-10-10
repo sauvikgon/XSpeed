@@ -221,29 +221,29 @@ int runWoFC = 0;	// To run WoFC
 	std::list<symbolic_states::ptr>::iterator it;
 
 	/** Choosing from the output format options	 */
-//	plottime.start();
-//	if(user_options.getOutputFormatType().compare("GEN")==0) {
-//		//Vertex-Enumeration using old algorithm of recursively searching in quadrants But Faster than HoughTransformation
-//		vertex_generator(Symbolic_states_list,user_options); //Generating Vertices using recursive-quadrant-search algorithm, can be plotted using GNU plotutil
-//		//SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Matrices (dir and SFM) as file output, which can be used in MatLab by ESP algorithm
-//
-//		//Our paper's Algorithm but slower than vertex_generator()
-//		//vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices using Sequential sampling of Hough Space, can be plotted using GNU plotutil
-//
-//		/* Running gnuplotutil to plot output */
-//		string cmdStr1;
-//		cmdStr1.append("graph -TX -BC ");
-//		cmdStr1.append(user_options.getOutFilename().c_str());
-//		system(cmdStr1.c_str());
-//	} else if(user_options.getOutputFormatType().compare("INTV")==0) {
-//		print_all_intervals(Symbolic_states_list);
-//	}
-//	plottime.stop();
-//
-//	double wall_clockPlot;
-//	wall_clockPlot = plottime.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-//	double plotTime = wall_clockPlot / (double) 1000;	//convert milliseconds to Seconds
-//	std::cout << "\nBoost Wall Time for Plotting (in Seconds) = " << plotTime << std::endl;
+	plottime.start();
+	if(user_options.getOutputFormatType().compare("GEN")==0) {
+		//Vertex-Enumeration using old algorithm of recursively searching in quadrants But Faster than HoughTransformation
+		vertex_generator(Symbolic_states_list,user_options); //Generating Vertices using recursive-quadrant-search algorithm, can be plotted using GNU plotutil
+		//SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Matrices (dir and SFM) as file output, which can be used in MatLab by ESP algorithm
+
+		//Our paper's Algorithm but slower than vertex_generator()
+		//vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices using Sequential sampling of Hough Space, can be plotted using GNU plotutil
+
+		/* Running gnuplotutil to plot output */
+		string cmdStr1;
+		cmdStr1.append("graph -TX -BC ");
+		cmdStr1.append(user_options.getOutFilename().c_str());
+		system(cmdStr1.c_str());
+	} else if(user_options.getOutputFormatType().compare("INTV")==0) {
+		print_all_intervals(Symbolic_states_list);
+	}
+	plottime.stop();
+
+	double wall_clockPlot;
+	wall_clockPlot = plottime.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+	double plotTime = wall_clockPlot / (double) 1000;	//convert milliseconds to Seconds
+	std::cout << "\nBoost Wall Time for Plotting (in Seconds) = " << plotTime << std::endl;
 
 	return 0;
 }
