@@ -131,16 +131,24 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	//	setNav25Timed(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 21){ // Timed Navigation instance navT02_Timed (20 x 20 locations) used in Int. J of STTT without input set
-		setnavT02_Timedmodel(ha, init_state, reach_parameters);
+	//	setnavT02_Timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 22){ // Timed Navigation instance navT04_Timed (25 x 25 locations) used in Int. J of STTT without input set
-		setnavT04_Timedmodel(ha, init_state, reach_parameters);
+	//	setnavT04_Timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 23){ // Timed Navigation instance navT04_Timed (25 x 25 locations) used in Int. J of STTT without input set
-		setnavT13_Timedmodel(ha, init_state, reach_parameters);
+	//	setnavT13_Timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 25){ // Timed Navigation instance navT07_Timed (25 x 25 locations) used in Int. J of STTT without input set
-		setnavT07_Timedmodel(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c and nc.
+	//	setnavT07_Timedmodel(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c and nc.
+	}
+
+	if(HybridSystem_Model_Type == 26){ // vehicle_platoon model (5 Vehicles)
+		set5_vehicle_platoonmodel(ha, init_state, reach_parameters);
+	}
+
+	if(HybridSystem_Model_Type == 27){ // vehicle_platoon model (10 Vehicles)
+		setvehicle10_platoonmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 26){ // Filtered Oscillator model with 8 filters called
 		set_f_osc_8_model(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c and nc.
@@ -205,3 +213,4 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 		//string_to_poly_HystFormat(op.get_forbidden_set(), forbidden_set);
 	}
 }
+
