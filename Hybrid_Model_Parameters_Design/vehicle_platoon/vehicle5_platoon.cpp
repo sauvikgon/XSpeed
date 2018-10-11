@@ -5,7 +5,8 @@
 
 
 #include "vehicle5_platoon.h"
-void set5_vehicle_platoonmodel(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+
+void set_platoon5_model(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -27,7 +28,7 @@ math::matrix<double> ConstraintsMatrixI , ConstraintsMatrixV, invariantConstrain
 
 std::vector<double> boundValueI,boundValueV , C , invariantBoundValue , guardBoundValue, boundValueF;
 
-int boundSignI=1, invariantBoundSign=1, guardBoundSign=1, boundSignV=1;
+int boundSignI=1;
 
 Assign assignment;
 math::matrix<double> R;

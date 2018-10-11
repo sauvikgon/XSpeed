@@ -5,7 +5,7 @@
 
 
 #include "vehicle10_platoon.h"
-void setvehicle10_platoonmodel(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+void set_platoon10_model(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
