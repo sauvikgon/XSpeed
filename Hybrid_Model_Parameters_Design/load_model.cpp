@@ -49,7 +49,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
-		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+//		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}
@@ -151,6 +151,9 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 	if(HybridSystem_Model_Type == 27){ // Filtered Oscillator model with 8 filters called
 		set_f_osc_8_model(ha, init_state, reach_parameters);
+	}
+	if(HybridSystem_Model_Type == 28){ // Filtered Oscillator model with 32 filters called
+		setf_osc_32model(ha, init_state, reach_parameters);
 	}
 }
 

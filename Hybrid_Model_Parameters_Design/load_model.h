@@ -24,6 +24,7 @@
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/Navigation5by5WithOutTime.h"
 #include "Hybrid_Model_Parameters_Design/oscillator_model/Oscillator.h"
 #include "Hybrid_Model_Parameters_Design/oscillator_model/f_osc_8.h"
+#include "Hybrid_Model_Parameters_Design/oscillator_model/f_osc_32.h"
 
 #include "Hybrid_Model_Parameters_Design/ConstantMotion/ConstantMotion.h"
 
@@ -53,6 +54,7 @@
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/navT13_Timed.h"
 #include "Hybrid_Model_Parameters_Design/vehicle_platoon/vehicle5_platoon.h"
 #include "Hybrid_Model_Parameters_Design/vehicle_platoon/vehicle10_platoon.h"
+
 
 
 
