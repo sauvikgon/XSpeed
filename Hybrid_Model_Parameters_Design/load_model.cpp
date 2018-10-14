@@ -151,10 +151,11 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		set_platoon10_model(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 27){ // Filtered Oscillator model with 8 filters called
-//		set_f_osc_8_model(ha, init_state, reach_parameters);
+		//set_f_osc_8_model(ha, init_state, reach_parameters);
+		setf_osc_8_timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 28){ // Filtered Oscillator model with 32 filters called
-//		setf_osc_32model(ha, init_state, reach_parameters);
+		setf_osc_32model(ha, init_state, reach_parameters);
 	}
 }
 
