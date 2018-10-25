@@ -211,6 +211,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 
 	// 	local optimization routine
 	unsigned int maxeval = 20000;
+	//unsigned int maxeval = 4000;
 	myopt.set_min_objective(myobjfunc2, NULL);
 	myopt.set_maxeval(maxeval);
 	myopt.set_stopval(1e-6);

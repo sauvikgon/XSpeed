@@ -112,20 +112,63 @@ int main(int argc, char *argv[]) {
 		return 0; //Only Trajectory Simulation is done
 	}
 
+	std::cout << std::fixed; //to assign precision on the std::output stream
+	std::cout.precision(7);
+
+
 // ----Section for Running WoFC.
-int runWoFC = 0;	// To run WoFC
+int runWoFC = 1;	// To run WoFC, remember to give a valid loc id for the forbidden set (and not -1, unlike FC algo)
 	if (runWoFC) {
+
 		std::list<initial_state::ptr>::iterator iit;
 		iit = init_state.begin();
 		int srcLoc = (*iit)->getLocationId();
 		int destLoc = forbidden_set.first;
 		//destLoc = 4;
-		int depthBound = 5;	// < then depthBound
-		std::list<structuralPath::ptr> allPaths =
-				Hybrid_Automata.get_structural_paths(destLoc, depthBound);
+		int depthBound = user_options.get_bfs_level();	//std::cout<<"depth bound = "<<depthBound<<std::endl;
+
+		boost::timer::cpu_timer timePaths;
+		timePaths.start();
+		//Record the time taken to compute the structural paths from the graph/HA
+		std::list<structuralPath::ptr> allPaths = Hybrid_Automata.get_structural_paths(destLoc, depthBound);
 		//std::list<structuralPath::ptr> allPaths = findAllPaths(Hybrid_Automata, srcLoc, destLoc, depthBound);
-		runWoFC_counter_example(allPaths, Hybrid_Automata, init_state,
-				forbidden_set.second, user_options);
+		timePaths.stop();
+		std::cout<<"Total number of paths = "<<allPaths.size()<<std::endl;
+		//double wall_clock_timePaths_nanosec, wall_clock_timePaths_millisec, wall_clock_timePaths_sec;
+		double user_clock_timePaths_nanosec, user_clock_timePaths_millisec, user_clock_timePaths_sec;
+
+		user_clock_timePaths_nanosec = (double) timePaths.elapsed().user; //in nanoseconds
+		user_clock_timePaths_millisec = timePaths.elapsed().user / (double) 1000000; //convert nanoseconds to milliseconds
+		user_clock_timePaths_sec = user_clock_timePaths_millisec / (double) 1000; //convert milliseconds to seconds
+		//std::cout<<"Time to compute All Paths = "<<return_timePaths<<std::endl;
+		std::cout<<"Time to compute All Paths (in nanoseconds) = "<<user_clock_timePaths_nanosec<<std::endl;
+		std::cout<<"Time to compute All Paths (in milliseconds) = "<<user_clock_timePaths_millisec<<std::endl;
+		std::cout<<"Time to compute All Paths (in seconds) = "<<user_clock_timePaths_sec<<std::endl;
+
+		bool found_CE = runWoFC_counter_example(allPaths, Hybrid_Automata, init_state, forbidden_set.second, user_options);
+
+		// printing the first initial polytope in the init_poly file
+		polytope::ptr init_poly = (*init_state.begin())->getInitialSet();
+		init_poly->print2file("./init_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+
+		if (forbidden_set.second != NULL){
+			//std::cout<<"Forbiddend Set is a Polytope and not NULL"<<std::endl;
+			polytope::ptr badpoly = forbidden_set.second;
+			badpoly->print2file("./bad_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+			//Todo:: note that forbidden set is not in use in the Algorithm WoFC, so the output bad_trace may not intersect with the bad_set.
+		} else {
+			location::ptr badLocation;
+			badLocation = Hybrid_Automata.getLocation(destLoc);
+			polytope::ptr loc_inv = badLocation->getInvariant();
+			loc_inv->print2file("./bad_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+			//Todo:: note that if the invariant does not have constraints on the plot_dimensions, then "print2file()" may throw exception
+		}
+		if (found_CE) {
+			string cmdStr1;
+			cmdStr1.append("graph -TX -BC -W 0.008 bad_trace.o -s -m 3 bad_poly -s -m 2 init_poly");
+			system(cmdStr1.c_str());
+
+		}
 		return 0;
 	}
 
@@ -190,8 +233,8 @@ int runWoFC = 0;	// To run WoFC
 		Avg_system_clock = Avg_system_clock / number_of_times;
 	}
 
-	std::cout << std::fixed; //to assign precision on the std::output stream
-	std::cout.precision(7);
+//	std::cout << std::fixed; //to assign precision on the std::output stream
+//	std::cout.precision(7);
 
 
 	double return_Time = Avg_wall_clock / (double) 1000;

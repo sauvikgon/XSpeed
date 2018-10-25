@@ -1413,6 +1413,12 @@ void setplatoon_const_input(hybrid_automata& Hybrid_Automata,
 	boundValueI.resize(row );
 	boundValueI.assign(row,0);
 
+	boundValueI[0] = 0.2;	//@Amit: modified to create initial set as a range instead of a singleton set.
+	boundValueI[1] = 0;		// 0<=e1<=0.2 &  0<=t<=0.2
+	boundValueI[18] = 0.2;
+	boundValueI[19] = 0;
+
+
 
 	initial_polytope_I0 = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
@@ -1442,7 +1448,7 @@ void setplatoon_const_input(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.insert_to_map("down_patt_1_t",10);
 
 	// ************* Section required for setting Reach Parameters & User Options *************
-	unsigned int Directions_Type = 1;
+/*	unsigned int Directions_Type = 1;
 	unsigned int iter_max = 1000;
 	double time_horizon = 5.0;
 	double sampling_time = 1.0E-4;
@@ -1473,5 +1479,5 @@ void setplatoon_const_input(hybrid_automata& Hybrid_Automata,
 	row = dir_nums;
 	col = dim;
 	reach_parameters.Directions.resize(row, col);
-	reach_parameters.Directions = Real_Directions;
+	reach_parameters.Directions = Real_Directions;*/
 }

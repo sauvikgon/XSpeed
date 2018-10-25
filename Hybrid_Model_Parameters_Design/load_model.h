@@ -56,6 +56,7 @@
 #include "Hybrid_Model_Parameters_Design/vehicle_platoon/vehicle10_platoon.h"
 #include "Hybrid_Model_Parameters_Design/oscillator_model/Oscillator_timed.h"
 #include "Hybrid_Model_Parameters_Design/oscillator_model/f_osc_8_timed.h"
+#include "Hybrid_Model_Parameters_Design/oscillator_model/f_osc_32_timed.h"
 
 
 // **************************************************************************************

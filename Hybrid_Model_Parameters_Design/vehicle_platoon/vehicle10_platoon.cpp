@@ -17,7 +17,7 @@ size_type row, col;
 polytope::ptr initial_polytope_I0, forbid_polytope;
 location::ptr l;
 transition::ptr t;
-polytope::ptr invariant;
+polytope::ptr invariant = polytope::ptr(new polytope()); //creating a universe invariant polytope; Note dim set to 0
 
 polytope::ptr guard_polytope;
 

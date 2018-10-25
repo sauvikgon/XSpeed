@@ -67,6 +67,7 @@ std::list<structuralPath::ptr> hybrid_automata::get_structural_paths(unsigned in
 	path_list = findAllPaths(srcLoc, destLoc, depth);
 	//std::cout<<"Test 1: locs size ="<<(*path_list.begin())->get_path_locations().size()<<std::endl;
 /*
+ToDo:: Uncomment this block-comment to print all the solution paths
 	for (std::list<structuralPath::ptr>::iterator it = path_list.begin();
 			it != path_list.end(); it++) {
 		std::cout << "\nSolution Paths are: ";

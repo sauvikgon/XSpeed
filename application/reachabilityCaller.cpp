@@ -41,7 +41,13 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 		std::ofstream myfile;
 		myfile.open("statistics.o",ios::out | ios::app);
 
-		myfile << "model number: " << user_options.get_model() << ", #Paths = " << ce_candidates.size() << ", #CEs = " << ce_list.size() << ", #Refs = " << reach_SEQ_BFS.get_refinements() << ", Time to search CEs (in secs) = " << reach_SEQ_BFS.get_ce_search_time()/1000 << ", CE algo used (1=FC, 2=WoFC) = " << CE_ALGO_TYPE << std::endl;
+		myfile << "model number: " << user_options.get_model() << ", #Paths = "
+				<< ce_candidates.size() << ", #CEs = " << ce_list.size()
+				<< ", #Refs = " << reach_SEQ_BFS.get_refinements()
+				<< ", Time to search CEs (in secs) = "
+				<< reach_SEQ_BFS.get_ce_search_time() / 1000
+				<< ", CE algo used (1=FC, 2=WoFC) = " << CE_ALGO_TYPE
+				<< std::endl;
 		myfile.close();
 		ce_search_time = reach_SEQ_BFS.get_ce_search_time();
 		// plot the first counter-example trajectory in the list.
