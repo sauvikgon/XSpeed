@@ -45,9 +45,10 @@
 
 #include "application/sf_utility.h"
 
-#define CE_ALGO_TYPE   2  // macro to choose algo_tyoe of ce search.
+#define CE_ALGO_TYPE 1 // macro to choose algo_type of ce search.
 						// 1 enables search of ce to forbidden region using flowpipe constraints (FC).
 						// 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
+
 
 using namespace std;
 
@@ -157,9 +158,9 @@ private:
 	/*
 	 * Manages the counter-example searching during reachability with BFS. The return status indicates whether the BFS should continue
 	 * to search for further abstract paths or whether to stop. A return value of true indicates the BFS to stop. A false indicates that
-	 * the BFS should continue to further explore for newer abstract counter-example paths.
+	 * the BFS should continue to further explore for newer abstract counterexamples.
 	 */
-	bool gen_counter_example(abstractCE::ptr abs_ce_path);
+	bool gen_counter_example(abstractCE::ptr abs_ce_path, unsigned int ce_search_algo_type);
 
 	/**
 	 * A search for counter-example during BFS.

@@ -8,6 +8,6 @@
 #include "core_system/symbolic_states/symbolic_states.h"
 #include "core_system/symbolic_states/initial_state.h"
 
-void set_f_osc_8_model(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters);
+void set_f_osc_8(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters);
 
 #endif /* f_osc_8_H_ */

@@ -273,8 +273,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 //	We assume that the time variable is named as 't' in the model.
 //	We find out the min,max components of the time variable
 
-	get_first_symbolic_state()->getInitialPolytope();
-
 	unsigned int t_index =
 		get_first_symbolic_state()->getInitialPolytope()->get_index("t");
 
@@ -781,11 +779,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 		myopt.set_stopval(tolerance);
 		unsigned int res = myopt.optimize(x, minf);
 		if(res==NLOPT_SUCCESS)
-			std::cout << "Splicing with HA Constraints: NLOPT stopped successfully returning the found minimum\n";
+			std::cout << "Splicing WoFC: NLOPT stopped successfully returning the found minimum\n";
 		else if(res == NLOPT_STOPVAL_REACHED)
-			std::cout << "Splicing with HA Constraints: NLOPT stopped due to stopping value (1e-6) reached\n";
+			std::cout << "Splicing WoFC: NLOPT stopped due to stopping value (1e-6) reached\n";
 		else if (res == NLOPT_MAXEVAL_REACHED)
-			std::cout << "Splicing with HA Constraints: NLOPT stopped due to reaching maxeval = " << maxeval << std::endl;
+			std::cout << "Splicing WoFC: NLOPT stopped due to reaching maxeval = " << maxeval << std::endl;
 
 
 	} catch (std::exception& e) {
@@ -836,7 +834,6 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 
 	concreteCE::ptr cexample;
 	bool val_res=true;
-	bool NLP_HA_algo_flag = false;
 	unsigned int max_refinements = 3, ref_count = 0; // maximum limit to refinement points to be added.
 
 	double valid_tol = 1e-3; // validation error tolerance, on invariant crossing.
@@ -844,14 +841,14 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 	do{
 		struct refinement_point pt;
 
-		if(algo_type==1) // FC called
+		if(algo_type == 1) // FC called
 			cexample = gen_concreteCE(tolerance,refinements);
 		else if(algo_type==2){ // WoFC called
 			cexample = gen_concreteCE_NLP_HA(tolerance,refinements);
-			NLP_HA_algo_flag = true;
 		}
 		else if(algo_type==3)
 			std::cout << "LP-NLP mixed implementation not in place yet\n";
+
 		else{std::cout << "Invalid algo type specified for trajectory splicing\n";}
 
 		if(cexample->is_empty()){

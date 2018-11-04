@@ -19,10 +19,8 @@
 
 
 
-bool runWoFC_counter_example(std::list<structuralPath::ptr>& allPaths,
-		hybrid_automata& Hybrid_Automata,
-		std::list<initial_state::ptr> init_state, polytope::ptr forbidden_set,
-		userOptions& user_options);
+bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr> init_state, std::pair<int, polytope::ptr> forbidden_set, userOptions& user_options) ;
 
 bool gen_counter_example_WoFC(abstractCE::ptr abs_path,
 		userOptions& user_options, double& traj_splicing_time, unsigned int& refinements, std::list<concreteCE::ptr>& ce_list);

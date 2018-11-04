@@ -7,8 +7,22 @@
 
 #include "WoFC_counter_example.h"
 
-bool runWoFC_counter_example(std::list<structuralPath::ptr>& allPaths, hybrid_automata& Hybrid_Automata,
-		std::list<initial_state::ptr> init_state, polytope::ptr forbidden_set, userOptions& user_options) {
+bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
+		std::list<initial_state::ptr> init_state, std::pair<int, polytope::ptr> forbidden_set, userOptions& user_options) {
+
+	unsigned int destLoc = forbidden_set.first;			// The location id of the forbidden symbolic state
+	unsigned int depthBound = user_options.get_bfs_level();	//std::cout<<"depth bound = "<<depthBound<<std::endl;
+
+	/* Get all structural discrete paths in the HA here*/
+	boost::timer::cpu_timer timePaths;
+	timePaths.start();
+	std::list<structuralPath::ptr> allPaths = Hybrid_Automata.get_structural_paths(destLoc, depthBound);
+	timePaths.stop();
+
+			//double wall_clock_timePaths_nanosec, wall_clock_timePaths_millisec, wall_clock_timePaths_sec;
+	double user_clock_timePaths_nanosec, user_clock_timePaths_millisec, user_clock_timePaths_sec;
+	user_clock_timePaths_millisec = timePaths.elapsed().user / (double) 1000000; //convert nanoseconds to milliseconds
+
 
 	polytope::ptr initialSet = (*init_state.begin())->getInitialSet();
 	double traj_splicing_time=0;
@@ -23,10 +37,18 @@ bool runWoFC_counter_example(std::list<structuralPath::ptr>& allPaths, hybrid_au
 
 		std::list<symbolic_states::ptr> list_sym_states;
 		std::list<location::ptr> locs_path = (*it)->get_path_locations();
+
+		unsigned int path_index = 0; // This is an index to the location on the path during a traversal.
+
 		for (std::list<location::ptr>::iterator itloc = locs_path.begin();
-				itloc != locs_path.end(); itloc++) {
+				itloc != locs_path.end(); itloc++, path_index++) {
 			symbolic_states::ptr sym_states = symbolic_states::ptr(new symbolic_states());
-			sym_states->setInitialPolytope(initialSet);	//only for the
+			if(path_index==0)
+				sym_states->setInitialPolytope(initialSet);	//only for the first one.
+			else{
+				polytope::ptr empty_poly = polytope::ptr(new polytope(true)); // creates an empty polytope
+				sym_states->setInitialPolytope(empty_poly);
+			}
 			discrete_set discrete_state;
 			discrete_state.insert_element((*itloc)->getLocId()); //creating discrete_state
 			sym_states->setDiscreteSet(discrete_state);
@@ -38,7 +60,7 @@ bool runWoFC_counter_example(std::list<structuralPath::ptr>& allPaths, hybrid_au
 		abst_ce->set_transitions((*it)->get_path_transitions());
 		hybrid_automata::ptr ha = hybrid_automata::ptr( new hybrid_automata(Hybrid_Automata));
 		abst_ce->set_automaton(ha);
-		abst_ce->set_forbid_poly(forbidden_set);
+		abst_ce->set_forbid_poly(forbidden_set.second);
 
 
 		bool continue_search = gen_counter_example_WoFC(abst_ce, user_options, traj_splicing_time, refinements, ce_list);
@@ -61,12 +83,13 @@ bool runWoFC_counter_example(std::list<structuralPath::ptr>& allPaths, hybrid_au
 	// recording statistics in a file to include in the paper
 	std::ofstream myfile;
 	myfile.open("statistics.o",ios::out | ios::app);
+	myfile << "New Table 3 data (using HA structural paths with WoFC): \n";
 
-	myfile << "model number: " << user_options.get_model()
-			<< ", #Paths = " << allPaths.size() << ", #CEs = "
+	myfile << "model number: " << user_options.get_model() << "; #Paths = " << allPaths.size() << "; Time to search all structural paths:" << user_clock_timePaths_millisec <<
+			"; #CEs = "
 			<< ce_list.size() << ", #Refs = " << refinements
 			<< ", Time to search CEs (in secs) = " << traj_splicing_time / 1000
-			<< ", CE algo used (1=FC, 2=WoFC) = " << 2 << std::endl;
+			<< std::endl;
 	myfile.close();
 	//ce_search_time = reach_SEQ_BFS.get_ce_search_time();
 	// plot the first counter-example trajectory in the list.
@@ -88,6 +111,8 @@ bool gen_counter_example_WoFC(abstractCE::ptr abs_path,	userOptions& user_option
 	//std::list<concreteCE::ptr> ce_list; // the list of concrete counter-examples in the HA.
 	//unsigned int refinements; // The number of refinements during the search of counter-example trajectories. This has meaning only when the counter-example generation function is enabled.
 
+	double wall_time, user_time, system_time;
+
 	if (ce_path.compare("all") == 0) // if all paths are to be searched for ce, then return true in order to collect more paths.
 	{
 		boost::timer::cpu_timer timer;
@@ -95,7 +120,6 @@ bool gen_counter_example_WoFC(abstractCE::ptr abs_path,	userOptions& user_option
 		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,	algo_type);
 		timer.stop();
 
-		double wall_time, user_time, system_time;
 
 		wall_time = timer.elapsed().wall / (double) 1000000; //convert nanoseconds to milliseconds
 		user_time = timer.elapsed().user / (double) 1000000;
@@ -117,8 +141,6 @@ bool gen_counter_example_WoFC(abstractCE::ptr abs_path,	userOptions& user_option
 		timer.start();
 		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol, algo_type);
 		timer.stop();
-
-		double wall_time, user_time, system_time;
 
 		wall_time = timer.elapsed().wall / (double) 1000000; //convert nanoseconds to milliseconds
 		user_time = timer.elapsed().user / (double) 1000000;
@@ -150,8 +172,6 @@ bool gen_counter_example_WoFC(abstractCE::ptr abs_path,	userOptions& user_option
 		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,
 				algo_type);
 		timer.stop();
-
-		double wall_time, user_time, system_time;
 
 		wall_time = timer.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		user_time = timer.elapsed().user / 1000000;

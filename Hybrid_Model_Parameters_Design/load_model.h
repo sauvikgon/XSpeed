@@ -59,11 +59,6 @@
 #include "Hybrid_Model_Parameters_Design/oscillator_model/f_osc_32_timed.h"
 
 
-// **************************************************************************************
-/*
- * Only ONE out of these headers should be declared at a time
- * since they all include the module1,module2,module3 and module4 declaration
- */
 #include "Navigation_Benchmark/NavigationBenchmark.h"
 
 //#include "Hybrid_Model_Parameters_Design/test_models/Arch_Benchmark/heart.h"

@@ -115,54 +115,32 @@ int main(int argc, char *argv[]) {
 	std::cout << std::fixed; //to assign precision on the std::output stream
 	std::cout.precision(7);
 
-
 // ----Section for Running WoFC.
-int runWoFC = 1;	// To run WoFC, remember to give a valid loc id for the forbidden set (and not -1, unlike FC algo)
+
+int	 runWoFC = 0;	// To run WoFC, remember to give a valid loc id for the forbidden set (and not -1, unlike FC algo)
 	if (runWoFC) {
 
 		std::list<initial_state::ptr>::iterator iit;
 		iit = init_state.begin();
-		int srcLoc = (*iit)->getLocationId();
-		int destLoc = forbidden_set.first;
-		//destLoc = 4;
-		int depthBound = user_options.get_bfs_level();	//std::cout<<"depth bound = "<<depthBound<<std::endl;
 
-		boost::timer::cpu_timer timePaths;
-		timePaths.start();
-		//Record the time taken to compute the structural paths from the graph/HA
-		std::list<structuralPath::ptr> allPaths = Hybrid_Automata.get_structural_paths(destLoc, depthBound);
-		//std::list<structuralPath::ptr> allPaths = findAllPaths(Hybrid_Automata, srcLoc, destLoc, depthBound);
-		timePaths.stop();
-		std::cout<<"Total number of paths = "<<allPaths.size()<<std::endl;
-		//double wall_clock_timePaths_nanosec, wall_clock_timePaths_millisec, wall_clock_timePaths_sec;
-		double user_clock_timePaths_nanosec, user_clock_timePaths_millisec, user_clock_timePaths_sec;
-
-		user_clock_timePaths_nanosec = (double) timePaths.elapsed().user; //in nanoseconds
-		user_clock_timePaths_millisec = timePaths.elapsed().user / (double) 1000000; //convert nanoseconds to milliseconds
-		user_clock_timePaths_sec = user_clock_timePaths_millisec / (double) 1000; //convert milliseconds to seconds
-		//std::cout<<"Time to compute All Paths = "<<return_timePaths<<std::endl;
-		std::cout<<"Time to compute All Paths (in nanoseconds) = "<<user_clock_timePaths_nanosec<<std::endl;
-		std::cout<<"Time to compute All Paths (in milliseconds) = "<<user_clock_timePaths_millisec<<std::endl;
-		std::cout<<"Time to compute All Paths (in seconds) = "<<user_clock_timePaths_sec<<std::endl;
-
-		bool found_CE = runWoFC_counter_example(allPaths, Hybrid_Automata, init_state, forbidden_set.second, user_options);
+		bool found_CE = runWoFC_counter_example(Hybrid_Automata, init_state, forbidden_set, user_options);
 
 		// printing the first initial polytope in the init_poly file
 		polytope::ptr init_poly = (*init_state.begin())->getInitialSet();
 		init_poly->print2file("./init_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
 
-		if (forbidden_set.second != NULL){
-			//std::cout<<"Forbiddend Set is a Polytope and not NULL"<<std::endl;
-			polytope::ptr badpoly = forbidden_set.second;
-			badpoly->print2file("./bad_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-			//Todo:: note that forbidden set is not in use in the Algorithm WoFC, so the output bad_trace may not intersect with the bad_set.
-		} else {
-			location::ptr badLocation;
-			badLocation = Hybrid_Automata.getLocation(destLoc);
-			polytope::ptr loc_inv = badLocation->getInvariant();
-			loc_inv->print2file("./bad_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-			//Todo:: note that if the invariant does not have constraints on the plot_dimensions, then "print2file()" may throw exception
-		}
+//		if (forbidden_set.second != NULL){
+//			//std::cout<<"Forbiddend Set is a Polytope and not NULL"<<std::endl;
+//			polytope::ptr badpoly = forbidden_set.second;
+//			badpoly->print2file("./bad_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+//			//Todo:: note that forbidden set is not in use in the Algorithm WoFC, so the output bad_trace may not intersect with the bad_set.
+//		} else {
+//			location::ptr badLocation;
+//			badLocation = Hybrid_Automata.getLocation(destLoc);
+//			polytope::ptr loc_inv = badLocation->getInvariant();
+//			loc_inv->print2file("./bad_poly",user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+//			//Todo:: note that if the invariant does not have constraints on the plot_dimensions, then "print2file()" may throw exception
+//		}
 		if (found_CE) {
 			string cmdStr1;
 			cmdStr1.append("graph -TX -BC -W 0.008 bad_trace.o -s -m 3 bad_poly -s -m 2 init_poly");
@@ -256,37 +234,43 @@ int runWoFC = 1;	// To run WoFC, remember to give a valid loc id for the forbidd
 
 	// Recording the analysis time in a statistics for reporting in a paper
 	std::ofstream myfile;
-	myfile.open("statistics.o",ios::out | ios::app);
+	if(CE_ALGO_TYPE ==1) //CE with FC
+		myfile.open("statistics_FC.txt",ios::out | ios::app);
+	else if(CE_ALGO_TYPE == 2) // CE with WoFC on RA given absCEs
+		myfile.open("statistics_WoFC.txt",ios::out | ios::app);
+	else {}
 
-	myfile << "flowpipe construction time (user time in secs) " << Avg_user_clock / (double) 1000 - ce_search_time/(double) 1000 << std::endl;
+
+	myfile << "Flowpipe construction time (user time in secs) " << Avg_user_clock / (double) 1000 - ce_search_time/(double) 1000 << "; ";
+	myfile << "Falsification time (user time in secs) " << Avg_user_clock / (double) 1000 << std::endl << std::endl;
 	myfile.close();
 
 	std::list<symbolic_states::ptr>::iterator it;
 
 	/** Choosing from the output format options	 */
-	plottime.start();
-	if(user_options.getOutputFormatType().compare("GEN")==0) {
-		//Vertex-Enumeration using old algorithm of recursively searching in quadrants But Faster than HoughTransformation
-		vertex_generator(Symbolic_states_list,user_options); //Generating Vertices using recursive-quadrant-search algorithm, can be plotted using GNU plotutil
-		//SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Matrices (dir and SFM) as file output, which can be used in MatLab by ESP algorithm
-
-		//Our paper's Algorithm but slower than vertex_generator()
-		//vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices using Sequential sampling of Hough Space, can be plotted using GNU plotutil
-
-		/* Running gnuplotutil to plot output */
-		string cmdStr1;
-		cmdStr1.append("graph -TX -BC ");
-		cmdStr1.append(user_options.getOutFilename().c_str());
-		system(cmdStr1.c_str());
-	} else if(user_options.getOutputFormatType().compare("INTV")==0) {
-		print_all_intervals(Symbolic_states_list);
-	}
-	plottime.stop();
-
-	double wall_clockPlot;
-	wall_clockPlot = plottime.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-	double plotTime = wall_clockPlot / (double) 1000;	//convert milliseconds to Seconds
-	std::cout << "\nBoost Wall Time for Plotting (in Seconds) = " << plotTime << std::endl;
+//	plottime.start();
+//	if(user_options.getOutputFormatType().compare("GEN")==0) {
+//		//Vertex-Enumeration using old algorithm of recursively searching in quadrants But Faster than HoughTransformation
+//		vertex_generator(Symbolic_states_list,user_options); //Generating Vertices using recursive-quadrant-search algorithm, can be plotted using GNU plotutil
+//		//SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Matrices (dir and SFM) as file output, which can be used in MatLab by ESP algorithm
+//
+//		//Our paper's Algorithm but slower than vertex_generator()
+//		//vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices using Sequential sampling of Hough Space, can be plotted using GNU plotutil
+//
+//		/* Running gnuplotutil to plot output */
+//		string cmdStr1;
+//		cmdStr1.append("graph -TX -BC ");
+//		cmdStr1.append(user_options.getOutFilename().c_str());
+//		system(cmdStr1.c_str());
+//	} else if(user_options.getOutputFormatType().compare("INTV")==0) {
+//		print_all_intervals(Symbolic_states_list);
+//	}
+//	plottime.stop();
+//
+//	double wall_clockPlot;
+//	wall_clockPlot = plottime.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+//	double plotTime = wall_clockPlot / (double) 1000;	//convert milliseconds to Seconds
+//	std::cout << "\nBoost Wall Time for Plotting (in Seconds) = " << plotTime << std::endl;
 
 	return 0;
 }

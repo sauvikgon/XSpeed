@@ -26,9 +26,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	refinements = 0;
 	traj_splicing_time = 0;
 	set_aggregation = user_options.getSetAggregation();
-	ce_search_algo_type = CE_ALGO_TYPE;
 }
-
 
 
 //bound is the maximum number of transitions or jumps permitted.
@@ -239,7 +237,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					 * Call the generation of counter-example routine of this class. The counter-example(s) are set
 					 * by this routine as per the user-options.
 					 */
-					bool continue_search = this->gen_counter_example(abst_ce);
+
+					bool continue_search = this->gen_counter_example(abst_ce,CE_ALGO_TYPE);
+
+					std::cout << "debug print\n" << std::endl;
 
 					if(continue_search == false) { // This status says whether to continue searching for further abstract paths or to stop
 						std::cout << "############# Safety Property is Violated #################\n";
@@ -1113,17 +1114,18 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 	}
 }
 
-bool reachability::gen_counter_example(abstractCE::ptr abs_path)
+bool reachability::gen_counter_example(abstractCE::ptr abs_path, unsigned int ce_search_algo_type)
 {
 	double splicing_error_tol = 1e-6; // A parameter particular to specify the precision of the search of ce by using trajectory splicing.
 
 	boost::timer::cpu_timer clock; // clocks the time taken to splice a trajectory
 
+	//std::cout << "CE ALGO_TYPE in gen_counter_example:" << ce_search_algo_type << std::endl;
 
 	if(ce_path.compare("all") == 0) // if all paths are to be searched for ce, then return true in order to collect more paths.
 	{
 		clock.start();
-		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,this->ce_search_algo_type);
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,ce_search_algo_type);
 		clock.stop();
 		traj_splicing_time += clock.elapsed().user /1000000;
 
@@ -1136,7 +1138,7 @@ bool reachability::gen_counter_example(abstractCE::ptr abs_path)
 	if(ce_path.compare("first") == 0) // Stop the BFS search once a concrete ce has been found
 	{
 		clock.start();
-		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,this->ce_search_algo_type);
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,ce_search_algo_type);
 		clock.stop();
 		traj_splicing_time += clock.elapsed().user / 1000000;
 

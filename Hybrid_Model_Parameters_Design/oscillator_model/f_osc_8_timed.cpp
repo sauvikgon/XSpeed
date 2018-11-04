@@ -5,7 +5,8 @@
 
 
 #include "f_osc_8_timed.h"
-void setf_osc_8_timedmodel(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+
+void set_f_osc_8_timed(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
