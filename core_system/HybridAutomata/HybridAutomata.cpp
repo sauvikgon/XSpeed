@@ -67,7 +67,7 @@ std::list<structuralPath::ptr> hybrid_automata::get_structural_paths(unsigned in
 	path_list = findAllPaths(srcLoc, destLoc, depth);
 	//std::cout<<"Test 1: locs size ="<<(*path_list.begin())->get_path_locations().size()<<std::endl;
 /*
-ToDo:: Uncomment this block-comment to print all the solution paths
+	//ToDo:: Uncomment this block-comment to print all the solution paths
 	for (std::list<structuralPath::ptr>::iterator it = path_list.begin();
 			it != path_list.end(); it++) {
 		std::cout << "\nSolution Paths are: ";
@@ -135,7 +135,8 @@ std::list<structuralPath::ptr> hybrid_automata::findAllPaths(int src, int dst, i
 			}
 			structuralPath::ptr solutionPath = structuralPath::ptr(new structuralPath(path_locations, path_transitions));
 			allStructralPaths.push_back(solutionPath);
-			continue;	//avoiding traversing further from here: bad location not repeated
+			//Disable instruction continue to avoid repeated bad location (applicable for discrete systems)
+			//continue;	//avoiding traversing further from here: bad location not repeated (applicable for hybrid systems)
 		}
 		// traverse to all the nodes connected to
 		// current node and push new path to queue
@@ -149,7 +150,7 @@ std::list<structuralPath::ptr> hybrid_automata::findAllPaths(int src, int dst, i
 			vector<transition::ptr> newtrans(pathDS.second);	//copy constructor
 			newtrans.push_back((*it));
 			int depthExplored = newpath.size();    //Size of the path
-			if (depthExplored == depthBound)
+			if (depthExplored == (depthBound+1))	//Allows path of length depthBound but not (depthBound+1)
 				break;
 			std::pair<vector<int>, vector<transition::ptr> > new_pathDS;
 			new_pathDS.first = newpath;

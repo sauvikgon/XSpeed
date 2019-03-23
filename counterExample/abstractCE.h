@@ -116,7 +116,7 @@ public:
 	 * returns a validated counterexample trace, a trace that satisfies the HA constraints
 	 * @algo_type: mention the splicing algorithm:
 	 * 	1 specifies to call splicing with FC
-	 * 	2 specifies to call splicing witn no FC
+	 * 	2 specifies to call splicing with no FC
 	 *	3 specifies to call LP-NLP mixed procedure for splicing.
 	 */
 	concreteCE::ptr get_validated_CE(double tolerance, unsigned int alg_type);
@@ -177,10 +177,25 @@ private:
 	 * Returns an instance of the concrete counter-example, if it exists, using mixed NLP-LP problem
 	 */
 	concreteCE::ptr gen_concreteCE_NLP_LP(double tolerance, const std::list<refinement_point>& refinements);
+
+	lp_solver construct_LP(unsigned int lpDim, std::vector<double> &t, math::matrix<double> lp_coeff, std::vector<double> lp_col);
+
+	void construct_bound_constraints(math::matrix<double> &coeff_mat, std::vector<double> &col, std::vector<double> lb, std::vector<double> ub, unsigned int dim);
+
+	concreteCE::ptr gen_concreteCE_NLP_LP_softconstr(double tolerance, const std::list<refinement_point>& refinements);
+	lp_solver construct_LP_softconstr(unsigned int lpDim, std::vector<double> &t, math::matrix<double> lp_coeff, std::vector<double> lp_col);
+
 	/**
 	 * Returns an instance of the concrete counter-example, if it exists, using NLP and HA given constraints
 	 */
 	concreteCE::ptr gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements);
+
+	concreteCE::ptr gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements);
+
+
+
+
+
 
 
 };

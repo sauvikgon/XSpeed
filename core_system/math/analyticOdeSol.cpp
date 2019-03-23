@@ -109,6 +109,101 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 	return res1;
 }
 
+math::matrix<double> ODESol_homogenous_coeff(const Dynamics& D, double time){
+	unsigned int dim = D.MatrixA.size2();
+
+	if(!D.isEmptyMatrixB && !D.U->getIsEmpty()){
+		std::cout << "File-analyticODEsol: Method-ODESol: Cannot solve ODE for dynamics with non-det input\n";
+		exit(0);
+	}
+	if(D.isEmptyMatrixA)
+	{
+		math::matrix<double> iden(dim, dim);
+		iden.matrix_Identity(dim, iden);
+		return iden;
+	} else {
+		math::matrix<double> expAt(dim,dim);
+		math::matrix<double> A(D.MatrixA);
+		math::matrix<double> At(A);
+
+		At.scalar_multiply(time);
+		At.matrix_exponentiation(expAt);
+		return expAt;
+	}
+}
+
+std::vector<double> ODESol_inhomogenous(const Dynamics& D, double time){
+	unsigned int dim = D.MatrixA.size2();
+
+	math::matrix<double> expAt(dim,dim);
+	math::matrix<double> A(D.MatrixA);
+	math::matrix<double> At(A);
+
+	At.scalar_multiply(time);
+
+	At.matrix_exponentiation(expAt);
+
+	std::vector<double> res2(dim), res3(dim);
+
+	math::matrix<double> AInv(dim,dim);
+	if(!A.inverse(AInv)) // meaning that the matrix A is singular,i.e., not invertible
+	{
+		// compute the expression A^-1 (e^At - I) alternatively as a sub-matrix of the exp(M),
+		// as shown in the SpaceEx paper, page 8, phi_1.
+		math::matrix<double> M(3*dim, 3*dim);
+		// putting this check to see if M is initialized to 0 matrix above
+		for(unsigned int i=0;i<3*dim;i++){
+			for(unsigned int j=0;j<3*dim;j++)
+				M(i,j) = 0;
+		}
+		// initialize the submatrix[0,dim-1][0,dim-1] with matrixAt
+		for(unsigned int i=0;i<dim;i++)
+		{
+			for(unsigned int j=0;j<dim;j++)
+				M(i,j) = At(i,j);
+		}
+		// initialize the [0,dim-1][dim,2*dim-1] with matrixAt
+		for(unsigned int i=0,j=dim;i<2*dim;i++,j++)
+			M(i,j)=time;
+		// initialize the [dim,2*dim-1][2*dim,3*dim-1] with matrixAt
+		for(unsigned int i=dim,j=2*dim;i<2*dim;i++,j++)
+			M(i,j)=time;
+
+		// compute the exponential of M
+		math::matrix<double> expM(dim,dim);
+		M.matrix_exponentiation(expM);
+		// extract the submatrix [0,dim][dim+2*dim] into the matrix phi
+		math::matrix<double> phi(dim,dim);
+		for(unsigned int i=0;i<dim;i++)
+		{
+			for(unsigned int j=0;j<dim;j++)
+				phi(i,j) = expM(i,dim+j);
+		}
+		phi.mult_vector(D.C,res2);
+		// debug
+		//std::cout << "Implemented trance end point for non-invertible matrices\n";
+		return res2;
+	}
+	std::vector<double> minusV(dim);
+
+	for(unsigned int i=0;i<dim;i++)
+		minusV[i] = (-1)*D.C[i];
+
+	AInv.mult_vector(minusV,res2);
+
+	math::matrix<double> mult(dim,dim);
+
+	AInv.multiply(expAt,mult);
+	mult.mult_vector(D.C,res3);
+
+	for(unsigned int i=0;i<res2.size();i++){
+		res2[i] = res2[i] + res3[i];
+	}
+
+	return res2;
+}
+
+
 math::matrix<double> time_slice_component(math::matrix<double>& A, double time){
 	unsigned int dim = A.size2();
 	math::matrix<double> expAt(dim, dim);

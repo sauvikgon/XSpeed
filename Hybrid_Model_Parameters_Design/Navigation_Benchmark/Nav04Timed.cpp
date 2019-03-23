@@ -98,7 +98,8 @@ void set_nav04_timed(hybrid_automata& Hybrid_Automata, std::list<initial_state::
 
 	guardBoundValue.resize(row);
 	guardBoundValue.assign(row,0);
-	guardBoundValue[0] = -1.0;
+	guardBoundValue[0] = -1.0;			//@Amit modifying to check valid_Function(for refinement cost) in Falsification paper
+	//guardBoundValue[0] = -0.8;			//@Amit modifying to check valid_Function(for refinement cost) in Falsification paper
 	guard_polytope = polytope::ptr(new polytope(guardConstraintsMatrix, guardBoundValue, guardBoundSign));
 
 

@@ -11,18 +11,19 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr> init_state, std::pair<int, polytope::ptr> forbidden_set, userOptions& user_options) {
 
 	unsigned int destLoc = forbidden_set.first;			// The location id of the forbidden symbolic state
-	unsigned int depthBound = user_options.get_bfs_level();	//std::cout<<"depth bound = "<<depthBound<<std::endl;
+	unsigned int depthBound = user_options.get_bfs_level() + 1;//trans 0 is the first flowpipe. Thus, depthBound should be +1
 
 	/* Get all structural discrete paths in the HA here*/
 	boost::timer::cpu_timer timePaths;
+	//std::cout<<"destLoc= " << destLoc<<"    depth bound = "<<depthBound<<std::endl;
 	timePaths.start();
 	std::list<structuralPath::ptr> allPaths = Hybrid_Automata.get_structural_paths(destLoc, depthBound);
 	timePaths.stop();
-
+	//std::cout<<"allPaths = "<<allPaths.size()<<"\n";
 			//double wall_clock_timePaths_nanosec, wall_clock_timePaths_millisec, wall_clock_timePaths_sec;
-	double user_clock_timePaths_nanosec, user_clock_timePaths_millisec, user_clock_timePaths_sec;
+	double user_clock_timePaths_nanosec, user_clock_timePaths_millisec, usertime_Paths_sec;
 	user_clock_timePaths_millisec = timePaths.elapsed().user / (double) 1000000; //convert nanoseconds to milliseconds
-
+	usertime_Paths_sec = user_clock_timePaths_millisec / (double) 1000;
 
 	polytope::ptr initialSet = (*init_state.begin())->getInitialSet();
 	double traj_splicing_time=0;
@@ -82,13 +83,13 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 
 	// recording statistics in a file to include in the paper
 	std::ofstream myfile;
-	myfile.open("statistics.o",ios::out | ios::app);
+	myfile.open("statistics_WoFC.txt",ios::out | ios::app);
 	myfile << "New Table 3 data (using HA structural paths with WoFC): \n";
 
-	myfile << "model number: " << user_options.get_model() << "; #Paths = " << allPaths.size() << "; Time to search all structural paths:" << user_clock_timePaths_millisec <<
-			"; #CEs = "
-			<< ce_list.size() << ", #Refs = " << refinements
-			<< ", Time to search CEs (in secs) = " << traj_splicing_time / 1000
+	myfile << "model number: " << user_options.get_model() << "; #Paths = " << allPaths.size()
+			<< "; Time to search all structural paths (in secs):" << usertime_Paths_sec
+			<< "; #CEs = " << ce_list.size() << ", #Refs = " << refinements
+			<< ", Time to search CEs (in secs) = " << traj_splicing_time / (double) 1000
 			<< std::endl;
 	myfile.close();
 	//ce_search_time = reach_SEQ_BFS.get_ce_search_time();

@@ -798,7 +798,8 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 							myobj.simulateHaLocation(s, s.cross_over_time,
 									tot_time, ha);
 					simtraces[w].push_back(myobj.get_sim_trace()); //TODO::Let us see if we can use pointer here to improve performance-time
-
+					//ToDo:: here w' should be generated randomly and used in place of q in the next wlist[1-t][w'][w].push_back(newpoints)
+					//also note that simulateHaLocation is generating only a single point due to "must" semantics of HA
 					for (unsigned int j = 0; j < newpoints.size(); j++) {
 						wlist[1 - t][q][w].push_back(newpoints[j]);//TODO:: if newpoints is more than 1 points then, q need to be selected randomly
 						newpointsCount++; //TODO:: take care of Race condition

@@ -48,4 +48,11 @@ double myconstraint(const std::vector<double> &x, std::vector<double> &grad, voi
 double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad, void *data);
 
 
+double myobjfuncOnDwellTime(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
+
+double myobjfuncOnStateVars(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
+
+
+
+
 #endif /* nlpFunctions.h */

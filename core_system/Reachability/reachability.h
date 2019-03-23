@@ -45,9 +45,12 @@
 
 #include "application/sf_utility.h"
 
-#define CE_ALGO_TYPE 1 // macro to choose algo_type of ce search.
-						// 1 enables search of ce to forbidden region using flowpipe constraints (FC).
-						// 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
+#define CE_ALGO_TYPE   5 // macro to choose algo_type of ce search.
+						 // 1 enables search of ce to forbidden region using flowpipe constraints (FC).
+						 // 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
+						 // 3 gen_concreteCE_iterative 			: Dongxu
+						 // 4 gen_concreteCE_NLP_LP				: Dongxu
+						 // 5 gen_concreteCE_NLP_LP_softconstr 	: Dongxu
 
 
 using namespace std;
