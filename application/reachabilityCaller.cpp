@@ -67,7 +67,6 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 				<< ", Cumulative time to search CEs (in secs) = "
 				<< reach_SEQ_BFS.get_ce_search_time() / 1000
 				<< ", Av.Time to search a CE (in secs) = " << reach_SEQ_BFS.get_ce_search_time() / (1000 * ce_list.size())
-
 				<< ", CE algo used (1=FC, 2=WoFC) = " << CE_ALGO_TYPE
 				<< std::endl;
 		myfile.close();

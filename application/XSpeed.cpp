@@ -38,6 +38,7 @@
 
 // *********** Command Line Boost Program Options ********
 #include <boost/program_options/config.hpp>
+#include <boost/program_options/options_description.hpp>
 
 #include "boost/program_options.hpp"
 #include <boost/config.hpp>

@@ -52,7 +52,6 @@ void hybrid_automata::addLocation(location::ptr& loc){
 	list_locations[key] = loc;	//storing the loc with the proper loc_id as the key
 }
 
-
 std::list<structuralPath::ptr> hybrid_automata::get_structural_paths(unsigned int forbidden_loc_id, unsigned int depth)
 {
 	std::list<structuralPath::ptr> path_list; // It is empty here.

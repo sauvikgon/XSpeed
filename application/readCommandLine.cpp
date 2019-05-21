@@ -210,7 +210,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			exit(0);
 		}
 		if (user_options.get_model() == 15) { //This condition specifies Recursive call of XSpeed
-			user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
+//amit			user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
 			unsigned int x1,x2;
 			x1 = user_options.get_first_plot_dimension();
 			x2 = user_options.get_second_plot_dimension();

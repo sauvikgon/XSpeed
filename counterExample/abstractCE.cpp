@@ -316,7 +316,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 				P=polys.front();
 			// Now intersect P with guard
 			P = P->GetPolytope_Intersection(guard);
-
 		}
 
 		lp_solver lp(GLPK_SOLVER);
@@ -333,7 +332,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<ref
 		}catch(...){
 			// assuming that the exception is caused due to an unbounded solution
 			min = 0; // the min value that time can take is 0.
-
 		}
 
 		// we add the bounds as constraints in the nlopt
@@ -872,7 +870,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP(double tolerance, const std::l
 /*
  *  dxli: September, 2018
  */
-void abstractCE::construct_bound_constraints(math::matrix<double> &coeff_mat, std::vector<double> &col, std::vector<double> lb, std::vector<double> ub, unsigned int dim){
+void abstractCE::construct_bound_constraints(math::matrix<double> &coeff_mat, std::vector<double> &col,
+		std::vector<double> lb, std::vector<double> ub, unsigned int dim){
 	// number of segments in abstract traj.
 	unsigned int N = lb.size() / dim;
 	unsigned int lpDim = coeff_mat.size2();
@@ -911,7 +910,8 @@ void abstractCE::construct_bound_constraints(math::matrix<double> &coeff_mat, st
 /*
  *  dxli: September, 2018
  */
-lp_solver abstractCE::construct_LP(unsigned int lpDim, std::vector<double> &t, math::matrix<double> lp_coeff_mat, std::vector<double> lp_col){
+lp_solver abstractCE::construct_LP(unsigned int lpDim, std::vector<double> &t,
+		math::matrix<double> lp_coeff_mat, std::vector<double> lp_col){
 	lp_solver mylp(GLPK_SOLVER);
 
 	symbolic_states::const_ptr S = get_first_symbolic_state();
@@ -2555,7 +2555,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 			return cexample;
 		}
 		std::cout << "Restarting Search with added refinement point\n";
-	}while(!val_res && ref_count< max_refinements);
+	}while (!val_res && ref_count < max_refinements);
 
 	throw std::runtime_error("Validation of counter example FAILED after MAX Refinements\n");
 	return concreteCE::ptr(new concreteCE());

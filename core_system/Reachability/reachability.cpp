@@ -238,6 +238,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					 * by this routine as per the user-options.
 					 */
 
+					std::cout << "CE_ALGO_TYPE "<< CE_ALGO_TYPE << std::endl;
+
 					bool continue_search = this->gen_counter_example(abst_ce,CE_ALGO_TYPE);
 
 					std::cout << "debug print\n" << std::endl;
