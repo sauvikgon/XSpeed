@@ -32,19 +32,18 @@ SUITE(directions_TestSuite) {
 
 		get_ublas_matrix(dirs, mydirs); //it returns vector vector so need to do conversion here:: Temporary solution
 
-		/*	std::cout << "output from get_octagonal directions \n ";
-		 for(unsigned int i = 0; i<mydirs.size();i++){
-		 for(unsigned int j=0;j<dim;j++){
-		 std::cout << mydirs[i][j] << " ";
-		 }
-		 cout << endl;
-		 }
-		 std::cout<< mydirs;
-		 * */
-		out << mydirs;
-		proper << "[8,2]((1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1),(0,1),(0,-1))";
-		CHECK_EQUAL(proper.str(),out.str());
 
-	}
+		float output2d[8][2];
+		for(unsigned int i = 0; i < mydirs.size1();i++){
+			for(unsigned int j= 0; j <dim;j++){
+				 output2d[i][j] = mydirs(i,j);
+			}
+		}
+		std::cout<< mydirs;
+
+		const float res2d[8][2]=  { {1,0},{-1,0}, {1,1}, {1,-1}, {-1,1}, {-1,-1}, {0,1}, {0,-1} };
+		CHECK_ARRAY2D_CLOSE(res2d,output2d,8,2,0.00);
+
+		}
 
 }

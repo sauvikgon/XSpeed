@@ -129,8 +129,8 @@ void glpk_lp_solver::setConstraints(math::matrix<double> coeff_constraints,
 	}
 
 	int prod = number_of_constraints * dimension;
-	int count = 1, ia[prod], ja[prod];
-	double ar[prod];
+	int count = 1, ia[prod+1], ja[prod+1];
+	double ar[prod+1];
 	for (int i = 0; i < number_of_constraints; i++) {
 		for (int j = 0; j < dimension; j++) {
 			ia[count] = i + 1, ja[count] = j + 1, ar[count] = coeff_constraints(

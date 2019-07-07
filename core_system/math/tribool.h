@@ -15,7 +15,7 @@ namespace math {
 typedef boost::tribool tribool;
 
 /** Returns whether t is true (and not indeterminate). */
-inline bool definitely(const tribool& t) {
+inline tribool definitely(const tribool& t) {
 	return t;
 }
 ;

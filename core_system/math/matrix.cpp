@@ -170,7 +170,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_copy(
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_Identity(int dimension,
 		math::matrix<scalar_type>& newIdentityMatrix) {
 	//boost::numeric::ublas::identity_matrix<scalar_type> iden(dimension);
-	ublas_matrix_impl m(this->size1(), this->size2());
+	ublas_matrix_impl m(dimension, dimension);
 	for (int i=0;i<dimension;i++){
 		for (int j=0;j<dimension;j++){
 			if (i==j)
@@ -228,6 +228,7 @@ template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf()
 		if (sum > norm)
 			norm = sum;
 	}
+	std::cout << "The calculated norm is:" << norm << std::endl;
 	return norm;
 }
 

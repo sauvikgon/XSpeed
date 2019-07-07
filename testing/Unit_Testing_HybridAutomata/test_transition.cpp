@@ -39,7 +39,7 @@ SUITE(Transition_TestSuite) {
 	TEST_FIXTURE(ClassTransition , constructor1_transitions_Test) {
 
 		transition tt;
-	//	cout << "Just testing an Empty Label of the Transition = " << tt.getLabel() << "\t" << endl;
+	    //cout << "Just testing an Empty Label of the Transition = " << tt.getLabel() << "\t" << endl;
 		out << tt.getLabel();
 		proper << "";
 		CHECK_EQUAL(proper.str(), out.str());
@@ -126,23 +126,18 @@ SUITE(Transition_TestSuite) {
 		CHECK_EQUAL(proper.str(), out.str());
 
 		Tout = trans.getAssignT();
-		/*std::cout << "Printing Assign_T::Matrix Map = ";
+		float output2D[2][2];
+		std::cout << "Printing Assign_T::Matrix Map = ";
 		for (unsigned int i = 0; i < Tout.Map.size1(); i++) {
 			for (unsigned int j = 0; j < Tout.Map.size2(); j++)
-				std::cout << Tout.Map(i, j) << "\t";
-			std::cout << std::endl;
-		}*/
+				output2D[i][j]=Tout.Map(i, j);
+		}
 //		std::cout << "Printing Assign_T::matrix Map = " << Tout.Map << std::endl;
 		out << "";
 		out << Tout.Map;
-		proper <<"[2,2]((7,7),(7,7))";
+		const float res1[2][2]={{7,7},{7,7}};
 
-		CHECK_EQUAL(proper.str(), out.str());
-
-/*		cout << "Printing Assign_T::Vector b =   ";
-		for (unsigned int i = 0; i < Tout.b.size(); i++)
-			std::cout << Tout.b[i] << "\t";
-		cout << endl;*/
+		CHECK_ARRAY2D_CLOSE(res1, output2D, 2, 2, 0.0);
 
 		CHECK_ARRAY_EQUAL(b2, Tout.b, b2.size());
 
@@ -151,34 +146,35 @@ SUITE(Transition_TestSuite) {
 		int loc_src_id = trans.getSource_Location_Id();
 		int loc_dst_id = trans.getDestination_Location_Id();
 
-		out << loc_src_id;
-		proper << "1";
-		CHECK_EQUAL(proper.str(), out.str());
+		unsigned int res = loc_src_id;
+		unsigned int proper1 = 1;
+		CHECK_EQUAL(proper1, res);
 
-		out << loc_dst_id;
-		proper << "2";
-		CHECK_EQUAL(proper.str(), out.str());
+		unsigned int dis=loc_dst_id;
+		unsigned int proper2 = 2;
+		CHECK_EQUAL(proper2, dis);
 
 		Dynamics outD, outDDest;
 	//	std::cout << "Name From Source Location= " << loc_src_out.getName() << std::endl;
 		outD = loc_src_out.getSystem_Dynamics();
-	/*	std::cout << "Dynamic matrixA From Source Location : " << std::endl;
-		for (unsigned int i = 0; i < outD.MatrixA.size1(); i++) {
+	/*std::cout << "Dynamic matrixA From Source Location : " << std::endl;
+		for (unsigned int i = 0; i < outD.MatrixA.size1(); i++)
+		 {
 			for (unsigned int j = 0; j < outD.MatrixA.size2(); j++)
-				std::cout << outD.MatrixA(i,j) << "\t";
-			std::cout << std::endl;
-		}*/
-		out<<"";
+					output2D1=outD.MatrixA(i,j);
+		}
+		out<<"";*/
 		out << outD.MatrixA;
-		proper <<"[0,0]()";
+		proper << "[0,0]()";
 		CHECK_EQUAL(proper.str(), out.str());
+		//CHECK_ARRAY2D_CLOSE(res11, output2D1, 0, 0, 0.0);
 
 /*
 		std::cout << endl << "**********************************************" << std::endl;
 		std::cout << "Name From Destination Location= " << loc_dest_out.getName() << std::endl;
 */
 		outDDest = loc_dest_out.getSystem_Dynamics();
-/*		cout << "Dynamic matrixA From Destination Location : " << std::endl;
+/*	cout << "Dynamic matrixA From Destination Location : " << std::endl;
 		for (unsigned int i = 0; i < outDDest.MatrixA.size1(); i++) {
 			for (unsigned int j = 0; j < outDDest.MatrixA.size2(); j++)
 				std::cout << outDDest.MatrixA(i,j) << "\t";

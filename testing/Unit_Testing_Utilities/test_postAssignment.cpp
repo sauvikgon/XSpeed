@@ -40,11 +40,7 @@ TEST_FIXTURE(ExamplePostAssignment, post_assign_exact_Test) {
 	row = 2;
 	col = 2;
 	R.resize(row, col);
-	/*R(0, 0) = -0.6;
-	R(0, 1) = 0;
-	R(1, 0) = 0;
-	R(1, 1) = 1;
-*/
+
 	R(0, 0) = 1;
 	R(0, 1) = 0;
 	R(1, 0) = 0;
@@ -77,31 +73,16 @@ TEST_FIXTURE(ExamplePostAssignment, post_assign_exact_Test) {
 
 	newPolytope = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
-/*	newPolytope.setCoeffMatrix(ConstraintsMatrixI);
-	newPolytope.setColumnVector(boundValueI);
-	newPolytope.setInEqualitySign(boundSignI);*/
-
 	newShiftedPolytope = post_assign_exact(newPolytope, R, w);
 
-/*	cout << "\nAmit here is A_dash Of newPolytope \n";
-	for (int i = 0; i < newShiftedPolytope->getCoeffMatrix().size1(); i++) {
+	float output2d[4][2];
+	for (int i = 0; i < newShiftedPolytope->getCoeffMatrix().size1(); i++)
 		for (int j = 0; j < newShiftedPolytope->getCoeffMatrix().size2(); j++)
-			cout << newShiftedPolytope->getCoeffMatrix()(i, j) << "\t";
-		cout << endl;
-	}*/
+			output2d[i][j] = newShiftedPolytope->getCoeffMatrix()(i, j);
 
-	out << newShiftedPolytope->getCoeffMatrix();
-	proper << "[4,2]((1,0),(-1,0),(0,-1.66667),(0,1.66667))";
+	const float res2d[4][2]={ {1,0}, {-1,0}, {0,-1.66667}, {0,1.66667} };
 
-/*
-	cout << "\nAmit here is bp of newShiftedPolytope \n";
-	for (int j = 0; j < newShiftedPolytope->getColumnVector().size(); j++)
-		cout << newShiftedPolytope->getColumnVector()[j] << "\t";
-	cout << endl;
-*/
-
-
-	 CHECK_EQUAL(proper.str(), out.str());
+	CHECK_ARRAY2D_CLOSE(output2d, res2d, 4, 2, 0.01);
 }
 
 }

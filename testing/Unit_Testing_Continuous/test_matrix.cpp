@@ -56,34 +56,32 @@ SUITE(templated_matrix_class_TestSuite) {
 	TEST_FIXTURE(templated_matrix_class, transpose_Test) {
 		math::matrix<double> mat_res = math::matrix<double>();
 		m.transpose(mat_res);
-		/*for (int i = 0; i < 2; i++) {
+		float output2[2][2];
+		for (int i = 0; i < 2; i++)
+		{
 			for (int j = 0; j < 2; j++)
-			cout << mat_res(i, j) << "\t";
-			cout << endl;
+				output2[i][j]=mat_res(i, j);
 		}
-		cout<< mat_res<<endl;*/
 
 		out << mat_res;
-		proper << "[2,2]((1,3),(2,4))";
-		CHECK_EQUAL(proper.str(),out.str());
+		const float res2[2][2]={{1,3},{2,4}};
+		CHECK_ARRAY2D_CLOSE(res2, output2, 2, 2, 0.0);
 	}
 	TEST_FIXTURE(templated_matrix_class, inf_norm_Test) {
 		//math::matrix<double> res = math::matrix<double>();
 		double val = m.norm_inf();
+		double res = 7;
 
-		out << val;
-		proper << "4";
-		CHECK_EQUAL(proper.str(), out.str());
+		CHECK_EQUAL(val, res);
 
 		m(0, 0) = 0;
 		m(0, 1) = -1;
 		m(1, 0) = 0;
 		m(1, 1) = 0;
-		out << "";
-		proper << "";
-		out << m.norm_inf();
-		proper << "1";
-		CHECK_EQUAL(proper.str(), out.str());
+
+		double output = m.norm_inf();
+		res = 1;
+		CHECK_EQUAL(res, output);
 	}
 	TEST_FIXTURE(templated_matrix_class, mult_vector_Test) {
 		m.mult_vector(dir, res);
@@ -105,16 +103,17 @@ SUITE(templated_matrix_class_TestSuite) {
 		m(1, 0) = 0;
 		m(1, 1) = 0;
 		m.matrix_exponentiation(mat_res);
-		/*std::cout << "tester matrix expo output\n";
-		 for (int i = 0; i < 2; i++) {
-		 for (int j = 0; j < 2; j++)
-		 std::cout << mat_res(i, j) << "\t";
-		 cout << endl;
+		float output1[2][2];
+		std::cout << "tester matrix expo output\n";
+		 for (int i = 0; i < 2; i++)
+		 {
+			 for (int j = 0; j < 2; j++)
+				 output1[i][j]=mat_res(i, j);
+
 		 }
-		 cout<< mat_res<<endl;*/
 		out<< mat_res;
-		proper << "[2,2]((1,-1),(0,1))";
-		CHECK_EQUAL(proper.str(), out.str());
+		const float res[2][2]={{1,-1},{0,1}};
+		CHECK_ARRAY2D_CLOSE(res, output1, 2, 2, 0.0);
 
 		//51.9690   74.7366
 		// 112.1048  164.0738
@@ -126,18 +125,16 @@ SUITE(templated_matrix_class_TestSuite) {
 		double tau = 2;
 		m.matrix_exponentiation(mat_res, tau);
 
-		//m2.matrix_exponentiation(mat_res);
+		double output[2][2];
 
-		/*cout << "\nResult of m = exp(m,tau) = \n";
-		 for (int i = 0; i < 2; i++) {
-		 for (int j = 0; j < 2; j++)
-		 std::cout << mat_res(i, j) << "\t";
-		 cout << endl;
-		 }
-		 cout<< mat_res<<endl;*/
-		out<< mat_res;
-		proper << "[2,2]((11079.1,16146.3),(24219.4,35298.5))";
-		CHECK_EQUAL(proper.str(), out.str());
+		for (int i = 0; i < 2; i++)
+			for (int j = 0; j < 2; j++)
+				output[i][j] = mat_res(i, j);
+
+		const double res2d[2][2] = {{11079.1, 16146.3}, {24219.4, 35298.5}};
+
+
+		CHECK_ARRAY2D_CLOSE(res2d,output,2,2,0.1);
 
 	}
 	TEST_FIXTURE(templated_matrix_class, matrix_copy_Test) {
@@ -150,16 +147,16 @@ SUITE(templated_matrix_class_TestSuite) {
 		m(1, 0) = 3;
 		m(1, 1) = 4;
 		m.matrix_copy(dest);
-		/*cout << "\nResult of Matrix_Copy function = \n";
+		float output2D[2][2];
+		cout << "\nResult of Matrix_Copy function = \n";
 		 for (int i = 0; i < 2; i++) {
-		 for (int j = 0; j < 2; j++) {
-		 std::cout << dest(i, j) << "\t";
+			 for (int j = 0; j < 2; j++) {
+				 	  output2D[i][j]=dest(i, j);
 		 }
-		 cout << endl;
-		 }*/
+		 }
 		out<< dest;
-		proper << "[2,2]((1,2),(3,4))";
-		CHECK_EQUAL(proper.str(), out.str());
+		float res1[2][2]={{1,2},{3,4}};
+		CHECK_ARRAY2D_CLOSE(res1, output2D, 2, 2, 0.0);
 
 	}
 	TEST_FIXTURE(templated_matrix_class, matrix_join_Test) {
@@ -180,17 +177,17 @@ SUITE(templated_matrix_class_TestSuite) {
 		amit2(1, 1) = 88;
 
 		mat1.matrix_join(amit2, joined_matrix);
+		float output3[4][2];
+		cout << "\nResult of Matrix_Join function = \n";
+		 for (unsigned int i = 0; i < joined_matrix.size1(); i++)
+		 {
+			 for (unsigned int j = 0; j < joined_matrix.size2(); j++)
+				 	 output3[i][j]=joined_matrix(i, j);
 
-		/*cout << "\nResult of Matrix_Join function = \n";
-		 for (unsigned int i = 0; i < joined_matrix.size1(); i++) {
-		 for (unsigned int j = 0; j < joined_matrix.size2(); j++)
-		 std::cout << joined_matrix(i, j) << "\t";
-		 cout << endl;
 		 }
-		 cout<< joined_matrix<<endl;*/
 		out<< joined_matrix;
-		proper << "[4,2]((1,2),(3,4),(55,66),(77,88))";
-		CHECK_EQUAL(proper.str(), out.str());
+		const float res4[4][2]={{1,2},{3,4},{55,66},{77,88}};
+		CHECK_ARRAY2D_CLOSE(res4, output3, 4, 2, 0.0);
 	}
 
 	TEST_FIXTURE(templated_matrix_class, matrix_inverse_Test) {
@@ -253,17 +250,16 @@ SUITE(templated_matrix_class_TestSuite) {
 		m2(2, 2) = 3;
 
 		m1.multiply(m2, output);
-
-		/*cout << "\nResult of Matrix_Multiply \n";
-		for (unsigned int i = 0; i < output.size1(); i++) {
+		float output5[3][3];
+		cout << "\nResult of Matrix_Multiply \n";
+		for (unsigned int i = 0; i < output.size1(); i++)
+		{
 			for (unsigned int j = 0; j < output.size2(); j++)
-			std::cout << output(i, j) << "\t";
-			cout << endl;
+			 output5[i][j]=output(i, j);
 		}
-		cout << "\noutput="<<output<<endl;*/
 		out<< output;
-		proper << "[3,3]((8,14,14),(20,35,32),(32,56,50))";
-		CHECK_EQUAL(proper.str(), out.str());
+		const float res5[3][3]={{8,14,14},{20,35,32},{32,56,50}};
+		CHECK_ARRAY2D_CLOSE(res5, output5, 3, 3, 0.0);
 
 	}
 

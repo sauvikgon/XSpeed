@@ -26,6 +26,7 @@ std::vector<double> getBestDirection(polytope::ptr initial,
 	lp.setMin_Or_Max(2);
 
 	if (!initial->getIsEmpty()) //set glpk constraints If not an empty polytope
+
 		lp.setConstraints(initial->getCoeffMatrix(), initial->getColumnVector(),
 				initial->getInEqualitySign());
 	clock_dir = dir;

@@ -197,10 +197,10 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 	l = location::ptr(new location(2, "v1", system_dynamics, invariant, true, Out_Going_Trans_fromv1));
 	Hybrid_Automata.addLocation(l);
 
-	module1(Hybrid_Automata,init_state_list,reach_parameters);
-	module2(Hybrid_Automata,init_state_list,reach_parameters);
-	module3(Hybrid_Automata,init_state_list,reach_parameters);
-	module4(Hybrid_Automata,init_state_list,reach_parameters);
+	WT_module1(Hybrid_Automata,init_state_list,reach_parameters);
+	WT_module2(Hybrid_Automata,init_state_list,reach_parameters);
+	WT_module3(Hybrid_Automata,init_state_list,reach_parameters);
+	WT_module4(Hybrid_Automata,init_state_list,reach_parameters);
 
 	row = 4;
 	col = 2;
@@ -236,7 +236,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 
 	}
 
-	void module1(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+	void WT_module1(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -336,7 +336,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 
 	}
 
-	void module2(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+	void WT_module2(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -435,7 +435,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 
 	}
 
-	void module3(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+	void WT_module3(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
@@ -535,7 +535,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 
 	}
 
-	void module4(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
+	void WT_module4(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list, ReachabilityParameters& reach_parameters) {
 
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;

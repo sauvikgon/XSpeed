@@ -43,7 +43,7 @@ TEST_FIXTURE(Example, SimulationTestOscillator) {
 	sim->set_out_dimension(0, 1); //output dimensions
 	sim->set_time_step(reach_parameters.time_step);
 
-	SetOscillatorParameters(ha, init_state, reach_parameters); //Paper's Model
+	SetOscillator(ha, init_state, reach_parameters); //Paper's Model
 
 	std::vector<double> x0(2);
 	x0[0] = 0.25; x0[1] = 0.1;
@@ -73,7 +73,7 @@ TEST_FIXTURE(Example, TestManySimulationOscillator) {
 	sim->set_out_dimension(0, 1); //output dimensions
 	sim->set_time_step(reach_parameters.time_step);
 
-	SetOscillatorParameters(ha, init_state, reach_parameters); //Paper's Model
+	SetOscillator(ha, init_state, reach_parameters); //Paper's Model
 	std::list<initial_state::ptr>::iterator it;
 	it=init_state.begin();
 	polytope::ptr initialset=(*it)->getInitialSet();
@@ -106,7 +106,7 @@ TEST_FIXTURE(Example, TestHaSimulationOscillator) {
 	sim->set_out_dimension(0, 1); //output dimensions
 	sim->set_time_step(reach_parameters.time_step);
 
-	SetOscillatorParameters(ha, init_state, reach_parameters); //Paper's Model
+	SetOscillator(ha, init_state, reach_parameters); //Paper's Model
 	std::list<initial_state::ptr>::iterator it;
 	it=init_state.begin();
 	polytope::ptr initialset=(*it)->getInitialSet();
@@ -138,7 +138,7 @@ TEST_FIXTURE(Example, ParTestHaSimulationOscillator) {
 	sim->set_out_dimension(0, 1); //output dimensions
 	sim->set_time_step(reach_parameters.time_step);
 
-	SetOscillatorParameters(ha, init_state, reach_parameters); //Paper's Model
+	SetOscillator(ha, init_state, reach_parameters); //Paper's Model
 	std::list<initial_state::ptr>::iterator it;
 	it=init_state.begin();
 	polytope::ptr initialset=(*it)->getInitialSet();

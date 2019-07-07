@@ -60,18 +60,18 @@ TEST_FIXTURE(matrix_class, minus_Test) {
 	m2(2, 2) = 3;
 
 	m1.minus(m2, output);
+	float outputD[3][3];
 
-	/*	cout << "\nResult of Matrix_Minus \n";
-	 for (unsigned int i = 0; i < output.size1(); i++) {
-	 for (unsigned int j = 0; j < output.size2(); j++)
-	 std::cout << output(i, j) << "\t";
-	 cout << endl;
-	 }*/
-	out << output;
+	cout << "\nResult of Matrix_Minus \n";
+	 for (unsigned int i = 0; i < output.size1(); i++)
+	 {	for (unsigned int j = 0; j < output.size2(); j++)
+			 outputD[i][j]=output(i, j);
+	 }
+	std::cout << output;
 
-	proper << "[3,3]((0,0,2),(2,2,4),(6,6,6))";
+	const float res1[3][3]={{0,0,2},{2,2,4},{6,6,6}};
 
-	CHECK_EQUAL(proper.str(), out.str());
+	CHECK_ARRAY2D_CLOSE(res1, outputD, 3, 3, 0.0);
 
 }
 TEST_FIXTURE(matrix_class, expTest)

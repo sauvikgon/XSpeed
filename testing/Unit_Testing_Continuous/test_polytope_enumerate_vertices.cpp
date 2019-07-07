@@ -111,19 +111,20 @@ SUITE(polytope_function_TestSuite) {
 		 }
 		 std::cout << "\n";
 		 }*/
-
+			float output7[7][2];
 		//std::cout << "My Sorted Vertices with closed vertex are \n";
 		my_vertices = sort_vertices(All_vertices);
-		/*for (int i = 0; i < my_vertices.size1(); i++) {
-			for (int j = 0; j < my_vertices.size2(); j++) {
-				std::cout << my_vertices(i, j) << "  ";
+		for (int i = 0; i < my_vertices.size1(); i++)
+		{
+			for (int j = 0; j < my_vertices.size2(); j++)
+			{
+				output7[i][j]=my_vertices(i, j);
 			}
-			std::cout << "\n";
+			;
 		}
-		std::cout <<my_vertices<< "\n";*/
 		out <<my_vertices;
-		proper << "[7,2]((-4,-2),(4,-2),(4,0),(4,2),(-4,2),(-4,0),(-4,-2))";
-		CHECK_EQUAL(proper.str(),out.str());
+		const float res7[7][2]={{-4,-2},{4,-2},{4,0},{4,2},{-4,2},{-4,0},{-4,-2}};
+		CHECK_ARRAY2D_CLOSE(res7, output7, 7, 2, 0.0);
 	}
 
 	/*

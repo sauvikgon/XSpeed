@@ -113,18 +113,25 @@ SUITE(Location_TestSuite) {
 
 		outD = loc.getSystem_Dynamics();
 
-		//	std::cout<< "\nMatrix A : "<< outD.MatrixA;
-		out << "";
-		out << outD.MatrixA;
-		proper <<"[2,2]((1,2),(3,4))";
+		const int res[2][2] = { {1,2}, {3,4}};
+		int output[2][2];
 
-		CHECK_EQUAL(proper.str(), out.str());
+		for(unsigned int i=0;i<outD.MatrixA.size1();i++)
+			for(unsigned int j=0;j<outD.MatrixA.size2();j++)
+				output[i][j] = outD.MatrixA(i,j);
+
+		CHECK_ARRAY2D_CLOSE(res,output,2,2,0.0);
 
 		//	std::cout<< "\nMatrix B : "<< outD.MatrixB;
 
-		out << outD.MatrixB;
-		proper << "[2,2]((5,6),(7,8))";
-		CHECK_EQUAL(proper.str(), out.str());
+		for(unsigned int i=0;i<outD.MatrixB.size1();i++)
+			for(unsigned int j=0;j<outD.MatrixB.size2();j++)
+				output[i][j] = outD.MatrixB(i,j);
+
+		const int res1[2][2] = {{5,6},{7,8}};
+
+		CHECK_ARRAY2D_CLOSE(res1,output,2,2,0.0);
+
 
 		std::vector<double> direction(2, 0.0);
 		direction[0] = 1;

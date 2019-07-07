@@ -10,7 +10,7 @@
 #include "core_system/symbolic_states/initial_state.h"
 #include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
 #include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark.h"
-#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed3by3.h"
+//#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed3by3.h"
 #include "Hybrid_Model_Parameters_Design/ConstantMotion/ConstantMotion.h"
 
 
@@ -32,7 +32,7 @@ struct Example {
 TEST_FIXTURE(Example, TimeSimulationConstantMotion) {
 
 	hybrid_automata ha;
-	initial_state::ptr init_state;
+	std::list<initial_state::ptr> init_state;
 	ReachabilityParameters reach_parameters;
 
 	reach_parameters.TimeBound = 100; //Total Time Interval
@@ -64,7 +64,7 @@ TEST_FIXTURE(Example, TimeSimulationConstantMotion) {
 TEST_FIXTURE(Example, TestManySimulationConstantMotion) {
 
 	hybrid_automata ha;
-	initial_state::ptr init_state;
+	std::list<initial_state::ptr> init_state;
 	ReachabilityParameters reach_parameters;
 
 	reach_parameters.TimeBound = 100; //Total Time Interval
@@ -80,7 +80,7 @@ TEST_FIXTURE(Example, TestManySimulationConstantMotion) {
 	SetConstantMotion(ha,init_state,reach_parameters);
 
 
-	polytope::ptr initialset=init_state->getInitialSet();
+	polytope::ptr initialset=init_state.front()->getInitialSet();
 
 	// testing HA location simulation
 	unsigned int n=10; // the number of start points
@@ -99,7 +99,7 @@ TEST_FIXTURE(Example, TestManySimulationConstantMotion) {
 TEST_FIXTURE(Example, TestHaSimulationConstantMotion) {
 
 	hybrid_automata ha;
-	initial_state::ptr init_state;
+	std::list<initial_state::ptr> init_state;
 	ReachabilityParameters reach_parameters;
 
 	reach_parameters.TimeBound = 100; //Total Time Interval
@@ -115,7 +115,7 @@ TEST_FIXTURE(Example, TestHaSimulationConstantMotion) {
 	SetConstantMotion(ha,init_state,reach_parameters);
 
 
-	polytope::ptr initialset=init_state->getInitialSet();
+	polytope::ptr initialset=init_state.front()->getInitialSet();
 
 	// testing HA location simulation
 	unsigned int n=10; // the number of start points
@@ -133,7 +133,7 @@ TEST_FIXTURE(Example, TestHaSimulationConstantMotion) {
 TEST_FIXTURE(Example, ParTestHaConstantMotion) {
 
 	hybrid_automata ha;
-	initial_state::ptr init_state;
+	std::list<initial_state::ptr> init_state;
 	ReachabilityParameters reach_parameters;
 
 	reach_parameters.TimeBound = 100; //Total Time Interval
@@ -149,7 +149,7 @@ TEST_FIXTURE(Example, ParTestHaConstantMotion) {
 	SetConstantMotion(ha,init_state,reach_parameters);
 
 
-	polytope::ptr initialset=init_state->getInitialSet();
+	polytope::ptr initialset=init_state.front()->getInitialSet();
 
 	unsigned int n=10; // the number of start points
 

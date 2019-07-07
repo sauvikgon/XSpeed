@@ -132,7 +132,7 @@ TEST_FIXTURE(ExampleSF_Utility, compute_beta_Test) {
 TEST_FIXTURE(ExampleSF_Utility, compute_alfa_Test) {
 	math::matrix<double> res = math::matrix<double>();
 	double tau = 2, result;
-	result = compute_alfa(tau, system_dynamics, V, 1);
+	result = compute_alfa<double>(tau, system_dynamics, V, 1);
 //		cout<<"\nResult of compute_alfa = "<<result;
 	out2 << result;
 	proper2 << "27490.6";
@@ -151,18 +151,16 @@ TEST_FIXTURE(ExampleSF_Utility, get_ublas_matrix_Test) {
 	A[1][0] = 3;
 	A[1][1] = 4;
 	get_ublas_matrix(A, res);
-	/*cout<<"\nResult of Get_Ublas_Matrix = ";
+	float output8[2][2];
 	 for(int i=0;i<2;i++)
 	 {
-	 for(int j=0;j<2;j++) {
-	 cout<<res(i,j)<<"\t";
+		 for(int j=0;j<2;j++) {
+			 output8[i][j]=res(i,j);
 	 }
-	 cout<<endl;
 	 }
-	 cout<<"matrix = "<<res;*/
-	out3 << res;
-	proper3 << "[2,2]((1,2),(3,4))";
-	CHECK_EQUAL(proper3.str(), out3.str());
+	 out3 << res;
+	const float res8[2][2]={{1,2},{3,4}};
+	CHECK_ARRAY2D_CLOSE(res8, output8, 2, 2, 0.0);
 
 }
 
@@ -216,8 +214,9 @@ TEST_FIXTURE(ExampleSF_Utility, Omega_Support_Test) {
 
 	double term1 = V->computeSupportFunction(r, lp);
 	double term2 = tau * V->computeSupportFunction(direction2, lp);
-	double term3 = compute_alfa(tau, system_dynamics, V, 1)
-			* support_unitball_infnorm(direction2);
+	double term3 = compute_alfa<double>(tau, system_dynamics, V, 1)	* support_unitball_infnorm(direction2);
+//	double term3 = 0.1; // a dummy value taken.
+
 	double result = term1 + term2 + term3;
 	/*cout << "\t" << "Expression 1 = " << term1 << "\t";
 	 cout << "\t" << "Expression 2 = " << term2 << "\t";
