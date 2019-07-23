@@ -12,7 +12,6 @@
 
 simulation::simulation() {
 	// TODO Auto-generated constructor stub
-
 }
 
 simulation::~simulation() {
@@ -22,6 +21,9 @@ simulation::~simulation() {
 /* Private function to check function return values */
 
 static int check_flag(void *flagvalue, const char *funcname, int opt);
+
+static int jtv (realtype t, N_Vector y, N_Vector fy, SUNMatrix Jac,
+                void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
 
 static int f(realtype t, N_Vector y, N_Vector ydot, void *f_data) {
 	Dynamics* D = (Dynamics *) (f_data);
@@ -87,7 +89,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time) {
 	/* Call CVodeCreate to create the solver memory and specify the
 	 * Backward Differentiation Formula and the use of a Newton iteration */
 
-	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+	cvode_mem = CVodeCreate(CV_BDF);
 
 	if (check_flag((void *) cvode_mem, "CVodeCreate", 0)) {
 		throw std::runtime_error("CVODE failed\n");
@@ -105,11 +107,6 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-	flag = CVDense(cvode_mem, dimension);
-	if (check_flag(&flag, "CVDense", 1)) {
-		throw std::runtime_error("CVODE failed\n");
-	}
-
 	/* Call CVodeSStolerances to specify the scalar relative tolerance
 	 * and scalar absolute tolerance */
 	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
@@ -117,6 +114,44 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time) {
 		throw std::runtime_error("CVODE failed\n");
 	}
 
+	// Create Matrix Object.
+	// ---------------------------------------------------------------------------
+	// Need to create a dense matrix for the dense solver.
+	SUNMatrix A = SUNDenseMatrix(dimension, dimension);
+	if(check_flag((void *)A, "SUNDenseMatrix", 0)){
+		throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 9. Create Linear Solver Object.
+	// ---------------------------------------------------------------------------
+	// Dense linear solver object instead of the iterative one in the original
+	// simple example.
+	SUNLinearSolver LS = SUNDenseLinearSolver(u, A) ;
+	if(check_flag((void *)LS, "SUNDenseLinearSolver", 0)){
+	  throw std::runtime_error("In simulation::simulate, SUNDenseLinearSolver: CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 10. Set linear solver optional inputs.
+
+	// 11. Attach linear solver module.
+	// ---------------------------------------------------------------------------
+	// Call CVDlsSetLinearSolver to attach the matrix and linear solver this
+	// function is different for direct solvers.
+	flag = CVDlsSetLinearSolver(cvode_mem, LS, A);
+	if(check_flag(&flag, "CVDlsSetLinearSolver", 1)){
+	  throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 12. Set linear solver interface optional inputs.
+	// ---------------------------------------------------------------------------
+	// Sets the jacobian-times-vector function.
+	flag = CVDlsSetJacFn(cvode_mem, jtv);
+	if(check_flag(&flag, "CVDlsSetJacFn", 1)){
+	  throw std::runtime_error("CVODE failed\n");
+	}
 	/* In loop over output points: call CVode, print results, test for errors */
 
 	std::vector<double> last(dimension);
@@ -204,7 +239,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 	// Call CVodeCreate to create the solver memory and specify the
 	// Backward Differentiation Formula and the use of a Newton iteration
 
-	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+	cvode_mem = CVodeCreate(CV_BDF);
 
 	if (check_flag((void *) cvode_mem, "CVodeCreate", 0)) {
 		throw std::runtime_error("CVODE failed\n");
@@ -223,14 +258,48 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-	flag = CVDense(cvode_mem, dimension);
-	if (check_flag(&flag, "CVDense", 1)) {
-		throw std::runtime_error("CVODE failed\n");
-	}
-
 	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
 	if (check_flag(&flag, "CVodeSStolerances", 1)) {
 		throw std::runtime_error("CVODE failed\n");
+	}
+
+	// Create Matrix Object.
+	// ---------------------------------------------------------------------------
+	// Need to create a dense matrix for the dense solver.
+	SUNMatrix A = SUNDenseMatrix(dimension, dimension);
+	if(check_flag((void *)A, "SUNDenseMatrix", 0)){
+		throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 9. Create Linear Solver Object.
+	// ---------------------------------------------------------------------------
+	// Dense linear solver object instead of the iterative one in the original
+	// simple example.
+	SUNLinearSolver LS = SUNDenseLinearSolver(u, A) ;
+	if(check_flag((void *)LS, "SUNDenseLinearSolver", 0)){
+	  throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 10. Set linear solver optional inputs.
+
+	// 11. Attach linear solver module.
+	// ---------------------------------------------------------------------------
+	// Call CVDlsSetLinearSolver to attach the matrix and linear solver this
+	// function is different for direct solvers.
+	flag = CVDlsSetLinearSolver(cvode_mem, LS, A);
+	if(check_flag(&flag, "CVDlsSetLinearSolver", 1)){
+	  throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 12. Set linear solver interface optional inputs.
+	// ---------------------------------------------------------------------------
+	// Sets the jacobian-times-vector function.
+	flag = CVDlsSetJacFn(cvode_mem, jtv);
+	if(check_flag(&flag, "CVDlsSetJacFn", 1)){
+	  throw std::runtime_error("CVODE failed\n");
 	}
 
 	std::vector<double> v(dimension), prev_v(dimension);
@@ -303,7 +372,7 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x,
 	// Call CVodeCreate to create the solver memory and specify the
 	// Backward Differentiation Formula and the use of a Newton iteration
 
-	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+	cvode_mem = CVodeCreate(CV_BDF);
 
 	if (check_flag((void *) cvode_mem, "CVodeCreate", 0)) {
 		throw std::runtime_error("CVODE failed\n");
@@ -322,14 +391,48 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x,
 		throw std::runtime_error("CVODE failed\n");
 	}
 
-	flag = CVDense(cvode_mem, dimension);
-	if (check_flag(&flag, "CVDense", 1)) {
-		throw std::runtime_error("CVODE failed\n");
-	}
-
 	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
 	if (check_flag(&flag, "CVodeSStolerances", 1)) {
 		throw std::runtime_error("CVODE failed\n");
+	}
+
+	// Create Matrix Object.
+	// ---------------------------------------------------------------------------
+	// Need to create a dense matrix for the dense solver.
+	SUNMatrix A = SUNDenseMatrix(dimension, dimension);
+	if(check_flag((void *)A, "SUNDenseMatrix", 0)){
+		throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 9. Create Linear Solver Object.
+	// ---------------------------------------------------------------------------
+	// Dense linear solver object instead of the iterative one in the original
+	// simple example.
+	SUNLinearSolver LS = SUNDenseLinearSolver(u, A) ;
+	if(check_flag((void *)LS, "SUNDenseLinearSolver", 0)){
+	  throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 10. Set linear solver optional inputs.
+
+	// 11. Attach linear solver module.
+	// ---------------------------------------------------------------------------
+	// Call CVDlsSetLinearSolver to attach the matrix and linear solver this
+	// function is different for direct solvers.
+	flag = CVDlsSetLinearSolver(cvode_mem, LS, A);
+	if(check_flag(&flag, "CVDlsSetLinearSolver", 1)){
+	  throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 12. Set linear solver interface optional inputs.
+	// ---------------------------------------------------------------------------
+	// Sets the jacobian-times-vector function.
+	flag = CVDlsSetJacFn(cvode_mem, jtv);
+	if(check_flag(&flag, "CVDlsSetJacFn", 1)){
+	  throw std::runtime_error("CVODE failed\n");
 	}
 
 	//printing simulation trace in a file for debug purpose, in the plot_dim dimension
@@ -506,7 +609,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 	// Call CVodeCreate to create the solver memory and specify the
 	// Backward Differentiation Formula and the use of a Newton iteration
-	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+	cvode_mem = CVodeCreate(CV_BDF);
 	if (check_flag((void *) cvode_mem, "CVodeCreate", 0)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
@@ -522,13 +625,49 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	if (check_flag(&flag, "CVodeInit", 1)) {
 		throw std::runtime_error("CVODE failed\n");
 	}
-	flag = CVDense(cvode_mem, dimension);
-	if (check_flag(&flag, "CVDense", 1)) {
-		throw std::runtime_error("CVODE failed\n");
-	}
+
 	flag = CVodeSStolerances(cvode_mem, reltol, abstol);
 	if (check_flag(&flag, "CVodeSStolerances", 1)) {
 		throw std::runtime_error("CVODE failed\n");
+	}
+
+	// Create Matrix Object.
+	// ---------------------------------------------------------------------------
+	// Need to create a dense matrix for the dense solver.
+	SUNMatrix A = SUNDenseMatrix(dimension, dimension);
+	if(check_flag((void *)A, "SUNDenseMatrix", 0)){
+		throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 9. Create Linear Solver Object.
+	// ---------------------------------------------------------------------------
+	// Dense linear solver object instead of the iterative one in the original
+	// simple example.
+	SUNLinearSolver LS = SUNDenseLinearSolver(u, A) ;
+	if(check_flag((void *)LS, "SUNDenseLinearSolver", 0)){
+	  throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 10. Set linear solver optional inputs.
+
+	// 11. Attach linear solver module.
+	// ---------------------------------------------------------------------------
+	// Call CVDlsSetLinearSolver to attach the matrix and linear solver this
+	// function is different for direct solvers.
+	flag = CVDlsSetLinearSolver(cvode_mem, LS, A);
+	if(check_flag(&flag, "CVDlsSetLinearSolver", 1)){
+	  throw std::runtime_error("CVODE failed\n");
+	}
+	// ---------------------------------------------------------------------------
+
+	// 12. Set linear solver interface optional inputs.
+	// ---------------------------------------------------------------------------
+	// Sets the jacobian-times-vector function.
+	flag = CVDlsSetJacFn(cvode_mem, jtv);
+	if(check_flag(&flag, "CVDlsSetJacFn", 1)){
+	  throw std::runtime_error("CVODE failed\n");
 	}
 
 	std::vector<double> v(dimension),prev_v;
@@ -623,8 +762,7 @@ void simulation::print_trace_to_outfile(std::string s) {
 	myoutfile.open(s.c_str(),std::fstream::app);
 	for(std::list<trace_point>::const_iterator it = sim_trace.begin();
 			it != sim_trace.end(); it++) {
-		myoutfile << (*it).second[this->x1] << "  " << (*it).second[this->x2]
-				<< "\n";
+		myoutfile << (*it).second[this->x1] << "  " << (*it).second[this->x2] << "\n";
 	}
 	myoutfile.close();
 }
@@ -874,4 +1012,35 @@ static int check_flag(void *flagvalue, const char* funcname, int opt) {
 	}
 
 	return (0);
+}
+static int jtv (realtype t, N_Vector y, N_Vector fy, SUNMatrix Jac,
+                void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
+{
+	Dynamics* D = (Dynamics *) (user_data);
+	math::matrix<double> A;
+
+	if (D->isEmptyMatrixA) {
+		assert(!D->isEmptyC); // The assumption is that this function is called with non-zero dynamics.
+		unsigned int dim = D->C.size();
+		A = math::matrix<double>(D->C.size(), D->C.size());
+		for (unsigned int i = 0; i < dim; i++)
+			for (unsigned int j = 0; j < dim; j++)
+				A(i, j) = 0;
+	} else
+		A = math::matrix<double>(D->MatrixA);
+
+	std::vector<double> C(A.size1());
+
+	assert(A.size1() == A.size2());
+	C = D->C;
+
+	double sum;
+	// Input set not included in the dynamics.
+
+	for (unsigned int i = 0; i < A.size1(); i++) {
+		for (unsigned int j = 0; j < A.size2(); j++) {
+			SM_ELEMENT_D(Jac, i, j) = A(i, j);
+		}
+	}
+	return 0;
 }

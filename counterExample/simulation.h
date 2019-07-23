@@ -11,7 +11,15 @@
 #include <vector>
 #include <cvode/cvode.h>
 #include <nvector/nvector_serial.h>
-#include <cvode/cvode_dense.h>
+//#include <cvode/cvode_dense.h>
+#include <cvode/cvode.h> // prototypes for CVODE fcts., consts.
+#include <nvector/nvector_serial.h>  // access to serial N_Vector
+#include <sunmatrix/sunmatrix_dense.h> // access to dense SUNMatrix
+#include <sunlinsol/sunlinsol_dense.h> // access to dense SUNLinearSolver
+#include <cvode/cvode_direct.h> // access to CVDls interface
+#include <sundials/sundials_types.h>  // defs. of realtype, sunindextype
+#include <sundials/sundials_math.h>  // contains the macros ABS, SUNSQR, EXP
+
 #include <sundials/sundials_dense.h>
 #include <sundials/sundials_types.h>
 #include "application/DataStructureDirections.h"

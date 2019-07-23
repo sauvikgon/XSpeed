@@ -1,7 +1,6 @@
 #include <sstream>
 #include <iostream>
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "core_system/math/matrix.h"
 #include "core_system/math/ourSimplex_lp_solver/simplex.h"
 #include <omp.h>
