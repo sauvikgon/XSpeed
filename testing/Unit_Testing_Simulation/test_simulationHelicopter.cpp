@@ -13,9 +13,6 @@
 //#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed3by3.h"
 #include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
 
-
-
-
 using namespace std;
 
 SUITE(SimulationTestSuite) {

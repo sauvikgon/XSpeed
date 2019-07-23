@@ -11,7 +11,6 @@
 #include <vector>
 #include <cvode/cvode.h>
 #include <nvector/nvector_serial.h>
-//#include <cvode/cvode_dense.h>
 #include <cvode/cvode.h> // prototypes for CVODE fcts., consts.
 #include <nvector/nvector_serial.h>  // access to serial N_Vector
 #include <sunmatrix/sunmatrix_dense.h> // access to dense SUNMatrix

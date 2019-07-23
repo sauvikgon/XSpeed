@@ -9,6 +9,9 @@
 #include <fstream>
 #include <iomanip>
 #include "../core_system/continuous/Polytope/Polytope.h"
+#include "Utilities/dbg_msg_logger.h"
+
+
 
 simulation::simulation() {
 	// TODO Auto-generated constructor stub
@@ -549,7 +552,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 	// Check if zero dynamics. No need to simulate then.
 	if (Dyn.isEmptyMatrixA && Dyn.isEmptyC) {
-		std::cout << "A location with empty dynamics reached\n";
+		DEBUG_MSG("A location with empty dynamics reached\n");
 		std::vector<sim_start_point> emptylist;
 		return emptylist;
 	}
@@ -882,8 +885,6 @@ void simulation::simulateHa(sim_start_point start, double start_time,
 		wlist.pop_front();
 		unsigned int loc_id = s.locptr->getLocId();
 
-		std::cout << "HA location visited:" << loc_id << std::endl;
-
 		std::vector<sim_start_point> next_pts;
 		next_pts = simulateHaLocation(s, s.cross_over_time, tot_time, ha);
 		//simulateHaLocation also creates a sim_trace per location per start_point and concatenates
@@ -956,7 +957,7 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 	sim_trace.clear();
 
 	// dump the simtraces list into this->sim_trace
-//TODO:: Let us note the time if expensive then better return "list <list<trace_point>> simtraces"
+	//TODO:: Let us note the time if expensive then better return "list <list<trace_point>> simtraces"
 	for (unsigned int i = 0; i < N_cores; i++) {
 		for (std::list<std::list<trace_point> >::iterator it =
 				simtraces[i].begin(); it != simtraces[i].end(); it++) {

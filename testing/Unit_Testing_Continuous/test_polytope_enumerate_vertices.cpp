@@ -70,7 +70,7 @@ SUITE(polytope_function_TestSuite) {
 
 	TEST_FIXTURE(Polytope_func_test, enumerate_2dVertices_test2) {
 
-	//	std::cout << "\nRunning Polytope enumerate_2dVertices function test -2\n";
+		//Running Polytope enumerate_2dVertices function test2
 		std::set<std::pair<double, double> > All_vertices;
 
 		row = 4;
@@ -96,23 +96,10 @@ SUITE(polytope_function_TestSuite) {
 
 		All_vertices = P.enumerate_2dVertices(0, 1); //variable 0,1 ie x,y
 		std::set<std::pair<double, double> >::iterator it;
-		/*std::cout << "\nVertices are ...\n";
-		for (it = All_vertices.begin(); it != All_vertices.end(); ++it) {
-			std::pair<double, double> point;
-			point = (*it);
-			cout << "(" << point.first << ", " << point.second << ")\n";
-		}*/
-			math::matrix<double> my_vertices;
-	/*	 my_vertices = matrix_vertices(All_vertices);
-		 std::cout << "My Matrix of Vertices are \n";
-		 for (int i = 0; i < my_vertices.size1(); i++) {
-		 for (int j = 0; j < my_vertices.size2(); j++) {
-		 std::cout << my_vertices(i, j) << "  ";
-		 }
-		 std::cout << "\n";
-		 }*/
-			float output7[7][2];
-		//std::cout << "My Sorted Vertices with closed vertex are \n";
+		math::matrix<double> my_vertices;
+		float output7[7][2];
+		// My Sorted Vertices with closed vertex are
+
 		my_vertices = sort_vertices(All_vertices);
 		for (int i = 0; i < my_vertices.size1(); i++)
 		{
@@ -120,7 +107,6 @@ SUITE(polytope_function_TestSuite) {
 			{
 				output7[i][j]=my_vertices(i, j);
 			}
-			;
 		}
 		out <<my_vertices;
 		const float res7[7][2]={{-4,-2},{4,-2},{4,0},{4,2},{-4,2},{-4,0},{-4,-2}};
@@ -167,6 +153,5 @@ SUITE(polytope_function_TestSuite) {
 	 }
 	 }
 	 */
-
 }
 

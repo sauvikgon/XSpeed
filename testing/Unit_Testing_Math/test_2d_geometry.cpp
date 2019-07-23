@@ -45,7 +45,6 @@ TEST_FIXTURE(geometry_2d, is_collinear_Test) {
 	proper << "true";
 	CHECK_EQUAL(proper.str(), out.str());
 
-	//std::cout << "Result is " << flag << std::endl;
 }
 
 TEST_FIXTURE(geometry_2d, non_collinear_Test) {
@@ -68,11 +67,9 @@ TEST_FIXTURE(geometry_2d, non_collinear_Test) {
 	proper1 << "false";
 	CHECK_EQUAL(proper1.str(), out1.str());
 
-//	std::cout << "Result is " << flag << std::endl;
 }
 
 TEST_FIXTURE(geometry_2d, is_collinear_Test2) {
-//	std::cout << "\nTesting collinear points Test-2\n";
 	p1.first = 4;
 	p1.second = 4;
 
@@ -94,7 +91,6 @@ TEST_FIXTURE(geometry_2d, is_collinear_Test2) {
 	proper << "true";
 	CHECK_EQUAL(proper.str(), out.str());
 
-//	std::cout << "Result is " << flag << std::endl;
 }
 
 TEST_FIXTURE(geometry_2d, angle_uv) {
@@ -110,13 +106,12 @@ TEST_FIXTURE(geometry_2d, angle_uv) {
 	out << ang;
 	proper << "";
 	proper << "90";
-//	std::cout << "Result is Angle = " << ang << std::endl;	//90 degree
 
 	CHECK_EQUAL(proper.str(), out.str());
 }
 
 TEST_FIXTURE(geometry_2d, angle_uv_test2) {
-//	std::cout << "\nReturn angle between u and v\n";
+//	Return angle between u and v\n";
 	std::vector<double> dir1(2, 0), dir2(2, 0);
 
 	dir1[0] = 1;
@@ -129,8 +124,6 @@ TEST_FIXTURE(geometry_2d, angle_uv_test2) {
 	out << ang;
 	proper << "";
 	proper << "45";
-
-//	std::cout << "Result is Angle = " << ang << std::endl;	//45 degree
 
 	CHECK_EQUAL(proper.str(), out.str());
 }

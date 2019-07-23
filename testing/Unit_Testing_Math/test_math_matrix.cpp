@@ -62,12 +62,10 @@ TEST_FIXTURE(matrix_class, minus_Test) {
 	m1.minus(m2, output);
 	float outputD[3][3];
 
-	cout << "\nResult of Matrix_Minus \n";
-	 for (unsigned int i = 0; i < output.size1(); i++)
-	 {	for (unsigned int j = 0; j < output.size2(); j++)
-			 outputD[i][j]=output(i, j);
-	 }
-	std::cout << output;
+	for (unsigned int i = 0; i < output.size1(); i++)
+	{	for (unsigned int j = 0; j < output.size2(); j++)
+		 outputD[i][j]=output(i, j);
+	}
 
 	const float res1[3][3]={{0,0,2},{2,2,4},{6,6,6}};
 
@@ -1264,15 +1262,9 @@ TEST_FIXTURE(matrix_class, expTest)
 	math::matrix<double> exp_Amatrix(row,col);
 	Amatrix.matrix_exponentiation(exp_Amatrix);
 
-	// display the result to observe
-//	for(unsigned int i=0;i<row;i++)
-//	{
-//		for(unsigned int j=0;j<col;j++)
-//			std::cout << exp_Amatrix(i,j) << " ";
-//		std::cout << "\n";
-//	}
+	float mat_norm = Amatrix.norm_inf();
 
-	std::cout << "norm of Amatrix:" << Amatrix.norm_inf() << std::endl;
+	CHECK_CLOSE(mat_norm, 11867.9, 1);
 
 }
 

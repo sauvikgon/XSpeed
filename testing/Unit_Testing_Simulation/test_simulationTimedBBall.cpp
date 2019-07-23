@@ -33,16 +33,10 @@ TEST_FIXTURE(Example, SimulationTestTimedBBall) {
 	hybrid_automata ha;
 		std::list<initial_state::ptr> init_state;
 		ReachabilityParameters reach_parameters;
-//		std::cout<<"Enter Time Bound\n";
-//		cin>>timebound;
-//		std::cout<<"Enter Time Step\n";
-//		cin>>timestep;
 
 	reach_parameters.TimeBound = 10; //Total Time Interval
 	reach_parameters.time_step = 0.01;
 	reach_parameters.Iterations = reach_parameters.TimeBound/reach_parameters.time_step; // number of iterations
-
-
 
 	simulation::ptr sim = simulation::ptr(new simulation());
 

@@ -43,9 +43,6 @@ SUITE(Location_TestSuite) {
 	}
 
 	TEST_FIXTURE(ClassLocation, constructor2_location_Test) {
-//location(string Name, Dynamics System_Dynamics, polytope Invariant);
-		/*	cout << "\n\n\nRuning From Module Hybrid Automata" << endl;
-		 cout << "*********************************************" << endl;*/
 		nn = "Hello Testing";
 
 		size_type row = 2;

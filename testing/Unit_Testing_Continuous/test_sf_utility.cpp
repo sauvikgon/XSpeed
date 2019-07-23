@@ -122,8 +122,7 @@ TEST_FIXTURE(ExampleSF_Utility, compute_beta_Test) {
 	double tau = 2, result;
 	result = compute_beta(system_dynamics, tau, 1);
 	//m2.matrix_exponentiation(res);
-	//	cout<<"\nResult of compute_beta = ";
-	//	cout<<result<<"\t";
+	std::cout<<"\nResult of compute_beta = "<< result<<"\t";
 	out1 << result;
 	proper1 << "6686.91";
 	CHECK_EQUAL(proper1.str(), out1.str());
@@ -133,7 +132,7 @@ TEST_FIXTURE(ExampleSF_Utility, compute_alfa_Test) {
 	math::matrix<double> res = math::matrix<double>();
 	double tau = 2, result;
 	result = compute_alfa<double>(tau, system_dynamics, V, 1);
-//		cout<<"\nResult of compute_alfa = "<<result;
+	cout<<"\nResult of compute_alfa = "<< result;
 	out2 << result;
 	proper2 << "27490.6";
 	CHECK_EQUAL(proper2.str(), out2.str());

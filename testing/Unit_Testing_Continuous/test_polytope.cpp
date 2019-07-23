@@ -73,7 +73,6 @@ SUITE(sf_utility_TestSuite) {
 
 		res = I->max_norm(1, I->getSystemDimension()); //temp solu
 		out << res;
-//	std::cout << res;
 		proper << "7";
 		CHECK_EQUAL(proper.str(), out.str());
 
@@ -181,7 +180,7 @@ SUITE(sf_utility_TestSuite) {
 		boundSignV = 1;
 
 		stringstream out1, proper1;
-	//	cout<<"\n\n\nHello Amit my output from here \n\n\n";
+
 		k = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 		lp_solver lp2(1);
 		lp2.setMin_Or_Max(2);
@@ -191,7 +190,7 @@ SUITE(sf_utility_TestSuite) {
 		direction[1] = 0;
 
 		sf = k->computeSupportFunction(direction, lp2);
-	//	std::cout << sf<<endl;
+
 		out1 << sf;
 		proper1 << "2";
 		CHECK_EQUAL(proper1.str(), out1.str());
@@ -200,7 +199,7 @@ SUITE(sf_utility_TestSuite) {
 		direction[1] = 0;
 		stringstream out2, proper2;
 		sf = k->computeSupportFunction(direction, lp2);
-	//	std::cout << sf;
+
 		out2 << sf;
 		proper2 << "2";
 		CHECK_EQUAL(proper2.str(), out2.str());
@@ -210,7 +209,7 @@ SUITE(sf_utility_TestSuite) {
 		sf = k->computeSupportFunction(direction, lp2);
 		stringstream out3, proper3;
 
-//		std::cout << sf;
+
 		out3 << sf;
 		proper3 << "-2";
 		CHECK_EQUAL(proper3.str(), out3.str());
@@ -219,7 +218,7 @@ SUITE(sf_utility_TestSuite) {
 		direction[1] = -1;
 
 		sf = k->computeSupportFunction(direction, lp2);
-//		std::cout << sf;
+
 		stringstream out4, proper4;
 		out4 << sf;
 		proper4 << "-2";
@@ -256,7 +255,7 @@ SUITE(sf_utility_TestSuite) {
 		direction[0] = 0;
 		direction[1] = -1;
 		sf = quad3->computeSupportFunction(direction, lp3);
-	//	std::cout << sf;
+
 		out5 << sf;
 		proper5 << "4";
 		CHECK_EQUAL(proper5.str(), out5.str());
@@ -265,7 +264,7 @@ SUITE(sf_utility_TestSuite) {
 
 		bool flag;
 		flag = I->check_polytope_intersection(P2, 1);
-		//cout << "Same polytope so Intersecting = "<<flag;
+		// Same polytope, so should be intersecting
 		out << flag;
 		proper << "1";
 		CHECK_EQUAL(proper.str(), out.str());
@@ -274,7 +273,6 @@ SUITE(sf_utility_TestSuite) {
 	TEST_FIXTURE(ExamplePolytope, NOTintersectingPolytopes_Test) {
 
 		bool flag;
-
 		row = 4;
 		col = 2;
 		ConstraintsMatrixP.resize(row, col);
@@ -298,7 +296,7 @@ SUITE(sf_utility_TestSuite) {
 
 		P2 = polytope::ptr(new polytope(ConstraintsMatrixP, boundValueP, boundSignP));
 		flag = I->check_polytope_intersection(P2,1);
-	//	cout << "Result should be false ie Not intersection = " <<flag<< endl;
+		//Result should be false, i.e Not intersection
 		out << flag;
 		proper << "0";
 		CHECK_EQUAL(proper.str(), out.str());

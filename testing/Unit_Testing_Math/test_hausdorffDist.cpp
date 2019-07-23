@@ -62,7 +62,6 @@ TEST_FIXTURE(Example, HausdorffDistanceTest) {
 			new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
 
 	double d = HausdorffDistance(G, G);
-	std::cout << "Hausdorff Distance: " << d << std::endl;
 	if (d < 0.000001)
 		d = 0;
 	CHECK_EQUAL(d, 0);
@@ -119,15 +118,12 @@ TEST_FIXTURE(Example, HausdorffDistanceTest2) {
 			new polytope(cV, bV, boundSignV));
 
 	double d = HausdorffDistance(G, G2);
-	std::cout << "Hausdorff Distance (should be 7.0710678): " << d << std::endl;
+
 	int res=0;
-//	res= d - 7.07107;
 	if ((d - 7.07107) < 0.00001)
 		res = 0;
 
 	CHECK_EQUAL(res, 0);
-	//CHECK_EQUAL(d, 7.07107);
-
 }
 TEST_FIXTURE(Example, HausdorffDistanceTest3) {
 
@@ -179,9 +175,7 @@ TEST_FIXTURE(Example, HausdorffDistanceTest3) {
 			new polytope(cV, bV, boundSignV));
 
 	double d = HausdorffDistance(G, G2);
-	std::cout << "Hausdorff Distance (should be 5) = " << d << std::endl;
 	int res=d;
-	//CHECK_EQUAL(d, 5);
 	CHECK_EQUAL(res, 5);
 
 }

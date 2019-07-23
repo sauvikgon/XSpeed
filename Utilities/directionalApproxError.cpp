@@ -6,6 +6,7 @@
  */
 
 #include "Utilities/directionalApproxError.h"
+#include "Utilities/dbg_msg_logger.h"
 
 nlopt::opt optProb1; // nlopt object to solve the problem 1
 
@@ -16,27 +17,27 @@ nlopt::opt optProb1; // nlopt object to solve the problem 1
 void printErrorStatus(int status) {
 
 	if (status == -1)
-		std::cout << "nlopt::result:=status =  FAILURE " << std::endl;
+		DEBUG_MSG("nlopt::result:=status =  FAILURE " << std::endl);
 	if (status == -2)
-		std::cout << "nlopt::result:=status = INVALID_ARGS " << std::endl;
+		DEBUG_MSG("nlopt::result:=status = INVALID_ARGS " << std::endl);
 	if (status == -3)
-		std::cout << "nlopt::result:=status = OUT_OF_MEMORY " << std::endl;
+		DEBUG_MSG("nlopt::result:=status = OUT_OF_MEMORY " << std::endl);
 	if (status == -4)
-		std::cout << "nlopt::result:=status = ROUNDOFF_LIMITED " << std::endl;
+		DEBUG_MSG(<< "nlopt::result:=status = ROUNDOFF_LIMITED " << std::endl);
 	if (status == -5)
-		std::cout << "nlopt::result:=status = FORCED_STOP " << std::endl;
+		DEBUG_MSG("nlopt::result:=status = FORCED_STOP " << std::endl);
 	if (status == 1)
-		std::cout << "nlopt::result:=status = SUCCESS " << std::endl;
+		DEBUG_MSG("nlopt::result:=status = SUCCESS " << std::endl);
 	if (status == 2)
-		std::cout << "nlopt::result:=status = STOPVAL_REACHED " << std::endl;
+		DEBUG_MSG("nlopt::result:=status = STOPVAL_REACHED " << std::endl);
 	if (status == 3)
-		std::cout << "nlopt::result:=status = FTOL_REACHED " << std::endl;
+		DEBUG_MSG(<< "nlopt::result:=status = FTOL_REACHED " << std::endl);
 	if (status == 4)
-		std::cout << "nlopt::result:=status = XTOL_REACHED " << std::endl;
+		DEBUG_MSG(<< "nlopt::result:=status = XTOL_REACHED " << std::endl);
 	if (status == 5)
-		std::cout << "nlopt::result:=status = MAXEVAL_REACHED " << std::endl;
+		DEBUG_MSG("nlopt::result:=status = MAXEVAL_REACHED " << std::endl);
 	if (status == 6)
-		std::cout << "nlopt::result:=status = MAXTIME_REACHED " << std::endl;
+		DEBUG_MSG("nlopt::result:=status = MAXTIME_REACHED " << std::endl);
 }
 
 double LinearHalfSpaceConstraint(const std::vector<double> &x, std::vector<double> &grad,
@@ -254,7 +255,5 @@ double getSolution(polytope::ptr X, std::list<std::vector<double> > X2) {
  */
 double ApproxError(polytope::ptr X1, std::list<std::vector<double> > X2) {
 	double d = getSolution(X1, X2);
-	std::cout << "Directional Approximation Error = " << d << std::endl;
-
 	return d;
 }

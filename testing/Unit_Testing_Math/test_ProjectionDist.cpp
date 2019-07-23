@@ -75,7 +75,6 @@ TEST_FIXTURE(Example, ApproxErrorTest1) {
 	X2.push_back(v);
 
 	double d = ApproxError(box, X2);
-	std::cout << "Approxmiation Error (should be 0): " << d << std::endl;
 	if (d < 0.000001)
 		d = 0;
 	CHECK_EQUAL(d, 0);
@@ -129,7 +128,6 @@ TEST_FIXTURE(Example, ApproxErrorTest2) {
 	X2.push_back(v);
 
 	double d = ApproxError(box, X2);
-	std::cout << "Approxmiation Error (should be 3.5355): " << d << std::endl;
 	if ((d - 3.5355) < 0.0001)
 		d = 0;
 	CHECK_EQUAL(d, 0);

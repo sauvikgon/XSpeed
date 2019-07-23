@@ -1,5 +1,6 @@
 
 #include "Utilities/HausdorffDistance.h"
+#include <Utilities/dbg_msg_logger.h>
 
 nlopt::opt minopt; // nlopt object to solve the distance Inf over Y
 
@@ -10,27 +11,27 @@ nlopt::opt minopt; // nlopt object to solve the distance Inf over Y
 void printStatus2(int status) {
 
 	if (status == -1)
-		std::cout << "nlopt::result:=status =  FAILURE "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status =  FAILURE " << std::endl);
 	if (status == -2)
-		std::cout << "nlopt::result:=status = INVALID_ARGS "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = INVALID_ARGS " << std::endl);
 	if (status == -3)
-		std::cout << "nlopt::result:=status = OUT_OF_MEMORY "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = OUT_OF_MEMORY " << std::endl);
 	if (status == -4)
-		std::cout << "nlopt::result:=status = ROUNDOFF_LIMITED "<<std::endl;
+		DEBUG_MSG(<< "nlopt::result:=status = ROUNDOFF_LIMITED " << std::endl);
 	if (status == -5)
-		std::cout << "nlopt::result:=status = FORCED_STOP "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = FORCED_STOP " << std::endl);
 	if (status == 1)
-		std::cout << "nlopt::result:=status = SUCCESS "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = SUCCESS " << std::endl);
 	if (status == 2)
-		std::cout << "nlopt::result:=status = STOPVAL_REACHED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = STOPVAL_REACHED " << std::endl);
 	if (status == 3)
-		std::cout << "nlopt::result:=status = FTOL_REACHED "<<std::endl;
+		DEBUG_MSG(<< "nlopt::result:=status = FTOL_REACHED " << std::endl);
 	if (status == 4)
-		std::cout << "nlopt::result:=status = XTOL_REACHED "<<std::endl;
+		DEBUG_MSG(<< "nlopt::result:=status = XTOL_REACHED " << std::endl);
 	if (status == 5)
-		std::cout << "nlopt::result:=status = MAXEVAL_REACHED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = MAXEVAL_REACHED " << std::endl);
 	if (status == 6)
-		std::cout << "nlopt::result:=status = MAXTIME_REACHED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = MAXTIME_REACHED " << std::endl);
 }
 
 double myconstraintH(const std::vector<double> &x, std::vector<double> &grad, void *data) {
@@ -175,9 +176,8 @@ double getDistance(polytope::ptr X, polytope::ptr Y)
 double HausdorffDistance(polytope::ptr X, polytope::ptr Y)
 {
 	double d1 = getDistance(X,Y);
-	std::cout<<"Called second getDistance()"<<std::endl;
 	double d2 = getDistance(Y,X);
-	std::cout<<"d1="<<d1<<" and d2="<<d2<<std::endl;
+	DEBUG_MSG("Hausdorff-Distance d(X,Y)=" << d1 << " and d(Y,X) = " << d2 << std::endl);
 
 	return d1>d2?d1:d2;
 }

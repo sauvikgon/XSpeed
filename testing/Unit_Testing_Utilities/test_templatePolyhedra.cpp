@@ -48,7 +48,7 @@ TEST_FIXTURE(TemplatePolyhedra, union_TemplatePolytope_Test) {
 	test = t->union_TemplatePolytope(t2);
 	test = test->union_TemplatePolytope(t);
 
-	std::cout << "output union template Polytope \n ";
+	// output union template Polytope
 	 for(unsigned int i = 0; i<test->getMatrixSupportFunction().size1();i++)
 	 {
 		 for(unsigned int j=0;j<test->getMatrixSupportFunction().size2();j++)

@@ -1,4 +1,5 @@
 #include "core_system/math/nlp_solver/nlp_solver.h"
+#include "Utilities/dbg_msg_logger.h"
 
 /**
  * A linear constraint represented as ax+b ≤ 0
@@ -42,27 +43,27 @@ double myObjFunc(const std::vector<double> &y, std::vector<double> &grad,
 void printStatus(nlopt::result status) {
 
 	if (status == -1)
-		std::cout << "nlopt::result:=status =  FAILURE "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status =  FAILURE " << std::endl);
 	if (status == -2)
-		std::cout << "nlopt::result:=status = INVALID_ARGS "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = INVALID_ARGS " << std::endl);
 	if (status == -3)
-		std::cout << "nlopt::result:=status = OUT_OF_MEMORY "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = OUT_OF_MEMORY " <<std::endl);
 	if (status == -4)
-		std::cout << "nlopt::result:=status = ROUNDOFF_LIMITED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = ROUNDOFF_LIMITED "<<std::endl);
 	if (status == -5)
-		std::cout << "nlopt::result:=status = FORCED_STOP "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = FORCED_STOP " << std::endl);
 	if (status == 1)
-		std::cout << "nlopt::result:=status = SUCCESS "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = SUCCESS " << std::endl);
 	if (status == 2)
-		std::cout << "nlopt::result:=status = STOPVAL_REACHED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = STOPVAL_REACHED " << std::endl);
 	if (status == 3)
-		std::cout << "nlopt::result:=status = FTOL_REACHED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = FTOL_REACHED "<<std::endl);
 	if (status == 4)
-		std::cout << "nlopt::result:=status = XTOL_REACHED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = XTOL_REACHED "<<std::endl);
 	if (status == 5)
-		std::cout << "nlopt::result:=status = MAXEVAL_REACHED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = MAXEVAL_REACHED "<<std::endl);
 	if (status == 6)
-		std::cout << "nlopt::result:=status = MAXTIME_REACHED "<<std::endl;
+		DEBUG_MSG("nlopt::result:=status = MAXTIME_REACHED "<<std::endl);
 }
 
 /**

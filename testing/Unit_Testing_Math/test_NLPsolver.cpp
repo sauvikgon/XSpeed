@@ -11,9 +11,10 @@
 #include <sstream>
 #include <exception>
 #include <vector>
-#include <cmath>"
+#include <cmath>
 #include "core_system/continuous/Polytope/Polytope.h"
 #include "core_system/math/nlp_solver/nlp_solver.h"
+#include "Utilities/dbg_msg_logger.h"
 
 
 using namespace std;
@@ -73,9 +74,10 @@ TEST_FIXTURE(Example, NLPSoverTest) {
 	std::vector<double> objfunc(col);
 	objfunc[0] = 1;
     objfunc[1] = 0;
-	std::cout << "Calling NLP Solver " << std::endl;
+
 	double d = computeNLP(G, objfunc);
-	std::cout << "Support Function of NLP: " << d << std::endl;
+	DEBUG_MSG("Support function of a polytope computed from NLP: " << d << std::endl) ;
+
 	CHECK_EQUAL(d,15);
 
 }

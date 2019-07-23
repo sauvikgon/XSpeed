@@ -82,41 +82,6 @@ TEST_FIXTURE(Glpk_LPSolver, CPU_LP_Test) {
 	proper << "10.2";
 
 	CHECK_EQUAL(proper.str(), out.str());
-
-	/*
-	 math::matrix<double> A;
-	 std::vector<double> b;
-	 std::vector<int> status_val;
-	 int N_S = 1000;
-	 int N_C = 2;
-	 int N_V = 2;
-
-	 A = math::matrix<double>(N_C, N_V);
-	 A(0, 0) = 1;
-	 A(0, 1) = 1;
-	 A(1, 0) = 2;
-	 A(1, 1) = 1;
-
-	 b.resize(N_C);
-	 b[0] = 4;
-	 b[1] = 5;
-
-	 boundSignI = 1;
-
-	 glpk_lp_solver lp;
-	 lp.setMin_Or_Max(2);	//2 for GLP_MAX
-	 lp.setConstraints(A, b, boundSignI);
-
-	 double res;
-	 direction.resize(2);
-	 direction[0]=3;
-	 direction[1]=4;
-	 std::cout << "\n**Answer_Of_All_Simplex GLPK**\n";
-	 for (int i=0;i<N_S;i++){
-	 res = lp.Compute_LLP(direction);
-	 cout <<res<<"\n";
-	 }
-	 */
 }
 
 }
