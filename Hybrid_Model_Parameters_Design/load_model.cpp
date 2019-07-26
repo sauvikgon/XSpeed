@@ -34,27 +34,27 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-		//amit				set_nav04_timed(ha, init_state, reach_parameters);
+		set_nav04_timed(ha, init_state, reach_parameters);
 		//Set_NavTimedEpsilonRelaxGuard(ha, init_state, reach_parameters);
 		//SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_2) {
-		//amit				SetNavigationModel2(ha, init_state, reach_parameters); //My own testing Model NAV2
+		SetNavigationModel2(ha, init_state, reach_parameters); //My own testing Model NAV2
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_3) {
-		//amit				SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
+		SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
-		//amit				SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) { // Model 9
-		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters); // NAV_9by9 Timed model
+		SetNavigationModel9by9Timed(ha,init_state,reach_parameters); // NAV_9by9 Timed model
 	}
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
@@ -104,7 +104,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 		//setFisher_Star(ha,init_state,reach_parameters);		
 
-		//set_watertank_controller(ha,init_state,reach_parameters);
+		set_watertank_controller(ha,init_state,reach_parameters);
 		//setISS_270(ha,init_state,reach_parameters); // International Space Station-217 vars, continuous system.
 		//SetTimedZigZag(ha,init_state,reach_parameters);
 		//setSpacecraft(ha,init_state,reach_parameters);
