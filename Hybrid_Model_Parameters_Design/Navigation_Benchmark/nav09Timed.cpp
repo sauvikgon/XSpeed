@@ -17917,6 +17917,10 @@ ConstraintsMatrixI(4 , 2) = 1;
 ConstraintsMatrixI(5 , 2) = -1;
 ConstraintsMatrixI(6 , 3) = 1;
 ConstraintsMatrixI(7 , 3) = -1;
+ConstraintsMatrixI(8 , 4) = 1;
+ConstraintsMatrixI(9 , 4) = -1;
+
+
 boundValueI.resize(row );
 boundValueI.assign(row,0);
 boundValueI[0]=0.8;
@@ -17927,6 +17931,8 @@ boundValueI[4]=0.5;
 boundValueI[5]=-0.5;
 boundValueI[6]=0.5;
 boundValueI[7]=-0.5;
+boundValueI[8]=0.5;
+boundValueI[9]=-0.5;
 
 
 initial_polytope_I0 = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));

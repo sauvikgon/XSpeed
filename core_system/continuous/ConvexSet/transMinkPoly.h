@@ -2,7 +2,7 @@
  * transMinkPoly.h
  *
  *  Created on: 16-Nov-2014
- *      Author: amit
+ *      Author: Amit
  */
 
 #include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
@@ -15,8 +15,9 @@
 
 /**
  * This class is to implement convex sets of the form:
- * C' = ATRANS. C \oplus t. BTRANS.U \oplus \oplus beta.B , where C, U are polytopes
- * and ATRANS, BTRANS are transformation matrices, Beta is a constant and B is a unit ball over the specified norm
+ * C' = ATRANS. C \oplus t. BTRANS.U \oplus beta.B , where C, U are polytopes
+ * and ATRANS, BTRANS are transformation matrices, Beta is a constant and B is a
+ * unit ball over the specified norm.
  */
 
 class transMinkPoly : public supportFunctionProvider
