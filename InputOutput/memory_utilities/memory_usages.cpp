@@ -6,6 +6,13 @@
  */
 
 #include "memory_usages.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include  <iostream>
+#include <mach/mach.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+using namespace std ;
 
 
 
@@ -30,12 +37,17 @@ long getCurrentProcess_VirtualMemoryUsed() { //Note: this value is in KB!
 	FILE* file = fopen("/proc/self/status", "r");	//reading the Linux resource file
 	long result = -1;
 	char line[128];
-
-	while (fgets(line, 128, file) != NULL) {
+	if(file==NULL)
+		{
+			std::cout<<"\n System Information cannot be found, System is MacOS or Windows\n";
+		}
+	else
+	{while (fgets(line, 128, file) != NULL) {
 		if (strncmp(line, "VmSize:", 7) == 0) {		//VmSize : Virtual Memory Size currently used
 			result = parseLine(line);
 			break;
 		}
+	}
 	}
 	fclose(file);
 	return result;
@@ -44,16 +56,32 @@ long getCurrentProcess_VirtualMemoryUsed() { //Note: this value is in KB!
 /*
  * Returns the Physical Memory currently used by current process:
  */
+size_t getCurrentRSS()//Process for macOS machines. Value will come in bytes
+{
+	struct mach_task_basic_info info;
+	mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+	if ( task_info( mach_task_self( ), MACH_TASK_BASIC_INFO,
+		(task_info_t)&info, &infoCount ) != KERN_SUCCESS )
+		return (size_t)0L;		/* Can't access? */
+	return (size_t)info.resident_size;
+}
 long getCurrentProcess_PhysicalMemoryUsed() { //Note: this value is in KB!
 	FILE* file = fopen("/proc/self/status", "r");	//reading the Linux resource file
 	long result = -1;
 	char line[128];
-
+	if(file==NULL)//if the source file is not found, machine is running macOS
+			{
+				result=getCurrentRSS();
+				result=result/1024;
+				//std::cout<<"\n vmRSS is: "<< result;
+			}
+	else {
 	while (fgets(line, 128, file) != NULL) {
 		if (strncmp(line, "VmRSS:", 6) == 0) {		//VmRSS : Virtual Memory Size currently used
 			result = parseLine(line);
 			break;
 		}
+	}
 	}
 	fclose(file);
 	return result;
