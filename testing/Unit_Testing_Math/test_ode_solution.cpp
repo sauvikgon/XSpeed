@@ -21,8 +21,7 @@ struct Example {
 	}
 
 };
-TEST_FIXTURE(Example, solutionTest)
-{
+TEST_FIXTURE(Example, solutionTest) {
 
 	Dynamics dyn;
 	math::matrix<double> Amatrix(5,5);
@@ -76,22 +75,17 @@ TEST_FIXTURE(Example, solutionTest)
 	sim->insert_to_map("x4",3);
 	sim->insert_to_map("t",4);
 
-	std::vector<double> x0(5), final_numerical(5), final_analytic(5);
+	std::vector<double> x0(5), final_numeric(5), final_analytic(5);
 	x0[0] = 1.01; x0[3] = 0.01;
 	x0[1] = 0.1;  x0[4] = 0.01;
 	x0[2] = 0.1;
 
 	double sim_time = 5.3;
-	final_numerical = sim->simulate(x0,sim_time);
-	std::cout << "Numerical Solution of ODE:";
-	for(unsigned int i=0;i<5;i++)
-		std::cout << final_numerical[i] << " " << std::endl;
+	final_numeric = sim->simulate(x0,sim_time);
 
-	final_analytic= ODESol(x0,dyn,sim_time);
+	final_analytic = ODESol(x0,dyn,sim_time);
 
-	std::cout << "Analytical Solution of ODE:";
-	for(unsigned int i=0;i<5;i++)
-		std::cout << final_analytic[i] << " " << std::endl;
+	CHECK_ARRAY_CLOSE(final_numeric, final_analytic, 5, 0.1);
 
 	// another test
 	math::matrix<double> Amatrix1(4,4);
@@ -141,19 +135,17 @@ TEST_FIXTURE(Example, solutionTest)
 	x[2] = 0.1;
 
 	sim_time = 5.3;
-	final_numerical = sim->simulate(x,sim_time);
-	std::cout << "Numerical Solution of ODE:";
-	for(unsigned int i=0;i<4;i++)
-		std::cout << final_numerical[i] << " " << std::endl;
-
-	//analytical solution
-
+	final_numeric = sim->simulate(x,sim_time);
 	final_analytic = ODESol(x,dyn,sim_time);
-	std::cout << "Analytic Solution of ODE:";
+
 	for(unsigned int i=0;i<4;i++)
-		std::cout << final_analytic[i] << " " << std::endl;
-
-	CHECK_ARRAY_CLOSE(final_numerical, final_analytic, 4,  2.0);
-
+	{
+		if(fabs(final_numeric[i] - final_analytic[i])<=2)
+			continue;
+		else
+			std::cout << "FAILED Comparison\n";
+	}
+	CHECK_ARRAY_CLOSE(final_numeric, final_analytic, 4, 2);
 }
+
 }
