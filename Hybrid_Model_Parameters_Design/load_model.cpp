@@ -75,7 +75,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 		//SetBilliardModel(ha, init_state, reach_parameters);
 
-		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
+		SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
@@ -104,7 +104,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 		//setFisher_Star(ha,init_state,reach_parameters);		
 
-		set_watertank_controller(ha,init_state,reach_parameters);
+		//set_watertank_controller(ha,init_state,reach_parameters);
 		//setISS_270(ha,init_state,reach_parameters); // International Space Station-217 vars, continuous system.
 		//SetTimedZigZag(ha,init_state,reach_parameters);
 		//setSpacecraft(ha,init_state,reach_parameters);

@@ -93,6 +93,7 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 	double V_max_norm = 0.0;
 
 	if (!SysD.isEmptyMatrixB) { //if NOT Empty
+
 		SysD.MatrixB.transpose(Btrans);
 		dim_for_Max_norm = SysD.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
@@ -109,10 +110,9 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 	}else {
 		double tt1 = exp(tau * norm_A);
 
-		if (std::isinf(tt1)){	//todo:: need to handle for infinity value
+		if (std::isinf(tt1)){
 			throw std::runtime_error("infinity in compute beta\n");
 		}
-		//result = (exp(tau * norm_A) - 1 - tau * norm_A) * (V_max_norm / norm_A);
 		result = (tt1 - 1 - tau * norm_A) * (V_max_norm / norm_A);
 	}
 

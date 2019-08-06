@@ -2,7 +2,7 @@
  * test_sf_utility.cpp
  *
  *  Created on: 05-Jul-2014
- *      Author: amit
+ *      Author: Amit
  */
 
 #include <sstream>
@@ -120,11 +120,10 @@ TEST_FIXTURE(ExampleSF_Utility, sf_unitball_infnorm_Test) {
 TEST_FIXTURE(ExampleSF_Utility, compute_beta_Test) {
 	math::matrix<double> res = math::matrix<double>();
 	double tau = 2, result;
-	result = compute_beta(system_dynamics, tau, 1);
-	//m2.matrix_exponentiation(res);
-	std::cout<<"\nResult of compute_beta = "<< result<<"\t";
+	result = compute_beta<double>(system_dynamics, tau, 1);
+
 	out1 << result;
-	proper1 << "6686.91";
+	proper1 << "1.54619e+06";
 	CHECK_EQUAL(proper1.str(), out1.str());
 
 }
@@ -140,24 +139,28 @@ TEST_FIXTURE(ExampleSF_Utility, compute_alfa_Test) {
 }
 TEST_FIXTURE(ExampleSF_Utility, get_ublas_matrix_Test) {
 	math::matrix<double> res = math::matrix<double>();
-	std::vector<std::vector<double> > A; //Testing vector vector to convert into ublas matrix
+	std::vector<std::vector<double> > A; //Testing vector to convert into ublas matrix
 	A.resize(2);
 	for (int i = 0; i < 2; i++) {
 		A[i].resize(2);
 	}
+
 	A[0][0] = 1;
 	A[0][1] = 2;
 	A[1][0] = 3;
 	A[1][1] = 4;
+
 	get_ublas_matrix(A, res);
+
 	float output8[2][2];
-	 for(int i=0;i<2;i++)
-	 {
+
+	for(int i=0;i<2;i++)
+	{
 		 for(int j=0;j<2;j++) {
 			 output8[i][j]=res(i,j);
-	 }
-	 }
-	 out3 << res;
+		 }
+	}
+	out3 << res;
 	const float res8[2][2]={{1,2},{3,4}};
 	CHECK_ARRAY2D_CLOSE(res8, output8, 2, 2, 0.0);
 

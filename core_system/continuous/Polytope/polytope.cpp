@@ -569,12 +569,12 @@ void polytope::printPoly(){
 	std::cout << "\n";
 }
 
-
 /*
  * Reads Hyst's formats "2<=v1 & v1 <=3 & 2<=v2 & v2 <=3"
  * unlike the function string_to_poly() reads the format " v1 >=2 & v1 <= 3 & v2 >=2 & v2 <=3"
  * Incomplete work::todo
  */
+
 void string_to_poly_HystFormat(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
 {
 	std::list<std::string> all_args;
