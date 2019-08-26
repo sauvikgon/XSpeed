@@ -9,10 +9,13 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include  <iostream>
-#include <mach/mach.h>
 #include <sys/sysctl.h>
 #include <sys/types.h>
-using namespace std ;
+using namespace std;
+
+#if defined(__MACH__)
+	#include <mach/mach.h>
+#endif
 
 
 
@@ -33,7 +36,7 @@ long parseLine(char* line) {
  * So to measure memory consumption, VmSize is pretty useless.
  *
  */
-
+#if defined(__MACH__)
 size_t getVMused_CurrentProcess()//Function to get VM used by current process in MacOS
 {
 	struct mach_task_basic_info info;
@@ -45,26 +48,30 @@ size_t getVMused_CurrentProcess()//Function to get VM used by current process in
 	return (size_t)info.virtual_size;
 
 }
+#endif
+
 long getCurrentProcess_VirtualMemoryUsed() { //Note: this value is in KB!
+#if defined(__unix__)
 	FILE* file = fopen("/proc/self/status", "r");	//reading the Linux resource file
 	long result = -1;
 	char line[128];
-	if(file==NULL)
-		{
-			result=getVMused_CurrentProcess()/1024;
-		}
-	else
-	{while (fgets(line, 128, file) != NULL) {
+	while (fgets(line, 128, file) != NULL) {
 		if (strncmp(line, "VmSize:", 7) == 0) {		//VmSize : Virtual Memory Size currently used
 			result = parseLine(line);
 			break;
 		}
 	}
-	}
 	fclose(file);
+#endif
+
+#if defined(__MACH__)
+	result=getVMused_CurrentProcess()/1024;
+#endif
+
 	return result;
 }
 
+#if defined(__MACH__)
 /*
  * Returns the Physical Memory currently used by current process:
  */
@@ -77,23 +84,25 @@ size_t getCurrentRSS()//Process resident set size retrieval process for macOS ma
 		return (size_t)0L;		/* Can't access? */
 	return (size_t)info.resident_size;
 }
+#endif
+
 long getCurrentProcess_PhysicalMemoryUsed() { //Note: this value is in KB!
+#if defined(__unix__)
 	FILE* file = fopen("/proc/self/status", "r");	//reading the Linux resource file
 	long result = -1;
 	char line[128];
-	if(file==NULL)//if the source file is not found, machine is running macOS
-			{
-				result=getCurrentRSS()/1024;
-
-			}
-	else {
-	while (fgets(line, 128, file) != NULL) {
+		while (fgets(line, 128, file) != NULL) {
 		if (strncmp(line, "VmRSS:", 6) == 0) {		//VmRSS : Virtual Memory Size currently used
 			result = parseLine(line);
 			break;
 		}
 	}
-	}
 	fclose(file);
+#endif
+
+#if defined(__MACH__)
+		result=getCurrentRSS()/1024;
+#endif
+
 	return result;
 }

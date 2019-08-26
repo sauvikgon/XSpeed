@@ -75,7 +75,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 		//SetBilliardModel(ha, init_state, reach_parameters);
 
-		SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
+		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 		//user_model(ha, init_state,reach_parameters);
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
@@ -86,7 +86,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//---------------Not working models-------------
-		//setbuild48(ha, init_state, reach_parameters);
+		setbuild48(ha, init_state, reach_parameters);
 		//setfwr(ha, init_state, reach_parameters);
 		//setpllConv(ha, init_state, reach_parameters);
 		//setheart(ha, init_state, reach_parameters);

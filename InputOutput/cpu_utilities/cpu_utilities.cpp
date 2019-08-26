@@ -22,6 +22,8 @@ static clock_t lastCPU, lastSysCPU, lastUserCPU;
 static int numProcessors;
 
 void init_cpu_usage() {
+
+#if defined(__unix__)
 	FILE* file;
 	struct tms timeSample;
 	char line[10000];
@@ -31,21 +33,20 @@ void init_cpu_usage() {
 	lastUserCPU = timeSample.tms_utime;
 	cout << "\nMemory and CPU stats can only be calculated for Linux or MacOS distributions. Other OS may cause segmentation fault.\n";
 	file = fopen("/proc/cpuinfo", "r");
-	numProcessors = 0;
-	if(file==NULL)
-	{//The OS is MacOS,
-		size_t numProcessors_size=sizeof(numProcessors);
-		if(sysctlbyname("hw.logicalcpu", &numProcessors, &numProcessors_size, nullptr, 0)!=0)
-				numProcessors--;
-	}
-	else{
-		// OS IS UBUNTU
-		while (fgets(line, 128, file)!= NULL) {
-		if (strncmp(line, "processor", 9) == 0)
-			numProcessors++;
-		}
+			// OS IS UBUNTU
+	while (fgets(line, 128, file)!= NULL) {
+	if (strncmp(line, "processor", 9) == 0)
+		numProcessors++;
 	}
 	fclose(file);
+#endif
+
+#if defined(__MACH__)
+	size_t numProcessors_size = sizeof(numProcessors);
+	if(sysctlbyname("hw.logicalcpu", &numProcessors, &numProcessors_size, nullptr, 0)!=0)
+					numProcessors--;
+#endif
+
 }
 
 double getCurrent_ProcessCPU_usage() {
