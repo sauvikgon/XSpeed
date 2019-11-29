@@ -9,6 +9,7 @@
 #define TPBFS_H_
 
 #include "reachability.h"
+#include "application/sf_directions.h"
 
 class tpbfs : public reachability{
 public:

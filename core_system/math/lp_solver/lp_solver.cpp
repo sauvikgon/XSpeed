@@ -19,10 +19,6 @@ lp_solver::lp_solver() {
 	if (lp_solver_type == GLPK_SOLVER) {
 		glpk_lp_problem = glpk_lp_solver::glpk_ptr(new glpk_lp_solver());
 	}
-
-	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
-		simplex_cpu_lp_problem = Simplex_CPU::simplex_ptr(new Simplex_CPU());
-	}
 	// ******* More can be added later  **************
 }
 
@@ -34,10 +30,6 @@ lp_solver::lp_solver(int solver_type) {
 
 	if (lp_solver_type == GLPK_SOLVER) {
 		glpk_lp_problem = glpk_lp_solver::glpk_ptr(new glpk_lp_solver());
-	}
-
-	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
-		simplex_cpu_lp_problem = Simplex_CPU::simplex_ptr(new Simplex_CPU());
 	}
 
 	// ******* More can be added later  **************
@@ -120,10 +112,6 @@ void lp_solver::setConstraints(math::matrix<double> coeff_constraints,
 		glpk_lp_problem->setConstraints(coeff_constraints, bounds, bound_signs);
 	}
 
-	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
-		simplex_cpu_lp_problem->setConstratint_CPU(coeff_constraints, bounds);
-	}
-
 	// ******* More can be added later  **************
 }
 
@@ -150,9 +138,6 @@ double lp_solver::Compute_LLP(const std::vector<double> coeff_function) {
 		//std::cout << "lp_solver: Unbounded solution to the objective function\n";
 		throw(new std::exception());
 	}
-	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
-		res = simplex_cpu_lp_problem->ComputeLP_CPU(coeff_function);
-	}
 	return res;
 }
 /**
@@ -163,9 +148,6 @@ std::vector<double> lp_solver::get_sv() {
 	std::vector<double> Maximum_point;
 	if (lp_solver_type == GLPK_SOLVER) {
 		Maximum_point = glpk_lp_problem->getMaximizing_Variables();
-	}
-	if (lp_solver_type == SIMPLEX_CPU_SOLVER) {
-		//Maximum_point = simplex_cpu_lp_problem->getMaximizing_Variables();
 	}
 	return Maximum_point;
 }

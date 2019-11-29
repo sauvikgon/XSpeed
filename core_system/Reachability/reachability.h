@@ -35,7 +35,6 @@
 #include "Utilities/computeInitialPolytope.h"
 #include "application/All_PP_Definition.h"
 
-#include "core_system/Reachability/GPU_Reach/reach_Sequential_GPU.h"
 #include "boost/timer/timer.hpp"
 #include "counterExample/abstractCE.h"
 #include <omp.h>
