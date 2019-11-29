@@ -14,14 +14,13 @@
 #include <boost/program_options/detail/config_file.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/algorithm/string.hpp> //string comparison
+
+#include "../benchmarks/user_model/user_model.h"
+#include "../io/io_utility.h"
+#include "../io/load_model.h"
 // *********** Command Line Boost Program Options ********
 #include "plotter_utility.h"
 // *********** User Selected Model ***************
-#include "Hybrid_Model_Parameters_Design/load_model.h"
-#include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
-
-#include "InputOutput/io_utility.h"
-// *******counter example **************/
 #include "counterExample/concreteCE.h"
 
 #include "reachabilityCaller.h"

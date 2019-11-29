@@ -6,14 +6,15 @@
  */
 
 #include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "core_system/math/matrix.h"
 #include <iostream>
 #include <sstream>
 #include <exception>
 #include <vector>
 #include <cmath>
-#include "Utilities/HausdorffDistance.h"
-#include "core_system/continuous/Polytope/Polytope.h"
+
+#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/math/matrix.h"
+#include "../../utilities/HausdorffDistance.h"
 
 using namespace std;
 

@@ -10,10 +10,11 @@
 
 #include "nlpFunctions.h"
 #include "vector"
-#include "../core_system/continuous/Polytope/Polytope.h"
+
+#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/math/analyticODESol.h"
 #include "application/DataStructureDirections.h"
 #include "abstractCE.h"
-#include "core_system/math/analyticODESol.h"
 
 
 double myconstraint(const std::vector<double> &x, std::vector<double> &grad,

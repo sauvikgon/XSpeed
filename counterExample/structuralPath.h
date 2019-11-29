@@ -14,9 +14,9 @@
  * paths may not be feasible with the HA semantics.
  */
 
-#include <core_system/HybridAutomata/Location.h>
-#include <core_system/HybridAutomata/Transition.h>
 #include <boost/shared_ptr.hpp>
+#include "../core/HybridAutomata/Location.h"
+#include "../core/HybridAutomata/Transition.h"
 
 class structuralPath
 {

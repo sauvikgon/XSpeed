@@ -9,15 +9,15 @@
 #include <iostream>
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 //#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
-#include "Utilities/Directions/Convert_To_BestDirection.h"
-#include "core_system/math/matrix.h"
-#include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
 
 #include<vector>
 
 #include <string>
+#include "../../../core/math/matrix.h"
+#include "../../../core/math/uni_sphere.h"	//for obtaining uniformly distributed directions
+#include "../../../utilities/Directions/Convert_To_BestDirection.h"
 
 using namespace std;
 

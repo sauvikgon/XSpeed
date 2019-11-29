@@ -8,8 +8,8 @@
 #include "counterExample/simulation.h"
 #include <fstream>
 #include <iomanip>
-#include "../core_system/continuous/Polytope/Polytope.h"
-#include "Utilities/dbg_msg_logger.h"
+#include "../core/continuous/Polytope/Polytope.h"
+#include "../utilities/dbg_msg_logger.h"
 
 
 

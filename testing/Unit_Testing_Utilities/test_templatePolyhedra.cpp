@@ -8,7 +8,8 @@
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 //#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <string>
-#include "Utilities/Template_Polyhedra.h"
+
+#include "../../utilities/Template_Polyhedra.h"
 
 using namespace std;
 

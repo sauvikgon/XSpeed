@@ -13,11 +13,11 @@
 #include <list>
 #include <iterator>
 
+#include "../../core/HybridAutomata/Hybrid_Automata.h"
+#include "../../core/HybridAutomata/Location.h"
+#include "../../core/HybridAutomata/Transition.h"
+#include "../../core/math/matrix.h"
 #include "application/DataStructureDirections.h"
-#include "core_system/HybridAutomata/Hybrid_Automata.h"
-#include "core_system/HybridAutomata/Location.h"
-#include "core_system/HybridAutomata/Transition.h"
-#include "core_system/math/matrix.h"
 
 using namespace std;
 using namespace math;

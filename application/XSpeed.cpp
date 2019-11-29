@@ -2,37 +2,37 @@
 #include <iostream>
 #include <fstream>
 #include "boost/timer/timer.hpp"
-#include "InputOutput/cpu_utilities/cpu_utilities.h"	//cpu usage functions
-#include "InputOutput/memory_utilities/memory_usages.h" //memory usage functions
-#include "core_system/math/uni_sphere.h"
+#include "utilities/cpu_utilities/cpu_utilities.h"	//cpu usage functions
+#include "utilities/memory_utilities/memory_usages.h" //memory usage functions
+#include "core/math/uni_sphere.h"
 #include "application/sf_directions.h"
 #include "application/DataStructureDirections.h"
-#include "core_system/continuous/Polytope/Polytope.h"
-#include "core_system/math/matrix.h"
+#include "core/continuous/Polytope/Polytope.h"
+#include "core/math/matrix.h"
 #include <boost/numeric/ublas/matrix.hpp>
-#include "Utilities/Template_Polyhedra.h"
-#include "Utilities/Post_Assignment.h"
-#include "Utilities/dump_abstractCE_list.h"
+#include "utilities/Template_Polyhedra.h"
+#include "utilities/Post_Assignment.h"
+#include "utilities/dump_abstractCE_list.h"
 #include <list>
 #include <utility>
 #include <iterator>
-#include "Hybrid_Model_Parameters_Design/BouncingBall.h"
-#include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
-#include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
-#include "Hybrid_Model_Parameters_Design/FiveDimSys.h"
-#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark.h"
-#include "Hybrid_Model_Parameters_Design/Rotation_Circle.h"
-#include "Hybrid_Model_Parameters_Design/Rotation_Circle_FourLocation.h"
-#include "Hybrid_Model_Parameters_Design/Rotation_Circle_One_Location.h"
+#include "benchmarks/BouncingBall.h"
+#include "benchmarks/TimedBouncingBall.h"
+#include "benchmarks/Helicopter_model/HelicopterModel28Dim.h"
+#include "benchmarks/FiveDimSys.h"
+#include "benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
+#include "benchmarks/Rotation_Circle.h"
+#include "benchmarks/Rotation_Circle_FourLocation.h"
+#include "benchmarks/Rotation_Circle_One_Location.h"
 
 //**************** Hybrid Automata Definition ***********************
-#include "core_system/Reachability/reachability.h"
+#include "core/Reachability/reachability.h"
 
-#include "core_system/HybridAutomata/Hybrid_Automata.h"
-#include "core_system/HybridAutomata/Transition.h"
-#include "core_system/HybridAutomata/Location.h"
-#include "core_system/symbolic_states/symbolic_states.h"
-#include "core_system/symbolic_states/initial_state.h"
+#include "core/HybridAutomata/Hybrid_Automata.h"
+#include "core/HybridAutomata/Transition.h"
+#include "core/HybridAutomata/Location.h"
+#include "core/symbolic_states/symbolic_states.h"
+#include "core/symbolic_states/initial_state.h"
 //**************** Hybrid Automata Definition ***********************
 #include "application/All_PP_Definition.h"
 
@@ -48,10 +48,10 @@
 // *********** Command Line Boost Program Options ********
 #include "plotter_utility.h"
 // *********** User Selected Model ***************
-#include "Hybrid_Model_Parameters_Design/load_model.h"
-#include "Hybrid_Model_Parameters_Design/user_model/user_model.h"
+#include "io/load_model.h"
+#include "benchmarks/user_model/user_model.h"
 
-#include "InputOutput/io_utility.h"
+#include "io/io_utility.h"
 // *******counter example **************/
 #include "counterExample/concreteCE.h"
 #include "counterExample/WoFC_counter_example.h"

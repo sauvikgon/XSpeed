@@ -13,8 +13,9 @@
 #include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <vector>
+
+#include "../core/HybridAutomata/Hybrid_Automata.h"
 #include "counterExample/simulation.h"
-#include "core_system/HybridAutomata/Hybrid_Automata.h"
 
 
 struct violating_CE;

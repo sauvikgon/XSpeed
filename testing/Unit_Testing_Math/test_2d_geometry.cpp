@@ -9,8 +9,9 @@
 #include <iostream>
 
 #include "UnitTest++.h"
-#include "core_system/math/2d_geometry.h"
 #include <string>
+
+#include "../../core/math/2d_geometry.h"
 using namespace std;
 
 SUITE(2d_geometry_TestSuite) {

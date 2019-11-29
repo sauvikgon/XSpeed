@@ -8,10 +8,10 @@
 #include <sstream>
 #include <iostream>
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "core_system/math/matrix.h"
-#include "core_system/continuous/Polytope/Polytope.h"
-
 #include <string>
+
+#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/math/matrix.h"
 using namespace std;
 using namespace math;
 

@@ -8,13 +8,14 @@
 #ifndef SUPPORTFUNCTION_UTILITY_H_
 #define SUPPORTFUNCTION_UTILITY_H_
 
-#include "core_system/math/matrix.h"
-#include "core_system/continuous/Polytope/Polytope.h"
 #include "application/DataStructureDirections.h"
-#include "core_system/math/basic_functions.h"
 #include <vector>
-#include "core_system/continuous/ConvexSet/transMinkPoly.h"
-#include "core_system/math/lp_solver/lp_solver.h"
+
+#include "../core/continuous/ConvexSet/transMinkPoly.h"
+#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/math/basic_functions.h"
+#include "../core/math/lp_solver/lp_solver.h"
+#include "../core/math/matrix.h"
 
 using namespace std;
 using namespace math;

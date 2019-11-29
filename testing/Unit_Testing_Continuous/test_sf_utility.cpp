@@ -8,9 +8,9 @@
 #include <sstream>
 #include <iostream>
 
+#include "../../core/continuous/Polytope/Polytope.h"
 #include "UnitTest++.h"
 #include "application/sf_utility.h"
-#include "core_system/continuous/Polytope/Polytope.h"
 #include "application/DataStructureDirections.h"
 
 using namespace std;

@@ -7,11 +7,12 @@
 
 #include <sstream>
 #include <iostream>
+
+#include "../../core/HybridAutomata/Location.h"
+#include "../../core/math/lp_solver/lp_solver.h"
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 //#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "application/DataStructureDirections.h"
-#include "core_system/HybridAutomata/Location.h"
-#include "core_system/math/lp_solver/lp_solver.h"
 
 using namespace std;
 

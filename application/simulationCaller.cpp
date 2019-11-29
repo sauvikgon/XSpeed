@@ -6,7 +6,8 @@
  */
 
 #include "application/simulationCaller.h"
-#include "core_system/continuous/Polytope/Polytope.h"
+
+#include "../core/continuous/Polytope/Polytope.h"
 
 
 void simulationCaller(ReachabilityParameters& reach_parameters,

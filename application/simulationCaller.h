@@ -8,8 +8,8 @@
 #ifndef SIMULATIONCALLER_H_
 #define SIMULATIONCALLER_H_
 
+#include "../io/load_model.h"
 #include "counterExample/simulation.h"
-#include "Hybrid_Model_Parameters_Design/load_model.h"
 #include "boost/timer/timer.hpp"
 
 

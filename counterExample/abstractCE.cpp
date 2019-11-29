@@ -7,18 +7,18 @@
 
 #include "counterExample/abstractCE.h"
 #include "counterExample/simulation.h"
-#include "core_system/continuous/Polytope/Polytope.h"
-#include "core_system/HybridAutomata/Hybrid_Automata.h"
-#include "Utilities/gradient.h"
-#include "core_system/math/analyticODESol.h"
-#include "InputOutput/io_utility.h"
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
-#include "Utilities/Post_Assignment.h"
-#include "core_system/math/matrix.h"
-
 #include <fstream>
 #include <sstream>
+
+#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/HybridAutomata/Hybrid_Automata.h"
+#include "../core/math/analyticODESol.h"
+#include "../core/math/matrix.h"
+#include "../io/io_utility.h"
+#include "../utilities/gradient.h"
+#include "../utilities/Post_Assignment.h"
 
 unsigned int dim;
 unsigned int N;

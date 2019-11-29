@@ -7,8 +7,8 @@
 
 #include <iostream>
 #include "UnitTest++.h"
-#include "core_system/math/randNumberGenerator.h"
 #include <vector>
+#include "../../core/math/randNumberGenerator.h"
 
 SUITE(randon_number_generator_TestSuite) {
 struct randGen {

@@ -1,13 +1,13 @@
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "core_system/math/matrix.h"
 #include "counterExample/simulation.h"
 #include "application/DataStructureDirections.h"
-#include "core_system/math/analyticODESol.h"
 #include <iostream>
 #include <sstream>
 #include <exception>
 #include <vector>
 #include <cmath>
+#include "../../core/math/analyticODESol.h"
+#include "../../core/math/matrix.h"
 
 using namespace std;
 

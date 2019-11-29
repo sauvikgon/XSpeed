@@ -10,7 +10,7 @@
 #define NLP_FUNC_H
 
 
-#include "core_system/math/matrix.h"
+#include "../core/math/matrix.h"
 
 #define VALIDATION
 

@@ -9,10 +9,6 @@
 #define ABSTRACTCE_H_
 
 
-#include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
-#include "core_system/symbolic_states/symbolic_states.h"
-#include "core_system/HybridAutomata/Transition.h"
-#include "core_system/HybridAutomata/Hybrid_Automata.h"
 #include <list>
 #include <boost/shared_ptr.hpp>
 #include "nlopt.hpp"
@@ -21,6 +17,10 @@
 #include "nlpFunctions.h"
 #include <fstream>
 #include <string>
+#include "../core/continuous/ConvexSet/supportFunctionProvider.h"
+#include "../core/HybridAutomata/Hybrid_Automata.h"
+#include "../core/HybridAutomata/Transition.h"
+#include "../core/symbolic_states/symbolic_states.h"
 
 
 /**

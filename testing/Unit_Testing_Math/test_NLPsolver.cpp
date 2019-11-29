@@ -6,15 +6,16 @@
  */
 
 #include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "core_system/math/matrix.h"
 #include <iostream>
 #include <sstream>
 #include <exception>
 #include <vector>
 #include <cmath>
-#include "core_system/continuous/Polytope/Polytope.h"
-#include "core_system/math/nlp_solver/nlp_solver.h"
-#include "Utilities/dbg_msg_logger.h"
+
+#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/math/matrix.h"
+#include "../../core/math/nlp_solver/nlp_solver.h"
+#include "../../utilities/dbg_msg_logger.h"
 
 
 using namespace std;

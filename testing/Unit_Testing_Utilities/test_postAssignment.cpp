@@ -10,10 +10,11 @@
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 //#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <vector>
-#include "Utilities/StandardVector.h"
-#include "core_system/math/matrix.h"
-#include "core_system/continuous/Polytope/Polytope.h"
-#include "Utilities/Post_Assignment.h"
+
+#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/math/matrix.h"
+#include "../../utilities/Post_Assignment.h"
+#include "../../utilities/StandardVector.h"
 
 using namespace std;
 

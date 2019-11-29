@@ -9,9 +9,10 @@
 #define WOFC_COUNTER_EXAMPLE_H_
 
 #include <list>
-#include "core_system/symbolic_states/initial_state.h"
-#include "core_system/continuous/Polytope/Polytope.h"
-#include "core_system/HybridAutomata/Hybrid_Automata.h"
+
+#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/HybridAutomata/Hybrid_Automata.h"
+#include "../core/symbolic_states/initial_state.h"
 #include "counterExample/structuralPath.h"
 #include "application/userOptions.h"
 #include "counterExample/abstractCE.h"

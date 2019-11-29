@@ -22,12 +22,12 @@
 #include <sundials/sundials_dense.h>
 #include <sundials/sundials_types.h>
 #include "application/DataStructureDirections.h"
-#include "Utilities/gradient.h"
-#include "core_system/HybridAutomata/Hybrid_Automata.h"
-#include "core_system/HybridAutomata/Transition.h"
-#include "core_system/HybridAutomata/Location.h"
-#include "core_system/continuous/Hyperbox/Hyperbox.h"
 #include <omp.h>
+#include "../core/continuous/Hyperbox/Hyperbox.h"
+#include "../core/HybridAutomata/Hybrid_Automata.h"
+#include "../core/HybridAutomata/Location.h"
+#include "../core/HybridAutomata/Transition.h"
+#include "../utilities/gradient.h"
 
 /*
  * A structure to return the last point in Invariant and the

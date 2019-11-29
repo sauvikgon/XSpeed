@@ -8,12 +8,13 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+
+#include "../../core/HybridAutomata/Location.h"
+#include "../../core/HybridAutomata/Transition.h"
+#include "../../core/math/matrix.h"
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 //#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "application/DataStructureDirections.h"
-#include "core_system/HybridAutomata/Transition.h"
-#include "core_system/HybridAutomata/Location.h"
-#include "core_system/math/matrix.h"
 
 using namespace std;
 using namespace math;

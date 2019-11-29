@@ -8,11 +8,11 @@
 #include <sstream>
 #include <iostream>
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "core_system/math/glpk_lp_solver/glpk_lp_solver.h"
-#include "core_system/math/matrix.h"
-#include "core_system/math/uni_sphere.h"	//for obtaining uniformly distributed directions
 #include "boost/timer/timer.hpp"
 #include <omp.h>
+#include "../../core/math/glpk_lp_solver/glpk_lp_solver.h"
+#include "../../core/math/matrix.h"
+#include "../../core/math/uni_sphere.h"	//for obtaining uniformly distributed directions
 
 using namespace std;
 

@@ -4,11 +4,11 @@
 //#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
-#include "core_system/math/matrix.h"
 #include <vector>
 #include <list>
 
 #include <string>
+#include "../../core/math/matrix.h"
 
 using namespace std;
 

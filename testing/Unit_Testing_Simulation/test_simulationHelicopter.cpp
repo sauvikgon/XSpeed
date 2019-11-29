@@ -1,5 +1,4 @@
 #include "UnitTest++/UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-#include "core_system/math/matrix.h"
 #include "counterExample/simulation.h"
 #include "application/DataStructureDirections.h"
 #include <iostream>
@@ -7,11 +6,12 @@
 #include <exception>
 #include <vector>
 #include <cmath>
-#include "core_system/symbolic_states/initial_state.h"
-#include "Hybrid_Model_Parameters_Design/TimedBouncingBall.h"
-#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationBenchmark.h"
-//#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed3by3.h"
-#include "Hybrid_Model_Parameters_Design/Helicopter_model/HelicopterModel28Dim.h"
+
+#include "../../Benchmarks/Helicopter_model/HelicopterModel28Dim.h"
+#include "../../Benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
+#include "../../Benchmarks/TimedBouncingBall.h"
+#include "../../core/math/matrix.h"
+#include "../../core/symbolic_states/initial_state.h"
 
 using namespace std;
 

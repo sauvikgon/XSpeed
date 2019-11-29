@@ -9,15 +9,16 @@
 #define REACHABILITYCALLER_H_
 
 #include "userOptions.h"
-#include "core_system/symbolic_states/symbolic_states.h"
-#include "core_system/Reachability/reachability.h"
 #include "counterExample/abstractCE.h"
 #include "application/userOptions.h"
 
 #include <list>
-#include "core_system/Reachability/AGJH.h"
-#include "core_system/Reachability/TPBFS.h"
-#include "core_system/Reachability/AsyncBFS.h"
+
+#include "../core/Reachability/AGJH.h"
+#include "../core/Reachability/AsyncBFS.h"
+#include "../core/Reachability/reachability.h"
+#include "../core/Reachability/TPBFS.h"
+#include "../core/symbolic_states/symbolic_states.h"
 
 extern unsigned int ce_search_time;
 

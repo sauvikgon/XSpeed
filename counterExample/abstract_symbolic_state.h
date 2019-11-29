@@ -8,10 +8,10 @@
 #ifndef ABSTRACT_SYMBOLIC_STATE_H_
 #define ABSTRACT_SYMBOLIC_STATE_H_
 
-#include "../core_system/continuous/Polytope/Polytope.h"
-#include "core_system/discrete/discrete_set/discrete_set.h"
-#include "core_system/symbolic_states/initial_state.h"
-#include "core_system/continuous/ConvexSet/supportFunctionProvider.h"
+#include "../core/continuous/ConvexSet/supportFunctionProvider.h"
+#include "../core/discrete/discrete_set/discrete_set.h"
+#include "../core/symbolic_states/initial_state.h"
+#include "../core/continuous/Polytope/Polytope.h"
 
 /**
  * Class to represent the abstract flowpipe. An abstract flowpipe
