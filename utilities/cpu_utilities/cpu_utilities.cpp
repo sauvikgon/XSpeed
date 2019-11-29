@@ -32,7 +32,7 @@ void init_cpu_usage() {
 	lastCPU = times(&timeSample);
 	lastSysCPU = timeSample.tms_stime;
 	lastUserCPU = timeSample.tms_utime;
-	cout << "\nMemory and CPU stats can only be calculated for Linux or MacOS distributions. Other OS may cause segmentation fault.\n";
+
 	file = fopen("/proc/cpuinfo", "r");
 			// OS IS UBUNTU
 	while (fgets(line, 128, file)!= NULL) {

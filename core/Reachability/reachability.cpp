@@ -413,14 +413,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 	if (bfslevel<bound){	//did not reach to the assigned bound
 		std::cout<<"\n\nFound Fix-point after "<<bfslevel <<" Jumps!!!\n";
 	}
-	cout << "\n ***************************************************************************\n";
-	cout << "\nMaximum Iterations Completed = " << num_flowpipe_computed << "\n";
-	cout << "\n ***************************************************************************\n";
-
 	return Reachability_Region;
 }
-
-
 
 void reachability::sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location,
 		polytope::ptr continuous_initial_polytope,

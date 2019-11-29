@@ -353,3 +353,22 @@ void SFM_for_MatLab(std::list<symbolic_states::ptr>& symbolic_states_list, userO
 	outFile_dirs.close();
 	outFile_sfm.close();
 }
+void show(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options)
+{
+	if(user_options.getOutputFormatType().compare("GEN")==0) {
+		//Vertex-Enumeration using old algorithm of recursively searching in quadrants But Faster than HoughTransformation
+		vertex_generator(symbolic_states_list,user_options); //Generating Vertices using recursive-quadrant-search algorithm, can be plotted using GNU plotutil
+		//SFM_for_MatLab(Symbolic_states_list,user_options); //Generating Matrices (dir and SFM) as file output, which can be used in MatLab by ESP algorithm
+
+		//Our paper's Algorithm but slower than vertex_generator()
+		//vertex_generator_HoughTransformation(Symbolic_states_list,user_options); //Generating Vertices using Sequential sampling of Hough Space, can be plotted using GNU plotutil
+
+		/* Running gnuplotutil to plot output */
+		string cmdStr1;
+		cmdStr1.append("graph -TX -BC ");
+		cmdStr1.append(user_options.getOutFilename().c_str());
+		system(cmdStr1.c_str());
+	} else if(user_options.getOutputFormatType().compare("INTV")==0) {
+		print_all_intervals(symbolic_states_list);
+	}
+}

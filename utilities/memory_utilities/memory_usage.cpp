@@ -5,13 +5,13 @@
  *      Author: amit
  */
 
-#include "../../utilities/memory_utilities/memory_usages.h"
-
 #include "stdio.h"
 #include "stdlib.h"
 #include  <iostream>
 #include <sys/sysctl.h>
 #include <sys/types.h>
+
+#include "memory_usage.h"
 using namespace std;
 
 #if defined(__MACH__)

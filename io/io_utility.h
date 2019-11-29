@@ -60,5 +60,11 @@ void vertex_generator_HoughTransformation(std::list<symbolic_states::ptr>& symbo
 
 void SFM_for_MatLab(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options);
 
+/**
+ * The top-level output method where selection of the algorithm to output result
+ * takes place.
+ */
+void show(std::list<symbolic_states::ptr>& symbolic_states_list, userOptions user_options);
+
 #endif /* IO_UTILITY_H_ */
 
