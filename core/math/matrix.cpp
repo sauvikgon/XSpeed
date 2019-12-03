@@ -22,10 +22,12 @@ template<typename scalar_type> math::matrix<scalar_type>::matrix(size_type r,
 		size_type c) :
 		ublas_matrix_impl(r, c) {
 }
-
 template<typename scalar_type> math::matrix<scalar_type>::matrix(size_type r,
-		size_type c, array_type data) :
-		ublas_matrix_impl(r, c, data) {
+		size_type c, const scalar_type init_val) : ublas_matrix_impl(r,c,init_val){
+
+}
+template<typename scalar_type> math::matrix<scalar_type>::matrix(size_type r,
+		size_type c, array_type data) :	ublas_matrix_impl(r, c, data) {
 }
 
 /**

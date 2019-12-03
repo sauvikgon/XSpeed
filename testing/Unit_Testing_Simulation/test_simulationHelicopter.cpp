@@ -7,9 +7,9 @@
 #include <vector>
 #include <cmath>
 
-#include "../../Benchmarks/Helicopter_model/HelicopterModel28Dim.h"
-#include "../../Benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
-#include "../../Benchmarks/TimedBouncingBall.h"
+#include "../../benchmarks/Helicopter_model/HelicopterModel28Dim.h"
+#include "../../benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
+#include "../../benchmarks/TimedBouncingBall.h"
 #include "../../core/math/matrix.h"
 #include "../../core/symbolic_states/initial_state.h"
 

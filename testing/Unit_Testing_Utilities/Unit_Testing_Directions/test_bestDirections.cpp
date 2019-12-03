@@ -11,7 +11,6 @@
 //#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include "application/sf_directions.h"
 #include "application/sf_utility.h"
-r
 #include<vector>
 
 #include <string>

@@ -7,10 +7,10 @@
 #include <vector>
 #include <cmath>
 
-#include "../../Benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
-#include "../../Benchmarks/Navigation_Benchmark/NavigationTimed3by3.h"
-#include "../../Benchmarks/oscillator_model/Oscillator.h"
-#include "../../Benchmarks/TimedBouncingBall.h"
+#include "../../benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
+#include "../../benchmarks/Navigation_Benchmark/NavigationTimed3by3.h"
+#include "../../benchmarks/oscillator_model/Oscillator.h"
+#include "../../benchmarks/TimedBouncingBall.h"
 #include "../../core/math/matrix.h"
 #include "../../core/symbolic_states/initial_state.h"
 

@@ -7,8 +7,8 @@
 #include <vector>
 #include <cmath>
 
-#include "../../Benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
-#include "../../Benchmarks/TimedBouncingBall.h"
+#include "../../benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
+#include "../../benchmarks/TimedBouncingBall.h"
 #include "../../core/math/matrix.h"
 #include "../../core/symbolic_states/initial_state.h"
 //#include "Hybrid_Model_Parameters_Design/Navigation_Benchmark/NavigationTimed3by3.h"

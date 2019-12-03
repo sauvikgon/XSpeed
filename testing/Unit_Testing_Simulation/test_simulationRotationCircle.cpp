@@ -7,10 +7,10 @@
 #include <vector>
 #include <cmath>
 
-#include "../../Benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
-#include "../../Benchmarks/Rotation_Circle.h"
-#include "../../Benchmarks/Rotation_Circle_FourLocation.h"
-#include "../../Benchmarks/TimedBouncingBall.h"
+#include "../../benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
+#include "../../benchmarks/Rotation_Circle.h"
+#include "../../benchmarks/Rotation_Circle_FourLocation.h"
+#include "../../benchmarks/TimedBouncingBall.h"
 #include "../../core/math/matrix.h"
 #include "../../core/symbolic_states/initial_state.h"
 

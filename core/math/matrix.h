@@ -26,8 +26,12 @@ public:
 
 	matrix();
 	matrix(size_type r, size_type c);
-	//matrix(int row, int col);			will try later
 	matrix(size_type r, size_type c, array_type data);
+	/**
+	 * This creates a matrix with the given dimension and assigns init_val to
+	 * every member of the matrix.
+	 */
+	matrix(size_type r, size_type c, const scalar_type init_val);
 	void matrix_exponentiation(math::matrix<scalar_type>& res, double time_tau) const;
 	void matrix_exponentiation(math::matrix<scalar_type>& res) const;
 	void multiply(matrix& A, matrix& res);
