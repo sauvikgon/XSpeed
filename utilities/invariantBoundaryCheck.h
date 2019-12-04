@@ -27,7 +27,7 @@
  * to check the points of intersection START and END. But START point were redundant task and was the caused for XSpeed's slow-performance
  */
 void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type_choosen, unsigned int &newTotIters);
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Sequential Algorithm using support-function-algorithm to perform invariant crossing check
@@ -40,7 +40,7 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
  * number of Omega's that need to be constructed in flowpipe is three.
  */
 void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type_choosen, unsigned int &newTotIters);
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Sequential Algorithm using support-function-algorithm to perform invariant crossing check
@@ -53,7 +53,7 @@ void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::p
  * number of Omega's that need to be constructed in flowpipe is three.
  */
 void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type_choosen, unsigned int &newTotIters);
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type, unsigned int &newTotIters);
 
 
 /*
@@ -69,14 +69,14 @@ void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider
 //--- this is an optimization technique/property provided by GLPK (glpk being the lp_solver)
  */
 void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters);
+		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Using Binary Search Algorithm to perform a Quick Check if an Omega crossing the invariant (uses actual set computation)
  * Returns the iterations(=Time-horizon/time-step), when the flowpipe is completely outside
  */
 void quickInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters);
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Returns an initialSet at time equals to START_TIME uses the transMinkPoly class to get the transposed Set at time equals to START_TIME
@@ -89,14 +89,14 @@ supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParame
  * iterations that is supplied by the user otherwise, when the invariant is in-between then Binary Search Algo is performed
  */
 unsigned int invariantCheck(std::vector<double>& pos_dir, std::vector<double>& neg_dir, double SearchKey, ReachabilityParameters& ReachParameters,
-		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, int lp_solver_type_choosen);
+		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, int lp_solver_type);
 
 
 //Invariant check using Slow-Start incremental time-step
 //NOTE :: this approach of increasing the time-step does not work in support-function algorithm
 // as change in time-step increases rate of bloating 'error'
 void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParametersOld, polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters);
+		ReachabilityParameters& ReachParametersOld, polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Uses the definition of able to compute a set at time instance 't' given the initial set.
@@ -108,7 +108,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,supportFunctionPro
  * number of Omega's that need to be constructed in flowpipe is three.
  */
 void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters);
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 
 /*
@@ -116,14 +116,14 @@ void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvide
  * Returns the time-bound when it just crosses the invariant bound
  */
 double invariantFaceCrossingCheck(std::vector<double>& neg_dir, double invBound, double START_TIME, double time_step, double time_horizon,
-		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type_choosen);
+		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type);
 
 /*
  * Returns the time-bound when a convex set represented by support-function (Initial), just crosses the invariant bound
  * efficient approach to detect flowpipe cost estimation.
  */
 double invariantCrossingCheck1(double START_TIME, double time_step, double time_horizon, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, Dynamics& SystemDynamics, int lp_solver_type_choosen, std::string fileName);
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, Dynamics& SystemDynamics, int lp_solver_type, std::string fileName);
 
 /*
  * Returns a bounded polytope from a convex set 'p' represented using support-function using templated directions in ReachParameters

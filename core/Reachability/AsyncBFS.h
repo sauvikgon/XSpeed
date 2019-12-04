@@ -61,13 +61,13 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
  * Otherwise returns False
  * This interface is NOT threadSafe but it has exact computed result AND SEQUENTIAL algorithm has no issue with threadSafety
  */
-//bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+//bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type);
 
 /*
  * This is thread-safe but uses template_Hull of poly an over-approximated technique
  */
-//bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int totalLocations, int lp_solver_type_choosen);
-bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int lp_solver_type_choosen);
+//bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int totalLocations, int lp_solver_type);
+bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int lp_solver_type);
 
 void initializeLocklessDS(LocklessDS L[], int ha_size);
 void printLocklessDS(LocklessDS L[], int ha_size);

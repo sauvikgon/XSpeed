@@ -34,7 +34,7 @@ public:
 	 */
 	virtual double computeSupportFunction(const std::vector<double>& direction,
 			lp_solver &lp) const = 0;
-	virtual double max_norm(int lp_solver_type_choosen,
+	virtual double max_norm(int lp_solver_type,
 			unsigned int dim_size) = 0;
 };
 

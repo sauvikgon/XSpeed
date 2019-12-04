@@ -117,7 +117,7 @@ polytope::ptr template_polyhedra::getPolytope(unsigned int Iterations_Number) {
 	return p;
 }
 
-const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionSequential(polytope::ptr G, int lp_solver_type_choosen) { //need testing due to modification
+const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionSequential(polytope::ptr G, int lp_solver_type) { //need testing due to modification
 
 	size_type row = 0;
 	size_type col = 0;
@@ -133,7 +133,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 
 		/* from the reach_region that is the calling template_polyhedra add the invariant constraint and bound_value to p*/
 		p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
-		is_intersected = p->check_polytope_intersection(G, lp_solver_type_choosen);	//result of intersection
+		is_intersected = p->check_polytope_intersection(G, lp_solver_type);	//result of intersection
 
 		if (is_intersected == true) {//if intersects create a new template_polyhedra subset
 //#pragma omp critical
@@ -179,7 +179,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 }
 
 const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionParallel(
-		polytope::ptr G, int lp_solver_type_choosen) { //need testing due to modification
+		polytope::ptr G, int lp_solver_type) { //need testing due to modification
 
 	size_type row = 0;
 	size_type col = 0;
@@ -208,7 +208,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 		p->setMoreConstraints(this->getInvariantDirections(),
 				constraint_bound_values);
 
-		intersects[i] = p->check_polytope_intersection(G, lp_solver_type_choosen);	//result of intersection
+		intersects[i] = p->check_polytope_intersection(G, lp_solver_type);	//result of intersection
 	} //end of parallel-loop :: we have the list of intersected polys
 
 	t100.stop();
@@ -285,7 +285,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 	return intersected_region;
 }
 
-std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_intersectionSequential_optimize(polytope::ptr G, int lp_solver_type_choosen) {
+std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_intersectionSequential_optimize(polytope::ptr G, int lp_solver_type) {
 
 	// Check special case:  G is empty
 	if(G->getIsEmpty()){
@@ -324,7 +324,7 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 			constraint_bound_values = this->getInvariantBoundValue(i);
 			p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 		}
-		intersects[i] = p->check_polytope_intersection(G, lp_solver_type_choosen); //result of intersection
+		intersects[i] = p->check_polytope_intersection(G, lp_solver_type); //result of intersection
 	} //end of parallel-loop :: we have the list of intersected polys
 
 	std::list<std::pair<unsigned int, unsigned int> > intersected_range;
@@ -360,10 +360,10 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 /*
  * returns the template hull of the flowpipe-guard intersected template polytopes
  */
-std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(bool aggregation, polytope::ptr guard, int lp_solver_type_choosen){
+std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(bool aggregation, polytope::ptr guard, int lp_solver_type){
 
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
-	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type_choosen);
+	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type);
 
 	std::list<polytope::ptr> polys;
 	unsigned int poly_dir_size = this->template_Directions.size1() + this->invariant_Directions.size1();
@@ -430,7 +430,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
  * Use PPL library to implement convex_hull of the flowpipe-guard intersection
  */
 
-/*std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type_choosen){
+/*std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type){
 
 	// debug
 //	if(guard->getIsUniverse()){
@@ -444,7 +444,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
 
 
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
-	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type_choosen);
+	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type);
 
 	std::cout << "range list size= " << range_list.size() << std::endl;
 	std::list<polytope::ptr> polys;
@@ -515,7 +515,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
 
 
 
-const polytope::ptr template_polyhedra::getTemplate_approx(int lp_solver_type_choosen) {
+const polytope::ptr template_polyhedra::getTemplate_approx(int lp_solver_type) {
 	/*
 	 * Here the calling template_polyhedra will have Matrix_SupportFunction and template_directions
 	 * without any invariant_direction or Matrix_InvariantBound:::::: it ALSO has invariant_bounds included
@@ -524,7 +524,7 @@ const polytope::ptr template_polyhedra::getTemplate_approx(int lp_solver_type_ch
 	 */
 	unsigned int rows;	//Maximizing
 	double Max_sf, sf;
-	int type = lp_solver_type_choosen;
+	int type = lp_solver_type;
 	rows = this->getTotalTemplateDirections();//cout << "\nrows here = " << rows << endl;
 	std::vector<double> columnVector(rows);
 	std::vector<double> each_direction(this->template_Directions.size2());//can try putting it inside the loop

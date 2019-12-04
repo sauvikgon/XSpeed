@@ -7,11 +7,11 @@
 #include "../../../core/continuous/ConvexSet/Create_Polytope_from_ConvexSet.h"
 
 polytope::ptr create_polytope_from_set(supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type_choosen) {
+		ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type) {
 	//polytope p;
 	std::vector<double> columnvector(ReachParameters.Directions.size1());
 
-	int type = lp_solver_type_choosen;
+	int type = lp_solver_type;
 	lp_solver lp(type), lp_U(type);
 	lp.setMin_Or_Max(2);
 	lp_U.setMin_Or_Max(2);

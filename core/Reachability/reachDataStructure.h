@@ -72,10 +72,8 @@ struct AsyncBFSData{
 	int bound;
 	ReachabilityParameters reach_parameters;
 	hybrid_automata H; //todo:: have to change it to boost::ptr
-	int lp_solver_type_choosen;
+	int lp_solver_type;
 	std::pair<int, polytope::ptr> forbidden_set;
-	int Solver_GLPK_Gurobi_GPU;
-
 	std::string set_aggregation; // The aggregation options thull(default), none
 
 };

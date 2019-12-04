@@ -12,7 +12,7 @@
 
 //Reachability Algorithm after optimization of the duplicate support function computation
 template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type_choosen) {
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
@@ -33,7 +33,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
 
 	col = shm_NewTotalIteration; //if invariant exists, col will be resized
 	MatrixValue.resize(row, col);
-	int solver_type = lp_solver_type_choosen;
+	int solver_type = lp_solver_type;
 	lp_solver s_per_thread_I(solver_type), s_per_thread_U(solver_type), s_per_thread_inv(solver_type);
 	s_per_thread_I.setMin_Or_Max(2);
 
@@ -197,7 +197,7 @@ template_polyhedra::ptr reachabilitySequential(unsigned int boundedTotIteration,
  */
 template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned int boundedTotIteration,
 		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, bool InvariantExist, int lp_solver_type_choosen) {
+		polytope::ptr invariant, bool InvariantExist, int lp_solver_type) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
@@ -208,7 +208,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 	MatrixValue.resize(row, col);
 
 	if (InvariantExist == true) { //if invariant exist. Computing
-		//shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial, ReachParameters, invariant, lp_solver_type_choosen);
+		//shm_NewTotalIteration = InvariantBoundaryCheck(SystemDynamics, Initial, ReachParameters, invariant, lp_solver_type);
 		shm_NewTotalIteration = boundedTotIteration;
 	} //End of Invariant Directions
 
@@ -216,7 +216,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
 		template_polyhedra::ptr poly_emptyp=template_polyhedra::ptr(new template_polyhedra());
 		return poly_emptyp;
 	}
-	int solver_type = lp_solver_type_choosen;
+	int solver_type = lp_solver_type;
 
 	lp_solver s_per_thread_I(solver_type), s_per_thread_U(solver_type),
 			s_per_thread_inv(solver_type);
@@ -377,7 +377,7 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
  */
 /*
 template_polyhedra::ptr reachForwardApprox(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type_choosen) {
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type) {
 
 	std::cout << "Forward Approximation Model not yet implemented\n";
 

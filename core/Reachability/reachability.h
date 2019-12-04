@@ -49,7 +49,6 @@
 						 // 4 gen_concreteCE_NLP_LP				: Dongxu
 						 // 5 gen_concreteCE_NLP_LP_softconstr 	: Dongxu
 
-
 using namespace std;
 
 class reachability {
@@ -57,12 +56,12 @@ public:
 	/*void setReachParameter(hybrid_automata& H, std::list<initial_state::ptr>& I,
 			ReachabilityParameters& reach_parameters, int bound,
 			unsigned int Algorithm_Type, unsigned int Total_Partition,
-			int lp_solver_type_choosen, unsigned int number_of_streams,
+			int lp_solver_type, unsigned int number_of_streams,
 			int Solver_GLPK_Gurobi_GPU,
 			std::pair<int, polytope::ptr> forbidden_set);*/
 
 	void setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
-			int lp_solver_type, int solver_GLPK_Gurobi_for_GPU, std::pair<int, polytope::ptr> forbidden, userOptions& user_options);
+			int lp_solver_type, std::pair<int, polytope::ptr> forbidden, userOptions& user_options);
 
 	/*
 	 * Get counter-example trajectories found during reachability analysis
@@ -92,14 +91,14 @@ public:
 	//I is the initial symbolic state
 	//Although this interface can be pushed in a separate sequential class but it can also be used to call par_SF and time_slice algorithms.
 
-	std::list<symbolic_states::ptr> computeSequentialBFSReach(std::list<abstractCE::ptr>& ce_candidates);
+	std::list<symbolic_states::ptr> computeSeqBFS(std::list<abstractCE::ptr>& ce_candidates);
 
 	//1)  Parallel Breadth First Search for Discrete Jumps with critical section for adding newSymbolicState
-	std::list<symbolic_states::ptr> computeParallelBFSReach( std::list<abstractCE::ptr>& ce_candidates);
+	std::list<symbolic_states::ptr> computeParBFS( std::list<abstractCE::ptr>& ce_candidates);
 
 	//2)  Lock Avoidance for adding newSymbolicState:: Parallel Breadth First Search for Discrete Jumps
 	//separate Read and Write Queue (pwlist.WaitingList)
-	std::list<symbolic_states::ptr> computeParallelBFSReachLockAvoid(std::list<abstractCE::ptr>& ce_candidates);
+	std::list<symbolic_states::ptr> computeParLockFreeBFS(std::list<abstractCE::ptr>& ce_candidates);
 
 	/*
 	 * List of private variables now converted into public due to class inheritance framework
@@ -108,13 +107,12 @@ public:
 	unsigned int bound;
 	ReachabilityParameters reach_parameters;
 	hybrid_automata H; //todo:: have to change it to boost::ptr
-	int lp_solver_type_choosen;
+	int lp_solver_type;
 	std::pair<int, polytope::ptr> forbidden_set;
 	bool ce_flag; // The flag to swithch ON/OFF the CE generation functionality.
 	std::string ce_path; // This string can be either "all", "first" or "1,3,4,15,16" type. The last string is a comma separated list of locations to represent a path.
-	int Solver_GLPK_Gurobi_GPU;
 
-	void sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
+	void seqReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 					template_polyhedra::ptr& reach_region);
 
 /*
@@ -123,19 +121,19 @@ public:
  * Otherwise returns False
  * This interface is NOT threadSafe but it has exact computed result AND SEQUENTIAL algorithm has no issue with threadSafety
  */
-//	bool isContained(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+//	bool isContained(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type);
 
 	/*
 	 * Uses the templated (an over-approximated) newShiftedPolytope to check for containment in the Omegas of the flowpipe
 	 * This interface is threadSafe however it is over-approximated result
 	 */
-	bool templated_isContained(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen);
+	bool templated_isContained(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type);
 
 	/*
 	 * This is thread-safe but uses template_Hull over-approximated technique.
 	 * This is locking on the reach set
 	 */
-	bool isContained_withLock(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr>& PASSED, int lp_solver_type_choosen);
+	bool isContained_withLock(int destination_locID, polytope::ptr newShiftedPolytope, std::list<symbolic_states::ptr>& PASSED, int lp_solver_type);
 
 	const std::string& getSetAggregation() const;
 	void setSetAggregation(const std::string& setAggregation);
@@ -152,7 +150,7 @@ private:
 	std::string set_aggregation; // The aggregation options thull (default) and none
 	std::list<concreteCE::ptr> ce_list; // the list of concrete counter-examples in the HA.
 
-	void parallelReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
+	void parReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);
 
 	/*

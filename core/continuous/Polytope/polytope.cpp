@@ -221,7 +221,7 @@ void polytope::setSystemDimension(unsigned int systemDimension) {
 	system_dimension = systemDimension;
 }
 
-double polytope::max_norm(int lp_solver_type_choosen,
+double polytope::max_norm(int lp_solver_type,
 		unsigned int dim_for_Max_Norm) {
 	//unsigned int dimension_size = this->system_dimension;
 	unsigned int dimension_size = dim_for_Max_Norm;
@@ -245,7 +245,7 @@ double polytope::max_norm(int lp_solver_type_choosen,
 			directions[i] = -1; //Negative Generators
 			generator_directions.push_back(directions);
 		}
-		int type = lp_solver_type_choosen;
+		int type = lp_solver_type;
 		lp_solver lp1(type);
 		lp1.setMin_Or_Max(2); //Setting GLP_MAX
 		lp1.setConstraints(this->coeffMatrix, this->columnVector,
@@ -298,7 +298,7 @@ const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
  */
 
 bool polytope::check_polytope_intersection(polytope::ptr p2,
-		int lp_solver_type_choosen) {
+		int lp_solver_type) {
 	// if the parameter polytope is a univserse, then return true
 	if(p2->getIsUniverse())
 		return true;
@@ -313,7 +313,7 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 	 *
 	 */
 	int Min_Or_Max = 2;
-	int type = lp_solver_type_choosen;
+	int type = lp_solver_type;
 	lp_solver lp2(type);
 	//lp2.setDefalultObject();		//executed by default now
 	lp2.setMin_Or_Max(Min_Or_Max);
@@ -347,10 +347,10 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 	return flag;
 }
 
-void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytope::ptr &resPoly, int lp_solver_type_choosen){
+void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytope::ptr &resPoly, int lp_solver_type){
 
 	std::vector<double> colVector(templatedDir.size1());
-	lp_solver lp(lp_solver_type_choosen);
+	lp_solver lp(lp_solver_type);
 	lp.setMin_Or_Max(2);//Maximization
 	lp.setConstraints(this->getCoeffMatrix(), this->getColumnVector(),this->getInEqualitySign());
 
@@ -364,11 +364,11 @@ void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytop
 	resPoly->setPolytope(templatedDir,colVector,this->getInEqualitySign());
 }
 
-bool polytope::contains(polytope::ptr poly, int lp_solver_type_choosen){
+bool polytope::contains(polytope::ptr poly, int lp_solver_type){
 
 	assert(this->getCoeffMatrix().size2() == poly->getCoeffMatrix().size2());	//same dimension
 	//assert(this->getCoeffMatrix().size1() == poly->getCoeffMatrix().size1());	//same number of constraints
-	lp_solver lp1(lp_solver_type_choosen), lp2(lp_solver_type_choosen);
+	lp_solver lp1(lp_solver_type), lp2(lp_solver_type);
 	lp1.setMin_Or_Max(2); lp2.setMin_Or_Max(2);
 	lp1.setConstraints(this->getCoeffMatrix(), this->getColumnVector(),this->getInEqualitySign());
 	lp2.setConstraints(poly->getCoeffMatrix(), poly->getColumnVector(),poly->getInEqualitySign());

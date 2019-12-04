@@ -56,7 +56,7 @@ public:
 	bool getIsEmpty() const;
 
 	double computeSupportFunction(const std::vector<double>& direction, lp_solver &lp) const;
-	double max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_Norm);
+	double max_norm(int lp_solver_type, unsigned int dim_for_Max_Norm);
 
 };
 

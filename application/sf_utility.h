@@ -83,7 +83,7 @@ scalar_type support_unitball_infnorm(std::vector<scalar_type> dir) {
 
 template<typename scalar_type>
 scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
-		int lp_solver_type_choosen) {
+		int lp_solver_type) {
 
 	scalar_type norm_A = 0.0, result;
 	unsigned int dim_for_Max_norm;
@@ -99,7 +99,7 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		dim_for_Max_norm = SysD.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(SysD.U, Btrans));
-		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
+		V_max_norm = Vptr->max_norm(lp_solver_type, dim_for_Max_norm);
 	}
 
 	if(!SysD.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
@@ -128,7 +128,7 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 
 template<typename scalar_type>
 scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
-		supportFunctionProvider::ptr I, int lp_solver_type_choosen) // polytope V
+		supportFunctionProvider::ptr I, int lp_solver_type) // polytope V
 {
 
 	scalar_type norm_A = 0.0, result;
@@ -140,7 +140,7 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 
 
 	dim_for_Max_norm = I->getSystemDimension();	//I is initial polytope
-	I_max_norm = I->max_norm(lp_solver_type_choosen, dim_for_Max_norm); //R_X_o ie max_norm of the Initial polytope
+	I_max_norm = I->max_norm(lp_solver_type, dim_for_Max_norm); //R_X_o ie max_norm of the Initial polytope
 
 	math::matrix<scalar_type> Btrans;
 	system_dynamics.MatrixB.transpose(Btrans);
@@ -152,7 +152,7 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 
 		dim_for_Max_norm = system_dynamics.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
 
-		V_max_norm = Vptr->max_norm(lp_solver_type_choosen, dim_for_Max_norm);
+		V_max_norm = Vptr->max_norm(lp_solver_type, dim_for_Max_norm);
 
 	}
 

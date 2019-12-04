@@ -10,7 +10,7 @@
 #include "../utilities/UtilitiesDataStructure.h"
 
 void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
+		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	//std::cout<<"\nTotal is "<<shm_NewTotalIteration <<std::endl;
@@ -29,7 +29,7 @@ void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::p
 	// *******************************************************************************************************************
 	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
 	//cout<<"Test 1.1 \n";
-int type = lp_solver_type_choosen;
+int type = lp_solver_type;
 //#pragma omp parallel for //num_threads(numberOfInvariants)
 	for (int eachInvariantDirection = 0; eachInvariantDirection < numberOfInvariants; eachInvariantDirection++) {
 		double TempOmega_min;
@@ -183,7 +183,7 @@ int type = lp_solver_type_choosen;
 
 //Using a single lp_solver object for initial and U polytopes each for all iteration and for all invariant faces
 void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
+		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	int dimension = Initial->getSystemDimension();
@@ -198,7 +198,7 @@ void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider
 		B_trans = ReachParameters.B_trans;
 	// *******************************************************************************************************************
 	std::vector<int> boundaryIterations(numberOfInvariants, shm_NewTotalIteration); // size(dimension_size,initial_value)
-	int type = lp_solver_type_choosen;
+	int type = lp_solver_type;
 
 
 	std::vector<InvariantCheckData> AllInvData(numberOfInvariants);
@@ -363,7 +363,7 @@ void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider
 //Using independent lp_solver object for initial and U polytopes for each invariant faces so that for all iteration same lp_solver object can be called
 //--- this is an optimization technique/property provided by GLPK (glpk being the lp_solver)
 void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
+		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	newTotIters = shm_NewTotalIteration;	//by default full iterations. This is modified if smaller value found
@@ -549,7 +549,7 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 
 //In-efficient method of checking each invariants face one after another
 void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
+		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 //	cout<<"shm_NewTotalIteration = "<<shm_NewTotalIteration<<"OK\n";
@@ -609,7 +609,7 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 		//	cout<<"Test 1.1 \n";
 		// ******** Lamda Computation for each invariant's directions/constraints **********
 		double invariant_SupportFunction;
-		int type = lp_solver_type_choosen;
+		int type = lp_solver_type;
 		//	cout<<"Test 2.a \n";
 		lp_solver lpSolver(type), lp_U_dummy(type);
 		//	cout<<"Test 2 \n";
@@ -866,7 +866,7 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 void quickInvariantBoundaryCheck(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		int lp_solver_type_choosen, unsigned int &newTotIters) {
+		int lp_solver_type, unsigned int &newTotIters) {
 
 	int dimension = ReachParameters.X0->getSystemDimension();
 	int numberOfInvariants = invariant->getColumnVector().size(); //total number of Invariant's constraints
@@ -887,7 +887,7 @@ void quickInvariantBoundaryCheck(Dynamics& SystemDynamics,
 		//Todo:: just get the boundvalue for the invariant direction without using LP_Solver
 
 		double invariant_SupportFunction=0;
-		lp_solver lpSolver(lp_solver_type_choosen);
+		lp_solver lpSolver(lp_solver_type);
 		//	cout<<"Test 2 \n";
 		lpSolver.setMin_Or_Max(2);
 		if (!invariant->getIsEmpty()) { //set glpk constraints If not an empty polytope
@@ -901,7 +901,7 @@ void quickInvariantBoundaryCheck(Dynamics& SystemDynamics,
 		// **********************XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX******************
 		boundaryIters[eachInvariant] = invariantCheck(pos_dir, neg_dir,
 				invariant_SupportFunction, ReachParameters, SystemDynamics,
-				Initial, lp_solver_type_choosen);
+				Initial, lp_solver_type);
 		cout << "boundaryIters[eachInvariant] = "
 				<< boundaryIters[eachInvariant] << std::endl;
 	}	//end of each Invariant directions
@@ -911,17 +911,17 @@ void quickInvariantBoundaryCheck(Dynamics& SystemDynamics,
 }
 
 unsigned int invariantCheck(std::vector<double>& pos_dir, std::vector<double>& neg_dir, double SearchKey, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial, int lp_solver_type_choosen) {
+		supportFunctionProvider::ptr Initial, int lp_solver_type) {
 	supportFunctionProvider::ptr p;
 	unsigned int start_iter = 0, end_iter = ReachParameters.Iterations;
 // ************************************************ object creations ************************************************
-	lp_solver pos_lp(lp_solver_type_choosen);
+	lp_solver pos_lp(lp_solver_type);
 	pos_lp.setMin_Or_Max(2);
 	if (!Initial->getIsEmpty()) { //set glpk constraints If not an empty polytope
 		pos_lp.setConstraints(ReachParameters.X0->getCoeffMatrix(), ReachParameters.X0->getColumnVector(),
 				ReachParameters.X0->getInEqualitySign());
 	}
-	lp_solver neg_lp(lp_solver_type_choosen);
+	lp_solver neg_lp(lp_solver_type);
 	neg_lp.setMin_Or_Max(2);
 
 	if (!Initial->getIsEmpty()) //set glpk constraints If not an empty polytope
@@ -1038,7 +1038,7 @@ supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParame
 void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParametersOld, polytope::ptr invariant,
-		int lp_solver_type_choosen, unsigned int &newTotIters) {
+		int lp_solver_type, unsigned int &newTotIters) {
 
 	ReachabilityParameters ReachParameters;	//local variable to work with
 	ReachParameters = ReachParametersOld;	//copy of Original
@@ -1103,7 +1103,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 		}
 		// ******** Lamda Computation for each invariant's directions/constraints **********
 		double invariant_SupportFunction = 0; // Initialized to 0, only to satisfy the compiler. @Todo: see an appropriate initial value
-		int type = lp_solver_type_choosen;
+		int type = lp_solver_type;
 		lp_solver lpSolver(type), lp_U_dummy(type);
 		//	cout<<"Test 2 \n";
 		lpSolver.setMin_Or_Max(2);
@@ -1360,7 +1360,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 }
 
 void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type_choosen, unsigned int &newTotIters) {
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	//-- get the time-horizon and time-step and discritization_factor=10 times
 	// compute the iteration using this new time-step
@@ -1371,9 +1371,9 @@ void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvide
 
 	std::string filename="./coarse.out";
 
-	//time_crossed = invariantCrossingCheck(start_time, time_step, time_horizon, Initial, ReachParameters, invariant, SystemDynamics, lp_solver_type_choosen);
+	//time_crossed = invariantCrossingCheck(start_time, time_step, time_horizon, Initial, ReachParameters, invariant, SystemDynamics, lp_solver_type);
 	time_crossed = invariantCrossingCheck1(start_time, time_step, time_horizon, Initial, ReachParameters, invariant,
-			SystemDynamics, lp_solver_type_choosen, filename);
+			SystemDynamics, lp_solver_type, filename);
 	//cout<<"First coarse time-step completed at time = "<< time_crossed<<"\n";
 	if (time_crossed == time_horizon){	//Search failed to find a crossing. Flowpipe completely inside Invariant
 		newTotIters = ReachParameters.Iterations;	//orginal iteration
@@ -1384,7 +1384,7 @@ void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvide
 		time_step = ReachParameters.time_step;	//setting the original time-step as fine-time-step
 		filename="./fine.out";
 		actual_time_bound = invariantCrossingCheck1(next_search_time, time_step, time_crossed, Initial, ReachParameters,
-				invariant, SystemDynamics, lp_solver_type_choosen, filename);
+				invariant, SystemDynamics, lp_solver_type, filename);
 		//Debugging the correct time
 			//Since I am following '0-indexing' throughout. So it must return the value/index N as its indices are (0...(N-1))
 			//since the function invariantCrossingCheck1(...) return crossing time bound 'N' starting from time at '0'
@@ -1399,11 +1399,11 @@ void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvide
 }
 
 double invariantFaceCrossingCheck(std::vector<double>& neg_dir, double invBound, double START_TIME, double time_step, double time_horizon,
-		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type_choosen){
+		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type){
 
 	supportFunctionProvider::ptr p;
 	// ************************************************ object creations ************************************************
-	lp_solver neg_lp(lp_solver_type_choosen);
+	lp_solver neg_lp(lp_solver_type);
 	neg_lp.setMin_Or_Max(2);
 	if (!Initial->getIsEmpty()) //set glpk constraints If not an empty polytope
 		neg_lp.setConstraints(ReachParameters.X0->getCoeffMatrix(), ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
@@ -1422,10 +1422,10 @@ double invariantFaceCrossingCheck(std::vector<double>& neg_dir, double invBound,
 }
 
 double invariantCrossingCheck1(double START_TIME, double time_step, double time_horizon, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, Dynamics& SystemDynamics, int lp_solver_type_choosen, std::string fileName){
+		ReachabilityParameters& ReachParameters, polytope::ptr invariant, Dynamics& SystemDynamics, int lp_solver_type, std::string fileName){
 	supportFunctionProvider::ptr p;
 	// ************************************************ object creations ************************************************
-	lp_solver neg_lp(lp_solver_type_choosen);
+	lp_solver neg_lp(lp_solver_type);
 	neg_lp.setMin_Or_Max(2);
 	if (!Initial->getIsEmpty()) //set glpk constraints If not an empty polytope
 		neg_lp.setConstraints(ReachParameters.X0->getCoeffMatrix(), ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());

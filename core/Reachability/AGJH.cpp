@@ -366,9 +366,9 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 
 	double result_alfa = compute_alfa(reach_parameters.time_step,
 			current_location->getSystem_Dynamics(), continuous_initial_polytope,
-			lp_solver_type_choosen); //2 glpk object created here
+			lp_solver_type); //2 glpk object created here
 	double result_beta = compute_beta(current_location->getSystem_Dynamics(),
-			reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
+			reach_parameters.time_step, lp_solver_type); // NO glpk object created here
 
 	reach_parameters.result_alfa = result_alfa;
 	reach_parameters.result_beta = result_beta;
@@ -405,21 +405,21 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 //			//Approach of Coarse-time-step and Fine-time-step
 //			//std::cout<<"Coarse-time-step and Fine-time-step Flowpipe \n";
 //			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-//				current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+//				current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 //		}else{
 //			//Approach of Sequential invariant check will work for all case
 			//InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
-			//	reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);	//OLD implementation
+			//	reach_parameters, current_location->getInvariant(), lp_solver_type, NewTotalIteration);	//OLD implementation
 			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
-				reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+				reach_parameters, current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 //		}
 
 		/*jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-						current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);*/
+						current_location->getInvariant(), lp_solver_type, NewTotalIteration);*/
 
 		/*quickInvariantBoundaryCheck(current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
-				current_location->getInvariant(), lp_solver_type_choosen,
+				current_location->getInvariant(), lp_solver_type,
 				NewTotalIteration);*/
 	}
 
@@ -431,7 +431,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 					current_location->getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(),
-					current_location->getInvariantExist(), lp_solver_type_choosen);
+					current_location->getInvariantExist(), lp_solver_type);
 	/*sequentialReachSelection(NewTotalIteration, current_location,
 			continuous_initial_polytope, reach_region);*/
 
@@ -471,15 +471,15 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				aggregation=false;
 			}
 
-			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
-			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type); //, intersection_start_point);
+			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type);
 			gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 			//	std::cout<<"Before flowpipe Guard intersection\n";
 			//std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
 			if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 			{
 				// Returns the template hull of the polytopes that intersect with the guard
-				polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
+				polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type);
 			} else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 				// This alternative introduces a large approximation at switchings
 				//polys.push_back(flowpipse_cluster(reach_region,100));
@@ -500,7 +500,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else{ // Try clustering with user defined clustering percent
 
-						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type);
 
 						/*int cluster = 100; // Sets the percentage of clustering to 100 ie only one cluster
 						polys = flowpipe_cluster(reach_region, cluster);//std::cout << "Inside Universe Guard intersection with flowpipe routine\n";//std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
@@ -538,7 +538,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 
 			for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {
 				intersectedRegion = (*i);
-				//intersectedRegion = (*i)->getTemplate_approx(lp_solver_type_choosen);
+				//intersectedRegion = (*i)->getTemplate_approx(lp_solver_type);
 				//Returns a single over-approximated polytope from the list of intersected polytopes
 				//	GeneratePolytopePlotter(intersectedRegion);
 				//std::cout<<"Before Guard intersected region called\n";
@@ -564,7 +564,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 					newShiftedPolytope = post_assign_approx_deterministic(
 							newPolytope, current_assignment.Map,
 							current_assignment.b, reach_parameters.Directions,
-							lp_solver_type_choosen);
+							lp_solver_type);
 				}
 				//std::cout<<"Before Invariant intersection called\n";
 				// @Amit: the newShifted satisfy the destination location invariant
@@ -580,9 +580,9 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 
 				//	std::cout<<"Before Containment check called\n";
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
-					newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
-					isContain = templated_isContained(destination_locID, newPoly, PASSED, lp_solver_type_choosen);//over-approximated but threadSafe
-					//isContain = isContained_withLock(destination_locID, newPoly, PASSED, lp_solver_type_choosen);
+					newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type);
+					isContain = templated_isContained(destination_locID, newPoly, PASSED, lp_solver_type);//over-approximated but threadSafe
+					//isContain = isContained_withLock(destination_locID, newPoly, PASSED, lp_solver_type);
 
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
@@ -622,7 +622,7 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 			if (forbidden_set.first==-1 || locID == forbidden_set.first) { //forbidden locID matches
 				polytope::ptr forbid_poly = forbidden_set.second;
 				std::list < template_polyhedra::ptr > forbid_intersects;
-				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
+				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
 				if (forbid_intersects.size() == 0) {
 					//std::cout << "\nThe model does NOT violate SAFETY property!!!\n";

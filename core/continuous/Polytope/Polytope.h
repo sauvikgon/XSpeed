@@ -97,13 +97,13 @@ public:
 	/*
 	 * Returns Max norm of the polytope
 	 */
-	double max_norm(int lp_solver_type_choosen, unsigned int dim_for_Max_Norm);
+	double max_norm(int lp_solver_type, unsigned int dim_for_Max_Norm);
 	/*
 	 * Returns True if polytope P1(the calling polytope object) and P2 intersects each other
 	 *  i.e., True iff	P1 intersection P2 != empty set
 	 */
 	bool check_polytope_intersection(polytope::ptr P2,
-			int lp_solver_type_choosen);
+			int lp_solver_type);
 	/*
 	 * Returns a new polytope after appending the constraints of P2
 	 * which is an intersection-region
@@ -115,7 +115,7 @@ public:
 	 * of the system of the calling polytope.
 	 * This is an operation that takes an over-approximation of a given input/calling polytope
 	 */
-	void templatedDirectionHull(math::matrix<double> templateDir, polytope::ptr &resPoly, int lp_solver_type_choosen);
+	void templatedDirectionHull(math::matrix<double> templateDir, polytope::ptr &resPoly, int lp_solver_type);
 
 	/*
 	 * Performs containment check. If poly is contained in the calling polytope then returns TRUE
@@ -126,7 +126,7 @@ public:
 	 *
 	 * 		Such an operations can be done by solving LPs of order equal to the number of templated directions
 	 */
-	bool contains(polytope::ptr poly, int lp_solver_type_choosen);
+	bool contains(polytope::ptr poly, int lp_solver_type);
 
 	/**
 	 * Enumerate all vertices of the polytope between the two vectors

@@ -33,7 +33,7 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 	reachData.bound = bound;
 	reachData.H = H;
 	reachData.reach_parameters = reach_parameters;
-	reachData.lp_solver_type_choosen = lp_solver_type_choosen;
+	reachData.lp_solver_type = lp_solver_type;
 	reachData.set_aggregation = this->getSetAggregation();
 	// ****************** End of Duplicating the Data *************
 
@@ -152,9 +152,9 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 
 	double result_alfa = compute_alfa(reach_parameters.time_step,
 			current_location->getSystem_Dynamics(), continuous_initial_polytope,
-			myData.lp_solver_type_choosen); //2 glpk object created here
+			myData.lp_solver_type); //2 glpk object created here
 	double result_beta = compute_beta(current_location->getSystem_Dynamics(),
-			reach_parameters.time_step, myData.lp_solver_type_choosen); // NO glpk object created here
+			reach_parameters.time_step, myData.lp_solver_type); // NO glpk object created here
 
 	reach_parameters.result_alfa = result_alfa;
 	reach_parameters.result_beta = result_beta;
@@ -190,21 +190,21 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 //		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
 //			//Approach of Coarse-time-step and Fine-time-step
 //			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-//				current_location->getInvariant(), myData.lp_solver_type_choosen, NewTotalIteration);
+//				current_location->getInvariant(), myData.lp_solver_type, NewTotalIteration);
 //		}else{
 			//Approach of Sequential invariant check will work for all case
 			//InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
-			//	reach_parameters, current_location->getInvariant(), myData.lp_solver_type_choosen, NewTotalIteration);//Old implementation
+			//	reach_parameters, current_location->getInvariant(), myData.lp_solver_type, NewTotalIteration);//Old implementation
 			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
-				reach_parameters, current_location->getInvariant(), myData.lp_solver_type_choosen, NewTotalIteration);
+				reach_parameters, current_location->getInvariant(), myData.lp_solver_type, NewTotalIteration);
 //		}
 
 		/*jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
-						current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);*/
+						current_location->getInvariant(), lp_solver_type, NewTotalIteration);*/
 
 		/*quickInvariantBoundaryCheck(current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
-				current_location->getInvariant(), lp_solver_type_choosen,
+				current_location->getInvariant(), lp_solver_type,
 				NewTotalIteration);*/
 	}
 
@@ -216,7 +216,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 					current_location->getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(),
-					current_location->getInvariantExist(), myData.lp_solver_type_choosen);
+					current_location->getInvariantExist(), myData.lp_solver_type);
 	/*sequentialReachSelection(NewTotalIteration, current_location,
 			continuous_initial_polytope, reach_region);*/
 
@@ -260,17 +260,17 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 
 
 			std::list<polytope::ptr> polys;
-			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
-			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, myData.lp_solver_type_choosen);
+			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type); //, intersection_start_point);
+			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, myData.lp_solver_type);
 
-			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
-			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type_choosen);
+			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type); //, intersection_start_point);
+			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type);
 			gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
 			//	std::cout<<"Before flowpipe Guard intersection\n";
 			if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 			{
 				// Returns the template hull of the polytopes that intersect with the guard
-				polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, myData.lp_solver_type_choosen);
+				polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, myData.lp_solver_type);
 			}
 			else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 				// This alternative introduces a large approximation at switchings
@@ -295,7 +295,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 						polys = flowpipe_cluster(reach_region, cluster);
 						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
 						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;*/
-						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, myData.lp_solver_type_choosen);
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, myData.lp_solver_type);
 					}
 				}
 				else{ // empty guard
@@ -329,7 +329,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 
 			for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {
 				intersectedRegion = (*i);
-				//intersectedRegion = (*i)->getTemplate_approx(lp_solver_type_choosen);
+				//intersectedRegion = (*i)->getTemplate_approx(lp_solver_type);
 				//Returns a single over-approximated polytope from the list of intersected polytopes
 				//	GeneratePolytopePlotter(intersectedRegion);
 				polytope::ptr newShiftedPolytope, newPolytope;//created an object here
@@ -348,7 +348,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 					newShiftedPolytope = post_assign_approx_deterministic(
 							newPolytope, current_assignment.Map,
 							current_assignment.b, myData.reach_parameters.Directions,
-							myData.lp_solver_type_choosen);
+							myData.lp_solver_type);
 				}
 				// @Amit: the newShifted satisfy the destination location invariant
 				if (myData.H.getLocation(destination_locID)->getInvariant() != NULL)
@@ -361,9 +361,9 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 				if (is_ContainmentCheckRequired){	//Containtment Checking required
 					bool isContain=false;
 					polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
-					newShiftedPolytope->templatedDirectionHull(myData.reach_parameters.Directions, newPoly, myData.lp_solver_type_choosen);
-					//isContain = AsyncBFS_isContained(destination_locID, newPoly, L, myData.H.getTotalLocations(), myData.lp_solver_type_choosen);//over-approximated but threadSafe
-					isContain = AsyncBFS_isContained(destination_locID, newPoly, L, myData.lp_solver_type_choosen);//over-approximated but threadSafe
+					newShiftedPolytope->templatedDirectionHull(myData.reach_parameters.Directions, newPoly, myData.lp_solver_type);
+					//isContain = AsyncBFS_isContained(destination_locID, newPoly, L, myData.H.getTotalLocations(), myData.lp_solver_type);//over-approximated but threadSafe
+					isContain = AsyncBFS_isContained(destination_locID, newPoly, L, myData.lp_solver_type);//over-approximated but threadSafe
 					if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 						initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 						newState->setTransitionId(transition_id); // keeps track of the transition_ID
@@ -389,8 +389,8 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
  * This is thread-safe but uses template_Hull of poly an over-approximated technique
  */
 
-//bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int totalLocations, int lp_solver_type_choosen) {
-bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int lp_solver_type_choosen) {
+//bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int totalLocations, int lp_solver_type) {
+bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int lp_solver_type) {
 	bool contained = false;
 	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
 	//int ha_size = totalLocations;// no need to search in all locations only on locID
@@ -414,11 +414,11 @@ bool AsyncBFS_isContained(int locID, polytope::ptr poly, LocklessDS L[], int lp_
 				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
-				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				intersects = p->check_polytope_intersection(poly, lp_solver_type); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
 					//std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
-					contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+					contained = p->contains(poly, lp_solver_type);//	Our simple polytope Containment Check
 					if (contained){
 						//std::cout<<"\n\nFound Fixed-point!!!\n";
 						break;	//No need to check the rest if contained in a single Omega
@@ -437,7 +437,7 @@ return contained;
  */
 /*
 
-bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
+bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type){
 
 	bool contained = false;
 	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
@@ -462,12 +462,12 @@ bool isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> 
 				constraint_bound_values = flowpipe->getInvariantBoundValue(i);
 				p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);
 
-				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				intersects = p->check_polytope_intersection(poly, lp_solver_type); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
 				//	std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
 
-					//contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+					//contained = p->contains(poly, lp_solver_type);//	Our simple polytope Containment Check
 
 					PPL_Polyhedron::ptr p1=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
 					PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(poly->getCoeffMatrix(),poly->getColumnVector(),poly->getInEqualitySign()));

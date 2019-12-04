@@ -30,7 +30,7 @@ const template_polyhedra::ptr reachParallelSampling(
 			unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 			supportFunctionProvider::ptr Initial,
 			ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-			bool isInvariantExist, int lp_solver_type_choosen);
+			bool isInvariantExist, int lp_solver_type);
 
 
 
@@ -46,7 +46,7 @@ const template_polyhedra::ptr reachTimeSlice(unsigned int NewTotalIteration, Dyn
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, const polytope::ptr invariant,
 		bool isInvariantExist, int CORES, unsigned int Algorithm_Type,
-		int lp_solver_type_choosen);
+		int lp_solver_type);
 
 
 #endif /* REACH_POSTC_PARALLEL_H_ */

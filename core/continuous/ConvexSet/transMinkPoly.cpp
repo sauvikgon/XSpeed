@@ -89,7 +89,7 @@ double transMinkPoly::computeSupportFunction(const std::vector<double>& directio
 		return res;
 }
 
-double transMinkPoly::max_norm(int lp_solver_type_choosen,
+double transMinkPoly::max_norm(int lp_solver_type,
 		unsigned int dim_for_Max_norm) {
 	unsigned int dimension_size = dim_for_Max_norm;
 	double Max_A, sf, Max = 0.0;
@@ -115,7 +115,7 @@ double transMinkPoly::max_norm(int lp_solver_type_choosen,
 			directions[i] = -1; //Negative Generators
 			generator_directions.push_back(directions);
 		}
-		int type = lp_solver_type_choosen;
+		int type = lp_solver_type;
 		lp_solver lp(type), lp_U(type);
 
 		if (!X0->getIsEmpty()) {

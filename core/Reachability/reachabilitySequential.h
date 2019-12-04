@@ -41,17 +41,17 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 template_polyhedra::ptr reachabilitySequential(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool InvariantExist, int lp_solver_type_choosen);
+		bool InvariantExist, int lp_solver_type);
 
 // A sequential postC computation with forward approximation model
 template_polyhedra::ptr reachForwardApprox(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool InvariantExist, int lp_solver_type_choosen);
+		bool InvariantExist, int lp_solver_type);
 
 template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool InvariantExist, int lp_solver_type_choosen);
+		bool InvariantExist, int lp_solver_type);
 
 #endif /* REACHABILITY_SEQ_H_ */

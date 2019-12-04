@@ -36,11 +36,10 @@ struct AllDirection {
 };
 
 /*
- * Parameters to be passed in Reachability Algorithm
+ *  Parameters to be passed to Reachability Algorithm
  *	Directions : is a Matrix consisting of directions of 'n'-variables.
  *	TimeBound : Total time bound or interval (in terms of Units and not Seconds)
  *	Iterations : Number of Iterations to be computed
- *
  */
 struct ReachabilityParameters {
 //	bool InvariantExists;		//True If invariant exists otherwise False
@@ -59,7 +58,7 @@ struct ReachabilityParameters {
 	polytope::ptr X0;  // The polytope representing the initial set
 	std::vector<int> Stop_locID;	//List of Locations for which Flowpipe need not be computed
 };
-
+typedef struct ReachabilityParameters ReachabilityParameters;
 struct Dynamics {
 	math::matrix<double> MatrixA;
 	bool isEmptyMatrixA;	//True if Zero otherwise False

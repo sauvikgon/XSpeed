@@ -69,14 +69,14 @@ public:
 	 * elements of the list is a intersected region.
 	 * Note::If the size of the returning list is 0 indicates that polytope-guard does not intersects with the calling template_polyhedra
 	 */
-	const std::list<template_polyhedra::ptr> polys_intersectionSequential(polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
-	const std::list<template_polyhedra::ptr> polys_intersectionParallel(polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
+	const std::list<template_polyhedra::ptr> polys_intersectionSequential(polytope::ptr guard, int lp_solver_type);//, int & point_of_intersection);
+	const std::list<template_polyhedra::ptr> polys_intersectionParallel(polytope::ptr guard, int lp_solver_type);//, int & point_of_intersection);
 
 	/*
 	 * Less Expensive function
 	 * Returns a list of pairs with each pair of element as (start,end) where start and end are index at which intersection start and end.
 	 */
-	std::list<std::pair<unsigned int, unsigned int> > polys_intersectionSequential_optimize(polytope::ptr guard, int lp_solver_type_choosen);//, int & point_of_intersection);
+	std::list<std::pair<unsigned int, unsigned int> > polys_intersectionSequential_optimize(polytope::ptr guard, int lp_solver_type);//, int & point_of_intersection);
 
 	/*
 	 * Less Expensive function
@@ -87,12 +87,12 @@ public:
 	 * intersection region. Note there can be more than one set of omegas that intersect with the same guard, in this case list of convex sets can be returned).
 	 * If aggregation is FALSE/OFF, it indicate for each omega that intersect with the guard it will be considered as individual convex set.
 	 */
-	std::list<polytope::ptr> flowpipe_intersectionSequential(bool aggregation, polytope::ptr guard, int lp_solver_type_choosen);
+	std::list<polytope::ptr> flowpipe_intersectionSequential(bool aggregation, polytope::ptr guard, int lp_solver_type);
 
 	/*
 	 * using PPL library returns a list of polytopes with each polytopes as the convex_hull approximation of the intersected region of guard with the flowpipe
 	 */
-	//std::list<polytope::ptr> flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type_choosen);
+	//std::list<polytope::ptr> flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type);
 
 	/*
 	 * From the calling TEMPLATE_POLYHEDRA a SINGLE POLYTOPE is returned.
@@ -100,7 +100,7 @@ public:
 	 * TEMPLATE_POLYHEDRA and returning a SINGLE POLYTOPE.
 	 * This an Expensive operation for an optimization see function flowpipe_intersectionSequential()
 	 */
-	const polytope::ptr getTemplate_approx(int lp_solver_type_choosen);
+	const polytope::ptr getTemplate_approx(int lp_solver_type);
 
 	/*
 	 *	Returns the union of the template_polyhedra Tpoly and the calling template_polyhedra object

@@ -102,10 +102,10 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			// ******************* Computing Parameters ************************ //current_location:: parameters alfa, beta and phi_trans
 
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
-					current_location->getSystem_Dynamics(), continuous_initial_polytope, lp_solver_type_choosen); //cout<<"\nCompute Alfa Done";
+					current_location->getSystem_Dynamics(), continuous_initial_polytope, lp_solver_type); //cout<<"\nCompute Alfa Done";
 
 			double result_beta = compute_beta(current_location->getSystem_Dynamics(),
-					reach_parameter_local.time_step, lp_solver_type_choosen); // NO glpk object created here
+					reach_parameter_local.time_step, lp_solver_type); // NO glpk object created here
 
 			reach_parameter_local.result_alfa = result_alfa;
 			reach_parameter_local.result_beta = result_beta;
@@ -156,13 +156,13 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 //						&& LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyC == false) {
 //					//Approach of Coarse-time-step and Fine-time-step
 //					jumpInvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(), LoadBalanceDS[id].X0, LoadBalanceDS[id].reach_param,
-//						LoadBalanceDS[id].current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+//						LoadBalanceDS[id].current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 //				} else {
 					//Approach of Sequential invariant check will work for all case
 					//InvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(),LoadBalanceDS[id].X0,
-					//	LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type_choosen, NewTotalIteration);//OLD implementation
+					//	LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type, NewTotalIteration);//OLD implementation
 					InvariantBoundaryCheckNewLPSolver(LoadBalanceDS[id].current_location->getSystem_Dynamics(),LoadBalanceDS[id].X0,
-						LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type_choosen, NewTotalIteration);
+						LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type, NewTotalIteration);
 //				}
 				LoadBalanceDS[id].newIteration = NewTotalIteration; //Important to take care
 			}else
@@ -293,7 +293,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 							//std::cout << "Approximate Post Assignment\n";
 							newShiftedPolytope = post_assign_approx_deterministic( newPolytope,
 									loadBalPostD[id].assign_list[trans].Map, loadBalPostD[id].assign_list[trans].b,
-									reach_parameters.Directions, lp_solver_type_choosen);
+									reach_parameters.Directions, lp_solver_type);
 						}
 						// @Amit: the newShifted satisfy the destination location invariant
 						if (H.getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant() != NULL)
@@ -307,10 +307,10 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 						if (is_ContainmentCheckRequired){	//Containtment Checking required
 							bool isContain=false;
 							polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
-							newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
-							isContain = templated_isContained(loadBalPostD[id].dest_locID[trans], newPoly, Reachability_Region, lp_solver_type_choosen);//over-approximated but threadSafe
+							newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type);
+							isContain = templated_isContained(loadBalPostD[id].dest_locID[trans], newPoly, Reachability_Region, lp_solver_type);//over-approximated but threadSafe
 							//Calling with the newShifted polytope to use PPL library This is NOT ThreadSafe
-							//isContain = isContainted(loadBalPostD[id].dest_locID[trans], newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);
+							//isContain = isContainted(loadBalPostD[id].dest_locID[trans], newShiftedPolytope, Reachability_Region, lp_solver_type);
 							if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 								initial_state::ptr newState = initial_state::ptr(new initial_state(loadBalPostD[id].dest_locID[trans], newShiftedPolytope));
 								newState->setTransitionId(loadBalPostD[id].trans_ID[trans]); // keeps track of the transition_ID
@@ -513,7 +513,7 @@ template_polyhedra::ptr tpbfs::polytopeTo_templatepolyhedra(LoadBalanceData Load
 	template_polyhedra::ptr reachableRegion;
 
 
-	lp_solver lp(lp_solver_type_choosen);
+	lp_solver lp(lp_solver_type);
 	lp.setMin_Or_Max(2);//maximize
 	lp.setConstraints(LoadBalanceDS.X0->getCoeffMatrix(), LoadBalanceDS.X0->getColumnVector(), LoadBalanceDS.X0->getInEqualitySign());
 
@@ -611,7 +611,7 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 		search_SymState_dirsX0Index(j, LoadBalanceDS, index, indexDir);
 		while (j < ub) {
 			oldIndex = index;	//previously computed
-			lp_solver lp(this->lp_solver_type_choosen); //1 for using GLPK solver
+			lp_solver lp(this->lp_solver_type); //1 for using GLPK solver
 			lp.setMin_Or_Max(2); //Maximizing
 			lp.setConstraints(LoadBalanceDS[index].X0->getCoeffMatrix(), LoadBalanceDS[index].X0->getColumnVector(),
 					LoadBalanceDS[index].X0->getInEqualitySign());
@@ -667,7 +667,7 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 			search_SymState_dirsUIndex(j, LoadBalanceDS, index, indexDir);
 			while (j < ub) {
 				oldIndex = index;	//previously computed
-				lp_solver lp(this->lp_solver_type_choosen); //1 for using GLPK solver
+				lp_solver lp(this->lp_solver_type); //1 for using GLPK solver
 				lp.setMin_Or_Max(2); //Maximizing
 				lp.setConstraints(LoadBalanceDS[index].U->getCoeffMatrix(), LoadBalanceDS[index].U->getColumnVector(),
 						LoadBalanceDS[index].U->getInEqualitySign());
@@ -746,7 +746,7 @@ void tpbfs::loadBalancedPostD(std::vector<LoadBalanceData_PostD>& loadBalPostD){
 			p->setMoreConstraints(loadBalPostD[sfmIndex].sfm->getInvariantDirections(),constraint_bound_values);
 		}
 		for (unsigned int trans = 0; trans < loadBalPostD[sfmIndex].trans_size; trans++) {
-			loadBalPostD[sfmIndex].bool_arr(trans, sfmColIndex) = p->check_polytope_intersection(loadBalPostD[sfmIndex].guard_list[trans], lp_solver_type_choosen);//result of intersection
+			loadBalPostD[sfmIndex].bool_arr(trans, sfmColIndex) = p->check_polytope_intersection(loadBalPostD[sfmIndex].guard_list[trans], lp_solver_type);//result of intersection
 		}
 	} //end of parallel-loop :: we have the list of intersected polys
 }

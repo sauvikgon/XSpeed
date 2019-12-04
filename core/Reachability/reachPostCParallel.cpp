@@ -11,7 +11,7 @@
 //Parallel sf sampling  using OMP
 const template_polyhedra::ptr reachParallelSampling(unsigned int boundedTotIteration, Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool InvariantExist, int lp_solver_type_choosen) {
+		bool InvariantExist, int lp_solver_type) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
@@ -38,7 +38,7 @@ const template_polyhedra::ptr reachParallelSampling(unsigned int boundedTotItera
 	phi_tau_Transpose = ReachParameters.phi_trans;
 	B_trans = ReachParameters.B_trans;
 
-	int type = lp_solver_type_choosen;
+	int type = lp_solver_type;
 
 #pragma omp parallel for
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
@@ -184,7 +184,7 @@ const template_polyhedra::ptr reachParallelSampling(unsigned int boundedTotItera
 
 const template_polyhedra::ptr reachTimeSlice(unsigned int NewTotalIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool invariantExist, int CORES,
-		unsigned int Algorithm_Type, int lp_solver_type_choosen) {
+		unsigned int Algorithm_Type, int lp_solver_type) {
 	double T = ReachParameters.TimeBound;
 	//double original_time_step = ReachParameters.time_step;
 
@@ -246,7 +246,7 @@ const template_polyhedra::ptr reachTimeSlice(unsigned int NewTotalIteration, Dyn
 		if (Algorithm_Type == TIME_SLICE) {
 
 			Tpoly = reachabilitySequential_For_Parallel_Iterations(ReachParameters.Iterations, SystemDynamics, Initial, ReachParameters, invariant,
-					invariantExist, lp_solver_type_choosen);
+					invariantExist, lp_solver_type);
 
 		}
 

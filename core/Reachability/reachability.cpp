@@ -11,16 +11,15 @@ using namespace std;
 
 
 void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
-		int lp_solver_type, int solver_GLPK_Gurobi_for_GPU, std::pair<int, polytope::ptr> forbidden, userOptions& user_options) {
+		int lp_solver_type, std::pair<int, polytope::ptr> forbidden, userOptions& user_options) {
 	H = h;
 	I = i;
 	reach_parameters = reach_param;
 	bound = user_options.get_bfs_level();	//bfs_level
 	Algorithm_Type = user_options.get_algorithm();	//Important parameter to decide to select an algorithm to execute
 	Total_Partition = user_options.getTotalSliceSize(); //slice size
-	lp_solver_type_choosen = lp_solver_type;
+	this->lp_solver_type= lp_solver_type;
 	number_of_streams = user_options.getStreamSize();
-	Solver_GLPK_Gurobi_GPU = solver_GLPK_Gurobi_for_GPU; //todo:: used for comparing GLPK solver vs GPU. Can be removed
 	forbidden_set = forbidden;
 	ce_flag = user_options.get_ce_flag();
 	ce_path = user_options.get_ce_path();
@@ -33,7 +32,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 //bound is the maximum number of transitions or jumps permitted.
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
-std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::list<abstractCE::ptr>& symbolic_ce_list){
+std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE::ptr>& symbolic_ce_list){
 
 	std::list < symbolic_states::ptr > Reachability_Region;
 	template_polyhedra::ptr reach_region;
@@ -94,10 +93,10 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		 * */
 		double result_alfa = compute_alfa(reach_parameters.time_step,
 				current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
+				continuous_initial_polytope, lp_solver_type); //2 glpk object created here
 
 		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
-				reach_parameters.time_step, lp_solver_type_choosen); // NO glpk object created here
+				reach_parameters.time_step, lp_solver_type); // NO glpk object created here
 
 		reach_parameters.result_alfa = result_alfa;
 		reach_parameters.result_beta = result_beta;
@@ -132,7 +131,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 			 * 	For submitting the reading in STTT Journal we did not include jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
 			 */
 
-			//InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+			//InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters, current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 		}
 
 		 /*********** Compute flowpipe_cost:: estimation Ends **********************************
@@ -140,7 +139,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 		 * This selection is only for purely continuous models.
 		 */
 
-		sequentialReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
+		seqReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 		num_flowpipe_computed++;//computed one Flowpipe
 
 		//	************************************ Reach or Flowpipe Computed *********************
@@ -162,7 +161,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 			if (forbidden_set.first==-1 || locID == forbidden_set.first) { // forbidden locID matches. loc id of -1 means any location
 				polytope::ptr forbid_poly = forbidden_set.second;
 				std::list < template_polyhedra::ptr > forbid_intersects;
-				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type_choosen);
+				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
 				if (forbid_intersects.size() != 0){
 					std::cout << "intersection with forbidden-region found at location: " << locID << std::endl;
@@ -291,8 +290,8 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 					 * First find out all Omegas that intersects with the gaurd_polytope and then push each Omega
 					 * into the polys. Guard intersection is done in the following steps below for each of these Omegas
 					 */
-					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type_choosen);//Todo::debug PPL
-					polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
+					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(gaurd_polytope, lp_solver_type);//Todo::debug PPL
+					polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type);
 
 				} else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings
@@ -319,7 +318,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						//polys = flowpipe_cluster(reach_region,cluster);
 
 						// Below is 100% template hull option
-						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type_choosen);
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type);
 					}
 
 				} else{ // empty guard
@@ -352,7 +351,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);
 					} else {
 						newShiftedPolytope = post_assign_approx_deterministic(newPolytope,
-								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type_choosen);
+								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type);
 					}
 					// @Rajarshi: the newShifted must satisfy the destination location invariant
 					if (H.getLocation(destination_locID)->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
@@ -371,11 +370,11 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 						 * actual polytope obtained after assignment operation i.e., newShiftedPolytope
 						 */
 						polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
-						newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type_choosen);
-						isContain = templated_isContained(destination_locID, newPoly, Reachability_Region, lp_solver_type_choosen);//over-approximated but threadSafe
+						newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type);
+						isContain = templated_isContained(destination_locID, newPoly, Reachability_Region, lp_solver_type);//over-approximated but threadSafe
 						//std::cout<<"Before Containment check\n";
 						//Calling with the newShifted polytope to use PPL library
-						//isContain = isContained(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type_choosen);//Todo::debug PPL for double data type
+						//isContain = isContained(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type);//Todo::debug PPL for double data type
 						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 							initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 							newState->setTransitionId(transition_id); // keeps track of the transition_ID
@@ -416,7 +415,7 @@ std::list<symbolic_states::ptr> reachability::computeSequentialBFSReach(std::lis
 	return Reachability_Region;
 }
 
-void reachability::sequentialReachSelection(unsigned int NewTotalIteration, location::ptr current_location,
+void reachability::seqReachSelection(unsigned int NewTotalIteration, location::ptr current_location,
 		polytope::ptr continuous_initial_polytope,
 		template_polyhedra::ptr& reach_region) {
 
@@ -425,7 +424,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		std::cout << "\nRunning sequential BFS.\n";
 		reach_region = reachabilitySequential(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
-				current_location->getInvariantExist(), lp_solver_type_choosen);
+				current_location->getInvariantExist(), lp_solver_type);
 	}
 
 	if (Algorithm_Type == PAR_SF) {
@@ -436,7 +435,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(),
-				current_location->getInvariantExist(), lp_solver_type_choosen);
+				current_location->getInvariantExist(), lp_solver_type);
 	}
 
 
@@ -445,7 +444,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		int NCores = Total_Partition; //Number of Partitions (number of threads)
 		reach_region = reachTimeSlice(NewTotalIteration, current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
-				current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type_choosen);
+				current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type);
 	}
 
 	if(Algorithm_Type == FORWARD){
@@ -453,7 +452,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 		exit(0);
 		/*reach_region = reachForwardApprox(NewTotalIteration, current_location->getSystem_Dynamics(),
 						continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
-						current_location->getInvariantExist(), lp_solver_type_choosen);
+						current_location->getInvariantExist(), lp_solver_type);
 		*/
 	}
 
@@ -463,7 +462,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 			AllReachGPU_time.start();
 			reachabilitySequential_GPU(NewTotalIteration, current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(), current_location->isInvariantExists(),
-					lp_solver_type_choosen, number_of_streams, Solver_GLPK_Gurobi_GPU, reach_region);
+					lp_solver_type, number_of_streams, Solver_GLPK_Gurobi_GPU, reach_region);
 			std::cout << "Out from GPU_reach\n";
 			AllReachGPU_time.stop();
 			double wall_clock1;
@@ -478,7 +477,7 @@ void reachability::sequentialReachSelection(unsigned int NewTotalIteration, loca
 //reach_parameters includes the different parameters needed in the computation of reachability.
 //I is the initial symbolic state
 
-std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
+std::list<symbolic_states::ptr> reachability::computeParBFS(
 		std::list<abstractCE::ptr>& symbolic_ce_list) {
 
 	std::list < symbolic_states::ptr > Reachability_Region;
@@ -545,11 +544,11 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 			// ******************* Computing Parameters *******************************
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
 					current_location->getSystem_Dynamics(),
-					continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
+					continuous_initial_polytope, lp_solver_type); //2 glpk object created here
 
 			double result_beta = compute_beta(
 					current_location->getSystem_Dynamics(),
-					reach_parameter_local.time_step, lp_solver_type_choosen); // NO glpk object created here
+					reach_parameter_local.time_step, lp_solver_type); // NO glpk object created here
 
 			reach_parameter_local.result_alfa = result_alfa;
 			reach_parameter_local.result_beta = result_beta;
@@ -571,11 +570,11 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 			unsigned int NewTotalIteration;
 			if (current_location->getInvariantExist()) {
 				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
-						reach_parameter_local, current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+						reach_parameter_local, current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 				std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 			}
 			//  ********************* FlowPipe or Reach Computation *************************
-			parallelReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_parameter_local, S, id);
+			parReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_parameter_local, S, id);
 			// Returns the Flow_Pipe in reach_region_list[id]
 			//  ********************* FlowPipe or Reach Computation Done ********************
 
@@ -608,11 +607,11 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 					boost::timer::cpu_timer t100;
 					//this intersected_polyhedra will have invariant direction added in it
 					string trans_name = (*t)->getLabel();
-					//	intersected_polyhedra = t_poly->polys_intersectionParallel(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
+					//	intersected_polyhedra = t_poly->polys_intersectionParallel(gaurd_polytope, lp_solver_type); //, intersection_start_point);
 					t100.start();
 					intersected_polyhedra =
 							t_poly->polys_intersectionSequential(gaurd_polytope,
-									lp_solver_type_choosen); //, intersection_start_point);
+									lp_solver_type); //, intersection_start_point);
 					t100.stop();
 					if (intersected_polyhedra.size() > 0) { //there is intersection so new symbolic state will be inserted into the waitingList
 						//std::cout << "Intersected = " < intersected_polyhedra.size() << std::endl;
@@ -642,7 +641,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 							i != intersected_polyhedra.end(); i++) {
 
 						intersectedRegion = (*i)->getTemplate_approx(
-								lp_solver_type_choosen);
+								lp_solver_type);
 						//Returns a single over-approximated polytope from the list of intersected polytopes
 						polytope::ptr newShiftedPolytope, newPolytope; //created an object here
 						newPolytope =
@@ -710,7 +709,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReach(
 
 //Lock Avoidance:: Parallel Breadth First Search for Discrete Jumps
 //separate Read and Write Queue (pwlist.WaitingList)
-std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(std::list<abstractCE::ptr>& symbolic_ce_list) {
+std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<abstractCE::ptr>& symbolic_ce_list) {
 
 	std::list < symbolic_states::ptr > Reachability_Region;
 	//	template_polyhedra::ptr reach_region;
@@ -816,9 +815,9 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 			//current_location:: parameters alfa, beta and phi_trans have to be re-computed
 			//cout<<"\nBefore Compute Alfa";
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
-					current_location->getSystem_Dynamics(), continuous_initial_polytope, lp_solver_type_choosen); //2 glpk object created here
+					current_location->getSystem_Dynamics(), continuous_initial_polytope, lp_solver_type); //2 glpk object created here
 			//cout<<"\nCompute Alfa Done";
-			double result_beta = compute_beta(current_location->getSystem_Dynamics(), reach_parameter_local.time_step, lp_solver_type_choosen); // NO glpk object created here
+			double result_beta = compute_beta(current_location->getSystem_Dynamics(), reach_parameter_local.time_step, lp_solver_type); // NO glpk object created here
 			//			cout<<"\nCompute Beta Done";
 			reach_parameter_local.result_alfa = result_alfa;
 			reach_parameter_local.result_beta = result_beta;
@@ -850,7 +849,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 			unsigned int NewTotalIteration;
 			if (current_location->getInvariantExist()){
 				InvariantBoundaryCheck(SymDataStruct[id].current_location->getSystem_Dynamics(), continuous_initial_polytope,
-						SymDataStruct[id].reach_param, SymDataStruct[id].current_location->getInvariant(), lp_solver_type_choosen, NewTotalIteration);
+						SymDataStruct[id].reach_param, SymDataStruct[id].current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 				std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 				//list_invBounaryValue[id] = NewTotalIteration;
 			}
@@ -872,7 +871,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 		for (unsigned int id = 0; id < count; id++) {
 			//  ********************* FlowPipe or Reach Computation *************************
 
-			parallelReachSelection(SymDataStruct[id].newIteration, SymDataStruct[id].current_location,
+			parReachSelection(SymDataStruct[id].newIteration, SymDataStruct[id].current_location,
 					SymDataStruct[id].X0, SymDataStruct[id].reach_param, S, id);
 
 		}
@@ -933,8 +932,8 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 					//this intersected_polyhedra will have invariant direction added in it
 					string trans_name = (*trans)->getLabel();
 					t100.start();
-					intersected_polyhedra = t_poly->polys_intersectionParallel(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
-					//intersected_polyhedra = t_poly->_intersectionSequential(gaurd_polytope, lp_solver_type_choosen); //, intersection_start_point);
+					intersected_polyhedra = t_poly->polys_intersectionParallel(gaurd_polytope, lp_solver_type); //, intersection_start_point);
+					//intersected_polyhedra = t_poly->_intersectionSequential(gaurd_polytope, lp_solver_type); //, intersection_start_point);
 					t100.stop();
 					if (intersected_polyhedra.size() > 0) { //there is intersection so new symbolic state will be inserted into the waitingList
 #pragma omp critical
@@ -956,7 +955,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 					ds.insert_element(destination_locID);
 					for (std::list<template_polyhedra::ptr>::iterator it = intersected_polyhedra.begin(); it != intersected_polyhedra.end(); it++) {
 						//cout << "\nNumber of Intersections #1\n";
-						intersectedRegion = (*it)->getTemplate_approx(lp_solver_type_choosen);
+						intersectedRegion = (*it)->getTemplate_approx(lp_solver_type);
 						//Returns a single over-approximated polytope from the list of intersected polytopes
 						polytope::ptr newShiftedPolytope, newPolytope; //created an object here
 						newPolytope = intersectedRegion->GetPolytope_Intersection(
@@ -1020,7 +1019,7 @@ std::list<symbolic_states::ptr> reachability::computeParallelBFSReachLockAvoid(s
 
 /*** TODO: Have to optimize invariant_boundary_check() for support function computation ***/
 
-void reachability::parallelReachSelection(unsigned int NewTotalIteration, location::ptr current_location,
+void reachability::parReachSelection(unsigned int NewTotalIteration, location::ptr current_location,
 		polytope::ptr continuous_initial_polytope,
 		ReachabilityParameters& reach_parameters,
 		std::vector<symbolic_states::ptr>& S, unsigned int id) {
@@ -1035,7 +1034,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(),
-				current_location->getInvariantExist(), lp_solver_type_choosen);
+				current_location->getInvariantExist(), lp_solver_type);
 		S[id]->setContinuousSetptr(reach_region);
 
 		AllReach_time.stop();
@@ -1054,7 +1053,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 				current_location->getSystem_Dynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(),
-				current_location->getInvariantExist(), lp_solver_type_choosen);
+				current_location->getInvariantExist(), lp_solver_type);
 		AllReach_time.stop();
 		S[id]->setContinuousSetptr(reach_region);
 		double wall_clock1;
@@ -1065,28 +1064,8 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 		//	std::cout << "Time seen from mop wall timer: "<< omp_get_wtime() - wall_timer << std::endl;
 	}
 
-/*	if (Algorithm_Type == GPU_SF) { //computing all support function in GPU
-		cout << "\nRunning GPU Sequential\n";
-		boost::timer::cpu_timer AllReachGPU_time;
-		AllReachGPU_time.start();
-		reachabilitySequential_GPU(NewTotalIteration, current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters,
-				current_location->getInvariant(),
-				current_location->isInvariantExists(), lp_solver_type_choosen,
-				number_of_streams, Solver_GLPK_Gurobi_GPU, reach_region);
-		S[id]->setContinuousSetptr(reach_region);
-
-		AllReachGPU_time.stop();
-		double wall_clock1;
-		wall_clock1 = AllReachGPU_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nAllReach_time: Boost Time:Wall(Seconds) = "
-				<< return_Time1 << std::endl;
-	}*/
-
 	if (Algorithm_Type == TIME_SLICE) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
-		cout
-				<< "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
+		cout << "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
 		bool invertible;
 		if (!current_location->getSystem_Dynamics().isEmptyMatrixA) {
 			math::matrix<double> A_inv(current_location->getSystem_Dynamics().MatrixA.size1(),
@@ -1099,7 +1078,7 @@ void reachability::parallelReachSelection(unsigned int NewTotalIteration, locati
 			int NCores = Total_Partition; //Number of Partitions (number of threads)
 			reach_region = reachTimeSlice(NewTotalIteration, current_location->getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
-					current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type_choosen);
+					current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type);
 			S[id]->setContinuousSetptr(reach_region);
 			//		std::cout << "Finished computing reachable states\n";
 		} else {
@@ -1204,10 +1183,10 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 			//check intersection with flowpipe/reach_region
 			//GeneratePolytopePlotter(forbid_poly);
 			std::list < template_polyhedra::ptr > forbid_intersects;
-			//forbid_intersects = computedSymStates->getContinuousSetptr()->polys_intersectionParallel(forbid_poly, lp_solver_type_choosen);
+			//forbid_intersects = computedSymStates->getContinuousSetptr()->polys_intersectionParallel(forbid_poly, lp_solver_type);
 
 			forbid_intersects = computedSymStates->getContinuousSetptr()->polys_intersectionSequential(
-							forbid_poly, lp_solver_type_choosen); //TODO:: CHECK RUNNING BOTH PARALLEL AND SEQUENTIAL
+							forbid_poly, lp_solver_type); //TODO:: CHECK RUNNING BOTH PARALLEL AND SEQUENTIAL
 
 			if (forbid_intersects.size() == 0) {
 				std::cout << "\nThe model does NOT violates SAFETY property!!!\n";
@@ -1327,8 +1306,8 @@ void reachability::computeBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS) 
 	for (unsigned int i = 0; i < LoadBalanceDS.size(); i++) { //for each symbolic-states
 		assert(i == LoadBalanceDS[i].symState_ID);
 		int dimension = LoadBalanceDS[i].List_dir_X0.size2();
-		lp_solver lp(this->lp_solver_type_choosen), lp_U(
-				this->lp_solver_type_choosen);
+		lp_solver lp(this->lp_solver_type), lp_U(
+				this->lp_solver_type);
 		lp.setMin_Or_Max(2); //2 for Maximization
 
 		lp.setConstraints(LoadBalanceDS[i].reach_param.X0->getCoeffMatrix(),
@@ -1449,7 +1428,7 @@ double reachability::LPSolver(polytope::ptr poly, std::vector<double> dirs) {
 	if (poly->getIsEmpty())
 		res = 0.0;
 	else {
-		lp_solver lp(this->lp_solver_type_choosen);
+		lp_solver lp(this->lp_solver_type);
 		lp.setMin_Or_Max(2); //for maximizing
 		lp.setConstraints(poly->getCoeffMatrix(), poly->getColumnVector(), poly->getInEqualitySign());
 		res = lp.Compute_LLP(dirs);
@@ -1493,7 +1472,7 @@ double reachability::boxLPSolver(polytope::ptr poly, std::vector<double> dir) {
 /*
  * This is NOT thread-safe but uses PPL library with exact computation
  */
-/*bool reachability::isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen){
+/*bool reachability::isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type){
 
 	bool contained = false;
 	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
@@ -1518,12 +1497,12 @@ double reachability::boxLPSolver(polytope::ptr poly, std::vector<double> dir) {
 					constraint_bound_values = flowpipe->getInvariantBoundValue(i);
 					p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);
 				}
-				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				intersects = p->check_polytope_intersection(poly, lp_solver_type); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
 			//		std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
 
-					//contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+					//contained = p->contains(poly, lp_solver_type);//	Our simple polytope Containment Check
 
 					PPL_Polyhedron::ptr p1=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
 					PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(poly->getCoeffMatrix(),poly->getColumnVector(),poly->getInEqualitySign()));
@@ -1545,7 +1524,7 @@ double reachability::boxLPSolver(polytope::ptr poly, std::vector<double> dir) {
  * This is called from Sequential Algorithm, uses template_Hull over-approximated technique
  */
 bool reachability::templated_isContained(int locID, polytope::ptr poly,
-		std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type_choosen) {
+		std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type) {
 	bool contained = false;
 
 
@@ -1566,11 +1545,11 @@ bool reachability::templated_isContained(int locID, polytope::ptr poly,
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
 
-				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				intersects = p->check_polytope_intersection(poly, lp_solver_type); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
 
-					contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+					contained = p->contains(poly, lp_solver_type);//	Our simple polytope Containment Check
 
 
 					if (contained){
@@ -1589,7 +1568,7 @@ bool reachability::templated_isContained(int locID, polytope::ptr poly,
  * This is locking on the passed list
  */
 bool reachability::isContained_withLock(int locID, polytope::ptr poly,
-		std::list<symbolic_states::ptr>& PASSED, int lp_solver_type_choosen) {
+		std::list<symbolic_states::ptr>& PASSED, int lp_solver_type) {
 	bool contained = false;
 #pragma omp critical
 {
@@ -1610,10 +1589,10 @@ bool reachability::isContained_withLock(int locID, polytope::ptr poly,
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
 
-				intersects = p->check_polytope_intersection(poly, lp_solver_type_choosen); //result of intersection
+				intersects = p->check_polytope_intersection(poly, lp_solver_type); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
-					contained = p->contains(poly, lp_solver_type_choosen);//	Our simple polytope Containment Check
+					contained = p->contains(poly, lp_solver_type);//	Our simple polytope Containment Check
 					if (contained){
 						break;	//No need to check the rest if contained in a single Omega
 					}
