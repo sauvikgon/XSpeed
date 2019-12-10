@@ -21,6 +21,7 @@
 #include "../core/HybridAutomata/Hybrid_Automata.h"
 #include "../core/HybridAutomata/Transition.h"
 #include "../core/symbolic_states/symbolic_states.h"
+#include "core/math/lp_solver/lp_solver.h"
 
 
 /**
@@ -141,6 +142,7 @@ public:
 	 */
 	static concreteCE::ptr search_concreteCE(double tolerance, std::list<abstractCE::ptr> paths, std::vector<unsigned int> path_filter,unsigned int algo_type);
 
+
 private:
 	/**
 	 * The first symbolic state is the initial symbolic state and the last one
@@ -192,12 +194,7 @@ private:
 
 	concreteCE::ptr gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements);
 
-
-
-
-
-
-
+	lp_solver build_lp(std::vector<double> dwell_times);
 };
 
 

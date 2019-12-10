@@ -131,7 +131,6 @@ private:
 	 #define GLP_MIN            1  // minimization
 	 #define GLP_MAX            2  // maximization
 	 */
-
 	int dimension;				//dimension of the system
 	int number_of_constraints;	//rows in glpk or facets of a polytope
 	std::vector<double> sv;// values of the variable that maximizes the result

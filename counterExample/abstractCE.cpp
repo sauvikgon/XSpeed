@@ -79,7 +79,6 @@ symbolic_states::const_ptr abstractCE::get_first_symbolic_state() const
 {
 	std::list<symbolic_states::ptr>::const_iterator it = sym_states.begin();
 	return *it;
-
 }
 symbolic_states::const_ptr abstractCE::get_last_symbolic_state() const
 {
@@ -128,26 +127,6 @@ bool abstractCE::filter(std::vector<unsigned int> template_seq){
 	}
 	return true;
 }
-//void abstractCE::plot(unsigned int i, unsigned int j) {
-//	/** Plotting the abstract counter example in a tracefile */
-//	std::ofstream tracefile;
-//	tracefile.open("./ceTrace.o");
-//	math::matrix<double> vertices_list;
-//	std::list<symbolic_states::ptr>::iterator it;
-//	for (it = sym_states.begin(); it != sym_states.end(); it++) {
-//		vertices_list = (*it)->getContinuousSet()->get_2dVertices(i, j);
-//		// ------------- Printing the vertices on the Output File -------------
-//		for (unsigned int p = 0; p < vertices_list.size1(); p++) {
-//			for (unsigned int q = 0; q < vertices_list.size2(); q++) {
-//				tracefile << vertices_list(p, q) << " ";
-//			}
-//			tracefile << std::endl;
-//		}
-//		tracefile << std::endl; // 1 gap after each polytope plotted
-//	}
-//	tracefile.close();
-//	/**end of tracefile generation */
-//}
 
 /**
  * Routine to compute concrete trajectory from given
@@ -1612,10 +1591,15 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP_softconstr(double tolerance, c
 
 	return cexample;
 }
-/*
- *  dxli: September, 2018
+
+/**
+ * Method to construct an LP from the abstract counter example,
+ * for trajectory splicing. The LP construction is by fixing the
+ * dwell time of the trajectory segments. The fixed dwell times
+ * are passed as an argument to this function.
  */
-concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements) {
+lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
+{
 	symbolic_states::const_ptr S = get_first_symbolic_state();
 	dim = S->getContinuousSetptr()->get_dimension();
 
@@ -1623,48 +1607,83 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std
 	transList = this->get_CE_transitions();
 	N = transList.size()+1; // the length of the counter example
 	bad_poly = this->forbid_poly;
-	ref_pts = refinements;
 
-	std::cout << "Length of the CE, N=" << N << std::endl;
-	std::cout << "gen_concreteCE_iterative: dimension =" << dim <<", length of CE=" << N << std::endl;
 
-	// initialize the global locIdList
-	locIdList.resize(N);
-
-	std::cout << "Location ID sequence in symbolic CE: ";
-	std::set<int> d;
-	for(unsigned int i=0;i<N;i++){
-		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
-		assert(d.size() == 1);
-		locIdList[i] = *(d.begin());
-		std::cout << locIdList[i] << " | " ;
-	}
-	std::cout << "\n";
-
-	/* 1. Declare the sub-problem by fixing starting points of each location.
-	 * This problem is supposed to be a nonlinear problem.
+	/*
+	 * 2. Declare a linear programming problem by fixing the dwell-times.
 	 *
-	 * The length of the counter example is N. When fixing the starting point of
-	 * each location, the decision variables are dwell time in each location.
-	 * Therefore, the dimension of the opt problem is N.
+	 * The dwell-times are fixed and the starting point of the trajectory segments
+	 * are variables in this setting of the optimization problem.
+	 * Therefore, the dimension of the opt problem is N*dim. We present the splicing
+	 * as a linear programming problem in this setting.
+	 */
+
+	lp_solver lp_fixed_time(GLPK_SOLVER);
+	unsigned int num_constr, num_vars;
+
+	/* For each splicing point, there will be 2*dim new variables introduced
+	 * E.g. |xi-yi| will introduce variables pi_1, pi_2 to represent the constraints
+	 * xi-yi = pi_1 - pi_2; and pi_1, pi_2 >=0.
+	 * For each dimension, two new variables will be introduced. Thus, (2 * dim) many new
+	 * vars will be introduced per splicing point. There are total (N-1) splicing points
+	 * for a N length abstract counter-example. Hence, a total of [2 * dim * (N-1)] new vars
+	 * will be there in the LP.
+	 * In addition, the LP has the original  (N * dim) vars. In total, the LP will have
+	 * (N*dim) + (2*dim * (N-1)) variables.
+	 *
+	 * Convention:
+	 * X = 2 * dim * (N-1)
+	 * Cols 0 to (X - 1) to represent the new variables.
+	 * Y = (N*dim) represent the number of actual variables
+	 * Cols X to (X+Y-1) to represent these
 	 *
 	 */
-	unsigned int optDimDwellTime = N;
-	unsigned int optDimStateVars = N * dim;
-	// LD_LBFGS
-	nlopt::opt myoptDwellTime(nlopt::LD_MMA, optDimDwellTime); // derivative based
-	nlopt::opt myoptStateVars(nlopt::LD_MMA, optDimStateVars); // derivative based
-//
-//	nlopt::opt myoptDwellTime(nlopt::LD_LBFGS, optDimDwellTime); // derivative based
-//	nlopt::opt myoptStateVars(nlopt::LD_LBFGS, optDimStateVars); // derivative based
+	unsigned int X = 2 * dim * (N-1);
+	unsigned int Y = N * dim;
+	num_vars = X + Y;
 
-	std::vector<double> t(optDimDwellTime, 0);
-	std::vector<double> lb_t(optDimDwellTime), ub_t(optDimDwellTime);
+	/*
+	 * We construct LPs with constraints as bounds on each variable
+	 * min <= x_i <= max; there will be [2*dim*N] such constraints
+	 *
+	 * To address the mod function, there will be constraints of the form:
+	 * x_i - y_i = p_i' - p_i''; there will be [2*dim*(N-1)] inequality constraints,
+	 * one for each splicing points in the N length abstract CE. Since equality
+	 * constraint has be to encoded as two inequality constraint, we have a
+	 * multiplication by 2.
+	 *
+	 * To enforce positivity on each new variable p_i', p_i'', we have
+	 * additionally 2 * dim * (N-1) constraints, since there are these
+	 * many new variables.
+	 *
+	 * To relate the end points of the segments with the start points,
+	 * with the fixed dwell times, we have constraints of the form:
+	 * y_i = e^{At}.x_i + v.
+	 * There will be a total of (N * dim * 2) such constraints. one equality
+	 * constraint per dimension of the starting point x.
+	 *
+	 * In total, there will be [2 * dim * N + (N-1)*dim + 2 * dim * (N-1) + (N*dim*2)]
+	 * constraints in the LP.
+	 *
+	 * Convention:
+	 * The first [2 * dim * (N-1)] rows to represent the positivity constraints.
+	 * The next [2 * dim * N] rows to represent the bound constraints.
+	 * The next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
+	 * The remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
+	 */
+	num_constr = (2 * dim * N) + (N-1)*dim + (2 * dim * (N-1) + (N*dim*2));
 
-	std::vector<double> x(optDimStateVars, 0);
-	std::vector<double> lb_x(optDimStateVars), ub_x(optDimStateVars);
+	math::matrix<double> A(num_constr, num_vars, 0);
+
+	std::vector<double> b(num_constr);
+	unsigned int boundsign = 1;
+	lp_fixed_time.setMin_Or_Max(1);
+	// populate the constraints matrix and bounds vector
 
 	double max,min,start_min,start_max;
+	std::vector<double> lb_x(dim*N),ub_x(dim*N);
+	unsigned int index;
+
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
 		// dxli: the whole flowpipe is a sequence of sub-flowpipes, each of which
@@ -1677,7 +1696,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std
 
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 
-		// 	we add bound constraints on the position parameters, which are required to run global opt routines.
+		// we add bound constraints on the position parameters, which are required to run global opt routines.
 		std::vector<double> dir(dim,0);
 		double min, max;
 		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
@@ -1696,19 +1715,87 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std
 				// assuming that the exception is caused due to an unbounded solution
 				max = +999; // an arbitrary value set as solution
 			}
-			unsigned int index = i*dim+j;
+			index = i*dim+j;
 
 			lb_x[index] = min;
 			ub_x[index] = max;
 
 			dir[j] = 0;
-			// dxli: using the (min+max)/2 to initialize variables.
-			x[index] = (lb_x[index] + ub_x[index])/2;
 		}
 	}
 
-	myoptStateVars.set_lower_bounds(lb_x);
-	myoptStateVars.set_upper_bounds(ub_x);
+	// We add the positivity constraints below p_i >= 0
+
+	for(unsigned int i=0, j=0; i<X;i++,j++){
+		A(i,j) = -1;
+	}
+	// To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
+	// To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
+	// To do: Add the remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
+	lp_fixed_time.setConstraints(A,b,boundsign);
+
+	// set the objective function: p_1' + p_1'' + p_2' + p_2''+ ... over all new vars
+	for(unsigned int i=0;i<X;i++){
+		lp_fixed_time.set_obj_coeff(i, 1);
+	}
+
+	return lp_fixed_time; // returns the built lp.
+}
+/**
+ * Implementing the LP-NLP iterative routine for trajectory splicing
+ */
+concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements) {
+	symbolic_states::const_ptr S = get_first_symbolic_state();
+	dim = S->getContinuousSetptr()->get_dimension();
+
+	HA = this->get_automaton();
+	transList = this->get_CE_transitions();
+	N = transList.size()+1; // the length of the counter example
+	bad_poly = this->forbid_poly;
+	ref_pts = refinements;
+
+	std::cout << "Length of the CE, N = " << N << std::endl;
+	std::cout << "gen_concreteCE_iterative: dimension =" << dim <<", length of CE = " << N << std::endl;
+
+	// initialize the global locIdList
+	locIdList.resize(N);
+
+	std::cout << "Location ID sequence in symbolic CE: ";
+
+	std::set<int> d;
+	for(unsigned int i=0;i<N;i++){
+		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
+		assert(d.size() == 1);
+		locIdList[i] = *(d.begin());
+		std::cout << locIdList[i] << " | " ;
+	}
+	std::cout << "\n";
+
+	/* 1. Declare the sub-problem by fixing starting points of each location.
+	 *
+	 * The length of the counter example is N. When fixing the starting point of
+	 * each location, the decision variables are dwell time in each location.
+	 * Therefore, the dimension of the opt problem is N. This problem is supposed
+	 * to be a nonlinear optimization problem.
+	 */
+	unsigned int optDimDwellTime = N; // non-linear
+	nlopt::opt myoptDwellTime(nlopt::LD_MMA, optDimDwellTime); // derivative based
+
+	std::vector<double> t(optDimDwellTime, 0);
+	std::vector<double> lb_t(optDimDwellTime), ub_t(optDimDwellTime);
+
+	// construct the NLP, where dwell times of the segments are variables.
+
+	double max,min,start_min,start_max;
+
+	std::vector<double> lb_x(N*dim);
+	std::vector<double> ub_x(N*dim);
+
+
+	/* build the lp where dwell times are fixed and the start points of the
+	 * trajectory are variables.
+	 */
+	std::vector<double> dwell_times(N);
 
 	get_first_symbolic_state()->getInitialPolytope();
 
@@ -1778,7 +1865,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std
 		}catch(...){
 			// assuming that the exception is caused due to an unbounded solution
 			min = 0; // the min value a time can take is 0.
-
 		}
 
 		// we add the bounds as constraints in the nlopt
@@ -1798,38 +1884,33 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std
 			lb_t[i] = min-start_max;
 
 		// We may choose to take the average time as the initial dwell time
-		t[i] = (lb_t[i] + ub_t[i])/2;
+		dwell_times[i] = (lb_t[i] + ub_t[i])/2;
 
-		// Increment the Transition to the next in the symbolic path
+		// Increment the transition to the next in the symbolic path
 		if(it!=transList.end())
 			it++;
 	}
 
+	lp_solver fixed_time_Lp = build_lp(dwell_times);
+
 	myoptDwellTime.set_lower_bounds(lb_t);
 	myoptDwellTime.set_upper_bounds(ub_t);
 
-	myoptDwellTime.set_min_objective(myobjfuncOnDwellTime, &x);
+	myoptDwellTime.set_min_objective(myobjfuncOnDwellTime, &t);
 	myoptDwellTime.set_stopval(tolerance);
 //			nlopt_set_xtol_rel(nlopt_opt opt, double tol)
 	myoptDwellTime.set_xtol_rel(1e-4);
 	myoptDwellTime.set_maxeval(500);
 
 
-	myoptStateVars.set_min_objective(myobjfuncOnStateVars, &t);
-	myoptStateVars.set_stopval(tolerance);
-	myoptStateVars.set_xtol_rel(1e-4);
-	myoptStateVars.set_maxeval(500);
-
 	double minf = 1e10;
 	try {
 		while (minf > tolerance){
-			std::cout << "Local optimization algorithm called:" << myoptDwellTime.get_algorithm_name() << std::endl;
-//
-			myoptDwellTime.set_min_objective(myobjfuncOnDwellTime, &x);
+
 			myoptDwellTime.optimize(t, minf);
-//
-			myoptStateVars.set_min_objective(myobjfuncOnStateVars, &t);
-			myoptStateVars.optimize(x, minf);
+
+			double res = fixed_time_Lp.solve();
+
 		}
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
@@ -1844,416 +1925,10 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std
 		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
 		return cexample;
 	} else {
-		std::ofstream ce_trace;
-		// one trajectory per symbolic state to be added in the concreteCE
-		for (unsigned int i = 0; i < N; i++) {
-			// create the sample
-			concreteCE::sample s;
-			std::set<int>::iterator dset_iter =
-					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
-			unsigned int locId = *dset_iter;
-
-			std::vector<double> y(dim);
-			for (unsigned int j = 0; j < dim; j++) {
-				y[j] = x[i * dim + j];
-			}
-
-			double time = t[i];
-			s.first = y;
-			//s.second = y[dim-1];
-			s.second = time;
-			concreteCE::traj_segment traj;
-			traj.first = locId;
-			traj.second = s;
-			cexample->push_back(traj);
-		}
+		// Todo: construct a concrete ce from the opt. result.
 	}
 
 	return cexample;
-}
-/*
- *  dxli: September, 2018
- */
-lp_solver abstractCE::construct_LP_softconstr(unsigned int lpDim, std::vector<double> &t, math::matrix<double> lp_coeff_mat, std::vector<double> lp_col){
-	lp_solver mylp(GLPK_SOLVER);
-
-	symbolic_states::const_ptr S = get_first_symbolic_state();
-	dim = S->getContinuousSetptr()->get_dimension();
-
-	HA = this->get_automaton();
-	transList = this->get_CE_transitions();
-	N = transList.size()+1; // the length of the counter example
-	bad_poly = this->forbid_poly;
-	polytope::ptr I;
-
-	std::list<transition::ptr>::iterator T_iter = transList.begin();
-	transition::ptr Tptr = *(T_iter);
-
-//	math::matrix<double> lp_coeff_mat = math::matrix<double>(1, lpDim);
-//	std::vector<double> lp_col;
-	// dimension of the LP problem
-
-	math::matrix<double> A, expAt;
-	std::vector<double> Axplusb(dim), mapAxplusb;
-
-	cout << lpDim << endl;
-
-	for (unsigned int i=0; i<N; i++){
-		int loc_index = locIdList[i];
-		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
-		I = HA->getLocation(loc_index)->getInvariant();
-
-		if(d.isEmptyMatrixA){
-			A = math::matrix<double>(dim,dim);
-			for(unsigned int i=0;i<dim;i++){
-				for(unsigned int j=0;j<dim;j++){
-					A(i,j)=0;
-				}
-			}
-		}
-		else
-			A = d.MatrixA;
-
-//		cout << "Location " << i << endl;
-//		cout << "coeff matrix:" << A << endl;
-//		cout << "dwelling time:" << t[i] << endl;
-
-		math::matrix<double> At(A);
-		At.scalar_multiply(t[i]);
-		At.matrix_exponentiation(expAt);
-
-		std::vector<double> inhomo_term = ODESol_inhomogenous(d, t[i]);
-//		cout << "inhomo_term: ";
-//		for(auto ele:inhomo_term){
-//			cout << ele << " ";
-//		}
-
-		if (i==N-1){
-			math::matrix<double> C = bad_poly->getCoeffMatrix();
-			math::vector<double> b = bad_poly->getColumnVector();
-
-			math::matrix<double> row = math::matrix<double>(1, C.size2());
-			math::matrix<double> res_row = math::matrix<double>(1, dim);
-			std::vector<double> res_col;
-
-			math::matrix<double> res_row_with_padding_pos = math::matrix<double>(1, lpDim);
-			math::matrix<double> res_row_with_padding_neg = math::matrix<double>(1, lpDim);
-
-			math::matrix<double> epsilon_row_pos = math::matrix<double>(1, lpDim);
-			math::matrix<double> epsilon_row_neg = math::matrix<double>(1, lpDim);
-
-			std::vector<double> sum_col_pos;
-			std::vector<double> sum_col_neg;
-			sum_col_pos.push_back(0);
-			sum_col_neg.push_back(0);
-
-			for (unsigned int j=0; j<lpDim;j++){
-				epsilon_row_pos(0, j) = 0;
-				epsilon_row_neg(0, j) = 0;
-				res_row_with_padding_pos(0,j) = 0;
-				res_row_with_padding_neg(0,j) = 0;
-			}
-
-			// \eps_pos >= 0 is equiv. to -\eps_pos <= 0
-			// \eps_neg >= 0 is equiv. to -\eps_neg <= 0
-			epsilon_row_pos(0, N*dim+i*2) = -1;
-			epsilon_row_neg(0, N*dim+i*2+1) = -1;
-//
-			lp_col.push_back(0);
-			lp_col.push_back(0);
-			lp_coeff_mat.matrix_join(epsilon_row_pos, lp_coeff_mat);
-			lp_coeff_mat.matrix_join(epsilon_row_neg, lp_coeff_mat);
-
-			// linear constraint saying that the last ending point is in the bad poly
-			for (unsigned int j=0; j<C.size1();j++){
-				for (unsigned int k=0; k<C.size2();k++){
-					row(0,k) = C(j, k);
-				}
-				row.multiply(expAt, res_row);
-				// padding with 0
-				// somehow resize does not padding with 0??
-//				res_row.resize(1, lpDim);
-				for (unsigned int l=0; l<lpDim; l++){
-					if (l>=i*dim && l<(i+1)*dim){
-						res_row_with_padding_pos(0,l) += res_row(0, l-i*dim);
-						res_row_with_padding_neg(0,l) += -res_row(0, l-i*dim);
-					}
-				}
-
-				// \eps_pos + \eps_neg = Ax + b
-				// we express it as:
-				// \eps_pos + \eps_neg <= Ax + b
-				// and
-				// (\eps_pos + \eps_neg) <= -(Ax + b)
-				res_row_with_padding_pos(0, N*dim+i*2) = 1;
-				res_row_with_padding_pos(0, N*dim+i*2+1) = -1;
-
-				res_row_with_padding_neg(0, N*dim+i*2) = -1;
-				res_row_with_padding_neg(0, N*dim+i*2+1) = 1;
-
-				row.mult_vector(inhomo_term, res_col);
-
-				sum_col_pos[0] += b[j] - res_col[0];
-				sum_col_neg[0] += res_col[0] - b[j];
-			}
-
-			lp_col.push_back(sum_col_pos[0]);
-			lp_coeff_mat.matrix_join(res_row_with_padding_pos, lp_coeff_mat);
-
-			lp_col.push_back(sum_col_neg[0]);
-			lp_coeff_mat.matrix_join(res_row_with_padding_neg, lp_coeff_mat);
-
-		} else {
-			polytope::ptr g;
-			Assign R;
-
-			// assign the transition pointer
-			Tptr = *(T_iter);
-
-			// assignment of the form: Rx + w
-			R = Tptr->getAssignT();
-//			cout << "Jump Map: " << R.Map << endl;
-//			cout << "Jump vec: ";
-//			for(auto ele:R.b){
-//				cout << ele << " ";
-//			}
-//			cout << endl;
-
-			//guard as a polytope
-			g = Tptr->getGaurd();
-
-			// guard \cap invariant distance, to address Eq. (12) in CDC 13' paper
-			polytope::ptr guard_intersect_inv;
-			guard_intersect_inv = I->GetPolytope_Intersection(g);
-
-			// ======================
-			// add constraints saying ending points yi should be in the intersection of guard and invariant.
-			math::matrix<double> C = guard_intersect_inv->getCoeffMatrix();
-			math::vector<double> b = guard_intersect_inv->getColumnVector();
-
-//			cout << "Guard intersect inv coeff:" << C << endl;
-//			cout << "Guard intersect inv vec: ";
-//			for(auto ele:b){
-//				cout << ele << " ";
-//			}
-//			cout << endl;
-
-			math::matrix<double> row = math::matrix<double>(1, C.size2());
-			math::matrix<double> res_row = math::matrix<double>(1, dim);
-			math::matrix<double> res_row_with_padding_pos = math::matrix<double>(1, lpDim);
-			math::matrix<double> res_row_with_padding_neg = math::matrix<double>(1, lpDim);
-			math::matrix<double> epsilon_row_pos = math::matrix<double>(1, lpDim);
-			math::matrix<double> epsilon_row_neg = math::matrix<double>(1, lpDim);
-			std::vector<double> res_col;
-
-			std::vector<double> sum_col_pos;
-			std::vector<double> sum_col_neg;
-			sum_col_pos.push_back(0);
-			sum_col_neg.push_back(0);
-
-			sum_col_pos.push_back(0);
-			sum_col_neg.push_back(0);
-
-			for (unsigned int j=0; j<lpDim;j++){
-				epsilon_row_pos(0, j) = 0;
-				epsilon_row_neg(0, j) = 0;
-				res_row_with_padding_pos(0,j) = 0;
-				res_row_with_padding_neg(0,j) = 0;
-			}
-
-			// \eps_pos >= 0 is equiv. to -\eps_pos <= 0
-			// \eps_neg >= 0 is equiv. to -\eps_neg <= 0
-			epsilon_row_pos(0, N*dim+i*2) = -1;
-			epsilon_row_neg(0, N*dim+i*2+1) = -1;
-//
-			lp_col.push_back(0);
-			lp_col.push_back(0);
-			lp_coeff_mat.matrix_join(epsilon_row_pos, lp_coeff_mat);
-			lp_coeff_mat.matrix_join(epsilon_row_neg, lp_coeff_mat);
-
-			// linear constraint saying that the last ending point is in the bad poly
-			for (unsigned int j=0; j<C.size1();j++){
-				for (unsigned int k=0; k<C.size2();k++){
-					row(0,k) = C(j, k);
-				}
-				row.multiply(expAt, res_row);
-				// padding with 0
-				// somehow resize does not padding with 0??
-//				res_row.resize(1, lpDim);
-				for (unsigned int l=0; l<lpDim; l++){
-					if (l>=i*dim && l<(i+1)*dim){
-						res_row_with_padding_pos(0,l) += res_row(0, l-i*dim);
-						res_row_with_padding_neg(0,l) += -res_row(0, l-i*dim);
-					}
-				}
-
-				// \eps_pos + \eps_neg = Ax + b
-				// we express it as:
-				// \eps_pos + \eps_neg <= Ax + b
-				// and
-				// (\eps_pos + \eps_neg) <= -(Ax + b)
-				res_row_with_padding_pos(0, N*dim+i*2) = 1;
-				res_row_with_padding_pos(0, N*dim+i*2+1) = -1;
-
-				res_row_with_padding_neg(0, N*dim+i*2) = -1;
-				res_row_with_padding_neg(0, N*dim+i*2+1) = 1;
-
-				row.mult_vector(inhomo_term, res_col);
-
-				sum_col_pos[0] += b[j] - res_col[0];
-				sum_col_neg[0] += res_col[0] - b[j];
-			}
-
-			lp_col.push_back(sum_col_pos[0]);
-			lp_coeff_mat.matrix_join(res_row_with_padding_pos, lp_coeff_mat);
-
-			lp_col.push_back(sum_col_neg[0]);
-			lp_coeff_mat.matrix_join(res_row_with_padding_neg, lp_coeff_mat);
-
-			// =======================================
-			// Adding linear constraints minimizing \inf-norm{R(y[i]) -x[i]}
-			// denote inf norm of a vector as |v|_{inf}
-			// By definition: |v|_{inf} = max{|vi|} across dimensions
-			//
-			// |v|_{inf} = max{|vi|}
-			// is equiv. to min w
-			//              s.t. -w - vi <= 0, for all i
-			//                   -w + vi <= 0, for all i
-			//                   -w      <= 0
-			// See
-			// (1) https://optimization.mccormick.northwestern.edu/index.php/Optimization_with_absolute_values
-			// (2) http://agecon2.tamu.edu/people/faculty/mccarl-bruce/mccspr/new09.pdf, page 10
-
-			R = Tptr->getAssignT();
-			math::matrix<double> mapExpAt(expAt);
-
-//			cout << "checkpoint 1" << endl;
-
-			// - ( R(y_{i,j}) - x_{i+1,j} ) - wi <= 0
-			math::matrix<double> res_row_pos = math::matrix<double>(1, lpDim);
-			// - ( R(y_{i,j}) - x_{i+1,j} ) - wi <= 0
-			math::matrix<double> res_row_neg = math::matrix<double>(1, lpDim);
-
-			std::vector<double> transform;
-
-			R.Map.multiply(expAt,mapExpAt);
-			R.Map.mult_vector(inhomo_term, transform);
-
-//			cout << "checkpoint 2" << endl;
-			for (unsigned int j=0; j<dim; j++){
-//				cout << "checkpoint 3" << endl;
-				// reset containers to 0 vectors
-				for (unsigned int k = 0; k < lpDim; k++){
-					res_row_pos(0, k) = 0;
-					res_row_neg(0, k) = 0;
-				}
-
-//				cout << "checkpoint 4" << endl;
-				for (unsigned int k=0; k<dim; k++){
-					//  R(y_{i,j})
-					res_row_pos(0,i*dim+k) = mapExpAt(j, k);
-
-					// - R(y_{i,j})
-					res_row_neg(0,i*dim+k) = -mapExpAt(j, k);
-				}
-//				cout << "checkpoint 5" << endl;
-				// - x_{i+1,j} - wi
-				res_row_pos(0,j+(i+1)*dim) += -1;
-//				res_row_pos(0,j+i*dim) = -1;
-				res_row_pos(0,N*dim+N*2+i) = -1;
-
-//				cout << "checkpoint 6" << endl;
-				// x_{i+1,j} - wi
-				res_row_neg(0,j+(i+1)*dim) += 1;
-				res_row_neg(0,N*dim+N*2+i) = -1;
-
-//				cout << "checkpoint 8" << endl;
-				// pos
-				lp_coeff_mat.matrix_join(res_row_pos, lp_coeff_mat);
-				lp_col.push_back(-transform[j]-R.b[j]);
-//				cout << "Adding " << res_row_pos << endl;
-//				cout << "checkpoint 9" << endl;
-				// neg
-				lp_coeff_mat.matrix_join(res_row_neg, lp_coeff_mat);
-				lp_col.push_back(transform[j]+R.b[j]);
-//				cout << "Adding " << res_row_neg << endl;
-//				cout << "checkpoint 10" << endl;
-
-			}
-
-			// - wi <= 0
-//			cout << "checkpoint 7" << endl;
-			math::matrix<double> res_row_w = math::matrix<double>(1, lpDim);
-			for (unsigned int j=0;j<res_row_w.size2();j++){
-				if (j == N*dim+N*2+i){
-					res_row_w(0,j) = -1;
-				} else {
-					res_row_w(0,j) = 0;
-				}
-			}
-
-//			cout << "Adding \n" << res_row_w << endl;
-
-			// w
-			lp_coeff_mat.matrix_join(res_row_w, lp_coeff_mat);
-			lp_col.push_back(0);
-		}
-
-		T_iter++; // Moving to the next transition.
-	}
-
-	int MYLP_EQUALITY_SIGN = 1;
-	unsigned int MIN_OR_MAX = 1;
-	mylp.setConstraints(lp_coeff_mat, lp_col, MYLP_EQUALITY_SIGN);
-	mylp.setMin_Or_Max(MIN_OR_MAX);
-
-	math::vector<double> obj_vec(lpDim, 0);
-	for (unsigned int i=N*dim; i<obj_vec.size(); i++){
-		obj_vec[i] = 1;
-	}
-
-//	double optimal_val = mylp.Compute_LLP(obj_vec);
-//	std::vector<double> optimal_point = mylp.get_sv();
-//	cout << endl;
-//	for (unsigned int i = 0; i < optimal_point.size(); i++){
-//		cout << optimal_point[i] << endl;
-//	}
-
-	/*   solution status:
-	 The routine glp_get_status reports the generic status of the current basic solution for
-	 the specified problem object as follows:
-
-	 #define GLP_UNDEF          1  // solution is undefined
-	 #define GLP_FEAS           2  // solution is feasible
-	 #define GLP_INFEAS         3  // solution is infeasible
-	 #define GLP_NOFEAS         4  // no feasible solution exists
-	 #define GLP_OPT            5  // solution is optimal
-	 #define GLP_UNBND          6  // solution is unbounded
-	 */
-	if ( mylp.getStatus() == 4 ){
-		cout << "\n lp_coeff_mat:" << endl;
-		cout << lp_coeff_mat << endl;
-	//	cout << "\n lp_col:" << endl;
-	//	for (auto i : lp_col){
-	//		cout << i << " ";
-	//	}
-	//	cout << lp_coeff_mat.size1() << endl;
-	//	cout << lp_coeff_mat.size2() << endl << endl;
-	//
-		cout << "\n lp_col:" << endl;
-		for (auto i : lp_col){
-			cout << i << " ";
-		}
-
-		cout << "\n time vars: " << endl;
-		for (auto elem : t){
-			cout << elem << " ";
-		}
-
-		exit(0);
-	}
-
-	return mylp;
 }
 
 
@@ -2560,7 +2235,6 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 	throw std::runtime_error("Validation of counter example FAILED after MAX Refinements\n");
 	return concreteCE::ptr(new concreteCE());
 }
-
 
 concreteCE::ptr abstractCE::search_concreteCE(double tolerance, std::list<abstractCE::ptr> paths, std::vector<unsigned int> path_filter, unsigned int algo_type)
 {

@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
 		int lp_solver_type, std::pair<int, polytope::ptr> forbidden, userOptions& user_options) {
 	H = h;
@@ -34,7 +33,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 //I is the initial symbolic state
 std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE::ptr>& symbolic_ce_list){
 
-	std::list < symbolic_states::ptr > Reachability_Region;
+	std::list <symbolic_states::ptr> Reachability_Region;
 	template_polyhedra::ptr reach_region;
 
 	unsigned int bfslevel = 0;
