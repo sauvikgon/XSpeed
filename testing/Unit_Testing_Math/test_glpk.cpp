@@ -141,14 +141,14 @@ TEST_FIXTURE(Glpk_LPSolver, LP_ABS_FUNC_Test) {
 
 	/**
 	 * The opt problem desciption is:
-	 * min |x-y| s.t
+	 * min |u-w| s.t
 	 * 0<=x<=3; 7<=y<=9
 	 *
 	 * The equivalent LP is:
 	 * min p1 + p2 s.t.
 	 * p1,p2>=0;
-	 * p1 - p2 = x - y;
-	 * 0<=x<=3; 7<=y<=9.
+	 * p1 - p2 = u - w;
+	 * 0<=u<=3; 7<=w<=9.
 	 * Below shown is the LP formulation as a XSpeed glpk_lp_solver object
 	 */
 	A(0,0) = 1;
@@ -199,14 +199,16 @@ TEST_FIXTURE(Glpk_LPSolver, LP_Embedding_Test) {
 
 	/**
 	 * The opt problem desciption is:
-	 * min |x-y| s.t
-	 * 2<=x<=5; 7<=y<=9
+	 * min |x-y| + |u-w| s.t
+	 * 2<=x<=5; 7<=y<=9 ; 0<=u<=3; 7<=w<=9
 	 *
 	 * The equivalent LP is:
-	 * min p1 + p2 s.t.
-	 * p1,p2>=0;
+	 * min p1 + p2 + q1 + q2 
+	 * s.t.
+	 * p1, p2, q1, q2 >= 0;
 	 * p1 - p2 = x - y;
-	 * 2<=x<=5; 7<=y<=9.
+	 * q1 - q2 = u - w
+	 * 2<=x<=5; 7<=y<=9; 0<=u<=3; 7<=w<=9
 	 * Below shown is the LP formulation as a XSpeed glpk_lp_solver object
 	 */
 	A(0,0) = 1;
