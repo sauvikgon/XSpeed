@@ -1613,65 +1613,76 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 	 * 2. Declare a linear programming problem by fixing the dwell-times.
 	 *
 	 * The dwell-times are fixed and the starting point of the trajectory segments
-	 * are variables in this setting of the optimization problem.
-	 * Therefore, the dimension of the opt problem is N*dim. We present the splicing
-	 * as a linear programming problem in this setting.
+	 * are variables in this setting of the optimization problem. Also, the end-points
+	 * obtained by dwelling for the fixed time; are kept the variables in the LP.
+	 *
+	 * We present the splicing as a linear programming problem in this setting.
+	 * Naming conventions:
+	 * x^i_j to represent the j-th component of the i-th start-point in an N length 
+	 * abstract counterexample.
+	 * {x*}^i_j to represent the j-th component of the i-th start-point in an N length
+	 * abstract counterexample.
 	 */
 
 	lp_solver lp_fixed_time(GLPK_SOLVER);
 	unsigned int num_constr, num_vars;
 
 	/* For each splicing point, there will be 2*dim new variables introduced
-	 * E.g. |xi-yi| will introduce variables pi_1, pi_2 to represent the constraints
-	 * xi-yi = pi_1 - pi_2; and pi_1, pi_2 >=0.
+	 * E.g. |{x*}^i_j - x^{i+1}_j| will introduce variables pj_1, pj_2 to represent the constraints
+	 * {x*}^i_j - x^{i+1}_j = p^i_j - {p'}^i_j; and p^i_j, {p'}^i_j >=0.
 	 * For each dimension, two new variables will be introduced. Thus, (2 * dim) many new
 	 * vars will be introduced per splicing point. There are total (N-1) splicing points
 	 * for a N length abstract counter-example. Hence, a total of [2 * dim * (N-1)] new vars
 	 * will be there in the LP.
-	 * In addition, the LP has the original  (N * dim) vars. In total, the LP will have
-	 * (N*dim) + (2*dim * (N-1)) variables.
+	 * In addition, the LP has the original (N * dim) vars, representing N start points of 
+	 * the N trajectory segments. 
+	 *
+	 * The LP must also have (N * dim) vars to represent the N end points of the segments,
+	 * In total, the LP will have (N*dim) + (N*dim) + (2 * dim * (N-1)) variables.
 	 *
 	 * Convention:
 	 * X = 2 * dim * (N-1)
 	 * Cols 0 to (X - 1) to represent the new variables.
-	 * Y = (N*dim) represent the number of actual variables
+	 * Y = (N*dim) represent the no. of variables to represent N start points of the segments.
 	 * Cols X to (X+Y-1) to represent these
-	 *
+	 * The rest of the (N*dim) vars to represent the N end-points of the trajectory segments.
+	 * Cols X+Y to X+2Y-1. 
 	 */
 	unsigned int X = 2 * dim * (N-1);
 	unsigned int Y = N * dim;
-	num_vars = X + Y;
+	num_vars = X + Y + Y;
 
 	/*
 	 * We construct LPs with constraints as bounds on each variable
-	 * min <= x_i <= max; there will be [2*dim*N] such constraints
+	 * {min}^i_j <= x^i_j <= {max}^i_j; there will be [2*dim*N] such constraints
 	 *
 	 * To address the mod function, there will be constraints of the form:
-	 * x_i - y_i = p_i' - p_i''; there will be [2*dim*(N-1)] inequality constraints,
-	 * one for each splicing points in the N length abstract CE. Since equality
-	 * constraint has be to encoded as two inequality constraint, we have a
-	 * multiplication by 2.
+	 * {x*}^i_j - x^{i+1)_j = p^i_j - {p'}^i_j; there will be [2*dim*(N-1)] 
+	 * inequality constraints, one for each splicing points in the N length
+	 * abstract CE. Since equality constraint has be to encoded as two 
+	 * inequality constraint, we have a multiplication by 2.
 	 *
-	 * To enforce positivity on each new variable p_i', p_i'', we have
+	 * To enforce positivity on each new variable  p^i_j, {p'}^i_j, we have
 	 * additionally 2 * dim * (N-1) constraints, since there are these
 	 * many new variables.
 	 *
 	 * To relate the end points of the segments with the start points,
 	 * with the fixed dwell times, we have constraints of the form:
-	 * y_i = e^{At}.x_i + v.
+	 * {x*}^i = e^{At}.x^i + v., where t is the fixed dwell time.
+	 * 
 	 * There will be a total of (N * dim * 2) such constraints. one equality
 	 * constraint per dimension of the starting point x.
 	 *
-	 * In total, there will be [2 * dim * N + (N-1)*dim + 2 * dim * (N-1) + (N*dim*2)]
-	 * constraints in the LP.
+	 * In total, there will be:
+	 * [2 * dim * N + (N-1)*dim + 2 * dim * (N-1) + (N*dim*2)] LP constraints.
 	 *
 	 * Convention:
 	 * The first [2 * dim * (N-1)] rows to represent the positivity constraints.
+	 * The next [2 * dim * (N-1)] rows to represent the  {x*}^i_j - x^{i+1)_j = p^i_j - {p'}^i_j constrs.
 	 * The next [2 * dim * N] rows to represent the bound constraints.
-	 * The next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
-	 * The remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
+	 * The remaining (N * dim * 2) rows to represent the end-point constrs, {x*}^i = e^{At}.x^i + v.
 	 */
-	num_constr = (2 * dim * N) + (N-1)*dim + (2 * dim * (N-1) + (N*dim*2));
+	num_constr = (2 * dim * N) + 2*N*dim + (2 * dim * (N-1) + (N*dim*2));
 
 	math::matrix<double> A(num_constr, num_vars, 0);
 
@@ -1724,7 +1735,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		}
 	}
 
-	// We add the positivity constraints below p_i >= 0
+	// We add the positivity constraints below p^i_j >= 0
 
 	for(unsigned int i=0, j=0; i<X;i++,j++){
 		A(i,j) = -1;
