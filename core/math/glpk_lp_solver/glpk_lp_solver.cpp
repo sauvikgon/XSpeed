@@ -229,6 +229,13 @@ double glpk_lp_solver::solve(){
 		}
 
 	}
+	/*
+	 * Updated to Maximizing vector
+	 */
+	sv.resize(dimension, 0.0);
+	for (int i = 0; i < dimension; i++)
+		sv[i] = glp_get_col_prim(mylp, i + 1);
+
 	return result;
 }
 
