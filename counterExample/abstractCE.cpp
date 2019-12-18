@@ -1865,7 +1865,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		D.MatrixA.matrix_exponentiation(expAt,dwell_times[i]);
 
 		// Now, we calculate v = A^{-1}.(e^{At} - I)* D.C
-		std::vector<double> v = ODESol_inhomogenous(D.MatrixA,dwell_times[i]);
+		std::vector<double> v = ODESol_inhomogenous(D,dwell_times[i]);
 
 		// Using expAt and v, add the constraints on the end-points to the lp
 
