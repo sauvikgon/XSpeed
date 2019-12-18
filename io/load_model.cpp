@@ -27,7 +27,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//SetTimedBouncingBall_2initSet(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {
-		SetHelicopter_Parameters3(ha, init_state, reach_parameters);
+		//amit				SetHelicopter_Parameters3(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == FIVEDIMSYS) {
 		setSysParams(ha, init_state, reach_parameters);
@@ -54,7 +54,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_5) { // Model 9
-		SetNavigationModel9by9Timed(ha,init_state,reach_parameters); // NAV_9by9 Timed model
+		//amit				SetNavigationModel9by9Timed(ha,init_state,reach_parameters); // NAV_9by9 Timed model
 	}
 
 	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
@@ -86,7 +86,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//---------------Not working models-------------
-		setbuild48(ha, init_state, reach_parameters);
+//amit		setbuild48(ha, init_state, reach_parameters);
 		//setfwr(ha, init_state, reach_parameters);
 		//setpllConv(ha, init_state, reach_parameters);
 		//setheart(ha, init_state, reach_parameters);

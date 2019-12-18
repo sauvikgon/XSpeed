@@ -22,6 +22,7 @@
 #include "../core/HybridAutomata/Transition.h"
 #include "../core/symbolic_states/symbolic_states.h"
 #include "core/math/lp_solver/lp_solver.h"
+#include "../core/math/analyticODESol.h"
 
 
 /**

@@ -1613,87 +1613,170 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 	 * 2. Declare a linear programming problem by fixing the dwell-times.
 	 *
 	 * The dwell-times are fixed and the starting point of the trajectory segments
-	 * are variables in this setting of the optimization problem.
-	 * Therefore, the dimension of the opt problem is N*dim. We present the splicing
-	 * as a linear programming problem in this setting.
+	 * are variables in this setting of the optimization problem. Also, the end-points
+	 * obtained by dwelling for the fixed time; are kept the variables in the LP.
+	 *
+	 * We present the splicing as a linear programming problem in this setting.
+	 * Naming conventions:
+	 * x^i_j to represent the j-th component of the i-th start-point in an N length 
+	 * abstract counterexample.
+	 * {x*}^i_j to represent the j-th component of the i-th end-point in an N length
+	 * abstract counterexample.
 	 */
 
 	lp_solver lp_fixed_time(GLPK_SOLVER);
 	unsigned int num_constr, num_vars;
 
 	/* For each splicing point, there will be 2*dim new variables introduced
-	 * E.g. |xi-yi| will introduce variables pi_1, pi_2 to represent the constraints
-	 * xi-yi = pi_1 - pi_2; and pi_1, pi_2 >=0.
+	 * E.g. |{x*}^i_j - x^{i+1}_j| will introduce variables pj_1, pj_2 to represent the constraints
+	 * {x*}^i_j - x^{i+1}_j = p^i_j - {p'}^i_j; and p^i_j, {p'}^i_j >=0.
 	 * For each dimension, two new variables will be introduced. Thus, (2 * dim) many new
 	 * vars will be introduced per splicing point. There are total (N-1) splicing points
 	 * for a N length abstract counter-example. Hence, a total of [2 * dim * (N-1)] new vars
 	 * will be there in the LP.
-	 * In addition, the LP has the original  (N * dim) vars. In total, the LP will have
-	 * (N*dim) + (2*dim * (N-1)) variables.
+	 * In addition, the LP has the original (N * dim) vars, representing N start points of 
+	 * the N trajectory segments. 
+	 *
+	 * The LP must also have (N * dim) vars to represent the N end points of the segments,
+	 * In total, the LP will have (N*dim) + (N*dim) + (2 * dim * (N-1)) variables.
 	 *
 	 * Convention:
 	 * X = 2 * dim * (N-1)
 	 * Cols 0 to (X - 1) to represent the new variables.
-	 * Y = (N*dim) represent the number of actual variables
+	 * Y = (N*dim) represent the no. of variables to represent N start points of the segments.
 	 * Cols X to (X+Y-1) to represent these
-	 *
+	 * The rest of the (N*dim) vars to represent the N end-points of the trajectory segments.
+	 * Cols X+Y to X+2Y-1. 
 	 */
 	unsigned int X = 2 * dim * (N-1);
 	unsigned int Y = N * dim;
-	num_vars = X + Y;
+	num_vars = X + Y + Y;
 
 	/*
 	 * We construct LPs with constraints as bounds on each variable
-	 * min <= x_i <= max; there will be [2*dim*N] such constraints
+	 * {min}^i_j <= x^i_j <= {max}^i_j; there will be [2*dim*N] such constraints
 	 *
 	 * To address the mod function, there will be constraints of the form:
-	 * x_i - y_i = p_i' - p_i''; there will be [2*dim*(N-1)] inequality constraints,
-	 * one for each splicing points in the N length abstract CE. Since equality
-	 * constraint has be to encoded as two inequality constraint, we have a
-	 * multiplication by 2.
+	 * {x*}^i_j - x^{i+1)_j = p^i_j - {p'}^i_j; there will be [2*dim*(N-1)] 
+	 * inequality constraints, one for each splicing points in the N length
+	 * abstract CE. Since equality constraint has be to encoded as two 
+	 * inequality constraint, we have a multiplication by 2.
 	 *
-	 * To enforce positivity on each new variable p_i', p_i'', we have
+	 * To enforce positivity on each new variable  p^i_j, {p'}^i_j, we have
 	 * additionally 2 * dim * (N-1) constraints, since there are these
 	 * many new variables.
 	 *
 	 * To relate the end points of the segments with the start points,
 	 * with the fixed dwell times, we have constraints of the form:
-	 * y_i = e^{At}.x_i + v.
+	 * {x*}^i = e^{At}.x^i + v., where t is the fixed dwell time.
+	 * 
 	 * There will be a total of (N * dim * 2) such constraints. one equality
 	 * constraint per dimension of the starting point x.
 	 *
-	 * In total, there will be [2 * dim * N + (N-1)*dim + 2 * dim * (N-1) + (N*dim*2)]
-	 * constraints in the LP.
+	 * In total, there will be:
+	 * [2 * dim * N + (N-1)*dim + 2 * dim * (N-1) + (N*dim*2)] LP constraints.
 	 *
 	 * Convention:
-	 * The first [2 * dim * (N-1)] rows to represent the positivity constraints.
-	 * The next [2 * dim * N] rows to represent the bound constraints.
-	 * The next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
-	 * The remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
+	 * The first X1 = [2 * dim * (N-1)] rows to represent the positivity constraints.
+	 * The next  X1 = [2 * dim * (N-1)] rows to represent the  {x*}^i_j - x^{i+1)_j = p^i_j - {p'}^i_j constrs.
+	 * The next  X2 = [2 * dim * N] rows to represent the bound constraints.
+	 * The remaining X2 = (2 * dim * N) rows to represent the end-point constrs, {x*}^i = e^{At}.x^i + v.
 	 */
-	num_constr = (2 * dim * N) + (N-1)*dim + (2 * dim * (N-1) + (N*dim*2));
+	//num_constr = (2 * dim * N) + 2*N*dim + (2 * dim * (N-1) + (N*dim*2));
+	unsigned int X1 = 2 * dim * (N-1);
+	unsigned int X2 = 2 * dim * N; //bounds on each variable of the start-point for N segments;
+	num_constr = X1 + X1 + X2 + X2;
 
 	math::matrix<double> A(num_constr, num_vars, 0);
 
 	std::vector<double> b(num_constr);
+	b.assign(num_constr, 0);
+
 	unsigned int boundsign = 1;
 	lp_fixed_time.setMin_Or_Max(1);
 	// populate the constraints matrix and bounds vector
 
-	double max,min,start_min,start_max;
-	std::vector<double> lb_x(dim*N),ub_x(dim*N);
-	unsigned int index;
 
+	// We add the positivity constraints below p^i_j >= 0
+	for(unsigned int i=0, j=0; i<X;i++,j++){ //X or X1
+		A(i,j) = -1;
+	}
+
+	/*
+	 *  To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
+	 */
+	unsigned int newRow=X1, newCol=0;
+	//1st Part: constrs only on the columns related to p' and p''
+	for (unsigned int i = 0; i < (N-1); i++) // iterate over (N-1) splicing. Each splice has dim number of absolute term
+	{
+		for (unsigned int j = 0; j < dim; j++) // for each dimension or absolute term 2 new variables
+		{
+			//for (unsigned int k = 0; k < 2; k++)	//p' and p''
+			//{
+				newCol = i * 2 * dim + j * 2 + 0; //k=0
+				A(newRow, newCol) = -1;
+				newCol = i * 2 * dim + j * 2 + 1; //k=1
+				A(newRow, newCol) = 1;
+			//}
+				newRow++;
+
+				newCol = i * 2 * dim + j * 2 + 0; //k=0
+				A(newRow, newCol) = 1;
+				newCol = i * 2 * dim + j * 2 + 1; //k=1
+				A(newRow, newCol) = -1;
+
+				newRow++;
+		}
+	}
+	//2nd Part: constrs only on the column related to the start-points involved in splice distance computation term
+	unsigned int startPoint = X;
+	for (unsigned int i = 0; i < (N-1); i++) // iterate over (N-1) transitions but access only the start-points from 2nd transition or (i+1)th transition
+	{
+		for (unsigned int j = 0; j < dim; j++) // for each dimension
+		{
+				newCol = startPoint + (i+1) * dim + j;
+				A(newRow, newCol) = -1;
+
+				newRow++;
+
+				newCol = startPoint + (i+1) * dim + j;
+				A(newRow, newCol) = 1;
+
+				newRow++;
+		}
+	}
+	//Last Part: constrs only on the column related to the end-points involved in splice distance computation term
+	startPoint = X + Y;
+	for (unsigned int i = 0; i < (N-1); i++) // iterate over N-1 transitions or splice
+	{
+		for (unsigned int j = 0; j < dim; j++) // for each dimension
+		{
+				newCol = startPoint + i * dim + j;
+				A(newRow, newCol) = 1;
+
+				newRow++;
+
+				newCol = startPoint + i * dim + j;
+				A(newRow, newCol) = -1;
+
+				newRow++;
+		}
+	}
+	//Todo: to be Optimized into one loop for all the three parts if possible
+	//Todo: Also verify if newRow== (2 * X1)
+
+
+	/*
+	 *  To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
+	 */
+
+	startPoint = X;
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
-		// dxli: the whole flowpipe is a sequence of sub-flowpipes, each of which
-		// denotes \omega in each location.
-		// S is the sub-flowpipe in i-th sequence; P is the first \omega in S.
 		S = get_symbolic_state(i);
 		polytope::ptr P = S->getInitialPolytope();
 
 		lp_solver lp(GLPK_SOLVER);
-
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 
 		// we add bound constraints on the position parameters, which are required to run global opt routines.
@@ -1715,20 +1798,50 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 				// assuming that the exception is caused due to an unbounded solution
 				max = +999; // an arbitrary value set as solution
 			}
-			index = i*dim+j;
 
-			lb_x[index] = min;
-			ub_x[index] = max;
+			newCol = startPoint + i * dim + j;
+			A(newRow, newCol) = 1;
+			b[newRow] = max;
+
+			newRow++;
+
+			A(newRow, newCol) = -1;
+			b[newRow] = -1 * min;
 
 			dir[j] = 0;
 		}
 	}
+	//	Todo: Also verify if newRow== (2 * X1 + X2)
 
-	// We add the positivity constraints below p_i >= 0
 
-	for(unsigned int i=0, j=0; i<X;i++,j++){
-		A(i,j) = -1;
+	/*
+	 *  To do: Add the remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
+	 */
+	startPoint = X;
+	std::vector<double> endPts(dim);
+	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
+	{
+		S = get_symbolic_state(i);
+		polytope::ptr P = S->getInitialPolytope();
+
+		lp_solver lp(GLPK_SOLVER);
+		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
+				P->getInEqualitySign());
+
+		int loc_index = locIdList[i];
+		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+
+		// dxli: analytic solution, rather ODE solver call. This closed form is true only when the input set is singular.
+		//	endPts = ODESol(startPts,d,dwell_times[i]);
+		// Need the starting point value for x_i's to compute x*_i's
+		//Once the endPts vector is computed, we can then create the constraints for the global opt.
+
+		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
+		{
+			//endPts[j]
+		}
 	}
+
 	// To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
 	// To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
 
@@ -1757,6 +1870,8 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		// Using expAt and v, add the constraints on the end-points to the lp
 
 	}
+
+	// Building the lp problem with the created A and b values
 
 	lp_fixed_time.setConstraints(A,b,boundsign);
 
