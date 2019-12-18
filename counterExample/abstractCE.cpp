@@ -1731,7 +1731,33 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 	}
 	// To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
 	// To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
-	// To do: Add the remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
+
+	// Adding the (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
+
+	// Get the sequence of loc_ids from the abstract counterexample.
+
+	std::set<int> d;
+	for(unsigned int i=0;i<N;i++){
+		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
+		assert(d.size() == 1);
+		locIdList[i] = *(d.begin());
+	}
+
+	for(unsigned int i=0;i<N;i++){
+		Dynamics D;
+		math::matrix<double> expAt; // To contrain the e^At matrix, for the fixed time.
+		unsigned int loc_id = locIdList[i];
+		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
+		D = ha_loc_ptr->getSystem_Dynamics();
+		D.MatrixA.matrix_exponentiation(expAt,dwell_times[i]);
+
+		// Now, we calculate v = A^{-1}.(e^{At} - I)* D.C
+		std::vector<double> v = ODESol_inhomogenous(D.MatrixA,dwell_times[i]);
+
+		// Using expAt and v, add the constraints on the end-points to the lp
+
+	}
+
 	lp_fixed_time.setConstraints(A,b,boundsign);
 
 	// set the objective function: p_1' + p_1'' + p_2' + p_2''+ ... over all new vars
