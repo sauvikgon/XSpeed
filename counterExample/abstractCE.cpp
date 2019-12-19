@@ -1598,6 +1598,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_LP_softconstr(double tolerance, c
  * dwell time of the trajectory segments. The fixed dwell times
  * are passed as an argument to this function.
  */
+//For temporary Debugging called from function abstractCE::get_validated_CE
 lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 {
 	symbolic_states::const_ptr S = get_first_symbolic_state();
@@ -1702,6 +1703,9 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		A(i,j) = -1;
 	}
 
+	unsigned int check=X1;
+//	std::cout<<"Check = "<< check <<" newRow = "<< X <<std::endl; //OK
+
 	/*
 	 *  To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
 	 */
@@ -1718,7 +1722,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 				newCol = i * 2 * dim + j * 2 + 1; //k=1
 				A(newRow, newCol) = 1;
 			//}
-				newRow++;
+				newRow++; //TODO :: need to verify if this effects the next part
 
 				newCol = i * 2 * dim + j * 2 + 0; //k=0
 				A(newRow, newCol) = 1;
@@ -1728,6 +1732,10 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 				newRow++;
 		}
 	}
+//	check=X1;
+//	std::cout<<"Check = "<< check<<" newRow = "<< newRow <<std::endl; //OK
+
+	newRow=X1;
 	//2nd Part: constrs only on the column related to the start-points involved in splice distance computation term
 	unsigned int startPoint = X;
 	for (unsigned int i = 0; i < (N-1); i++) // iterate over (N-1) transitions but access only the start-points from 2nd transition or (i+1)th transition
@@ -1737,7 +1745,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 				newCol = startPoint + (i+1) * dim + j;
 				A(newRow, newCol) = -1;
 
-				newRow++;
+				newRow++; //TODO :: need to verify if this effects the next part
 
 				newCol = startPoint + (i+1) * dim + j;
 				A(newRow, newCol) = 1;
@@ -1745,7 +1753,12 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 				newRow++;
 		}
 	}
+
 	//Last Part: constrs only on the column related to the end-points involved in splice distance computation term
+	//check=X1;
+	//std::cout<<"Check = "<< check<<" newRow = "<< newRow <<std::endl; //OK
+
+	newRow=X1;
 	startPoint = X + Y;
 	for (unsigned int i = 0; i < (N-1); i++) // iterate over N-1 transitions or splice
 	{
@@ -1763,13 +1776,16 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		}
 	}
 	//Todo: to be Optimized into one loop for all the three parts if possible
-	//Todo: Also verify if newRow== (2 * X1)
-
+	//assert(newRow == 2*X1);
+//	check=2*X1;
+//	std::cout<<"4. Check = "<< check<<" newRow = "<< newRow <<std::endl; //OK
+	assert(newRow == 2*X1);
 
 	/*
 	 *  To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
 	 */
 
+	//cout<<"N="<<N<<" Dim="<<dim<<" \n";
 	startPoint = X;
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
@@ -1803,21 +1819,25 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 			A(newRow, newCol) = 1;
 			b[newRow] = max;
 
-			newRow++;
+			newRow++; //TODO :: need to verify if this effects the next part
 
 			A(newRow, newCol) = -1;
 			b[newRow] = -1 * min;
 
 			dir[j] = 0;
+			newRow++;
 		}
 	}
-	//	Todo: Also verify if newRow== (2 * X1 + X2)
+
+//	check=2*X1 + X2;
+//	std::cout<<"5. Check = "<< check<<" newRow = "<< newRow <<std::endl;
+	assert(newRow == 2*X1 + X2);
 
 
 	/*
 	 *  To do: Add the remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
 	 */
-	startPoint = X;
+/*	startPoint = X;
 	std::vector<double> endPts(dim);
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
@@ -1831,7 +1851,6 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		int loc_index = locIdList[i];
 		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
 
-		// dxli: analytic solution, rather ODE solver call. This closed form is true only when the input set is singular.
 		//	endPts = ODESol(startPts,d,dwell_times[i]);
 		// Need the starting point value for x_i's to compute x*_i's
 		//Once the endPts vector is computed, we can then create the constraints for the global opt.
@@ -1840,7 +1859,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		{
 			//endPts[j]
 		}
-	}
+	}*/
 
 	// To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
 	// To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
@@ -1849,6 +1868,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 
 	// Get the sequence of loc_ids from the abstract counterexample.
 
+	locIdList.resize(N);
 	std::set<int> d;
 	for(unsigned int i=0;i<N;i++){
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
@@ -1856,6 +1876,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		locIdList[i] = *(d.begin());
 	}
 
+	startPoint = X+Y;
 	for(unsigned int i=0;i<N;i++){
 		Dynamics D;
 		math::matrix<double> expAt; // To contrain the e^At matrix, for the fixed time.
@@ -1869,7 +1890,31 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 
 		// Using expAt and v, add the constraints on the end-points to the lp
 
+		for (unsigned int j = 0; j < dim; j++) {
+			// iterate over each row of the e^(At)-matrix (which is equal to dim)
+			newCol =  X + Y + i * dim + j;
+			A(newRow,newCol) = 1; //first inequality
+			b[newRow] = v[j];
+			for (unsigned int k = 0; k < expAt.size2(); k++)
+			{
+				newCol =  X + i * dim + k;
+				A(newRow,newCol) = -1 * expAt(j,k); //first inequality
+
+				A(newRow + 1,newCol) = expAt(j,k); //second inequality
+			}
+
+			newRow++;
+
+			newCol =  X + Y + i * dim + j;
+			A(newRow,newCol) = -1;  //second inequality
+			b[newRow] = -1 * v[j];
+			newRow++;
+		}
 	}
+//	check=2*X1+2*X2;
+//	std::cout<<"6. Check = "<< check<<" newRow = "<< newRow <<std::endl;
+	assert(newRow == (2*X1+2*X2));
+
 
 	// Building the lp problem with the created A and b values
 
@@ -2321,6 +2366,24 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::l
 
 concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo_type)
 {
+
+	/*
+	 * Debugging: Temporary
+	 */
+
+	symbolic_states::const_ptr S = get_first_symbolic_state();
+	dim = S->getContinuousSetptr()->get_dimension();
+
+	std::vector<double> dwell_times(dim,4);
+	/*for (unsigned int i=0;i<dim;i++){
+		dwell_times[i] = 4;
+	}*/
+	cout <<"Dwell_times size = "<<dwell_times.size()<<"\n";
+	build_lp(dwell_times);
+
+
+	//Debug
+
 	// call to genCE func with no refining trajectory
 	std::list<struct refinement_point> refinements;
 	refinements.clear(); // No refinement point initially

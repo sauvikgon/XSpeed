@@ -34,21 +34,21 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-		set_nav04_timed(ha, init_state, reach_parameters);
+//		set_nav04_timed(ha, init_state, reach_parameters);
 		//Set_NavTimedEpsilonRelaxGuard(ha, init_state, reach_parameters);
 		//SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_2) {
-		SetNavigationModel2(ha, init_state, reach_parameters); //My own testing Model NAV2
+//		SetNavigationModel2(ha, init_state, reach_parameters); //My own testing Model NAV2
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_3) {
-		SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
+//		SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
-		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+//		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}
