@@ -147,7 +147,7 @@ std::vector<double> ODESol_inhomogenous(const Dynamics& D, double time){
 	std::vector<double> res2(dim), res3(dim);
 
 	math::matrix<double> AInv(dim,dim);
-	if(!A.inverse(AInv)) // meaning that the matrix A is singular,i.e., not invertible
+	if(!A.inverse(AInv)) // meaning that the matrix A is singular, i.e., not invertible
 	{
 		// compute the expression A^-1 (e^At - I) alternatively as a sub-matrix of the exp(M),
 		// as shown in the SpaceEx paper, page 8, phi_1.
