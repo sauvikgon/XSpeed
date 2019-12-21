@@ -1837,29 +1837,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 	/*
 	 *  To do: Add the remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
 	 */
-/*	startPoint = X;
-	std::vector<double> endPts(dim);
-	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
-	{
-		S = get_symbolic_state(i);
-		polytope::ptr P = S->getInitialPolytope();
 
-		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-				P->getInEqualitySign());
-
-		int loc_index = locIdList[i];
-		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
-
-		//	endPts = ODESol(startPts,d,dwell_times[i]);
-		// Need the starting point value for x_i's to compute x*_i's
-		//Once the endPts vector is computed, we can then create the constraints for the global opt.
-
-		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
-		{
-			//endPts[j]
-		}
-	}*/
 
 	// To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
 	// To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
@@ -1924,9 +1902,185 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 	for(unsigned int i=0;i<X;i++){
 		lp_fixed_time.set_obj_coeff(i, 1);
 	}
+cout<<"A matrix\n";
+cout<<A;
+cout<<endl<<"Bound Vector b is\n";
+for(unsigned int i=0;i<b.size();i++){
+	cout<<b[i]<<endl;
+}
 
 	return lp_fixed_time; // returns the built lp.
 }
+
+
+/**
+ * Amit:
+ * Method to construct and solve an NLP from the abstract counter example,
+ * for trajectory splicing. The NLP construction is by fixing the start points but
+ * keeping the dwell times of the trajectory segments as variable. The start points
+ * are passed as an argument to this function.
+ */
+nlopt::opt abstractCE::build_nlp(double tolerance, std::vector<std::vector<double>> fixedStartPoint)
+{
+	//1. Generate an nlopt object with the hard constraints on dwell times
+	//2. Objective function as distance(startPts, endPts) + dp(endPts,Reach Intersects Guard) + dp(endPts, Bad_set)
+
+
+	symbolic_states::const_ptr S = get_first_symbolic_state();
+	dim = S->getInitialPolytope()->getSystemDimension();
+	HA = this->get_automaton();
+	transList = this->get_CE_transitions();
+	N = transList.size()+1; // the length of the counter example
+	bad_poly = this->forbid_poly;
+	//ref_pts = refinements;
+
+	// initialize the global locIdList
+	locIdList.resize(N);
+	std::set<int> d;
+	for(unsigned int i=0;i<N;i++){
+		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
+		assert(d.size() == 1);
+		locIdList[i] = *(d.begin());
+		std::cout << locIdList[i] << " | " ;
+	}
+
+	unsigned int optD = N; //each segment will have a different dwell time
+	std::cout << "nlopt problem dimension (number of Dwell Time) = " << optD << std::endl;
+//	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
+//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+	nlopt::opt myoptStartPointFixed(nlopt::LD_MMA, optD); // derivative based
+//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
+
+// 	local optimization routine
+
+	polytope::ptr P;
+
+	bool aggregation=true; //default is ON
+
+	std::vector<double> solutionsTau(optD,0);
+
+	std::vector<double> lb_t(optD), ub_t(optD);
+	std::vector<double> t(optD, 0);
+	double minf = 1e10;
+
+	unsigned int t_index = get_first_symbolic_state()->getInitialPolytope()->get_index("t");
+
+	assert((t_index >= 0) && (t_index < dim));
+
+	std::vector<double> dmin(dim, 0), dmax(dim, 0);
+	dmax[t_index] = 1;
+	dmin[t_index] = -1;
+	double min, max, start_min, start_max;
+	std::list<polytope::ptr> polys;
+	polytope::ptr guard;
+	std::list<transition::ptr>::iterator it = transList.begin();
+	transition::ptr T;
+
+	//For every N-locations find the bounds on dwell time
+
+	for(unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
+	{
+
+		polytope::ptr P;
+		if (i==(N-1)) {	//For last location find intersection between Flowpipe and Bad set
+			// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
+			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation,bad_poly,1);
+			assert(polys.size()>=0); // The last sym state of an abstract CE must intersect with the bad set
+
+			if(polys.size()>1)
+				P = get_template_hull(S->getContinuousSetptr(),0,S->getContinuousSetptr()->getTotalIterations()-1); // 100% clustering
+			else
+				P = polys.front();
+
+			P = P->GetPolytope_Intersection(bad_poly);
+
+
+			lp_solver lp(GLPK_SOLVER);
+			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
+			try {
+				max = lp.Compute_LLP(dmax);
+			} catch (...) {
+				max = 999; // large positive value
+			}
+			try {
+				min = -1 * lp.Compute_LLP(dmin);
+			} catch (...) {
+				min = 0; // a minimum of possible value for time
+			}
+		} else {
+			// Take time projection of flowpipe \cap transition guard
+			T = *(it);	//runs based on the for-i-loop except the last iteration
+			guard = T->getGaurd();
+			if(guard->getIsUniverse())
+				std::cout << "#Guard is Universe#\n" << std::endl;
+
+			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation,guard,1);
+
+			assert(polys.size()>=1); // An abstract CE state must have intersection with the trans guard
+			if(polys.size()>1)
+				P = get_template_hull(S->getContinuousSetptr(),0,S->getContinuousSetptr()->getTotalIterations()-1); // 100% clustering
+			else
+				P=polys.front();
+			// Now intersect P with guard
+			P = P->GetPolytope_Intersection(guard);
+
+		}
+
+		lp_solver lp(GLPK_SOLVER);
+		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
+		// ensure that time is always positive
+		try{
+			max = lp.Compute_LLP(dmax);
+		}catch(...){
+			// assuming that the exception is caused due to an unbounded solution
+			max = 999; // an arbitrary large value set as solution
+		}
+		try{
+			min = -1 * lp.Compute_LLP(dmin);
+		}catch(...){
+			// assuming that the exception is caused due to an unbounded solution
+			min = 0; // the min value a time can take is 0.
+		}
+
+		// we add the bounds as constraints in the nlopt
+		// Get the min and max time projection of start set
+		lp_solver lp1(GLPK_SOLVER);
+		polytope::ptr init_of_symb = S->getInitialPolytope();
+
+		lp1.setConstraints(init_of_symb->getCoeffMatrix(), init_of_symb->getColumnVector(),init_of_symb->getInEqualitySign());
+		// Ensure that the time is positive
+		start_min = -1 * lp1.Compute_LLP(dmin);
+		start_max = lp1.Compute_LLP(dmax);
+		ub_t[i] = max - start_min;
+		if(min<=start_max)
+			lb_t[i] = 0;
+		else
+			lb_t[i] = min-start_max;
+
+		// Increment the transition to the next in the symbolic path
+		if(it!=transList.end())
+			it++;
+		t[i] = (lb_t[i] + ub_t[i])/2;	//setting some initial \tau value for call to optimize()
+	}
+
+	unsigned int maxeval = 20000;
+	myoptStartPointFixed.set_maxeval(maxeval);
+	myoptStartPointFixed.set_stopval(tolerance);
+	myoptStartPointFixed.set_xtol_rel(1e-4);
+
+	myoptStartPointFixed.set_lower_bounds(lb_t);
+	myoptStartPointFixed.set_upper_bounds(ub_t);
+
+	myoptStartPointFixed.set_min_objective(myobjfuncIterativeNLP, &fixedStartPoint);
+
+//	myoptStartPointFixed.optimize(t, minf);
+//
+//	solutionsTau = t;
+return myoptStartPointFixed; //myoptStartPointFixed object
+//	return t;
+
+}
+
 /**
  * Implementing the LP-NLP iterative routine for trajectory splicing
  */
@@ -2382,7 +2536,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, unsigned int algo
 	build_lp(dwell_times);
 
 
-	//Debug
+	// ****Debug
 
 	// call to genCE func with no refining trajectory
 	std::list<struct refinement_point> refinements;

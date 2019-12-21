@@ -196,6 +196,9 @@ private:
 	concreteCE::ptr gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements);
 
 	lp_solver build_lp(std::vector<double> dwell_times);
+
+	nlopt::opt build_nlp(double tolerance, std::vector<std::vector<double>> fixedStartPoint);
+
 };
 
 
