@@ -1067,8 +1067,9 @@ double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &
 // Computes the L2 norm or Euclidean distances between the trace end points.
 //-----------------------------------------
 
-	std::vector<std::vector<double>> x =
-			*((std::vector<std::vector<double>>*) my_func_data); //N start vectors (fixed-constants)
+	std::vector<double> *x = (std::vector<double> *) my_func_data;
+//	std::vector<std::vector<double>> x =
+//			*((std::vector<std::vector<double>>*) my_func_data); //N start vectors (fixed-constants)
 
 	/*This is the vector of end-points of N trajectory segments to be computed*/
 	std::vector<std::vector<double> > y(N);
