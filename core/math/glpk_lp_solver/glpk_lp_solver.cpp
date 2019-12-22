@@ -218,7 +218,8 @@ double glpk_lp_solver::solve(){
 
 	double result = glp_get_obj_val(mylp);
 
-	for(int i=1;i<=glp_get_num_rows(mylp);i++)
+/*	Commented the Debugging Lines to suppress outputs
+ * for(int i=1;i<=glp_get_num_rows(mylp);i++)
 	{
 		int ind[100];
 		double val[100];
@@ -228,7 +229,7 @@ double glpk_lp_solver::solve(){
 			std::cout << "index: " << ind[k] << ", value = " << val[k] << std::endl;
 		}
 
-	}
+	}*/
 	/*
 	 * Updated to Maximizing vector
 	 */

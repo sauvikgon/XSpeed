@@ -586,7 +586,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 			newCol = i * 2 * dim + j * 2 + 1; //k=1
 			A(newRow, newCol) = 1;
 			//}
-			newRow++; //TODO :: need to verify if this effects the next part
+			newRow++;
 
 			newCol = i * 2 * dim + j * 2 + 0; //k=0
 			A(newRow, newCol) = 1;
@@ -609,7 +609,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 			newCol = startPoint + (i + 1) * dim + j;
 			A(newRow, newCol) = -1;
 
-			newRow++; //TODO :: need to verify if this effects the next part
+			newRow++;
 
 			newCol = startPoint + (i + 1) * dim + j;
 			A(newRow, newCol) = 1;
@@ -684,7 +684,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 			A(newRow, newCol) = 1;
 			b[newRow] = max;
 
-			newRow++; //TODO :: need to verify if this effects the next part
+			newRow++;
 
 			A(newRow, newCol) = -1;
 			b[newRow] = -1 * min;
@@ -760,12 +760,14 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	for (unsigned int i = 0; i < X; i++) {
 		lp_fixed_time.set_obj_coeff(i, 1);
 	}
+/*
 	cout << "A matrix\n";
 	cout << A;
 	cout << endl << "Bound Vector b is\n";
 	for (unsigned int i = 0; i < b.size(); i++) {
 		cout << b[i] << endl;
 	}
+*/
 
 	return lp_fixed_time; // returns the built lp.
 }
@@ -824,7 +826,7 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 			get_first_symbolic_state()->getInitialPolytope()->get_index("t");
 
 	assert((t_index >= 0) && (t_index < dim));
-
+//	cout <<"1 successfull!! \n";
 	std::vector<double> dmin(dim, 0), dmax(dim, 0);
 	dmax[t_index] = 1;
 	dmin[t_index] = -1;
@@ -837,26 +839,52 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 	//For every N-locations find the bounds on dwell time
 
 	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
-			{
-
+	{
+		S = get_symbolic_state(i);
+//		cout <<"2 successfull!! \n";
 		polytope::ptr P;
 		if (i == (N - 1)) {	//For last location find intersection between Flowpipe and Bad set
+//			cout <<"7 successfull!! \n";
 			// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
 					aggregation, bad_poly, 1);
 			assert(polys.size() >= 0); // The last sym state of an abstract CE must intersect with the bad set
-
-			if (polys.size() > 1)
+//			cout <<"8 successfull!! polys.size() = "<<polys.size()<< "\n";
+			if (polys.size() > 1){
 				P = get_template_hull(S->getContinuousSetptr(), 0,
 						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-			else
+//				cout <<"8a successfull!! \n";
+			} else {
 				P = polys.front();
+//				cout <<"8b successfull!! \n";
+			}
+//			cout <<"9 successfull!! \n";
+
+			/*matrix<double> A = bad_poly->getCoeffMatrix();
+			std::vector<double> b = bad_poly->getColumnVector();
+			cout << "A matrix\n";
+			cout << A;
+			cout << endl << "Bound Vector b is\n";
+			for (unsigned int i = 0; i < b.size(); i++) {
+				cout << b[i] << endl;
+			}
+
+			matrix<double> A2 = P->getCoeffMatrix();
+			std::vector<double> b2 = P->getColumnVector();
+			cout << "A2 matrix\n";
+			cout << A2;
+			cout << endl << "Bound Vector b2 is\n";
+			for (unsigned int i = 0; i < b2.size(); i++) {
+				cout << b2[i] << endl;
+			}
+*/
 
 			P = P->GetPolytope_Intersection(bad_poly);
-
+//			cout <<"3 successfull!! \n";
 			lp_solver lp(GLPK_SOLVER);
 			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
 					P->getInEqualitySign());
+//			cout <<"10 successfull!! \n";
 			try {
 				max = lp.Compute_LLP(dmax);
 			} catch (...) {
@@ -867,10 +895,12 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 			} catch (...) {
 				min = 0; // a minimum of possible value for time
 			}
+//			cout <<"11 successfull!! \n";
 		} else {
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);	//runs based on the for-i-loop except the last iteration
 			guard = T->getGaurd();
+//			cout <<"4 successfull!! \n";
 			if (guard->getIsUniverse())
 				std::cout << "#Guard is Universe#\n" << std::endl;
 
@@ -885,7 +915,7 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 				P = polys.front();
 			// Now intersect P with guard
 			P = P->GetPolytope_Intersection(guard);
-
+//			cout <<"5 successfull!! \n";
 		}
 
 		lp_solver lp(GLPK_SOLVER);
@@ -904,6 +934,7 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 			// assuming that the exception is caused due to an unbounded solution
 			min = 0; // the min value a time can take is 0.
 		}
+//		cout <<"6 successfull!! \n";
 
 		// we add the bounds as constraints in the nlopt
 		// Get the min and max time projection of start set
@@ -936,7 +967,8 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 	myoptStartPointFixed.set_lower_bounds(lb_t);
 	myoptStartPointFixed.set_upper_bounds(ub_t);
 
-	myoptStartPointFixed.set_min_objective(myobjfuncIterativeNLP, fixedStartPoint);
+	myoptStartPointFixed.set_min_objective(myobjfuncIterativeNLP,
+			fixedStartPoint);
 
 //	myoptStartPointFixed.optimize(t, minf);
 //
@@ -992,7 +1024,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	 * and the dwell times of the segments are variables
 	 */
 
-	//std::vector<std::vector<double>> x0(N, std::vector<double>(dim)); // to contain the fixed start-points.
 	std::vector<double> x0[N]; // to contain the fixed start-points.
 
 	std::vector<double> lb_t(N), ub_t(N);
@@ -1106,7 +1137,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 	double minf = 1e10; // a large value to start
 	nlopt::opt myoptDwellTime; // nlp object;
-
+	unsigned int X1 = 2 * dim * (N - 1); //list of new variables
+	unsigned int nlp_status;
 	try {
 		while (minf > tolerance) {
 
@@ -1114,14 +1146,36 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			lp_solver fixed_time_Lp = build_lp(dwell_times);
 			double res = fixed_time_Lp.solve();
 			std::vector<double> x = fixed_time_Lp.get_sv();
-			//todo:from this vector, get the N vectors in x0 vector: Amit may help
+			//From this vector, get the N vectors in x0 vector
+			cout << "Printing x0[i][j] (LP res = )"<< res <<" \n";
+			for (int i = 0; i < N; i++) {
+				x0[i].resize(dim);	//declaring each array element its size
+				for (int j = 0; j < dim; j++) {
+					x0[i][j] = x[X1 + i * dim + j];
+					cout << x0[i][j] <<"  ";
+				}
+			}
+			cout<<endl;
 			if (res < tolerance)
 				break;
 
 			// solve the nlp with fixed start points.
 			myoptDwellTime = build_nlp(tolerance, x0);
-			myoptDwellTime.optimize(dwell_times, minf);
+			cout <<"build_nlp successfull!! \n";
+			nlp_status = myoptDwellTime.optimize(dwell_times, minf);
+			cout <<"nlp_optimize successfull!! \n";
 		}
+
+		if (nlp_status == NLOPT_SUCCESS)
+			std::cout
+					<< "Splicing with Iterative LP-NLP: NLOPT stopped successfully returning the found minimum\n";
+		else if (nlp_status == NLOPT_STOPVAL_REACHED)
+			std::cout
+					<< "Splicing with Iterative LP-NLP: NLOPT stopped due to stopping value (1e-6) reached\n";
+		else if (nlp_status == NLOPT_MAXEVAL_REACHED)
+			std::cout
+					<< "Splicing with Iterative LP-NLP: NLOPT stopped due to reaching maxeval!!"
+					<< std::endl;
 	} catch (std::exception &e) {
 		std::cout << e.what() << std::endl;
 	}
@@ -1135,6 +1189,35 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		return cexample;
 	} else {
 		// Todo: construct a concrete ce from the opt. result., Rajarshi to code
+		std::cout << "nlopt returned min : " << minf << "\n";
+		std::cout << "Length of abstract counter example:" << N << "\n";
+
+		/*if (minf > tolerance) {
+		 std::cout << "Obtained minimum greater than " << tolerance
+		 << ", with no. of refined search:" << refinements.size() << std::endl;
+		 return cexample;
+		 } else {*/
+		std::ofstream ce_trace;
+		// one trajectory per symbolic state to be added in the concreteCE
+		for (unsigned int i = 0; i < N; i++) {
+			// create the sample
+			concreteCE::sample s;
+			std::set<int>::iterator dset_iter =
+					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
+			unsigned int locId = *dset_iter;
+
+			std::vector<double> y(dim);
+			for (unsigned int j = 0; j < dim; j++) {
+				y[j] = x0[i][j];
+			}
+
+			s.first = y;
+			s.second = dwell_times[i];
+			concreteCE::traj_segment traj;
+			traj.first = locId;
+			traj.second = s;
+			cexample->push_back(traj);
+		}
 	}
 
 	return cexample;
@@ -1396,17 +1479,17 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 	 * Debugging: Temporary
 	 */
 
-	symbolic_states::const_ptr S = get_first_symbolic_state();
+	/*symbolic_states::const_ptr S = get_first_symbolic_state();
 	dim = S->getContinuousSetptr()->get_dimension();
 
 	std::vector<double> dwell_times(dim, 4);
-	/*for (unsigned int i=0;i<dim;i++){
+	for (unsigned int i=0;i<dim;i++){
 	 dwell_times[i] = 4;
-	 }*/
+	 }
 	cout << "Dwell_times size = " << dwell_times.size() << "\n";
 	build_lp(dwell_times);
 
-	// ****Debug
+	// ****Debug*/
 
 	// call to genCE func with no refining trajectory
 	std::list<struct refinement_point> refinements;
@@ -1425,7 +1508,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 			cexample = gen_concreteCE(tolerance, refinements);
 		else if (algo_type == 2) { // WoFC called
 			cexample = gen_concreteCE_NLP_HA(tolerance, refinements);
-		} else if (algo_type == 3)//std::cout << "LP-NLP mixed implementation not in place yet\n";
+		} else if (algo_type == 3) //std::cout << "LP-NLP mixed implementation not in place yet\n";
 			cexample = gen_concreteCE_iterative(tolerance, refinements);
 		else {
 			std::cout

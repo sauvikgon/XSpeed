@@ -1059,41 +1059,60 @@ double myobjfuncOnDwellTime(const std::vector<double> &t,
  * Here endPoints are computed using the equation x* = e^(At) x + v
  * startPoints are fixed vectors taken as inputs.
  */
-double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &grad, void *my_func_data) {
+double myobjfuncIterativeNLP(const std::vector<double> &t,
+		std::vector<double> &grad, void *my_func_data) {
 
 // 1. Get the N start vectors (fixed-constants) and dwell times (variables) and call the simulation routine to get endpoints, say y[i]
 // 2. Get the N end points of the simulation trace, say, y[i].
 // 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
 // Computes the L2 norm or Euclidean distances between the trace end points.
 //-----------------------------------------
-
-	std::vector<double> *x = (std::vector<double> *) my_func_data;
+	cout << "Inside myobjfuncIterativeNLP due to call from optimize" << endl;
+	std::vector<double> *x = (std::vector<double>*) my_func_data;
+	cout << "1 success"<<endl;
 //	std::vector<std::vector<double>> x =
 //			*((std::vector<std::vector<double>>*) my_func_data); //N start vectors (fixed-constants)
 
 	/*This is the vector of end-points of N trajectory segments to be computed*/
 	std::vector<std::vector<double> > y(N);
-
+	cout << "2 success"<<endl;
 	double cost = 0;
 	std::vector<double> deriv(N, 0); // contains the gradient, all initialized to 0. Amit: resize to N ToDo have doubt here
 
 	std::list<transition::ptr>::iterator T_iter = transList.begin();
 	transition::ptr Tptr = *(T_iter);
-
+	cout << "3 success"<<endl;
 	math::matrix<double> A, expAt, mapExpAt;
-	std::vector<double> Axplusb(dim), mapAxplusb;
+	//std::vector<double> checkthisout(7);
+	cout << "4 success here dim = "<<dim<<"\n";
+	//std::vector<double> Axplusb(dim); //this is causing error
+	std::vector < double > myAxPlusb,test1,test2, test3;
+
+	cout << "4 1 success here dim = "<<dim<<"\n";
+	test1.resize(dim); //this is causing error
+	cout << "4 2 success here dim = "<<dim<<"\n";
+	test2.resize(dim);
+	cout << "4 3 success here dim = "<<dim<<"\n";
+	test3.resize(dim);
+	cout << "4 success here dim = "<<dim<<"\n";
+	myAxPlusb.resize(dim);
+	cout << "5 success here dim = "<<dim<<endl;
+	std::vector<double> mapAxplusb;
 
 //	std::ofstream myfile;
 //	myfile.open("./endpoints");
 
 	polytope::ptr I;
 
-//	cout << "before loop over i" << endl;
+	cout << "before loop over i" << endl;
 	for (unsigned int i = 0; i < N; i++) {
 
 		// dxli: v is a copy of state variables. (Get the N start vectors)
 		std::vector<double> v(dim, 0);
-		v = x[i];	//Todo:: need to verify vector copy
+
+		for (unsigned int j = 0; j < dim; j++) {
+			v[j] = x[i * dim][j];
+		}
 
 		int loc_index = locIdList[i]; //global variable populated already
 		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
@@ -1122,9 +1141,9 @@ double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &
 		At.scalar_multiply(t[i]);
 		At.matrix_exponentiation(expAt);
 
-		A.mult_vector(y[i], Axplusb); //Amit: ToDo: discuss about this y[i] as multiplier
+		A.mult_vector(y[i], myAxPlusb);
 		for (unsigned int j = 0; j < dim; j++) {
-			Axplusb[j] = Axplusb[j] + d.C[j];
+			myAxPlusb[j] = myAxPlusb[j] + d.C[j];
 		}
 
 		//		For validation, the distance of trace end points from the invariant is
@@ -1139,24 +1158,22 @@ double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &
 
 		inv_dist_grad = dist_grad(y[i], I);
 
-		//ToDo: Amit: May Need changes here I supposed for deriv.size is now just N
-		for (unsigned int j = 0; j < dim; j++) {
-			double dist_gradx_j = 0;
-			for (unsigned int k = 0; k < dim; k++) {
-			//amit:	dist_gradx_j += inv_dist_grad[k] * expAt(k, j);
-				dist_gradx_j += inv_dist_grad[k] * expAt(k, i);
-			}
-			//ToDo: Amit: May Need changes
-			deriv[i * dim + j] += dist_gradx_j;
-
+		//for (unsigned int j = 0; j < dim; j++) {
+		double dist_gradx_j = 0;
+		for (unsigned int k = 0; k < dim; k++) {
+			//  dist_gradx_j += inv_dist_grad[k] * expAt(k, j);
+			dist_gradx_j += inv_dist_grad[k] * expAt(k, i); //Todo discuss about j replacing to i
 		}
+		//deriv[i * dim + j] += dist_gradx_j;
+		deriv[i] += dist_gradx_j;
+		//}
 		//	add the cost gradient w.r.t traj segment's dwell time
 		double dist_gradt = 0;
 		for (unsigned int j = 0; j < dim; j++) {
-			dist_gradt += inv_dist_grad[j] * Axplusb[j];
+			dist_gradt += inv_dist_grad[j] * myAxPlusb[j];
 		}
-		//ToDo: Amit: May Need changes
-		deriv[N * dim + i] += dist_gradt;
+		//deriv[N * dim + i] += dist_gradt;
+		deriv[i] += dist_gradt;
 
 		/*
 		 * In Dongxu's version this code is commented
@@ -1175,26 +1192,23 @@ double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &
 
 			badpoly_dist_grad = dist_grad(y[N - 1], bad_poly);
 
-			for (unsigned int j = 0; j < dim; j++) {
-				double dist_gradx_j = 0;
-				for (unsigned int k = 0; k < dim; k++) {
-					dist_gradx_j += badpoly_dist_grad[k] * expAt(k, j);
-				}
-				//ToDo: Amit: May Need changes
-				deriv[(N - 1) * dim + j] += dist_gradx_j;
+			//for (unsigned int j = 0; j < dim; j++) {
+			double dist_gradx_j = 0;
+			for (unsigned int k = 0; k < dim; k++) {
+				//dist_gradx_j += badpoly_dist_grad[k] * expAt(k, j);
+				dist_gradx_j += badpoly_dist_grad[k] * expAt(k, i);
 			}
+			//deriv[(N - 1) * dim + j] += dist_gradx_j;
+			deriv[i] += dist_gradx_j;
+			//}
 
 			//	add the cost gradient w.r.t last traj segment's dwell time
-
-			//	add the cost gradient w.r.t last traj segment's dwell time
-
 			double dist_gradt = 0;
 			for (unsigned int j = 0; j < dim; j++) {
-				dist_gradt += badpoly_dist_grad[j] * Axplusb[j];
+				dist_gradt += badpoly_dist_grad[j] * myAxPlusb[j];
 			}
-			//ToDo: Amit: May Need changes
-			deriv[N * dim + N - 1] += dist_gradt;
-			//		deriv[N - 1] += dist_gradt;
+			//deriv[N * dim + N - 1] += dist_gradt;
+			deriv[i] += dist_gradt;
 
 			break;
 		} else {
@@ -1210,7 +1224,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &
 			//guard as a polytope
 			g = Tptr->getGaurd();
 
-			std::vector<double> mapderiv(Axplusb);
+			std::vector<double> mapderiv(myAxPlusb);
 
 			// guard \cap invariant distance, to address Eq. (12) in CDC 13' paper
 			polytope::ptr guard_intersect_inv;
@@ -1227,23 +1241,23 @@ double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &
 			std::vector<double> guard_dist_grad(dim, 0);
 			guard_dist_grad = dist_grad(y[i], guard_intersect_inv);
 
-			for (unsigned int j = 0; j < dim; j++) {
-				double dist_gradx_j = 0;
-				for (unsigned int k = 0; k < dim; k++) {
-					dist_gradx_j += guard_dist_grad[k] * expAt(k, j);
-				}
-				//ToDo: Amit: May Need changes
-				deriv[i * dim + j] += dist_gradx_j;
-
+			//for (unsigned int j = 0; j < dim; j++) {
+			double dist_gradx_j = 0;
+			for (unsigned int k = 0; k < dim; k++) {
+				//dist_gradx_j += guard_dist_grad[k] * expAt(k, j);
+				dist_gradx_j += guard_dist_grad[k] * expAt(k, i);
 			}
+			//deriv[i * dim + j] += dist_gradx_j;
+			deriv[i] += dist_gradx_j;
+			//}
 
 			// dxli: add derivative of guard \cup invariant wrt dwell time
 			double dist_gradt = 0;
 			for (unsigned int j = 0; j < dim; j++) {
-				dist_gradt += guard_dist_grad[j] * Axplusb[j];
+				dist_gradt += guard_dist_grad[j] * myAxPlusb[j];
 			}
-			//ToDo: Amit: May Need changes
-			deriv[N * dim + i] += dist_gradt;
+			//deriv[N * dim + i] += dist_gradt;
+			deriv[i] += dist_gradt;
 
 //			cout << "line  949" << endl;
 			assert(y[i].size() == R.Map.size2());
@@ -1251,12 +1265,14 @@ double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &
 //			cout << "line  953" << endl;
 			R.Map.mult_vector(y[i], transform);
 			for (unsigned int j = 0; j < transform.size(); j++)
-				y[i][j] = transform[j] + R.b[j];	//ToDo: Amit: May Need changes
+				y[i][j] = transform[j] + R.b[j];
+
+//ToDo: Amit: Not sure if we need for this function
 
 //			cout << "line  957" << endl;
 			R.Map.multiply(expAt, mapExpAt);
 //			cout << "line  960" << endl;
-			R.Map.mult_vector(Axplusb, mapAxplusb);
+			R.Map.mult_vector(myAxPlusb, mapAxplusb);
 //			cout << "line  962" << endl;
 
 			assert(y[i].size() == R.b.size());
@@ -1265,23 +1281,22 @@ double myobjfuncIterativeNLP(const std::vector<double> &t, std::vector<double> &
 			T_iter++; // Moving to the next transition.
 
 			//compute the Euclidean distance between the next start point and the simulated end point
-			//ToDo: Amit: May Need changes
 			for (unsigned int j = 0; j < dim; j++) {
-				//ToDo: Amit: May Need changes
 				//cost += (y[i][j] - x[(i + 1) * dim + j]) * (y[i][j] - x[(i + 1) * dim + j]);
 				cost += (y[i][j] - x[(i + 1) * dim][j]) * (y[i][j] - x[(i + 1) * dim][j]);
 
-/* Amit Todo:	for (unsigned int k = 0; k < dim; k++) {
-					//ToDo: Amit: May Need changes
-					deriv[i * dim + j] += 2 * (y[i][k] - x[(i + 1) * dim + k]) * mapExpAt(k, j);
-				}
-				if (i != 0) {
-					//ToDo: Amit: May Need changes
-					deriv[i * dim + j] += -2 * (y[(i - 1)][j] - x[i * dim + j]);
-				}
-				//ToDo: Amit: May Need changes
-				deriv[N * dim + i] += 2 * (y[i][j] - x[(i + 1) * dim + j]) * mapAxplusb[j];
-*/
+				for (unsigned int k = 0; k < dim; k++) {
+					//deriv[i * dim + j] += 2 * (y[i][k] - x[(i + 1) * dim + k]) * mapExpAt(k, j);
+					deriv[i] += 2 * (y[i][k] - x[(i + 1) * dim][k]) * mapExpAt(k, j); //Todo need to check deriv[index]
+				 }
+				 if (i != 0) {
+					 //ToDo: need to check deriv[index]
+					 //deriv[i * dim + j] += -2 * (y[(i - 1)][j] - x[i * dim + j]);
+					 deriv[i] += -2 * (y[(i - 1)][j] - x[i * dim][j]);
+				 }
+				 //ToDo: need to check deriv[index]
+				 //deriv[N * dim + i] += 2 * (y[i][j] - x[(i + 1) * dim + j]) * mapAxplusb[j];
+				 deriv[i] += 2 * (y[i][j] - x[(i + 1) * dim][j]) * mapAxplusb[j];
 			}
 		}
 //		cout << "line  979" << endl;
