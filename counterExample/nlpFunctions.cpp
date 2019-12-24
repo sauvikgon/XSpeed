@@ -1067,36 +1067,42 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 // 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
 // Computes the L2 norm or Euclidean distances between the trace end points.
 //-----------------------------------------
-	cout << "Inside myobjfuncIterativeNLP due to call from optimize" << endl;
-	std::vector<double> *x = (std::vector<double>*) my_func_data;
-	cout << "1 success"<<endl;
+	cout << "Inside myobjfuncIterative NLP due to call from optimize" << endl;
+	//Current use std::vector<double> *x = (std::vector<double>*) my_func_data;
+	std::vector<double> *x = reinterpret_cast<std::vector<double>*>(my_func_data);
+	//std::vector<double> *x = (std::vector<double>*) my_func_data;
+
+//	cout << "N=" << N << "   dim=" << dim << endl;
+/*
+
+	cout << "FixedStartPoints are \n";
+	for (unsigned int i = 0; i < N; i++) {
+		for (unsigned int j = 0; j < dim; j++) {
+			cout << x[i][j] << "  ";
+		}
+	}
+	cout << endl;
+	cout << endl;
+*/
+
+
+
+//	cout << "1 success"<<endl;
 //	std::vector<std::vector<double>> x =
 //			*((std::vector<std::vector<double>>*) my_func_data); //N start vectors (fixed-constants)
 
 	/*This is the vector of end-points of N trajectory segments to be computed*/
 	std::vector<std::vector<double> > y(N);
-	cout << "2 success"<<endl;
 	double cost = 0;
 	std::vector<double> deriv(N, 0); // contains the gradient, all initialized to 0. Amit: resize to N ToDo have doubt here
 
 	std::list<transition::ptr>::iterator T_iter = transList.begin();
 	transition::ptr Tptr = *(T_iter);
-	cout << "3 success"<<endl;
 	math::matrix<double> A, expAt, mapExpAt;
-	//std::vector<double> checkthisout(7);
-	cout << "4 success here dim = "<<dim<<"\n";
 	//std::vector<double> Axplusb(dim); //this is causing error
-	std::vector < double > myAxPlusb,test1,test2, test3;
+	std::vector < double > myAxPlusb(dim);
+	//double myAxPlusb[dim];
 
-	cout << "4 1 success here dim = "<<dim<<"\n";
-	test1.resize(dim); //this is causing error
-	cout << "4 2 success here dim = "<<dim<<"\n";
-	test2.resize(dim);
-	cout << "4 3 success here dim = "<<dim<<"\n";
-	test3.resize(dim);
-	cout << "4 success here dim = "<<dim<<"\n";
-	myAxPlusb.resize(dim);
-	cout << "5 success here dim = "<<dim<<endl;
 	std::vector<double> mapAxplusb;
 
 //	std::ofstream myfile;
@@ -1104,14 +1110,14 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 
 	polytope::ptr I;
 
-	cout << "before loop over i" << endl;
 	for (unsigned int i = 0; i < N; i++) {
 
+//		cout << "After 1 loop over i" << endl;
 		// dxli: v is a copy of state variables. (Get the N start vectors)
 		std::vector<double> v(dim, 0);
-
 		for (unsigned int j = 0; j < dim; j++) {
-			v[j] = x[i * dim][j];
+			v[j] = x[i][j];
+			//v[j] = x[i * dim+j];
 		}
 
 		int loc_index = locIdList[i]; //global variable populated already
@@ -1127,17 +1133,15 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 		// patch for constant dynamics
 
 		if (d.isEmptyMatrixA) {
-			A = math::matrix<double>(dim, dim);
+			A.resize(dim,dim);	// = math::matrix<double>(dim, dim);
 			A.clear(); //Amit: writes zero for all elements
 		} else
 			A = d.MatrixA;
 		// end of patch
-
-//		cout << "line 845" << endl;
 		assert(d.C.size() == dim);
 
-		// dxli: some initialization for calculating derivatives
 		math::matrix<double> At(A);
+	//	cout << "7Success" << endl;
 		At.scalar_multiply(t[i]);
 		At.matrix_exponentiation(expAt);
 
@@ -1146,61 +1150,43 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 			myAxPlusb[j] = myAxPlusb[j] + d.C[j];
 		}
 
+//		cout << "8Success" << endl;
 		//		For validation, the distance of trace end points from the invariant is
 		//		added to the cost
-		/*
-		 * In Dongxu's version this code is commented
-		 * *******Start*******
-		 */
+/*
 		std::vector<double> inv_dist_grad(dim, 0);
 
 		cost += I->point_distance(y[i]); // end point distance to invariant added to cost; Soft-Constriant check on inv
-
+//		cout << "9Success" << endl;
 		inv_dist_grad = dist_grad(y[i], I);
+//		cout << "8Success" << endl;
 
-		//for (unsigned int j = 0; j < dim; j++) {
-		double dist_gradx_j = 0;
-		for (unsigned int k = 0; k < dim; k++) {
-			//  dist_gradx_j += inv_dist_grad[k] * expAt(k, j);
-			dist_gradx_j += inv_dist_grad[k] * expAt(k, i); //Todo discuss about j replacing to i
-		}
-		//deriv[i * dim + j] += dist_gradx_j;
-		deriv[i] += dist_gradx_j;
-		//}
+//		cout << "9Success" << endl;
 		//	add the cost gradient w.r.t traj segment's dwell time
 		double dist_gradt = 0;
 		for (unsigned int j = 0; j < dim; j++) {
 			dist_gradt += inv_dist_grad[j] * myAxPlusb[j];
 		}
+		//cout << "12Success" << endl;
 		//deriv[N * dim + i] += dist_gradt;
-		deriv[i] += dist_gradt;
+		deriv[i] = dist_gradt;
 
-		/*
-		 * In Dongxu's version this code is commented
-		 * *******End*******
-		 */
+*/
+
 
 //end of validation logic
 		if (i == N - 1) {
 			// compute the distance of this endpoint with the forbidden polytope \cap invariant (the segment end point must lie
 			// in the intersection of the bad_set and the last location invariant).
 
-//			cout << "line  891" << endl;
+		//	cout << "Inside Last transition 1" << endl;
 			cost += bad_poly->point_distance(y[N - 1]); // end point distance to bad-set added to cost; Soft-Constriant check on bad-set
-
+			cout<<"Inside bad-set = "<< bad_poly->point_distance(y[N - 1])<<endl;
 			std::vector<double> badpoly_dist_grad(dim, 0);
 
 			badpoly_dist_grad = dist_grad(y[N - 1], bad_poly);
-
-			//for (unsigned int j = 0; j < dim; j++) {
-			double dist_gradx_j = 0;
-			for (unsigned int k = 0; k < dim; k++) {
-				//dist_gradx_j += badpoly_dist_grad[k] * expAt(k, j);
-				dist_gradx_j += badpoly_dist_grad[k] * expAt(k, i);
-			}
-			//deriv[(N - 1) * dim + j] += dist_gradx_j;
-			deriv[i] += dist_gradx_j;
-			//}
+		//	cout << "Inside Last transition 2" << endl;
+		//	cout << "Inside Last transition 3" << endl;
 
 			//	add the cost gradient w.r.t last traj segment's dwell time
 			double dist_gradt = 0;
@@ -1208,28 +1194,31 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 				dist_gradt += badpoly_dist_grad[j] * myAxPlusb[j];
 			}
 			//deriv[N * dim + N - 1] += dist_gradt;
-			deriv[i] += dist_gradt;
-
+			deriv[i] = dist_gradt;
+		//	cout << "Inside Last transition 4" << endl;
 			break;
 		} else {
+	//		cout <<"         Loop "<<i << "     \n";
 //			cout << "line  911" << endl;
 			polytope::ptr g;
 			Assign R;
-			math::matrix<double> mapExpAt(expAt);
+
 			// assign the transition pointer
 			Tptr = *(T_iter);
 			// assignment of the form: Rx + w
 
 			R = Tptr->getAssignT();
+
 			//guard as a polytope
 			g = Tptr->getGaurd();
+	//		cout << "A Success" << endl;
 
-			std::vector<double> mapderiv(myAxPlusb);
 
 			// guard \cap invariant distance, to address Eq. (12) in CDC 13' paper
 			polytope::ptr guard_intersect_inv;
 			guard_intersect_inv = I->GetPolytope_Intersection(g);
 
+	//		cout << "B Success" << endl;
 			// plot the guard intersection with location invariant
 //			if(loc_index == 7){
 //				guard_intersect_inv->print2file("./guard_intersect.txt",0,1);
@@ -1237,29 +1226,28 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 			//-----------------------------------------------------
 			double guard_dist = guard_intersect_inv->point_distance(y[i]);
 			cost += guard_dist;
+			cout <<"Point y["<<i<<"] is inside ="<<guard_dist<<endl;
 
+
+	//		cout << "C Success" << endl;
 			std::vector<double> guard_dist_grad(dim, 0);
 			guard_dist_grad = dist_grad(y[i], guard_intersect_inv);
 
-			//for (unsigned int j = 0; j < dim; j++) {
-			double dist_gradx_j = 0;
-			for (unsigned int k = 0; k < dim; k++) {
-				//dist_gradx_j += guard_dist_grad[k] * expAt(k, j);
-				dist_gradx_j += guard_dist_grad[k] * expAt(k, i);
-			}
-			//deriv[i * dim + j] += dist_gradx_j;
-			deriv[i] += dist_gradx_j;
-			//}
+	//		cout << "D 1 Success" << endl;
+
+	//		cout << "D Success" << endl;
 
 			// dxli: add derivative of guard \cup invariant wrt dwell time
 			double dist_gradt = 0;
 			for (unsigned int j = 0; j < dim; j++) {
 				dist_gradt += guard_dist_grad[j] * myAxPlusb[j];
 			}
-			//deriv[N * dim + i] += dist_gradt;
-			deriv[i] += dist_gradt;
 
-//			cout << "line  949" << endl;
+	//		cout << "E Success" << endl;
+			//deriv[N * dim + i] += dist_gradt;
+			deriv[i] = dist_gradt;
+
+//cout << "y[i].size"<<y[i].size()<<"   R.map.size2()="<<R.Map.size2() << endl;
 			assert(y[i].size() == R.Map.size2());
 			std::vector<double> transform(y[i].size(), 0);
 //			cout << "line  953" << endl;
@@ -1267,10 +1255,9 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 			for (unsigned int j = 0; j < transform.size(); j++)
 				y[i][j] = transform[j] + R.b[j];
 
-//ToDo: Amit: Not sure if we need for this function
-
+	//		cout << "F Success" << endl;
 //			cout << "line  957" << endl;
-			R.Map.multiply(expAt, mapExpAt);
+
 //			cout << "line  960" << endl;
 			R.Map.mult_vector(myAxPlusb, mapAxplusb);
 //			cout << "line  962" << endl;
@@ -1280,23 +1267,15 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 //			cout << "line  962" << endl;
 			T_iter++; // Moving to the next transition.
 
+	//		cout << "G Success" << endl;
 			//compute the Euclidean distance between the next start point and the simulated end point
 			for (unsigned int j = 0; j < dim; j++) {
 				//cost += (y[i][j] - x[(i + 1) * dim + j]) * (y[i][j] - x[(i + 1) * dim + j]);
-				cost += (y[i][j] - x[(i + 1) * dim][j]) * (y[i][j] - x[(i + 1) * dim][j]);
-
-				for (unsigned int k = 0; k < dim; k++) {
-					//deriv[i * dim + j] += 2 * (y[i][k] - x[(i + 1) * dim + k]) * mapExpAt(k, j);
-					deriv[i] += 2 * (y[i][k] - x[(i + 1) * dim][k]) * mapExpAt(k, j); //Todo need to check deriv[index]
-				 }
-				 if (i != 0) {
-					 //ToDo: need to check deriv[index]
-					 //deriv[i * dim + j] += -2 * (y[(i - 1)][j] - x[i * dim + j]);
-					 deriv[i] += -2 * (y[(i - 1)][j] - x[i * dim][j]);
-				 }
-				 //ToDo: need to check deriv[index]
-				 //deriv[N * dim + i] += 2 * (y[i][j] - x[(i + 1) * dim + j]) * mapAxplusb[j];
-				 deriv[i] += 2 * (y[i][j] - x[(i + 1) * dim][j]) * mapAxplusb[j];
+				//cost += (y[i][j] - x[(i + 1) * dim][j]) * (y[i][j] - x[(i + 1) * dim][j]);
+				cost += (y[i][j] - x[(i + 1)][j]) * (y[i][j] - x[(i + 1)][j]);
+				double gaps = (y[i][j] - x[(i + 1)][j]) * (y[i][j] - x[(i + 1)][j]);
+				cout<<"Gaps between points = "<< gaps <<endl;
+				deriv[i] += 2 * (y[i][j] - x[(i + 1)][j]) * mapAxplusb[j];
 			}
 		}
 //		cout << "line  979" << endl;

@@ -714,10 +714,17 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		locIdList[i] = *(d.begin());
 	}
 
+
+	std::list<polytope::ptr> polys;
+	polytope::ptr guard;
+	std::list<transition::ptr>::iterator it = transList.begin();
+	transition::ptr T;
+
+
 	startPoint = X + Y;
 	for (unsigned int i = 0; i < N; i++) {
 		Dynamics D;
-		math::matrix<double> expAt; // To contrain the e^At matrix, for the fixed time.
+		math::matrix<double> expAt; // To contain the e^At matrix, for the fixed time.
 		unsigned int loc_id = locIdList[i];
 		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
 		D = ha_loc_ptr->getSystem_Dynamics();
@@ -727,26 +734,55 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		std::vector<double> v = ODESol_inhomogenous(D, dwell_times[i]);
 
 		// Using expAt and v, add the constraints on the end-points to the lp
+		/*
+		 * Till here we have x1' = expAt x + v
+		 * Now to obtain new start-point for the next transition we need to perform the mapping operation
+		 * This gives x2 = Rx' + w; where x2 is the new start-point with R as the mapping matrix and w the mapping constant
+		 * xdash = R(expAt x + v) + w
+		 * xdash = R expAt x + R v + w
+		 * Here R and expAt is matrix multiplication giving constant matrix and v,w are constant vectors
+		 * So, we first solve these constant terms and then form equations
+		 */
+
+		math::matrix<double> RexpAt;//matrix multiplication, RexpAt = R.expAt
+		std::vector<double> Rvplusw(dim); // Rvplusw = R.v + w
+		Assign R;
+		if (i != (N - 1)) {	//For all transition except the last perform mapping operation
+			// assign the transition pointer
+			T = *(it);	//runs based on the for-i-loop except the last iteration
+			// assignment of the form: Rx + w
+			R = T->getAssignT();
+			R.Map.multiply(expAt, RexpAt);
+			R.Map.mult_vector(v, Rvplusw);
+			for (unsigned int j = 0; j < dim; j++) {
+				Rvplusw[j] += R.b[j];
+			}
+
+		}else{ //i == (N-1)  the last transition don't need mapping
+			RexpAt = expAt;
+			Rvplusw = v;
+		}
 
 		for (unsigned int j = 0; j < dim; j++) {
-			// iterate over each row of the e^(At)-matrix (which is equal to dim)
 			newCol = X + Y + i * dim + j;
 			A(newRow, newCol) = 1; //first inequality
-			b[newRow] = v[j];
-			for (unsigned int k = 0; k < expAt.size2(); k++) {
+			b[newRow] = Rvplusw[j];
+			for (unsigned int k = 0; k < RexpAt.size2(); k++) {
 				newCol = X + i * dim + k;
-				A(newRow, newCol) = -1 * expAt(j, k); //first inequality
+				A(newRow, newCol) = -1 * RexpAt(j, k); //first inequality
 
-				A(newRow + 1, newCol) = expAt(j, k); //second inequality
+				A(newRow + 1, newCol) = RexpAt(j, k); //second inequality
 			}
 
 			newRow++;
-
 			newCol = X + Y + i * dim + j;
 			A(newRow, newCol) = -1;  //second inequality
-			b[newRow] = -1 * v[j];
+			b[newRow] = -1 * Rvplusw[j];
 			newRow++;
-		}
+		}	// Increment the transition to the next in the symbolic path
+
+		if (it != transList.end())
+			it++;
 	}
 //	check=2*X1+2*X2;
 //	std::cout<<"6. Check = "<< check<<" newRow = "<< newRow <<std::endl;
@@ -760,14 +796,13 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	for (unsigned int i = 0; i < X; i++) {
 		lp_fixed_time.set_obj_coeff(i, 1);
 	}
-/*
-	cout << "A matrix\n";
+
+	/*cout << "A matrix\n";
 	cout << A;
 	cout << endl << "Bound Vector b is\n";
 	for (unsigned int i = 0; i < b.size(); i++) {
 		cout << b[i] << endl;
-	}
-*/
+	}*/
 
 	return lp_fixed_time; // returns the built lp.
 }
@@ -779,10 +814,10 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
  * keeping the dwell times of the trajectory segments as variable. The start points
  * are passed as an argument to this function.
  */
-nlopt::opt abstractCE::build_nlp(double tolerance,
-		std::vector<double> fixedStartPoint[]) {
+ void abstractCE::build_nlp(nlopt::opt & myoptStartPointFixed) {
 	//1. Generate an nlopt object with the hard constraints on dwell times
 	//2. Objective function as distance(startPts, endPts) + dp(endPts,Reach Intersects Guard) + dp(endPts, Bad_set)
+
 
 	symbolic_states::const_ptr S = get_first_symbolic_state();
 	dim = S->getInitialPolytope()->getSystemDimension();
@@ -799,18 +834,8 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
-		std::cout << locIdList[i] << " | ";
+	//	std::cout << locIdList[i] << " | ";
 	}
-
-	unsigned int optD = N; //each segment will have a different dwell time
-	std::cout << "nlopt problem dimension (number of Dwell Time) = " << optD
-			<< std::endl;
-//	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
-//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
-	nlopt::opt myoptStartPointFixed(nlopt::LD_MMA, optD); // derivative based
-//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
-
-// 	local optimization routine
 
 	polytope::ptr P;
 
@@ -818,12 +843,11 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 
 	//std::vector<double> solutionsTau(optD, 0);
 
-	std::vector<double> lb_t(optD), ub_t(optD);
-	std::vector<double> t(optD, 0);
+	std::vector<double> lb_t(N), ub_t(N);
+	std::vector<double> t(N, 0);
 	double minf = 1e10;
 
-	unsigned int t_index =
-			get_first_symbolic_state()->getInitialPolytope()->get_index("t");
+	unsigned int t_index = get_first_symbolic_state()->getInitialPolytope()->get_index("t");
 
 	assert((t_index >= 0) && (t_index < dim));
 //	cout <<"1 successfull!! \n";
@@ -881,21 +905,6 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 
 			P = P->GetPolytope_Intersection(bad_poly);
 //			cout <<"3 successfull!! \n";
-			lp_solver lp(GLPK_SOLVER);
-			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-					P->getInEqualitySign());
-//			cout <<"10 successfull!! \n";
-			try {
-				max = lp.Compute_LLP(dmax);
-			} catch (...) {
-				max = 999; // large positive value
-			}
-			try {
-				min = -1 * lp.Compute_LLP(dmin);
-			} catch (...) {
-				min = 0; // a minimum of possible value for time
-			}
-//			cout <<"11 successfull!! \n";
 		} else {
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);	//runs based on the for-i-loop except the last iteration
@@ -915,7 +924,7 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 				P = polys.front();
 			// Now intersect P with guard
 			P = P->GetPolytope_Intersection(guard);
-//			cout <<"5 successfull!! \n";
+
 		}
 
 		lp_solver lp(GLPK_SOLVER);
@@ -959,21 +968,37 @@ nlopt::opt abstractCE::build_nlp(double tolerance,
 		//t[i] = (lb_t[i] + ub_t[i]) / 2;	//setting some initial \tau value for call to optimize()
 	}
 
-	unsigned int maxeval = 20000;
-	myoptStartPointFixed.set_maxeval(maxeval);
-	myoptStartPointFixed.set_stopval(tolerance);
-	myoptStartPointFixed.set_xtol_rel(1e-4);
 
 	myoptStartPointFixed.set_lower_bounds(lb_t);
 	myoptStartPointFixed.set_upper_bounds(ub_t);
 
-	myoptStartPointFixed.set_min_objective(myobjfuncIterativeNLP,
-			fixedStartPoint);
+/*
+	cout << endl << "Upper Bound Vector b2 is\n";
+	for (unsigned int i = 0; i < ub_t.size(); i++) {
+		cout << ub_t[i] << endl;
+	}
+	cout << endl << "Lower Bound Vector b2 is\n";
+	for (unsigned int i = 0; i < lb_t.size(); i++) {
+		cout << lb_t[i] << endl;
+	}
+*/
+
+/*
+	cout<<"Before Call FixedStartPoints are \n";
+	for (int i=0;i<N;i++){
+		for (int j=0;j<fixedStartPoint[i].size();j++){
+			cout << fixedStartPoint[i][j] <<"  ";
+		}
+	}
+	cout<<endl;
+*/
+
+
 
 //	myoptStartPointFixed.optimize(t, minf);
 //
 //	solutionsTau = t;
-	return myoptStartPointFixed; //myoptStartPointFixed object
+	//return myoptStartPointFixed; //myoptStartPointFixed object
 //	return t;
 
 }
@@ -1025,6 +1050,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	 */
 
 	std::vector<double> x0[N]; // to contain the fixed start-points.
+/*
+cout <<"What is N="<<N <<"   ";
+x0[0].resize(3);
+cout <<"What is x0.size="<< x0->size() <<"   ";
+*/
 
 	std::vector<double> lb_t(N), ub_t(N);
 
@@ -1135,35 +1165,60 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			it++;
 	}
 
+
 	double minf = 1e10; // a large value to start
-	nlopt::opt myoptDwellTime; // nlp object;
+	//nlopt::opt myoptDwellTime; // nlp object;
+	unsigned int optD = N;
+	nlopt::opt myoptDwellTime(nlopt::LD_MMA, optD); // derivative based
+
+	unsigned int maxeval = 400;//20000;
+	myoptDwellTime.set_maxeval(maxeval);
+	myoptDwellTime.set_stopval(tolerance);
+	myoptDwellTime.set_xtol_rel(1e-4);
+
+
 	unsigned int X1 = 2 * dim * (N - 1); //list of new variables
 	unsigned int nlp_status;
+	unsigned int maxIterations = 2, maxiter=0;
+	//tolerance = 0.00001;
 	try {
 		while (minf > tolerance) {
-
+			maxiter++;
 			//solve the lp with fixed times
 			lp_solver fixed_time_Lp = build_lp(dwell_times);
+			cout <<"Dwell time\n";
+			for (unsigned int j = 0; j < dwell_times.size(); j++) {
+				cout << dwell_times[j] <<"  ";
+			}
+			cout<<endl;
+
 			double res = fixed_time_Lp.solve();
 			std::vector<double> x = fixed_time_Lp.get_sv();
 			//From this vector, get the N vectors in x0 vector
-			cout << "Printing x0[i][j] (LP res = )"<< res <<" \n";
-			for (int i = 0; i < N; i++) {
+			//cout << "Creating and Printing x0[i][j] (LP res = )"<< res <<" \n";
+			for (unsigned int i = 0; i < N; i++) {
 				x0[i].resize(dim);	//declaring each array element its size
-				for (int j = 0; j < dim; j++) {
+				for (unsigned int j = 0; j < dim; j++) {
 					x0[i][j] = x[X1 + i * dim + j];
-					cout << x0[i][j] <<"  ";
+				//	cout << x0[i][j] <<"  ";
 				}
+			//	cout<<endl;
 			}
-			cout<<endl;
+
+			cout <<"GLPK Solution res  = "<<res<< "\n";
 			if (res < tolerance)
 				break;
 
 			// solve the nlp with fixed start points.
-			myoptDwellTime = build_nlp(tolerance, x0);
+			build_nlp(myoptDwellTime); // Build nlp with bounds on dwell-time for each transitions
 			cout <<"build_nlp successfull!! \n";
+			myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
+			cout <<"After call to nlp Optimize \n";
+
 			nlp_status = myoptDwellTime.optimize(dwell_times, minf);
-			cout <<"nlp_optimize successfull!! \n";
+			cout <<"nlp_optimize successfull  minf = "<<minf<< "\n";
+			if (maxiter==maxIterations)
+				break;
 		}
 
 		if (nlp_status == NLOPT_SUCCESS)
@@ -1182,13 +1237,14 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 	std::cout << "nlopt returned min : " << minf << "\n";
 
+	tolerance = 1.1; //Just to see all traces
+
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
 		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
 		return cexample;
 	} else {
-		// Todo: construct a concrete ce from the opt. result., Rajarshi to code
 		std::cout << "nlopt returned min : " << minf << "\n";
 		std::cout << "Length of abstract counter example:" << N << "\n";
 

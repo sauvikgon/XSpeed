@@ -191,7 +191,7 @@ private:
 
 	lp_solver build_lp(std::vector<double> dwell_times);
 
-	nlopt::opt build_nlp(double tolerance, std::vector<double> fixedStartPoint[]);
+	void build_nlp(nlopt::opt &);
 	/*
 	 * creates an nlp obj for the trajectory splicing problem
 	 */
