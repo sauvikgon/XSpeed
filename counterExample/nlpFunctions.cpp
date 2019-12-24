@@ -1094,7 +1094,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 	/*This is the vector of end-points of N trajectory segments to be computed*/
 	std::vector<std::vector<double> > y(N);
 	double cost = 0;
-	std::vector<double> deriv(N, 0); // contains the gradient, all initialized to 0. Amit: resize to N ToDo have doubt here
+	std::vector<double> deriv(N, 0); // contains the gradient, all initialized to 0.
 
 	std::list<transition::ptr>::iterator T_iter = transList.begin();
 	transition::ptr Tptr = *(T_iter);

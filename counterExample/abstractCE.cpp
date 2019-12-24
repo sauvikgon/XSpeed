@@ -1179,7 +1179,7 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 
 	unsigned int X1 = 2 * dim * (N - 1); //list of new variables
 	unsigned int nlp_status;
-	unsigned int maxIterations = 2, maxiter=0;
+	unsigned int maxIterations = 100, maxiter=0;
 	//tolerance = 0.00001;
 	try {
 		while (minf > tolerance) {
@@ -1211,9 +1211,9 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 
 			// solve the nlp with fixed start points.
 			build_nlp(myoptDwellTime); // Build nlp with bounds on dwell-time for each transitions
-			cout <<"build_nlp successfull!! \n";
+			//cout <<"build_nlp successfull!! \n";
 			myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
-			cout <<"After call to nlp Optimize \n";
+			//cout <<"After call to nlp Optimize \n";
 
 			nlp_status = myoptDwellTime.optimize(dwell_times, minf);
 			cout <<"nlp_optimize successfull  minf = "<<minf<< "\n";
