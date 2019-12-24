@@ -34,7 +34,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-//		set_nav04_timed(ha, init_state, reach_parameters);
+		set_nav04_timed(ha, init_state, reach_parameters);
 		//Set_NavTimedEpsilonRelaxGuard(ha, init_state, reach_parameters);
 		//SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
 	}

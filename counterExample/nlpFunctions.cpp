@@ -1067,7 +1067,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 // 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
 // Computes the L2 norm or Euclidean distances between the trace end points.
 //-----------------------------------------
-	cout << "Inside myobjfuncIterative NLP due to call from optimize" << endl;
+//	cout << "Inside myobjfuncIterative NLP due to call from optimize" << endl;
 	//Current use std::vector<double> *x = (std::vector<double>*) my_func_data;
 	std::vector<double> *x = reinterpret_cast<std::vector<double>*>(my_func_data);
 	//std::vector<double> *x = (std::vector<double>*) my_func_data;
@@ -1181,7 +1181,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 
 		//	cout << "Inside Last transition 1" << endl;
 			cost += bad_poly->point_distance(y[N - 1]); // end point distance to bad-set added to cost; Soft-Constriant check on bad-set
-			cout<<"Inside bad-set = "<< bad_poly->point_distance(y[N - 1])<<endl;
+//			cout<<"Inside bad-set = "<< bad_poly->point_distance(y[N - 1])<<endl;
 			std::vector<double> badpoly_dist_grad(dim, 0);
 
 			badpoly_dist_grad = dist_grad(y[N - 1], bad_poly);
@@ -1226,7 +1226,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 			//-----------------------------------------------------
 			double guard_dist = guard_intersect_inv->point_distance(y[i]);
 			cost += guard_dist;
-			cout <<"Point y["<<i<<"] is inside ="<<guard_dist<<endl;
+//			cout <<"Point y["<<i<<"] is inside ="<<guard_dist<<endl;
 
 
 	//		cout << "C Success" << endl;
@@ -1273,8 +1273,8 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 				//cost += (y[i][j] - x[(i + 1) * dim + j]) * (y[i][j] - x[(i + 1) * dim + j]);
 				//cost += (y[i][j] - x[(i + 1) * dim][j]) * (y[i][j] - x[(i + 1) * dim][j]);
 				cost += (y[i][j] - x[(i + 1)][j]) * (y[i][j] - x[(i + 1)][j]);
-				double gaps = (y[i][j] - x[(i + 1)][j]) * (y[i][j] - x[(i + 1)][j]);
-				cout<<"Gaps between points = "<< gaps <<endl;
+//				double gaps = (y[i][j] - x[(i + 1)][j]) * (y[i][j] - x[(i + 1)][j]);
+//				cout<<"Gaps between points = "<< gaps <<endl;
 				deriv[i] += 2 * (y[i][j] - x[(i + 1)][j]) * mapAxplusb[j];
 			}
 		}

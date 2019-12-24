@@ -551,7 +551,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	//num_constr = (2 * dim * N) + 2*N*dim + (2 * dim * (N-1) + (N*dim*2));
 	unsigned int X1 = 2 * dim * (N - 1);
 	unsigned int X2 = 2 * dim * N; //bounds on each variable of the start-point for N segments;
-	num_constr = X1 + X1 + X2 + X2;
+	num_constr = X1 + X1 + X2 + X2 + 2*dim;
 
 	math::matrix<double> A(num_constr, num_vars, 0);
 
@@ -787,6 +787,66 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 //	check=2*X1+2*X2;
 //	std::cout<<"6. Check = "<< check<<" newRow = "<< newRow <<std::endl;
 	assert(newRow == (2 * X1 + 2 * X2));
+
+
+
+
+
+
+
+
+
+	/*
+	 * Adding Constraints on Bad-set, the last point must lie inside the bad set.
+	 */
+	lp_solver lp(GLPK_SOLVER);
+	lp.setConstraints(bad_poly->getCoeffMatrix(), bad_poly->getColumnVector(),
+			bad_poly->getInEqualitySign());
+	// we add bound constraints on
+	std::vector<double> dir(dim, 0);
+	double min, max;
+	for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
+	{
+		dir[j] = -1;
+		try {
+			min = -1 * lp.Compute_LLP(dir);
+		} catch (...) {
+			// assuming that the exception is caused due to an unbounded solution
+			min = -999;	// an arbitrary value set as solution
+		}
+		dir[j] = 1;
+		try {
+			max = lp.Compute_LLP(dir);
+		} catch (...) {
+			// assuming that the exception is caused due to an unbounded solution
+			max = +999; // an arbitrary value set as solution
+		}
+
+		newCol = (X + Y) + (N-1) * dim + j;
+		A(newRow, newCol) = 1;
+		b[newRow] = max;
+
+		newRow++;
+
+		A(newRow, newCol) = -1;
+		b[newRow] = -1 * min;
+
+		dir[j] = 0;
+		newRow++;
+	}
+
+assert (newRow==((2 * X1 + 2 * X2) + 2 * dim));
+
+
+
+
+
+
+
+
+
+
+
 
 	// Building the lp problem with the created A and b values
 
@@ -1179,7 +1239,7 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 
 	unsigned int X1 = 2 * dim * (N - 1); //list of new variables
 	unsigned int nlp_status;
-	unsigned int maxIterations = 100, maxiter=0;
+	unsigned int maxIterations = 1000, maxiter=0;
 	//tolerance = 0.00001;
 	try {
 		while (minf > tolerance) {
