@@ -42,10 +42,10 @@
 #include "../../utilities/Template_Polyhedra.h"
 #include "application/sf_utility.h"
 
-#define CE_ALGO_TYPE   1 // macro to choose algo_type of ce search.
+#define CE_ALGO_TYPE   3 // macro to choose algo_type of ce search.
 						 // 1 enables search of ce to forbidden region using flowpipe constraints (FC).
 						 // 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
-						 // 3 gen_concreteCE_iterative 			: Dongxu
+						 // 3 gen_concreteCE_iterative 			: Updated by Rajarshi & Amit
 						 // 4 gen_concreteCE_NLP_LP				: Dongxu
 						 // 5 gen_concreteCE_NLP_LP_softconstr 	: Dongxu
 

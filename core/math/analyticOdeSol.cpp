@@ -85,7 +85,7 @@ std::vector<double> ODESol(std::vector<double> x0, const Dynamics& D, double tim
 			res1[i] = res1[i] + res2[i];
 		}
 		// debug
-		//std::cout << "Implemented trance end point for non-invertible matrices\n";
+		//std::cout << "Implemented trace end point for non-invertible matrices\n";
 		return res1;
 	}
 	std::vector<double> minusV(dim);
@@ -147,7 +147,7 @@ std::vector<double> ODESol_inhomogenous(const Dynamics& D, double time){
 	std::vector<double> res2(dim), res3(dim);
 
 	math::matrix<double> AInv(dim,dim);
-	if(!A.inverse(AInv)) // meaning that the matrix A is singular,i.e., not invertible
+	if(!A.inverse(AInv)) // meaning that the matrix A is singular, i.e., not invertible
 	{
 		// compute the expression A^-1 (e^At - I) alternatively as a sub-matrix of the exp(M),
 		// as shown in the SpaceEx paper, page 8, phi_1.
@@ -182,7 +182,7 @@ std::vector<double> ODESol_inhomogenous(const Dynamics& D, double time){
 		}
 		phi.mult_vector(D.C,res2);
 		// debug
-		//std::cout << "Implemented trance end point for non-invertible matrices\n";
+		//std::cout << "Implemented trace end point for non-invertible matrices\n";
 		return res2;
 	}
 	std::vector<double> minusV(dim);

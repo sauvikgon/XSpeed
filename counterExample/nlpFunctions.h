@@ -52,6 +52,8 @@ double myobjfuncOnDwellTime(const std::vector<double> &x, std::vector<double> &g
 
 double myobjfuncOnStateVars(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
+//Object function for splicing with Iterative LP-NLP
+double myobjfuncIterativeNLP(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
 
 

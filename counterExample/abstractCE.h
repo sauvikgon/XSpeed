@@ -176,26 +176,27 @@ private:
 	 */
 	concreteCE::ptr gen_concreteCE(double tolerance, const std::list<refinement_point>& refinements);
 
-	/**
-	 * Returns an instance of the concrete counter-example, if it exists, using mixed NLP-LP problem
-	 */
-	concreteCE::ptr gen_concreteCE_NLP_LP(double tolerance, const std::list<refinement_point>& refinements);
-
-	lp_solver construct_LP(unsigned int lpDim, std::vector<double> &t, math::matrix<double> lp_coeff, std::vector<double> lp_col);
-
 	void construct_bound_constraints(math::matrix<double> &coeff_mat, std::vector<double> &col, std::vector<double> lb, std::vector<double> ub, unsigned int dim);
 
-	concreteCE::ptr gen_concreteCE_NLP_LP_softconstr(double tolerance, const std::list<refinement_point>& refinements);
-	lp_solver construct_LP_softconstr(unsigned int lpDim, std::vector<double> &t, math::matrix<double> lp_coeff, std::vector<double> lp_col);
 
 	/**
 	 * Returns an instance of the concrete counter-example, if it exists, using NLP and HA given constraints
 	 */
 	concreteCE::ptr gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements);
 
+	/**
+	 * Interface for solving trajectory splicing with LP-NLP iterations.
+	 */
 	concreteCE::ptr gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements);
 
 	lp_solver build_lp(std::vector<double> dwell_times);
+
+	void build_nlp(nlopt::opt &);
+	/*
+	 * creates an nlp obj for the trajectory splicing problem
+	 */
+	//nlopt::opt build_nlp(std::vector<double> x0[]);
+
 };
 
 

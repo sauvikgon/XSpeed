@@ -241,6 +241,9 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 					bool continue_search = this->gen_counter_example(abst_ce,CE_ALGO_TYPE);
 
+
+
+
 					std::cout << "debug print\n" << std::endl;
 
 					if(continue_search == false) { // This status says whether to continue searching for further abstract paths or to stop

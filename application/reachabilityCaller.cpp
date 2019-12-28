@@ -45,4 +45,3 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 		Symbolic_states_list = reach.reachComputeAsynBFS(ce_candidates);
 	}
 }
-
