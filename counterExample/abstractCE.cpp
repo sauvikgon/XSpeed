@@ -135,6 +135,7 @@ bool abstractCE::filter(std::vector<unsigned int> template_seq){
  *
  * @Rajarshi
  * 28th January 2016
+ * The approach FC in the HSCC 2019 Paper
  */
 concreteCE::ptr abstractCE::gen_concreteCE(double tolerance, const std::list<refinement_point>& refinements) {
 
@@ -1836,10 +1837,10 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times)
 		// Need the starting point value for x_i's to compute x*_i's
 		//Once the endPts vector is computed, we can then create the constraints for the global opt.
 
-		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
+		/*for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
 		{
 			//endPts[j]
-		}
+		}*/
 	}
 
 
@@ -2051,6 +2052,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance, const std
 
 /**
  * Generate concrete trajectory using splicing with NLP problem (Zutchi, Sankaranarayanan's  Idea)
+ * The approach WoFC in the HSCC 2019 Paper
  */
 concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements) {
 	//	 Generate an nlopt object with the constraints defined by the Abstract
