@@ -11,6 +11,7 @@
 
 
 #include "../core/math/matrix.h"
+#include "../application/DataStructureDirections.h"
 
 #define VALIDATION
 
@@ -56,5 +57,6 @@ double myobjfuncOnStateVars(const std::vector<double> &x, std::vector<double> &g
 double myobjfuncIterativeNLP(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
 
+std::vector<double> firstprinciple(std::vector<double> x, Dynamics D, double time, double delta_h);
 
 #endif /* nlpFunctions.h */

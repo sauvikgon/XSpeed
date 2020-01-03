@@ -576,9 +576,9 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	unsigned int newRow = X1, newCol = 0;
 	//1st Part: constrs only on the columns related to p' and p''
 	for (unsigned int i = 0; i < (N - 1); i++) // iterate over (N-1) splicing. Each splice has dim number of absolute term
-			{
+	{
 		for (unsigned int j = 0; j < dim; j++) // for each dimension or absolute term 2 new variables
-				{
+		{
 			//for (unsigned int k = 0; k < 2; k++)	//p' and p''
 			//{
 			newCol = i * 2 * dim + j * 2 + 0; //k=0
@@ -603,9 +603,9 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	//2nd Part: constrs only on the column related to the start-points involved in splice distance computation term
 	unsigned int startPoint = X;
 	for (unsigned int i = 0; i < (N - 1); i++) // iterate over (N-1) transitions but access only the start-points from 2nd transition or (i+1)th transition
-			{
+	{
 		for (unsigned int j = 0; j < dim; j++) // for each dimension
-				{
+		{
 			newCol = startPoint + (i + 1) * dim + j;
 			A(newRow, newCol) = -1;
 
@@ -652,7 +652,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	//cout<<"N="<<N<<" Dim="<<dim<<" \n";
 	startPoint = X;
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
-			{
+	{
 		S = get_symbolic_state(i);
 		polytope::ptr P = S->getInitialPolytope();
 
@@ -733,7 +733,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		// Now, we calculate v = A^{-1}.(e^{At} - I)* D.C
 		std::vector<double> v = ODESol_inhomogenous(D, dwell_times[i]);
 
-		// Using expAt and v, add the constraints on the end-points to the lp
+		// Using expAt and v, add the constraints on the end-points to the LP
 		/*
 		 * Till here we have x1' = expAt x + v
 		 * Now to obtain new start-point for the next transition we need to perform the mapping operation
@@ -757,8 +757,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 			for (unsigned int j = 0; j < dim; j++) {
 				Rvplusw[j] += R.b[j];
 			}
-
-		}else{ //i == (N-1)  the last transition don't need mapping
+		} else { //i == (N-1)  the last transition don't need mapping
 			RexpAt = expAt;
 			Rvplusw = v;
 		}
@@ -773,7 +772,6 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 
 				A(newRow + 1, newCol) = RexpAt(j, k); //second inequality
 			}
-
 			newRow++;
 			newCol = X + Y + i * dim + j;
 			A(newRow, newCol) = -1;  //second inequality
@@ -798,10 +796,36 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 
 	/*
 	 * Adding Constraints on Bad-set, the last point must lie inside the bad set.
+	 *
+	 * Note: new bad set should be, (Flowpipe intersection with Invariant) followed by intersection with the supplied bad set.
+	 * This step is crucial for benchmarks such as navigation.
+	 *
 	 */
+
+// *********************** Taking care of bad set on boundaries with the next location
+	bool aggregation=true;
+	S = get_symbolic_state(N - 1);
+	polytope::ptr P;
+	unsigned int loc_id = locIdList[N-1];	//last location
+	location::ptr ha_loc_ptr = HA->getLocation(loc_id);
+	polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+
+	//bad_poly = bad_poly->GetPolytope_Intersection(loc_inv); //Invariant with Bad poly
+
+	polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation, bad_poly, 1);
+	assert(polys.size() >= 0); // The last sym state of an abstract CE must intersect with the bad set
+	if (polys.size() > 1){
+		P = get_template_hull(S->getContinuousSetptr(), 0,
+				S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
+	} else {
+		P = polys.front();
+	}
+	P = P->GetPolytope_Intersection(loc_inv);	//Invariant intersection with templated flowpipe
+	P = P->GetPolytope_Intersection(bad_poly);	//followed by intersection with templated flowpipe
+// ***********************
+
 	lp_solver lp(GLPK_SOLVER);
-	lp.setConstraints(bad_poly->getCoeffMatrix(), bad_poly->getColumnVector(),
-			bad_poly->getInEqualitySign());
+	lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 	// we add bound constraints on
 	std::vector<double> dir(dim, 0);
 	double min, max;
@@ -891,12 +915,12 @@ assert (newRow==((2 * X1 + 2 * X2) + 2 * dim));
 	// initialize the global locIdList
 	locIdList.resize(N);
 	std::set<int> d;
-	for (unsigned int i = 0; i < N; i++) {
+	/*for (unsigned int i = 0; i < N; i++) {
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
-	//	std::cout << locIdList[i] << " | ";
-	}
+		std::cout <<"Amit Doing AGAIN?   "<< locIdList[i] << " | ";
+	}*/
 
 	polytope::ptr P;
 
@@ -926,6 +950,12 @@ assert (newRow==((2 * X1 + 2 * X2) + 2 * dim));
 	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
 	{
 		S = get_symbolic_state(i);
+
+		unsigned int loc_id = locIdList[i];	//last location
+		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
+		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+
+
 //		cout <<"2 successfull!! \n";
 		polytope::ptr P;
 		if (i == (N - 1)) {	//For last location find intersection between Flowpipe and Bad set
@@ -964,7 +994,10 @@ assert (newRow==((2 * X1 + 2 * X2) + 2 * dim));
 			}
 */
 
+			P = P->GetPolytope_Intersection(loc_inv);
+
 			P = P->GetPolytope_Intersection(bad_poly);
+
 //			cout <<"3 successfull!! \n";
 		} else {
 			// Take time projection of flowpipe \cap transition guard
@@ -983,7 +1016,10 @@ assert (newRow==((2 * X1 + 2 * X2) + 2 * dim));
 						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
 			else
 				P = polys.front();
+
 			// Now intersect P with guard
+			P = P->GetPolytope_Intersection(loc_inv);
+
 			P = P->GetPolytope_Intersection(guard);
 
 		}
@@ -1082,13 +1118,22 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	bad_poly = this->forbid_poly;
 	ref_pts = refinements;
 
+
+
+	std::cout << "Length of the CE, N=" << N << std::endl;
+	std::cout << "gen_concreteCE: dimension =" << dim << ", length of CE=" << N
+			<< std::endl;
+
 	// initialize the global locIdList
 	locIdList.resize(N);
+	std::cout << "Location ID sequence in symbolic CE: ";
+
 	std::set<int> d;
 	for (unsigned int i = 0; i < N; i++) {
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
+		std::cout << locIdList[i] << " | ";
 	}
 
 	/* 1. Declare the sub-problem by fixing starting points of each location.
@@ -1142,6 +1187,12 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 	// initialize values for dwell time from calculating min, max bounds.
 	for (unsigned int i = 0; i < N; i++) {
 		S = get_symbolic_state(i);
+
+		unsigned int loc_id = locIdList[i];	//location ID
+		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
+		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+
+
 		polytope::ptr P;
 		if (i == N - 1) {
 			// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
@@ -1155,6 +1206,7 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 			else
 				P = polys.front();
 
+			P = P->GetPolytope_Intersection(loc_inv);
 			P = P->GetPolytope_Intersection(bad_poly);
 		} else {
 			// Take time projection of flowpipe \cap transition guard
@@ -1173,6 +1225,7 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 			else
 				P = polys.front();
 			// Now intersect P with guard
+			P = P->GetPolytope_Intersection(loc_inv);
 			P = P->GetPolytope_Intersection(guard);
 
 		}
@@ -1224,19 +1277,76 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 	double minf = 1e10; // a large value to start
 	//nlopt::opt myoptDwellTime; // nlp object;
 	unsigned int optD = N;
+
+	//	nlopt::opt myoptDwellTime(nlopt::LN_AUGLAG, optD); // derivative free
+	//	nlopt::opt myoptDwellTime(nlopt::LN_COBYLA, optD); // derivative free
+
 	nlopt::opt myoptDwellTime(nlopt::LD_MMA, optD); // derivative based
+
+	//  nlopt::opt myoptDwellTime(nlopt::LD_MMA, optD); // derivative based
+	//	nlopt::opt myoptDwellTime(nlopt::GN_ISRES,optD); // derivative free global
+
+
+
+
 
 	unsigned int maxeval = 400;//20000;
 	myoptDwellTime.set_maxeval(maxeval);
 	myoptDwellTime.set_stopval(tolerance);
 	myoptDwellTime.set_xtol_rel(1e-4);
+	build_nlp(myoptDwellTime); // Build nlp with bounds on dwell-time for each transitions
 
 
 	unsigned int X1 = 2 * dim * (N - 1); //list of new variables
 	unsigned int nlp_status;
 	unsigned int maxIterations = 1000, maxiter=0;
+	double previousMinf=999, previousRes=999; //some large value
+	double smallChange = 1e-10;
 	//tolerance = 0.00001;
+	cout.precision(17);
+
 	try {
+
+		/*
+		 * Loop for Uniform-distributed Random Restart of the Search Algorithm
+		 */
+
+		unsigned int totalRuns= 10; //ToDo: We must find out what is the maximum numbers of iteration sufficient to Restart
+
+		std::vector<std::vector<double>> mydwell_times(totalRuns);
+		for (int i = 0; i < totalRuns; i++) {
+			mydwell_times[i].resize(N); //dynamic memory allocation
+		}
+
+		//For each Location generating 1000 random dwell_times for performing different restart operation
+		for (int j = 0; j < N; j++) {
+
+			double a = lb_t[j], b = ub_t[j];
+			std::default_random_engine generator;
+			std::uniform_real_distribution<double> distribution(a, b);
+
+			for (int i = 0; i < totalRuns; i++) {
+
+				double number = distribution(generator); //uniformly generating random numbers
+				mydwell_times[i][j] = number; //This is done so that for the same Location Uniform generation can be maintained
+			}
+
+		}
+
+		//dwell_times[j] = number; //Random number between lb_t and ub_t
+
+
+/*
+ * Now create a loop for totalRuns to try out Random Restart Algorithm.....
+ * Note we must fix totalRuns otherwise it will not stop searching the path which actually do not have any Concrete CE.
+ *
+ */
+		int iterNo=0;
+while (iterNo < totalRuns)
+{
+	//minf = 1e10; // reset a large value to restart
+	dwell_times = mydwell_times[iterNo];
+
 		while (minf > tolerance) {
 			maxiter++;
 			//solve the lp with fixed times
@@ -1265,18 +1375,39 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 				break;
 
 			// solve the nlp with fixed start points.
-			build_nlp(myoptDwellTime); // Build nlp with bounds on dwell-time for each transitions
 			//cout <<"build_nlp successfull!! \n";
 			myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
 			//cout <<"After call to nlp Optimize \n";
 
 			nlp_status = myoptDwellTime.optimize(dwell_times, minf);
 			cout <<"nlp_optimize successfull  minf = "<<minf<< "\n";
-			if (maxiter==maxIterations)
-				break;
-		}
 
-		if (nlp_status == NLOPT_SUCCESS)
+			double newChange = fabs(previousMinf - minf);
+			if (smallChange>=newChange){
+				cout<< "STOPING LP-NLP loop DUE to very small change in the result!!\n";
+				break;
+			}
+			if (((previousMinf == minf) && (previousRes == res))
+					|| (maxiter == maxIterations)) { //This is WORKING
+				cout
+						<< "STOPING LP-NLP loop either, DUE TO no change in the result or MAX-ITERATIONS REACHed!!\n";
+				break;
+			}
+			previousMinf = minf;
+			previousRes = res;
+		} //End of Search for a dwell_time
+
+		if (minf <= tolerance)
+			break; //out of the loop random restart loop
+
+		iterNo++;
+	} //Loop for next random restart search
+
+		if (iterNo == totalRuns)
+			std::cout
+					<< "Splicing with Iterative LP-NLP: stopped Searching all possible random start-point!!"
+					<< std::endl;
+		else if (nlp_status == NLOPT_SUCCESS)
 			std::cout
 					<< "Splicing with Iterative LP-NLP: NLOPT stopped successfully returning the found minimum\n";
 		else if (nlp_status == NLOPT_STOPVAL_REACHED)
@@ -1292,12 +1423,13 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 
 	std::cout << "nlopt returned min : " << minf << "\n";
 
-	tolerance = 1.1; //Just to see all traces
+	//tolerance = 1.1; //Just to see all traces
 
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
-		std::cout << "Obtained minimum greater than " << tolerance << std::endl;
+		std::cout << "Obtained minimum greater than " << tolerance
+				 << ", with no. of refined search:" << refinements.size() << std::endl;
 		return cexample;
 	} else {
 		std::cout << "nlopt returned min : " << minf << "\n";
@@ -1330,6 +1462,7 @@ cout <<"What is x0.size="<< x0->size() <<"   ";
 			cexample->push_back(traj);
 		}
 	}
+
 
 	return cexample;
 }
@@ -1595,7 +1728,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 	bool val_res = true;
 	unsigned int max_refinements = 3, ref_count = 0; // maximum limit to refinement points to be added.
 
-	double valid_tol = 1e-6; // validation error tolerance, on invariant crossing. @Amit changed 1e-3 to 1e-6
+	double valid_tol = 1e-3; // validation error tolerance, on invariant crossing. @Amit changed 1e-3 to 1e-6
 
 	do {
 		struct refinement_point pt;

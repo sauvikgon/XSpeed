@@ -1150,6 +1150,26 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 			myAxPlusb[j] = myAxPlusb[j] + d.C[j];
 		}
 
+		//*** Debugging derivatives using First Principle Method
+
+/*		std::vector<double> lhsSol = firstprinciple(v, d, t[i],0.00001);
+		cout<<"LHS Solution is "<<endl;
+		for (unsigned int j = 0; j < dim; j++) {
+			cout<< lhsSol[j]<<"   ";
+		}
+		cout<<endl;
+
+		cout<<"RHS Solution is "<<endl;
+		for (unsigned int j = 0; j < dim; j++) {
+			cout<< myAxPlusb[j]<<"   ";
+		}
+		cout<<endl;*/
+
+		//*** Debugging End
+		//exit(1);
+
+
+
 //		cout << "8Success" << endl;
 		//		For validation, the distance of trace end points from the invariant is
 		//		added to the cost
@@ -1375,3 +1395,23 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 
 }
 
+/*
+ * d(x'(t))/dt = A.x'(t) + C : Rate of change of x'(t) with respect to change in t
+ * Solving the LHS by First Principle Method
+ */
+std::vector<double> firstprinciple(std::vector<double> x, Dynamics D, double time, double delta_h){
+	std::vector<double> res(x.size());
+	math::matrix<double> expAt;
+
+	/*D.MatrixA.matrix_exponentiation(expAt, time);
+	std::vector<double> v = ODESol_inhomogenous(D, time);*/
+
+	double t1=time, t2=time+delta_h;
+	std::vector<double> res1 = ODESol(x,D,t1);
+	std::vector<double> res2 = ODESol(x,D,t2);
+
+	for(int i=0;i<x.size();i++){
+		res[i] = (res2[i] - res1[i])/delta_h;
+	}
+	return res;
+}
