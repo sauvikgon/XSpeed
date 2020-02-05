@@ -24,6 +24,8 @@
 #include "core/math/lp_solver/lp_solver.h"
 #include "../core/math/analyticODESol.h"
 
+#include <application/userOptions.h>
+#include "counterExample/simulation.h"
 
 /**
  * This class is a data structure to store the abstract counter-example generated
@@ -142,7 +144,16 @@ public:
 	 * the argument. The path-filter argument restricts the search in a unique path.
 	 */
 	static concreteCE::ptr search_concreteCE(double tolerance, std::list<abstractCE::ptr> paths, std::vector<unsigned int> path_filter,unsigned int algo_type);
+	const userOptions& getUserOptions() const;
+	void setUserOptions(const userOptions& userOptions);
 
+	hybrid_automata& getHa() {
+		return Ha;
+	}
+
+	void setHa(hybrid_automata& ha) {
+		Ha = ha;
+	}
 
 private:
 	/**
@@ -166,10 +177,16 @@ private:
 	 * The reference to the automaton to which this is an abstract counter example
 	 */
 	hybrid_automata::ptr H;
+	hybrid_automata Ha; //Just the object without pointer for easy of access, to call simulationHa function
+
 	/**
 	 * The reference to the forbidden polytope given by the user
 	 */
 	polytope::ptr forbid_poly;
+
+
+	//kept here for temporary; for easy access
+	userOptions user_options;
 
 	/**
 	 * Returns an instance of a concrete counter-example from the abstract one, using NLP with flowpipe given constraints
@@ -188,6 +205,16 @@ private:
 	 * Interface for solving trajectory splicing with LP-NLP iterations.
 	 */
 	concreteCE::ptr gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements);
+
+
+	/***
+	 * Interface for solving trajectory splicing with LP solution for initial point followed by Simulation and CAGAR based Refinement
+	 */
+	concreteCE::ptr gen_concreteCE_Simulation(double tolerance, const std::list<refinement_point>& refinements);
+
+
+
+
 
 	lp_solver build_lp(std::vector<double> dwell_times);
 

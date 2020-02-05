@@ -42,12 +42,12 @@
 #include "../../utilities/Template_Polyhedra.h"
 #include "application/sf_utility.h"
 
-#define CE_ALGO_TYPE   3 // macro to choose algo_type of ce search.
+#define CE_ALGO_TYPE   4 // macro to choose algo_type of ce search.
 						 // 1 enables search of ce to forbidden region using flowpipe constraints (FC).
 						 // 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
-						 // 3 gen_concreteCE_iterative 			: Updated by Rajarshi & Amit
-						 // 4 gen_concreteCE_NLP_LP				: Dongxu
-						 // 5 gen_concreteCE_NLP_LP_softconstr 	: Dongxu
+						 // 3 gen_concreteCE_iterative 	: Updated by Rajarshi & Amit. Algorithm using iterative call to LP-NLP
+						 // 4 gen_concreteCE_Simulation : Amit:- Algorithm that use LP formulation for initial start-point followed by Simulation for falsification
+
 
 using namespace std;
 
@@ -137,6 +137,8 @@ public:
 
 	const std::string& getSetAggregation() const;
 	void setSetAggregation(const std::string& setAggregation);
+	const userOptions& getUserOp() const;
+	void setUserOp(const userOptions& userOp);
 
 private:
 	//initial_state::ptr I;
@@ -149,6 +151,11 @@ private:
 
 	std::string set_aggregation; // The aggregation options thull (default) and none
 	std::list<concreteCE::ptr> ce_list; // the list of concrete counter-examples in the HA.
+
+
+	//defining here userOptions for easy access
+	userOptions user_op; //user options
+
 
 	void parReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);

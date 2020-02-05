@@ -25,6 +25,8 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	refinements = 0;
 	traj_splicing_time = 0;
 	set_aggregation = user_options.getSetAggregation();
+
+	setUserOp(user_options); //Amit set here for easy access
 }
 
 
@@ -229,6 +231,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					abst_ce->set_transitions(list_transitions);
 					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
 					abst_ce->set_automaton(ha);
+					abst_ce->setHa(H);
 					abst_ce->set_forbid_poly(forbidden_set.second);
 
 					symbolic_ce_list.push_back(abst_ce); // This abstract counter-example path is added to the list of all such identified paths.
@@ -239,6 +242,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 					std::cout << "CE_ALGO_TYPE "<< CE_ALGO_TYPE << std::endl;
 
+					abst_ce->setUserOptions(this->getUserOp());	//Amit: for easy access
 					bool continue_search = this->gen_counter_example(abst_ce,CE_ALGO_TYPE);
 
 
@@ -1606,3 +1610,10 @@ bool reachability::isContained_withLock(int locID, polytope::ptr poly,
 	return contained;
 }
 
+const userOptions& reachability::getUserOp() const {
+	return user_op;
+}
+
+void reachability::setUserOp(const userOptions& userOp) {
+	user_op = userOp;
+}

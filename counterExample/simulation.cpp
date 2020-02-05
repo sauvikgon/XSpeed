@@ -484,6 +484,7 @@ void simulation::Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<do
 			sum2 = sum2 + M(i+1,j) * x[j];
 		}
 		if(count == 0 && (abs(Bounds[i]) == abs(Bounds[i+1])) && (Bounds[i] != Bounds[i+1] || (Bounds[i] == 0 && Bounds[i+1] == 0))){ // start line to half-space
+
 			if(sum1 <= Bounds[i]){
 				for(unsigned int j=0; j<M.size2(); j++){
 					if(M(i,j) != 0){
@@ -534,6 +535,7 @@ void simulation::Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<do
 			}
 		}*/ // End region to half-space
 	}
+	//cout<<"converted to Halfspace"<<endl;
 }
 
 
@@ -545,7 +547,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	realtype Tfinal = tot_time - start_time;
 	N = Tfinal / time_step;
 	double tout1 = start_time;  //New Start Time for new simulation
-
+//cout<<"\nN="<<N<<endl;
 	Dynamics Dyn = start_point.locptr->getSystem_Dynamics();
 
 	std::vector<double> x = start_point.start_point;
@@ -576,16 +578,23 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 		math::matrix<double> M = g->getCoeffMatrix();
 		std::vector<double> Bounds = g->getColumnVector();
-
+	/*cout<<"Guard before Conversion"<<endl;
+	cout<<M;
+	for(int myi=0;myi<Bounds.size();myi++) {
+		cout<<Bounds[myi]<<"\t";
+	}*/
 		Hyperplane_to_Halfspace(M, Bounds, x);  // Convert guard as half-space to solve line crossing problem
-
+	/*cout<<"Guard After Conversion to Halfspace"<<endl;
+	for(int myi=0;myi<Bounds.size();myi++) {
+		cout<<Bounds[myi]<<"\t";
+	}*/
 		g->setCoeffMatrix(M);
 		g->setColumnVector(Bounds);
 		trans.inv_g_intersection = g;
 		trans.trans = *it;
 		etrans_list.push_back(trans);
 	}
-
+//cout<<"etrans_list.size = "<<etrans_list.size()<<endl;
 	double tol_inv = 1e-10;
 
 	dimension = x.size();
@@ -599,6 +608,14 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	N_Vector u = N_VNew_Serial(dimension);
 
 	double dist = math::abs(inv->point_distance(x));
+
+	cout.precision(17);
+
+	/*for (unsigned int i = 0; i < dimension; i++)
+		cout<<x[i]<<"\t";
+	cout<<"Checking "<<tol_inv <<"  point-distance with Invariant = "<<dist<<endl;*/
+
+
 	if (dist > tol_inv) {
 		std::vector<sim_start_point> emptylist;
 		return emptylist;
@@ -685,6 +702,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	for (unsigned int k = 1; k <= N; k++) {
 		double tout = k * (Tfinal / N);
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
+//		cout<<"Solving ode\n";
 		if (check_flag(&flag, "CVode", 1)) {
 			cout << "Start time = " << t << "  Total Time = " << Tfinal
 					<< " Value of tout = " << tout << endl;
@@ -697,48 +715,70 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 		simpoint.first = tout;
 		simpoint.second = v;
 		sim_trace.push_back(simpoint);
+	/*cout<<"\nPrevious_point: ";
+	for (unsigned int i=0;i<prev_v.size();i++)
+		cout<<prev_v[i]<<"\t";*/
 
 		for (std::list<eligibleTransition>::iterator it = etrans_list.begin();
 				it != etrans_list.end(); it++) {
 			polytope::ptr p = it->inv_g_intersection;
+
+			/*cout<<"\nInv_G_intersectgion ";
+			cout<<p->getCoeffMatrix();
+			for (unsigned int i=0;i<p->getColumnVector().size();i++)
+				cout<<p->getColumnVector()[i]<<"\t";
+			cout<<endl;*/
 			double dist = p->point_distance(v);
+
+//			cout<<"Checking  point-distance with Invariant_guard = "<<dist<<endl;
+
 
 			if (dist == 0) { //just intersected the guard
 				sim_start_point w;
 				int locID = it->trans->getDestination_Location_Id();
 				location::ptr loc = ha.getLocation(locID);
+//				cout<<"Intersected with the Guard and Destination LocationID="<<locID<<endl;
 				w.locptr = loc;
 				w.cross_over_time = tout1 + tout;
+//				cout<<"w.cross_over_time = "<<w.cross_over_time<<endl;
 				//Now assignment operation of the transition to be performed
 				std::vector<double> mapped_point;
 
 				mapped_point = it->trans->applyTransitionMap(v);
+//				cout<<"\nMapped_point: ";
+//				for (int i=0;i<mapped_point.size();i++)
+//					cout<<mapped_point[i]<<"\t";
+
 				w.start_point = mapped_point;
 				polytope::ptr new_inv = w.locptr->getInvariant();
 
 				double dist1 = new_inv->point_distance(v);
+			//	cout<<"\nInside the Destination Inv="<<dist1<<endl;
 				if (dist1 == 0){ // the new point is within the invariant of the new location
 					// In the urgent semantics, only the first guard intersecting point is added for further simulation
 					new_start_points.push_back(w);
 					break;
-				}
-				else if(inv->point_distance(prev_v)==0){
+				} else if(inv->point_distance(prev_v)==0){ //Amit todo modify prev_v with v in consultation with Sir Rajarshi
 					sim_start_point u;
 					location::ptr loc = start_point.locptr;
 
+					//cout<<"\nInside previous Inv = "<<inv->point_distance(v)<<endl;//Amit testing prev_v with v
+
 					u.locptr = loc;
+					//cout<<"This locID = "<<loc->getLocId()<<endl;
 					u.cross_over_time = tout1 + tout - Tfinal/N;
 
 					//Now assignment operation of the transition to be performed
 					std::vector<double> mapped_point;
 
-					mapped_point = it->trans->applyTransitionMap(prev_v);
+					mapped_point = it->trans->applyTransitionMap(prev_v); //Amit todo modify prev_v with v in consultation with Sir Rajarshi
 					u.start_point = mapped_point;
 					sim_trace.pop_back();
 					new_start_points.push_back(u);
 					break;
 				}
 			}
+//			cout<<"Does not intersection invariant with Guard"<<endl;
 		} // end of for loop
 
 		// Add the point to the sim_trace because it does not intersect with the guard yet
@@ -884,7 +924,8 @@ void simulation::simulateHa(sim_start_point start, double start_time,
 		sim_start_point s = wlist.front();
 		wlist.pop_front();
 		unsigned int loc_id = s.locptr->getLocId();
-
+		cout<<"\nWlist.size="<<wlist.size()<<endl;
+cout<<"\nThis is the Location ID="<<loc_id<<endl;
 		std::vector<sim_start_point> next_pts;
 		next_pts = simulateHaLocation(s, s.cross_over_time, tot_time, ha);
 		//simulateHaLocation also creates a sim_trace per location per start_point and concatenates
