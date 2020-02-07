@@ -9,6 +9,7 @@
 #define SIMULATION_H_
 
 #include <vector>
+#include <utility>
 #include <cvode/cvode.h>
 #include <nvector/nvector_serial.h>
 #include <cvode/cvode.h> // prototypes for CVODE fcts., consts.
@@ -182,20 +183,34 @@ public:
 	 * Simulate the location dynamics mentioned in the start_point (symbolic initial point), for the initial point passed in the parameter.
 	 * Returns a collection of valid new start points for further simulation of ha.
 	 */
-	std::vector<sim_start_point> simulateHaLocation(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha);
+	std::vector<sim_start_point> simulateHaLocation(sim_start_point start_point, double start_time,
+			double tot_time, hybrid_automata& ha, std::pair<int, polytope::ptr>& forbidden_set,
+			bool& safety_status);
 
 	/**
 	 * Simulates the Hybrid Automaton from the given start point for the time_duration.
 	 * The result is stored in the sim_trace data-structure. The simulation follows "urgent"
 	 * semantics of HA. According to this, a transition is taken as soon as the transition
-	 * guard constraint is satisfied. A simulation with "max_jumps" transitions is computed
+	 * guard constraint is satisfied. A simulation with "max_jumps" transitions is computed.
+	 * Returns true when the simulated trajectory is safe, and return false otherwise.
 	 */
-	void simulateHa(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps=10);
+	bool simulateHa(sim_start_point start_point, double start_time, double tot_time, hybrid_automata& ha,
+			std::pair<int, polytope::ptr>& forbidden_set, unsigned int max_jumps);
+
 	/**
 	 * Parallel Simulation of Ha with N uniformly distributed random start points from the initial set.
+	 * Returns true when the simulated trajectory is safe, and return false otherwise.
 	 */
-	void parSimulateHa(unsigned int N, polytope::ptr initial_set, double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps=10);
+	bool parSimulateHa(unsigned int N, polytope::ptr initial_set, double start_time, double tot_time,
+			hybrid_automata& ha, std::pair<int, polytope::ptr>& forbidden_set, unsigned int max_jumps);
 
+	/**
+	 * Generates N simulation from uniformly distributed start points from the initial set. Monitors how many
+	 * of these intersect with the unsafe_region.
+	 * Returns the number of trajectory(ies) that intersects with the unsafe region.
+	 */
+	unsigned int SafetyTestingSimHa(unsigned int N, polytope::ptr initial_set, polytope::ptr unsafe_set,
+			double start_time, double tot_time, hybrid_automata& ha, unsigned int max_jumps=10);
 	/**
 	 * Returns a vector of start points for initiating simulation from the given location of a ha.
 	 * The parameter n is the number of start points to get, the initial_set specifies the region from

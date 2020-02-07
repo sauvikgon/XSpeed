@@ -15,7 +15,7 @@
 
 void simulationCaller(ReachabilityParameters& reach_parameters,
 		hybrid_automata& ha, std::list<initial_state::ptr> init_state,
-		userOptions& op);
+		userOptions& op, std::pair<int, polytope::ptr>& forbidden_set);
 
 
 #endif /* SIMULATIONCALLER_H_ */

@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 	// ----Trajectory Simulation
 	if (boost::iequals(user_options.getEngine(),"simu")==true) {
 		std::cout<<"Running simulation engine ... \n";
-		simulationCaller(reach_parameters, Hybrid_Automata, init_state, user_options);
+		simulationCaller(reach_parameters, Hybrid_Automata, init_state, user_options, forbidden_set);
 		return 0; //Only Trajectory Simulation is done
 	}
 	// Reachability with CE generation

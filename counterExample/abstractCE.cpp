@@ -1700,16 +1700,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 concreteCE::ptr abstractCE::gen_concreteCE_Simulation(double tolerance, const std::list<refinement_point>& refinements){
 
 
-
-
-
-
-
-
-
-
-
-
 	symbolic_states::const_ptr S = get_first_symbolic_state();
 		dim = S->getContinuousSetptr()->get_dimension();
 
@@ -1883,16 +1873,8 @@ double global_time_horizon =0; //to hold the maximum global time horizon from th
 
 		try {
 
-
-			//	while (minf > tolerance) {
-
 					//solve the lp with fixed times
 					lp_solver fixed_time_Lp = build_lp(dwell_times);
-					/*cout <<"Dwell time\n";
-					 for (unsigned int j = 0; j < dwell_times.size(); j++) {
-					 cout << dwell_times[j] <<"  ";
-					 }
-					 cout<<endl;*/
 
 					double res = fixed_time_Lp.solve();
 					std::vector<double> x = fixed_time_Lp.get_sv();
@@ -1928,61 +1910,31 @@ double global_time_horizon =0; //to hold the maximum global time horizon from th
 						cout<< start_pts.start_point[ii] <<"\t";
 					}
 
-				/*	// generate the points
-					for (unsigned int i = 0; i < N; i++) {
-						sim_start_point start_pts;
-
-						start_pts.cross_over_time = 0;
-						location::ptr ha_loc_ptr = HA->getLocation(locIdList[i]);
-						start_pts.locptr =ha_loc_ptr;
-						start_pts.start_point = x0[i];
-
-						ress.push_back(start_pts);
-					}
-				 */
-
-
 	double starting=0;
 	unsigned int bfslevel = user_options.get_bfs_level();
-	sim->simulateHa(start_pts, starting, global_time_horizon, getHa(), bfslevel);
+
+	std::pair<int, polytope::ptr> unsafe_symb_set;
+
+	unsafe_symb_set.first = -1; // location id; Thoughtlessly set here.
+	unsafe_symb_set.second=forbid_poly;
+	sim->simulateHa(start_pts, starting, global_time_horizon, getHa(), unsafe_symb_set, bfslevel);
 
 
 	cout <<"global_time_horizon = "<<global_time_horizon <<"  bfslevel = " << bfslevel <<endl;
 
 
-					std::ofstream myfile;
-					myfile.open(user_options.getOutFilename().c_str(), std::ofstream::out);
-					myfile.close();
-					sim->print_trace_to_outfile(user_options.getOutFilename());
+	std::ofstream myfile;
+	myfile.open(user_options.getOutFilename().c_str(), std::ofstream::out);
+	myfile.close();
+	sim->print_trace_to_outfile(user_options.getOutFilename());
 
-					string cmdStr1;
-					cmdStr1.append("graph -TX -BC ");
-					cmdStr1.append(user_options.getOutFilename().c_str());
-					system(cmdStr1.c_str());
+	string cmdStr1;
+	cmdStr1.append("graph -TX -BC ");
+	cmdStr1.append(user_options.getOutFilename().c_str());
+	system(cmdStr1.c_str());
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-			//	} //End of Search for a dwell_time
 
 exit(0);
-
-
 
 			if (res < tolerance)
 				std::cout<< "Splicing with Iterative LP-Simulation: stopped successfully returning the found minimum\n"<< std::endl;

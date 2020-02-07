@@ -468,7 +468,7 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x,
 
 /**
  * Computes the simulation trace inside the location of a ha, from the given start point and for the give time duration.
- * Returns the set of new start points which are valid for starting new simulation from the new location of the ha.
+ * Returns the set of new start points which are valid for starting new simulation from the successor location of the ha.
  */
 
 void simulation::Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<double>& Bounds, std::vector<double> x){
@@ -538,16 +538,18 @@ void simulation::Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<do
 	//cout<<"converted to Halfspace"<<endl;
 }
 
-
 std::vector<sim_start_point> simulation::simulateHaLocation(
 		sim_start_point start_point, double start_time, double tot_time,
-		hybrid_automata& ha) {
+		hybrid_automata& ha, std::pair<int, polytope::ptr>& forbidden_set,
+		bool& safety_status) {
+
 	int flag;
+
 	realtype t = start_time, T0 = 0;
 	realtype Tfinal = tot_time - start_time;
 	N = Tfinal / time_step;
 	double tout1 = start_time;  //New Start Time for new simulation
-//cout<<"\nN="<<N<<endl;
+
 	Dynamics Dyn = start_point.locptr->getSystem_Dynamics();
 
 	std::vector<double> x = start_point.start_point;
@@ -566,6 +568,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 	location::ptr loc = start_point.locptr;
 	polytope::ptr inv = loc->getInvariant();
+	unsigned int this_loc_id = loc->getLocId();
 
 	//Computing guard-invariant intersection and bloating the set with time-step
 	std::list<transition::ptr> outgoingtrans;
@@ -578,23 +581,14 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 		math::matrix<double> M = g->getCoeffMatrix();
 		std::vector<double> Bounds = g->getColumnVector();
-	/*cout<<"Guard before Conversion"<<endl;
-	cout<<M;
-	for(int myi=0;myi<Bounds.size();myi++) {
-		cout<<Bounds[myi]<<"\t";
-	}*/
-		Hyperplane_to_Halfspace(M, Bounds, x);  // Convert guard as half-space to solve line crossing problem
-	/*cout<<"Guard After Conversion to Halfspace"<<endl;
-	for(int myi=0;myi<Bounds.size();myi++) {
-		cout<<Bounds[myi]<<"\t";
-	}*/
+
+		Hyperplane_to_Halfspace(M, Bounds, x);  // Convert guard as half-space to detect line crossing
 		g->setCoeffMatrix(M);
 		g->setColumnVector(Bounds);
 		trans.inv_g_intersection = g;
 		trans.trans = *it;
 		etrans_list.push_back(trans);
 	}
-//cout<<"etrans_list.size = "<<etrans_list.size()<<endl;
 	double tol_inv = 1e-10;
 
 	dimension = x.size();
@@ -693,16 +687,17 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	std::vector<double> v(dimension),prev_v;
 	v = x;
 
-	// add the initial point to to the trace:
+	// add the initial point to the trace:
 	trace_point simpoint;
 	simpoint.first = 0;
 	simpoint.second = x;
 	sim_trace.push_back(simpoint); // adding the simpoint in the sim_trace data-structure.
+	int unsafe_loc_id = forbidden_set.first;
 	//-------------------
 	for (unsigned int k = 1; k <= N; k++) {
 		double tout = k * (Tfinal / N);
 		flag = CVode(cvode_mem, tout, u, &t, CV_NORMAL);
-//		cout<<"Solving ode\n";
+
 		if (check_flag(&flag, "CVode", 1)) {
 			cout << "Start time = " << t << "  Total Time = " << Tfinal
 					<< " Value of tout = " << tout << endl;
@@ -711,23 +706,20 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 		prev_v  = v;
 		for (unsigned int i = 0; i < dimension; i++)
 			v[i] = NV_Ith_S(u, i) ;
+		//checking safety of the trajectory.
+		if( (unsafe_loc_id == this_loc_id || unsafe_loc_id ==-1) && forbidden_set.second->point_distance(v) == 0){
+			safety_status=false;
+			return new_start_points;
+		}
 		trace_point simpoint;
 		simpoint.first = tout;
 		simpoint.second = v;
 		sim_trace.push_back(simpoint);
-	/*cout<<"\nPrevious_point: ";
-	for (unsigned int i=0;i<prev_v.size();i++)
-		cout<<prev_v[i]<<"\t";*/
 
 		for (std::list<eligibleTransition>::iterator it = etrans_list.begin();
 				it != etrans_list.end(); it++) {
 			polytope::ptr p = it->inv_g_intersection;
 
-			/*cout<<"\nInv_G_intersectgion ";
-			cout<<p->getCoeffMatrix();
-			for (unsigned int i=0;i<p->getColumnVector().size();i++)
-				cout<<p->getColumnVector()[i]<<"\t";
-			cout<<endl;*/
 			double dist = p->point_distance(v);
 
 //			cout<<"Checking  point-distance with Invariant_guard = "<<dist<<endl;
@@ -745,15 +737,11 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 				std::vector<double> mapped_point;
 
 				mapped_point = it->trans->applyTransitionMap(v);
-//				cout<<"\nMapped_point: ";
-//				for (int i=0;i<mapped_point.size();i++)
-//					cout<<mapped_point[i]<<"\t";
 
 				w.start_point = mapped_point;
 				polytope::ptr new_inv = w.locptr->getInvariant();
 
-				double dist1 = new_inv->point_distance(v);
-			//	cout<<"\nInside the Destination Inv="<<dist1<<endl;
+				double dist1 = new_inv->point_distance(w.start_point);
 				if (dist1 == 0){ // the new point is within the invariant of the new location
 					// In the urgent semantics, only the first guard intersecting point is added for further simulation
 					new_start_points.push_back(w);
@@ -771,14 +759,15 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 					//Now assignment operation of the transition to be performed
 					std::vector<double> mapped_point;
 
-					mapped_point = it->trans->applyTransitionMap(prev_v); //Amit todo modify prev_v with v in consultation with Sir Rajarshi
+					mapped_point = it->trans->applyTransitionMap(prev_v); //Amit: todo modify prev_v with v in consultation with Sir Rajarshi
 					u.start_point = mapped_point;
-					sim_trace.pop_back();
-					new_start_points.push_back(u);
-					break;
+					if(new_inv->point_distance(u.start_point) == 0)
+					{
+						sim_trace.pop_back();
+						new_start_points.push_back(u);
+					}
 				}
 			}
-//			cout<<"Does not intersection invariant with Guard"<<endl;
 		} // end of for loop
 
 		// Add the point to the sim_trace because it does not intersect with the guard yet
@@ -912,33 +901,34 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n,
 	return res;
 }
 
-void simulation::simulateHa(sim_start_point start, double start_time,
-		double tot_time, hybrid_automata& ha, unsigned int max_jumps) {
+bool simulation::simulateHa(sim_start_point start, double start_time, double tot_time, hybrid_automata& ha, std::pair<int, polytope::ptr>& forbidden_set, unsigned int max_jumps=10)
+{
 	std::list<sim_start_point> wlist;
 	wlist.push_back(start);
 
 
 	unsigned int jumps_taken = 0;
 
+	bool safety_status = true;
 	while (wlist.size() != 0 && jumps_taken <= max_jumps) {
 		sim_start_point s = wlist.front();
 		wlist.pop_front();
 		unsigned int loc_id = s.locptr->getLocId();
-		cout<<"\nWlist.size="<<wlist.size()<<endl;
-cout<<"\nThis is the Location ID="<<loc_id<<endl;
 		std::vector<sim_start_point> next_pts;
-		next_pts = simulateHaLocation(s, s.cross_over_time, tot_time, ha);
+		next_pts = simulateHaLocation(s, s.cross_over_time, tot_time, ha, forbidden_set, safety_status);
 		//simulateHaLocation also creates a sim_trace per location per start_point and concatenates
-
+		if(safety_status == false)
+			return false; // the simulated trajectory is unsafe.
 		for (unsigned int i = 0; i < next_pts.size(); i++)
 			wlist.push_back(next_pts[i]);
 		jumps_taken++;
 	}
+	return true; // the simulated trajectory is safe.
 }
 
-void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
+bool simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 		double start_time, double tot_time, hybrid_automata& ha,
-		unsigned int max_jumps) {
+		std::pair<int, polytope::ptr>& forbidden_set, unsigned int max_jumps=10) {
 
 	std::vector<sim_start_point> start_points = get_start_points(n, initial_set,
 			ha.getInitial_Location());
@@ -959,8 +949,8 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 	}
 
 	std::list<std::list<trace_point> > simtraces[N_cores];
-
-	bool wlistNotEmpty = true;
+	// Bug: safety_status needs to be correctly set with mutual exclusion.
+	bool wlistNotEmpty = true, safety_status=true;
 	unsigned int jumps_taken = 0;
 	while (wlistNotEmpty == true && jumps_taken <= max_jumps) {
 		int newpointsCount = 0;
@@ -976,7 +966,7 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 					myobj.set_time_step(this->time_step);
 					std::vector<sim_start_point> newpoints =
 							myobj.simulateHaLocation(s, s.cross_over_time,
-									tot_time, ha);
+									tot_time, ha, forbidden_set, safety_status);
 					simtraces[w].push_back(myobj.get_sim_trace()); //TODO::Let us see if we can use pointer here to improve performance-time
 					//ToDo:: here w' should be generated randomly and used in place of q in the next wlist[1-t][w'][w].push_back(newpoints)
 					//also note that simulateHaLocation is generating only a single point due to "must" semantics of HA
@@ -1010,7 +1000,7 @@ void simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 			}
 		}
 	}
-
+	return safety_status;
 }
 
 /* Check function return value...
