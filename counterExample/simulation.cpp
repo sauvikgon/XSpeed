@@ -69,6 +69,7 @@ std::vector<double> lin_interpolate(std::vector<double> x_l2,
 	return res;
 }
 std::vector<double> simulation::simulate(std::vector<double> x, double time) {
+
 	int flag;
 	realtype T0 = 0;
 	realtype Tfinal = time;
@@ -199,6 +200,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time) {
 
 bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 		polytope::ptr I, bool& status, double tol) {
+
 	int flag;
 	realtype T0 = 0;
 	realtype Tfinal = time;
@@ -348,6 +350,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 std::vector<double> simulation::metric_simulate(std::vector<double> x,
 		double time, double& distance, polytope::ptr I,
 		std::vector<double>& grad) {
+
 	int flag;
 	realtype T0 = 0;
 	realtype Tfinal = time;

@@ -11,6 +11,7 @@
 
 #include <list>
 #include <boost/shared_ptr.hpp>
+#include "boost/timer/timer.hpp"
 #include "nlopt.hpp"
 #include "counterExample/abstract_symbolic_state.h"
 #include "counterExample/concreteCE.h"
@@ -23,7 +24,6 @@
 #include "../core/symbolic_states/symbolic_states.h"
 #include "core/math/lp_solver/lp_solver.h"
 #include "../core/math/analyticODESol.h"
-
 #include <application/userOptions.h>
 #include "counterExample/simulation.h"
 
@@ -45,9 +45,11 @@ extern polytope::ptr bad_poly;
 extern std::list<refinement_point> ref_pts; // a list of invariant violating points to refine the search and obtain a valid trajectory
 extern std::vector<std::vector<double> > X0; // list of start points of the trajectory segments. Used only in the NLP-LP mixed program
 extern std::list<symbolic_states::ptr> ce_sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
+extern std::vector<double> start_pos; // the start vectors of opt trajectory from LP solving. Useful in the context of CE_ALGO_TYPE 5
 
 class abstractCE
 {
+
 public:
 	typedef boost::shared_ptr<abstractCE> ptr;
 	typedef boost::shared_ptr<const abstractCE> const_ptr;
@@ -155,6 +157,13 @@ public:
 		Ha = ha;
 	}
 
+	lp_solver build_lp(std::vector<double> dwell_times);
+
+	/*
+	 * creates an nlp obj for the trajectory splicing problem
+	 */
+	void build_nlp(nlopt::opt &);
+
 private:
 	/**
 	 * The first symbolic state is the initial symbolic state and the last one
@@ -202,27 +211,25 @@ private:
 	concreteCE::ptr gen_concreteCE_NLP_HA(double tolerance, const std::list<refinement_point>& refinements);
 
 	/**
-	 * Interface for solving trajectory splicing with LP-NLP iterations.
+	 * Interface for solving trajectory splicing with LP-NLP policy iterations.
 	 */
 	concreteCE::ptr gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements);
 
-
-	/***
-	 * Interface for solving trajectory splicing with LP solution for initial point followed by Simulation and CAGAR based Refinement
+	/**
+	 * Interface for solving trajectory splicing with LP solution for initial point followed by Simulation.
 	 */
 	concreteCE::ptr gen_concreteCE_Simulation(double tolerance, const std::list<refinement_point>& refinements);
 
-
-
-
-
-	lp_solver build_lp(std::vector<double> dwell_times);
-
-	void build_nlp(nlopt::opt &);
-	/*
-	 * creates an nlp obj for the trajectory splicing problem
+	/**
+	 * Interface for trajectory splicing with NLP using dwell-time only as vars. The objective function is the soln
+	 * of a LP formed for splicing with fixed-dwell and varying starts.
 	 */
-	//nlopt::opt build_nlp(std::vector<double> x0[]);
+	concreteCE::ptr gen_concreteCE_LPobj(double tolerance, const std::list<refinement_point>& refinements);
+	/*
+	 * Interface for trajectory splicing with NLP that returns a dwell-time
+	 * minimal counterexample.
+	 */
+	concreteCE::ptr gen_concreteCE_Opt(double tolerance, const std::list<refinement_point> &refinements);
 
 };
 

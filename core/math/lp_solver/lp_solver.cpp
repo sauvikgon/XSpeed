@@ -81,7 +81,7 @@ void lp_solver::setMin_Or_Max(int Min_Or_Max) {
 void lp_solver::set_obj_coeff(unsigned int j, double val)
 {
 	if (lp_solver_type == GLPK_SOLVER) {
-		glpk_lp_problem->set_obj_coeff(j, val);
+		glpk_lp_problem->set_obj_coeff(j+1, val);
 	}
 	else{
 		throw std::runtime_error("set objective coeff: Cannot set objective function coefficient in the LP problem with the chosen type of LP Solver\n");
@@ -90,7 +90,7 @@ void lp_solver::set_obj_coeff(unsigned int j, double val)
 double lp_solver::get_obj_coeff(unsigned int j)
 {
 	if (lp_solver_type == GLPK_SOLVER) {
-		glpk_lp_problem->get_obj_coeff(j);
+		glpk_lp_problem->get_obj_coeff(j+1);
 	}
 	else{
 		throw std::runtime_error("set objective coeff: Cannot set objective function coefficient in the LP problem with the chosen type of LP Solver\n");

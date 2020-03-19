@@ -39,14 +39,18 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 	simulation::ptr sim;
 	std::cout << "Inside concrete trace plotter, no. of trajectory segs:" << T.size() << std::endl;
 	double steps = 10000;
-	// cleaning the old contents of the file now:
+	// cleaning the old contents of the file first
 	std::ofstream myoutfile;
 	myoutfile.open(filename.c_str(),std::fstream::out);
 	myoutfile.close();
+
 	for(trajectory::iterator it = T.begin(); it!=T.end();it++){
 		seg = *it;
 		locId = seg.first;
 		std::cout << "plotCE: loc id = " << locId << std::endl;
+		//debug print
+		std::cout << "dwell time in this location = " << seg.second.second << std::endl;
+		//---
 		simulation_sample = seg.second;
 		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
 		sim->set_out_dimension(x1, x2);

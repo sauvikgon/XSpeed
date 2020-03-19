@@ -42,12 +42,16 @@
 #include "../../utilities/Template_Polyhedra.h"
 #include "application/sf_utility.h"
 
-#define CE_ALGO_TYPE   4 // macro to choose algo_type of ce search.
-						 // 1 enables search of ce to forbidden region using flowpipe constraints (FC).
-						 // 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
-						 // 3 gen_concreteCE_iterative 	: Updated by Rajarshi & Amit. Algorithm using iterative call to LP-NLP
-						 // 4 gen_concreteCE_Simulation : Amit:- Algorithm that use LP formulation for initial start-point followed by Simulation for falsification
+// macro to choose algo_type of ce search.
+// 1 enables search of ce to forbidden region using flowpipe constraints (FC).
+// 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
+// 3 gen_concreteCE_iterative 	: Updated by Rajarshi & Amit. Algorithm using iterative call to LP-NLP
+// 4 gen_concreteCE_Simulation : Amit:- Algorithm that use LP formulation for initial start-point followed by Simulation for falsification
+// 5 gen_concreteCE_LPobj: trajectory splicing with NLP using dwell-time only as vars. The objective function is the soln
+// 	 of a LP formed for splicing with fixed-dwell and varying starts.
+// 6 gen_concreteCE_Opt: trajectory splicing with NLP that returns a time minimal ce. (Not Functional)
 
+#define CE_ALGO_TYPE  1
 
 using namespace std;
 
@@ -109,7 +113,7 @@ public:
 	hybrid_automata H; //todo:: have to change it to boost::ptr
 	int lp_solver_type;
 	std::pair<int, polytope::ptr> forbidden_set;
-	bool ce_flag; // The flag to swithch ON/OFF the CE generation functionality.
+	bool ce_flag; // The flag to switch ON/OFF the CE generation functionality.
 	std::string ce_path; // This string can be either "all", "first" or "1,3,4,15,16" type. The last string is a comma separated list of locations to represent a path.
 
 	void seqReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
