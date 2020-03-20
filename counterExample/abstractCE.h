@@ -207,6 +207,13 @@ private:
 	concreteCE::ptr gen_concreteCE_iterative(double tolerance, const std::list<refinement_point>& refinements);
 
 
+	/*
+	 * Interface for solving trajectory splicing with LP-NLP with RANDOM-ReStart iterations.
+	 */
+	concreteCE::ptr gen_concreteCE_iterativeReStart(double tolerance, const std::list<refinement_point> &refinements);
+
+
+
 	/***
 	 * Interface for solving trajectory splicing with LP solution for initial point followed by Simulation and CAGAR based Refinement
 	 */

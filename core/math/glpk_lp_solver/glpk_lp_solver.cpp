@@ -200,12 +200,13 @@ void glpk_lp_solver::add_new_constraint(int len, int ind[], double val[])
 
 }
 void glpk_lp_solver::set_obj_coeff(unsigned int j, double val){
-	glp_set_obj_coef(mylp, j,val);
+	glp_set_obj_coef(mylp, j + 1, val);	//Amit: modified to +1, since GLPK uses 1-based indexing
+	//cout << "j+1" << j+1<<endl;
 }
 
 double glpk_lp_solver::get_obj_coeff(unsigned int j)
 {
-	return glp_get_obj_coef(mylp,j);
+	return glp_get_obj_coef(mylp,j + 1);	//Amit: modified to +1, since GLPK uses 1-based indexing
 }
 double glpk_lp_solver::solve(){
 	glp_init_smcp(&param);

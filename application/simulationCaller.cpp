@@ -50,7 +50,7 @@ void simulationCaller(ReachabilityParameters& reach_parameters,
 			is_safe = sim->simulateHa(start_pts[i], 0,reach_parameters.TimeBound,ha, forbidden_set, max_jump);
 			if(!is_safe) num_unsafe_traj++;
 		}
-		std::cout << num_unsafe_traj << "trajectories violated safety out of " << n << " simulations\n";
+		std::cout << num_unsafe_traj << " trajectories violated safety out of " << n << " simulations\n";
 
 	} else if (op.get_simu_algo() == 2) { //Adaptation of Gerard J. Holzmann's algorithm for Simulation
 		std::cout << "\nComputing trajectories in parallel using an adaptation of Gerard J. Holzmann's algorithm.\n";
