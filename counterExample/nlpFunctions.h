@@ -53,10 +53,13 @@ double myobjfuncOnDwellTime(const std::vector<double> &x, std::vector<double> &g
 
 double myobjfuncOnStateVars(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
-//Object function for splicing with Iterative LP-NLP
+//Objective function for splicing with Iterative LP-NLP
 double myobjfuncIterativeNLP(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
+// Objective function for splicing with LP solution as objective
+double myobjfunc_LP(const std::vector<double> &t, std::vector<double> &grad,void *my_func_data);
 
-std::vector<double> firstprinciple(std::vector<double> x, Dynamics D, double time, double delta_h);
+// Objective function for time-optimal splicing
+double myobjfunc_Opt(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
 #endif /* nlpFunctions.h */

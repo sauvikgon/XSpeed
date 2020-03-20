@@ -92,16 +92,6 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 			<< ", Time to search CEs (in secs) = " << traj_splicing_time / (double) 1000
 			<< std::endl;
 	myfile.close();
-	//ce_search_time = reach_SEQ_BFS.get_ce_search_time();
-	// plot the first counter-example trajectory in the list.
-	if(ce_list.size() !=0){
-		concreteCE::ptr first_ce = *(ce_list.begin());
-		std::string tracefile = "./bad_trace.o";
-		first_ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
-		return true;	//Found a Counter-example
-	}
-	else
-		return false;	//No Counter-example exists
 }
 
 bool gen_counter_example_WoFC(abstractCE::ptr abs_path,	userOptions& user_options, double& traj_splicing_time, unsigned int& refinements, std::list<concreteCE::ptr>& ce_list) {

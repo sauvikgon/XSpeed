@@ -163,7 +163,7 @@ public:
 	/**
 	 * Generates a simulation trace for time duration, starting at start_time.
 	 * The time instant, within the simulation time, when the polytope I is
-	 * violated by the trace is returned and with the first lsimulation point
+	 * violated by the trace is returned and with the first simulation point
 	 * that violated I, as a struct object. status is set to false if invariant
 	 * is violated. If the Inv violation distance is < tol, then it is tolerated.
 	 * Returns the last point of the simulation trace.

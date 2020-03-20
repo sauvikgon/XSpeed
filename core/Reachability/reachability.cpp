@@ -245,11 +245,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					abst_ce->setUserOptions(this->getUserOp());	//Amit: for easy access
 					bool continue_search = this->gen_counter_example(abst_ce,CE_ALGO_TYPE);
 
-
-
-
-					std::cout << "debug print\n" << std::endl;
-
 					if(continue_search == false) { // This status says whether to continue searching for further abstract paths or to stop
 						std::cout << "############# Safety Property is Violated #################\n";
 						return Reachability_Region; // return and report the time to search the counter-example
@@ -1102,8 +1097,10 @@ bool reachability::gen_counter_example(abstractCE::ptr abs_path, unsigned int ce
 
 	boost::timer::cpu_timer clock; // clocks the time taken to splice a trajectory
 
-	//std::cout << "CE ALGO_TYPE in gen_counter_example:" << ce_search_algo_type << std::endl;
-
+	if(traj_splicing_time > 3600000){
+		std::cout << "Seach for CE TIMED-OUT (>1hrs)\n";
+		return false;
+	}
 	if(ce_path.compare("all") == 0) // if all paths are to be searched for ce, then return true in order to collect more paths.
 	{
 		clock.start();

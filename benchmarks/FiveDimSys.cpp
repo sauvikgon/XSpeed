@@ -27,7 +27,6 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	size_type row, col;
 
 	//Polytope I Declaration in the form of Ax<=b
-	//Input Polytope I as a line(bar) 10<=x(position)<=10.2 y(velocity)== 0.
 	row = 10;
 	col = 5;
 	ConstraintsMatrixI.resize(row, col);

@@ -31,6 +31,7 @@ std::list<refinement_point> ref_pts;
 std::vector<std::vector<double> > X0; // list of start point of the trajectory segments. Used only in the NLP-LP mixed program
 
 std::list<symbolic_states::ptr> ce_sym_states; // list of CE abstract sym states. Used only in the NLP-LP mixed problem
+std::vector<double> start_pos; // the start vectors of opt trajectory from LP solving. Useful in the context of CE_ALGO_TYPE 5
 
 unsigned int samples = 0;
 
@@ -80,6 +81,7 @@ symbolic_states::const_ptr abstractCE::get_first_symbolic_state() const {
 	std::list<symbolic_states::ptr>::const_iterator it = sym_states.begin();
 	return *it;
 }
+
 symbolic_states::const_ptr abstractCE::get_last_symbolic_state() const {
 	std::list<symbolic_states::ptr>::const_iterator it = sym_states.end();
 	return *it;
@@ -133,7 +135,6 @@ bool abstractCE::filter(std::vector<unsigned int> template_seq) {
  * routine and using the constraints from flowpipe
  *
  * @Rajarshi
- * 28th January 2016
  * The approach FC in the HSCC 2019 Paper
  */
 concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
@@ -157,8 +158,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 	//assert that the number of transitions equals 1 less than the length of the abstract CE path
 
 	std::cout << "Length of the CE, N=" << N << std::endl;
-	std::cout << "gen_concreteCE: dimension =" << dim << ", length of CE=" << N
-			<< std::endl;
 
 	// initialize the global locIdList
 	locIdList.resize(N);
@@ -187,12 +186,14 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 //	nlopt::opt myopt(nlopt::LD_AUGLAG, optD);
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
-	// 	local optimization routine
+	// 	Parameters of the optimization routine
 	unsigned int maxeval = 20000;
-	//unsigned int maxeval = 4000;
+	unsigned int maxtime = 600; // time-out of 10 mins per abstract ce.
+
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(maxeval);
-	myopt.set_stopval(1e-6);
+	//myopt.set_maxeval(maxeval);
+	myopt.set_maxtime(600);
+	myopt.set_stopval(tolerance); // search stopping value, set typically to 1e-6.
 
 	//Set Initial value to the optimization problem
 	std::vector<double> x(optD, 0);
@@ -344,13 +345,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 			it++;
 	}
 
-	// debug (print lb,ub)
-//	for(unsigned int i=0;i<lb.size();i++){
-//		std::cout << "lb at " << i << " =" << lb[i] << std::endl;
-//		std::cout << "ub at " << i << " =" << ub[i] << std::endl;
-//		//assert(lb[i] <= ub[i]);
-//	}
-	//--
 	myopt.set_lower_bounds(lb);
 	myopt.set_upper_bounds(ub);
 
@@ -363,7 +357,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 
 		if (res == NLOPT_SUCCESS)
 			std::cout
-					<< "Splicing with FC: NLOPT stopped successfully returning the found minimum\n";
+					<< "Splicing with FC: NLOPT stopped successfully\n";
 		else if (res == NLOPT_STOPVAL_REACHED)
 			std::cout
 					<< "Splicing with FC: NLOPT stopped due to stopping value (1e-6) reached\n";
@@ -371,18 +365,24 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 			std::cout
 					<< "Splicing with FC: NLOPT stopped due to reaching maxeval = "
 					<< maxeval << std::endl;
+		else if (res == NLOPT_MAXTIME_REACHED)
+					std::cout
+							<< "Splicing with FC: NLOPT stopped due to reaching maxtime = "
+							<< myopt.get_maxtime() << std::endl;
 
 	} catch (std::exception &e) {
 		std::cout << e.what() << std::endl;
 	}
 	std::cout << "nlopt returned min : " << minf << "\n";
 	std::cout << "Length of abstract counter example:" << N << "\n";
+	std::cout << "Number of iterations completed:" << myopt.get_maxeval() << "\n";
 
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
 		std::cout << "Obtained minimum greater than " << tolerance
-				<< ", with no. of refined search:" << refinements.size()
+				<< ", No. of refined search:" << refinements.size()
+				<< " No. of iterations completed:" << myopt.get_maxeval()
 				<< std::endl;
 		return cexample;
 	} else {
@@ -417,9 +417,6 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 /**
  * Generate concrete trajectory using splicing with mixed NLP-LP problem (Goran's Idea).
  * @Rajarshi: Dec 2019
- */
-/*
- *  dxli: September, 2018
  */
 void abstractCE::construct_bound_constraints(math::matrix<double> &coeff_mat,
 		std::vector<double> &col, std::vector<double> lb,
@@ -596,8 +593,6 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 			newRow++;
 		}
 	}
-//	check=X1;
-//	std::cout<<"Check = "<< check<<" newRow = "<< newRow <<std::endl; //OK
 
 	newRow = X1;
 	//2nd Part: constrs only on the column related to the start-points involved in splice distance computation term
@@ -619,8 +614,6 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	}
 
 	//Last Part: constrs only on the column related to the end-points involved in splice distance computation term
-	//check=X1;
-	//std::cout<<"Check = "<< check<<" newRow = "<< newRow <<std::endl; //OK
 
 	newRow = X1;
 	startPoint = X + Y;
@@ -640,16 +633,13 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		}
 	}
 	//Todo: to be Optimized into one loop for all the three parts if possible
-	//assert(newRow == 2*X1);
-//	check=2*X1;
-//	std::cout<<"4. Check = "<< check<<" newRow = "<< newRow <<std::endl; //OK
+
 	assert(newRow == 2 * X1);
 
 	/*
 	 *  To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
 	 */
 
-	//cout<<"N="<<N<<" Dim="<<dim<<" \n";
 	startPoint = X;
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 			{
@@ -694,13 +684,14 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		}
 	}
 
-//	check=2*X1 + X2;
-//	std::cout<<"5. Check = "<< check<<" newRow = "<< newRow <<std::endl;
 	assert(newRow == 2 * X1 + X2);
 
 	/*
 	 *  To do: Add the remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
 	 */
+
+	// To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
+	// To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
 	// Adding the (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
 	// Get the sequence of loc_ids from the abstract counterexample.
 	locIdList.resize(N);
@@ -777,8 +768,6 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		if (it != transList.end())
 			it++;
 	}
-//	check=2*X1+2*X2;
-//	std::cout<<"6. Check = "<< check<<" newRow = "<< newRow <<std::endl;
 	assert(newRow == (2 * X1 + 2 * X2));
 
 	/*
@@ -835,7 +824,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 			max = +999; // an arbitrary value set as solution
 		}
 
-		newCol = (X + Y) + (N - 1) * dim + j;	// last segment's EndPts must lie inside badpoly
+		newCol = (X + Y) + (N - 1) * dim + j;
 		A(newRow, newCol) = 1;
 		b[newRow] = max;
 
@@ -856,15 +845,8 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 
 	// set the objective function: p_1' + p_1'' + p_2' + p_2''+ ... over all new vars
 	for (unsigned int i = 0; i < X; i++) {
-		lp_fixed_time.set_obj_coeff(i, 1);	//Amit Modification glpk implementation
+		lp_fixed_time.set_obj_coeff(i, 1);
 	}
-
-	/*cout << "A matrix\n";
-	 cout << A;
-	 cout << endl << "Bound Vector b is\n";
-	 for (unsigned int i = 0; i < b.size(); i++) {
-	 cout << b[i] << endl;
-	 }*/
 
 	return lp_fixed_time; // returns the built lp.
 }
@@ -899,12 +881,6 @@ void abstractCE::build_nlp(nlopt::opt & myoptStartPointFixed) {
 	// initialize the global locIdList
 	locIdList.resize(N);
 	std::set<int> d;
-	/*for (unsigned int i = 0; i < N; i++) {
-	 d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
-	 assert(d.size() == 1);
-	 locIdList[i] = *(d.begin());
-	 std::cout <<"Amit Doing AGAIN?   "<< locIdList[i] << " | ";
-	 }*/
 
 	polytope::ptr P;
 
@@ -920,7 +896,7 @@ void abstractCE::build_nlp(nlopt::opt & myoptStartPointFixed) {
 			get_first_symbolic_state()->getInitialPolytope()->get_index("t");
 
 	assert((t_index >= 0) && (t_index < dim));
-//	cout <<"1 successfull!! \n";
+
 	std::vector<double> dmin(dim, 0), dmax(dim, 0);
 	dmax[t_index] = 1;
 	dmin[t_index] = -1;
@@ -940,54 +916,28 @@ void abstractCE::build_nlp(nlopt::opt & myoptStartPointFixed) {
 		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
 		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
 
-//		cout <<"2 successfull!! \n";
 		polytope::ptr P;
 		if (i == (N - 1)) {	//For last location find intersection between Flowpipe and Bad set
-//			cout <<"7 successfull!! \n";
-				// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
 					aggregation, bad_poly, 1);
 			assert(polys.size() >= 0); // The last sym state of an abstract CE must intersect with the bad set
-//			cout <<"8 successfull!! polys.size() = "<<polys.size()<< "\n";
+
 			if (polys.size() > 1) {
 				P = get_template_hull(S->getContinuousSetptr(), 0,
 						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-//				cout <<"8a successfull!! \n";
 			} else {
 				P = polys.front();
-//				cout <<"8b successfull!! \n";
 			}
-//			cout <<"9 successfull!! \n";
-
-			/*matrix<double> A = bad_poly->getCoeffMatrix();
-			 std::vector<double> b = bad_poly->getColumnVector();
-			 cout << "A matrix\n";
-			 cout << A;
-			 cout << endl << "Bound Vector b is\n";
-			 for (unsigned int i = 0; i < b.size(); i++) {
-			 cout << b[i] << endl;
-			 }
-
-			 matrix<double> A2 = P->getCoeffMatrix();
-			 std::vector<double> b2 = P->getColumnVector();
-			 cout << "A2 matrix\n";
-			 cout << A2;
-			 cout << endl << "Bound Vector b2 is\n";
-			 for (unsigned int i = 0; i < b2.size(); i++) {
-			 cout << b2[i] << endl;
-			 }
-			 */
 
 			P = P->GetPolytope_Intersection(loc_inv);
 
 			P = P->GetPolytope_Intersection(bad_poly);
 
-//			cout <<"3 successfull!! \n";
 		} else {
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);	//runs based on the for-i-loop except the last iteration
 			guard = T->getGaurd();
-//			cout <<"4 successfull!! \n";
+
 			if (guard->getIsUniverse())
 				std::cout << "#Guard is Universe#\n" << std::endl;
 
@@ -1024,7 +974,6 @@ void abstractCE::build_nlp(nlopt::opt & myoptStartPointFixed) {
 			// assuming that the exception is caused due to an unbounded solution
 			min = 0; // the min value a time can take is 0.
 		}
-//		cout <<"6 successfull!! \n";
 
 		// we add the bounds as constraints in the nlopt
 		// Get the min and max time projection of start set
@@ -1046,39 +995,11 @@ void abstractCE::build_nlp(nlopt::opt & myoptStartPointFixed) {
 		// Increment the transition to the next in the symbolic path
 		if (it != transList.end())
 			it++;
-		//t[i] = (lb_t[i] + ub_t[i]) / 2;	//setting some initial \tau value for call to optimize()
 
 	}
 
 	myoptStartPointFixed.set_lower_bounds(lb_t);
 	myoptStartPointFixed.set_upper_bounds(ub_t);
-
-	/*
-	 cout << endl << "Upper Bound Vector b2 is\n";
-	 for (unsigned int i = 0; i < ub_t.size(); i++) {
-	 cout << ub_t[i] << endl;
-	 }
-	 cout << endl << "Lower Bound Vector b2 is\n";
-	 for (unsigned int i = 0; i < lb_t.size(); i++) {
-	 cout << lb_t[i] << endl;
-	 }
-	 */
-
-	/*
-	 cout<<"Before Call FixedStartPoints are \n";
-	 for (int i=0;i<N;i++){
-	 for (int j=0;j<fixedStartPoint[i].size();j++){
-	 cout << fixedStartPoint[i][j] <<"  ";
-	 }
-	 }
-	 cout<<endl;
-	 */
-
-//	myoptStartPointFixed.optimize(t, minf);
-//
-//	solutionsTau = t;
-	//return myoptStartPointFixed; //myoptStartPointFixed object
-//	return t;
 }
 
 /**
@@ -1096,10 +1017,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	bad_poly = this->forbid_poly;
 	ref_pts = refinements;
 
-	std::cout << "Length of the CE, N=" << N << std::endl;
-	std::cout << "gen_concreteCE: dimension =" << dim << ", length of CE=" << N
-			<< std::endl;
-
 	// initialize the global locIdList
 	locIdList.resize(N);
 	std::cout << "Location ID sequence in symbolic CE: ";
@@ -1126,19 +1043,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	 */
 
 	std::vector<double> x0[N]; // to contain the fixed start-points.
-	/*
-	 cout <<"What is N="<<N <<"   ";
-	 x0[0].resize(3);
-	 cout <<"What is x0.size="<< x0->size() <<"   ";
-	 */
 
 	std::vector<double> lb_t(N), ub_t(N);
 
 	double max, min, start_min, start_max;
 
-	/* build the lp where dwell times are fixed and the start points of the
-	 * trajectory are variables.
-	 */
 	std::vector<double> dwell_times(N); // contains the fixed dwell_times
 
 	get_first_symbolic_state()->getInitialPolytope();
@@ -1248,107 +1157,124 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			it++;
 	}
 
-	double minf = 1e10; // a large value to start
-	//nlopt::opt myoptDwellTime; // nlp object;
 	unsigned int optD = N;
-
-	//	nlopt::opt myoptDwellTime(nlopt::LN_AUGLAG, optD); // derivative free
-	//	nlopt::opt myoptDwellTime(nlopt::LN_COBYLA, optD); // derivative free
+	unsigned int X1 = 2 * dim * (N - 1); //list of new variables in LP
 
 	nlopt::opt myoptDwellTime(nlopt::LD_MMA, optD); // derivative based
 
-	//  nlopt::opt myoptDwellTime(nlopt::LD_MMA, optD); // derivative based
-	//	nlopt::opt myoptDwellTime(nlopt::GN_ISRES,optD); // derivative free global
+	unsigned int maxeval = 100; // the max allowed iterations in nlp
+	unsigned int nlp_status;
 
-	unsigned int maxeval = 5000;	//20000;
+	myoptDwellTime.set_lower_bounds(lb_t);
+	myoptDwellTime.set_upper_bounds(ub_t);
+
 	myoptDwellTime.set_maxeval(maxeval);
 	myoptDwellTime.set_stopval(tolerance);
-	myoptDwellTime.set_xtol_rel(1e-4);
-	build_nlp(myoptDwellTime); // Build nlp with bounds on dwell-time for each transitions
 
-	unsigned int X1 = 2 * dim * (N - 1); //list of new variables
-	unsigned int nlp_status;
-	unsigned int maxIterations = 500, maxiter = 0;
-	double previousMinf = 999, previousRes = 999; //some large value
-	double smallChange = 1e-10;
-	//tolerance = 0.00001;
-	cout.precision(17);
+	double minf = 1e10; // a large value to start
+	double last_iter_lpopt = 1e10; // stores the opt returned by lp-solver from the last iteration
+								 // A large value in the beginning.
+	double last_iter_nlpopt = 1e10; // stores the opt returned by nlp-solver from the last iteration
+									 // A large value in the beginning.
+	const double diff = 1e-10; // the constant difference to decide stuck at local minima.
+	bool stuck_at_local_min, success=false;
 
-	try {
+	// A random restart algorithm for jumping out of local minima.
+	const unsigned int max_restarts = 20; // the max allowed restarts
+	unsigned int num_restart = 0; // keeps the count of number of restarts
+	std::default_random_engine generator;
 
+	boost::timer::cpu_timer timer;
+	using boost::timer::cpu_times;
+	using boost::timer::nanosecond_type;
+	nanosecond_type const sixhundred_seconds(600 * 1000000000LL);
+	// a search in an abstract ce is to timeout after 300 secs.
+	timer.start();
 
+	for(unsigned int i=0;i<max_restarts;i++){
 
-		/*
-		 * Now create a loop for totalRuns to try out Random Restart Algorithm.....
-		 * Note we must fix totalRuns otherwise it will not stop searching the path which actually do not have any Concrete CE.
-		 *
-		 */
+		while (minf > tolerance) {
 
-			while (minf > tolerance) {
-				maxiter++;
-				cout << " LP-NLP iterNo: " << maxiter << endl;
-				//solve the lp with fixed times
-				lp_solver fixed_time_Lp = build_lp(dwell_times);
-				/*cout <<"Dwell time\n";
-				 for (unsigned int j = 0; j < dwell_times.size(); j++) {
-				 cout << dwell_times[j] <<"  ";
-				 }
-				 cout<<endl;*/
+			//solve the lp with fixed times
+			lp_solver fixed_time_Lp = build_lp(dwell_times);
 
-				double res = fixed_time_Lp.solve();
-				std::vector<double> x = fixed_time_Lp.get_sv();
-				//From this vector, get the N vectors in x0 vector
-				//cout << "Creating and Printing x0[i][j] (LP res = )"<< res <<" \n";
-				for (unsigned int i = 0; i < N; i++) {
-					x0[i].resize(dim);	//declaring each array element its size
-					for (unsigned int j = 0; j < dim; j++) {
-						x0[i][j] = x[X1 + i * dim + j];
-						//	cout << x0[i][j] <<"  ";
-					}
-					//	cout<<endl;
+			double lp_res = fixed_time_Lp.solve();
+
+			std::vector<double> x = fixed_time_Lp.get_sv();
+
+			//From this vector, get the N start vectors in x0
+			for (unsigned int i = 0; i < N; i++) {
+				x0[i].resize(dim);	//declaring each array element its size
+				for (unsigned int j = 0; j < dim; j++) {
+					x0[i][j] = x[X1 + i * dim + j];
 				}
+			}
 
-				cout << "GLPK Solution res  = " << res << "\n";
-				if (res < tolerance)
-					break;
+//			cout << "\nLP returned opt.  = " << lp_res << "\n";
+			minf = lp_res;
+			if (lp_res < tolerance){
+				success = true;
+				break;
+			}
+			if( (last_iter_lpopt - lp_res) < diff){
+				stuck_at_local_min = true;
+				break;
+			}
+			last_iter_lpopt = lp_res; // storing this lp_res for comparison in the next iteration.
 
-				// solve the nlp with fixed start points.
-				//cout <<"build_nlp successfull!! \n";
-				myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
-				//cout <<"After call to nlp Optimize \n";
+			// solve the nlp with fixed start points.
+			myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
+			double nlp_res;
+			nlp_status = myoptDwellTime.optimize(dwell_times, nlp_res);
+	//		cout << "nlp returned opt. = " << nlp_res << "\n";
+			minf = nlp_res;
+			if (nlp_res < tolerance){
+				success = true;
+				break;
+			}
+//			if((last_iter_nlpopt - nlp_res) < diff){
+//				stuck_at_local_min = true;
+//				break;
+//			}
+//			last_iter_nlpopt = nlp_res; // storing this nlp_res for comparison in the next iteration.
+	//		if (nlp_status == NLOPT_SUCCESS)
+	//			std::cout
+	//					<< "Splicing with Iterative LP-NLP: NLOPT stopped successfully returning the found minimum\n";
+	//		else if (nlp_status == NLOPT_STOPVAL_REACHED)
+	//			std::cout
+	//					<< "Splicing with Iterative LP-NLP: NLOPT stopped due to stopping value (1e-6) reached\n";
+	//		else if (nlp_status == NLOPT_MAXEVAL_REACHED)
+	//			std::cout
+	//					<< "Splicing with Iterative LP-NLP: NLOPT stopped due to reaching maxeval!!"
+	//					<< std::endl;
+			cpu_times const elapsed_times(timer.elapsed());
+			nanosecond_type const elapsed(elapsed_times.user);
+			if (elapsed > sixhundred_seconds)
+			{
+				std::cout << "Timed-out on the abstract counterexample\n";
+				success = true; // here, success true is break the restart loop.
+				break;
+			}
+		} // end of alternating lp-nlp loop.
 
-				nlp_status = myoptDwellTime.optimize(dwell_times, minf);
-				cout << "nlp_optimize successfull  minf = " << minf << "\n";
+		if(success) break; // splicing complete. terminate.
 
-				double newChange = fabs(previousMinf - minf);
-				if (smallChange >= newChange) {
-					cout<< "STOPING LP-NLP loop DUE to very small change in the result!!\n";
-					break;
-				}
-				if ((previousMinf == minf) && (previousRes == res) || (maxiter >= maxIterations)) { //This is WORKING
-					cout<< "STOPING LP-NLP loop either, DUE TO no change in the result or MAX-ITERATIONS REACHed!!\n";
-					break;
-				}
-				previousMinf = minf;
-				previousRes = res;
+		if(stuck_at_local_min){
+			// get a new random start value of the dwell times, and restart search.
+			for(unsigned int j=0;j<N;j++){
+				std::uniform_real_distribution<double> distribution(lb_t[j], ub_t[j]);
 
+				double new_start = distribution(generator); //uniformly generating random numbers
+				dwell_times[j] = new_start; // This is done so that for the same Location Uniform generation can be maintained
+			}
+			stuck_at_local_min = false;
+			num_restart = i++;
+			last_iter_lpopt=1e10; // last lp res set to a large value;
+			last_iter_nlpopt=1e10; // last nlp res set to a large value;
+		}
 
-			} //End of Search for a dwell_time
+	} // end of search restart loop/
 
-
-		if (nlp_status == NLOPT_SUCCESS)
-			std::cout<< "Splicing with Iterative LP-NLP: NLOPT stopped successfully returning the found minimum\n";
-		else if (nlp_status == NLOPT_STOPVAL_REACHED)
-			std::cout<< "Splicing with Iterative LP-NLP: NLOPT stopped due to stopping value (1e-6) reached\n";
-		else if (nlp_status == NLOPT_MAXEVAL_REACHED)
-			std::cout<< "Splicing with Iterative LP-NLP: NLOPT stopped due to reaching maxeval!!"<< std::endl;
-	} catch (std::exception &e) {
-		std::cout << e.what() << std::endl;
-	}
-
-	std::cout << "nlopt returned min : " << minf << "\n";
-
-	//tolerance = 1.1; //Just to see all traces
 
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
@@ -1358,14 +1284,9 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 				<< std::endl;
 		return cexample;
 	} else {
-		std::cout << "nlopt returned min : " << minf << "\n";
+		std::cout << "Alternating solver returned min : " << minf << "\n";
 		std::cout << "Length of abstract counter example:" << N << "\n";
-
-		/*if (minf > tolerance) {
-		 std::cout << "Obtained minimum greater than " << tolerance
-		 << ", with no. of refined search:" << refinements.size() << std::endl;
-		 return cexample;
-		 } else {*/
+		std::cout << "Number of solver restarts:" << num_restart << "\n";
 		std::ofstream ce_trace;
 		// one trajectory per symbolic state to be added in the concreteCE
 		for (unsigned int i = 0; i < N; i++) {
@@ -1391,376 +1312,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 	return cexample;
 }
-
-
-
-
-
-
-/**
- * Implementing the LP-NLP with Random-ReStart iterative routine for trajectory splicing
- *
- */
-concreteCE::ptr abstractCE::gen_concreteCE_iterativeReStart(double tolerance,
-		const std::list<refinement_point> &refinements) {
-	symbolic_states::const_ptr S = get_first_symbolic_state();
-	dim = S->getContinuousSetptr()->get_dimension();
-
-	HA = this->get_automaton();
-	transList = this->get_CE_transitions();
-	N = transList.size() + 1; // the length of the counter example
-	bad_poly = this->forbid_poly;
-	ref_pts = refinements;
-
-	std::cout << "Length of the CE, N=" << N << std::endl;
-	std::cout << "gen_concreteCE: dimension =" << dim << ", length of CE=" << N
-			<< std::endl;
-
-	// initialize the global locIdList
-	locIdList.resize(N);
-	std::cout << "Location ID sequence in symbolic CE: ";
-
-	std::set<int> d;
-	for (unsigned int i = 0; i < N; i++) {
-		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
-		assert(d.size() == 1);
-		locIdList[i] = *(d.begin());
-		std::cout << locIdList[i] << " | ";
-	}
-
-	/* 1. Declare the sub-problem by fixing starting points of each location.
-	 *
-	 * The length of the counter example is N. When fixing the starting point of
-	 * each location, the decision variables are dwell time in each location.
-	 * Therefore, the dimension of the opt problem is N. This problem is supposed
-	 * to be a nonlinear optimization problem.
-	 */
-
-	/* build nlp creates a trajectory splicing opt. prob.
-	 * where start points of the trajectory segments are fixed
-	 * and the dwell times of the segments are variables
-	 */
-
-	std::vector<double> x0[N]; // to contain the fixed start-points.
-	/*
-	 cout <<"What is N="<<N <<"   ";
-	 x0[0].resize(3);
-	 cout <<"What is x0.size="<< x0->size() <<"   ";
-	 */
-
-	std::vector<double> lb_t(N), ub_t(N);
-
-	double max, min, start_min, start_max;
-
-	/* build the lp where dwell times are fixed and the start points of the
-	 * trajectory are variables.
-	 */
-	std::vector<double> dwell_times(N); // contains the fixed dwell_times
-
-	get_first_symbolic_state()->getInitialPolytope();
-
-	unsigned int t_index =
-			get_first_symbolic_state()->getInitialPolytope()->get_index("t");
-
-	assert((t_index >= 0) && (t_index < dim));
-
-	std::vector<double> dmin(dim, 0), dmax(dim, 0);
-	dmax[t_index] = 1;
-	dmin[t_index] = -1;
-
-	std::list<polytope::ptr> polys;
-	polytope::ptr guard;
-
-	std::list<transition::ptr>::iterator it = transList.begin();
-	transition::ptr T;
-
-	bool aggregation = true; //default is ON
-
-	// initialize values for dwell time from calculating min, max bounds.
-	for (unsigned int i = 0; i < N; i++) {
-		S = get_symbolic_state(i);
-
-		unsigned int loc_id = locIdList[i];	//location ID
-		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
-		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
-
-		polytope::ptr P;
-		if (i == N - 1) {
-			// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
-			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
-					aggregation, bad_poly, 1);
-			assert(polys.size() >= 0); // The last sym state of an abstract CE must intersect with the bad set
-
-			if (polys.size() > 1)
-				P = get_template_hull(S->getContinuousSetptr(), 0,
-						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-			else
-				P = polys.front();
-
-			P = P->GetPolytope_Intersection(loc_inv);
-			P = P->GetPolytope_Intersection(bad_poly);
-		} else {
-			// Take time projection of flowpipe \cap transition guard
-			T = *(it);
-			guard = T->getGaurd();
-			if (guard->getIsUniverse())
-				std::cout << "#Guard is Universe#\n" << std::endl;
-
-			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
-					aggregation, guard, 1);
-
-			assert(polys.size() >= 1); // An abstract CE state must have intersection with the trans guard
-			if (polys.size() > 1)
-				P = get_template_hull(S->getContinuousSetptr(), 0,
-						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-			else
-				P = polys.front();
-			// Now intersect P with guard
-			P = P->GetPolytope_Intersection(loc_inv);
-			P = P->GetPolytope_Intersection(guard);
-
-		}
-
-		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-				P->getInEqualitySign());
-		// ensure that time is always positive
-		try {
-			max = lp.Compute_LLP(dmax);
-		} catch (...) {
-			// assuming that the exception is caused due to an unbounded solution
-			max = 999; // an arbitrary large value set as solution
-		}
-		try {
-			min = -1 * lp.Compute_LLP(dmin);
-		} catch (...) {
-			// assuming that the exception is caused due to an unbounded solution
-			min = 0; // the min value a time can take is 0.
-		}
-
-		// we add the bounds as constraints in the nlopt
-
-		// Get the min and max time projection of start set
-		lp_solver lp1(GLPK_SOLVER);
-		polytope::ptr init_of_symb = S->getInitialPolytope();
-
-		lp1.setConstraints(init_of_symb->getCoeffMatrix(),
-				init_of_symb->getColumnVector(),
-				init_of_symb->getInEqualitySign());
-		// Ensure that the time is positive
-		start_min = -1 * lp1.Compute_LLP(dmin);
-		start_max = lp1.Compute_LLP(dmax);
-		ub_t[i] = max - start_min;
-		if (min <= start_max)
-			lb_t[i] = 0;
-		else
-			lb_t[i] = min - start_max;
-
-		// We may choose to take the average time as the initial dwell time
-		dwell_times[i] = (lb_t[i] + ub_t[i]) / 2;
-
-		// Increment the transition to the next in the symbolic path
-		if (it != transList.end())
-			it++;
-	}
-
-	double minf = 1e10; // a large value to start
-	//nlopt::opt myoptDwellTime; // nlp object;
-	unsigned int optD = N;
-
-	//	nlopt::opt myoptDwellTime(nlopt::LN_AUGLAG, optD); // derivative free
-	//	nlopt::opt myoptDwellTime(nlopt::LN_COBYLA, optD); // derivative free
-
-	nlopt::opt myoptDwellTime(nlopt::LD_MMA, optD); // derivative based
-
-	//  nlopt::opt myoptDwellTime(nlopt::LD_MMA, optD); // derivative based
-	//	nlopt::opt myoptDwellTime(nlopt::GN_ISRES,optD); // derivative free global
-
-	unsigned int maxeval = 5000;	//20000;
-	myoptDwellTime.set_maxeval(maxeval);
-	myoptDwellTime.set_stopval(tolerance);
-	myoptDwellTime.set_xtol_rel(1e-4);
-	build_nlp(myoptDwellTime); // Build nlp with bounds on dwell-time for each transitions
-
-	unsigned int X1 = 2 * dim * (N - 1); //list of new variables
-	unsigned int nlp_status;
-	unsigned int maxIterations = 1000, maxiter = 0;
-	double previousMinf = 999, previousRes = 999; //some large value
-	double smallChange = 1e-10;
-	//tolerance = 0.00001;
-	cout.precision(17);
-
-	try {
-
-		/*
-		 * Loop for Uniform-distributed Random Restart of the Search Algorithm
-		 */
-
-		unsigned int totalRuns = 30; //ToDo: We must find out what is the maximum numbers of iteration sufficient to Restart
-
-		std::vector<std::vector<double>> mydwell_times(totalRuns);
-		for (int i = 0; i < totalRuns; i++) {
-			mydwell_times[i].resize(N); //dynamic memory allocation
-		}
-
-		//For each Location generating 1000 random dwell_times for performing different restart operation
-		for (int j = 0; j < N; j++) {
-			double a = lb_t[j], b = ub_t[j];
-			cout << "(" << a << ", " << b << ")" << endl;
-			std::default_random_engine generator;
-			std::uniform_real_distribution<double> distribution(a, b);
-
-			for (int i = 0; i < totalRuns; i++) {
-				double number = distribution(generator); //uniformly generating random numbers
-				mydwell_times[i][j] = number; //This is done so that for the same Location Uniform generation can be maintained
-			}
-		}
-		cout << "List of Random Dwell time for Location 0\n";
-		for (int i = 0; i < totalRuns; i++) {
-			cout << "Dwell time\n";
-			cout << mydwell_times[i][0] << endl;
-		}
-
-		//dwell_times[j] = number; //Random number between lb_t and ub_t
-
-		/*
-		 * Now create a loop for totalRuns to try out Random Restart Algorithm.....
-		 * Note we must fix totalRuns otherwise it will not stop searching the path which actually do not have any Concrete CE.
-		 *
-		 */
-		int iterNo = 0;
-		while (iterNo < totalRuns) {
-			//minf = 1e10; // reset a large value to restart
-			dwell_times = mydwell_times[iterNo];
-
-			while (minf > tolerance) {
-				maxiter++;
-				cout << "Iter. No: " << iterNo << "  LP-NLP iterNo: " << maxiter
-						<< endl;
-				//solve the lp with fixed times
-				lp_solver fixed_time_Lp = build_lp(dwell_times);
-				/*cout <<"Dwell time\n";
-				 for (unsigned int j = 0; j < dwell_times.size(); j++) {
-				 cout << dwell_times[j] <<"  ";
-				 }
-				 cout<<endl;*/
-
-				double res = fixed_time_Lp.solve();
-				std::vector<double> x = fixed_time_Lp.get_sv();
-				//From this vector, get the N vectors in x0 vector
-				//cout << "Creating and Printing x0[i][j] (LP res = )"<< res <<" \n";
-				for (unsigned int i = 0; i < N; i++) {
-					x0[i].resize(dim);	//declaring each array element its size
-					for (unsigned int j = 0; j < dim; j++) {
-						x0[i][j] = x[X1 + i * dim + j];
-						//	cout << x0[i][j] <<"  ";
-					}
-					//	cout<<endl;
-				}
-
-				cout << "GLPK Solution res  = " << res << "\n";
-				if (res < tolerance)
-					break;
-
-				// solve the nlp with fixed start points.
-				//cout <<"build_nlp successfull!! \n";
-				myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
-				//cout <<"After call to nlp Optimize \n";
-
-				nlp_status = myoptDwellTime.optimize(dwell_times, minf);
-				cout << "nlp_optimize successfull  minf = " << minf << "\n";
-
-				double newChange = fabs(previousMinf - minf);
-				if (smallChange >= newChange) {
-					cout
-							<< "STOPING LP-NLP loop DUE to very small change in the result!!\n";
-					break;
-				}
-				if (((previousMinf == minf) && (previousRes == res))
-						|| (maxiter >= maxIterations)) { //This is WORKING
-					cout
-							<< "STOPING LP-NLP loop either, DUE TO no change in the result or MAX-ITERATIONS REACHed!!\n";
-					break;
-				}
-				previousMinf = minf;
-				previousRes = res;
-			} //End of Search for a dwell_time
-
-			if (minf <= tolerance)
-				break; //out of the loop random restart loop
-
-			iterNo++;
-			maxiter = 0;
-		} //Loop for next random restart search
-
-		if (iterNo == totalRuns)
-			std::cout
-					<< "Splicing with Iterative LP-NLP: stopped Searching all possible random start-point!!"
-					<< std::endl;
-		else if (nlp_status == NLOPT_SUCCESS)
-			std::cout
-					<< "Splicing with Iterative LP-NLP: NLOPT stopped successfully returning the found minimum\n";
-		else if (nlp_status == NLOPT_STOPVAL_REACHED)
-			std::cout
-					<< "Splicing with Iterative LP-NLP: NLOPT stopped due to stopping value (1e-6) reached\n";
-		else if (nlp_status == NLOPT_MAXEVAL_REACHED)
-			std::cout
-					<< "Splicing with Iterative LP-NLP: NLOPT stopped due to reaching maxeval!!"
-					<< std::endl;
-	} catch (std::exception &e) {
-		std::cout << e.what() << std::endl;
-	}
-
-	std::cout << "nlopt returned min : " << minf << "\n";
-
-	//tolerance = 1.1; //Just to see all traces
-
-	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
-	cexample->set_automaton(HA);
-	if (minf > tolerance) {
-		std::cout << "Obtained minimum greater than " << tolerance
-				<< ", with no. of refined search:" << refinements.size()
-				<< std::endl;
-		return cexample;
-	} else {
-		std::cout << "nlopt returned min : " << minf << "\n";
-		std::cout << "Length of abstract counter example:" << N << "\n";
-
-		/*if (minf > tolerance) {
-		 std::cout << "Obtained minimum greater than " << tolerance
-		 << ", with no. of refined search:" << refinements.size() << std::endl;
-		 return cexample;
-		 } else {*/
-		std::ofstream ce_trace;
-		// one trajectory per symbolic state to be added in the concreteCE
-		for (unsigned int i = 0; i < N; i++) {
-			// create the sample
-			concreteCE::sample s;
-			std::set<int>::iterator dset_iter =
-					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
-			unsigned int locId = *dset_iter;
-
-			std::vector<double> y(dim);
-			for (unsigned int j = 0; j < dim; j++) {
-				y[j] = x0[i][j];
-			}
-
-			s.first = y;
-			s.second = dwell_times[i];
-			concreteCE::traj_segment traj;
-			traj.first = locId;
-			traj.second = s;
-			cexample->push_back(traj);
-		}
-	}
-
-	return cexample;
-}
-
-
-
-
-
 
 /**
  * Generate concrete trajectory using splicing with NLP problem (Zutchi, Sankaranarayanan's  Idea)
@@ -1814,10 +1365,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 	//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
-	// 	local optimization routine
+	// 	Optimization routine paramters
 	unsigned int maxeval = 20000;
+	unsigned int maxtime = 600; //600 secs.
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(maxeval);
+	myopt.set_maxtime(maxtime); // times out after maxtime
+	//myopt.set_maxeval(maxeval);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;
@@ -1850,37 +1403,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			polytope::ptr src_loc_inv = src_loc->getInvariant();
 			polytope::ptr dest_loc_inv = dest_loc->getInvariant();
 
-			/*  This code is not Commented in Dongxu's version
-			 *
-			 polytope::ptr guard = T->getGaurd();
-
-			 assert(guard!=NULL);
-			 assert(src_loc_inv!=NULL);
-			 assert(dest_loc_inv!=NULL);
-
-			 polytope::ptr src_inv_inters_g = src_loc_inv->GetPolytope_Intersection(guard);
-
-			 polytope::ptr mapped_poly;
-			 polytope::ptr feas_poly; // feas_poly is the feasible region to sample start points
-
-			 Assign trans_assign = T->getAssignT();
-			 math::matrix<double> directions;
-
-			 std::vector<std::vector<double> > box_directions;
-			 box_directions = generate_axis_directions(HA->getDimension());
-
-			 get_ublas_matrix(box_directions, directions);
-
-
-			 if (trans_assign.Map.isInvertible()) {
-			 mapped_poly = post_assign_exact(src_inv_inters_g, trans_assign.Map, trans_assign.b);
-			 } else {
-			 mapped_poly = post_assign_approx_deterministic(src_inv_inters_g,
-			 trans_assign.Map, trans_assign.b, directions,1);
-			 }
-
-			 feas_poly = mapped_poly->GetPolytope_Intersection(dest_loc_inv);
-			 //P = feas_poly; */
 			P = dest_loc_inv; // The feasible region for start point of the traj. segment is taken as the loc invariant
 			assert(P!=NULL);
 
@@ -1888,7 +1410,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			lb[N * dim + i] = 0;
 			ub[N * dim + i] = 999;
 		}
-		//P->printPoly();
 
 		if (P->getIsUniverse()) {
 			// set arbitrarily large but finite bounds on start points
@@ -2012,312 +1533,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 
 }
 
-/*
- * AMIT: Implementing LP for initial solution point followed by Simulation for CE generation.
- */
-concreteCE::ptr abstractCE::gen_concreteCE_Simulation(double tolerance, const std::list<refinement_point>& refinements){
-
-
-	symbolic_states::const_ptr S = get_first_symbolic_state();
-		dim = S->getContinuousSetptr()->get_dimension();
-
-		HA = this->get_automaton();
-		transList = this->get_CE_transitions();
-		N = transList.size() + 1; // the length of the counter example
-		bad_poly = this->forbid_poly;
-		ref_pts = refinements;
-
-		std::cout << "Length of the CE, N=" << N << std::endl;
-		std::cout << "gen_concreteCE: dimension =" << dim << ", length of CE=" << N
-				<< std::endl;
-
-		// initialize the global locIdList
-		locIdList.resize(N);
-		std::cout << "Location ID sequence in symbolic CE: ";
-
-		std::set<int> d;
-		for (unsigned int i = 0; i < N; i++) {
-			d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
-			assert(d.size() == 1);
-			locIdList[i] = *(d.begin());
-			std::cout << locIdList[i] << " | ";
-		}
-
-		/* 1. Declare the sub-problem by fixing starting points of each location.
-		 *
-		 * The length of the counter example is N. When fixing the starting point of
-		 * each location, the decision variables are dwell time in each location.
-		 * Therefore, the dimension of the opt problem is N. This problem is supposed
-		 * to be a nonlinear optimization problem.
-		 */
-
-		std::vector<double> x0[N]; // to contain the fixed start-points.
-		/*
-		 cout <<"What is N="<<N <<"   ";
-		 x0[0].resize(3);
-		 cout <<"What is x0.size="<< x0->size() <<"   ";
-		 */
-
-		std::vector<double> lb_t(N), ub_t(N);
-
-		double max, min, start_min, start_max;
-
-		/* build the lp where dwell times are fixed and the start points of the
-		 * trajectory are variables.
-		 */
-		std::vector<double> dwell_times(N); // contains the fixed dwell_times
-
-		get_first_symbolic_state()->getInitialPolytope();
-
-		unsigned int t_index =
-				get_first_symbolic_state()->getInitialPolytope()->get_index("t");
-
-		assert((t_index >= 0) && (t_index < dim));
-
-		std::vector<double> dmin(dim, 0), dmax(dim, 0);
-		dmax[t_index] = 1;
-		dmin[t_index] = -1;
-
-		std::list<polytope::ptr> polys;
-		polytope::ptr guard;
-
-		std::list<transition::ptr>::iterator it = transList.begin();
-		transition::ptr T;
-
-		bool aggregation = true; //default is ON
-double global_time_horizon =0; //to hold the maximum global time horizon from the flowpipe computation
-		// initialize values for dwell time from calculating min, max bounds.
-		for (unsigned int i = 0; i < N; i++) {
-			S = get_symbolic_state(i);
-
-			unsigned int loc_id = locIdList[i];	//location ID
-			location::ptr ha_loc_ptr = HA->getLocation(loc_id);
-			polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
-
-			polytope::ptr P;
-			if (i == N - 1) {
-				// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
-				polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
-						aggregation, bad_poly, 1);
-				assert(polys.size() >= 0); // The last sym state of an abstract CE must intersect with the bad set
-
-				if (polys.size() > 1)
-					P = get_template_hull(S->getContinuousSetptr(), 0,
-							S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-				else
-					P = polys.front();
-
-				P = P->GetPolytope_Intersection(loc_inv);
-				P = P->GetPolytope_Intersection(bad_poly);
-			} else {
-				// Take time projection of flowpipe \cap transition guard
-				T = *(it);
-				guard = T->getGaurd();
-				if (guard->getIsUniverse())
-					std::cout << "#Guard is Universe#\n" << std::endl;
-
-				polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
-						aggregation, guard, 1);
-
-				assert(polys.size() >= 1); // An abstract CE state must have intersection with the trans guard
-				if (polys.size() > 1)
-					P = get_template_hull(S->getContinuousSetptr(), 0,
-							S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-				else
-					P = polys.front();
-				// Now intersect P with guard
-				P = P->GetPolytope_Intersection(loc_inv);
-				P = P->GetPolytope_Intersection(guard);
-
-			}
-
-			lp_solver lp(GLPK_SOLVER);
-			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-					P->getInEqualitySign());
-			// ensure that time is always positive
-			try {
-				max = lp.Compute_LLP(dmax);
-			} catch (...) {
-				// assuming that the exception is caused due to an unbounded solution
-				max = 999; // an arbitrary large value set as solution
-			}
-			try {
-				min = -1 * lp.Compute_LLP(dmin);
-			} catch (...) {
-				// assuming that the exception is caused due to an unbounded solution
-				min = 0; // the min value a time can take is 0.
-			}
-
-			// we add the bounds as constraints in the nlopt
-
-			// Get the min and max time projection of start set
-			lp_solver lp1(GLPK_SOLVER);
-			polytope::ptr init_of_symb = S->getInitialPolytope();
-
-			lp1.setConstraints(init_of_symb->getCoeffMatrix(),
-					init_of_symb->getColumnVector(),
-					init_of_symb->getInEqualitySign());
-			// Ensure that the time is positive
-			start_min = -1 * lp1.Compute_LLP(dmin);
-			start_max = lp1.Compute_LLP(dmax);
-			ub_t[i] = max - start_min;
-			if (min <= start_max)
-				lb_t[i] = 0;
-			else
-				lb_t[i] = min - start_max;
-
-			// We may choose to take the average time as the initial dwell time
-			dwell_times[i] = (lb_t[i] + ub_t[i]) / 2;
-			global_time_horizon += ub_t[i];
-			// Increment the transition to the next in the symbolic path
-			if (it != transList.end())
-				it++;
-		}
-
-		double minf = 1e10; // a large value to start
-
-
-		simulation::ptr sim = simulation::ptr(new simulation());
-
-		sim->set_out_dimension(user_options.get_first_plot_dimension(), user_options.get_second_plot_dimension()); //output dimensions
-		sim->set_time_step(user_options.get_timeStep());
-
-
-
-		unsigned int X1 = 2 * dim * (N - 1); //list of new variables
-
-
-		cout.precision(17);
-
-		try {
-
-					//solve the lp with fixed times
-					lp_solver fixed_time_Lp = build_lp(dwell_times);
-
-					double res = fixed_time_Lp.solve();
-					std::vector<double> x = fixed_time_Lp.get_sv();
-					//From this vector, get the N vectors in x0 vector
-					cout << "Creating and Printing x0[i][j] (LP res = )"<< res <<" \n";
-					for (unsigned int i = 0; i < N; i++) {
-						x0[i].resize(dim);	//declaring each array element its size
-						for (unsigned int j = 0; j < dim; j++) {
-							x0[i][j] = x[X1 + i * dim + j];
-								cout << x0[i][j] <<"  ";
-						}
-							cout<<endl;
-					}
-
-
-					if (res < tolerance)
-						cout << "GLPK Solution res  = " << res << "\n";
-
-
-					// Now do a Simulation with solution of LP by using the first segment's initial start point.
-
-
-					std::vector<sim_start_point> ress;
-
-					sim_start_point start_pts;
-
-					start_pts.cross_over_time = 0;
-					location::ptr ha_loc_ptr = HA->getLocation(locIdList[0]);
-					start_pts.locptr =ha_loc_ptr;
-					start_pts.start_point = x0[0];
-					cout <<"Hello check x0[0]\n";
-					for (unsigned int ii=0;ii<x0[0].size();ii++) {
-						cout<< start_pts.start_point[ii] <<"\t";
-					}
-
-	double starting=0;
-	unsigned int bfslevel = user_options.get_bfs_level();
-
-	std::pair<int, polytope::ptr> unsafe_symb_set;
-
-	unsafe_symb_set.first = -1; // location id; Thoughtlessly set here.
-	unsafe_symb_set.second=forbid_poly;
-	sim->simulateHa(start_pts, starting, global_time_horizon, getHa(), unsafe_symb_set, bfslevel);
-
-
-	cout <<"global_time_horizon = "<<global_time_horizon <<"  bfslevel = " << bfslevel <<endl;
-
-
-	std::ofstream myfile;
-	myfile.open(user_options.getOutFilename().c_str(), std::ofstream::out);
-	myfile.close();
-	sim->print_trace_to_outfile(user_options.getOutFilename());
-
-	string cmdStr1;
-	cmdStr1.append("graph -TX -BC ");
-	cmdStr1.append(user_options.getOutFilename().c_str());
-	system(cmdStr1.c_str());
-
-
-exit(0);
-
-			if (res < tolerance)
-				std::cout<< "Splicing with Iterative LP-Simulation: stopped successfully returning the found minimum\n"<< std::endl;
-
-		} catch (std::exception &e) {
-			std::cout << e.what() << std::endl;
-		}
-
-
-		concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
-		cexample->set_automaton(HA);
-		if (minf > tolerance) {
-			std::cout << "Obtained minimum greater than " << tolerance
-					<< ", with no. of refined search:" << refinements.size()
-					<< std::endl;
-			return cexample;
-		} else {
-			std::cout << "nlopt returned min : " << minf << "\n";
-			std::cout << "Length of abstract counter example:" << N << "\n";
-
-			/*if (minf > tolerance) {
-			 std::cout << "Obtained minimum greater than " << tolerance
-			 << ", with no. of refined search:" << refinements.size() << std::endl;
-			 return cexample;
-			 } else {*/
-			std::ofstream ce_trace;
-			// one trajectory per symbolic state to be added in the concreteCE
-			for (unsigned int i = 0; i < N; i++) {
-				// create the sample
-				concreteCE::sample s;
-				std::set<int>::iterator dset_iter =
-						get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
-				unsigned int locId = *dset_iter;
-
-				std::vector<double> y(dim);
-				for (unsigned int j = 0; j < dim; j++) {
-					y[j] = x0[i][j];
-				}
-
-				s.first = y;
-				s.second = dwell_times[i];
-				concreteCE::traj_segment traj;
-				traj.first = locId;
-				traj.second = s;
-				cexample->push_back(traj);
-			}
-		}
-
-		return cexample;
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
 concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 		unsigned int algo_type) {
 
@@ -2329,22 +1544,27 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 	bool val_res = true;
 	unsigned int max_refinements = 3, ref_count = 0; // maximum limit to refinement points to be added.
 
-	double valid_tol = 1e-3; // validation error tolerance, on invariant crossing. @Amit changed 1e-3 to 1e-6
+	double valid_tol = 1e-3; // validation error tolerance, on invariant crossing.
 
 	do {
 		struct refinement_point pt;
 
-		if (algo_type == 1) // FC called
+		if (algo_type == 1) // FC - Trajectory splicing with constraints over the search-space derived from flowpipe.
 			cexample = gen_concreteCE(tolerance, refinements);
-		else if (algo_type == 2) { // WoFC called
+		else if (algo_type == 2) { // WoFC - Trajectory splicing with HA implicit constraints over the search-space.
 			cexample = gen_concreteCE_NLP_HA(tolerance, refinements);
-		} else if (algo_type == 3) { //std::cout << "LP-NLP mixed implementation\n";
+		} else if (algo_type == 3) { // LP-NLP alternative looping \n";
 			cexample = gen_concreteCE_iterative(tolerance, refinements);
-		} else if (algo_type == 4) { //std::cout << "LP solution for initial point followed by Simulation and CAGAR based Refinement\n";
+		} else if (algo_type == 4) { // Trajectory splicing with fixed-dwell-times (LP), using LP soln as initial point for simulation\n";
 				cexample = gen_concreteCE_Simulation(tolerance, refinements);
-		} else if (algo_type == 5) { //std::cout << "LP-NLP mixed implementation with Random-ReStart algorithm\n";
-			cexample = gen_concreteCE_iterativeReStart(tolerance, refinements);
-		} else {
+		}
+		else if (algo_type == 5) { // Trajectory splicing with search over dwell-times (NLP), Obj Func as an LP solution.
+			cexample = gen_concreteCE_LPobj(tolerance, refinements);
+		}
+		else if (algo_type == 6) { // Trajectory splicing with time-optimal splicing.
+			cexample = gen_concreteCE_Opt(tolerance, refinements);
+		}
+		else {
 			std::cout
 					<< "Invalid algo type specified for trajectory splicing\n";
 		}
@@ -2354,9 +1574,9 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 			return cexample;
 		}
 
-		val_res = cexample->valid(pt, valid_tol);
+		//val_res = cexample->valid(pt, valid_tol);
 		//putting off validation loop by refinements
-		//val_res = true;
+		val_res = true;
 		//--
 
 		if (!val_res) {
@@ -2414,3 +1634,5 @@ concreteCE::ptr abstractCE::search_concreteCE(double tolerance,
 		return ce;
 	}
 }
+
+#include "abstraceCE.hpp"

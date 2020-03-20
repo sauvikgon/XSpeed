@@ -19,6 +19,7 @@
 #include "../benchmarks/Navigation_Benchmark/Nav30Timed.h"
 #include "../benchmarks/Navigation_Benchmark/Navigation5by5WithOutTime.h"
 #include "../benchmarks/Navigation_Benchmark/NavigationBenchmark.h"
+#include "../benchmarks/Navigation_Benchmark/NavigationTimed3by3.h"
 #include "../benchmarks/oscillator_model/f_osc_32.h"
 #include "../benchmarks/oscillator_model/f_osc_32_timed.h"
 #include "../benchmarks/oscillator_model/f_osc_8.h"
