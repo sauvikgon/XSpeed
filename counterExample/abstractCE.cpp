@@ -1365,10 +1365,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 	//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
-	// 	local optimization routine
+	// 	Optimization routine paramters
 	unsigned int maxeval = 20000;
+	unsigned int maxtime = 600; //600 secs.
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(maxeval);
+	myopt.set_maxtime(maxtime); // times out after maxtime
+	//myopt.set_maxeval(maxeval);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
 	polytope::ptr P;

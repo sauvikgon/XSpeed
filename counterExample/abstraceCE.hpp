@@ -523,7 +523,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_LPobj(double tolerance, const std::li
  * abstract counter example using non-linear optimization
  * routine and using the constraints from flowpipe.
  * The NLP returns a time minimal trajectory from the
- * abstract counterexample. This routine has a "flaw"
+ * abstract counterexample. This routine has a "flaw".
  *
  * @Rajarshi
  * The approach FC in the HSCC 2019 Paper
