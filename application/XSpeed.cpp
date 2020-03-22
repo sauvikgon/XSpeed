@@ -10,6 +10,8 @@
 #include "utilities/statistics.h"
 #include "application/readCommandLine.h"
 #include "application/simulationCaller.h"
+#include "counterExample/WoFC_counter_example.h"
+#include "core/continuous/Polytope/Polytope.h"
 
 int main(int argc, char *argv[]) {
 
@@ -36,6 +38,28 @@ int main(int argc, char *argv[]) {
 		simulationCaller(reach_parameters, Hybrid_Automata, init_state, user_options, forbidden_set);
 		return 0; //Only Trajectory Simulation is done
 	}
+
+	// ----Section for Running Exp-Graph. This code is put only for experimental task.
+
+	int	 runExpGraph_WoFC = 0;	// To run Exp-Graph Algorithm, that is, Explore the Graph. Note should assign a valid loc-id in the forbidden set (and not -1, unlike FC algo)
+	if (runExpGraph_WoFC) {
+		bool found_CE = runWoFC_counter_example(Hybrid_Automata, init_state, forbidden_set, user_options);
+
+		if (found_CE) {
+			string cmdStr1;
+			//cmdStr1.append("graph -TX -BC -W 0.008 out.txt -s -m 3 bad_poly -s -m 2 init_poly");
+			cmdStr1.append("graph -TX -BC -W 0.008 out.txt");
+			system(cmdStr1.c_str());
+		}
+
+		return 0;
+	}
+
+//End of Section Exp-Graph.
+
+
+
+
 	// Reachability with CE generation
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 

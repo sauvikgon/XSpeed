@@ -155,6 +155,14 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	if(HybridSystem_Model_Type == 28){ // Filtered Oscillator model with 32 filters called
 		setf_osc_32_timedmodel(ha, init_state, reach_parameters);
 	}
+
+	if(HybridSystem_Model_Type == 29){ // Space craft
+		setSpacecraft(ha,init_state,reach_parameters);
+		//setSpacecraftAbort(ha,init_state,reach_parameters);
+	}
+
+
+
 }
 
 void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,

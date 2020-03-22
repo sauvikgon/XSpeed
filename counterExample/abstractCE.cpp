@@ -1461,14 +1461,14 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	}
 
 	// debug
-	std::cout << "The lower bounds are:\n";
+/*	std::cout << "The lower bounds are:\n";
 	for (unsigned int i = 0; i < lb.size(); i++)
 		std::cout << lb[i] << " ";
 	std::cout << "\n";
 	std::cout << "The upper bounds are:\n";
 	for (unsigned int i = 0; i < ub.size(); i++)
 		std::cout << ub[i] << " ";
-	std::cout << "\n";
+	std::cout << "\n";*/
 	//---
 
 	myopt.set_lower_bounds(lb);
