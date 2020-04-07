@@ -4,6 +4,13 @@
 #include <cstring>
 #include <utility>
 
+
+#include "../benchmarks/FiveDim_switching_linear_system/5_dim_linear_switchCORRECTED.h"
+#include "../benchmarks/Satellite/bm01.h"
+#include "../benchmarks/Satellite/bm02.h"
+#include "../benchmarks/Satellite/bm03.h"
+#include "../benchmarks/Satellite/bm04.h"
+#include "../benchmarks/Satellite/bm05.h"
 #include "../benchmarks/Billiard/Billiard.h"
 #include "../benchmarks/BouncingBall.h"
 #include "../benchmarks/ConstantMotion/ConstantMotion.h"

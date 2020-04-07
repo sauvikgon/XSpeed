@@ -13,7 +13,10 @@
 #include "counterExample/WoFC_counter_example.h"
 #include "core/continuous/Polytope/Polytope.h"
 
+#include "counterExample/abstractCE.h"
+
 int main(int argc, char *argv[]) {
+
 
 	ReachabilityParameters reach_parameters;
 	userOptions user_options;

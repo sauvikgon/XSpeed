@@ -1152,6 +1152,9 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		// We may choose to take the average time as the initial dwell time
 		dwell_times[i] = (lb_t[i] + ub_t[i]) / 2;
 
+
+	//	std::cout<<"\nIteration/Segment No = "<<i<<"  Dwell-time="<< dwell_times[i]<< ",   Min="<<lb_t[i]<< ",   Max ="<<ub_t[i]<<endl;
+
 		// Increment the transition to the next in the symbolic path
 		if (it != transList.end())
 			it++;
@@ -1296,11 +1299,13 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
 			unsigned int locId = *dset_iter;
 
+			//std::cout<<"\nIteration/Segment No = "<< i << "  Solution of system variables are :  ";
 			std::vector<double> y(dim);
 			for (unsigned int j = 0; j < dim; j++) {
 				y[j] = x0[i][j];
+				//std::cout<<y[j] <<"   ";	//Prints all the System Variables
 			}
-
+			//std::cout<<"   and dwell-time = "<< dwell_times[i] << endl;
 			s.first = y;
 			s.second = dwell_times[i];
 			concreteCE::traj_segment traj;
@@ -1308,10 +1313,13 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			traj.second = s;
 			cexample->push_back(traj);
 		}
+
 	}
 
 	return cexample;
 }
+
+
 
 /**
  * Generate concrete trajectory using splicing with NLP problem (Zutchi, Sankaranarayanan's  Idea)
@@ -1555,6 +1563,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 			cexample = gen_concreteCE_NLP_HA(tolerance, refinements);
 		} else if (algo_type == 3) { // LP-NLP alternative looping \n";
 			cexample = gen_concreteCE_iterative(tolerance, refinements);
+
 		} else if (algo_type == 4) { // Trajectory splicing with fixed-dwell-times (LP), using LP soln as initial point for simulation\n";
 				cexample = gen_concreteCE_Simulation(tolerance, refinements);
 		}

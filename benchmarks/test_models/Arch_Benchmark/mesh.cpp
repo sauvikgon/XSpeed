@@ -405,8 +405,8 @@ void setmesh(hybrid_automata& Hybrid_Automata,
 	boundValueI[3] = -0.08;
 	boundValueI[6] = 0.5;
 	boundValueI[7] = -0.5;
-	boundValueI[8] = -0.02;
-	boundValueI[9] = 0.02;
+	boundValueI[8] = -0.02;	//Sx=-0.02    //-0.02<=Sx<=-0.03
+	boundValueI[9] = 0.03;	//Sx=-0.02    //changed to a set instead of a point -0.02
 
 	initial_polytope_I0 = polytope::ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));

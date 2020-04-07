@@ -113,7 +113,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 	}
 	if(HybridSystem_Model_Type == 16){
-		//setMotorcade(ha,init_state,reach_parameters);
+		setMotorcade(ha,init_state,reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 17){
 		//setNav2u(ha,init_state,reach_parameters);
@@ -159,6 +159,34 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	if(HybridSystem_Model_Type == 29){ // Space craft
 		setSpacecraft(ha,init_state,reach_parameters);
 		//setSpacecraftAbort(ha,init_state,reach_parameters);
+	}
+
+	if(HybridSystem_Model_Type == 30){ // mesh: Runs well but FC fails to find CE
+		setmesh(ha, init_state, reach_parameters);
+	}
+
+	if(HybridSystem_Model_Type == 31){ // mesh: Runs well but FC fails to find CE
+		set_5_dim_linear_switchCORRECTED_model(ha, init_state, reach_parameters);
+	}
+
+	if(HybridSystem_Model_Type == 32){ // Satellite bmp01
+		set_bm01_model(ha, init_state, reach_parameters);
+	}
+
+	if(HybridSystem_Model_Type == 33){ // Satellite bmp02
+		set_bm02_model(ha, init_state, reach_parameters);
+	}
+
+	if(HybridSystem_Model_Type == 34){ // Satellite bmp03  //I assume precision error in XSpeed's flowpipe computation
+		set_bm03_model(ha, init_state, reach_parameters);
+	}
+
+	if(HybridSystem_Model_Type == 35){ // Satellite bmp04
+		set_bm04_model(ha, init_state, reach_parameters);
+	}
+
+	if(HybridSystem_Model_Type == 36){ // Satellite bmp04
+		set_bm05_model(ha, init_state, reach_parameters);
 	}
 
 
