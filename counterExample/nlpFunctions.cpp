@@ -1051,6 +1051,116 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 	return cost;
 }
 
+
+/*
+ * Amit:
+ * Function "myobjfuncIterativeNLP" above is replicated with the name "myobjfuncIterativeNLP_Function" to be used for 3D plotting.
+ * The function is simplified by removing gradient computation and simplified the parameters
+ */
+double myobjfuncIterativeNLP_Function(const std::vector<double> &t,
+		std::vector<double> *x) {
+
+// 1. Get the N start vectors (fixed-constants) and dwell times (variables) and call the simulation routine to get endpoints, say y[i]
+// 2. Get the N end points of the simulation trace, say, y[i].
+// 3. Compute the Euclidean distances d(y[i],y[i+1]) and sum them up.
+// Computes the L2 norm or Euclidean distances between the trace end points.
+//-----------------------------------------
+
+	//std::vector<double> *x = reinterpret_cast<std::vector<double>*>(my_func_data);
+
+	/*This is the vector of end-points of N trajectory segments to be computed*/
+	std::vector<std::vector<double> > y(N);
+	double cost = 0;
+
+
+	std::list<transition::ptr>::iterator T_iter = transList.begin();
+	transition::ptr Tptr = *(T_iter);
+	math::matrix<double> A, expAt, mapExpAt;
+	std::vector < double > myAxPlusb(dim);
+
+	std::vector<double> mapAxplusb;
+
+	polytope::ptr I;
+
+	for (unsigned int i = 0; i < N; i++) {
+
+		std::vector<double> v(dim, 0);
+		for (unsigned int j = 0; j < dim; j++) {
+			v[j] = x[i][j];
+		}
+
+		int loc_index = locIdList[i]; //global variable populated already
+		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+		I = HA->getLocation(loc_index)->getInvariant();
+		assert(d.C.size() == dim);
+
+		std::vector<double> traj_dist_grad(dim, 0); // holds the grads of the trajectories distance to invariant
+
+		y[i] = ODESol(v, d, t[i]);
+
+		if (d.isEmptyMatrixA) {
+			A.resize(dim,dim);	// = math::matrix<double>(dim, dim);
+			A.clear(); //Amit: writes zero for all elements
+		} else
+			A = d.MatrixA;
+		// end of patch
+		assert(d.C.size() == dim);
+
+		if (i == N - 1) {
+			// compute the distance of this endpoint with the forbidden polytope \cap invariant (the segment end point must lie
+			// in the intersection of the bad_set and the last location invariant).
+
+			cost += bad_poly->point_distance(y[N - 1]); // end point distance to bad-set added to cost;
+
+			break;
+		} else {
+			polytope::ptr g;
+			Assign R;
+
+			// assign the transition pointer
+			Tptr = *(T_iter);
+			// assignment of the form: Rx + w
+
+			R = Tptr->getAssignT();
+
+			//guard as a polytope
+			g = Tptr->getGaurd();
+			// guard \cap invariant distance, to address Eq. (12) in CDC 13' paper
+			polytope::ptr guard_intersect_inv;
+			guard_intersect_inv = I->GetPolytope_Intersection(g);
+
+			// plot the guard intersection with location invariant
+			//-----------------------------------------------------
+			double guard_dist = guard_intersect_inv->point_distance(y[i]);
+			cost += guard_dist;
+
+			assert(y[i].size() == R.Map.size2());
+			std::vector<double> transform(y[i].size(), 0);
+
+			R.Map.mult_vector(y[i], transform);
+			for (unsigned int j = 0; j < transform.size(); j++)
+				y[i][j] = transform[j] + R.b[j];
+
+			assert(y[i].size() == R.b.size());
+
+			T_iter++; // Moving to the next transition.
+
+			//compute the Euclidean distance between the next start point and the simulated end point
+			for (unsigned int j = 0; j < dim; j++) {
+				cost += (y[i][j] - x[(i + 1)][j]) * (y[i][j] - x[(i + 1)][j]);
+			}
+		}
+
+	} // End of for-loop over i
+
+	return cost;
+}
+
+
+
+
+
+
 double myobjfunc_LP(const std::vector<double> &t, std::vector<double> &grad,void *my_func_data)
 {
 	abstractCE* abst_ce_obj = reinterpret_cast<abstractCE*>(my_func_data);
