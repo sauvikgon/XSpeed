@@ -159,11 +159,6 @@ public:
 
 	lp_solver build_lp(std::vector<double> dwell_times);
 
-	/*
-	 * creates an nlp obj for the trajectory splicing problem
-	 */
-	void build_nlp(nlopt::opt &);
-
 private:
 	/**
 	 * The first symbolic state is the initial symbolic state and the last one
@@ -225,11 +220,6 @@ private:
 	 * of a LP formed for splicing with fixed-dwell and varying starts.
 	 */
 	concreteCE::ptr gen_concreteCE_LPobj(double tolerance, const std::list<refinement_point>& refinements);
-	/*
-	 * Interface for trajectory splicing with NLP that returns a dwell-time
-	 * minimal counterexample.
-	 */
-	concreteCE::ptr gen_concreteCE_Opt(double tolerance, const std::list<refinement_point> &refinements);
 
 };
 

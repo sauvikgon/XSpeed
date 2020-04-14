@@ -192,7 +192,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 
 	myopt.set_min_objective(myobjfunc2, NULL);
 	//myopt.set_maxeval(maxeval);
-	myopt.set_maxtime(600);
+	myopt.set_maxtime(maxtime);
 	myopt.set_stopval(tolerance); // search stopping value, set typically to 1e-6.
 
 	//Set Initial value to the optimization problem
@@ -483,8 +483,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	 * Naming conventions:
 	 * x^i_j to represent the j-th component of the i-th start-point in an N length 
 	 * abstract counterexample.
-	 * {x*}^i_j to represent the j-th component of the i-th end-point in an N length
-	 * abstract counterexample.
+	 * {x*}^i_j to represent the j-th component of the i-th end-point in an N length abstract counterexample, after transforming with transition map.
 	 */
 
 	lp_solver lp_fixed_time(GLPK_SOLVER);
@@ -508,7 +507,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	 * Cols 0 to (X - 1) to represent the new variables.
 	 * Y = (N*dim) represent the no. of variables to represent N start points of the segments.
 	 * Cols X to (X+Y-1) to represent these
-	 * The rest of the (N*dim) vars to represent the N end-points of the trajectory segments.
+	 * The rest of the (N*dim) vars to represent the N transition mapped end-points of the trajectory segments.
 	 * Cols X+Y to X+2Y-1. 
 	 */
 	unsigned int X = 2 * dim * (N - 1);
@@ -529,7 +528,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	 * additionally 2 * dim * (N-1) constraints, since there are these
 	 * many new variables.
 	 *
-	 * To relate the end points of the segments with the start points,
+	 * To relate the transition mapped end points of the segments with the start points,
 	 * with the fixed dwell times, we have constraints of the form:
 	 * {x*}^i = e^{At}.x^i + v., where t is the fixed dwell time.
 	 * 
@@ -543,9 +542,11 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	 * The first X1 = [2 * dim * (N-1)] rows to represent the positivity constraints.
 	 * The next  X1 = [2 * dim * (N-1)] rows to represent the  {x*}^i_j - x^{i+1)_j = p^i_j - {p'}^i_j constrs.
 	 * The next  X2 = [2 * dim * N] rows to represent the bound constraints.
-	 * The remaining X2 = (2 * dim * N) rows to represent the end-point constrs, {x*}^i = e^{At}.x^i + v.
+	 * The following X2 = [2 * dim * N] rows to represent the end-point constrs, {x*}^i = e^{At}.x^i + v.
+         * The last X3 = [2 * dim * N] rows to represent the bound constraints
+         * on the transition mapped end-points.
 	 */
-	//num_constr = (2 * dim * N) + 2*N*dim + (2 * dim * (N-1) + (N*dim*2));
+	//num_constr = (2 * dim * N) + 2*N*dim + 2*N*dim + (2 * dim * (N-1) + (N*dim*2));
 	unsigned int X1 = 2 * dim * (N - 1);
 	unsigned int X2 = 2 * dim * N; //bounds on each variable of the start-point for N segments;
 	num_constr = X1 + X1 + X2 + X2 + 2 * dim;
@@ -642,7 +643,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 
 	startPoint = X;
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
-			{
+	{
 		S = get_symbolic_state(i);
 		polytope::ptr P = S->getInitialPolytope();
 
@@ -689,10 +690,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	/*
 	 *  To do: Add the remaining (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
 	 */
-
-	// To do: using the lb_x and ub_x values, add bound constraints in the A matrix.
-	// To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
-	// Adding the (N * dim * 2) rows to represent the end-point constrs, y_i = e^{At}.x_i + v.
+	
 	// Get the sequence of loc_ids from the abstract counterexample.
 	locIdList.resize(N);
 	std::set<int> d;
@@ -716,8 +714,57 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		D = ha_loc_ptr->getSystem_Dynamics();
 		D.MatrixA.matrix_exponentiation(expAt, dwell_times[i]);
 
+		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
 		// Now, we calculate v = A^{-1}.(e^{At} - I)* D.C
 		std::vector<double> v = ODESol_inhomogenous(D, dwell_times[i]);
+
+		// @Rajarshi:Here, we add the bounds constraints on the end-pts.
+		/*		
+		if(i!= (N-1)){
+			// assign the transition pointer
+			T = *(it);	//runs based on the for-i-loop except the last iteration
+			guard = T->getGaurd();
+			polytope::ptr P;
+			P = loc_inv->GetPolytope_Intersection(guard); //Invariant with Bad poly
+			lp_solver lp(GLPK_SOLVER);
+			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
+			
+			std::vector<double> dir(dim, 0);
+			double min[dim], max[dim];
+			for (unsigned int j = 0; j < dim; j++) // iterate over each component
+			{
+				dir[j] = -1;
+				try {
+					min[j] = -1 * lp.Compute_LLP(dir);
+				} catch (...) {
+				// assuming that the exception is caused due to an unbounded solution
+				min[j] = -999;	// an arbitrary value set as solution
+				}
+				dir[j] = 1;
+				try {
+					max[j] = lp.Compute_LLP(dir);
+				} catch (...) {
+				// assuming that the exception is caused due to an unbounded solution
+				max[j] = +999; // an arbitrary value set as solution
+				}
+				dir[j]=0;
+			}
+
+			for (unsigned int j = 0; j < dim; j++) {
+				
+				for (unsigned int k = 0; k < expAt.size2(); k++) {
+					newCol = X + i * dim + k;
+					A(newRow, newCol) = expAt(j,k); //first inequality
+
+					A(newRow + 1, newCol) = -1*expAt(j,k); //second inequality
+				}
+				b[newRow] = max[j] - v[j];
+				newRow++;
+				b[newRow] = -1 * min[j] + v[j];
+				newRow++;
+			}
+		} */
+		/* End of code to add bound constraints of end-pts. */
 
 		// Using expAt and v, add the constraints on the end-points to the LP
 		/*
@@ -734,8 +781,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		std::vector<double> Rvplusw(dim); // Rvplusw = R.v + w
 		Assign R;
 		if (i != (N - 1)) {	//For all transition except the last perform mapping operation
-			// assign the transition pointer
-			T = *(it);	//runs based on the for-i-loop except the last iteration
+			T = *(it);			
 			// assignment of the form: Rx + w
 			R = T->getAssignT();
 			R.Map.multiply(expAt, RexpAt);
@@ -786,21 +832,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	location::ptr ha_loc_ptr = HA->getLocation(loc_id);
 	polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
 
-	//bad_poly = bad_poly->GetPolytope_Intersection(loc_inv); //Invariant with Bad poly
-
-	polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
-			aggregation, bad_poly, 1);
-	assert(polys.size() >= 0); // The last sym state of an abstract CE must intersect with the bad set
-	if (polys.size() > 1) {
-		P = get_template_hull(S->getContinuousSetptr(), 0,
-				S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-	} else {
-		P = polys.front();
-	}
-	P = P->GetPolytope_Intersection(loc_inv);//Invariant intersection with templated flowpipe
-	P = P->GetPolytope_Intersection(bad_poly);//followed by intersection with templated flowpipe
-// ***********************
-
+	P = bad_poly->GetPolytope_Intersection(loc_inv); //Invariant with Bad poly
 	lp_solver lp(GLPK_SOLVER);
 	lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
 			P->getInEqualitySign());
@@ -860,151 +892,8 @@ void abstractCE::setUserOptions(const userOptions& userOptions) {
 }
 
 /**
- * Amit:
- * Method to construct and solve an NLP from the abstract counter example,
- * for trajectory splicing. The NLP construction is by fixing the start points but
- * keeping the dwell times of the trajectory segments as variable. The start points
- * are passed as an argument to this function.
- */
-void abstractCE::build_nlp(nlopt::opt & myoptStartPointFixed) {
-	//1. Generate an nlopt object with the hard constraints on dwell times
-	//2. Objective function as distance(startPts, endPts) + dp(endPts,Reach Intersects Guard) + dp(endPts, Bad_set)
-
-	symbolic_states::const_ptr S = get_first_symbolic_state();
-	dim = S->getInitialPolytope()->getSystemDimension();
-	HA = this->get_automaton();
-	transList = this->get_CE_transitions();
-	N = transList.size() + 1; // the length of the counter example
-	bad_poly = this->forbid_poly;
-	//ref_pts = refinements;
-
-	// initialize the global locIdList
-	locIdList.resize(N);
-	std::set<int> d;
-
-	polytope::ptr P;
-
-	bool aggregation = true; //default is ON
-
-	//std::vector<double> solutionsTau(optD, 0);
-
-	std::vector<double> lb_t(N), ub_t(N);
-	std::vector<double> t(N, 0);
-	double minf = 1e10;
-
-	unsigned int t_index =
-			get_first_symbolic_state()->getInitialPolytope()->get_index("t");
-
-	assert((t_index >= 0) && (t_index < dim));
-
-	std::vector<double> dmin(dim, 0), dmax(dim, 0);
-	dmax[t_index] = 1;
-	dmin[t_index] = -1;
-	double min, max, start_min, start_max;
-	std::list<polytope::ptr> polys;
-	polytope::ptr guard;
-	std::list<transition::ptr>::iterator it = transList.begin();
-	transition::ptr T;
-
-	//For every N-locations find the bounds on dwell time
-
-	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
-			{
-		S = get_symbolic_state(i);
-
-		unsigned int loc_id = locIdList[i];	//last location
-		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
-		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
-
-		polytope::ptr P;
-		if (i == (N - 1)) {	//For last location find intersection between Flowpipe and Bad set
-			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
-					aggregation, bad_poly, 1);
-			assert(polys.size() >= 0); // The last sym state of an abstract CE must intersect with the bad set
-
-			if (polys.size() > 1) {
-				P = get_template_hull(S->getContinuousSetptr(), 0,
-						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-			} else {
-				P = polys.front();
-			}
-
-			P = P->GetPolytope_Intersection(loc_inv);
-
-			P = P->GetPolytope_Intersection(bad_poly);
-
-		} else {
-			// Take time projection of flowpipe \cap transition guard
-			T = *(it);	//runs based on the for-i-loop except the last iteration
-			guard = T->getGaurd();
-
-			if (guard->getIsUniverse())
-				std::cout << "#Guard is Universe#\n" << std::endl;
-
-			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
-					aggregation, guard, 1);
-
-			assert(polys.size() >= 1); // An abstract CE state must have intersection with the trans guard
-			if (polys.size() > 1)
-				P = get_template_hull(S->getContinuousSetptr(), 0,
-						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
-			else
-				P = polys.front();
-
-			// Now intersect P with guard
-			P = P->GetPolytope_Intersection(loc_inv);
-
-			P = P->GetPolytope_Intersection(guard);
-
-		}
-
-		lp_solver lp(GLPK_SOLVER);
-		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-				P->getInEqualitySign());
-		// ensure that time is always positive
-		try {
-			max = lp.Compute_LLP(dmax);
-		} catch (...) {
-			// assuming that the exception is caused due to an unbounded solution
-			max = 999; // an arbitrary large value set as solution
-		}
-		try {
-			min = -1 * lp.Compute_LLP(dmin);
-		} catch (...) {
-			// assuming that the exception is caused due to an unbounded solution
-			min = 0; // the min value a time can take is 0.
-		}
-
-		// we add the bounds as constraints in the nlopt
-		// Get the min and max time projection of start set
-		lp_solver lp1(GLPK_SOLVER);
-		polytope::ptr init_of_symb = S->getInitialPolytope();
-
-		lp1.setConstraints(init_of_symb->getCoeffMatrix(),
-				init_of_symb->getColumnVector(),
-				init_of_symb->getInEqualitySign());
-		// Ensure that the time is positive
-		start_min = -1 * lp1.Compute_LLP(dmin);
-		start_max = lp1.Compute_LLP(dmax);
-		ub_t[i] = max - start_min;
-		if (min <= start_max)
-			lb_t[i] = 0;
-		else
-			lb_t[i] = min - start_max;
-
-		// Increment the transition to the next in the symbolic path
-		if (it != transList.end())
-			it++;
-
-	}
-
-	myoptStartPointFixed.set_lower_bounds(lb_t);
-	myoptStartPointFixed.set_upper_bounds(ub_t);
-}
-
-/**
  * Implementing the LP-NLP iterative routine for trajectory splicing
- * @Rajarshi; 20 Dec 2019.
+ * @Rajarshi: 20 Dec 2019.
  */
 concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		const std::list<refinement_point> &refinements) {
@@ -1152,9 +1041,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		// We may choose to take the average time as the initial dwell time
 		dwell_times[i] = (lb_t[i] + ub_t[i]) / 2;
 
-
-	//	std::cout<<"\nIteration/Segment No = "<<i<<"  Dwell-time="<< dwell_times[i]<< ",   Min="<<lb_t[i]<< ",   Max ="<<ub_t[i]<<endl;
-
 		// Increment the transition to the next in the symbolic path
 		if (it != transList.end())
 			it++;
@@ -1207,7 +1093,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			//From this vector, get the N start vectors in x0
 			for (unsigned int i = 0; i < N; i++) {
-				x0[i].resize(dim);	//declaring each array element its size
+				x0[i].resize(dim);	//declaring each array element its size		
 				for (unsigned int j = 0; j < dim; j++) {
 					x0[i][j] = x[X1 + i * dim + j];
 				}
@@ -1252,12 +1138,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	//					<< std::endl;
 			cpu_times const elapsed_times(timer.elapsed());
 			nanosecond_type const elapsed(elapsed_times.user);
-			if (elapsed > sixhundred_seconds)
+			/*if (elapsed > sixhundred_seconds)
 			{
 				std::cout << "Timed-out on the abstract counterexample\n";
 				success = true; // here, success true is break the restart loop.
 				break;
-			}
+			}*/
 		} // end of alternating lp-nlp loop.
 
 		if(success) break; // splicing complete. terminate.
@@ -1299,13 +1185,13 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 					get_symbolic_state(i)->getDiscreteSet().getDiscreteElements().begin();
 			unsigned int locId = *dset_iter;
 
-			//std::cout<<"\nIteration/Segment No = "<< i << "  Solution of system variables are :  ";
+			//std::cout<< "\nSegment No = "<< i << " ce-trajectory starting point: ";
 			std::vector<double> y(dim);
 			for (unsigned int j = 0; j < dim; j++) {
 				y[j] = x0[i][j];
-				//std::cout<<y[j] <<"   ";	//Prints all the System Variables
+			//	std::cout<<y[j] <<"   ";	//Prints all the System Variables
 			}
-			//std::cout<<"   and dwell-time = "<< dwell_times[i] << endl;
+			//std::cout <<"\n and ce-trajectory dwell-time = "<< dwell_times[i] << endl;
 			s.first = y;
 			s.second = dwell_times[i];
 			concreteCE::traj_segment traj;
@@ -1313,7 +1199,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			traj.second = s;
 			cexample->push_back(traj);
 		}
-
 	}
 
 	return cexample;
@@ -1375,7 +1260,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 
 	// 	Optimization routine paramters
 	unsigned int maxeval = 20000;
-	unsigned int maxtime = 600; //600 secs.
+	unsigned int maxtime = 1200; //1200 secs.
 	myopt.set_min_objective(myobjfunc2, NULL);
 	myopt.set_maxtime(maxtime); // times out after maxtime
 	//myopt.set_maxeval(maxeval);
@@ -1468,17 +1353,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			trans_iter++;
 	}
 
-	// debug
-/*	std::cout << "The lower bounds are:\n";
-	for (unsigned int i = 0; i < lb.size(); i++)
-		std::cout << lb[i] << " ";
-	std::cout << "\n";
-	std::cout << "The upper bounds are:\n";
-	for (unsigned int i = 0; i < ub.size(); i++)
-		std::cout << ub[i] << " ";
-	std::cout << "\n";*/
-	//---
-
 	myopt.set_lower_bounds(lb);
 	myopt.set_upper_bounds(ub);
 
@@ -1544,13 +1418,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 		unsigned int algo_type) {
 
-	// call to genCE func with no refining trajectory
 	std::list<struct refinement_point> refinements;
 	refinements.clear(); // No refinement point initially
 
 	concreteCE::ptr cexample;
 	bool val_res = true;
-	unsigned int max_refinements = 3, ref_count = 0; // maximum limit to refinement points to be added.
+	unsigned int max_refinements = 1, ref_count = 0; // maximum limit to refinement points to be added.
 
 	double valid_tol = 1e-3; // validation error tolerance, on invariant crossing.
 
@@ -1561,7 +1434,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 			cexample = gen_concreteCE(tolerance, refinements);
 		else if (algo_type == 2) { // WoFC - Trajectory splicing with HA implicit constraints over the search-space.
 			cexample = gen_concreteCE_NLP_HA(tolerance, refinements);
-		} else if (algo_type == 3) { // LP-NLP alternative looping \n";
+		} else if (algo_type == 3) { // LP-NLP Alt-Min \n";
 			cexample = gen_concreteCE_iterative(tolerance, refinements);
 
 		} else if (algo_type == 4) { // Trajectory splicing with fixed-dwell-times (LP), using LP soln as initial point for simulation\n";
@@ -1569,9 +1442,6 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 		}
 		else if (algo_type == 5) { // Trajectory splicing with search over dwell-times (NLP), Obj Func as an LP solution.
 			cexample = gen_concreteCE_LPobj(tolerance, refinements);
-		}
-		else if (algo_type == 6) { // Trajectory splicing with time-optimal splicing.
-			cexample = gen_concreteCE_Opt(tolerance, refinements);
 		}
 		else {
 			std::cout
@@ -1583,16 +1453,17 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 			return cexample;
 		}
 
-		//val_res = cexample->valid(pt, valid_tol);
+		val_res = cexample->valid(pt, valid_tol);
 		//putting off validation loop by refinements
-		val_res = true;
+		//val_res = true;
 		//--
 
 		if (!val_res) {
 			refinements.push_back(pt);
 			ref_count++;
+			algo_type=1;
 			//debug: print the invalid trajectory in a file, in the first two dimensions
-			cexample->plot_ce("./invalid_traj.txt", 0, 1);
+			//cexample->plot_ce("./invalid_traj.txt", 0, 1);
 		} else {
 			std::cout << "Generated Trace Validated with " << ref_count
 					<< " point Refinements\n";
@@ -1600,7 +1471,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 			return cexample;
 		}
 		std::cout << "Restarting Search with added refinement point\n";
-	} while (!val_res && ref_count < max_refinements);
+	} while (!val_res && ref_count <= max_refinements);
 
 	throw std::runtime_error(
 			"Validation of counter example FAILED after MAX Refinements\n");

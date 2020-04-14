@@ -1,11 +1,11 @@
 #ifndef __LOAD_MODEL_H
 #define __LOAD_MODEL_H
 
+#include <benchmarks/FiveDim_switching_system/5_dim_linear_switchCORRECTED.h>
 #include <cstring>
 #include <utility>
 
 
-#include "../benchmarks/FiveDim_switching_linear_system/5_dim_linear_switchCORRECTED.h"
 #include "../benchmarks/Satellite/bm01.h"
 #include "../benchmarks/Satellite/bm02.h"
 #include "../benchmarks/Satellite/bm03.h"

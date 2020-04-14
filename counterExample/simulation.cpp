@@ -325,6 +325,11 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 			std::cout << "DISTANCE TO INV= " << std::setprecision(10) << dist
 					<< std::endl;
 			std::cout << "tol = " << std::setprecision(10) << tol << std::endl;
+			std::cout << "Violating trajectory start point:\n";
+			for(unsigned int j=0;j<dimension;j++)
+				std::cout << x[j] << " ";
+			std::cout << std::endl;
+
 			status = false;
 			trace_point simpoint;
 			simpoint.first = tout;

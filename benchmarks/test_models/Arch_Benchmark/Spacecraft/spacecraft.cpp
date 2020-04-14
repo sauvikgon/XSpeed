@@ -166,9 +166,8 @@ void setSpacecraft(hybrid_automata& Hybrid_Automata, std::list<initial_state::pt
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
-	/* B matrix set as identity matrix
-	 *
-	 */
+	/* B matrix set as identity matrix*/
+
 	system_dynamics.isEmptyMatrixB = true;
 //	Bmatrix.resize(row, col);
 //	for (unsigned int i = 0; i < row; i++)

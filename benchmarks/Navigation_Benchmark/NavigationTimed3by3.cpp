@@ -3020,6 +3020,7 @@ void Set_NavTimed_Parameters(hybrid_automata& Hybrid_Automata,
 	Hybrid_Automata.addLocation(l9);
 	Hybrid_Automata.setDimension(dim);
 
+	// the variable to id map
 	Hybrid_Automata.insert_to_map("x1", 0);
 	Hybrid_Automata.insert_to_map("x2", 1);
 	Hybrid_Automata.insert_to_map("v1", 2);

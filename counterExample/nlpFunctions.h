@@ -35,7 +35,7 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
 
 /**
  * Objective function for splicing with Flowpipe constraints
- *  only. (Sergiy's Idea)
+ *  only.
  */
 double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
