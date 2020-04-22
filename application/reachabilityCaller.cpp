@@ -10,8 +10,8 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 
 	if ((user_options.get_algorithm() == SEQ_SF)
 			|| (user_options.get_algorithm() == PAR_SF)
-			|| (user_options.get_algorithm() == TIME_SLICE) || (user_options.get_algorithm() == GPU_SF)
-			|| (user_options.get_algorithm() == FORWARD) ) {
+			|| (user_options.get_algorithm() == TIME_SLICE)
+			|| (user_options.get_algorithm() == FB_INTERPOL) ) {
 
 		//sequential BFS exploration of the HA graph is executed for these options.
 

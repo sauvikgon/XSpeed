@@ -1,33 +1,20 @@
 #ifndef LP_SOLVER_CPP_
 #define LP_SOLVER_CPP_
 
-/*
- * lp_solver.cpp
- *
- *  Created on: 23-Apr-2014
- *      Author: gurung
- */
-
-#include "../../../core/math/glpk_lp_solver/glpk_lp_solver.h"
-
-#include "../../../core/math/matrix.h"
+#include "core/math/glpk_lp_solver/glpk_lp_solver.h"
+#include "core/math/matrix.h"
 
 using namespace std;
 
 unsigned int glpk_lp_solver::lp_count = 0;		//initialize the static variable
 
 glpk_lp_solver::~glpk_lp_solver() {
-	//cout<<"\nLP problem died Here \n";
 	lp_count--;
 	glp_delete_prob(mylp);
 }
 void glpk_lp_solver::free_glpk_lp_solver() {
 	lp_count--;
 	glp_delete_prob(mylp);
-	//glp_free(mylp);
-	//	if (lp_count <= 0) {
-	//		glp_free_env();
-	//	}
 }
 void glpk_lp_solver::delete_prob()
 {
@@ -37,7 +24,6 @@ void glpk_lp_solver::free_environment_glpk_lp_solver() {
 	glp_free_env();
 }
 glpk_lp_solver::glpk_lp_solver() {
-	//cout<<"\nLP problem Created Empty Here :::: No GLPK OBJECT CREATED SO FAR\n";
 	mylp = glp_create_prob();
 	glp_init_smcp(&param);
 	Min_Or_Max = GLP_MAX;	//Setting the GLP_MAX as the default value
@@ -75,10 +61,6 @@ glpk_lp_solver::glpk_lp_solver(math::matrix<double> coeff_constraints,
 }
 
 void glpk_lp_solver::setMin_Or_Max(int Min_Or_Max) {
-	/* optimization direction flag:
-	 #define GLP_MIN            1  // minimization
-	 #define GLP_MAX            2  // maximization
-	 */
 	if (Min_Or_Max == 1)
 		this->Min_Or_Max = GLP_MIN;
 	else if(Min_Or_Max == 2)
@@ -108,9 +90,8 @@ void glpk_lp_solver::setConstraints(math::matrix<double> coeff_constraints,
 	dimension = coeff_constraints.size2();	//
 	number_of_constraints = bounds.size();
 	result = 0.0;
-	glp_set_prob_name(mylp, "Sample");	// eg "sample"
+	glp_set_prob_name(mylp, "Sample");
 	glp_set_obj_dir(mylp, Min_Or_Max);
-	//std::cout<<"\nMin or max = "<<Min_Or_Max;
 	glp_add_rows(mylp, number_of_constraints);
 
 	for (int i = 0; i < number_of_constraints; i++) {
@@ -126,7 +107,6 @@ void glpk_lp_solver::setConstraints(math::matrix<double> coeff_constraints,
 	for (int i = 0; i < dimension; i++) {
 		glp_set_col_name(mylp, i + 1, "xi");
 		glp_set_col_bnds(mylp, i + 1, GLP_FR, 0.0, 0.0);
-		//	glp_set_obj_coef(mylp, i+1, coeff_function[i]);
 	}
 
 	int prod = number_of_constraints * dimension;
@@ -136,7 +116,6 @@ void glpk_lp_solver::setConstraints(math::matrix<double> coeff_constraints,
 		for (int j = 0; j < dimension; j++) {
 			ia[count] = i + 1, ja[count] = j + 1, ar[count] = coeff_constraints(
 					i, j);
-			//cout<<"ia="<<ia[count]<<"\t ja="<< ja[count]<<"\t ar="<<ar[count]<<endl;
 			count++;
 		}
 	}
@@ -200,13 +179,12 @@ void glpk_lp_solver::add_new_constraint(int len, int ind[], double val[])
 
 }
 void glpk_lp_solver::set_obj_coeff(unsigned int j, double val){
-	glp_set_obj_coef(mylp, j + 1, val);	//Amit: modified to +1, since GLPK uses 1-based indexing
-	//cout << "j+1" << j+1<<endl;
+	glp_set_obj_coef(mylp, j + 1, val);	//modified to +1, since GLPK uses 1-based indexing
 }
 
 double glpk_lp_solver::get_obj_coeff(unsigned int j)
 {
-	return glp_get_obj_coef(mylp,j + 1);	//Amit: modified to +1, since GLPK uses 1-based indexing
+	return glp_get_obj_coef(mylp,j + 1);	//modified to +1, since GLPK uses 1-based indexing
 }
 double glpk_lp_solver::solve(){
 	glp_init_smcp(&param);
@@ -218,19 +196,6 @@ double glpk_lp_solver::solve(){
 	}
 
 	double result = glp_get_obj_val(mylp);
-
-/*	Commented the Debugging Lines to suppress outputs
- * for(int i=1;i<=glp_get_num_rows(mylp);i++)
-	{
-		int ind[100];
-		double val[100];
-		int len = glp_get_mat_row(mylp, i, ind, val);
-		std::cout << "Contents of row number i:" << i << std::endl;
-		for(int k=1;k<=len;k++){
-			std::cout << "index: " << ind[k] << ", value = " << val[k] << std::endl;
-		}
-
-	}*/
 	/*
 	 * Updated to Maximizing vector
 	 */
@@ -249,7 +214,6 @@ void glpk_lp_solver::setIteration_Limit(int limits) {
 	param.it_lim = limits;
 }
 void glpk_lp_solver::setInitial_SimplexControlParameters() {
-	//param = NULL;
 	glp_init_smcp(&param);
 }
 unsigned int glpk_lp_solver::getStatus() {
@@ -275,12 +239,6 @@ unsigned int glpk_lp_solver::TestConstraints() {
 	}
 	glp_term_out(GLP_OFF);
 	glp_simplex(mylp, &param);
-	/*result = glp_get_obj_val(mylp);
-	 Maximizing_VariablesINT_MAX.resize(dimension, 0.0);
-	 for (int i = 0; i < dimension; i++)
-	 Maximizing_Variables[i] = glp_get_col_prim(mylp, i + 1);
-	 return result;
-	 */
 	return getStatus();
 }
 
@@ -290,13 +248,7 @@ double glpk_lp_solver::Compute_LLP(const std::vector<double> coeff_function) {//
 		glp_set_obj_coef(mylp, i + 1, coeff_function[i]);
 	}
 	glp_term_out(GLP_OFF);
-	// initiliase the simplex parameters
-	/*glp_smcp param;
-	 glp_init_smcp(&param);
-	 param.msg_lev = GLP_MSG_ERR; */
-	/*param.msg_lev = GLP_MSG_OFF;*/
 	glp_simplex(mylp, &param);
-	//glp_simplex(mylp, NULL);
 	double result = glp_get_obj_val(mylp);
 	int status = glp_get_status(mylp);
 	if(status==GLP_UNBND)

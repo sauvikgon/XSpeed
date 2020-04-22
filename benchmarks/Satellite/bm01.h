@@ -2,7 +2,7 @@
 #define bm01_H_
 
 
-#include "core/continuous/Polytope/Polytope.h"
+#include "core/continuous/Polytope/polytope.h"
 #include "core/HybridAutomata/Hybrid_Automata.h"
 #include "core/math/matrix.h"
 #include "core/math/uni_sphere.h"

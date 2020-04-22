@@ -12,7 +12,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "../core/HybridAutomata/Hybrid_Automata.h"
 #include "../core/math/analyticODESol.h"
 #include "../core/math/matrix.h"
@@ -288,7 +288,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 		} else {
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
-			guard = T->getGaurd();
+			guard = T->getGuard();
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
 					aggregation, guard, 1);
 
@@ -565,8 +565,6 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		A(i, j) = -1;
 	}
 
-	unsigned int check = X1;
-//	std::cout<<"Check = "<< check <<" newRow = "<< X <<std::endl; //OK
 
 	/*
 	 *  To do: Add the next [2 * dim * (N-1)] rows to represent the  x_i - y_i = p_i' - p_i'' constrs.
@@ -723,7 +721,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		if(i!= (N-1)){
 			// assign the transition pointer
 			T = *(it);	//runs based on the for-i-loop except the last iteration
-			guard = T->getGaurd();
+			guard = T->getGuard();
 			polytope::ptr P;
 			P = loc_inv->GetPolytope_Intersection(guard); //Invariant with Bad poly
 			lp_solver lp(GLPK_SOLVER);
@@ -825,7 +823,6 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	 */
 
 // *********************** Taking care of bad set on boundaries with the next location
-	bool aggregation = true;
 	S = get_symbolic_state(N - 1);
 	polytope::ptr P;
 	unsigned int loc_id = locIdList[N - 1];	//last location
@@ -984,7 +981,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		} else {
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
-			guard = T->getGaurd();
+			guard = T->getGuard();
 			if (guard->getIsUniverse())
 				std::cout << "#Guard is Universe#\n" << std::endl;
 
@@ -1052,7 +1049,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	nlopt::opt myoptDwellTime(nlopt::LD_MMA, optD); // derivative based
 
 	unsigned int maxeval = 100; // the max allowed iterations in nlp
-	unsigned int nlp_status;
 
 	myoptDwellTime.set_lower_bounds(lb_t);
 	myoptDwellTime.set_upper_bounds(ub_t);
@@ -1063,7 +1059,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	double minf = 1e10; // a large value to start
 	double last_iter_lpopt = 1e10; // stores the opt returned by lp-solver from the last iteration
 								 // A large value in the beginning.
-	double last_iter_nlpopt = 1e10; // stores the opt returned by nlp-solver from the last iteration
 									 // A large value in the beginning.
 	const double diff = 1e-10; // the constant difference to decide stuck at local minima.
 	bool stuck_at_local_min, success=false;
@@ -1114,28 +1109,14 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			// solve the nlp with fixed start points.
 			myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
 			double nlp_res;
-			nlp_status = myoptDwellTime.optimize(dwell_times, nlp_res);
+			myoptDwellTime.optimize(dwell_times, nlp_res);
 	//		cout << "nlp returned opt. = " << nlp_res << "\n";
 			minf = nlp_res;
 			if (nlp_res < tolerance){
 				success = true;
 				break;
 			}
-//			if((last_iter_nlpopt - nlp_res) < diff){
-//				stuck_at_local_min = true;
-//				break;
-//			}
-//			last_iter_nlpopt = nlp_res; // storing this nlp_res for comparison in the next iteration.
-	//		if (nlp_status == NLOPT_SUCCESS)
-	//			std::cout
-	//					<< "Splicing with Iterative LP-NLP: NLOPT stopped successfully returning the found minimum\n";
-	//		else if (nlp_status == NLOPT_STOPVAL_REACHED)
-	//			std::cout
-	//					<< "Splicing with Iterative LP-NLP: NLOPT stopped due to stopping value (1e-6) reached\n";
-	//		else if (nlp_status == NLOPT_MAXEVAL_REACHED)
-	//			std::cout
-	//					<< "Splicing with Iterative LP-NLP: NLOPT stopped due to reaching maxeval!!"
-	//					<< std::endl;
+
 			cpu_times const elapsed_times(timer.elapsed());
 			nanosecond_type const elapsed(elapsed_times.user);
 			/*if (elapsed > sixhundred_seconds)
@@ -1158,8 +1139,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			}
 			stuck_at_local_min = false;
 			num_restart = i++;
-			last_iter_lpopt=1e10; // last lp res set to a large value;
-			last_iter_nlpopt=1e10; // last nlp res set to a large value;
+			last_iter_lpopt=1e10; // last lp res set to a large value;		
 		}
 
 	} // end of search restart loop/
@@ -1423,7 +1403,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 
 	concreteCE::ptr cexample;
 	bool val_res = true;
-	unsigned int max_refinements = 1, ref_count = 0; // maximum limit to refinement points to be added.
+	unsigned int max_refinements = 3, ref_count = 0; // maximum limit to refinement points to be added.
 
 	double valid_tol = 1e-3; // validation error tolerance, on invariant crossing.
 
@@ -1515,4 +1495,4 @@ concreteCE::ptr abstractCE::search_concreteCE(double tolerance,
 	}
 }
 
-#include "abstraceCE.hpp"
+#include "abstractCE.hpp"

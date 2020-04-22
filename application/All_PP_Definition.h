@@ -9,26 +9,13 @@
 #define ALL_PP_DEFINITION_H_
 
 // *********** Various Algorithms ******************
-#define SEQ_SF			1	//Sequential Reachability Algorithm
-#define PAR_SF		 	2	//Parallel Reachability Algorithm using OpenMP Thread Creation, using parallelizing over Directions
-#define TIME_SLICE	 	3	//Parallel Reachability Algorithm using OpenMP Thread Creation, using parallelizing over Iterations
-#define AGJH_BFS		4	//Parallel Breadth First Search Algorithm using Gerard J. Holzmann Algorithm
-#define TPBFS			5	//Parallel Breadth First Search Algorithm using Load Balancing Algorithm
-#define ASYNC_BFS 		6	//Parallel Asynchronous Breadth First Search Algorithm
-#define GPU_SF			7	//PostC using GPU with Sequential BFS
-#define FORWARD			8	//PostC using forward approximation model
-
-
-
-//#define PAR_PROCESS	3	//Parallel Reachability Algorithm using Process Creation, using parallelizing over Directions
-//#define PAR_ITER_DIR	5	//Parallel Reachability Algorithm using parallelizing over Iterations and Directions (using OpenMP Thread Creation)
-//#define PAR_BY_PARTS	6	//Parallel Reachability Algorithm parallelizing over Initial Set Partitioning (using OpenMP Thread Creation)
-//#define PAR_BY_PARTS_ITERS	7	//Parallel Reachability Algorithm parallelizing over multiple Initial Set ALSO Partitioning iterations.
-//#define SAME_DIRS		8	//If dir1 = phi_transpose x dir then no need to compute support function for dir1
-//#define ALL_DIRS		9	//compute all the list of transpose directions
-//#define GPU_MULTI_SEQ	10	//Matrix-Vector GPU multiplication
-//#define BFS			12	//Sequential Breadth First Search Algorithm
-// *********** Various Algorithms ******************
+#define SEQ_SF			1	//Sequential postC with supfunc.
+#define PAR_SF		 	2	//Parallel postC using OpenMP Thread Creation, parallel sampling of supfunc over directions
+#define TIME_SLICE	 	3	//Parallel postC with Time-slicing
+#define FB_INTERPOL	 	4	//postC with fwd-bwd interp. model.
+#define AGJH_BFS		5	//Parallel BFS using G.J. Holzmann's Algorithm
+#define TPBFS			6	//Parallel BFS using Load Balancing
+#define ASYNC_BFS 		7	//Parallel Asynchronous BFS
 
 // *********** Various Hybrid System Model ******************
 #define BBALL				1		//Bouncing Ball
@@ -45,7 +32,6 @@
 #define CIRCLE_FOUR_LOC		12		//CIRCLE model with four locations
 #define OSCILLATOR			13		//OSCILLATOR model without any Filter
 
-//**************** Hybrid Automata Definition ***********************
 
 // *********** Different Template Directions ******************
 #define BOX			1

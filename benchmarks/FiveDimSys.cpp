@@ -7,22 +7,22 @@
 
 #include "../benchmarks/FiveDimSys.h"
 
-void setSysParams(hybrid_automata& Hybrid_Automata,
+void setFiveDimSys(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	polytope::ptr initial_polytope_I;
 	polytope::ptr invariant;
-	polytope::ptr gaurd_polytope;
+	polytope::ptr guard_polytope;
 	Dynamics system_dynamics;
 
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
-			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
+			invariantConstraintsMatrix, guardConstraintsMatrix, Amatrix,
 			Bmatrix;
 	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
-			gaurdBoundValue;
-	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
+			guardBoundValue;
+	int boundSignI, boundSignV;
 
 	size_type row, col;
 
@@ -141,7 +141,6 @@ void setSysParams(hybrid_automata& Hybrid_Automata,
 	Amatrix(4, 3) = -7.1915;
 	Amatrix(4, 4) = 1.6098;
 
-//row= ;	col=
 	Bmatrix.resize(row, col);
 	for (unsigned int i = 0; i < row; i++)
 		for (unsigned int j = 0; j < col; j++)

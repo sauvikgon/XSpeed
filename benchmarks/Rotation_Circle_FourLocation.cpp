@@ -13,16 +13,16 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	polytope::ptr initial_polytope_I;
 	polytope::ptr invariant1, invariant2, invariant3, invariant4;
-	polytope::ptr gaurd_polytope1, gaurd_polytope2, gaurd_polytope3,
-			gaurd_polytope4;
+	polytope::ptr guard_polytope1, guard_polytope2, guard_polytope3,
+			guard_polytope4;
 	Dynamics system_dynamics;
 
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
-			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
+			invariantConstraintsMatrix, guardConstraintsMatrix, Amatrix,
 			Bmatrix;
 	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
-			gaurdBoundValue;
-	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
+			guardBoundValue;
+	int boundSignI, invariantBoundSign, guardBoundSign, boundSignV;
 
 	size_type row, col;
 
@@ -102,23 +102,23 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 //Location 1 has Transition 1 with guard is x<=0 & y>=0 and No Assignment so its identity i.e., x'=x and y'=y
 	row = 2;
 	col = 2;
-	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = 1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0;
-	gaurdConstraintsMatrix(1, 1) = -1;
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix(0, 0) = 1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(1, 0) = 0;
+	guardConstraintsMatrix(1, 1) = -1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 0;
+	guardBoundValue[1] = 0;
 
-	gaurdBoundSign = 1;
+	guardBoundSign = 1;
 
-	gaurd_polytope1 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guard_polytope1 = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t1 = transition::ptr(
-			new transition(1, "T1", 1, 2, gaurd_polytope1, assignment));
+			new transition(1, "T1", 1, 2, guard_polytope1, assignment));
 
 //Location 1:: Invariant constraint : y >=0
 	row = 2;
@@ -148,21 +148,21 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 //Location 2::has transition t2::with guard is x<=0 & y<=0
 	row = 2;
 	col = 2;
-	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = 1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0;
-	gaurdConstraintsMatrix(1, 1) = 1;
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix(0, 0) = 1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(1, 0) = 0;
+	guardConstraintsMatrix(1, 1) = 1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundSign = 1;
-	gaurd_polytope2 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 0;
+	guardBoundValue[1] = 0;
+	guardBoundSign = 1;
+	guard_polytope2 = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t2 = transition::ptr(
-			new transition(2, "T2", 2, 3, gaurd_polytope2, assignment));
+			new transition(2, "T2", 2, 3, guard_polytope2, assignment));
 
 //Location 2:: Invariant constraint : y <=0
 	row = 2;
@@ -192,21 +192,21 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	//Location 3::has transition t3::with guard is x>=0 & y<=0
 	row = 2;
 	col = 2;
-	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = -1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0;
-	gaurdConstraintsMatrix(1, 1) = 1;
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix(0, 0) = -1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(1, 0) = 0;
+	guardConstraintsMatrix(1, 1) = 1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundSign = 1;
-	gaurd_polytope3 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 0;
+	guardBoundValue[1] = 0;
+	guardBoundSign = 1;
+	guard_polytope3 = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t3 = transition::ptr(
-			new transition(3, "T3", 3, 4, gaurd_polytope3, assignment));
+			new transition(3, "T3", 3, 4, guard_polytope3, assignment));
 
 	//Location 3:: Invariant constraint : x<=0 & y<=0
 	row = 2;
@@ -236,21 +236,21 @@ void SetRotationCircle4Location_Parameters(hybrid_automata& Hybrid_Automata,
 	//Location 4::has transition t4::with guard is x>=0 & y>=0
 	row = 2;
 	col = 2;
-	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = -1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0;
-	gaurdConstraintsMatrix(1, 1) = -1;
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix(0, 0) = -1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(1, 0) = 0;
+	guardConstraintsMatrix(1, 1) = -1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundSign = 1;
-	gaurd_polytope4 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 0;
+	guardBoundValue[1] = 0;
+	guardBoundSign = 1;
+	guard_polytope4 = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t4 = transition::ptr(
-			new transition(4, "T4", 4, 1, gaurd_polytope4, assignment));
+			new transition(4, "T4", 4, 1, guard_polytope4, assignment));
 
 	//Location 4:: Invariant constraint : x>=0 & y<=0
 	row = 2;

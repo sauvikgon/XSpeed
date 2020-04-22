@@ -20,24 +20,22 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	unsigned int HybridSystem_Model_Type = op.get_model();
 
 	if (HybridSystem_Model_Type == BBALL) {
-	//	SetBouncingBall_Parameters(ha, init_state, reach_parameters);
+	//	SetBouncingBall(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == TBBALL) {
-	//	SetTimedBouncingBall_ParametersHystOutput(ha, init_state,	reach_parameters);
-		//SetTimedBouncingBall_2initSet(ha, init_state, reach_parameters);
+		SetTimedBouncingBall(ha, init_state,	reach_parameters);
 	}
 	if (HybridSystem_Model_Type == HELICOPTER) {
-	//	SetHelicopter_Parameters3(ha, init_state, reach_parameters);
+		SetHelicopter(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == FIVEDIMSYS) {
-	//	setSysParams(ha, init_state, reach_parameters);
+		setFiveDimSys(ha, init_state, reach_parameters);
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
 	//	set_nav04_timed(ha, init_state, reach_parameters);
-		//Set_NavTimedEpsilonRelaxGuard(ha, init_state, reach_parameters);
 		//SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
-		Set_NavTimed_Parameters(ha, init_state, reach_parameters);
+	//	Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_2) {
@@ -49,7 +47,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
-		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+	//	SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}
@@ -70,7 +68,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//SetRotation_Navtimed_Parameters(ha, init_state,reach_parameters);
 	}
 	if (HybridSystem_Model_Type == OSCILLATOR) {
-		setOscillatorTimed(ha, init_state, reach_parameters);
+	//	setOscillatorTimed(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == 14) {
 
@@ -82,12 +80,12 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
 		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
 
-		setNav30Timed(ha,init_state,reach_parameters);
+		//setNav30Timed(ha,init_state,reach_parameters);
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
 		//---------------Not working models-------------
-//amit		setbuild48(ha, init_state, reach_parameters);
+		setbuild48(ha, init_state, reach_parameters);
 		//setfwr(ha, init_state, reach_parameters);
 		//setpllConv(ha, init_state, reach_parameters);
 		//setheart(ha, init_state, reach_parameters);
@@ -121,25 +119,25 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//setNav4u(ha,init_state,reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 18){ // Platoon Model
-		setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
+	//	setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
 	}
 	if(HybridSystem_Model_Type == 19){ // Timed Navigation instance 22 (15 x 15 locations)
-		setNav22Timed(ha, init_state, reach_parameters);
+	//	setNav22Timed(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 20){ // Timed Navigation instance 25 (20 x 20 locations)
-		setNav25Timed(ha, init_state, reach_parameters);
+	//	setNav25Timed(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 21){ // Timed Navigation instance navT02_Timed (20 x 20 locations) used in Int. J of STTT without input set
-		setnavT02_Timedmodel(ha, init_state, reach_parameters);
+	//	setnavT02_Timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 22){ // Timed Navigation instance navT04_Timed (25 x 25 locations) used in Int. J of STTT without input set
-		setnavT04_Timedmodel(ha, init_state, reach_parameters);
+	//	setnavT04_Timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 23){ // Timed Navigation instance navT04_Timed (25 x 25 locations) used in Int. J of STTT without input set
-		setnavT13_Timedmodel(ha, init_state, reach_parameters);
+	//	setnavT13_Timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 24){ // Timed Navigation instance navT07_Timed (25 x 25 locations) used in Int. J of STTT without input set
-		setnavT07_Timedmodel(ha, init_state, reach_parameters);
+	//	setnavT07_Timedmodel(ha, init_state, reach_parameters);
 	}
 
 	if(HybridSystem_Model_Type == 25){ // vehicle_platoon model (5 Vehicles)

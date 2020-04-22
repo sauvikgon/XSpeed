@@ -2,7 +2,7 @@
 #ifndef Oscillator_timed_H_
 #define Oscillator_timed_H_
 
-#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/continuous/Polytope/polytope.h"
 #include "../../core/HybridAutomata/Hybrid_Automata.h"
 #include "../../core/math/matrix.h"
 #include "../../core/symbolic_states/initial_state.h"

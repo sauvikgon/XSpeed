@@ -10,10 +10,10 @@
 #include <assert.h>
 #include <iostream>
 #include <iomanip>
-#include <algorithm> // for max
+#include <algorithm>
 
-#include "../../../core/math/basic_functions.h"
-#include "../../../core/math/tribool.h"
+#include "core/math/basic_functions.h"
+#include "tribool.h"
 
 namespace math {
 namespace numeric {

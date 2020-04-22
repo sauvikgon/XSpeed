@@ -20,18 +20,18 @@ void SetOscillator(hybrid_automata& Hybrid_Automata,
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	polytope::ptr initial_polytope_I;
 	polytope::ptr invariant1, invariant2, invariant3, invariant4;
-	polytope::ptr gaurd_polytope1, gaurd_polytope2, gaurd_polytope3,
-			gaurd_polytope4;
+	polytope::ptr guard_polytope1, guard_polytope2, guard_polytope3,
+			guard_polytope4;
 	Dynamics system_dynamics;
 
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
-			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
+			invariantConstraintsMatrix, guardConstraintsMatrix, Amatrix,
 			Bmatrix;
 	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
-			gaurdBoundValue;
+			guardBoundValue;
 
 	std::vector<double> vector_c;
-	int boundSignI, invariantBoundSign, gaurdBoundSign;
+	int boundSignI, invariantBoundSign, guardBoundSign;
 
 	size_type row, col;
 
@@ -95,23 +95,23 @@ void SetOscillator(hybrid_automata& Hybrid_Automata,
 
 	row = 3;
 	col = 2;
-	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = 1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = -1;
-	gaurdConstraintsMatrix(1, 1) = 0;
-	gaurdConstraintsMatrix(2, 0) = -0.714286;
-	gaurdConstraintsMatrix(2, 1) = -1;
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix(0, 0) = 1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(1, 0) = -1;
+	guardConstraintsMatrix(1, 1) = 0;
+	guardConstraintsMatrix(2, 0) = -0.714286;
+	guardConstraintsMatrix(2, 1) = -1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundValue[2] = 0;
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 0;
+	guardBoundValue[1] = 0;
+	guardBoundValue[2] = 0;
 
-	gaurdBoundSign = 1;
-	gaurd_polytope1 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundSign = 1;
+	guard_polytope1 = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 
 //Transition Dynamics  Rx + w where R is the Assignment Mapping and w is a vector
 	math::matrix<double> R;	//Transition Dynamics
@@ -130,7 +130,7 @@ void SetOscillator(hybrid_automata& Hybrid_Automata,
 	assignment.b = w;
 //--------------
 	transition::ptr t1 = transition::ptr(
-			new transition(1, "t1", 1, 3, gaurd_polytope1, assignment));
+			new transition(1, "t1", 1, 3, guard_polytope1, assignment));
 
 //Location 1:: Invariant constraint : x<=0 &  y >= -c/x0 * x
 	row = 2;
@@ -179,25 +179,25 @@ void SetOscillator(hybrid_automata& Hybrid_Automata,
 
 	row = 3;
 	col = 2;
-	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = 1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0.714286;
-	gaurdConstraintsMatrix(1, 1) = 1;
-	gaurdConstraintsMatrix(2, 0) = -0.714286;
-	gaurdConstraintsMatrix(2, 1) = -1;
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix(0, 0) = 1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(1, 0) = 0.714286;
+	guardConstraintsMatrix(1, 1) = 1;
+	guardConstraintsMatrix(2, 0) = -0.714286;
+	guardConstraintsMatrix(2, 1) = -1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundValue[2] = 0;
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 0;
+	guardBoundValue[1] = 0;
+	guardBoundValue[2] = 0;
 
-	gaurdBoundSign = 1;
-	gaurd_polytope2 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundSign = 1;
+	guard_polytope2 = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t2 = transition::ptr(
-			new transition(2, "t2", 2, 1, gaurd_polytope2, assignment));
+			new transition(2, "t2", 2, 1, guard_polytope2, assignment));
 
 //Location 2:: Invariant constraint : y <=0
 	row = 2;
@@ -247,24 +247,24 @@ void SetOscillator(hybrid_automata& Hybrid_Automata,
 			//Location 3::has transition t3::with guard is x>=0 & y<=0
 	row = 3;
 	col = 2;
-	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = -1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = 0.714286;
-	gaurdConstraintsMatrix(1, 1) = 1;
-	gaurdConstraintsMatrix(2, 0) = -0.714286;
-	gaurdConstraintsMatrix(2, 1) = -1;
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix(0, 0) = -1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(1, 0) = 0.714286;
+	guardConstraintsMatrix(1, 1) = 1;
+	guardConstraintsMatrix(2, 0) = -0.714286;
+	guardConstraintsMatrix(2, 1) = -1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundValue[2] = 0;
-	gaurdBoundSign = 1;
-	gaurd_polytope3 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 0;
+	guardBoundValue[1] = 0;
+	guardBoundValue[2] = 0;
+	guardBoundSign = 1;
+	guard_polytope3 = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t3 = transition::ptr(
-			new transition(3, "t3", 3, 4, gaurd_polytope3, assignment));
+			new transition(3, "t3", 3, 4, guard_polytope3, assignment));
 
 	//Location 3:: Invariant constraint : x<=0 & y<=0
 	row = 2;
@@ -313,25 +313,25 @@ void SetOscillator(hybrid_automata& Hybrid_Automata,
 
 	row = 3;
 	col = 2;
-	gaurdConstraintsMatrix.resize(row, col);
-	gaurdConstraintsMatrix(0, 0) = 1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(1, 0) = -1;
-	gaurdConstraintsMatrix(1, 1) = 0;
-	gaurdConstraintsMatrix(2, 0) = 0.714286;
-	gaurdConstraintsMatrix(2, 1) = 1;
+	guardConstraintsMatrix.resize(row, col);
+	guardConstraintsMatrix(0, 0) = 1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(1, 0) = -1;
+	guardConstraintsMatrix(1, 1) = 0;
+	guardConstraintsMatrix(2, 0) = 0.714286;
+	guardConstraintsMatrix(2, 1) = 1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 0;
-	gaurdBoundValue[1] = 0;
-	gaurdBoundValue[2] = 0;
-	gaurdBoundSign = 1;
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 0;
+	guardBoundValue[1] = 0;
+	guardBoundValue[2] = 0;
+	guardBoundSign = 1;
 
-	gaurd_polytope4 = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guard_polytope4 = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t4 = transition::ptr(
-			new transition(4, "t4", 4, 2, gaurd_polytope4, assignment));
+			new transition(4, "t4", 4, 2, guard_polytope4, assignment));
 
 	//Location 4:: Invariant constraint : x<=0 & y<=-c/x0 * x
 	row = 2;

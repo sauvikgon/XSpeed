@@ -8,7 +8,7 @@
 #ifndef TESTPOLYTOPEPLOTTING_H_
 #define TESTPOLYTOPEPLOTTING_H_
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "../core/math/matrix.h"
 
 void GeneratePolytopePlotter(polytope::ptr poly);

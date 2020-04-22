@@ -9,10 +9,10 @@
 #ifndef LP_SOLVER_H_
 #define LP_SOLVER_H_
 
+#define GLPK_SOLVER 1
 
 #include <boost/shared_ptr.hpp>
-#include "../../../core/math/glpk_lp_solver/glpk_lp_solver.h"
-#include "../../../core/math/lp_solver/All_Solver_Definition.h"
+#include "core/math/glpk_lp_solver/glpk_lp_solver.h"
 
 class lp_solver {
 public:

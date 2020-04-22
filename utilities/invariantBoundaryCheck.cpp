@@ -6,7 +6,6 @@
  */
 
 #include "../utilities/invariantBoundaryCheck.h"
-
 #include "../utilities/UtilitiesDataStructure.h"
 
 void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
@@ -166,7 +165,7 @@ int type = lp_solver_type;
 			// ************************************************   Negative Direction Ends *******************************************
 			loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
 
-			rVariable_minus = CopyVector(r1Variable_minus);
+			rVariable_minus = r1Variable_minus;
 			sVariable_min = s1Variable_min;
 		} //end of iterations
 		//	if (invariantCrossed)	//We need to check all invariants as we are taking the min of all the directions
@@ -345,7 +344,7 @@ void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider
 			// ************************************************   Negative Direction Ends *******************************************
 			loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
 			//rVariable_minus = CopyVector(r1Variable_minus);
-			AllInvData[eachInvariantDirection].r_minus = CopyVector(AllInvData[eachInvariantDirection].r1_minus);
+			AllInvData[eachInvariantDirection].r_minus = AllInvData[eachInvariantDirection].r1_minus;
 			//sVariable_min = s1Variable_min;
 			AllInvData[eachInvariantDirection].sVariable_min = AllInvData[eachInvariantDirection].s1Variable_min;
 
@@ -520,21 +519,17 @@ void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunction
 			else
 				zI_min = res2_minus;
 			//  **************  Omega Function Over  ********************
-			//TempOmega_min = zI_min + s1Variable_min; //Y1 //cout<<"TempOmega_min = "<<TempOmega_min<<"\t";
-			AllInvData[invDir].TempOmega_min = zI_min + AllInvData[invDir].s1Variable_min;
-			/*if (invDir==0)
-				std::cout<<"TempOmega = "<< AllInvData[invDir].TempOmega_min<<"\t";*/
 
+			AllInvData[invDir].TempOmega_min = zI_min + AllInvData[invDir].s1Variable_min;
+			
 			// ************************************************   Negative Direction Ends *******************************************
 
-			//rVariable_minus = CopyVector(r1Variable_minus);
-			AllInvData[invDir].r_minus = CopyVector(AllInvData[invDir].r1_minus);
-			//sVariable_min = s1Variable_min;
+			AllInvData[invDir].r_minus = AllInvData[invDir].r1_minus;
 			AllInvData[invDir].sVariable_min = AllInvData[invDir].s1Variable_min;
 		} //end of eachInvariantDirection
 
 		loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
-		//std::cout<<"Loop Breaking at "<<loopIteration<<std::endl;
+		
 		//ToDo:: check if any of the invariantCrossed is true exit and return the value
 		if (invariantCrossed == true){
 			break;
@@ -842,9 +837,9 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 			//***** Intersection Detection Section *****
 			//---taken from here
 
-			rVariable = CopyVector(r1Variable); //source to destination		//Also works   rVariable=r1Variable
+			rVariable = r1Variable; //source to destination		//Also works   rVariable=r1Variable
 			sVariable = s1Variable;
-			rVariable_minus = CopyVector(r1Variable_minus);
+			rVariable_minus = r1Variable_minus;
 			sVariable_min = s1Variable_min;
 		} //end of iterations
 		//	if (invariantCrossed)	//We need to check all invariants as we are taking the min of all the directions
@@ -1338,9 +1333,9 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 			}
 
 // ******************************************* Intersection Detection Section Ends *******************************************
-			rVariable = CopyVector(r1Variable); //source to destination		//Also works   rVariable=r1Variable
+			rVariable = r1Variable; 
 			sVariable = s1Variable;
-			rVariable_minus = CopyVector(r1Variable_minus);
+			rVariable_minus = r1Variable_minus;
 			sVariable_min = s1Variable_min;
 		} //end of iterations
 		//	if (invariantCrossed)	//We need to check all invariants as we are taking the min of all the directions

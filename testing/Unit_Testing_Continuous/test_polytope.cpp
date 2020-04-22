@@ -9,7 +9,7 @@
 #include <iostream>
 #include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
 #include "fstream"
-#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/continuous/Polytope/polytope.h"
 #include "../../core/math/matrix.h"
 #include "../../utilities/StandardVector.h"
 

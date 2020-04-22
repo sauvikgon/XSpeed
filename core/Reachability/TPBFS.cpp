@@ -227,7 +227,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 					unsigned int index=0; // for guard_list, assign_list if they are vector
 					for (std::list<transition::ptr>::iterator trans =LoadBalanceDS[id].current_location->getOut_Going_Transitions().begin();
 						trans!= LoadBalanceDS[id].current_location->getOut_Going_Transitions().end(); trans++) { // get each destination_location_id and push into the pwl.waiting_list
-						loadBalPostD[id].guard_list[index] = (*trans)->getGaurd();
+						loadBalPostD[id].guard_list[index] = (*trans)->getGuard();
 						loadBalPostD[id].assign_list[index] = (*trans)->getAssignT();
 						loadBalPostD[id].dest_locID[index] = (*trans)->getDestination_Location_Id();
 						index++;

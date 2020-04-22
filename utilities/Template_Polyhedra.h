@@ -1,5 +1,5 @@
 /*
- * Template_Polytope.h
+ * Template_polytope.h
  *
  *  Created on: 10-July-2014
  *      Author: amit
@@ -14,7 +14,7 @@
 #include <omp.h>
 
 #include "../core/math/matrix.h"
-																																																																																																																										#include "../core/continuous/Polytope/Polytope.h"
+																																																																																																																										#include "../core/continuous/Polytope/polytope.h"
 
 using namespace std;
 /*

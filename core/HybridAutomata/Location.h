@@ -14,7 +14,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "../../core/HybridAutomata/Transition.h"
-#include "../continuous/Polytope/Polytope.h"
+#include "../continuous/Polytope/polytope.h"
 
 
 class location {

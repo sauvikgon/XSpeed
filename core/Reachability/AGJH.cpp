@@ -424,10 +424,8 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	}
 
 	template_polyhedra::ptr reach_region;
-	//std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
-
-	//parallelReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_parameters, reach_region, id);
-	reach_region = reachabilitySequential(NewTotalIteration,
+	
+	reach_region = postC_sf(NewTotalIteration,
 					current_location->getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(),
@@ -452,14 +450,14 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 
 			location::ptr current_destination;
 			Assign current_assignment;
-			polytope::ptr gaurd_polytope;
+			polytope::ptr guard_polytope;
 			//std::list < template_polyhedra::ptr > intersected_polyhedra;
 			polytope::ptr intersectedRegion;//created two objects here
 			discrete_set ds;
 			current_destination = H.getLocation((*t)->getDestination_Location_Id());
 
 			string locName = current_destination->getName();
-			gaurd_polytope = (*t)->getGaurd();//	GeneratePolytopePlotter(gaurd_polytope);
+			guard_polytope = (*t)->getGuard();//	GeneratePolytopePlotter(guard_polytope);
 
 			std::list<polytope::ptr> polys;
 
@@ -471,16 +469,16 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				aggregation=false;
 			}
 
-			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type); //, intersection_start_point);
-			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type);
-			gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
+			//intersected_polyhedra = reach_region->polys_intersectionSequential(guard_polytope, lp_solver_type); //, intersection_start_point);
+			//polys = reach_region->flowpipe_intersectionSequential(guard_polytope, lp_solver_type);
+			guard_polytope = (*t)->getGuard(); //	GeneratePolytopePlotter(guard_polytope);
 			//	std::cout<<"Before flowpipe Guard intersection\n";
 			//std::cout<<"locName = "<<locName<<"   res.size="<<res.size()<<std::endl;//
-			if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
+			if (!guard_polytope->getIsUniverse() && !guard_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 			{
 				// Returns the template hull of the polytopes that intersect with the guard
-				polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type);
-			} else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
+				polys = reach_region->flowpipe_intersectionSequential(aggregation, guard_polytope, lp_solver_type);
+			} else if (guard_polytope->getIsUniverse()) {	//the guard polytope is universal
 				// This alternative introduces a large approximation at switchings
 				//polys.push_back(flowpipse_cluster(reach_region,100));
 
@@ -500,7 +498,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 						polys.push_back(reach_region->getPolytope(template_poly_size - 1)); // last polytope
 					} else{ // Try clustering with user defined clustering percent
 
-						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, lp_solver_type);
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, guard_polytope, lp_solver_type);
 
 						/*int cluster = 100; // Sets the percentage of clustering to 100 ie only one cluster
 						polys = flowpipe_cluster(reach_region, cluster);//std::cout << "Inside Universe Guard intersection with flowpipe routine\n";//std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;
@@ -543,12 +541,12 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				//	GeneratePolytopePlotter(intersectedRegion);
 				//std::cout<<"Before Guard intersected region called\n";
 				polytope::ptr newShiftedPolytope, newPolytope;//created an object here
-				if (gaurd_polytope == NULL){
+				if (guard_polytope == NULL){
 					//std::cout<<"Guard is NULL"<<std::endl;//so do not perform intersection
 					continue;
 				}
 				else
-					newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
+					newPolytope = intersectedRegion->GetPolytope_Intersection(guard_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
 				//newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);//initial_polytope_I = post_assign_exact(newPolytope, R, w);
 
 				math::matrix<double> test(current_assignment.Map.size1(),

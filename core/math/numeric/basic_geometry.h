@@ -8,7 +8,7 @@
 #ifndef BASIC_GEOMETRY_H_
 #define BASIC_GEOMETRY_H_
 
-#include "../../../core/math/numeric/comp.h"
+#include "comp.h"
 
 namespace math {
 namespace numeric {

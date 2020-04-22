@@ -14,9 +14,6 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 	unsigned int depthBound = user_options.get_bfs_level() + 1;//trans 0 is the first flowpipe. Thus, depthBound should be +1
 
 
-
-
-
 	/* Get all structural discrete paths in the HA here*/
 	boost::timer::cpu_timer timePaths;
 	//std::cout<<"destLoc= " << destLoc<<"    depth bound = "<<depthBound<<std::endl;
@@ -25,7 +22,7 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 	timePaths.stop();
 	//std::cout<<"allPaths = "<<allPaths.size()<<"\n";
 			//double wall_clock_timePaths_nanosec, wall_clock_timePaths_millisec, wall_clock_timePaths_sec;
-	double user_clock_timePaths_nanosec, user_clock_timePaths_millisec, usertime_Paths_sec;
+	double user_clock_timePaths_millisec, usertime_Paths_sec;
 	user_clock_timePaths_millisec = timePaths.elapsed().user / (double) 1000000; //convert nanoseconds to milliseconds
 	usertime_Paths_sec = user_clock_timePaths_millisec / (double) 1000;
 
@@ -107,7 +104,7 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 			<< ", Total Time to search concrete CEs (in secs) = " << ce_search_time_sec << std::endl;
 	myfile.close();
 
-
+	return true;
 
 }
 

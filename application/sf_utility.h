@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "../core/continuous/ConvexSet/transMinkPoly.h"
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "../core/math/basic_functions.h"
 #include "../core/math/lp_solver/lp_solver.h"
 #include "../core/math/matrix.h"
@@ -105,12 +105,15 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 	if(!SysD.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
 		V_max_norm = get_infinity_norm(SysD.C);
 	}
-
+	if(!SysD.isEmptyMatrixB && !SysD.isEmptyC){
+		std::cout << "EXAMPLE MODEL WITH NON_EMPTY INPUT-SET AND CONSTANT VECTOR IN DYNAMICS. XSpeed has a flaw in these models. \n";
+	}
 	if (SysD.isEmptyMatrixA){ //if A is Empty
-		result = 0;	//norm_A will be zero and which is common term
+		result = 0;	//norm_A will be zero
 	}else {
 		double tt1 = exp(tau * norm_A);
-
+		std::cout << "norm_A="<< norm_A << std::endl;
+		std::cout << "exp(tau * norm_A)=" << tt1 << endl; 
 		if (std::isinf(tt1)){
 			throw std::runtime_error("infinity in compute beta\n");
 		}

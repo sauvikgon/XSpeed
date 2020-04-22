@@ -13,8 +13,13 @@
 #include <set>
 #include <utility>
 
-#include "../core/math/matrix.h"
+#include "core/math/matrix.h"
 
+// concatenates the second vector with the second one.
+std::vector<double> vector_join(std::vector<double> v1, std::vector<double> v2);
+
+// Elementwise addition of two vectors
+std::vector<double> vector_add(std::vector<double> v1, std::vector<double> v2);
 
 // converts the vector v into a unit vector
 std::vector<double> normalize_vector(std::vector<double> v);

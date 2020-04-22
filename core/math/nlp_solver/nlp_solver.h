@@ -13,7 +13,7 @@
 #include <math.h>
 #include <vector>
 #include <cassert>
-#include "../../../core/continuous/Polytope/Polytope.h"
+#include "../../../core/continuous/Polytope/polytope.h"
 
 //extern nlopt::opt minopt;
 //extern int count;

@@ -10,7 +10,7 @@
 
 
 #include <boost/shared_ptr.hpp>
-#include "../continuous/Polytope/Polytope.h"
+#include "../continuous/Polytope/polytope.h"
 
 
 /*
@@ -27,19 +27,19 @@ class transition {
 	string label;
 	int source_location_id;
 	int destination_location_id;
-	polytope::ptr Gaurd;
+	polytope::ptr Guard;
 	Assign Assign_T;
 public:
 	typedef boost::shared_ptr<transition> ptr;
 	transition();
 	transition(int trans_id, string label, int source_id, int destination_id,
-			polytope::ptr Gaurd, Assign Assign_T);
+			polytope::ptr Guard, Assign Assign_T);
 	Assign& getAssignT();
 	void setAssignT(Assign assignT);
 	int getDestination_Location_Id();
 	void setDestination_Location_Id(int dest_loc_id);
-	polytope::ptr getGaurd();
-	void setGaurd(polytope::ptr gaurd);
+	polytope::ptr getGuard();
+	void setGuard(polytope::ptr guard);
 	const string& getLabel() const;
 	void setLabel(const string& label);
 	int getSource_Location_Id();

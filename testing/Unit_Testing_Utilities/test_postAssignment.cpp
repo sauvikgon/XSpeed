@@ -11,7 +11,7 @@
 //#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
 #include <vector>
 
-#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/continuous/Polytope/polytope.h"
 #include "../../core/math/matrix.h"
 #include "../../utilities/Post_Assignment.h"
 #include "../../utilities/StandardVector.h"

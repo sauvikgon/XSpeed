@@ -9,7 +9,7 @@
 #ifndef UTILITIES_FLOW_COST_ESTIMATE_H_
 #define UTILITIES_FLOW_COST_ESTIMATE_H_
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "application/DataStructureDirections.h"
 #include "counterExample/simulation.h"
 

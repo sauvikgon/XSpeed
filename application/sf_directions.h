@@ -11,7 +11,6 @@
 
 #include <vector>
 #include "application/DataStructureDirections.h"
-#include "application/CopyArray.h"
 #include <list>
 #include "omp.h"
 //#include "matrixOperation.h"

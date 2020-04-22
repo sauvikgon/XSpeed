@@ -163,7 +163,7 @@ void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachP
 				indexU++; //for next entry
 			}
 			// ********** Omega's Directions End **********************
-			rVariable = CopyVector(r1Variable); //source to destination
+			rVariable = r1Variable; //source to destination
 			loopIteration++; //for the next iteration
 		} //end of iteration for each direction
 
@@ -234,7 +234,7 @@ void getDirectionList_X0_and_U_OnlyForGLPK(
 				list_U.insert(indexU, B_trans_dir1); //optimizing in a single loop
 			}
 			// ********** Omega's Directions End **********************
-			rVariable = CopyVector(r1Variable); //source to destination
+			rVariable = r1Variable; //source to destination
 			loopIteration++; //for the next iteration
 		} //end of iteration for each direction
 	} //end of all directions

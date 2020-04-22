@@ -1,14 +1,6 @@
-/*
- * lp_solver.cpp
- *
- *  Created on: 11-Feb-2015
- *      Author: amit
- */
 
-// **** change the file name of glpk_lp_solver to avoid conflict with lp_solver.cpp *********
 #include "../../../core/math/lp_solver/lp_solver.h"
 
-#include "../../../core/math/lp_solver/All_Solver_Definition.h"
 
 int lp_solver::lp_solver_count = 0;
 lp_solver::lp_solver() {

@@ -11,7 +11,7 @@
 #include "application/readCommandLine.h"
 #include "application/simulationCaller.h"
 #include "counterExample/WoFC_counter_example.h"
-#include "core/continuous/Polytope/Polytope.h"
+#include "core/continuous/Polytope/polytope.h"
 
 #include "counterExample/abstractCE.h"
 
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)
 	std::list<abstractCE::ptr> ce_candidates; //object of class counter_example
 
-	int lp_solver_type = 1; //	1 for GLPK and 2 for Gurobi
+	int lp_solver_type = 1;
 
 	try{
 		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters,forbidden_set);

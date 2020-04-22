@@ -9,12 +9,11 @@
 #define UTILITIES_FLOWPIPE_CLUSTER_H_
 
 #include <cassert>
-
-#include "../core/continuous/Polytope/Polytope.h"
-#include "../core/HybridAutomata/Location.h"
-#include "../core/HybridAutomata/Transition.h"
-#include "../io/io_utility.h"
-#include "../utilities/Template_Polyhedra.h"
+#include "core/continuous/Polytope/polytope.h"
+#include "core/HybridAutomata/Location.h"
+#include "core/HybridAutomata/Transition.h"
+#include "io/io_utility.h"
+#include "utilities/Template_Polyhedra.h"
 /**
  * Clusters the template polyhedra. The parameter factor provides the
  * percent of clustering [can range from 0 to 100]

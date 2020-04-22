@@ -65,9 +65,6 @@ double Omega_Support(const ReachabilityParameters& ReachParameters,
 	// transpose to be done once and stored in the structure of parameters */
 	B_trans = ReachParameters.B_trans;
 
-
-	// todo:commented the line below to avoid run time error
-
 	// todo: changed the above line to below to avoid runtime error
 	term2 = ReachParameters.time_step* system_dynamics.U->computeSupportFunction(direction, lp_U);
 

@@ -16,7 +16,7 @@
  *
  * Initial Polytope
  * Dynamics : Matrix A, Matrix B and Polytope U :: x' = Ax + Bu and u belongs to U. where x and u are convex polytope
- * Gaurd : Polytope
+ * Guard : Polytope
  * Invariant : Polytope *
  * Transition Dynamics  Rx + w : where R is a Assignment_mapping matrix and w a constant vector or a Polytope
  *
@@ -25,7 +25,7 @@
 #ifndef NAVIGATIONBENCHMARK4Var_H_
 #define NAVIGATIONBENCHMARK4Var_H_
 
-#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/continuous/Polytope/polytope.h"
 #include "../../core/HybridAutomata/Hybrid_Automata.h"
 #include "../../core/symbolic_states/initial_state.h"
 #include "../../core/symbolic_states/symbolic_states.h"

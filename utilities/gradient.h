@@ -11,7 +11,7 @@
 #include <vector>
 #include <cmath>
 #include "../core/math/analyticODESol.h"
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 
 /*
  * Computes derivative of vector (x) to polytope distance d w.r.t x.

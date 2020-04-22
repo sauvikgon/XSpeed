@@ -8,9 +8,9 @@
 #ifndef POST_ASSIGNMENT_H_
 #define POST_ASSIGNMENT_H_
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "../core/math/matrix.h"
-#include "../utilities/StandardVector.h"
+#include "../utilities/vector_operations.h"
 
 
 

@@ -10,12 +10,12 @@
 #include <set>
 #include <utility>
 #include <fstream>
-#include "../../../core/continuous/Polytope/Polytope.h"
-#include "../../../core/math/2d_geometry.h"
-#include "../../../core/math/basic_functions.h"
-#include "../../../core/math/matrix.h"
-#include "../../../utilities/StandardVector.h"
-#include "../../../utilities/vector_operations.h"
+#include "core/continuous/Polytope/polytope.h"
+#include "core/math/2d_geometry.h"
+#include "core/math/basic_functions.h"
+#include "core/math/matrix.h"
+#include "utilities/vector_operations.h"
+#include "utilities/vector_operations.h"
 
 //#include "math/lp_solver_ourSimplex/simplex.h"
 
@@ -254,9 +254,8 @@ double polytope::max_norm(int lp_solver_type,
 		for (unsigned int i = 0; i < generator_directions.size(); i++) {
 			std::vector<double> each_generator;
 			each_generator = generator_directions[i];
-			//cout<<"Each Generator = (" << each_generator[0]<<" , "<<each_generator[1]<<") "<<endl;
 			sf = lp1.Compute_LLP(each_generator);
-			Max_A = (abs(sf));
+			Max_A = (fabs(sf));
 			if (Max_A > Max)
 				Max = Max_A;
 		}
@@ -501,7 +500,7 @@ double polytope::point_distance(std::vector<double> v){
 		return 0;
 	if(this->IsEmpty){
 		std::cout << "distance of a point from an empty polytope asked\n";
-		exit(0);
+		return 0;
 	}
 
 	math::matrix<double> C = getCoeffMatrix();

@@ -11,7 +11,7 @@
 #include "../core/continuous/ConvexSet/supportFunctionProvider.h"
 #include "../core/discrete/discrete_set/discrete_set.h"
 #include "../core/symbolic_states/initial_state.h"
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 
 /**
  * Class to represent the abstract flowpipe. An abstract flowpipe

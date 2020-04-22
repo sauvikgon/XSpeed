@@ -85,9 +85,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 	std::vector<std::string> output_vars(3); //stores the output/plotting variables
 
-	// string with commandline options except model and cfg file names
-	const char *stFileNameWithPath;
-
 	std::string input;
 	for (int i = 1; i < argc; i++) {
 
@@ -159,7 +156,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			user_options.setOutFilename(fileName);
 		}
 		fileWithPath.append(fileName);
-		stFileNameWithPath = fileWithPath.c_str();//Required for recursive Call
 		// ********************** Setting for Output file Done **********************************
 
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default

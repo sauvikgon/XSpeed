@@ -28,9 +28,9 @@
 #include "../../core/HybridAutomata/Hybrid_Automata.h"
 #include "../../core/PWL/pwlist.h"
 #include "../../core/Reachability/LockAvoidanceUtility.h"
-#include "../../core/Reachability/reachabilitySequential.h"
+#include "../../core/Reachability/postCSequential.h"
 #include "../../core/Reachability/reachDataStructure.h"
-#include "../../core/Reachability/reachPostCParallel.h"
+#include "../../core/Reachability/postCParallel.h"
 #include "../../core/symbolic_states/initial_state.h"
 #include "../../core/symbolic_states/initial_state.h"
 #include "../../core/symbolic_states/symbolic_states.h"
@@ -117,7 +117,7 @@ public:
 	bool ce_flag; // The flag to switch ON/OFF the CE generation functionality.
 	std::string ce_path; // This string can be either "all", "first" or "1,3,4,15,16" type. The last string is a comma separated list of locations to represent a path.
 
-	void seqReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
+	void seq_postC_selection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 					template_polyhedra::ptr& reach_region);
 
 /*
@@ -162,7 +162,7 @@ private:
 	userOptions user_op; //user options
 
 
-	void parReachSelection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
+	void par_postC_selection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);
 
 	/*

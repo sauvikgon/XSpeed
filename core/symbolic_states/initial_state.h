@@ -9,7 +9,7 @@
 #define INITIAL_STATE_H_
 
 #include "../../core/symbolic_states/symbolic_states.h"
-#include "../continuous/Polytope/Polytope.h"
+#include "../continuous/Polytope/polytope.h"
 
 class initial_state {
 public:

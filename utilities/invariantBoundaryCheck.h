@@ -10,7 +10,6 @@
 
 #include "application/DataStructureDirections.h"
 #include "application/sf_utility.h"
-#include "application/CopyArray.h"
 #include <omp.h>
 #include <stdlib.h>	//for using abs() absolute function
 

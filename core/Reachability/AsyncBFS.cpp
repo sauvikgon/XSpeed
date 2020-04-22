@@ -212,7 +212,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 //	std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 
 	//parallelReachSelection(NewTotalIteration, current_location, continuous_initial_polytope, reach_parameters, reach_region, id);
-	reach_region = reachabilitySequential(NewTotalIteration,
+	reach_region = postC_sf(NewTotalIteration,
 					current_location->getSystem_Dynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(),
@@ -239,14 +239,14 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 
 			location::ptr current_destination;
 			Assign current_assignment;
-			polytope::ptr gaurd_polytope;
+			polytope::ptr guard_polytope;
 			//std::list < template_polyhedra::ptr > intersected_polyhedra;
 			polytope::ptr intersectedRegion;//created two objects here
 			discrete_set ds;
 			current_destination = myData.H.getLocation((*t)->getDestination_Location_Id());
 
 			string locName = current_destination->getName();
-			gaurd_polytope = (*t)->getGaurd();//	GeneratePolytopePlotter(gaurd_polytope);
+			guard_polytope = (*t)->getGuard();//	GeneratePolytopePlotter(guard_polytope);
 
 			bool aggregation=true;//ON indicate TRUE, so a single/more (if clustering) template-hulls are taken
 			//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
@@ -260,19 +260,19 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 
 
 			std::list<polytope::ptr> polys;
-			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type); //, intersection_start_point);
-			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, myData.lp_solver_type);
+			//intersected_polyhedra = reach_region->polys_intersectionSequential(guard_polytope, lp_solver_type); //, intersection_start_point);
+			//polys = reach_region->flowpipe_intersectionSequential(guard_polytope, myData.lp_solver_type);
 
-			//intersected_polyhedra = reach_region->polys_intersectionSequential(gaurd_polytope, lp_solver_type); //, intersection_start_point);
-			//polys = reach_region->flowpipe_intersectionSequential(gaurd_polytope, lp_solver_type);
-			gaurd_polytope = (*t)->getGaurd(); //	GeneratePolytopePlotter(gaurd_polytope);
+			//intersected_polyhedra = reach_region->polys_intersectionSequential(guard_polytope, lp_solver_type); //, intersection_start_point);
+			//polys = reach_region->flowpipe_intersectionSequential(guard_polytope, lp_solver_type);
+			guard_polytope = (*t)->getGuard(); //	GeneratePolytopePlotter(guard_polytope);
 			//	std::cout<<"Before flowpipe Guard intersection\n";
-			if (!gaurd_polytope->getIsUniverse() && !gaurd_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
+			if (!guard_polytope->getIsUniverse() && !guard_polytope->getIsEmpty())	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
 			{
 				// Returns the template hull of the polytopes that intersect with the guard
-				polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, myData.lp_solver_type);
+				polys = reach_region->flowpipe_intersectionSequential(aggregation, guard_polytope, myData.lp_solver_type);
 			}
-			else if (gaurd_polytope->getIsUniverse()) {	//the guard polytope is universal
+			else if (guard_polytope->getIsUniverse()) {	//the guard polytope is universal
 				// This alternative introduces a large approximation at switchings
 				//polys.push_back(flowpipse_cluster(reach_region,100));
 
@@ -295,7 +295,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 						polys = flowpipe_cluster(reach_region, cluster);
 						std::cout << "Inside Universe Guard intersection with flowpipe routine\n";
 						std::cout << "Number of polytopes after clustering:" << polys.size() << std::endl;*/
-						polys = reach_region->flowpipe_intersectionSequential(aggregation, gaurd_polytope, myData.lp_solver_type);
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, guard_polytope, myData.lp_solver_type);
 					}
 				}
 				else{ // empty guard
@@ -333,7 +333,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 				//Returns a single over-approximated polytope from the list of intersected polytopes
 				//	GeneratePolytopePlotter(intersectedRegion);
 				polytope::ptr newShiftedPolytope, newPolytope;//created an object here
-				newPolytope = intersectedRegion->GetPolytope_Intersection(gaurd_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
+				newPolytope = intersectedRegion->GetPolytope_Intersection(guard_polytope);//Retuns the intersected region as a single newpolytope. **** with added directions
 				//newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);//initial_polytope_I = post_assign_exact(newPolytope, R, w);
 
 				math::matrix<double> test(current_assignment.Map.size1(),

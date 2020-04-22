@@ -8,7 +8,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/continuous/Polytope/polytope.h"
 #include "../../core/math/matrix.h"
 #include "../../utilities/vector_operations.h"
 #include "UnitTest++.h"

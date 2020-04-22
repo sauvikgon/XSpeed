@@ -8,7 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include "../../../core/continuous/ConvexSet/supportFunctionProvider.h"
-#include "../../../core/continuous/Polytope/Polytope.h"
+#include "../../../core/continuous/Polytope/polytope.h"
 
 #ifndef TRANSMINKPOLY_H_
 #define TRANSMINKPOLY_H_

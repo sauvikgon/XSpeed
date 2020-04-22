@@ -12,7 +12,7 @@
 #include <list>
 #include <utility>
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "application/userOptions.h"
 #include <fstream>
 
@@ -23,7 +23,7 @@
 #include "../core/math/point/point.h"
 #include "../core/symbolic_states/initial_state.h"
 #include "../core/symbolic_states/symbolic_states.h"
-#include "../utilities/StandardVector.h"
+#include "../utilities/vector_operations.h"
 #include "../utilities/vector_operations.h"
 
 

@@ -12,15 +12,15 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata,
 		ReachabilityParameters& reach_parameters) {
 
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
-	polytope::ptr initial_polytope_I, invariant, gaurd_polytope;
+	polytope::ptr initial_polytope_I, invariant, guard_polytope;
 	Dynamics system_dynamics;
 
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
-			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
+			invariantConstraintsMatrix, guardConstraintsMatrix, Amatrix,
 			Bmatrix;
 	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
-			gaurdBoundValue, C;
-	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
+			guardBoundValue, C;
+	int boundSignI, invariantBoundSign, guardBoundSign, boundSignV;
 
 	size_type row, col;
 	unsigned int initial_location_id; //the initial Location ID
@@ -121,218 +121,218 @@ void SetConstantMotion(hybrid_automata& Hybrid_Automata,
 	 */
 	row = 6;
 	col = 3;
-	gaurdConstraintsMatrix.resize(row, col); //this matrix will be common for all transition except the gaurdBoundValue.
-	gaurdConstraintsMatrix(0, 0) = 1;
-	gaurdConstraintsMatrix(0, 1) = 0;
-	gaurdConstraintsMatrix(0, 2) = 0;
+	guardConstraintsMatrix.resize(row, col); //this matrix will be common for all transition except the guardBoundValue.
+	guardConstraintsMatrix(0, 0) = 1;
+	guardConstraintsMatrix(0, 1) = 0;
+	guardConstraintsMatrix(0, 2) = 0;
 
-	gaurdConstraintsMatrix(1, 0) = -1;
-	gaurdConstraintsMatrix(1, 1) = 0;
-	gaurdConstraintsMatrix(1, 2) = 0;
+	guardConstraintsMatrix(1, 0) = -1;
+	guardConstraintsMatrix(1, 1) = 0;
+	guardConstraintsMatrix(1, 2) = 0;
 
-	gaurdConstraintsMatrix(2, 0) = 0;
-	gaurdConstraintsMatrix(2, 1) = 1;
-	gaurdConstraintsMatrix(2, 2) = 0;
+	guardConstraintsMatrix(2, 0) = 0;
+	guardConstraintsMatrix(2, 1) = 1;
+	guardConstraintsMatrix(2, 2) = 0;
 
-	gaurdConstraintsMatrix(3, 0) = 0;
-	gaurdConstraintsMatrix(3, 1) = -1;
-	gaurdConstraintsMatrix(3, 2) = 0;
+	guardConstraintsMatrix(3, 0) = 0;
+	guardConstraintsMatrix(3, 1) = -1;
+	guardConstraintsMatrix(3, 2) = 0;
 
-	gaurdConstraintsMatrix(4, 0) = 0;
-	gaurdConstraintsMatrix(4, 1) = 0;
-	gaurdConstraintsMatrix(4, 2) = 1;
+	guardConstraintsMatrix(4, 0) = 0;
+	guardConstraintsMatrix(4, 1) = 0;
+	guardConstraintsMatrix(4, 2) = 1;
 
-	gaurdConstraintsMatrix(5, 0) = 0;
-	gaurdConstraintsMatrix(5, 1) = 0;
-	gaurdConstraintsMatrix(5, 2) = -1;
+	guardConstraintsMatrix(5, 0) = 0;
+	guardConstraintsMatrix(5, 1) = 0;
+	guardConstraintsMatrix(5, 2) = -1;
 
-	gaurdBoundSign = 1;
+	guardBoundSign = 1;
 
-	gaurdBoundValue.resize(row);
-	gaurdBoundValue[0] = 1;	 // x1==1 and 0<=x2<=1 and  -100<=t<=100
-	gaurdBoundValue[1] = -1;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = 0;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
+	guardBoundValue.resize(row);
+	guardBoundValue[0] = 1;	 // x1==1 and 0<=x2<=1 and  -100<=t<=100
+	guardBoundValue[1] = -1;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = 0;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
 
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 
 	transition::ptr t1 = transition::ptr(
-			new transition(1, "1 to 2", 1, 2, gaurd_polytope, assignment));
+			new transition(1, "1 to 2", 1, 2, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 1; // x2==1 and 0<=x1<=1 and  -100<=t<=100
-	gaurdBoundValue[1] = 0;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
+	guardBoundValue[0] = 1; // x2==1 and 0<=x1<=1 and  -100<=t<=100
+	guardBoundValue[1] = 0;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
 
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t2 = transition::ptr(
-			new transition(2, "1 to 6", 1, 6, gaurd_polytope, assignment));
+			new transition(2, "1 to 6", 1, 6, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 2; // x1==2 and 0<=x2<=1 and  -100<=t<=100
-	gaurdBoundValue[1] = -2;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = 0;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
+	guardBoundValue[0] = 2; // x1==2 and 0<=x2<=1 and  -100<=t<=100
+	guardBoundValue[1] = -2;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = 0;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
 
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t3 = transition::ptr(
-			new transition(3, "2 to 3", 2, 3, gaurd_polytope, assignment));
+			new transition(3, "2 to 3", 2, 3, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 2; // x2==1 and 1<=x1<=2 and  -100<=t<=100
-	gaurdBoundValue[1] = -1;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 2; // x2==1 and 1<=x1<=2 and  -100<=t<=100
+	guardBoundValue[1] = -1;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t4 = transition::ptr(
-			new transition(4, "2 to 5", 2, 5, gaurd_polytope, assignment));
+			new transition(4, "2 to 5", 2, 5, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 1; // x1==1 and 0<=x2<=1 and  -100<=t<=100
-	gaurdBoundValue[1] = -1;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = 0;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 1; // x1==1 and 0<=x2<=1 and  -100<=t<=100
+	guardBoundValue[1] = -1;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = 0;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t5 = transition::ptr(
-			new transition(5, "2 to 1", 2, 1, gaurd_polytope, assignment));
+			new transition(5, "2 to 1", 2, 1, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 3; // x2==1 and 2<=x1<=3 and  -100<=t<=100
-	gaurdBoundValue[1] = -2;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 3; // x2==1 and 2<=x1<=3 and  -100<=t<=100
+	guardBoundValue[1] = -2;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t6 = transition::ptr(
-			new transition(6, "3 to 4", 3, 4, gaurd_polytope, assignment));
+			new transition(6, "3 to 4", 3, 4, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 2; // x1==2 and 0<=x2<=1 and  -100<=t<=100
-	gaurdBoundValue[1] = -2;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = 0;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
+	guardBoundValue[0] = 2; // x1==2 and 0<=x2<=1 and  -100<=t<=100
+	guardBoundValue[1] = -2;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = 0;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
 
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t7 = transition::ptr(
-			new transition(7, "3 to 2", 3, 2, gaurd_polytope, assignment));
+			new transition(7, "3 to 2", 3, 2, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 2; // x1==2 and 1<=x2<=2 and  -100<=t<=100
-	gaurdBoundValue[1] = -2;
-	gaurdBoundValue[2] = 2;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 2; // x1==2 and 1<=x2<=2 and  -100<=t<=100
+	guardBoundValue[1] = -2;
+	guardBoundValue[2] = 2;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t8 = transition::ptr(
-			new transition(8, "4 to 5", 4, 5, gaurd_polytope, assignment));
+			new transition(8, "4 to 5", 4, 5, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 3; // x2==1 and 2<=x1<=3 and  -100<=t<=100
-	gaurdBoundValue[1] = -2;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 3; // x2==1 and 2<=x1<=3 and  -100<=t<=100
+	guardBoundValue[1] = -2;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t9 = transition::ptr(
-			new transition(9, "4 to 3", 4, 3, gaurd_polytope, assignment));
+			new transition(9, "4 to 3", 4, 3, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 2; // x1==2 and 1<=x2<=2 and  -100<=t<=100
-	gaurdBoundValue[1] = -2;
-	gaurdBoundValue[2] = 2;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 2; // x1==2 and 1<=x2<=2 and  -100<=t<=100
+	guardBoundValue[1] = -2;
+	guardBoundValue[2] = 2;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t10 = transition::ptr(
-			new transition(10, "5 to 4", 5, 4, gaurd_polytope, assignment));
+			new transition(10, "5 to 4", 5, 4, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 1; // x1==1 and 1<=x2<=2 and  -100<=t<=100
-	gaurdBoundValue[1] = -1;
-	gaurdBoundValue[2] = 2;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 1; // x1==1 and 1<=x2<=2 and  -100<=t<=100
+	guardBoundValue[1] = -1;
+	guardBoundValue[2] = 2;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t11 = transition::ptr(
-			new transition(11, "5 to 6", 5, 6, gaurd_polytope, assignment));
+			new transition(11, "5 to 6", 5, 6, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 2; // x2==1 and 1<=x1<=2 and  -100<=t<=100
-	gaurdBoundValue[1] = -1;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 2; // x2==1 and 1<=x1<=2 and  -100<=t<=100
+	guardBoundValue[1] = -1;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t12 = transition::ptr(
-			new transition(12, "5 to 2", 5, 2, gaurd_polytope, assignment));
+			new transition(12, "5 to 2", 5, 2, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 1; // x1==1 and 1<=x2<=2 and  -100<=t<=100
-	gaurdBoundValue[1] = -1;
-	gaurdBoundValue[2] = 2;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 1; // x1==1 and 1<=x2<=2 and  -100<=t<=100
+	guardBoundValue[1] = -1;
+	guardBoundValue[2] = 2;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t13 = transition::ptr(
-			new transition(13, "6 to 5", 6, 5, gaurd_polytope, assignment));
+			new transition(13, "6 to 5", 6, 5, guard_polytope, assignment));
 
-	gaurdBoundValue[0] = 1; // x2==1 and 0<=x1<=1 and  -100<=t<=100
-	gaurdBoundValue[1] = 0;
-	gaurdBoundValue[2] = 1;
-	gaurdBoundValue[3] = -1;
-	gaurdBoundValue[4] = 100;
-	gaurdBoundValue[5] = 100;
-	//gaurd_polytope.setPolytope(gaurdConstraintsMatrix, gaurdBoundValue,gaurdBoundSign);
-	gaurd_polytope = polytope::ptr(
-			new polytope(gaurdConstraintsMatrix, gaurdBoundValue,
-					gaurdBoundSign));
+	guardBoundValue[0] = 1; // x2==1 and 0<=x1<=1 and  -100<=t<=100
+	guardBoundValue[1] = 0;
+	guardBoundValue[2] = 1;
+	guardBoundValue[3] = -1;
+	guardBoundValue[4] = 100;
+	guardBoundValue[5] = 100;
+	//guard_polytope.setPolytope(guardConstraintsMatrix, guardBoundValue,guardBoundSign);
+	guard_polytope = polytope::ptr(
+			new polytope(guardConstraintsMatrix, guardBoundValue,
+					guardBoundSign));
 	transition::ptr t14 = transition::ptr(
-			new transition(14, "6 to 1", 6, 1, gaurd_polytope, assignment));
+			new transition(14, "6 to 1", 6, 1, guard_polytope, assignment));
 // ******************* Transition initialized **************************
 
 	/*	*************** Initialization of all Locations *******************

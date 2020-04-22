@@ -11,7 +11,7 @@
 #include "nlpFunctions.h"
 #include "vector"
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "../core/math/analyticODESol.h"
 #include "application/DataStructureDirections.h"
 #include "abstractCE.h"
@@ -178,7 +178,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad,
 
 			R = Tptr->getAssignT();
 			//guard as a polytope
-			g = Tptr->getGaurd();
+			g = Tptr->getGuard();
 
 			std::vector<double> mapderiv(Axplusb);
 
@@ -416,7 +416,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 			R = Tptr->getAssignT();
 
 			//guard as a polytope
-			g = Tptr->getGaurd();
+			g = Tptr->getGuard();
 			// guard \cap invariant distance, to address Eq. (12) in CDC 13' paper
 			polytope::ptr guard_intersect_inv;
 			guard_intersect_inv = I->GetPolytope_Intersection(g);

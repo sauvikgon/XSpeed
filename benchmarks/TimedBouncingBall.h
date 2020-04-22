@@ -13,13 +13,13 @@
  *
  * Initial Polytope
  * Dynamics : Matrix A, Matrix B and Polytope U
- * Gaurd : Polytope
+ * Guard : Polytope
  * Invariant : Polytope *
  * Transition Dynamics  Rx + w : where R is a Assignment_mapping matrix and w a constant vector or a Polytope
  *
  */
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "../core/HybridAutomata/Hybrid_Automata.h"
 #include "../core/math/matrix.h"
 #include "../core/symbolic_states/initial_state.h"
@@ -27,10 +27,7 @@
 #include "application/DataStructureDirections.h"
 
 
-void SetTimedBouncingBall_ParametersOurOutput(hybrid_automata& Hybrid_Automata,
-		std::list<initial_state::ptr>& init_state_list,
-		ReachabilityParameters& reach_parameters);
-void SetTimedBouncingBall_ParametersHystOutput(hybrid_automata& Hybrid_Automata,
+void SetTimedBouncingBall(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 

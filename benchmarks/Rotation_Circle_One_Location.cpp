@@ -17,15 +17,15 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 	typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 	polytope::ptr initial_polytope_I;
 	polytope::ptr invariant1, invariant2;
-	polytope::ptr gaurd_polytope1, gaurd_polytope2;
+	polytope::ptr guard_polytope1, guard_polytope2;
 	Dynamics system_dynamics;
 
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
-			invariantConstraintsMatrix, gaurdConstraintsMatrix, Amatrix,
+			invariantConstraintsMatrix, guardConstraintsMatrix, Amatrix,
 			Bmatrix;
 	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
-			gaurdBoundValue;
-	int boundSignI, invariantBoundSign, gaurdBoundSign, boundSignV;
+			guardBoundValue;
+	int boundSignI, invariantBoundSign, guardBoundSign, boundSignV;
 
 	size_type row, col;
 
@@ -148,20 +148,20 @@ void SetRotationCircleOneLocation_Parameters(hybrid_automata& Hybrid_Automata,
 //--------------
 
 	/*
-	 //Location 1:: gaurd is y<=0 and No Assignment so its identity i.e., x'=x and y'=y
+	 //Location 1:: guard is y<=0 and No Assignment so its identity i.e., x'=x and y'=y
 	 row = 1;
 	 col = 2;
-	 gaurdConstraintsMatrix.resize(row, col);
-	 gaurdConstraintsMatrix(0, 0) = 0;
-	 gaurdConstraintsMatrix(0, 1) = 1;
+	 guardConstraintsMatrix.resize(row, col);
+	 guardConstraintsMatrix(0, 0) = 0;
+	 guardConstraintsMatrix(0, 1) = 1;
 
-	 gaurdBoundValue.resize(row);
-	 gaurdBoundValue[0] = 0;
+	 guardBoundValue.resize(row);
+	 guardBoundValue[0] = 0;
 
-	 gaurdBoundSign = 1;
+	 guardBoundSign = 1;
 
-	 gaurd_polytope1 = polytope::ptr(new polytope(gaurdConstraintsMatrix, gaurdBoundValue, gaurdBoundSign));
-	 transitions t1(1, "T1", 1, 2, gaurd_polytope1, assignment);
+	 guard_polytope1 = polytope::ptr(new polytope(guardConstraintsMatrix, guardBoundValue, guardBoundSign));
+	 transitions t1(1, "T1", 1, 2, guard_polytope1, assignment);
 	 */
 
 //Location 1:: Invariant constraint : y >=0

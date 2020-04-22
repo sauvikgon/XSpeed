@@ -14,6 +14,9 @@
 #include <boost/numeric/ublas/io.hpp>
 
 #include "../../core/math/expm.h"
+#include "../../core/math/matrix_exponential.hpp"
+#include "../../core/math/r8lib.hpp"
+
 namespace math {
 
 template<typename scalar_type> class matrix: public boost::numeric::ublas::matrix<
@@ -32,7 +35,7 @@ public:
 	 * every member of the matrix.
 	 */
 	matrix(size_type r, size_type c, const scalar_type init_val);
-	void matrix_exponentiation(math::matrix<scalar_type>& res, double time_tau) const;
+	void matrix_exponentiation(math::matrix<scalar_type>& res, double time_tau);
 	void matrix_exponentiation(math::matrix<scalar_type>& res) const;
 	void multiply(matrix& A, matrix& res);
 
@@ -44,7 +47,16 @@ public:
 	void mult_vector(std::vector<scalar_type> v, std::vector<scalar_type> &res) const;
 	// multiplies each entry of the matrix by c
 	void scalar_multiply(double c);
-	void transpose(matrix& re );
+
+	/**
+    	  * Gets the transpose of the current matrix in res
+	  */
+	void transpose(matrix& res );
+
+	/**
+	  * Gets the absolute matrix M = (|m_{i,j}|) in res
+	  */
+	void absolute(matrix& res);
 	/*
 	 * Appends a column vector to the end of the calling matrix and returns the new resized matrix
 	 */

@@ -11,7 +11,7 @@
 
 #include "../../core/discrete/discrete_set/discrete_set.h"
 #include "../../utilities/Template_Polyhedra.h"
-#include "../continuous/Polytope/Polytope.h"
+#include "../continuous/Polytope/polytope.h"
 
 class symbolic_states {
 public:

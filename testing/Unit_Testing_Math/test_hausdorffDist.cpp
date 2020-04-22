@@ -12,7 +12,7 @@
 #include <vector>
 #include <cmath>
 
-#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/continuous/Polytope/polytope.h"
 #include "../../core/math/matrix.h"
 #include "../../utilities/HausdorffDistance.h"
 

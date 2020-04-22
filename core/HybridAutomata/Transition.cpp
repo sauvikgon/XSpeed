@@ -1,10 +1,4 @@
-/*
- * Transition.cpp
- *
- *  Created on: 09-Jul-2014
- *      Author: amit
- */
-//#include "HybridAutomata/Location.h"
+
 #include "../../core/HybridAutomata/Transition.h"
 
 using namespace std;
@@ -15,18 +9,18 @@ transition::transition() {
 	source_location_id = -1; // default null value
 	destination_location_id = -1; // default null value
 	math::matrix<double> m;
-	Gaurd = polytope::ptr(new polytope()); // universal guard, always true
-	unsigned int dim = Gaurd->map_size();
+	Guard = polytope::ptr(new polytope()); // universal guard, always true
+	unsigned int dim = Guard->map_size();
 	m.matrix_Identity(dim, Assign_T.Map);
 	Assign_T.b = std::vector<double>(dim,0);
 }
 transition::transition(int transition_id, string label_name, int source_id,
-		int dest_id, polytope::ptr gaurd, Assign assign_Trans) {
+		int dest_id, polytope::ptr guard, Assign assign_Trans) {
 	trans_id = transition_id;
 	label = label_name;
 	source_location_id =source_id;
 	destination_location_id = dest_id;
-	Gaurd = gaurd;
+	Guard = guard;
 	Assign_T = assign_Trans;
 }
 
@@ -40,12 +34,12 @@ void transition::setAssignT(Assign assignT) {
 	 Assign_T.b = assignT.b;	*/
 }
 
-polytope::ptr transition::getGaurd() {
-	return Gaurd;
+polytope::ptr transition::getGuard() {
+	return Guard;
 }
 
-void transition::setGaurd(polytope::ptr gaurd) {
-	Gaurd = gaurd;
+void transition::setGuard(polytope::ptr guard) {
+	Guard = guard;
 }
 
 const string& transition::getLabel() const {

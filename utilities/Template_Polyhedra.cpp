@@ -9,7 +9,7 @@
 
 #include <omp.h>
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "../utilities/testPolytopePlotting.h"
 #include "boost/timer/timer.hpp"
 //#include "core_system/math/PPL_Polyhedron/PPL_Polyhedron.h"

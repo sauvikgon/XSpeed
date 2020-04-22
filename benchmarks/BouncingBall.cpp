@@ -6,9 +6,8 @@
  */
 
 #include "../benchmarks/BouncingBall.h"
-//testing a push
 
-void SetBouncingBall_Parameters(hybrid_automata& Hybrid_Automata,
+void SetBouncingBall(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters) {
 

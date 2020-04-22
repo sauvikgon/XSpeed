@@ -8,7 +8,7 @@
 #ifndef DATASTRUCTUREDIRECTIONS_H_
 #define DATASTRUCTUREDIRECTIONS_H_
 
-#include "../core/continuous/Polytope/Polytope.h"
+#include "../core/continuous/Polytope/polytope.h"
 #include "../core/math/matrix.cpp"
 
 /*

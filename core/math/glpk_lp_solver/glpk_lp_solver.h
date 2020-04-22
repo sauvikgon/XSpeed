@@ -14,7 +14,7 @@
 #include <boost/shared_ptr.hpp>
 #include <limits.h>
 
-#include "../../../core/math/matrix.h"
+#include "core/math/matrix.h"
 
 /* solution status:
  *

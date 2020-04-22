@@ -8,7 +8,7 @@
 #ifndef CONVERT_TO_BESTDIRECTION_H_
 #define CONVERT_TO_BESTDIRECTION_H_
 
-#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/continuous/Polytope/polytope.h"
 
 
 /*

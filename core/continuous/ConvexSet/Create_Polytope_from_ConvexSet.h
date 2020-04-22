@@ -8,7 +8,7 @@
 #ifndef CREATE_POLYTOPE_FROM_CONVEXSET_H_
 #define CREATE_POLYTOPE_FROM_CONVEXSET_H_
 
-#include "../../../core/continuous/Polytope/Polytope.h"
+#include "../../../core/continuous/Polytope/polytope.h"
 #include "application/DataStructureDirections.h"
 
 /*

@@ -63,7 +63,6 @@ void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_
 	std::cout << "Number of refinements performed when searching: " << reachObj.get_refinements() << std::endl;
 	std::cout << "Time to search concrete counter-example(s) from the abstract path(s) (user time in ms):" << reachObj.get_ce_search_time() << std::endl;
 	std::cout << std::endl;
-	unsigned int ce_search_time = reachObj.get_ce_search_time();
 
 	// plot the first counter-example trajectory in the list.
 	if(ce_list.size() !=0){
