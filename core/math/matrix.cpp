@@ -5,11 +5,11 @@
 #ifndef MATRIX_CPP_
 #define MATRIX_CPP_
 
-#include "../../core/math/matrix.h"
+#include "core/math/matrix.h"
 
 #include <iostream>
 
-#include "../../core/math/basic_functions.h"
+#include "core/math/basic_functions.h"
 
 using namespace std;
 

@@ -21,7 +21,6 @@ class fb_interpol : public approx_model
 	math::matrix<double> transpose_phi_2;	//{\phi_2}^T
 	math::matrix<double> transpose_A_square; //{A^2}^T
 	math::matrix<double> transpose_AsquarePhi; //{A^2.expAt}^T
-	math::matrix<double> transpose_expAt; // t = this->delta
 	math::matrix<double> transpose_A; //A^T
 	unsigned int num_iters; // essential for efficient computation of rho_psi
 	std::vector<double> C; // the constant dynamics vector.

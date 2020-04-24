@@ -150,6 +150,9 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 
 	if (!system_dynamics.isEmptyMatrixB) { //if NOT Empty
 
+		//debug
+		std::cout << "U empty? " << system_dynamics.U->getIsEmpty()  << std::endl;
+		//--
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(system_dynamics.U, Btrans));
 

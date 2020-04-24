@@ -26,8 +26,7 @@ void SetBouncingBall(hybrid_automata& Hybrid_Automata,
 	Dynamics system_dynamics;
 
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
-			invariantConstraintsMatrix, guardConstraintsMatrix, Amatrix,
-			Bmatrix, forbiddenMatrixI;
+			invariantConstraintsMatrix, guardConstraintsMatrix, Amatrix, Bmatrix, forbiddenMatrixI;
 
 	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
 			guardBoundValue, boundValueF;
@@ -47,14 +46,31 @@ void SetBouncingBall(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.isEmptyMatrixB = true;
+	system_dynamics.isEmptyMatrixB = false;
 
-	C.resize(row);
+	Amatrix.matrix_Identity(col,Bmatrix);
+	system_dynamics.MatrixB = Bmatrix;
+
+	ConstraintsMatrixV.resize(4, 2);
+	ConstraintsMatrixV.clear();
+	ConstraintsMatrixV(0,0)=1;
+	ConstraintsMatrixV(1,0)=-1;
+	ConstraintsMatrixV(2,1)=1;
+	ConstraintsMatrixV(3,1)=-1;
+	
+	boundValueV.resize(4,0);
+	boundValueV[2] = -1; // This is the assumed acceleration due to gravity
+	boundValueV[3] = 1;
+
+	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1) );
+	
+	system_dynamics.isEmptyC = true;
+/*	C.resize(row);
 	C.assign(row, 0);
-	C[1] = -1; // This is the assumed acceleration due to gravity
+	C[1] = -1; 
 	system_dynamics.isEmptyC = false;
 	system_dynamics.C = C;
-
+*/
 	row = 1;
 	col = 2;
 	invariantConstraintsMatrix.resize(row, col);
@@ -67,7 +83,7 @@ void SetBouncingBall(hybrid_automata& Hybrid_Automata,
 			new polytope(invariantConstraintsMatrix, invariantBoundValue,
 					invariantBoundSign));
 
-	system_dynamics.U = polytope::ptr(new polytope(true));
+	
 
 	std::list<transition::ptr> Out_Going_Trans_fromalways;
 

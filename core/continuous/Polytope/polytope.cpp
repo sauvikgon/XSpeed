@@ -201,7 +201,7 @@ double polytope::computeSupportFunction(const std::vector<double>& direction,
 			throw std::runtime_error("Unbounded solution to an LP problem");
 		}
 
-	}									//with constraints at the time of creation
+	}									//
 	return sf;
 }
 

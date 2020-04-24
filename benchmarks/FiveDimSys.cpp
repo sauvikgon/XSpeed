@@ -149,7 +149,6 @@ void setFiveDimSys(hybrid_automata& Hybrid_Automata,
 			else
 				Bmatrix(i, j) = 0;
 
-	//  * here polytope U == 0
 	row = 10;
 	col = 5;
 	ConstraintsMatrixV.resize(row, col);

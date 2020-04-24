@@ -86,7 +86,7 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 		}//handling constant dynamics
 
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
-			B_trans.mult_vector(rVariable, Btrans_dir);
+			B_trans.mult_vector(rVariable, Btrans_dir); 
 
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
 			term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);

@@ -9,16 +9,9 @@ fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::
 
 	get_phi_2(absolute_A,delta).transpose(transpose_phi_2);
 
-	math::matrix<double> expAt;
-	my_A.matrix_exponentiation(expAt,delta);
-	expAt.transpose(transpose_expAt); 
-
-	math::matrix<double> A_square, AsquarePhi;
+	math::matrix<double> A_square, AsquarePhi, expAt;
 	my_A.multiply(my_A, A_square);
 	A_square.transpose(transpose_A_square);
-	
-	A_square.multiply(expAt,AsquarePhi);
-	AsquarePhi.transpose(transpose_AsquarePhi);
 	
 	my_A.transpose(transpose_A);
 	this->num_iters = num_iters;
@@ -31,12 +24,23 @@ fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::
 	// initializing the phi list
 	double t;
 	phi_list.resize(num_iters);
-	
-	for(unsigned int i=0;i<num_iters;i++){
+	my_A.matrix_Identity(my_A.size1(), phi_list[0]);
+
+	for(unsigned int i=1;i<num_iters;i++){
 		t = delta*i;
 		my_A.matrix_exponentiation(expAt,t);
-		expAt.transpose(phi_list[i]);
+		expAt.transpose(phi_list[i]);		
 	}
+	if(num_iters == 1){
+		my_A.matrix_exponentiation(expAt,delta);
+		A_square.multiply(expAt, AsquarePhi);
+	}
+	else{
+		A_square.multiply(phi_list[1], AsquarePhi);
+	}
+	
+	AsquarePhi.transpose(transpose_AsquarePhi);
+	
 }
 
 double fb_interpol::rho_symhull_AsquareX0(const std::vector<double>& l)
@@ -229,7 +233,6 @@ double myobjfun(const std::vector<double> &x, std::vector<double> &grad, void *m
 	res += lambda * objfun_terms->sup_deltaU;
 	res += lambda * lambda * objfun_terms->sup_epsilon_psi;
 	res += (objfun_terms->fb_interpol_obj)->rho_fb_intersection(dir,lambda);
-	
 	//std::cout << "lambda="<< lambda << ", cost=" << res << std::endl;
 	return res;
 }
@@ -243,24 +246,30 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	
 	// This term to compute rho_(X0) in the direction transpose(expAt).l
 	double term2;
-	math::matrix<double> expAt, my_transpose_expAt;
-	if(time_step != get_delta()){
+	math::matrix<double> expAt;
+	math::matrix<double> *my_transpose_expAt;
+	if(time_step != get_delta() || num_iters==1){
+		math::matrix<double> trans_expAt;
 		get_A().matrix_exponentiation(expAt,time_step);
-		expAt.transpose(my_transpose_expAt);
+		expAt.transpose(trans_expAt);
+		my_transpose_expAt = &trans_expAt;
 	}
 	else{
-		my_transpose_expAt = transpose_expAt;	
-	} 
+		my_transpose_expAt = &phi_list[1];
+	}
 	
 	// transform l to transpose(exp^{At}).l
 	 
 	std::vector<double> transformed_l;
-	my_transpose_expAt.mult_vector(l,transformed_l);
+	
+	my_transpose_expAt->mult_vector(l,transformed_l);
 	term2 = rho_X0(transformed_l);
-
+	//std::cout << "term2 = " << term2 << std::endl;
+	
 	// This term to compute time_step * rho_U(l)
 	double term3 = time_step *  rho_U(l);
 	
+	//std::cout << "term3 =" << term3 << std::endl; 
 	// Term 4 is lambda dependent and will be computed inside
         // the objective function of nlopt.
 
@@ -269,6 +278,19 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	
 	double term5 = rho_epsilon_psi(l);
 	
+	//This term to cater for fixed input.
+	// get support function of constant input
+	/*double sup_const_input = 0;
+	if(C.size() != 0){
+		unsigned int dim = l.size();
+		assert(C.size() == l.size());
+
+		for(unsigned int i=0;i<dim;i++){
+			sup_const_input += l[i] * C[i] * time_step;	
+		}
+		
+	}*/
+	//--
 	// creating a structure to pass on calculated terms to the obj of nlopt.
 	terms my_terms;
 	my_terms.sup_X0 = sup_X0;
@@ -298,6 +320,7 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	std::vector<double> opt_lambda(1);
 	myopt.set_max_objective(myobjfun, &my_terms);
 	myopt.optimize(opt_lambda,res);
+	
 	return res;
 }
 
@@ -313,20 +336,8 @@ double fb_interpol::omega_support(const std::vector<double>& l, unsigned int ite
 		phi_list[iter].mult_vector(l,transformed_l);
 
 	double first_omega_sup = first_omega_support(transformed_l, get_delta());
-	// get support function of constant input
-	if(C.size() != 0){
-		double sup_const_input = 0;
-		unsigned int dim = l.size();
-		assert(C.size() == l.size());
-		double my_delta = get_delta();
-
-		for(unsigned int i=0;i<dim;i++){
-			sup_const_input += l[i] *my_delta*iter;	
-		}
-		res = sup_const_input;
-	}
-	//--
-	res += first_omega_sup + psi_support(l,iter) ;
+	
+	res = first_omega_sup + psi_support(l,iter) ;
 	return res;
 }
 
