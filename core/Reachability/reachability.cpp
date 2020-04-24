@@ -15,7 +15,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	I = i;
 	reach_parameters = reach_param;
 	bound = user_options.get_bfs_level();	//bfs_level
-	Algorithm_Type = user_options.get_algorithm();	//Important parameter to decide to select an algorithm to execute
+	Algorithm_Type = user_options.get_algorithm();	// selects an algorithm to execute
 	Total_Partition = user_options.getTotalSliceSize(); //slice size
 	this->lp_solver_type= lp_solver_type;
 	number_of_streams = user_options.getStreamSize();
@@ -25,7 +25,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	refinements = 0;
 	traj_splicing_time = 0;
 	set_aggregation = user_options.getSetAggregation();
-
+	safe = true; // Assumed initially that the model is safe.
 	setUserOp(user_options); //Amit set here for easy access
 }
 
@@ -170,6 +170,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				if (forbid_intersects.size() != 0){
 					std::cout << "intersection with forbidden-region found at location: " << locID << std::endl;
 					safety_violation = true;
+					this->safe = false;
 				}
 
 				if (safety_violation && ce_flag == false) break; // No need to generate CE

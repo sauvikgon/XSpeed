@@ -2,7 +2,7 @@
 
 fb_interpol::~fb_interpol(){}
 
-fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::ptr U, double delta, std::vector<double> C, unsigned int num_iters) : approx_model(my_A, X0, U, delta) 
+fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double> my_B, double delta, unsigned int num_iters) : approx_model(my_A, my_B, X0, U, delta) 
 {
 	math::matrix<double> absolute_A;
 	my_A.absolute(absolute_A);
@@ -15,8 +15,6 @@ fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::
 	
 	my_A.transpose(transpose_A);
 	this->num_iters = num_iters;
-
-	this->C = C; // the constant dynamics vector.
 
 	rho_psi.resize(num_iters);
 	rho_psi[0] = 0;	

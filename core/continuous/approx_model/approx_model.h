@@ -41,8 +41,9 @@ public:
 	typedef boost::shared_ptr<approx_model> ptr;
 
 	/** Initializing constructor */
-	approx_model(math::matrix<double> my_A, polytope::ptr X0, polytope::ptr U, double delta){
+	approx_model(math::matrix<double> my_A, math::matrix<double> my_B, polytope::ptr X0, polytope::ptr U, double delta){
 		this->my_A = my_A;
+		this->my_B = my_B;
 		this->my_X0 = X0;
 		this->my_U = U;
 		this->my_delta = delta;
@@ -56,6 +57,10 @@ public:
 	/** Returns the dynamics matrix A*/
 	inline math::matrix<double> get_A() const
 	{return my_A;}
+
+	/** Returns the input-transformation matrix B*/
+	inline math::matrix<double> get_B() const
+	{return my_B;}
 
 	/** Returns the initial_set */
 	inline polytope::ptr get_X0() const{return my_X0;}
@@ -80,6 +85,7 @@ public:
 
 private:
 	math::matrix<double> my_A;
+	math::matrix<double> my_B;
 	double my_delta;
 	polytope::ptr my_X0;
 	polytope::ptr my_U;

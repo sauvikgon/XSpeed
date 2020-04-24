@@ -91,6 +91,11 @@ public:
 		return this->traj_splicing_time;
 	}
 
+	/**
+	  * Returns the safety status of the model w.r.t the given
+          * forbidden region
+	  */
+	bool isSafe(){ return safe;}
 	//bound is the maximum number of transitions or jumps permitted.
 	//reach_parameters includes the different parameters needed in the computation of reachability.
 	//I is the initial symbolic state
@@ -146,7 +151,7 @@ public:
 	void setUserOp(const userOptions& userOp);
 
 private:
-	//initial_state::ptr I;
+	bool safe;
 	unsigned int Algorithm_Type;
 	unsigned int Total_Partition;
 	unsigned int number_of_streams;

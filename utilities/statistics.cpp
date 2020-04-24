@@ -56,6 +56,12 @@ void print_statistics(boost::timer::cpu_timer timer, std::string msg)
 void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, userOptions& user_options, std::string msg)
 {
 	std::cout << "\n\n-----Statistics for " << msg << "-----------" << std::endl;
+	if(reachObj.isSafe()){
+		std::cout << "Model is SAFE w.r.t to safety condition\n";
+	}
+	else{
+		std::cout << "Model is UNSAFE w.r.t to safety condition\n";
+	}
 	std::cout << "number of abstract ce-paths found for exploration: " << ce_candidates.size() << std::endl;
 	std::list<concreteCE::ptr> ce_list = reachObj.get_counter_examples();
 	std::cout << "Number of concrete ce trajectories found: " << ce_list.size() << std::endl;

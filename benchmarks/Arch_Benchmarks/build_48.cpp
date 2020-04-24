@@ -1221,33 +1221,40 @@ void setbuild48(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.isEmptyMatrixB = true;
-	Bmatrix.resize(49,1);	
-	Bmatrix.clear();
-	Bmatrix(24,0) = 0.0136967538693329680865634844542;
+	system_dynamics.isEmptyMatrixB = false;
+	Amatrix.matrix_Identity(49,Bmatrix);
+	
+	Bmatrix(24,24) = 0.0136967538693329680865634844542;
 	system_dynamics.MatrixB = Bmatrix;
 
-	C.resize(row);
-	C.assign(row, 0);
-	C[48] = 1.0;
-	system_dynamics.isEmptyC = false;
-	system_dynamics.C = C;
-
+	// Keeping C for simulation scenario.
+	system_dynamics.isEmptyC = true;
+//	C.resize(49,0);
+//	C[48] = 1 ;
+//	system_dynamics.C = C;
+	
 	invariant = polytope::ptr(new polytope(true));
-	/*
-	row = 2;
-	col = 1;
+	
+	row = 98;
+	col = 49;
 	ConstraintsMatrixV.resize(row, col);
+	ConstraintsMatrixV.clear();
+	for(unsigned int i=0,j=0;i<row-1;i+=2,j++){
+		ConstraintsMatrixV(i,j)=1;
+		ConstraintsMatrixV(i+1,j)=-1;	
+	}
+	
 	ConstraintsMatrixV(0,0)= -0.8;
 	ConstraintsMatrixV(1,0)= 1.0;
 
-	boundValueV.resize(row);
-	boundValueV[0] = -1;
-	boundValueV[1] = 1.0;
-
-	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));*/
-	system_dynamics.U = polytope::ptr(new polytope(true));
-
+	boundValueV.resize(98,0);
+	boundValueV[48] = 1;
+	boundValueV[49] = -0.8;
+	boundValueV[96] = 1; // time constant dynamics
+	boundValueV[97] = -1;
+	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));
+	
+		
 	std::list<transition::ptr> Out_Going_Trans_fromModel;
 
 	l = location::ptr(
@@ -1387,7 +1394,7 @@ void setbuild48(hybrid_automata& Hybrid_Automata,
 
 
 	initial_polytope_I0 = polytope::ptr(
-			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+	new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
 	dim = initial_polytope_I0->getSystemDimension();
 	int transition_id = 0;

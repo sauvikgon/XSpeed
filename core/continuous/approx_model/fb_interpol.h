@@ -23,7 +23,6 @@ class fb_interpol : public approx_model
 	math::matrix<double> transpose_AsquarePhi; //{A^2.expAt}^T
 	math::matrix<double> transpose_A; //A^T
 	unsigned int num_iters; // essential for efficient computation of rho_psi
-	std::vector<double> C; // the constant dynamics vector.
 	std::vector<double> rho_psi; // stores rho_{psi_k}
 	std::vector<math::matrix<double> > phi_list; 
 
@@ -36,7 +35,7 @@ class fb_interpol : public approx_model
 	unsigned int dim; // dimension of the system.
 public:
 	/* constructor */
-	fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::ptr U, double delta, std::vector<double> C, unsigned int num_iters);
+	fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double> my_B, double delta, unsigned int num_iters);
 
 	/** Virtual destructor class */
 	virtual ~fb_interpol();

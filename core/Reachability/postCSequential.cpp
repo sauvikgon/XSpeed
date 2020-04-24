@@ -392,7 +392,7 @@ template_polyhedra::ptr postC_fbinterpol(unsigned int boundedTotIteration, Dynam
 	unsigned int num_iters = ReachParameters.Iterations;
 	math::matrix<double> SFM(num_directions, num_iters); // The data structure to store the template polytopes
 
-	approx_model::ptr fbinterpol_model = approx_model::ptr(new fb_interpol(SystemDynamics.MatrixA, Initial, SystemDynamics.U, ReachParameters.time_step, SystemDynamics.C, num_iters) );
+	approx_model::ptr fbinterpol_model = approx_model::ptr(new fb_interpol(SystemDynamics.MatrixA, Initial, SystemDynamics.U, SystemDynamics.MatrixB, ReachParameters.time_step, num_iters) );
 
 	for (unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
 		std::vector<double> direction(dimension);
