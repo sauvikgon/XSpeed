@@ -150,14 +150,10 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 
 	if (!system_dynamics.isEmptyMatrixB) { //if NOT Empty
 
-		//debug
-		std::cout << "U empty? " << system_dynamics.U->getIsEmpty()  << std::endl;
-		//--
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(system_dynamics.U, Btrans));
 
-		dim_for_Max_norm = system_dynamics.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
-
+		dim_for_Max_norm = system_dynamics.MatrixB.size1();
 		V_max_norm = Vptr->max_norm(lp_solver_type, dim_for_Max_norm);
 
 	}

@@ -40,78 +40,135 @@ fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::
 	}
 	
 	AsquarePhi.transpose(transpose_AsquarePhi);
+	dim = get_X0()->getSystemDimension();
 	
+	initialize_rho(); // initialize internal data-structures for memoization.
+}
+
+void fb_interpol::initialize_rho()
+{
+	unsigned int N = 2*dim;
+	
+	std::vector<double> unit_dir(dim,0), transformed_dir;
+
+	// initialize rho_AU_list
+	rho_AU_list.resize(N);	
+	
+	for(unsigned int i=0;i<dim;i++){
+		unit_dir[i] = 1;
+		transpose_A.mult_vector(unit_dir,transformed_dir);
+		double max = rho_U(transformed_dir);
+		rho_AU_list[i*2] = max;
+		unit_dir[i] = -1;
+		transpose_A.mult_vector(unit_dir,transformed_dir);
+		double neg_min = rho_U(transformed_dir);
+		rho_AU_list[i*2+1] = neg_min;
+
+		unit_dir[i] = 0;		
+	}
+	// initialize rho_AsqrX0_list
+	rho_AsqrX0_list.resize(N);
+
+	for(unsigned int i=0;i<dim;i++){
+		unit_dir[i] = 1;
+		transpose_A_square.mult_vector(unit_dir,transformed_dir);
+		rho_AsqrX0_list[2*i] = rho_X0(transformed_dir);
+		unit_dir[i] = -1;
+		transpose_A_square.mult_vector(unit_dir,transformed_dir);
+		rho_AsqrX0_list[2*i+1] = rho_X0(transformed_dir);
+		
+		unit_dir[i] = 0;
+				
+	}
+	// initialize rho_AsqrPhiX0_list
+	rho_AsqrPhiX0_list.resize(N);
+	for(unsigned int i=0;i<dim;i++){
+		
+		unit_dir[i] = 1;
+		transpose_AsquarePhi.mult_vector(unit_dir,transformed_dir);
+		rho_AsqrPhiX0_list[2*i] = rho_X0(transformed_dir);
+		unit_dir[i] = -1;
+		transpose_AsquarePhi.mult_vector(unit_dir,transformed_dir);
+		rho_AsqrPhiX0_list[2*i+1] = rho_X0(transformed_dir);
+		unit_dir[i] = 0;		
+	}
+	// initialize rho_symhull_AsquareX0_list
+	rho_symhull_AsqrX0_list.resize(N);
+	for(unsigned int i=0;i<dim;i++){
+		unit_dir[i] = 1;
+		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
+		rho_symhull_AsqrX0_list[2*i] = rho_symhull_AsquareX0(transformed_dir);
+		unit_dir[i] = -1;
+		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
+		rho_symhull_AsqrX0_list[2*i+1] = rho_symhull_AsquareX0(transformed_dir);
+		unit_dir[i] = 0;		
+	}
+	// initialize rho_symhull_AsquarePhiX0_list
+	rho_symhull_AsqrPhiX0_list.resize(N);
+	for(unsigned int i=0;i<dim;i++){
+		unit_dir[i] = 1;
+		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
+		rho_symhull_AsqrPhiX0_list[2*i] = rho_symhull_AsquarePhiX0(transformed_dir);
+		unit_dir[i] = -1;
+		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
+		rho_symhull_AsqrPhiX0_list[2*i+1] = rho_symhull_AsquarePhiX0(transformed_dir);
+		unit_dir[i] = 0;		
+	}
+	// initialize rho_symhull_AU_list
+	rho_symhull_AU_list.resize(N);
+	for(unsigned int i=0;i<dim;i++){
+		unit_dir[i] = 1;
+		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
+		rho_symhull_AU_list[2*i] = rho_symhull_AU(transformed_dir);
+		unit_dir[i] = -1;
+		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
+		rho_symhull_AU_list[2*i+1] = rho_symhull_AU(transformed_dir);
+
+		unit_dir[i] = 0;		
+	}
 }
 
 double fb_interpol::rho_symhull_AsquareX0(const std::vector<double>& l)
 {
 	if(get_X0()->getIsEmpty()) return 0;
-
-	unsigned int dim = get_X0()->getSystemDimension();
-
-	std::vector<double> unit_dir(dim,0), transformed_dir;
 	
 	double res=0;
 	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		transpose_A_square.mult_vector(unit_dir,transformed_dir);
-		double max = rho_X0(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_A_square.mult_vector(unit_dir,transformed_dir);
-		double neg_min = rho_X0(transformed_dir);
-		unit_dir[i] = 0;
-		if(max > neg_min)
-			res+= max * fabs(l[i]);
+		
+		if(rho_AsqrX0_list[2*i] > rho_AsqrX0_list[2*i+1])
+			res+= rho_AsqrX0_list[2*i] * fabs(l[i]);
 		else
-			res+= neg_min * fabs(l[i]);		
+			res+= rho_AsqrX0_list[2*i+1] * fabs(l[i]);		
 	}
 	return res;
 }
+
 double fb_interpol::rho_omega_plus(const std::vector<double>& l)
 {
 	if(get_X0()->getIsEmpty()) return 0;
-
-	unsigned int dim = get_X0()->getSystemDimension();
-
-	std::vector<double> unit_dir(dim,0), transformed_dir;
 	
 	double res=0;
 	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		double max = rho_symhull_AsquareX0(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		double neg_min = rho_symhull_AsquareX0(transformed_dir);
-		unit_dir[i] = 0;
-		if(max > neg_min)
-			res+= max * fabs(l[i]);
+		
+		if(rho_symhull_AsqrX0_list[2*i] > rho_symhull_AsqrX0_list[2*i+1])
+			res+= rho_symhull_AsqrX0_list[2*i] * fabs(l[i]);
 		else
-			res+= neg_min * fabs(l[i]);		
+			res+= rho_symhull_AsqrX0_list[2*i+1] * fabs(l[i]);		
 	}
 	return res;	
 }
+
 double fb_interpol::rho_symhull_AsquarePhiX0(const std::vector<double>& l)
 {
 	if(get_X0()->getIsEmpty()) return 0;
-
-	unsigned int dim = get_X0()->getSystemDimension();
-
-	std::vector<double> unit_dir(dim,0), transformed_dir;
 	
 	double res=0;
 	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		transpose_AsquarePhi.mult_vector(unit_dir,transformed_dir);
-		double max = rho_X0(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_AsquarePhi.mult_vector(unit_dir,transformed_dir);
-		double neg_min = rho_X0(transformed_dir);
-		unit_dir[i] = 0;
-		if(max > neg_min)
-			res+= max * fabs(l[i]);
+		
+		if(rho_AsqrPhiX0_list[2*i] > rho_AsqrPhiX0_list[2*i+1])
+			res+= rho_AsqrPhiX0_list[2*i] * fabs(l[i]);
 		else
-			res+= neg_min * fabs(l[i]);		
+			res+= rho_AsqrPhiX0_list[2*i+1] * fabs(l[i]);		
 	}
 	return res;	
 }
@@ -120,23 +177,13 @@ double fb_interpol::rho_omega_minus(const std::vector<double>& l)
 {
 	if(get_X0()->getIsEmpty()) return 0;
 
-	unsigned int dim = get_X0()->getSystemDimension();
-
-	std::vector<double> unit_dir(dim,0), transformed_dir;
-	
 	double res=0;
 	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		double max = rho_symhull_AsquarePhiX0(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		double neg_min = rho_symhull_AsquarePhiX0(transformed_dir);
-		unit_dir[i] = 0;
-		if(max > neg_min)
-			res+= max * fabs(l[i]);
+
+		if(rho_symhull_AsqrPhiX0_list[2*i] > rho_symhull_AsqrPhiX0_list[2*i+1])
+			res+= rho_symhull_AsqrPhiX0_list[2*i] * fabs(l[i]);
 		else
-			res+= neg_min * fabs(l[i]);		
+			res+= rho_symhull_AsqrPhiX0_list[2*i+1] * fabs(l[i]);		
 	}
 	return res;
 }
@@ -144,24 +191,14 @@ double fb_interpol::rho_omega_minus(const std::vector<double>& l)
 double fb_interpol::rho_symhull_AU(const std::vector<double>& l)
 {
 	if(get_U()->getIsEmpty()) return 0;
-
-	unsigned int dim = get_U()->getSystemDimension();
-
-	std::vector<double> unit_dir(dim,0), transformed_dir;
 	
 	double res=0;
 	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		transpose_A.mult_vector(unit_dir,transformed_dir);
-		double max = rho_U(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_A.mult_vector(unit_dir,transformed_dir);
-		double neg_min = rho_U(transformed_dir);
-		unit_dir[i] = 0;
-		if(max > neg_min)
-			res+= max * fabs(l[i]);
+		
+		if(rho_AU_list[2*i] > rho_AU_list[2*i+1])
+			res+= rho_AU_list[2*i] * fabs(l[i]);
 		else
-			res+= neg_min * fabs(l[i]);		
+			res+= rho_AU_list[2*i+1] * fabs(l[i]);		
 	}
 	return res;
 }
@@ -198,24 +235,14 @@ double fb_interpol::rho_fb_intersection(const std::vector<double>& l, double lam
 double fb_interpol::rho_epsilon_psi(const std::vector<double>& l)
 {
 	if(get_U()->getIsEmpty()) return 0;
-
-	unsigned int dim = get_U()->getSystemDimension();
-
-	std::vector<double> unit_dir(dim,0), transformed_dir;
 	
 	double res=0;
 	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		double max = rho_symhull_AU(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		double neg_min = rho_symhull_AU(transformed_dir);
-		unit_dir[i] = 0;
-		if(max > neg_min)
-			res+= max * fabs(l[i]);
+		
+		if(rho_symhull_AU_list[2*i] > rho_symhull_AU_list[2*i+1])
+			res+= rho_symhull_AU_list[2*i] * fabs(l[i]);
 		else
-			res+= neg_min * fabs(l[i]);		
+			res+= rho_symhull_AU_list[2*i+1] * fabs(l[i]);		
 	}
 	return res;
 }

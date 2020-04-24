@@ -26,6 +26,14 @@ class fb_interpol : public approx_model
 	std::vector<double> C; // the constant dynamics vector.
 	std::vector<double> rho_psi; // stores rho_{psi_k}
 	std::vector<math::matrix<double> > phi_list; 
+
+	std::vector<double> rho_AU_list;	
+	std::vector<double> rho_symhull_AU_list;
+	std::vector<double> rho_AsqrX0_list;
+	std::vector<double> rho_AsqrPhiX0_list;
+	std::vector<double> rho_symhull_AsqrX0_list;
+	std::vector<double> rho_symhull_AsqrPhiX0_list;
+	unsigned int dim; // dimension of the system.
 public:
 	/* constructor */
 	fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::ptr U, double delta, std::vector<double> C, unsigned int num_iters);
@@ -52,6 +60,8 @@ private:
 
 	double rho_symhull_AsquarePhiX0(const std::vector<double>& l);
 	double rho_omega_minus(const std::vector<double>& l);
+
+	void initialize_rho();
 };
 
 // structure to hold terms for computing the obj function

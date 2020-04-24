@@ -28,7 +28,7 @@ void SetBouncingBall(hybrid_automata& Hybrid_Automata,
 	math::matrix<double> ConstraintsMatrixI, ConstraintsMatrixV,
 			invariantConstraintsMatrix, guardConstraintsMatrix, Amatrix, Bmatrix, forbiddenMatrixI;
 
-	std::vector<double> boundValueI, boundValueV, C, invariantBoundValue,
+	std::vector<double> boundValueI, boundValueV, invariantBoundValue,
 			guardBoundValue, boundValueF;
 
 	int boundSignI = 1, invariantBoundSign = 1, guardBoundSign = 1;
@@ -65,12 +65,7 @@ void SetBouncingBall(hybrid_automata& Hybrid_Automata,
 	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1) );
 	
 	system_dynamics.isEmptyC = true;
-/*	C.resize(row);
-	C.assign(row, 0);
-	C[1] = -1; 
-	system_dynamics.isEmptyC = false;
-	system_dynamics.C = C;
-*/
+
 	row = 1;
 	col = 2;
 	invariantConstraintsMatrix.resize(row, col);
