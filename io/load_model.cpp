@@ -154,13 +154,13 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	//	setf_osc_32_timedmodel(ha, init_state, reach_parameters);
 	}
 
+	/* Spacecraft rendezvous mission with NO ABORT */
 	if(HybridSystem_Model_Type == 29){ // Space craft
 		setSpacecraft(ha,init_state,reach_parameters);
-		//setSpacecraftAbort(ha,init_state,reach_parameters);
 	}
-
-	if(HybridSystem_Model_Type == 30){ // mesh: Runs well but FC fails to find CE
-	//	setmesh(ha, init_state, reach_parameters);
+	/* Spacecraft rendezvous with mission ABORT */
+	if(HybridSystem_Model_Type == 30){ 
+		setSpacecraftAbort(ha,init_state,reach_parameters);
 	}
 
 	if(HybridSystem_Model_Type == 31){ // mesh: Runs well but FC fails to find CE

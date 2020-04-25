@@ -91,21 +91,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		// ************ Compute flowpipe_cost:: estimation Starts **********************************
 		unsigned int NewTotalIteration = reach_parameters.Iterations;
 
-		if (current_location->getInvariantExist()){
-			/*
-			 * Apply this approach only when input-set U is a point set and dynamics is constant dynamics.
-			 * That is we have to determine that Matrix A has constant dynamics (which at the moment not feasible) so avoid it
-			 * and also avoid B (and poly U) for similar reason. However, C here is a constant vector.
-			 *
-			 * ToDo:: This jumpInvariantBoundaryCheck() need to be modified for check Omega crossing all Invariant's boundary
-			 * 	at the same time instead of checking each invariant for the whole time horizon as implemented in InvariantBoundaryCheckNewLPSolver()
-			 * 	For submitting the reading in STTT Journal we did not include jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
-			 */
-
-			//InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters, current_location->getInvariant(), lp_solver_type, NewTotalIteration);
-		}
-
-		 /*********** Compute flowpipe_cost:: estimation Ends **********************************
+		 /*
 		 * This method selects the postC computation routine based on the user option. 
 		 * This function is to be called for sequential BFS.
 		 */
@@ -135,12 +121,12 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
 				if (forbid_intersects.size() != 0){
-					std::cout << "intersection with forbidden-region found at location: " << locID << std::endl;
+					//std::cout << "intersection with forbidden-region found at location: " << locID << std::endl;
 					safety_violation = true;
 					this->safe = false;
 				}
 
-				if (safety_violation && ce_flag == false) break; // No need to generate CE
+				//if (safety_violation && ce_flag == false) break; // No need to generate CE
 
 				if (safety_violation && ce_flag == true) // CE Generation is requested
 				{

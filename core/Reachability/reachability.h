@@ -58,13 +58,7 @@ using namespace std;
 
 class reachability {
 public:
-	/*void setReachParameter(hybrid_automata& H, std::list<initial_state::ptr>& I,
-			ReachabilityParameters& reach_parameters, int bound,
-			unsigned int Algorithm_Type, unsigned int Total_Partition,
-			int lp_solver_type, unsigned int number_of_streams,
-			int Solver_GLPK_Gurobi_GPU,
-			std::pair<int, polytope::ptr> forbidden_set);*/
-
+	
 	void setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
 			int lp_solver_type, std::pair<int, polytope::ptr> forbidden, userOptions& user_options);
 

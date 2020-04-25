@@ -85,9 +85,6 @@ void setSpacecraft(hybrid_automata& Hybrid_Automata, std::list<initial_state::pt
 	boundValueV[1]=-1;
 	
 	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));
-	
-	system_dynamics.isEmptyC = true;
-
 
 	row = 1;
 	col = 5;
@@ -191,8 +188,6 @@ void setSpacecraft(hybrid_automata& Hybrid_Automata, std::list<initial_state::pt
 	system_dynamics.MatrixB = Bmatrix;
 
 	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));
-	
-	system_dynamics.isEmptyC = true;
 
 	row = 8;
 	col = 5;
@@ -299,7 +294,7 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 
 	math::matrix<double> ConstraintsMatrixI , ConstraintsMatrixV, invariantConstraintsMatrix , guardConstraintsMatrix , Amatrix , Bmatrix,forbiddenMatrixI;
 
-	std::vector<double> boundValueI,boundValueV , C , invariantBoundValue , guardBoundValue, boundValueF;
+	std::vector<double> boundValueI,boundValueV, invariantBoundValue , guardBoundValue, boundValueF;
 
 	int boundSignI=1, invariantBoundSign=1, guardBoundSign=1, boundSignV=1;
 
@@ -325,16 +320,31 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.isEmptyMatrixB = true;
-	system_dynamics.U = polytope::ptr(new polytope(true));
+	/* B matrix set as identity matrix */
 
-	C.resize(row );
-	C.assign(row,0);
-	C[0] = 1.0;
-	system_dynamics.isEmptyC = false;
-	system_dynamics.C = C;
+	system_dynamics.isEmptyMatrixB = false;
+	Amatrix.matrix_Identity(row, Bmatrix);
+	system_dynamics.MatrixB = Bmatrix;
 
+	// set the U polytope matrix
+	row = 10;
+	col = 5;
+	ConstraintsMatrixV.resize(row,col);
+	ConstraintsMatrixV.clear();
+	ConstraintsMatrixV(0,0)=1;
 
+	for(unsigned int i=0,j=0;i<row-1;i+=2,j++){
+		ConstraintsMatrixV(i,j)=1;
+		ConstraintsMatrixV(i+1,j)=-1;	
+	}
+
+	boundValueV.resize(row,0);
+
+	boundValueV[0]=1;
+	boundValueV[1]=-1;
+	
+	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));
+	
 	row = 2;
 	col = 5;
 	invariantConstraintsMatrix.resize(row, col);
@@ -347,8 +357,6 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	invariantBoundValue[0] = 125.0;
 	invariantBoundValue[1] = -100.0;
 	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign));
-
-	system_dynamics.U = polytope::ptr(new polytope(true));
 
 
 	std::list<transition::ptr> Out_Going_Trans_fromP2;
@@ -468,16 +476,11 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.isEmptyMatrixB = true;
-	system_dynamics.U = polytope::ptr(new polytope(true));
+	/* B matrix set as identity matrix */
 
-	C.resize(row );
-	C.assign(row,0);
-	C[0] = 1.0;
-	system_dynamics.isEmptyC = false;
-	system_dynamics.C = C;
-
-
+	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));
+	
 	row = 9;
 	col = 5;
 	invariantConstraintsMatrix.resize(row, col);
@@ -508,8 +511,6 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	invariantBoundValue[7] = 100.0;
 	invariantBoundValue[8] = 141.1;
 	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign));
-
-	system_dynamics.U = polytope::ptr(new polytope(true));
 
 
 	std::list<transition::ptr> Out_Going_Trans_fromP3;
@@ -567,15 +568,10 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.isEmptyMatrixB = true;
-	system_dynamics.U = polytope::ptr(new polytope(true));
+	/* B matrix set as identity matrix */
 
-	C.resize(row );
-	C.assign(row,0);
-	C[0] = 1.0;
-	system_dynamics.isEmptyC = false;
-	system_dynamics.C = C;
-
+	system_dynamics.MatrixB = Bmatrix;
+	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));
 
 	row = 1;
 	col = 5;
@@ -587,8 +583,6 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	invariantBoundValue.assign(row,0);
 	invariantBoundValue[0] = -120.0;
 	invariant = polytope::ptr(new polytope(invariantConstraintsMatrix, invariantBoundValue,invariantBoundSign));
-
-	system_dynamics.U = polytope::ptr(new polytope(true));
 
 
 	std::list<transition::ptr> Out_Going_Trans_fromPassive;
@@ -632,8 +626,6 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 
 	init_state_list.push_back(I0);
 	Hybrid_Automata.setDimension(dim);
-
-
 
 	Hybrid_Automata.insert_to_map("t",0);
 	Hybrid_Automata.insert_to_map("x",1);
