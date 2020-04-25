@@ -86,40 +86,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		string name = current_location->getName();
 
 		// ******************* Computing Parameters *******************************
-		/*
-		 * Computing the parameters to avoid multiple computation in the child process
-		 * Items Required :: time_step, phi_trans , B_trans, compute_alfa,compute_beta
-		 * Computation of compute_alfa depends on initial set. For algorithm PAR_BY_PARTS where the
-		 * initial set in divided into parts. Compute_alfa should be computed for each initial sets.
-		 * */
-		double result_alfa = compute_alfa(reach_parameters.time_step,
-				current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, lp_solver_type); //2 glpk object created here
 
-		double result_beta = compute_beta(current_location->getSystem_Dynamics(),
-				reach_parameters.time_step, lp_solver_type); // NO glpk object created here
-
-		reach_parameters.result_alfa = result_alfa;
-		reach_parameters.result_beta = result_beta;
-		//debug
-		std::cout << "Beta value:" << result_beta << std::endl;
-		std::cout << "alpha value:" << result_alfa << std::endl;
-		//--
-		// Intialised the transformation and its transpose matrix
-		math::matrix<double> phi_matrix, phi_trans;
-
-		if (!current_location->getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
-			current_location->getSystem_Dynamics().MatrixA.matrix_exponentiation(
-					phi_matrix, reach_parameters.time_step);
-			phi_matrix.transpose(phi_trans);
-			reach_parameters.phi_trans = phi_trans;
-		}
-		math::matrix<double> B_trans;
-		// transpose to be done once and stored in the structure of parameters
-		if (!current_location->getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
-			current_location->getSystem_Dynamics().MatrixB.transpose(B_trans);
-			reach_parameters.B_trans = B_trans;
-		}
 		// ******************* Computing Parameters *******************************
 		// ************ Compute flowpipe_cost:: estimation Starts **********************************
 		unsigned int NewTotalIteration = reach_parameters.Iterations;

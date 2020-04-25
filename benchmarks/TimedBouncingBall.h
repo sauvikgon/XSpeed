@@ -31,9 +31,4 @@ void SetTimedBouncingBall(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters);
 
-//Testing for 2 initial set
-void SetTimedBouncingBall_2initSet(hybrid_automata& Hybrid_Automata,
-		std::list<initial_state::ptr>& init_state_list,
-		ReachabilityParameters& reach_parameters);
-
 #endif /* TIMEDBOUNCINGBALL_H_ */

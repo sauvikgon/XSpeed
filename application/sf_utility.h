@@ -102,18 +102,10 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		V_max_norm = Vptr->max_norm(lp_solver_type, dim_for_Max_norm);
 	}
 
-	if(!SysD.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
-		V_max_norm = get_infinity_norm(SysD.C);
-	}
-	if(!SysD.isEmptyMatrixB && !SysD.isEmptyC){
-		std::cout << "EXAMPLE MODEL WITH NON_EMPTY INPUT-SET AND CONSTANT VECTOR IN DYNAMICS. XSpeed has a flaw in these models. \n";
-	}
 	if (SysD.isEmptyMatrixA){ //if A is Empty
 		result = 0;	//norm_A will be zero
 	}else {
 		double tt1 = exp(tau * norm_A);
-		std::cout << "norm_A="<< norm_A << std::endl;
-		std::cout << "exp(tau * norm_A)=" << tt1 << endl; 
 		if (std::isinf(tt1)){
 			throw std::runtime_error("infinity in compute beta\n");
 		}
@@ -141,7 +133,6 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		norm_A = system_dynamics.MatrixA.norm_inf();
 	}
 
-
 	dim_for_Max_norm = I->getSystemDimension();	//I is initial polytope
 	I_max_norm = I->max_norm(lp_solver_type, dim_for_Max_norm); //R_X_o ie max_norm of the Initial polytope
 
@@ -156,10 +147,6 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		dim_for_Max_norm = system_dynamics.MatrixB.size1();
 		V_max_norm = Vptr->max_norm(lp_solver_type, dim_for_Max_norm);
 
-	}
-
-	if(!system_dynamics.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
-		V_max_norm = get_infinity_norm(system_dynamics.C);
 	}
 
 	if (system_dynamics.isEmptyMatrixA){ //if A is Empty

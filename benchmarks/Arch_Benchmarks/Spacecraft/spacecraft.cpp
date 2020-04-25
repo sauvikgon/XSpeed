@@ -35,9 +35,9 @@ void setSpacecraft(hybrid_automata& Hybrid_Automata, std::list<initial_state::pt
 
 	math::matrix<double> ConstraintsMatrixI , ConstraintsMatrixV, invariantConstraintsMatrix , guardConstraintsMatrix , Amatrix , Bmatrix,forbiddenMatrixI;
 
-	std::vector<double> boundValueI,boundValueV , C , invariantBoundValue , guardBoundValue, boundValueF;
+	std::vector<double> boundValueI, boundValueV, invariantBoundValue , guardBoundValue, boundValueF;
 
-	int boundSignI=1, invariantBoundSign=1, guardBoundSign=1, boundSignV=1;
+	int boundSignI=1, invariantBoundSign=1, guardBoundSign=1;
 
 	Assign assignment;
 	math::matrix<double> R;
@@ -61,14 +61,32 @@ void setSpacecraft(hybrid_automata& Hybrid_Automata, std::list<initial_state::pt
 	system_dynamics.isEmptyMatrixA = false;
 	system_dynamics.MatrixA = Amatrix;
 
-	system_dynamics.isEmptyMatrixB = true;
-	system_dynamics.U = polytope::ptr(new polytope(true));
+	/* B matrix set as identity matrix */
 
-	C.resize(row );
-	C.assign(row,0);
-	C[0] = 1.0;
-	system_dynamics.isEmptyC = false;
-	system_dynamics.C = C;
+	system_dynamics.isEmptyMatrixB = false;
+	Amatrix.matrix_Identity(row, Bmatrix);
+	system_dynamics.MatrixB = Bmatrix;
+
+	// set the U polytope matrix
+	row = 10;
+	col = 5;
+	ConstraintsMatrixV.resize(row,col);
+	ConstraintsMatrixV.clear();
+	ConstraintsMatrixV(0,0)=1;
+
+	for(unsigned int i=0,j=0;i<row-1;i+=2,j++){
+		ConstraintsMatrixV(i,j)=1;
+		ConstraintsMatrixV(i+1,j)=-1;	
+	}
+
+	boundValueV.resize(row,0);
+
+	boundValueV[0]=1;
+	boundValueV[1]=-1;
+	
+	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));
+	
+	system_dynamics.isEmptyC = true;
 
 
 	row = 1;
@@ -168,43 +186,13 @@ void setSpacecraft(hybrid_automata& Hybrid_Automata, std::list<initial_state::pt
 
 	/* B matrix set as identity matrix*/
 
-	system_dynamics.isEmptyMatrixB = true;
-//	Bmatrix.resize(row, col);
-//	for (unsigned int i = 0; i < row; i++)
-//		for (unsigned int j = 0; j < col; j++)
-//			if (i == j)
-//				Bmatrix(i, j) = 1;
-//			else
-//				Bmatrix(i, j) = 0;
+	system_dynamics.isEmptyMatrixB = false;
+	Amatrix.matrix_Identity(row, Bmatrix);
+	system_dynamics.MatrixB = Bmatrix;
 
-	// set the U polytope matrix
-//	row = 4;
-//	col = 5;
-//	ConstraintsMatrixV.resize(row,col);
-//	ConstraintsMatrixV.clear();
-//	ConstraintsMatrixV(0,0)=1;
-//	ConstraintsMatrixV(1,0)=-1;
-//	ConstraintsMatrixV(2,1)=1;
-//	ConstraintsMatrixV(3,1)=-1;
-//
-//	boundValueV.resize(row);
-//	boundValueV.clear();
-//	boundValueV[0]=25;
-//	boundValueV[1]=25;
-//	boundValueV[2]=25;
-//	boundValueV[3]=25;
-//
-//	boundSignV = 1;
-//
-//	system_dynamics.U = polytope::ptr( new polytope(ConstraintsMatrixV, boundValueV, boundSignV));
-	system_dynamics.U = polytope::ptr( new polytope(true)); // empty polytope
-
-	C.resize(row );
-	C.assign(row,0);
-	C[0] = 1.0;
-	system_dynamics.isEmptyC = false;
-	system_dynamics.C = C;
-
+	system_dynamics.U = polytope::ptr(new polytope(ConstraintsMatrixV, boundValueV, 1));
+	
+	system_dynamics.isEmptyC = true;
 
 	row = 8;
 	col = 5;
@@ -288,9 +276,8 @@ void setSpacecraft(hybrid_automata& Hybrid_Automata, std::list<initial_state::pt
 	Hybrid_Automata.insert_to_map("vy",4);
 
 }
-/* Model with transition to mission abort mode. *.
- *
- */
+/* Model with transition to mission abort mode. */
+
 void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& init_state_list,
 		ReachabilityParameters& reach_parameters){
 
