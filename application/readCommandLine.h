@@ -1,9 +1,4 @@
-/*
- * readCommandLine.h
- *
- *  Created on: 28-Oct-2016
- *      Author: hazel
- */
+
 //**************** Hybrid Automata Definition ***********************
 #include "application/All_PP_Definition.h"
 
@@ -13,9 +8,10 @@
 #include <boost/config.hpp>
 #include <boost/program_options/detail/config_file.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <boost/algorithm/string.hpp> //string comparison
+#include <boost/algorithm/string.hpp>
 #include "../io/io_utility.h"
 #include "../io/load_model.h"
+#include "../io/parser.h"
 // *********** Command Line Boost Program Options ********
 #include "plotter_utility.h"
 // *********** User Selected Model ***************

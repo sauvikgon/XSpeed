@@ -1,0 +1,110 @@
+%{
+#include <cstdio>
+#include <cstring>
+#include <vector>
+
+#include "application/DataStructureDirections.h"
+#include "core/HybridAutomata/Hybrid_Automata.h"
+
+extern int yylex();
+extern int yyerror(char *);
+extern int yywrap();
+
+// The mode dynamics to be created
+Dynamics D;
+hybrid_automata ha; // gives access to index to id map.
+std::vector<double> coeff;
+double constant = 0;
+%}
+
+%union{ char* token_str; double const_val;}
+%token VAR UVAR CONST PLUS MULT EQ
+%type <token_str> VAR UVAR
+%type <const_val> CONST
+%start S
+ 
+%%
+
+S : VAR EQ Expr					{
+													printf("Assignment Rule\n");
+											
+													std::string var=$1;
+													int lhs_id = ha.get_index(var);
+													unsigned int n = ha.map_size();
+													//printf("ha map size: %d\n",n);
+													//printf("lhs_id: %d\n",lhs_id);
+													
+													if(!coeff.empty()){
+														for(unsigned int j=0;j<n;j++)
+															D.MatrixA(lhs_id,j)=coeff[j];
+														D.isEmptyMatrixA = false;
+													}
+													if(!D.isEmptyC)
+														D.C[lhs_id] = constant;
+													coeff.clear();
+													constant = 0;
+													return 0;
+												}
+	;
+
+Expr : Expr PLUS Expr  	{printf("expr + expr\n");}
+		 | VAR					  	{
+													printf("var\n");
+													std::string var = $1;
+													int id = ha.get_index(var);
+													if(coeff.empty()) 
+														coeff.resize(ha.map_size(),0);
+													coeff[id]=1;
+												}
+		 | UVAR							{printf("uvar\n");}
+		 | CONST 						{
+													printf("const\n");
+													constant = $1; 
+													D.isEmptyC = false;
+													D.C.resize(ha.map_size());
+												}
+		 | CONST MULT UVAR	{printf("const mult uvar\n");}
+		 | UVAR MULT CONST	{printf("uvar mult const\n");}
+		 | CONST MULT VAR		{
+													printf("const mult var\n");
+													std::string var = $3;
+													int id = ha.get_index($3);
+													double c = $1;
+													if(coeff.empty()) 
+														coeff.resize(ha.map_size(),0);						
+													coeff[id] = c; 	
+												}
+		 | VAR MULT CONST		{
+													
+													printf("var mult const\n");
+													std::string var = $1;
+													int id = ha.get_index(var);
+													double c = $3;
+													if(coeff.empty()) 
+														coeff.resize(ha.map_size(),0);						
+													coeff[id] = c;	
+												}
+		 | CONST VAR				{
+													printf("const var \n");
+													std::string var = $2;
+													int id = ha.get_index(var);
+													double c = $1;
+													if(coeff.empty()) 
+														coeff.resize(ha.map_size(),0);						
+													coeff[id] = c; 								
+												}
+		 | CONST UVAR				{printf("uvar \n");}
+		 ;
+%%
+
+void flow_parser(Dynamics& Dyn)
+{
+	D = Dyn;
+	yyparse();
+	Dyn = D;
+}
+int yyerror(char *s)
+{
+	fprintf(stderr,"Flow specification: %s\n", s);
+	return 0;
+}

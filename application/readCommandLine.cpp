@@ -1,9 +1,3 @@
-/*
- * readCommandLine.cpp
- *
- *  Created on: 28-Oct-2016
- *      Author: hazel
- */
 
 #include <application/readCommandLine.h>
 
@@ -15,12 +9,12 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		ReachabilityParameters& reach_parameters,
 		std::pair<int, polytope::ptr>& forbidden_set) {
 
-	bool isConfigFileAssigned = false, isModelParsed = false;
+	bool isConfigFileAssigned = false;
 
 	po::options_description desc("XSpeed options");
 	po::variables_map vm;
 
-	if (argc == 1) { //No argument:: When Running directly from the Eclipse Editor
+	if (argc == 1) { //No argument
 		std::cout << "Missing arguments!\n";
 		throw(new exception());
 	}
@@ -63,7 +57,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			"6 -- Lazy Evaluation Algorithm, PostC in GPU\n"
 			"7 -- AsyncBFS, Asynchronous Parallel BFS Algorithm (Parallel exploration of symbolic states)\n"
 			"8 -- Sequential algorithm (Forward approximation model)\n")
-	("number-of-streams", po::value<int>()->default_value(1), "Set the number of GPU-streams (Set to 1 by default).")
 	("time-slice", po::value<int>(), "Set the number of Time Slice or partitions for the Time-sliced Algorithm")
 	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking (0 for only postC)")
 	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - none : consider each convex set as successor sets for the next depth")
@@ -76,14 +69,14 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("model-file,m", po::value<std::string>(), "include model file")
 	("config-file,c", po::value<std::string>(), "include configuration file")
 	("output-file,o", po::value<std::string>(), "output file name for redirecting the outputs")
-	("output-variable,v", po::value<std::string>(), "projecting variables for e.g., 'x,v' for Bouncing Ball") //better to be handled by hyst
+	("output-variable,v", po::value<std::string>(), "variables for plotting. E.g., 'x,v' for Bouncing Ball") 
 	("output-format", po::value<std::string>()->default_value("GEN"), "The type of output format, either GEN or INTV. GEN prints the vertices of the reach set and INTV prints the global bounds on the output variables (Set to GEN by default)")
 ;
 
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
 
-	std::vector<std::string> output_vars(3); //stores the output/plotting variables
+	std::vector<std::string> output_vars(3); //stores the plotting variables
 
 	std::string input;
 	for (int i = 1; i < argc; i++) {
@@ -93,7 +86,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			i++;
 		else {
 			if (std::string(argv[i]).find("-F") != string::npos){
-				//std::cout<<"argv[i] = " <<argv[i]<<std::endl;
 				input.append(argv[i]);	//-F
 				input.append(" ");
 				i++; //move next arg ie options for -F
@@ -107,7 +99,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 	}
 	//--------
-	if (argc > 1) { // Boost Options to be filled-up
+	if (argc > 1) { // Options to be filled-up
 		if (vm.count("help")) {
 			cout << desc << "\n";
 			exit(0);
@@ -127,15 +119,8 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("model-file")) {
 			user_options.set_modelFile(vm["model-file"].as<std::string>());
 		}
-		if (vm.count("model")) { //Compulsory Options but set to 0 by default
-			user_options.set_model(vm["model"].as<int>());
-			if (user_options.get_model() < 0 || user_options.get_model() > 100) {
-				std::cout << "Invalid Model specified\n";
-				throw(new exception());
-			}
-		}
-
-		// ********************** Setting for Output file **********************************
+		
+		// ***********Setting for Output file ****
 		std::string fileName, fullPath, fileWithPath, forbidStr;
 		if (vm.count("include-path")) {
 			fullPath = vm["include-path"].as<std::string>();
@@ -156,7 +141,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			user_options.setOutFilename(fileName);
 		}
 		fileWithPath.append(fileName);
-		// ********************** Setting for Output file Done **********************************
+		// ******** Setting for Output file Done *************
 
 		if (vm.count("forbidden") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
 			user_options.set_forbidden_set(vm["forbidden"].as<std::string>());
@@ -167,55 +152,14 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			std::cout << "Invalid inputs (Either a model file or a pre-loaded model to be specified, but not both.)\n";
 			throw(new exception());
 		}
-
+		
 		if (vm.count("model-file") && vm.count("config-file")
-					&& ((user_options.get_model()==0))) { // model=0 default to no model specified
-				std::cout << "Translating user model to XSpeed format using Hyst model translator\n";
-				std::string cmdStr, replacingFile, SingleSpace = " ", projLocation,
-						java_exeFile, forbidden_string;
-			replacingFile = "./user_model.cpp";
-			//replacingFile = "../src/Hybrid_Model_Parameters_Design/user_model/user_model.cpp";
-			java_exeFile = "java -jar";
-			cmdStr.append(java_exeFile);
-			cmdStr.append(SingleSpace);
-			cmdStr.append("../Hyst-XSpeed.jar -t xspeed \"\" -o");
-			cmdStr.append(SingleSpace);
-			cmdStr.append(replacingFile);
-			cmdStr.append(" -i ");
-			cmdStr.append(user_options.get_modelFile()); //cmdStr.append(modelFile);
-			cmdStr.append(" ");
-			cmdStr.append(user_options.get_configFile()); //cmdStr.append(configFile);
-			const char *st;
-			st = cmdStr.c_str();
-			system(st); //calling hyst interface to generate the XSpeed model file
-
-
-//			system("g++ -c -I/usr/local/include/ -I/home/rajarshi/workspace/xspeed/ user_model.cpp -o user_model.o");
-//			system("g++ -L/usr/local/lib/ user_model.o -lxspeed -lgsl -lgslcblas -lppl -lgmp -lboost_timer -lboost_chrono -lboost_system -lboost_program_options -pthread -lgomp -lglpk -lsundials_cvode -lsundials_nvecserial -lnlopt -lmodels -o ./xspeed");
-//
-//			std::cout << "Model Parsed Successfully!! Calling XSpeed ... " << std::endl;
-//
-//			string cmdStr1="";
-//			cmdStr1.append("./xspeed --model=15 -o"); //Recursive call has model file, config file and model=15 and the rest of the parameters(if available)
-//			cmdStr1.append(SingleSpace);
-//			cmdStr1.append(stFileNameWithPath);
-//			cmdStr1.append(SingleSpace);
-//			cmdStr1.append(input);
-//
-//			system(cmdStr1.c_str());
-			exit(0);
-		}
-		if (user_options.get_model() == 15) { //This condition specifies Recursive call of XSpeed
-//amit			user_model(Hybrid_Automata, init_state, reach_parameters,user_options);
-			unsigned int x1,x2;
-			x1 = user_options.get_first_plot_dimension();
-			x2 = user_options.get_second_plot_dimension();
-
-			if (!user_options.get_forbidden_set().empty()){
-				string_to_poly(user_options.get_forbidden_set(), forbidden_set);
-				forbidden_set.second->print2file("./bad_poly", x1, x2);
-			}
-			isModelParsed = true;
+					&& ((user_options.get_model()==0))) { // model=0 means no model specified
+			std::cout << "Translating SpaceEx model to XSpeed model.\n";
+			//string cmd_str = "java -jar Model-Translator.jar -t XSpeed \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl"; 
+			//system(cmd_str.c_str());
+			parser _parser("input_model.mdl", Hybrid_Automata);
+			_parser.parse();
 		}
 
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
@@ -266,10 +210,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				}
 			}
 		}
-		if ((user_options.get_model() == 3 || user_options.get_model() == 4) && user_options.get_bfs_level() != 0){
-			std::cout << "Invalid depth. Only depth 0 permitted on continuous models.\n";
-			throw(new exception());
-		}
+		
 		if (vm.count("output-variable")) {
 			std::string VarStr;
 			VarStr = vm["output-variable"].as<std::string>();
@@ -297,18 +238,20 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout << "Invalid time-horizon option specified. A positive non-zero value expected.\n";
 				throw(new exception());
 			}
-		} else if (user_options.get_model() != 15) {
-			std::cout << "Missing value for parameter \"time-horizon\"\n";
-			throw(new exception());
+		} 
+		else{
+				std::cout << "Missing value for parameter \"time-horizon\"\n";
+				throw(new exception());
 		}
+
 		if (vm.count("time-step") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeStep(vm["time-step"].as<double>());
 			if (user_options.get_timeStep() <= 0) {
 				std::cout << "Invalid time-step option specified. A positive non-zero time-step expected.\n";
 				throw(new exception());
 			}
-		} // else if (isConfigFileAssigned == false) {
-		else if (user_options.get_model() != 15) {
+		}
+		else {
 			std::cout << "Missing value for parameter \"time-step\". \n";
 			throw(new exception());
 		}
@@ -319,10 +262,11 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout << "Invalid algorithm option specified.\n";
 				throw(new exception());
 			}
-		} else if (user_options.get_model() != 15) {
+		} else {
 			std::cout << "Missing value for parameter \"algo\". \n";
 			throw(new exception());
 		}
+
 		if (user_options.get_algorithm() == 3) { //this argument will be set only if algorithm==time-slice or PAR_ITER
 			if (vm.count("time-slice")) { //Compulsory Options if algorithm-type==Time-Slice(4)
 				int partition_size = vm["time-slice"].as<int>();
@@ -337,55 +281,42 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				throw(new exception());
 			}
 		}
-		if (user_options.get_algorithm() == 6) { //if gpu enabled then
-			if (vm.count("number-of-streams")) { //Compulsory Options but set 1 by default
-				int no_streams = vm["number-of-streams"].as<int>(); //default value ==1
-				if (no_streams >= 1) {
-					//number_of_streams = no_streams; //Number of GPU-Streams selected
-					user_options.setStreamSize(no_streams);
-				} else {
-					std::cout << "Invalid number_of_streams option specified. An integral value larger of equal to 1 expected.\n";
-					throw(new exception());
-				}
-			}
+		if (vm.count("model")) { //Compulsory Options but set to 0 by default
+			user_options.set_model(vm["model"].as<int>());
+			load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
 		}
-
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
-	if (!isModelParsed && user_options.get_model() != 15) { //all command line options has been supplied
-		load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
+			
+	if(output_vars[0].empty() && output_vars[1].empty())
+	{
+		std::cout<<"Output variables not specified. Two variables of the system expected.\n"<<std::endl;
+		throw(new exception());
+	}
 
-		if(output_vars[0].empty() && output_vars[1].empty())
-		{
-			std::cout<<"Output variables not specified. Two variables of the system expected.\n"<<std::endl;
-			throw(new exception());
-		}
+	unsigned int x1, x2;
+	try{
+		x1 = Hybrid_Automata.get_index(output_vars[0]);
+		x2 = Hybrid_Automata.get_index(output_vars[1]);
+	}catch(const std::out_of_range& oor)
+	{
+		std::cerr << "Output variables not defined in the model: " << oor.what() << '\n';
+		std::cerr << "Please use two output variables from the following list of model variables\n";
+		Hybrid_Automata.print_var_index_map();
+		exit(0);
+	}
 
-		unsigned int x1, x2;
+	user_options.set_first_plot_dimension(x1);
+	user_options.set_second_plot_dimension(x2);
+	if (!(output_vars[2].empty())) {
+		unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
+		user_options.set_third_plot_dimension(x3);
+	}
+	if (!user_options.get_forbidden_set().empty()){
 		try{
-			x1 = Hybrid_Automata.get_index(output_vars[0]);
-			x2 = Hybrid_Automata.get_index(output_vars[1]);
-		}catch(const std::out_of_range& oor)
-		{
-			std::cerr << "Output variables not defined in the model: " << oor.what() << '\n';
-			std::cerr << "Please use two output variables from the following list of model variables\n";
-			Hybrid_Automata.print_var_index_map();
-			exit(0);
-		}
-
-		user_options.set_first_plot_dimension(x1);
-		user_options.set_second_plot_dimension(x2);
-		if (!(output_vars[2].empty())) {
-			unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
-			user_options.set_third_plot_dimension(x3);
-		}
-		if (!user_options.get_forbidden_set().empty()){
-			try{
-				forbidden_set.second->print2file("./bad_poly", x1, x2);
-			} catch(...){
-				std::cout << "Cannot print the forbidden polytope because it is unbounded in the print dimensions or may be empty\n";
-			}
+			forbidden_set.second->print2file("./bad_poly", x1, x2);
+		} catch(...){
+			std::cout << "Cannot print the forbidden polytope because it is unbounded in the print dimensions or may be empty\n";
 		}
 	}
-	//return 1;
 }
