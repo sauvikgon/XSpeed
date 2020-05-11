@@ -174,7 +174,7 @@ void SetTimedBouncingBall(hybrid_automata& Hybrid_Automata,
 			new location(1, "always_running", system_dynamics, invariant, true, Out_Going_Trans_fromalways_running));
 
 	int dim = initial_polytope_I->getSystemDimension();
-	Hybrid_Automata.addInitial_Location(l1);
+	Hybrid_Automata.addInitialLocation(l1);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.setDimension(dim);
 

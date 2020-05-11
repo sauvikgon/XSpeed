@@ -122,7 +122,7 @@ void setpllConv(hybrid_automata& Hybrid_Automata,
 			new location(1, "up_1", system_dynamics, invariant, true,
 					Out_Going_Trans_fromup_1));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 	// The mode name is  both_0

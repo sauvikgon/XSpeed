@@ -872,7 +872,7 @@ t = transition::ptr(new transition(10,"null",10,24,guard_polytope,assignment));
 Out_Going_Trans_fromloc_9.push_back(t);
 l = location::ptr(new location(10, "loc_9", system_dynamics, invariant, true, Out_Going_Trans_fromloc_9));
 
-Hybrid_Automata.addInitial_Location(l);
+Hybrid_Automata.addInitialLocation(l);
 Hybrid_Automata.addLocation(l);
 
 

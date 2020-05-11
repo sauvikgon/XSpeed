@@ -31,8 +31,8 @@ using namespace std;
  * columnVector :	The values b for each facet.
  * InEqualitySign :	The in equalities sign of the bound values 'b'. Possible values are
  * 					0 :	for  Ax = b (b Equals to)
- * 					1 :	for  Ax <= b (b is Greater Than or Equals to)
- * 					2 :	for  Ax >= b (b is Less Than or Equals to)
+ * 					1 :	for  Ax <= b (b is Greater or Equals to lhs)
+ * 					2 :	for  Ax >= b (b is Less or Equals to lhs)
  *
  * Also include the function to compute Support Function of the defined polytope in any given direction.
  * Also include the function to return the Dimension of the defined polytope.
@@ -178,6 +178,6 @@ public:
  * Creates a pair of <loc_id, poly> from the user given bad state string
  */
 void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set);
-void string_to_poly_HystFormat(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set);
+
 
 #endif /* POLYTOPE_H_ */

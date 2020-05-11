@@ -360,7 +360,7 @@ void SetOscillator(hybrid_automata& Hybrid_Automata,
 
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.setDimension(dim);
-	Hybrid_Automata.addInitial_Location(l3);
+	Hybrid_Automata.addInitialLocation(l3);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.addLocation(l2);
 	Hybrid_Automata.addLocation(l3);

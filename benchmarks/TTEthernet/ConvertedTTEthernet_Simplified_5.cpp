@@ -695,7 +695,7 @@ void setTTEthernet5(hybrid_automata& Hybrid_Automata,
 							system_dynamics, invariant0, true,
 							Out_Going_Trans_fromtiming_receive_receive_send_send_send_send_send));
 
-	Hybrid_Automata.addInitial_Location(l1);
+	Hybrid_Automata.addInitialLocation(l1);
 	Hybrid_Automata.addLocation(l1);
 
 // The mode name is  timing_correct2_correct2_sync2_sync2_sync2_sync2_sync2

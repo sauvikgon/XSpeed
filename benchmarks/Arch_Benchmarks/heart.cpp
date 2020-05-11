@@ -166,7 +166,7 @@ void setheart(hybrid_automata& Hybrid_Automata,
 			new location(1, "low0_s0_q0_loc1", system_dynamics, invariant, true,
 					Out_Going_Trans_fromlow0_s0_q0_loc1));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 	// The mode name is  low0_s0_q1_loc1

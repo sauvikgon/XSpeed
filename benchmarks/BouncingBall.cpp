@@ -120,7 +120,7 @@ void SetBouncingBall(hybrid_automata& Hybrid_Automata,
 			new location(1, "always", system_dynamics, invariant, true,
 					Out_Going_Trans_fromalways));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 	row = 4;

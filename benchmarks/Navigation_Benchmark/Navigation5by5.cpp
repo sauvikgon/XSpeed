@@ -6576,7 +6576,7 @@ void SetNavigationModel5by5Timed(hybrid_automata& Hybrid_Automata,
 			new location(17, "loc19", system_dynamics, invariant16, true,
 					Out_Going_Trans_fromloc19));
 	Hybrid_Automata.addLocation(l17);
-	Hybrid_Automata.addInitial_Location(l17);
+	Hybrid_Automata.addInitialLocation(l17);
 
 // The mode name is  loc17
 

@@ -169,7 +169,7 @@ void set_nav04_timed(hybrid_automata& Hybrid_Automata,
 			new location(1, "loc_0", system_dynamics, invariant, true,
 					Out_Going_Trans_fromloc_0));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 	// The mode name is  loc_1

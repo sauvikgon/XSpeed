@@ -27,7 +27,13 @@ public:
 	hybrid_automata();
 	hybrid_automata(std::map<int, location::ptr>& list_locs, location::ptr init_loc,
 			int dim);
-	void addInitial_Location(location::ptr& initLoc);
+	void addInitialLocation(location::ptr& initLoc);
+
+	/* sets the initial location from its id. Silently does nothing
+   * if the init_id is not in the id to location map.   
+	 */
+	void setInitialLoc(int init_id);
+	
 	location::ptr& getInitial_Location();
 
 	//returns the location from the list of locations with location_ID as the input parameter

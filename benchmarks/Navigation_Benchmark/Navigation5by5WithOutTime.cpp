@@ -235,7 +235,7 @@ void SetNavigationNav5by5WithOutTime(hybrid_automata& Hybrid_Automata,
 			new location(1, "loc3", system_dynamics, invariant, true,
 					Out_Going_Trans_fromloc3));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 	// The mode name is  loc8

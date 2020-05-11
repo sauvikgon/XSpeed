@@ -59,10 +59,18 @@
 #define YYPULL 1
 
 
+/* Substitute the variable and function names.  */
+#define yyparse         linexpparse
+#define yylex           linexplex
+#define yyerror         linexperror
+#define yydebug         linexpdebug
+#define yynerrs         linexpnerrs
 
+#define yylval          linexplval
+#define yychar          linexpchar
 
 /* Copy the first part of user declarations.  */
-#line 1 "flow.ypp" /* yacc.c:339  */
+#line 1 "linexp.ypp" /* yacc.c:339  */
 
 #include <cstdio>
 #include <cstring>
@@ -70,18 +78,20 @@
 
 #include "application/DataStructureDirections.h"
 #include "core/HybridAutomata/Hybrid_Automata.h"
+#include "core/continuous/Polytope/polytope.h"
 
-extern int yylex();
-extern int yyerror(char *);
-extern int yywrap();
+extern int linexplex();
+extern int linexperror(char *);
 
-// The mode dynamics to be created
-Dynamics D;
-hybrid_automata ha; // gives access to index to id map.
-std::vector<double> coeff;
-double constant = 0;
+polytope::ptr global_p; // initial_polytope
 
-#line 85 "flow.tab.cpp" /* yacc.c:339  */
+extern hybrid_automata ha; // gives access to index to id map.
+std::vector<double> l_coeff, r_coeff;
+extern std::vector<double> coeff, u_coeff;
+
+double lconstant = 0, rconstant = 0, bound = 0;
+
+#line 95 "linexp.tab.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -100,15 +110,15 @@ double constant = 0;
 #endif
 
 /* In a future release of Bison, this section will be replaced
-   by #include "flow.tab.hpp".  */
-#ifndef YY_YY_FLOW_TAB_HPP_INCLUDED
-# define YY_YY_FLOW_TAB_HPP_INCLUDED
+   by #include "linexp.tab.hpp".  */
+#ifndef YY_LINEXP_LINEXP_TAB_HPP_INCLUDED
+# define YY_LINEXP_LINEXP_TAB_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
 #if YYDEBUG
-extern int yydebug;
+extern int linexpdebug;
 #endif
 
 /* Token type.  */
@@ -121,7 +131,9 @@ extern int yydebug;
     CONST = 260,
     PLUS = 261,
     MULT = 262,
-    EQ = 263
+    EQ = 263,
+    LEQ = 264,
+    GEQ = 265
   };
 #endif
 
@@ -130,10 +142,10 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 20 "flow.ypp" /* yacc.c:355  */
+#line 22 "linexp.ypp" /* yacc.c:355  */
  char* token_str; double const_val;
 
-#line 137 "flow.tab.cpp" /* yacc.c:355  */
+#line 149 "linexp.tab.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -142,15 +154,15 @@ typedef union YYSTYPE YYSTYPE;
 #endif
 
 
-extern YYSTYPE yylval;
+extern YYSTYPE linexplval;
 
-int yyparse (void);
+int linexpparse (void);
 
-#endif /* !YY_YY_FLOW_TAB_HPP_INCLUDED  */
+#endif /* !YY_LINEXP_LINEXP_TAB_HPP_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 154 "flow.tab.cpp" /* yacc.c:358  */
+#line 166 "linexp.tab.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -390,23 +402,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  4
+#define YYFINAL  11
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   17
+#define YYLAST   35
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  9
+#define YYNTOKENS  11
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  3
+#define YYNNTS  4
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  12
+#define YYNRULES  24
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  20
+#define YYNSTATES  38
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   263
+#define YYMAXUTOK   265
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -441,15 +453,16 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8
+       5,     6,     7,     8,     9,    10
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    28,    28,    50,    51,    59,    60,    66,    67,    68,
-      77,    87,    96
+       0,    30,    30,    72,    95,   115,   116,   123,   125,   128,
+     136,   144,   152,   160,   168,   178,   179,   186,   188,   191,
+     199,   207,   215,   223,   231
 };
 #endif
 
@@ -459,7 +472,7 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "VAR", "UVAR", "CONST", "PLUS", "MULT",
-  "EQ", "$accept", "S", "Expr", YY_NULLPTR
+  "EQ", "LEQ", "GEQ", "$accept", "S", "LExpr", "RExpr", YY_NULLPTR
 };
 #endif
 
@@ -468,14 +481,15 @@ static const char *const yytname[] =
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,   262,   263
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265
 };
 # endif
 
-#define YYPACT_NINF -4
+#define YYPACT_NINF -15
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-4)))
+  (!!((Yystate) == (-15)))
 
 #define YYTABLE_NINF -1
 
@@ -486,8 +500,10 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       5,     1,    10,     2,    -4,     4,     6,    -3,     8,     7,
-      11,    -4,    -4,    -1,     2,    -4,    -4,    -4,    -4,     8
+      11,     5,    10,     4,     3,    -4,    22,    23,   -15,   -15,
+      19,   -15,    11,    16,    16,    16,   -15,   -15,   -15,   -15,
+      20,    24,    25,     6,    27,    27,    27,    29,    30,   -15,
+     -15,    21,    16,   -15,   -15,   -15,   -15,    27
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -495,20 +511,22 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     1,     4,     5,     6,     2,     0,
-       0,    11,    12,     0,     0,    10,     8,     9,     7,     3
+       0,     6,     7,     8,     0,     0,     0,     0,    13,    14,
+       0,     1,     0,     0,     0,     0,    12,    10,    11,     9,
+       5,    16,    17,    18,     2,     3,     4,     0,     0,    23,
+      24,     0,     0,    22,    20,    21,    19,    15
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -4,    -4,     3
+     -15,   -15,    17,   -14
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     8
+      -1,     4,     5,    24
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -516,36 +534,44 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      11,    12,    17,    18,    13,     5,     6,     7,     1,     3,
-       4,     9,    15,    10,    14,     0,    16,    19
+      25,    26,    12,    11,    13,    14,    15,     8,     9,    29,
+      30,    10,     6,    31,     1,     2,     3,     7,    37,    21,
+      22,    23,    18,    19,    35,    36,    12,    16,    17,    20,
+       0,    27,    28,    32,    33,    34
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,     4,     3,     4,     7,     3,     4,     5,     3,     8,
-       0,     7,     5,     7,     6,    -1,     5,    14
+      14,    15,     6,     0,     8,     9,    10,     3,     4,     3,
+       4,     7,     7,     7,     3,     4,     5,     7,    32,     3,
+       4,     5,     3,     4,     3,     4,     6,     5,     5,    12,
+      -1,     7,     7,     6,     5,     5
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    10,     8,     0,     3,     4,     5,    11,     7,
-       7,     3,     4,     7,     6,     5,     5,     3,     4,    11
+       0,     3,     4,     5,    12,    13,     7,     7,     3,     4,
+       7,     0,     6,     8,     9,    10,     5,     5,     3,     4,
+      13,     3,     4,     5,    14,    14,    14,     7,     7,     3,
+       4,     7,     6,     5,     5,     3,     4,    14
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,     9,    10,    11,    11,    11,    11,    11,    11,    11,
-      11,    11,    11
+       0,    11,    12,    12,    12,    13,    13,    13,    13,    13,
+      13,    13,    13,    13,    13,    14,    14,    14,    14,    14,
+      14,    14,    14,    14,    14
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     3,     3,     1,     1,     1,     3,     3,     3,
-       3,     2,     2
+       0,     2,     3,     3,     3,     3,     1,     1,     1,     3,
+       3,     3,     3,     2,     2,     3,     1,     1,     1,     3,
+       3,     3,     3,     2,     2
 };
 
 
@@ -1222,129 +1248,327 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 28 "flow.ypp" /* yacc.c:1646  */
+#line 30 "linexp.ypp" /* yacc.c:1646  */
     {
-													printf("Assignment Rule\n");
-											
-													std::string var=(yyvsp[-2].token_str);
-													int lhs_id = ha.get_index(var);
-													unsigned int n = ha.map_size();
-													printf("ha map size: %d\n",n);
-													printf("lhs_id: %d\n",lhs_id);
-													
-													if(!coeff.empty()){
-														for(unsigned int j=0;j<n;j++)
-															D.MatrixA(lhs_id,j)=coeff[j];
-														D.isEmptyMatrixA = false;
+														// consider as <=
+														int n = ha.map_size();
+														coeff.clear();
+														coeff.resize(n,0);
+														for(unsigned int i=0;i<n;i++)
+														{
+															if(!l_coeff.empty() && l_coeff[i]!=0)
+																coeff[i] = l_coeff[i];
+															else if(!r_coeff.empty() && r_coeff[i]!=0)
+																coeff[i] = -r_coeff[i];
+														}
+														bound = rconstant - lconstant;
+														global_p->setMoreConstraints(coeff, bound);
+														/*std::cout << "EQ constraint(<=):\n";
+														for(unsigned int i=0;i<n;i++)
+															std::cout << coeff[i] << " ";
+														
+														std::cout << "\nbound = " << bound << std::endl;
+														*/	
+														// consider as >=
+														coeff.clear();
+														coeff.resize(n,0);
+														for(unsigned int i=0;i<n;i++)
+														{
+															if(!l_coeff.empty() && l_coeff[i]!=0)
+																coeff[i] = -l_coeff[i];
+															else if(!r_coeff.empty() && r_coeff[i]!=0)
+																coeff[i] = r_coeff[i];
+														}
+														bound =  lconstant - rconstant;
+														global_p->setMoreConstraints(coeff, bound);
+														/*
+														std::cout << "EQ constraint (>=):\n";
+														for(unsigned int i=0;i<n;i++)
+															std::cout << coeff[i] << " ";
+														std::cout << "\nbound = " << bound << std::endl;
+														*/
+														rconstant = 0; lconstant=0;
+														l_coeff.clear(); r_coeff.clear();
+														return 0;
 													}
-													if(!D.isEmptyC)
-														D.C[lhs_id] = constant;
-													coeff.clear();
-													constant = 0;
-													return 0;
-												}
-#line 1247 "flow.tab.cpp" /* yacc.c:1646  */
+#line 1295 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 50 "flow.ypp" /* yacc.c:1646  */
-    {printf("expr + expr\n");}
-#line 1253 "flow.tab.cpp" /* yacc.c:1646  */
+#line 72 "linexp.ypp" /* yacc.c:1646  */
+    {
+														int n = ha.map_size();
+														coeff.clear();
+														coeff.resize(n,0);
+														for(unsigned int i=0;i<n;i++)
+														{
+															if(!l_coeff.empty() && l_coeff[i]!=0)
+																coeff[i] = l_coeff[i];
+															else if(!r_coeff.empty() && r_coeff[i]!=0)
+																coeff[i] = -r_coeff[i];
+														}
+														bound = rconstant - lconstant;
+														global_p->setMoreConstraints(coeff, bound);
+														rconstant = 0; lconstant=0;
+														l_coeff.clear(); r_coeff.clear();
+														/*
+														std::cout << "leq constraint:\n";
+														for(unsigned int i=0;i<n;i++)
+															std::cout << coeff[i] << " " ;
+														std::cout << "\nbound = " << bound << std::endl;
+														*/
+														return 0; 
+													}
+#line 1323 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 51 "flow.ypp" /* yacc.c:1646  */
+#line 95 "linexp.ypp" /* yacc.c:1646  */
     {
-													printf("var\n");
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index(var);
-													if(coeff.empty()) 
-														coeff.resize(ha.map_size(),0);
-													coeff[id]=1;
-												}
-#line 1266 "flow.tab.cpp" /* yacc.c:1646  */
+														int n = ha.map_size();
+														coeff.clear();
+														coeff.resize(n,0);
+														for(unsigned int i=0;i<n;i++)
+														{
+															if(!l_coeff.empty() && l_coeff[i]!=0)
+																coeff[i] = -l_coeff[i];
+															else if(!r_coeff.empty() && r_coeff[i]!=0)
+																coeff[i] = r_coeff[i];
+														}
+														bound = lconstant - rconstant;
+														global_p->setMoreConstraints(coeff, bound);
+
+														rconstant = 0; lconstant=0;
+														l_coeff.clear(); r_coeff.clear();
+														return 0;
+													}
+#line 1346 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 59 "flow.ypp" /* yacc.c:1646  */
-    {printf("uvar\n");}
-#line 1272 "flow.tab.cpp" /* yacc.c:1646  */
+#line 115 "linexp.ypp" /* yacc.c:1646  */
+    {;}
+#line 1352 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 60 "flow.ypp" /* yacc.c:1646  */
-    {
-													printf("const\n");
-													constant = (yyvsp[0].const_val); 
-													D.isEmptyC = false;
-													D.C.resize(ha.map_size());
+#line 116 "linexp.ypp" /* yacc.c:1646  */
+    {										
+													std::string var = (yyvsp[0].token_str);
+													int id = ha.get_index(var);
+													if(l_coeff.empty()) 
+														l_coeff.resize(ha.map_size(),0);
+													l_coeff[id]=1;
 												}
-#line 1283 "flow.tab.cpp" /* yacc.c:1646  */
+#line 1364 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 66 "flow.ypp" /* yacc.c:1646  */
-    {printf("const mult uvar\n");}
-#line 1289 "flow.tab.cpp" /* yacc.c:1646  */
+#line 123 "linexp.ypp" /* yacc.c:1646  */
+    {
+												}
+#line 1371 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 67 "flow.ypp" /* yacc.c:1646  */
-    {printf("uvar mult const\n");}
-#line 1295 "flow.tab.cpp" /* yacc.c:1646  */
+#line 125 "linexp.ypp" /* yacc.c:1646  */
+    {
+													lconstant = (yyvsp[0].const_val); 
+												}
+#line 1379 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 68 "flow.ypp" /* yacc.c:1646  */
+#line 128 "linexp.ypp" /* yacc.c:1646  */
     {
-													printf("const mult var\n");
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index((yyvsp[0].token_str));
+													std::string uvar = (yyvsp[0].token_str);
+													int id = ha.get_u_index(uvar);
 													double c = (yyvsp[-2].const_val);
-													if(coeff.empty()) 
-														coeff.resize(ha.map_size(),0);						
-													coeff[id] = c; 	
+													if(u_coeff.empty())
+														u_coeff.resize(ha.umap_size(),0);
+													u_coeff[id] = c;
 												}
-#line 1309 "flow.tab.cpp" /* yacc.c:1646  */
+#line 1392 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 77 "flow.ypp" /* yacc.c:1646  */
+#line 136 "linexp.ypp" /* yacc.c:1646  */
     {
-													
-													printf("var mult const\n");
-													std::string var = (yyvsp[-2].token_str);
-													int id = ha.get_index(var);
+													std::string uvar = (yyvsp[-2].token_str);
+													int id = ha.get_u_index(uvar);
 													double c = (yyvsp[0].const_val);
-													if(coeff.empty()) 
-														coeff.resize(ha.map_size(),0);						
-													coeff[id] = c;	
+													if(u_coeff.empty()) 
+														u_coeff.resize(ha.umap_size(),0);						
+													u_coeff[id] = c;
 												}
-#line 1324 "flow.tab.cpp" /* yacc.c:1646  */
+#line 1405 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 87 "flow.ypp" /* yacc.c:1646  */
+#line 144 "linexp.ypp" /* yacc.c:1646  */
     {
-													printf("const var \n");
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
-													double c = (yyvsp[-1].const_val);
-													if(coeff.empty()) 
-														coeff.resize(ha.map_size(),0);						
-													coeff[id] = c; 								
+													double c = (yyvsp[-2].const_val);
+													if(l_coeff.empty()) 
+														l_coeff.resize(ha.map_size(),0);						
+													l_coeff[id] = c; 	
 												}
-#line 1338 "flow.tab.cpp" /* yacc.c:1646  */
+#line 1418 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 96 "flow.ypp" /* yacc.c:1646  */
-    {printf("uvar \n");}
-#line 1344 "flow.tab.cpp" /* yacc.c:1646  */
+#line 152 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string var = (yyvsp[-2].token_str);
+													int id = ha.get_index(var);
+													double c = (yyvsp[0].const_val);
+													if(l_coeff.empty()) 
+														l_coeff.resize(ha.map_size(),0);						
+													l_coeff[id] = c;	
+												}
+#line 1431 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 13:
+#line 160 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string var = (yyvsp[0].token_str);
+													int id = ha.get_index(var);
+													double c = (yyvsp[-1].const_val);
+													if(l_coeff.empty()) 
+														l_coeff.resize(ha.map_size(),0);						
+													l_coeff[id] = c; 								
+												}
+#line 1444 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 14:
+#line 168 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string uvar = (yyvsp[0].token_str);
+													int id = ha.get_u_index(uvar);
+													double c = (yyvsp[-1].const_val);
+													if(u_coeff.empty()) 
+														u_coeff.resize(ha.umap_size(),0);						
+													u_coeff[id] = c; 								
+												}
+#line 1457 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 15:
+#line 178 "linexp.ypp" /* yacc.c:1646  */
+    {;}
+#line 1463 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 179 "linexp.ypp" /* yacc.c:1646  */
+    {										
+													std::string var = (yyvsp[0].token_str);
+													int id = ha.get_index(var);
+													if(r_coeff.empty()) 
+														r_coeff.resize(ha.map_size(),0);
+													r_coeff[id]=1;
+												}
+#line 1475 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 17:
+#line 186 "linexp.ypp" /* yacc.c:1646  */
+    {
+												}
+#line 1482 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 18:
+#line 188 "linexp.ypp" /* yacc.c:1646  */
+    {
+													rconstant = (yyvsp[0].const_val); 
+												}
+#line 1490 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 19:
+#line 191 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string uvar = (yyvsp[0].token_str);
+													int id = ha.get_u_index(uvar);
+													double c = (yyvsp[-2].const_val);
+													if(u_coeff.empty())
+														u_coeff.resize(ha.umap_size(),0);
+													u_coeff[id] = c;
+												}
+#line 1503 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 20:
+#line 199 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string uvar = (yyvsp[-2].token_str);
+													int id = ha.get_u_index(uvar);
+													double c = (yyvsp[0].const_val);
+													if(u_coeff.empty()) 
+														u_coeff.resize(ha.umap_size(),0);						
+													u_coeff[id] = c;
+												}
+#line 1516 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 21:
+#line 207 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string var = (yyvsp[0].token_str);
+													int id = ha.get_index(var);
+													double c = (yyvsp[-2].const_val);
+													if(r_coeff.empty()) 
+														r_coeff.resize(ha.map_size(),0);						
+													r_coeff[id] = c; 	
+												}
+#line 1529 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 22:
+#line 215 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string var = (yyvsp[-2].token_str);
+													int id = ha.get_index(var);
+													double c = (yyvsp[0].const_val);
+													if(r_coeff.empty()) 
+														r_coeff.resize(ha.map_size(),0);						
+													r_coeff[id] = c;	
+												}
+#line 1542 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 23:
+#line 223 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string var = (yyvsp[0].token_str);
+													int id = ha.get_index(var);
+													double c = (yyvsp[-1].const_val);
+													if(r_coeff.empty()) 
+														r_coeff.resize(ha.map_size(),0);						
+													r_coeff[id] = c; 								
+												}
+#line 1555 "linexp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 24:
+#line 231 "linexp.ypp" /* yacc.c:1646  */
+    {
+													std::string uvar = (yyvsp[0].token_str);
+													int id = ha.get_u_index(uvar);
+													double c = (yyvsp[-1].const_val);
+													if(u_coeff.empty()) 
+														u_coeff.resize(ha.umap_size(),0);						
+													u_coeff[id] = c; 								
+												}
+#line 1568 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1348 "flow.tab.cpp" /* yacc.c:1646  */
+#line 1572 "linexp.tab.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1572,17 +1796,18 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 98 "flow.ypp" /* yacc.c:1906  */
+#line 240 "linexp.ypp" /* yacc.c:1906  */
 
 
-void flow_parser(Dynamics& Dyn)
+void linexp_parser(polytope::ptr& p)
 {
-	D = Dyn;
-	yyparse();
-	Dyn = D;
+	global_p = p;
+	linexpparse();
+	p = global_p;
 }
-int yyerror(char *s)
+int linexperror(char* s)
 {
-	fprintf(stderr,"Flow specification: %s\n", s);
+	fprintf(stderr,"Linear Constraint Expression Specification: %s\n", s);
 	return 0;
 }
+

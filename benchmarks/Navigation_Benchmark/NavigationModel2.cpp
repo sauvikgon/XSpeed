@@ -1011,7 +1011,7 @@ void SetNavigationModel2(hybrid_automata& Hybrid_Automata,
 	//	*************** Initialization The Hybrid Automata *******************
 	int dim = initial_polytope_I->getSystemDimension();
 	Hybrid_Automata.setDimension(dim);
-	Hybrid_Automata.addInitial_Location(l1);
+	Hybrid_Automata.addInitialLocation(l1);
 	Hybrid_Automata.addLocation(l1);
 	Hybrid_Automata.addLocation(l2);
 	Hybrid_Automata.addLocation(l3);

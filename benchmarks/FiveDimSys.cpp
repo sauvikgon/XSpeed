@@ -252,7 +252,7 @@ void setFiveDimSys(hybrid_automata& Hybrid_Automata,
 
 	int dim = initial_polytope_I->getSystemDimension();
 
-	Hybrid_Automata.addInitial_Location(source);
+	Hybrid_Automata.addInitialLocation(source);
 	Hybrid_Automata.addLocation(source);
 	Hybrid_Automata.setDimension(dim);
 

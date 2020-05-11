@@ -23,16 +23,20 @@ location::ptr& hybrid_automata::getInitial_Location() {
 	return initial_loc;
 }
 
-void hybrid_automata::addInitial_Location(location::ptr& initLoc) {
+void hybrid_automata::addInitialLocation(location::ptr& initLoc) {
 	initial_loc = initLoc;
 }
 
+void hybrid_automata::setInitialLoc(int loc_id)
+{
+	location::ptr init_loc_ptr = this->getLocation(loc_id);
+	addInitialLocation(init_loc_ptr);
+}
+
 location::ptr hybrid_automata::getLocation(int Loc_Id){
-	//iterate through the transition and find for given input Name that match with the source_location
 	assert(list_locations.count(Loc_Id)!=0);
 	location::ptr l;
 	l = list_locations[Loc_Id];
-//	std::cout<<"\ntest 3\n";
 	return l;
 }
 
@@ -56,42 +60,10 @@ std::list<structuralPath::ptr> hybrid_automata::get_structural_paths(unsigned in
 {
 	std::list<structuralPath::ptr> path_list; // It is empty here.
 
-
-//	std::list<initial_state::ptr>::iterator iit;
-//	iit = init_state.begin();
-//	int srcLoc = (*iit)->getLocationId();
 	unsigned int srcLoc = getInitial_Location()->getLocId();
 	unsigned int destLoc = forbidden_loc_id;
-	//unsigned int depthBound = 5;	// < then depthBound
 	path_list = findAllPaths(srcLoc, destLoc, depth);
-	//std::cout<<"Test 1: locs size ="<<(*path_list.begin())->get_path_locations().size()<<std::endl;
-/*
-	//ToDo:: Uncomment this block-comment to print all the solution paths
-	for (std::list<structuralPath::ptr>::iterator it = path_list.begin();
-			it != path_list.end(); it++) {
-		std::cout << "\nSolution Paths are: ";
-		//structuralPath::ptr sp;
-		std::list<location::ptr> listLocs;
-		std::list<transition::ptr> listTrans;
-		//sp = (*it);
-		listLocs = (*it)->get_path_locations();
-		listTrans = (*it)->get_path_transitions();
-		for (std::list<location::ptr>::iterator iit = listLocs.begin();
-				iit != listLocs.end(); iit++) {
-			std::cout << (*iit)->getName() << "  ,  ";
-		}
-		std::cout << "    Transitions Paths are: ";
-		for (std::list<transition::ptr>::iterator iit = listTrans.begin();
-				iit != listTrans.end(); iit++) {
-			//std::cout<<(*iit)->getLabel()<<"  ,  ";
-			std::cout << (*iit)->getTransitionId() << "  ,  ";
-		}
-	}
-	std::cout<<endl;
-*/
 
-
-	//for(unsigned int i)
 	return path_list;
 }
 

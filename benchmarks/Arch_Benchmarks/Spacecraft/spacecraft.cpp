@@ -158,7 +158,7 @@ void setSpacecraft(hybrid_automata& Hybrid_Automata, std::list<initial_state::pt
 	Out_Going_Trans_fromP2.push_back(t);
 	l =location::ptr(new location(1, "P2", system_dynamics, invariant, false, Out_Going_Trans_fromP2));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 
@@ -453,7 +453,7 @@ void setSpacecraftAbort(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 	Out_Going_Trans_fromP2.push_back(t);
 	l = location::ptr(new location(1, "P2", system_dynamics, invariant, true, Out_Going_Trans_fromP2));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 

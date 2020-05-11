@@ -24,18 +24,13 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("model", po::value<int>()->default_value(0), "set model for reachability analysis\n"
 					"1.  Bouncing Ball Model: Variables{x,v}\n"
 					"2.  Timed Bouncing Ball Model: Variables{x,v,t}\n"
-					"3.  28-Dimensional Helicopter Controller Model: Variables{x1..x28}\n"
 					"4.  Five dimensional Benchmark Model: Variables{x1..x5} \n"
 					"5.  Navigation Benchmark Model-NAV01 (3 X 3): Variables{x1,x2,v1,v2}\n"
 					"6.  Navigation Benchmark Model-NAV02 (3 X 3): Variables{x1,x2,v1,v2}\n"
 					"7.  Navigation Benchmark Model-NAV03 (3 X 3): Variables{x1,x2,v1,v2}\n"
 					"8.  Navigation Benchmark Model-NAV04 (5 X 5): Variables{x1,x2,v1,v2}\n"
 					"9.  Navigation Benchmark Model-NAV05 (9 X 9): Variables{x1,x2,v1,v2}\n"
-					"10. Circle with only ONE location model: Variables{x,y} \n"
-					"11. Circle with TWO locations model: Variables{x,y} \n"
-					"12. Circle with FOUR locations model: Variables{x,y} \n"
-					"13. Oscillator model without any filters: Variables{x,y}\n"
-					"14. Testing Model: Variables{depends on the model in test}\n")
+					"13. Oscillator model without any filters: Variables{x,y}\n")
 	("engine,e", po::value<std::string>()->default_value("supp"), "set the running engine (default supp): \n - supp : Reachability Computation using Support Functions Algorithm \n - simu : Trajectory Simulation\n")
 	("simu-algo",po::value<int>()->default_value(1), "Set the Simulation algorithm\n"
 				"1 -- Sequential Algorithm (Set to default)\n"
@@ -156,10 +151,13 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("model-file") && vm.count("config-file")
 					&& ((user_options.get_model()==0))) { // model=0 means no model specified
 			std::cout << "Translating SpaceEx model to XSpeed model.\n";
-			//string cmd_str = "java -jar Model-Translator.jar -t XSpeed \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl"; 
-			//system(cmd_str.c_str());
-			parser _parser("input_model.mdl", Hybrid_Automata);
+			string cmd_str = "java -jar Model-Translator.jar -t XSpeed \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl"; 
+			system(cmd_str.c_str());
+			parser _parser("input_model.mdl");
 			_parser.parse();
+			Hybrid_Automata = _parser.getHa(); // assign the parsed ha
+			init_state.push_back(_parser.getInitState()); // assign the parsed init
+			isConfigFileAssigned = false;// to continue taking the params from cmdline
 		}
 
 		if (vm.count("directions") && isConfigFileAssigned == false) { //Compulsory Options but set to 1 by default
@@ -175,9 +173,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout<< "Invalid bfs level specified. A zero or a positive integer is expected.\n";
 				throw(new exception());
 			}
-		} else if (user_options.get_model() != 15) {
-			std::cout << "Missing value for parameter \"depth\"\n";
-			throw(new exception());
 		}
 		if (vm.count("engine")) { //Compulsory Options but set to thull by default
 			user_options.setEngine((vm["engine"].as<std::string>()));

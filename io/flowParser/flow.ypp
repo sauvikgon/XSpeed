@@ -8,17 +8,17 @@
 
 extern int yylex();
 extern int yyerror(char *);
-extern int yywrap();
 
 // The mode dynamics to be created
 Dynamics D;
 hybrid_automata ha; // gives access to index to id map.
 std::vector<double> coeff;
+std::vector<double> u_coeff; // stores the coeff of inputs.
 double constant = 0;
 %}
 
 %union{ char* token_str; double const_val;}
-%token VAR UVAR CONST PLUS MULT EQ
+%token VAR UVAR CONST PLUS MULT EQ LEQ GEQ
 %type <token_str> VAR UVAR
 %type <const_val> CONST
 %start S
@@ -26,7 +26,7 @@ double constant = 0;
 %%
 
 S : VAR EQ Expr					{
-													printf("Assignment Rule\n");
+													//printf("Assignment Rule\n");
 											
 													std::string var=$1;
 													int lhs_id = ha.get_index(var);
@@ -39,6 +39,13 @@ S : VAR EQ Expr					{
 															D.MatrixA(lhs_id,j)=coeff[j];
 														D.isEmptyMatrixA = false;
 													}
+													if(!u_coeff.empty()){
+														unsigned int m = ha.umap_size();
+														for(unsigned int j=0;j<m;j++)
+															D.MatrixB(lhs_id,j)=u_coeff[j];
+														D.isEmptyMatrixB = false;
+														u_coeff.clear();
+													}
 													if(!D.isEmptyC)
 														D.C[lhs_id] = constant;
 													coeff.clear();
@@ -47,36 +54,58 @@ S : VAR EQ Expr					{
 												}
 	;
 
-Expr : Expr PLUS Expr  	{printf("expr + expr\n");}
+Expr : Expr PLUS Expr  	{;}
 		 | VAR					  	{
-													printf("var\n");
+													//printf("var\n");
 													std::string var = $1;
 													int id = ha.get_index(var);
 													if(coeff.empty()) 
 														coeff.resize(ha.map_size(),0);
 													coeff[id]=1;
 												}
-		 | UVAR							{printf("uvar\n");}
+		 | UVAR							{
+													//printf("uvar\n");
+													std::string uvar = $1;
+													int id = ha.get_u_index(uvar);
+													if(u_coeff.empty())
+														u_coeff.resize(ha.umap_size(),0);
+													u_coeff[id] = 1;
+												}
 		 | CONST 						{
-													printf("const\n");
+													//printf("const\n");
 													constant = $1; 
 													D.isEmptyC = false;
 													D.C.resize(ha.map_size());
 												}
-		 | CONST MULT UVAR	{printf("const mult uvar\n");}
-		 | UVAR MULT CONST	{printf("uvar mult const\n");}
+		 | CONST MULT UVAR	{
+												//printf("const mult var\n");
+													std::string uvar = $3;
+													int id = ha.get_u_index(uvar);
+													double c = $1;
+													if(u_coeff.empty())
+														u_coeff.resize(ha.umap_size(),0);
+													u_coeff[id] = c;
+												}
+		 | UVAR MULT CONST	{
+												//printf("var mult const\n");
+													std::string uvar = $1;
+													int id = ha.get_u_index(uvar);
+													double c = $3;
+													if(u_coeff.empty()) 
+														u_coeff.resize(ha.umap_size(),0);						
+													u_coeff[id] = c;
+												}
 		 | CONST MULT VAR		{
-													printf("const mult var\n");
+													//printf("const mult var\n");
 													std::string var = $3;
-													int id = ha.get_index($3);
+													int id = ha.get_index(var);
 													double c = $1;
 													if(coeff.empty()) 
 														coeff.resize(ha.map_size(),0);						
 													coeff[id] = c; 	
 												}
 		 | VAR MULT CONST		{
-													
-													printf("var mult const\n");
+													//printf("var mult const\n");
 													std::string var = $1;
 													int id = ha.get_index(var);
 													double c = $3;
@@ -85,7 +114,7 @@ Expr : Expr PLUS Expr  	{printf("expr + expr\n");}
 													coeff[id] = c;	
 												}
 		 | CONST VAR				{
-													printf("const var \n");
+													//printf("const var \n");
 													std::string var = $2;
 													int id = ha.get_index(var);
 													double c = $1;
@@ -93,7 +122,15 @@ Expr : Expr PLUS Expr  	{printf("expr + expr\n");}
 														coeff.resize(ha.map_size(),0);						
 													coeff[id] = c; 								
 												}
-		 | CONST UVAR				{printf("uvar \n");}
+		 | CONST UVAR				{
+												//printf("const var \n");
+													std::string uvar = $2;
+													int id = ha.get_u_index(uvar);
+													double c = $1;
+													if(u_coeff.empty()) 
+														u_coeff.resize(ha.umap_size(),0);						
+													u_coeff[id] = c; 								
+												}
 		 ;
 %%
 

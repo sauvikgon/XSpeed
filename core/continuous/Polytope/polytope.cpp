@@ -569,92 +569,6 @@ void polytope::printPoly(){
 }
 
 /*
- * Reads Hyst's formats "2<=v1 & v1 <=3 & 2<=v2 & v2 <=3"
- * unlike the function string_to_poly() reads the format " v1 >=2 & v1 <= 3 & v2 >=2 & v2 <=3"
- * Incomplete work::todo
- */
-
-void string_to_poly_HystFormat(const std::string& bad_state, std::pair<int, polytope::ptr>& f_set)
-{
-	std::list<std::string> all_args;
-	//polytope::ptr p = polytope::ptr(new polytope());
-	polytope::ptr p = polytope::ptr(new polytope());
-	p->setIsEmpty(false);
-	p->setIsUniverse(true);
-
-	//p->setIsUniverse(false); //Not a universe Polytope
-	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("& ");
-	tokenizer tokens(bad_state, sep);
-
-	for (tokenizer::iterator tok_iter = tokens.begin();
-			tok_iter != tokens.end(); ++tok_iter) {
-		all_args.push_back((std::string) *tok_iter);
-		//std::cout<<(std::string)*tok_iter<<" ...  \n";
-	}
-	/* get the location number from the first token */
-	std::string locString = *all_args.begin();
-	all_args.pop_front();
-	boost::char_separator<char> sep1("= ");
-	tokens = tokenizer(locString, sep1);
-
-	tokenizer::iterator tok_iter = tokens.begin();
-
-	std::string tokString = *tok_iter;
-	if(tokString.compare("loc")!=0 && tokString.compare("Loc")!=0 && tokString.compare("LOC")!=0 ){
-		throw std::runtime_error("forbidden state string improper: start with loc=id & ...\n use loc=-1 for any location\n");
-	}
-	tok_iter++;
-	f_set.first = std::atoi((*tok_iter).c_str());
-std::cout<<"Arrary output\n";
-	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
-			tokString = *iter;
-			std::cout<<tokString<<" ...  \n";
-	}
-
-	std::string varname;
-	unsigned int i;
-	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
-		tokString = *iter;
-
-		if (tokString.find("<=")!=std::string::npos ){ // less than equal to constraint
-			sep = boost::char_separator<char>("<=");
-			tokens = tokenizer(tokString,sep);
-			tok_iter = tokens.begin();
-			varname = *tok_iter;
-			tok_iter++;
-			i = p->get_index(varname);
-			std::vector<double> cons(p->map_size(),0);
-			cons[i] = 1;
-			double bound = std::atof((*tok_iter).c_str());
-			p->setMoreConstraints(cons,bound);
-		}
-		else if(tokString.find(">=")!=std::string::npos){ // greater than equal to constraint
-			sep = boost::char_separator<char>(">=");
-			tokens = tokenizer(tokString,sep);
-			tok_iter = tokens.begin();
-			varname = *tok_iter;
-			tok_iter++;
-			i = p->get_index(varname);
-			std::vector<double> cons(p->map_size(),0);
-			cons[i] = -1;
-			double bound = std::atof((*tok_iter).c_str());
-			p->setMoreConstraints(cons,-bound);
-		}
-		else{
-			throw std::runtime_error("forbidden state string improper: <= or >= constraint expected\n");
-		}
-	}
-//	cout<<"constraints = "<<p->getCoeffMatrix()<<"\n";
-//	cout << "forbidden location id: " << f_set.first << std::endl;
-//	for (int i=0;i<p->getColumnVector().size();i++)
-//		cout<<p->getColumnVector()[i]<<"\t";
-//	cout<<endl;
-	f_set.second=p;
-};
-
-
-/*
  * Reads the format " v1 >=2 & v1 <= 3 & v2 >=2 & v2 <=3"
  * Also, should be able to now read linear constrains of the format " 1*x + 2*y >=10 & 1*x + -1*y <=20"
  */
@@ -667,7 +581,6 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 	p->setIsEmpty(false);
 	p->setIsUniverse(true);
 
-	//p->setIsUniverse(false); //Not a universe Polytope
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("&");
 	tokenizer tokens(bad_state, sep);
@@ -676,25 +589,11 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			tok_iter != tokens.end(); ++tok_iter) {
 		all_args.push_back((std::string) *tok_iter);
 	}
-	/* get the location number from the first token */
-	std::string locString = *all_args.begin();
-	all_args.pop_front();
-	boost::char_separator<char> sep1("= ");
-	tokens = tokenizer(locString, sep1);
-
-	tokenizer::iterator tok_iter = tokens.begin();
-
-	std::string tokString = *tok_iter;
-	if(tokString.compare("loc")!=0 && tokString.compare("Loc")!=0 && tokString.compare("LOC")!=0 ){
-		throw std::runtime_error("forbidden state string improper: start with loc=id & ...\n use loc=-1 for any location\n");
-	}
-	tok_iter++;
-	f_set.first = std::atoi((*tok_iter).c_str());
-
-
-	std::string varname;
-	unsigned int i;
-
+	
+	std::string varname, tokString;
+	tokenizer::iterator tok_iter;
+	unsigned int i, init_locId = 1; // initial loc Id set to 1 by default
+		
 	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
 		tokString = *iter;
 		if (tokString.find("<=")!=std::string::npos ){ // less than equal to constraint
@@ -729,10 +628,59 @@ void string_to_poly(const std::string& bad_state, std::pair<int, polytope::ptr>&
 			double bound = std::atof((*tok_iter).c_str());
 			p->setMoreConstraints(cons,-bound);
 		}
+		else if(tokString.find("=")!=std::string::npos){
+			/* check if setting location id*/
+				
+			if(tokString.find("loc")!=std::string::npos){
+				
+				boost::char_separator<char> sep1("=; ");
+				tokens = tokenizer(tokString, sep1);
+				tok_iter = tokens.begin();
+				assert(*tok_iter == "loc");
+				
+				tok_iter++;
+				init_locId = std::atoi((*tok_iter).c_str());
+				continue;
+			}
+			
+			/*---end of loc id setting -----*/
+
+			sep = boost::char_separator<char>("=");
+			tokens = tokenizer(tokString,sep);
+			tok_iter = tokens.begin(); // tok_iter contains the lhs of a linear exp
+			std::list<std::pair<double, std::string> > coeff_var_pairs = linexp_parser(*tok_iter);
+			std::vector<double> cons(p->map_size(), 0);
+			for(std::list<std::pair<double, std::string> >::iterator it = coeff_var_pairs.begin(); it!=coeff_var_pairs.end();++it){
+				double coeff = (*it).first;
+				varname = (*it).second;
+ 				i = p->get_index(varname);
+				cons[i] = coeff;
+			}
+			tok_iter++;
+			double bound = std::atof((*tok_iter).c_str());
+			p->setMoreConstraints(cons,bound);
+			//-----------------------
+			sep = boost::char_separator<char>(">=");
+			tokens = tokenizer(tokString,sep);
+			tok_iter = tokens.begin();
+			coeff_var_pairs = linexp_parser(*tok_iter);
+			std::vector<double> cons1(p->map_size(), 0);
+			for(std::list<std::pair<double, std::string> >::iterator it = coeff_var_pairs.begin(); it!=coeff_var_pairs.end();++it){
+				double coeff = (*it).first;
+				varname = (*it).second;
+				i = p->get_index(varname);
+				cons1[i] = -coeff;
+			}
+			tok_iter++;
+			bound = std::atof((*tok_iter).c_str());
+			p->setMoreConstraints(cons1,-bound);
+		}
 		else{
-			throw std::runtime_error("forbidden state string improper: <= or >= constraint expected\n");
+			std::cout << "Error in string to poly conversion\n";
+			throw std::runtime_error("forbidden state string improper\n");
 		}
 	}
+	f_set.first = init_locId;
 	f_set.second=p;
 };
 

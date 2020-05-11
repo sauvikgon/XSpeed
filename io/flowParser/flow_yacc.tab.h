@@ -50,13 +50,24 @@ extern int yydebug;
     CONST = 260,
     PLUS = 261,
     MULT = 262,
-    EQ = 263
+    EQ = 263,
+    LEQ = 264,
+    GEQ = 265
   };
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+
+union YYSTYPE
+{
+#line 21 "flow.ypp" /* yacc.c:1909  */
+ char* token_str; double const_val;
+
+#line 68 "flow.tab.hpp" /* yacc.c:1909  */
+};
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

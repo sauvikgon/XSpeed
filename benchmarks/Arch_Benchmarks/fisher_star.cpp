@@ -120,7 +120,7 @@ void setFisher_Star(hybrid_automata& Hybrid_Automata,
 			new location(1, "s1_s1_s1_s0", system_dynamics, invariant, false,
 					Out_Going_Trans_froms1_s1_s1_s0));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 	// The mode name is  s1_s1_s2_s0

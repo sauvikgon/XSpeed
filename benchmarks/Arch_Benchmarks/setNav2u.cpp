@@ -136,7 +136,7 @@ t = transition::ptr(new transition(2,"d2",1,3,guard_polytope,assignment));
 Out_Going_Trans_fromL00.push_back(t);
 l = location::ptr(new location(1, "L00", system_dynamics, invariant, true, Out_Going_Trans_fromL00));
 
-Hybrid_Automata.addInitial_Location(l);
+Hybrid_Automata.addInitialLocation(l);
 Hybrid_Automata.addLocation(l);
 
 

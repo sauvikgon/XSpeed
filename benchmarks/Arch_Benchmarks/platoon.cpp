@@ -167,7 +167,7 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromcommunication_communication.push_back(t);
 	l = location::ptr(new location(1, "communication_communication", system_dynamics, invariant, true, Out_Going_Trans_fromcommunication_communication));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 
@@ -547,7 +547,7 @@ void setplatoon_ndt(hybrid_automata& Hybrid_Automata,
 		Out_Going_Trans_fromcommunication_communication.push_back(t);
 		l = location::ptr(new location(1, "communication_communication", system_dynamics, invariant, true, Out_Going_Trans_fromcommunication_communication));
 
-		Hybrid_Automata.addInitial_Location(l);
+		Hybrid_Automata.addInitialLocation(l);
 		Hybrid_Automata.addLocation(l);
 
 
@@ -894,7 +894,7 @@ void setplatoon_na(hybrid_automata& Hybrid_Automata,
 		Out_Going_Trans_fromcommunication_communication.push_back(t);
 		l = location::ptr(new location(1, "communication_communication", system_dynamics, invariant, true, Out_Going_Trans_fromcommunication_communication));
 
-		Hybrid_Automata.addInitial_Location(l);
+		Hybrid_Automata.addInitialLocation(l);
 		Hybrid_Automata.addLocation(l);
 
 
@@ -1266,7 +1266,7 @@ void setplatoon_const_input(hybrid_automata& Hybrid_Automata,
 	Out_Going_Trans_fromcommunication_communication.push_back(t);
 	l = location::ptr(new location(1, "communication_communication", system_dynamics, invariant, true, Out_Going_Trans_fromcommunication_communication));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 

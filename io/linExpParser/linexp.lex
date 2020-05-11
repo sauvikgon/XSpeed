@@ -1,6 +1,6 @@
 
 %{
-#include "flow_yacc.tab.h"
+#include "linexp.tab.h"
 %}
 
 %%
@@ -21,21 +21,32 @@
 										return(EQ);
 									}
 
+"<="							{
+										//printf("LEQ token\n");
+										return(LEQ);
+									}
+">="							{
+										//printf("GEQ token\n");
+										return(GEQ);
+									}
+
+[ \t\r]+					{;}
+
 [uU][0-9]*				{
 										//printf("UVAR token\n");
-										yylval.token_str = strdup(yytext);
+										linexplval.token_str = strdup(yytext);
 										return(UVAR);
 									}
 
 [a-zA-Z]+[0-9]* 	{
 										//printf("VAR token\n");
-										yylval.token_str = strdup(yytext);
+										linexplval.token_str = strdup(yytext);
 										return(VAR);
 									}
 				
 [+-]?[0-9]+[.]?[0-9]*				{
 															//printf("CONST token\n");
-															yylval.const_val = atof(yytext);
+															linexplval.const_val = atof(yytext);
 															return(CONST);
 														}
 		

@@ -220,7 +220,7 @@ void setNav4u(hybrid_automata& Hybrid_Automata, std::list<initial_state::ptr>& i
 	Out_Going_Trans_fromL0000.push_back(t);
 	l = location::ptr(new location(1, "L0000", system_dynamics, invariant, true, Out_Going_Trans_fromL0000));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 

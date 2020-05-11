@@ -30,14 +30,14 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_FLOW_TAB_HPP_INCLUDED
-# define YY_YY_FLOW_TAB_HPP_INCLUDED
+#ifndef YY_LINEXP_LINEXP_TAB_HPP_INCLUDED
+# define YY_LINEXP_LINEXP_TAB_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
 #if YYDEBUG
-extern int yydebug;
+extern int linexpdebug;
 #endif
 
 /* Token type.  */
@@ -50,7 +50,9 @@ extern int yydebug;
     CONST = 260,
     PLUS = 261,
     MULT = 262,
-    EQ = 263
+    EQ = 263,
+    LEQ = 264,
+    GEQ = 265
   };
 #endif
 
@@ -59,10 +61,10 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 20 "flow.ypp" /* yacc.c:1909  */
+#line 22 "linexp.ypp" /* yacc.c:1909  */
  char* token_str; double const_val;
 
-#line 66 "flow.tab.hpp" /* yacc.c:1909  */
+#line 68 "linexp.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -71,8 +73,8 @@ typedef union YYSTYPE YYSTYPE;
 #endif
 
 
-extern YYSTYPE yylval;
+extern YYSTYPE linexplval;
 
-int yyparse (void);
+int linexpparse (void);
 
-#endif /* !YY_YY_FLOW_TAB_HPP_INCLUDED  */
+#endif /* !YY_LINEXP_LINEXP_TAB_HPP_INCLUDED  */

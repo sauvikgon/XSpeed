@@ -885,7 +885,7 @@ l = location::ptr(new location(1, "Model", system_dynamics, invariant, true, Out
 
 
 
-Hybrid_Automata.addInitial_Location(l);
+Hybrid_Automata.addInitialLocation(l);
 Hybrid_Automata.addLocation(l);
 
 

@@ -13,10 +13,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	reach_parameters.TimeBound = op.get_timeHorizon(); //Total Time Interval
 	reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
 	reach_parameters.time_step = op.get_timeStep();
-	//reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
-
-	//Assigning the Model of the Hybrid System
-	//	(1,2,3,4,5,6,7) = (BBALL, TBBALL, HELICOPTER, FIVEDIMSYS, NAVIGATION, CIRCLE, CIRCLE_FOUR_LOC)
+	
 	unsigned int HybridSystem_Model_Type = op.get_model();
 
 	if (HybridSystem_Model_Type == BBALL) {
@@ -25,9 +22,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	if (HybridSystem_Model_Type == TBBALL) {
 		SetTimedBouncingBall(ha, init_state,	reach_parameters);
 	}
-	if (HybridSystem_Model_Type == HELICOPTER) {
-		SetHelicopter(ha, init_state, reach_parameters);
-	}
+
 	if (HybridSystem_Model_Type == FIVEDIMSYS) {
 		setFiveDimSys(ha, init_state, reach_parameters);
 	}
@@ -56,23 +51,10 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 	//	SetNavigationModel9by9Timed(ha,init_state,reach_parameters); // NAV_9by9 Timed model
 	}
 
-	if (HybridSystem_Model_Type == CIRCLE_ONE_LOC) {
-	//	SetRotationCircleOneLocation_Parameters(ha, init_state, reach_parameters);
-	}
-	if (HybridSystem_Model_Type == CIRCLE_TWO_LOC) {
-		//SetRotationCircle_Parameters(ha, init_state, reach_parameters);
-	//	SetRotationTimedCircle_Parameters(ha, init_state, reach_parameters);
-	}
-	if (HybridSystem_Model_Type == CIRCLE_FOUR_LOC) {
-	//	SetRotationCircle4Location_Parameters(ha, init_state, reach_parameters);
-		//SetRotation_Navtimed_Parameters(ha, init_state,reach_parameters);
-	}
 	if (HybridSystem_Model_Type == OSCILLATOR) {
 	//	setOscillatorTimed(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == 14) {
-
-		//SetBilliardModel(ha, init_state, reach_parameters);
 
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
@@ -84,12 +66,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
-		//---------------Not working models-------------
 		setbuild48(ha, init_state, reach_parameters);
-		//setfwr(ha, init_state, reach_parameters);
-		//setpllConv(ha, init_state, reach_parameters);
-		//setheart(ha, init_state, reach_parameters);
-		// --------------------------------------------
 
 
 		//setTTEthernet5(ha, init_state, reach_parameters);
@@ -106,9 +83,7 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		//set_watertank_controller(ha,init_state,reach_parameters);
 		//setISS_270(ha,init_state,reach_parameters); // International Space Station-217 vars, continuous system.
 		//SetTimedZigZag(ha,init_state,reach_parameters);
-		//setSpacecraft(ha,init_state,reach_parameters);
-		//setSpacecraftAbort(ha,init_state,reach_parameters);
-
+	
 	}
 	if(HybridSystem_Model_Type == 16){
 	//	setMotorcade(ha,init_state,reach_parameters);
@@ -163,32 +138,6 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 		setSpacecraftAbort(ha,init_state,reach_parameters);
 	}
 
-	if(HybridSystem_Model_Type == 31){ // mesh: Runs well but FC fails to find CE
-	//	set_5_dim_linear_switchCORRECTED_model(ha, init_state, reach_parameters);
-	}
-
-	if(HybridSystem_Model_Type == 32){ // Satellite bmp01
-	//	set_bm01_model(ha, init_state, reach_parameters);
-	}
-
-	if(HybridSystem_Model_Type == 33){ // Satellite bmp02
-	//	set_bm02_model(ha, init_state, reach_parameters);
-	}
-
-	if(HybridSystem_Model_Type == 34){ // Satellite bmp03  //I assume precision error in XSpeed's flowpipe computation
-	//	set_bm03_model(ha, init_state, reach_parameters);
-	}
-
-	if(HybridSystem_Model_Type == 35){ // Satellite bmp04
-	//	set_bm04_model(ha, init_state, reach_parameters);
-	}
-
-	if(HybridSystem_Model_Type == 36){ // Satellite bmp04
-	//	set_bm05_model(ha, init_state, reach_parameters);
-	}
-
-
-
 }
 
 void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
@@ -199,17 +148,13 @@ void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
 	//Loads the HA models and set the reach_parameters from user-options
 	load_ha_models(init_state, ha, reach_parameters,op); //function re-used
 
-//Assigning Directions
-	unsigned int Directions_Type = op.get_directionTemplate(); //(1,2,>2) = (BOX, OCT, UNIFORM)
+	//Assigning Directions
+	unsigned int Directions_Type = op.get_directionTemplate(); 
 
 	unsigned int dims=0;
 	for (std::list<initial_state::ptr>::iterator it=init_state.begin();it!=init_state.end();it++){
 		dims = (*it)->getInitialSet()->getSystemDimension();
 	}
-
-	//Assigning the Number of Directions and Generating the Template Directions from the above given dimension of the model
-	//todo:: needs to decide that, is this the right place to include Invariant direction
-	//and also Redundant invariant directional constraints to be removed
 
 	math::matrix<double> Real_Directions; //List of all directions
 	std::vector<std::vector<double> > newDirections;

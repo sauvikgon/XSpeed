@@ -92,7 +92,7 @@ void set_watertank_controller(hybrid_automata& Hybrid_Automata, std::list<initia
 	Out_Going_Trans_fromv0.push_back(t);
 	l =location::ptr(new location(1, "v0", system_dynamics, invariant, false, Out_Going_Trans_fromv0));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 

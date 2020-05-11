@@ -1703,7 +1703,7 @@ void SetNavigationModel9by9(hybrid_automata& Hybrid_Automata,
 			new location(9, "loc1", system_dynamics, invariant, true,
 					Out_Going_Trans_fromloc1));
 
-	Hybrid_Automata.addInitial_Location(l);
+	Hybrid_Automata.addInitialLocation(l);
 	Hybrid_Automata.addLocation(l);
 
 // The mode name is  loc18

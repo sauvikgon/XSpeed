@@ -385,7 +385,7 @@ std::list<transition::ptr> Out_Going_Trans_fromok;
 
 l =location::ptr(new location(1, "ok", system_dynamics, invariant, false, Out_Going_Trans_fromok));
 
-Hybrid_Automata.addInitial_Location(l);
+Hybrid_Automata.addInitialLocation(l);
 Hybrid_Automata.addLocation(l);
 
 

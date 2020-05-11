@@ -29,7 +29,8 @@ int main(int argc, char *argv[]) {
 
 	try{
 		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters,forbidden_set);
-	}catch(...){
+	}catch(std::exception e){
+		std::cout << "Exception:" << e.what() << std::endl;
 		std::cout<<"\nTerminating XSpeed, caused due to error in command-line inputs.\n";
 		std::cout << "Try XSpeed --help to see the command-line options\n";
 		exit(0);
