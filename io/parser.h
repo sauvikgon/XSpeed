@@ -22,6 +22,7 @@ class parser
 	string model_file;
 	hybrid_automata ha;
 	initial_state::ptr ini;
+	std::pair<int, polytope::ptr> forbidden;
 
 public:
 	parser(string m_file){
@@ -36,6 +37,9 @@ public:
 
 	/* returns the parsed initial state */
 	initial_state::ptr getInitState();
+
+	/* return the parsed forbidden region */
+	std::pair<int, polytope::ptr> getForbidden();
 
 	/* parses the ha locatios and a list of locations.*/
 	void parse_loc(fstream& file, location::ptr loc);
@@ -57,6 +61,9 @@ public:
 
 	/* parses a list of consecutive ode to create the flow matrix */
 	void gen_flow(fstream& file, Dynamics& D);
+
+	/* parses the location invariant string */
+	void parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& U);
 
 	/* parses transition parameters and creates a transition obj */
 	void parse_transition(fstream& file, transition::ptr& t);

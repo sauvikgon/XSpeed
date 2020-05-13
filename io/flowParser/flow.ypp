@@ -38,6 +38,7 @@ S : VAR EQ Expr					{
 														for(unsigned int j=0;j<n;j++)
 															D.MatrixA(lhs_id,j)=coeff[j];
 														D.isEmptyMatrixA = false;
+														coeff.clear();
 													}
 													if(!u_coeff.empty()){
 														unsigned int m = ha.umap_size();
@@ -48,7 +49,7 @@ S : VAR EQ Expr					{
 													}
 													if(!D.isEmptyC)
 														D.C[lhs_id] = constant;
-													coeff.clear();
+													
 													constant = 0;
 													return 0;
 												}
@@ -137,6 +138,8 @@ Expr : Expr PLUS Expr  	{;}
 void flow_parser(Dynamics& Dyn)
 {
 	D = Dyn;
+	coeff.clear();
+	u_coeff.clear();
 	yyparse();
 	Dyn = D;
 }

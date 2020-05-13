@@ -76,9 +76,6 @@ public:
 	 */
 	void setMoreConstraints(math::matrix<double> coeff_constraints,std::vector<double> bound_values);
 
-	// void set_Default_lp_init();
-	// void set_lp_object(glpk_lp_solver* newObject);
-	//const std::vector<std::vector<double> > getCoeffMatrix() const;
 	math::matrix<double>& getCoeffMatrix();
 	void setCoeffMatrix(const math::matrix<double> coeffMatrix);
 	void setColumnVector(const std::vector<double> columnVector);
@@ -87,8 +84,8 @@ public:
 	void setInEqualitySign(int inEqualitySign);
 	std::vector<double> getColumnVector();
 
-	unsigned int getSystemDimension() const;
-	void setSystemDimension(unsigned int systemDimension); //returns the number of variables of the polytopes.
+	unsigned int getSystemDimension() const; //returns the number of variables of the polytopes.
+	void setSystemDimension(unsigned int systemDimension); 
 	unsigned int getNumberFacets() const;
 	void setNumberFacets(unsigned int numberFacets);
 

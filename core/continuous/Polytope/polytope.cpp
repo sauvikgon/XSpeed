@@ -116,8 +116,8 @@ void polytope::setCoeffMatrix(const math::matrix<double> coeffMatrix) {
 }
 void polytope::setMoreConstraints(std::vector<double> coeff_constraint,
 		double bound_value) {
-	//this->setSystemDimension(coeff_constraint.size());	//or can be obtained from the map_size()
-	this->setSystemDimension(this->map_size());
+	this->setSystemDimension(coeff_constraint.size());	//or can be obtained from the map_size()
+	//this->setSystemDimension(this->map_size());
 	this->setIsUniverse(false); //Not a Universe Polytope and is now 'Bounded' polytope
 	this->InEqualitySign = 1; // assuming that always less than ineq cons is added.
 	// todo: make the impl to accept ineq sign as param or
@@ -200,8 +200,7 @@ double polytope::computeSupportFunction(const std::vector<double>& direction,
 		if (lp.getStatus() == GLP_UNBND){
 			throw std::runtime_error("Unbounded solution to an LP problem");
 		}
-
-	}									//
+	}					
 	return sf;
 }
 

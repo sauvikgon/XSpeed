@@ -11,9 +11,10 @@ extern int linexplex();
 extern int linexperror(char *);
 
 polytope::ptr global_p; // initial_polytope
+polytope::ptr global_U; // input polytope U
 
 extern hybrid_automata ha; // gives access to index to id map.
-std::vector<double> l_coeff, r_coeff;
+std::vector<double> l_coeff, r_coeff, l_ucoeff, r_ucoeff;
 extern std::vector<double> coeff, u_coeff;
 
 double lconstant = 0, rconstant = 0, bound = 0;
@@ -29,85 +30,156 @@ double lconstant = 0, rconstant = 0, bound = 0;
 
 S : LExpr EQ RExpr				{
 														// consider as <=
-														int n = ha.map_size();
-														coeff.clear();
-														coeff.resize(n,0);
-														for(unsigned int i=0;i<n;i++)
+														if(!l_coeff.empty() || !r_coeff.empty()){
+															int n = ha.map_size();
+															coeff.clear();														
+															coeff.resize(n,0);
+															for(unsigned int i=0;i<n;i++)
+															{
+																if(!l_coeff.empty() && l_coeff[i]!=0)
+																	coeff[i] = l_coeff[i];
+																else if(!r_coeff.empty() && r_coeff[i]!=0)
+																	coeff[i] = -r_coeff[i];
+															}
+															bound = rconstant - lconstant;
+															global_p->setMoreConstraints(coeff, bound);
+														
+															
+															// consider as >=
+															coeff.clear();
+															coeff.resize(n,0);
+															for(unsigned int i=0;i<n;i++)
+															{
+																if(!l_coeff.empty() && l_coeff[i]!=0)
+																	coeff[i] = -l_coeff[i];
+																else if(!r_coeff.empty() && r_coeff[i]!=0)
+																	coeff[i] = r_coeff[i];
+															}
+															bound =  lconstant - rconstant;
+															global_p->setMoreConstraints(coeff, bound);
+															rconstant = 0; lconstant=0;
+															l_coeff.clear(); r_coeff.clear();
+														}
+
+														// setting the input U
+														int m = ha.umap_size();
+														if(m==0) return 0; // no input
+														if(l_ucoeff.empty() && r_ucoeff.empty())
+															return 0; //no input constraint.
+
+														u_coeff.clear();
+														u_coeff.resize(m,0);
+														for(unsigned int i=0;i<m;i++)
 														{
-															if(!l_coeff.empty() && l_coeff[i]!=0)
-																coeff[i] = l_coeff[i];
-															else if(!r_coeff.empty() && r_coeff[i]!=0)
-																coeff[i] = -r_coeff[i];
+															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
+																u_coeff[i] = l_ucoeff[i];
+															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
+																u_coeff[i] = -r_ucoeff[i];
 														}
 														bound = rconstant - lconstant;
-														global_p->setMoreConstraints(coeff, bound);
-														/*std::cout << "EQ constraint(<=):\n";
-														for(unsigned int i=0;i<n;i++)
-															std::cout << coeff[i] << " ";
-														
-														std::cout << "\nbound = " << bound << std::endl;
-														*/	
-														// consider as >=
-														coeff.clear();
-														coeff.resize(n,0);
-														for(unsigned int i=0;i<n;i++)
+														global_U->setMoreConstraints(u_coeff, bound);
+
+														u_coeff.clear();
+														u_coeff.resize(m,0);
+														for(unsigned int i=0;i<m;i++)
 														{
-															if(!l_coeff.empty() && l_coeff[i]!=0)
-																coeff[i] = -l_coeff[i];
-															else if(!r_coeff.empty() && r_coeff[i]!=0)
-																coeff[i] = r_coeff[i];
+															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
+																u_coeff[i] = -l_ucoeff[i];
+															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
+																u_coeff[i] = r_ucoeff[i];
 														}
-														bound =  lconstant - rconstant;
-														global_p->setMoreConstraints(coeff, bound);
-														/*
-														std::cout << "EQ constraint (>=):\n";
-														for(unsigned int i=0;i<n;i++)
-															std::cout << coeff[i] << " ";
-														std::cout << "\nbound = " << bound << std::endl;
-														*/
+														bound = lconstant - rconstant;
+														global_U->setMoreConstraints(u_coeff, bound);
+
 														rconstant = 0; lconstant=0;
-														l_coeff.clear(); r_coeff.clear();
-														return 0;
+														l_ucoeff.clear(); r_ucoeff.clear();
+														return 0; 
+														
 													}
 	| LExpr LEQ RExpr 			{
-														int n = ha.map_size();
-														coeff.clear();
-														coeff.resize(n,0);
-														for(unsigned int i=0;i<n;i++)
-														{
-															if(!l_coeff.empty() && l_coeff[i]!=0)
-																coeff[i] = l_coeff[i];
-															else if(!r_coeff.empty() && r_coeff[i]!=0)
-																coeff[i] = -r_coeff[i];
+														
+														if(!l_coeff.empty() || !r_coeff.empty()){
+															int n = ha.map_size();
+															coeff.clear();
+															coeff.resize(n,0);
+															for(unsigned int i=0;i<n;i++)
+															{
+																if(!l_coeff.empty() && l_coeff[i]!=0)
+																	coeff[i] = l_coeff[i];
+																else if(!r_coeff.empty() && r_coeff[i]!=0)
+																	coeff[i] = -r_coeff[i];
+															}
+															bound = rconstant - lconstant;
+															global_p->setMoreConstraints(coeff, bound);
+															rconstant = 0; lconstant=0;
+															l_coeff.clear(); r_coeff.clear();									
 														}
-														bound = rconstant - lconstant;
-														global_p->setMoreConstraints(coeff, bound);
-														rconstant = 0; lconstant=0;
-														l_coeff.clear(); r_coeff.clear();
 														/*
 														std::cout << "leq constraint:\n";
 														for(unsigned int i=0;i<n;i++)
 															std::cout << coeff[i] << " " ;
 														std::cout << "\nbound = " << bound << std::endl;
 														*/
+
+														// setting the input U
+														int m = ha.umap_size();
+														if(m==0) return 0; // no input
+														if(l_ucoeff.empty() && r_ucoeff.empty())
+															return 0; //no input constraint.
+
+														u_coeff.clear();
+														u_coeff.resize(m,0);
+														for(unsigned int i=0;i<m;i++)
+														{
+															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
+																u_coeff[i] = l_ucoeff[i];
+															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
+																u_coeff[i] = -r_ucoeff[i];
+														}
+														bound = rconstant - lconstant;
+														global_U->setMoreConstraints(u_coeff, bound);
+														rconstant = 0; lconstant=0;
+														l_ucoeff.clear(); r_ucoeff.clear();
 														return 0; 
 													}
 	| LExpr GEQ RExpr				{
-														int n = ha.map_size();
-														coeff.clear();
-														coeff.resize(n,0);
-														for(unsigned int i=0;i<n;i++)
+														
+														if(!l_coeff.empty() || !r_coeff.empty()){
+															int n = ha.map_size();
+															coeff.clear();
+															coeff.resize(n,0);
+															for(unsigned int i=0;i<n;i++)
+															{
+																if(!l_coeff.empty() && l_coeff[i]!=0)
+																	coeff[i] = -l_coeff[i];
+																else if(!r_coeff.empty() && r_coeff[i]!=0)
+																	coeff[i] = r_coeff[i];
+															}
+															bound = lconstant - rconstant;
+															global_p->setMoreConstraints(coeff, bound);
+															rconstant = 0; lconstant=0;
+															l_coeff.clear(); r_coeff.clear();
+														}
+														
+														// setting the input U
+														int m = ha.umap_size();
+														if(m==0) return 0; // no input
+														if(l_ucoeff.empty() && r_ucoeff.empty())
+															return 0; //no input constraint.
+
+														u_coeff.clear();
+														u_coeff.resize(m,0);
+														for(unsigned int i=0;i<m;i++)
 														{
-															if(!l_coeff.empty() && l_coeff[i]!=0)
-																coeff[i] = -l_coeff[i];
-															else if(!r_coeff.empty() && r_coeff[i]!=0)
-																coeff[i] = r_coeff[i];
+															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
+																u_coeff[i] = -l_ucoeff[i];
+															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
+																u_coeff[i] = r_ucoeff[i];
 														}
 														bound = lconstant - rconstant;
-														global_p->setMoreConstraints(coeff, bound);
-
+														global_U->setMoreConstraints(u_coeff, bound);
 														rconstant = 0; lconstant=0;
-														l_coeff.clear(); r_coeff.clear();
+														l_ucoeff.clear(); r_ucoeff.clear();
 														return 0;
 													}
 	;	
@@ -121,6 +193,11 @@ LExpr : LExpr PLUS LExpr  	{;}
 													l_coeff[id]=1;
 												}
 		 | UVAR							{
+													std::string uvar = $1;
+													int id = ha.get_u_index(uvar);
+													if(l_ucoeff.empty()) 
+														l_ucoeff.resize(ha.umap_size(),0);
+													l_ucoeff[id]=1;
 												}
 		 | CONST 						{
 													lconstant = $1; 
@@ -129,17 +206,17 @@ LExpr : LExpr PLUS LExpr  	{;}
 													std::string uvar = $3;
 													int id = ha.get_u_index(uvar);
 													double c = $1;
-													if(u_coeff.empty())
-														u_coeff.resize(ha.umap_size(),0);
-													u_coeff[id] = c;
+													if(l_ucoeff.empty())
+														l_ucoeff.resize(ha.umap_size(),0);
+													l_ucoeff[id] = c;
 												}
 		 | UVAR MULT CONST	{
 													std::string uvar = $1;
 													int id = ha.get_u_index(uvar);
 													double c = $3;
-													if(u_coeff.empty()) 
-														u_coeff.resize(ha.umap_size(),0);						
-													u_coeff[id] = c;
+													if(l_ucoeff.empty()) 
+														l_ucoeff.resize(ha.umap_size(),0);						
+													l_ucoeff[id] = c;
 												}
 		 | CONST MULT VAR		{
 													std::string var = $3;
@@ -169,9 +246,9 @@ LExpr : LExpr PLUS LExpr  	{;}
 													std::string uvar = $2;
 													int id = ha.get_u_index(uvar);
 													double c = $1;
-													if(u_coeff.empty()) 
-														u_coeff.resize(ha.umap_size(),0);						
-													u_coeff[id] = c; 								
+													if(l_ucoeff.empty()) 
+														l_ucoeff.resize(ha.umap_size(),0);						
+													l_ucoeff[id] = c; 								
 												}
 		 ;
 
@@ -184,6 +261,11 @@ RExpr : RExpr PLUS RExpr {;}
 													r_coeff[id]=1;
 												}
 		 | UVAR							{
+													std::string uvar = $1;
+													int id = ha.get_u_index(uvar);
+													if(r_ucoeff.empty()) 
+														r_ucoeff.resize(ha.umap_size(),0);
+													r_ucoeff[id]=1;
 												}
 		 | CONST 						{
 													rconstant = $1; 
@@ -192,17 +274,17 @@ RExpr : RExpr PLUS RExpr {;}
 													std::string uvar = $3;
 													int id = ha.get_u_index(uvar);
 													double c = $1;
-													if(u_coeff.empty())
-														u_coeff.resize(ha.umap_size(),0);
-													u_coeff[id] = c;
+													if(r_ucoeff.empty())
+														r_ucoeff.resize(ha.umap_size(),0);
+													r_ucoeff[id] = c;
 												}
 		 | UVAR MULT CONST	{
 													std::string uvar = $1;
 													int id = ha.get_u_index(uvar);
 													double c = $3;
-													if(u_coeff.empty()) 
-														u_coeff.resize(ha.umap_size(),0);						
-													u_coeff[id] = c;
+													if(r_ucoeff.empty()) 
+														r_ucoeff.resize(ha.umap_size(),0);						
+													r_ucoeff[id] = c;
 												}
 		 | CONST MULT VAR		{
 													std::string var = $3;
@@ -232,19 +314,23 @@ RExpr : RExpr PLUS RExpr {;}
 													std::string uvar = $2;
 													int id = ha.get_u_index(uvar);
 													double c = $1;
-													if(u_coeff.empty()) 
-														u_coeff.resize(ha.umap_size(),0);						
-													u_coeff[id] = c; 								
+													if(r_ucoeff.empty()) 
+														r_ucoeff.resize(ha.umap_size(),0);						
+													r_ucoeff[id] = c; 								
 												}
 		 ;
 %%
 
-void linexp_parser(polytope::ptr& p)
+void linexp_parser(polytope::ptr& p, polytope::ptr& U)
 {
 	global_p = p;
+	global_U = U;
 	linexpparse();
 	p = global_p;
+	U = global_U;
 }
+
+
 int linexperror(char* s)
 {
 	fprintf(stderr,"Linear Constraint Expression Specification: %s\n", s);

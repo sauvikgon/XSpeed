@@ -84,14 +84,15 @@ extern int linexplex();
 extern int linexperror(char *);
 
 polytope::ptr global_p; // initial_polytope
+polytope::ptr global_U; // input polytope U
 
 extern hybrid_automata ha; // gives access to index to id map.
-std::vector<double> l_coeff, r_coeff;
+std::vector<double> l_coeff, r_coeff, l_ucoeff, r_ucoeff;
 extern std::vector<double> coeff, u_coeff;
 
 double lconstant = 0, rconstant = 0, bound = 0;
 
-#line 95 "linexp.tab.cpp" /* yacc.c:339  */
+#line 96 "linexp.tab.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -142,10 +143,10 @@ extern int linexpdebug;
 
 union YYSTYPE
 {
-#line 22 "linexp.ypp" /* yacc.c:355  */
+#line 23 "linexp.ypp" /* yacc.c:355  */
  char* token_str; double const_val;
 
-#line 149 "linexp.tab.cpp" /* yacc.c:355  */
+#line 150 "linexp.tab.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -162,7 +163,7 @@ int linexpparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 166 "linexp.tab.cpp" /* yacc.c:358  */
+#line 167 "linexp.tab.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -458,11 +459,11 @@ static const yytype_uint8 yytranslate[] =
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    30,    30,    72,    95,   115,   116,   123,   125,   128,
-     136,   144,   152,   160,   168,   178,   179,   186,   188,   191,
-     199,   207,   215,   223,   231
+       0,    31,    31,    99,   145,   187,   188,   195,   202,   205,
+     213,   221,   229,   237,   245,   255,   256,   263,   270,   273,
+     281,   289,   297,   305,   313
 };
 #endif
 
@@ -1248,111 +1249,182 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 30 "linexp.ypp" /* yacc.c:1646  */
+#line 31 "linexp.ypp" /* yacc.c:1646  */
     {
 														// consider as <=
-														int n = ha.map_size();
-														coeff.clear();
-														coeff.resize(n,0);
-														for(unsigned int i=0;i<n;i++)
+														if(!l_coeff.empty() || !r_coeff.empty()){
+															int n = ha.map_size();
+															coeff.clear();														
+															coeff.resize(n,0);
+															for(unsigned int i=0;i<n;i++)
+															{
+																if(!l_coeff.empty() && l_coeff[i]!=0)
+																	coeff[i] = l_coeff[i];
+																else if(!r_coeff.empty() && r_coeff[i]!=0)
+																	coeff[i] = -r_coeff[i];
+															}
+															bound = rconstant - lconstant;
+															global_p->setMoreConstraints(coeff, bound);
+														
+															
+															// consider as >=
+															coeff.clear();
+															coeff.resize(n,0);
+															for(unsigned int i=0;i<n;i++)
+															{
+																if(!l_coeff.empty() && l_coeff[i]!=0)
+																	coeff[i] = -l_coeff[i];
+																else if(!r_coeff.empty() && r_coeff[i]!=0)
+																	coeff[i] = r_coeff[i];
+															}
+															bound =  lconstant - rconstant;
+															global_p->setMoreConstraints(coeff, bound);
+															rconstant = 0; lconstant=0;
+															l_coeff.clear(); r_coeff.clear();
+														}
+
+														// setting the input U
+														int m = ha.umap_size();
+														if(m==0) return 0; // no input
+														if(l_ucoeff.empty() && r_ucoeff.empty())
+															return 0; //no input constraint.
+
+														u_coeff.clear();
+														u_coeff.resize(m,0);
+														for(unsigned int i=0;i<m;i++)
 														{
-															if(!l_coeff.empty() && l_coeff[i]!=0)
-																coeff[i] = l_coeff[i];
-															else if(!r_coeff.empty() && r_coeff[i]!=0)
-																coeff[i] = -r_coeff[i];
+															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
+																u_coeff[i] = l_ucoeff[i];
+															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
+																u_coeff[i] = -r_ucoeff[i];
 														}
 														bound = rconstant - lconstant;
-														global_p->setMoreConstraints(coeff, bound);
-														/*std::cout << "EQ constraint(<=):\n";
-														for(unsigned int i=0;i<n;i++)
-															std::cout << coeff[i] << " ";
-														
-														std::cout << "\nbound = " << bound << std::endl;
-														*/	
-														// consider as >=
-														coeff.clear();
-														coeff.resize(n,0);
-														for(unsigned int i=0;i<n;i++)
+														global_U->setMoreConstraints(u_coeff, bound);
+
+														u_coeff.clear();
+														u_coeff.resize(m,0);
+														for(unsigned int i=0;i<m;i++)
 														{
-															if(!l_coeff.empty() && l_coeff[i]!=0)
-																coeff[i] = -l_coeff[i];
-															else if(!r_coeff.empty() && r_coeff[i]!=0)
-																coeff[i] = r_coeff[i];
+															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
+																u_coeff[i] = -l_ucoeff[i];
+															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
+																u_coeff[i] = r_ucoeff[i];
 														}
-														bound =  lconstant - rconstant;
-														global_p->setMoreConstraints(coeff, bound);
-														/*
-														std::cout << "EQ constraint (>=):\n";
-														for(unsigned int i=0;i<n;i++)
-															std::cout << coeff[i] << " ";
-														std::cout << "\nbound = " << bound << std::endl;
-														*/
+														bound = lconstant - rconstant;
+														global_U->setMoreConstraints(u_coeff, bound);
+
 														rconstant = 0; lconstant=0;
-														l_coeff.clear(); r_coeff.clear();
-														return 0;
+														l_ucoeff.clear(); r_ucoeff.clear();
+														return 0; 
+														
 													}
-#line 1295 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1322 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 72 "linexp.ypp" /* yacc.c:1646  */
+#line 99 "linexp.ypp" /* yacc.c:1646  */
     {
-														int n = ha.map_size();
-														coeff.clear();
-														coeff.resize(n,0);
-														for(unsigned int i=0;i<n;i++)
-														{
-															if(!l_coeff.empty() && l_coeff[i]!=0)
-																coeff[i] = l_coeff[i];
-															else if(!r_coeff.empty() && r_coeff[i]!=0)
-																coeff[i] = -r_coeff[i];
+														
+														if(!l_coeff.empty() || !r_coeff.empty()){
+															int n = ha.map_size();
+															coeff.clear();
+															coeff.resize(n,0);
+															for(unsigned int i=0;i<n;i++)
+															{
+																if(!l_coeff.empty() && l_coeff[i]!=0)
+																	coeff[i] = l_coeff[i];
+																else if(!r_coeff.empty() && r_coeff[i]!=0)
+																	coeff[i] = -r_coeff[i];
+															}
+															bound = rconstant - lconstant;
+															global_p->setMoreConstraints(coeff, bound);
+															rconstant = 0; lconstant=0;
+															l_coeff.clear(); r_coeff.clear();									
 														}
-														bound = rconstant - lconstant;
-														global_p->setMoreConstraints(coeff, bound);
-														rconstant = 0; lconstant=0;
-														l_coeff.clear(); r_coeff.clear();
 														/*
 														std::cout << "leq constraint:\n";
 														for(unsigned int i=0;i<n;i++)
 															std::cout << coeff[i] << " " ;
 														std::cout << "\nbound = " << bound << std::endl;
 														*/
+
+														// setting the input U
+														int m = ha.umap_size();
+														if(m==0) return 0; // no input
+														if(l_ucoeff.empty() && r_ucoeff.empty())
+															return 0; //no input constraint.
+
+														u_coeff.clear();
+														u_coeff.resize(m,0);
+														for(unsigned int i=0;i<m;i++)
+														{
+															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
+																u_coeff[i] = l_ucoeff[i];
+															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
+																u_coeff[i] = -r_ucoeff[i];
+														}
+														bound = rconstant - lconstant;
+														global_U->setMoreConstraints(u_coeff, bound);
+														rconstant = 0; lconstant=0;
+														l_ucoeff.clear(); r_ucoeff.clear();
 														return 0; 
 													}
-#line 1323 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1373 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 95 "linexp.ypp" /* yacc.c:1646  */
+#line 145 "linexp.ypp" /* yacc.c:1646  */
     {
-														int n = ha.map_size();
-														coeff.clear();
-														coeff.resize(n,0);
-														for(unsigned int i=0;i<n;i++)
+														
+														if(!l_coeff.empty() || !r_coeff.empty()){
+															int n = ha.map_size();
+															coeff.clear();
+															coeff.resize(n,0);
+															for(unsigned int i=0;i<n;i++)
+															{
+																if(!l_coeff.empty() && l_coeff[i]!=0)
+																	coeff[i] = -l_coeff[i];
+																else if(!r_coeff.empty() && r_coeff[i]!=0)
+																	coeff[i] = r_coeff[i];
+															}
+															bound = lconstant - rconstant;
+															global_p->setMoreConstraints(coeff, bound);
+															rconstant = 0; lconstant=0;
+															l_coeff.clear(); r_coeff.clear();
+														}
+														
+														// setting the input U
+														int m = ha.umap_size();
+														if(m==0) return 0; // no input
+														if(l_ucoeff.empty() && r_ucoeff.empty())
+															return 0; //no input constraint.
+
+														u_coeff.clear();
+														u_coeff.resize(m,0);
+														for(unsigned int i=0;i<m;i++)
 														{
-															if(!l_coeff.empty() && l_coeff[i]!=0)
-																coeff[i] = -l_coeff[i];
-															else if(!r_coeff.empty() && r_coeff[i]!=0)
-																coeff[i] = r_coeff[i];
+															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
+																u_coeff[i] = -l_ucoeff[i];
+															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
+																u_coeff[i] = r_ucoeff[i];
 														}
 														bound = lconstant - rconstant;
-														global_p->setMoreConstraints(coeff, bound);
-
+														global_U->setMoreConstraints(u_coeff, bound);
 														rconstant = 0; lconstant=0;
-														l_coeff.clear(); r_coeff.clear();
+														l_ucoeff.clear(); r_ucoeff.clear();
 														return 0;
 													}
-#line 1346 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1418 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 115 "linexp.ypp" /* yacc.c:1646  */
+#line 187 "linexp.ypp" /* yacc.c:1646  */
     {;}
-#line 1352 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1424 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 116 "linexp.ypp" /* yacc.c:1646  */
+#line 188 "linexp.ypp" /* yacc.c:1646  */
     {										
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
@@ -1360,52 +1432,57 @@ yyreduce:
 														l_coeff.resize(ha.map_size(),0);
 													l_coeff[id]=1;
 												}
-#line 1364 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1436 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 123 "linexp.ypp" /* yacc.c:1646  */
+#line 195 "linexp.ypp" /* yacc.c:1646  */
     {
+													std::string uvar = (yyvsp[0].token_str);
+													int id = ha.get_u_index(uvar);
+													if(l_ucoeff.empty()) 
+														l_ucoeff.resize(ha.umap_size(),0);
+													l_ucoeff[id]=1;
 												}
-#line 1371 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1448 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 125 "linexp.ypp" /* yacc.c:1646  */
+#line 202 "linexp.ypp" /* yacc.c:1646  */
     {
 													lconstant = (yyvsp[0].const_val); 
 												}
-#line 1379 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1456 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 128 "linexp.ypp" /* yacc.c:1646  */
+#line 205 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string uvar = (yyvsp[0].token_str);
 													int id = ha.get_u_index(uvar);
 													double c = (yyvsp[-2].const_val);
-													if(u_coeff.empty())
-														u_coeff.resize(ha.umap_size(),0);
-													u_coeff[id] = c;
+													if(l_ucoeff.empty())
+														l_ucoeff.resize(ha.umap_size(),0);
+													l_ucoeff[id] = c;
 												}
-#line 1392 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1469 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 136 "linexp.ypp" /* yacc.c:1646  */
+#line 213 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string uvar = (yyvsp[-2].token_str);
 													int id = ha.get_u_index(uvar);
 													double c = (yyvsp[0].const_val);
-													if(u_coeff.empty()) 
-														u_coeff.resize(ha.umap_size(),0);						
-													u_coeff[id] = c;
+													if(l_ucoeff.empty()) 
+														l_ucoeff.resize(ha.umap_size(),0);						
+													l_ucoeff[id] = c;
 												}
-#line 1405 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1482 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 144 "linexp.ypp" /* yacc.c:1646  */
+#line 221 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
@@ -1414,11 +1491,11 @@ yyreduce:
 														l_coeff.resize(ha.map_size(),0);						
 													l_coeff[id] = c; 	
 												}
-#line 1418 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1495 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 152 "linexp.ypp" /* yacc.c:1646  */
+#line 229 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string var = (yyvsp[-2].token_str);
 													int id = ha.get_index(var);
@@ -1427,11 +1504,11 @@ yyreduce:
 														l_coeff.resize(ha.map_size(),0);						
 													l_coeff[id] = c;	
 												}
-#line 1431 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1508 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 160 "linexp.ypp" /* yacc.c:1646  */
+#line 237 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
@@ -1440,30 +1517,30 @@ yyreduce:
 														l_coeff.resize(ha.map_size(),0);						
 													l_coeff[id] = c; 								
 												}
-#line 1444 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1521 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 168 "linexp.ypp" /* yacc.c:1646  */
+#line 245 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string uvar = (yyvsp[0].token_str);
 													int id = ha.get_u_index(uvar);
 													double c = (yyvsp[-1].const_val);
-													if(u_coeff.empty()) 
-														u_coeff.resize(ha.umap_size(),0);						
-													u_coeff[id] = c; 								
+													if(l_ucoeff.empty()) 
+														l_ucoeff.resize(ha.umap_size(),0);						
+													l_ucoeff[id] = c; 								
 												}
-#line 1457 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1534 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 178 "linexp.ypp" /* yacc.c:1646  */
+#line 255 "linexp.ypp" /* yacc.c:1646  */
     {;}
-#line 1463 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1540 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 179 "linexp.ypp" /* yacc.c:1646  */
+#line 256 "linexp.ypp" /* yacc.c:1646  */
     {										
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
@@ -1471,52 +1548,57 @@ yyreduce:
 														r_coeff.resize(ha.map_size(),0);
 													r_coeff[id]=1;
 												}
-#line 1475 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1552 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 186 "linexp.ypp" /* yacc.c:1646  */
+#line 263 "linexp.ypp" /* yacc.c:1646  */
     {
+													std::string uvar = (yyvsp[0].token_str);
+													int id = ha.get_u_index(uvar);
+													if(r_ucoeff.empty()) 
+														r_ucoeff.resize(ha.umap_size(),0);
+													r_ucoeff[id]=1;
 												}
-#line 1482 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1564 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 188 "linexp.ypp" /* yacc.c:1646  */
+#line 270 "linexp.ypp" /* yacc.c:1646  */
     {
 													rconstant = (yyvsp[0].const_val); 
 												}
-#line 1490 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1572 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 191 "linexp.ypp" /* yacc.c:1646  */
+#line 273 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string uvar = (yyvsp[0].token_str);
 													int id = ha.get_u_index(uvar);
 													double c = (yyvsp[-2].const_val);
-													if(u_coeff.empty())
-														u_coeff.resize(ha.umap_size(),0);
-													u_coeff[id] = c;
+													if(r_ucoeff.empty())
+														r_ucoeff.resize(ha.umap_size(),0);
+													r_ucoeff[id] = c;
 												}
-#line 1503 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1585 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 199 "linexp.ypp" /* yacc.c:1646  */
+#line 281 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string uvar = (yyvsp[-2].token_str);
 													int id = ha.get_u_index(uvar);
 													double c = (yyvsp[0].const_val);
-													if(u_coeff.empty()) 
-														u_coeff.resize(ha.umap_size(),0);						
-													u_coeff[id] = c;
+													if(r_ucoeff.empty()) 
+														r_ucoeff.resize(ha.umap_size(),0);						
+													r_ucoeff[id] = c;
 												}
-#line 1516 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1598 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 207 "linexp.ypp" /* yacc.c:1646  */
+#line 289 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
@@ -1525,11 +1607,11 @@ yyreduce:
 														r_coeff.resize(ha.map_size(),0);						
 													r_coeff[id] = c; 	
 												}
-#line 1529 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1611 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 215 "linexp.ypp" /* yacc.c:1646  */
+#line 297 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string var = (yyvsp[-2].token_str);
 													int id = ha.get_index(var);
@@ -1538,11 +1620,11 @@ yyreduce:
 														r_coeff.resize(ha.map_size(),0);						
 													r_coeff[id] = c;	
 												}
-#line 1542 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1624 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 223 "linexp.ypp" /* yacc.c:1646  */
+#line 305 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
@@ -1551,24 +1633,24 @@ yyreduce:
 														r_coeff.resize(ha.map_size(),0);						
 													r_coeff[id] = c; 								
 												}
-#line 1555 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1637 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 231 "linexp.ypp" /* yacc.c:1646  */
+#line 313 "linexp.ypp" /* yacc.c:1646  */
     {
 													std::string uvar = (yyvsp[0].token_str);
 													int id = ha.get_u_index(uvar);
 													double c = (yyvsp[-1].const_val);
-													if(u_coeff.empty()) 
-														u_coeff.resize(ha.umap_size(),0);						
-													u_coeff[id] = c; 								
+													if(r_ucoeff.empty()) 
+														r_ucoeff.resize(ha.umap_size(),0);						
+													r_ucoeff[id] = c; 								
 												}
-#line 1568 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1650 "linexp.tab.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1572 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1654 "linexp.tab.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1796,15 +1878,19 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 240 "linexp.ypp" /* yacc.c:1906  */
+#line 322 "linexp.ypp" /* yacc.c:1906  */
 
 
-void linexp_parser(polytope::ptr& p)
+void linexp_parser(polytope::ptr& p, polytope::ptr& U)
 {
 	global_p = p;
+	global_U = U;
 	linexpparse();
 	p = global_p;
+	U = global_U;
 }
+
+
 int linexperror(char* s)
 {
 	fprintf(stderr,"Linear Constraint Expression Specification: %s\n", s);

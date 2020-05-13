@@ -292,7 +292,9 @@ bool math::matrix<scalar_type>::isInvertible()
 template<typename scalar_type>
 bool math::matrix<scalar_type>::isIdentity()
 {
-	assert(this->size1() == this->size2());
+	if(this->size1() != this->size2())
+		return false;
+	
 	using namespace boost::numeric::ublas;
 
 	for(unsigned int i=0;i<this->size1();i++){

@@ -128,7 +128,7 @@ double lp_solver::Compute_LLP(const std::vector<double> coeff_function) {
 		status = glpk_lp_problem->getStatus();
 	}
 	if(status == GLP_UNBND) {
-		//std::cout << "lp_solver: Unbounded solution to the objective function\n";
+		std::cout << "lp_solver: Unbounded solution to the objective function\n";
 		throw(new std::exception());
 	}
 	return res;

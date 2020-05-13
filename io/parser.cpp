@@ -33,7 +33,7 @@ extern yy_buffer_state* linexp_scan_string ( const char *yy_str  );
 extern void linexp_delete_buffer ( yy_buffer_state* b  );
 
 extern void flow_parser(Dynamics& D);
-extern void linexp_parser(polytope::ptr& p);
+extern void linexp_parser(polytope::ptr& p, polytope::ptr& U);
 
 /* parses the variable names and creates the
  * var_to_id list.
@@ -96,18 +96,25 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			tok_iter++;
 			//std::cout << "Setting inv to:" << *tok_iter << std::endl;
 			string inv_str = *tok_iter;
-			polytope::ptr inv;
-			if(inv_str.compare("true")==0)
+			polytope::ptr inv, U;
+
+			if(inv_str.compare(" true")==0){
 				inv = polytope::ptr(new polytope()); // universe
+			}
 			else
-			{	
+			{
+				//initialise inv	
 				inv = polytope::ptr(new polytope()); //universe
-				//todo: initialise inv
+				U = polytope::ptr(new polytope()); // universe
+				parse_invariant(inv_str, inv, U);
+	
+				if( U->getColumnVector().size() == 0) 
+					U->setIsEmpty(true);
+		
 				if(!inv->getIsEmpty())
 					loc->setInvariantExist(true);
 			}
-			// todo: Get U from Inv string.
-			D.U = polytope::ptr(new polytope(true)); // empty input U
+			D.U = U;
 			loc->setInvariant(inv);
 		}
 		else if((*tok_iter).compare("Flow")==0){
@@ -140,23 +147,82 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			/* Setting the constants in dynamics to input when U is empty */
 			
 			if(D.isEmptyMatrixB && !D.isEmptyC){
+				//std::cout << "B is empty and C is not empty\n";
 				D.MatrixA.matrix_Identity(dim,D.MatrixB); // dim X dim Identity Mat
 				D.isEmptyMatrixB = false;
+				
+				unsigned int row = dim*2;
+				unsigned int col = dim;
+				math::matrix<double> UMatrix(row, col);
+				UMatrix.clear();
+				for(unsigned int i=0,j=0;i<row-1;i+=2,j++){
+					UMatrix(i,j)=1;
+					UMatrix(i+1,j)=-1;	
+				}
+				std::vector<double> Ubound(row,0);
+				for(unsigned int i=0;i<row-1;i+=2){
+					Ubound[i] = D.C[i];
+					Ubound[i+1] = -D.C[i];
+				}
+				D.U = polytope::ptr(new polytope(UMatrix, Ubound, 1));
+			}	
+			/* Setting D when U as well as C is non-empty */
+			else if(!D.isEmptyMatrixB && !D.isEmptyC)
+			{
+				//std::cout << "B is not empty and C is not empty\n";
+				assert(!D.U->getIsEmpty()); // U is not empty
+				math::matrix<double> coeff = D.U->getCoeffMatrix();
+				std::vector<double> b = D.U->getColumnVector();
+	
+				/*std::cout << "size of col vector of U before expanding:" << b.size() << std::endl;
+				std::cout << "elements of col vector of U before expanding:\n";
+				for(unsigned int i=0;i<b.size();i++)
+					std::cout << b[i] << std::endl;
+				*/
+				unsigned int n = D.C.size();
+				unsigned int m = D.U->getSystemDimension();
+				assert(n == D.MatrixA.size2());
+				assert(m == coeff.size2());
+				
+				math::matrix<double> newB(n,m+n);
+				math::matrix<double> newCoeff(coeff.size1(), coeff.size2()+n);
+				newB.clear();
+				newCoeff.clear();
+
+				//copy the old B 
+				for(unsigned int i=0;i<D.MatrixB.size1();i++)
+					for(unsigned int j=0;j<D.MatrixB.size2();j++)
+						newB(i,j) = D.MatrixB(i,j);
+
+				//augment n x n identity matrix
+				for(unsigned int i=0;i<D.MatrixB.size1();i++)
+					newB(i,m+i) = 1;
+				D.MatrixB = newB; // new B assigned to dynamics
+
+				// copy the old coeff to newCoeff
+				for(unsigned int i=0;i<coeff.size1();i++)
+					for(unsigned int j=0;j<coeff.size2();j++)
+						newCoeff(i,j) = coeff(i,j);
+
+				D.U->setPolytope(newCoeff,b,1);
+				// add constraints from C vector
+				std::vector<double> cons(n+m,0);
+			
+				for(unsigned int i=0;i<n;i++){
+						cons[m+i] = 1;
+						D.U->setMoreConstraints(cons,D.C[i]);
+						cons[m+i] = -1;
+						D.U->setMoreConstraints(cons,-D.C[i]);
+						cons[m+i]=0;
+				}
+				// printing the column vector of U
+				/*std::cout << "size of col vector of U after exp:" << D.U->getColumnVector().size() << std::endl;
+				std::cout << "elements of col vector are:\n";
+				for(unsigned int i=0;i<D.U->getColumnVector().size();i++)
+					std::cout << D.U->getColumnVector()[i] << " ";
+				std::cout << std::endl; */
 			}
-			unsigned int row = dim*2;
-			unsigned int col = dim;
-			math::matrix<double> UMatrix(row, col);
-			UMatrix.clear();
-			for(unsigned int i=0,j=0;i<row-1;i+=2,j++){
-				UMatrix(i,j)=1;
-				UMatrix(i+1,j)=-1;	
-			}
-			std::vector<double> Ubound(row,0);
-			for(unsigned int i=0;i<row-1;i+=2){
-				Ubound[i] = D.C[i];
-				Ubound[i+1] = -D.C[i];
-			}
-			D.U = polytope::ptr(new polytope(UMatrix, Ubound, 1));
+
 			loc->setSystem_Dynamics(D);
 			
 		}
@@ -167,6 +233,32 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 		}
 	}
 	
+}
+
+/* parses a location invariant */
+void parser::parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& U)
+{
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("&;");
+	tokenizer tokens(inv_str, sep);
+
+	std::list<std::string> all_args;				
+	for (tokenizer::iterator tok_iter = tokens.begin();
+			tok_iter != tokens.end(); ++tok_iter) {
+		all_args.push_back((std::string) *tok_iter);
+	}
+	
+	string tokString;
+	tokenizer::iterator tok_iter;
+	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
+		tokString = *iter;	
+		
+	 // to satisfy linexp_parser interface.
+		tokString+="\n"; // To bypass flex issue - not able to detect eos 		
+		yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
+		linexp_parser(Inv,U); // calls bison parser			
+		linexp_delete_buffer(my_string_buffer);
+	}	
 }
 
 /* The master parsing method */
@@ -210,6 +302,13 @@ void parser::parse()
 				initial_state::ptr ini_ptr = initial_state::ptr(new initial_state(init_locId, p));
 		
 				this->ini = ini_ptr;
+			}
+			else if(line.compare("#Forbidden")==0){
+				int bad_locId=-1; // default, meaning any location
+				polytope::ptr bad_poly = polytope::ptr(new polytope());
+				parse_initial(mdlFile, bad_poly, bad_locId);
+				this->forbidden.first = bad_locId;
+				this->forbidden.second = bad_poly;
 			}
 			else{
 				std::cout << "Error in model file. Expected #Variables, #Location, #Init or #forbidden\n";
@@ -314,10 +413,11 @@ void parser::parse_initial(fstream& file, polytope::ptr& p, int& init_locId)
 			}
 			
 			/*---end of loc id setting -----*/
-	
+			polytope::ptr U = polytope::ptr(new polytope());
+		 // to satisfy linexp_parser interface.
 			tokString+="\n"; // To bypass flex issue - not able to detect eos 		
 			yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
-			linexp_parser(p); // calls bison parser			
+			linexp_parser(p,U); // calls bison parser			
 			linexp_delete_buffer(my_string_buffer);
 	}
 }
@@ -333,3 +433,8 @@ initial_state::ptr parser::getInitState()
 	return this->ini;
 }
 
+/* return the parsed forbidden region */
+std::pair<int, polytope::ptr> parser::getForbidden()
+{
+	return this->forbidden;
+}

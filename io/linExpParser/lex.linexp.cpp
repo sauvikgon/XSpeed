@@ -1046,7 +1046,7 @@ YY_RULE_SETUP
 #line 35 "linexp.lex"
 {
 										//printf("UVAR token\n");
-										linexplval.token_str = strdup(yytext);
+										linexplval.token_str = strdup(linexptext);
 										return(UVAR);
 									}
 	YY_BREAK
@@ -1055,7 +1055,7 @@ YY_RULE_SETUP
 #line 41 "linexp.lex"
 {
 										//printf("VAR token\n");
-										linexplval.token_str = strdup(yytext);
+										linexplval.token_str = strdup(linexptext);
 										return(VAR);
 									}
 	YY_BREAK
@@ -1064,7 +1064,7 @@ YY_RULE_SETUP
 #line 47 "linexp.lex"
 {
 															//printf("CONST token\n");
-															linexplval.const_val = atof(yytext);
+															linexplval.const_val = atof(linexptext);
 															return(CONST);
 														}
 	YY_BREAK

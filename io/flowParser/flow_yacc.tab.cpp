@@ -73,7 +73,6 @@
 
 extern int yylex();
 extern int yyerror(char *);
-extern int yywrap();
 
 // The mode dynamics to be created
 Dynamics D;
@@ -82,7 +81,7 @@ std::vector<double> coeff;
 std::vector<double> u_coeff; // stores the coeff of inputs.
 double constant = 0;
 
-#line 86 "flow.tab.cpp" /* yacc.c:339  */
+#line 85 "flow.tab.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -133,10 +132,10 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 21 "flow.ypp" /* yacc.c:355  */
+#line 20 "flow.ypp" /* yacc.c:355  */
  char* token_str; double const_val;
 
-#line 140 "flow.tab.cpp" /* yacc.c:355  */
+#line 139 "flow.tab.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -153,7 +152,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 157 "flow.tab.cpp" /* yacc.c:358  */
+#line 156 "flow.tab.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -451,7 +450,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    29,    29,    58,    59,    67,    75,    81,    90,    99,
+       0,    28,    28,    58,    59,    67,    75,    81,    90,    99,
      108,   117,   126
 };
 #endif
@@ -1226,7 +1225,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 29 "flow.ypp" /* yacc.c:1646  */
+#line 28 "flow.ypp" /* yacc.c:1646  */
     {
 													//printf("Assignment Rule\n");
 											
@@ -1240,6 +1239,7 @@ yyreduce:
 														for(unsigned int j=0;j<n;j++)
 															D.MatrixA(lhs_id,j)=coeff[j];
 														D.isEmptyMatrixA = false;
+														coeff.clear();
 													}
 													if(!u_coeff.empty()){
 														unsigned int m = ha.umap_size();
@@ -1250,7 +1250,7 @@ yyreduce:
 													}
 													if(!D.isEmptyC)
 														D.C[lhs_id] = constant;
-													coeff.clear();
+													
 													constant = 0;
 													return 0;
 												}
@@ -1619,6 +1619,8 @@ yyreturn:
 void flow_parser(Dynamics& Dyn)
 {
 	D = Dyn;
+	coeff.clear();
+	u_coeff.clear();
 	yyparse();
 	Dyn = D;
 }

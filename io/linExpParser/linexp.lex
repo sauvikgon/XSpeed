@@ -34,19 +34,19 @@
 
 [uU][0-9]*				{
 										//printf("UVAR token\n");
-										linexplval.token_str = strdup(yytext);
+										linexplval.token_str = strdup(linexptext);
 										return(UVAR);
 									}
 
 [a-zA-Z]+[0-9]* 	{
 										//printf("VAR token\n");
-										linexplval.token_str = strdup(yytext);
+										linexplval.token_str = strdup(linexptext);
 										return(VAR);
 									}
 				
 [+-]?[0-9]+[.]?[0-9]*				{
 															//printf("CONST token\n");
-															linexplval.const_val = atof(yytext);
+															linexplval.const_val = atof(linexptext);
 															return(CONST);
 														}
 		

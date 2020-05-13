@@ -61,7 +61,7 @@ extern int linexpdebug;
 
 union YYSTYPE
 {
-#line 22 "linexp.ypp" /* yacc.c:1909  */
+#line 23 "linexp.ypp" /* yacc.c:1909  */
  char* token_str; double const_val;
 
 #line 68 "linexp.tab.hpp" /* yacc.c:1909  */

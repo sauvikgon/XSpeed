@@ -49,6 +49,7 @@ public:
 		}catch(...)
 		{
 			std::cout << "index of variable not found in the variable to index map. Check the variable name.\n";
+			std::cout << "varname:" << var_name << std::endl;
 			exit(0);
 		};
 		return index;

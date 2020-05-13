@@ -61,7 +61,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 21 "flow.ypp" /* yacc.c:1909  */
+#line 20 "flow.ypp" /* yacc.c:1909  */
  char* token_str; double const_val;
 
 #line 68 "flow.tab.hpp" /* yacc.c:1909  */
