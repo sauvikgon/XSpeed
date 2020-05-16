@@ -30,14 +30,14 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_LINEXP_LINEXP_TAB_HPP_INCLUDED
-# define YY_LINEXP_LINEXP_TAB_HPP_INCLUDED
+#ifndef YY_RESET_RESET_TAB_HPP_INCLUDED
+# define YY_RESET_RESET_TAB_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
 #if YYDEBUG
-extern int linexpdebug;
+extern int resetdebug;
 #endif
 
 /* Token type.  */
@@ -46,14 +46,12 @@ extern int linexpdebug;
   enum yytokentype
   {
     VAR = 258,
-    UVAR = 259,
-    CONST = 260,
-    PLUS = 261,
-    MINUS = 262,
-    MULT = 263,
-    EQ = 264,
-    LEQ = 265,
-    GEQ = 266
+    CONST = 259,
+    PLUS = 260,
+    MULT = 261,
+    EQ = 262,
+    LEQ = 263,
+    GEQ = 264
   };
 #endif
 
@@ -62,10 +60,10 @@ extern int linexpdebug;
 
 union YYSTYPE
 {
-#line 23 "linexp.ypp" /* yacc.c:1909  */
+#line 21 "reset.ypp" /* yacc.c:1909  */
  char* token_str; double const_val;
 
-#line 69 "linexp.tab.hpp" /* yacc.c:1909  */
+#line 67 "reset.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -74,8 +72,8 @@ typedef union YYSTYPE YYSTYPE;
 #endif
 
 
-extern YYSTYPE linexplval;
+extern YYSTYPE resetlval;
 
-int linexpparse (void);
+int resetparse (void);
 
-#endif /* !YY_LINEXP_LINEXP_TAB_HPP_INCLUDED  */
+#endif /* !YY_RESET_RESET_TAB_HPP_INCLUDED  */

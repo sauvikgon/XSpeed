@@ -49,7 +49,10 @@
 															linexplval.const_val = atof(linexptext);
 															return(CONST);
 														}
-		
+[-]								{
+										return(MINUS);
+									}	
+[()']							{;}	
 %%
 
 int yywrap()

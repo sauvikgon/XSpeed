@@ -60,39 +60,37 @@
 
 
 /* Substitute the variable and function names.  */
-#define yyparse         linexpparse
-#define yylex           linexplex
-#define yyerror         linexperror
-#define yydebug         linexpdebug
-#define yynerrs         linexpnerrs
+#define yyparse         resetparse
+#define yylex           resetlex
+#define yyerror         reseterror
+#define yydebug         resetdebug
+#define yynerrs         resetnerrs
 
-#define yylval          linexplval
-#define yychar          linexpchar
+#define yylval          resetlval
+#define yychar          resetchar
 
 /* Copy the first part of user declarations.  */
-#line 1 "linexp.ypp" /* yacc.c:339  */
+#line 1 "reset.ypp" /* yacc.c:339  */
 
 #include <cstdio>
 #include <cstring>
 #include <vector>
 
 #include "application/DataStructureDirections.h"
+#include "core/HybridAutomata/Transition.h"
 #include "core/HybridAutomata/Hybrid_Automata.h"
-#include "core/continuous/Polytope/polytope.h"
 
-extern int linexplex();
-extern int linexperror(char *);
+extern int resetlex();
+extern int resetparse(void);
+extern int reseterror(char *);
 
-polytope::ptr global_p; // initial_polytope
-polytope::ptr global_U; // input polytope U
-
+// The mode dynamics to be created
 extern hybrid_automata ha; // gives access to index to id map.
-std::vector<double> l_coeff, r_coeff, l_ucoeff, r_ucoeff, cff;
-extern std::vector<double> u_coeff;
+Assign r_map; // the global transition reset map
+std::vector<double> cf;
+double w = 0;
 
-double lconstant = 0, rconstant = 0, bound = 0;
-
-#line 96 "linexp.tab.cpp" /* yacc.c:339  */
+#line 94 "reset.tab.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -111,15 +109,15 @@ double lconstant = 0, rconstant = 0, bound = 0;
 #endif
 
 /* In a future release of Bison, this section will be replaced
-   by #include "linexp.tab.hpp".  */
-#ifndef YY_LINEXP_LINEXP_TAB_HPP_INCLUDED
-# define YY_LINEXP_LINEXP_TAB_HPP_INCLUDED
+   by #include "reset.tab.hpp".  */
+#ifndef YY_RESET_RESET_TAB_HPP_INCLUDED
+# define YY_RESET_RESET_TAB_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
 #if YYDEBUG
-extern int linexpdebug;
+extern int resetdebug;
 #endif
 
 /* Token type.  */
@@ -128,14 +126,12 @@ extern int linexpdebug;
   enum yytokentype
   {
     VAR = 258,
-    UVAR = 259,
-    CONST = 260,
-    PLUS = 261,
-    MINUS = 262,
-    MULT = 263,
-    EQ = 264,
-    LEQ = 265,
-    GEQ = 266
+    CONST = 259,
+    PLUS = 260,
+    MULT = 261,
+    EQ = 262,
+    LEQ = 263,
+    GEQ = 264
   };
 #endif
 
@@ -144,10 +140,10 @@ extern int linexpdebug;
 
 union YYSTYPE
 {
-#line 23 "linexp.ypp" /* yacc.c:355  */
+#line 21 "reset.ypp" /* yacc.c:355  */
  char* token_str; double const_val;
 
-#line 151 "linexp.tab.cpp" /* yacc.c:355  */
+#line 147 "reset.tab.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -156,15 +152,15 @@ typedef union YYSTYPE YYSTYPE;
 #endif
 
 
-extern YYSTYPE linexplval;
+extern YYSTYPE resetlval;
 
-int linexpparse (void);
+int resetparse (void);
 
-#endif /* !YY_LINEXP_LINEXP_TAB_HPP_INCLUDED  */
+#endif /* !YY_RESET_RESET_TAB_HPP_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 168 "linexp.tab.cpp" /* yacc.c:358  */
+#line 164 "reset.tab.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -404,23 +400,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  15
+#define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   64
+#define YYLAST   11
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  12
+#define YYNTOKENS  10
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  4
+#define YYNNTS  3
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  40
+#define YYNRULES  8
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  64
+#define YYNSTATES  15
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   266
+#define YYMAXUTOK   264
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -455,18 +451,14 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11
+       5,     6,     7,     8,     9
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,    31,    31,    99,   145,   187,   188,   195,   202,   209,
-     216,   219,   227,   235,   243,   251,   259,   267,   275,   283,
-     291,   299,   307,   318,   319,   326,   333,   340,   347,   350,
-     358,   366,   374,   382,   390,   398,   406,   414,   422,   430,
-     438
+       0,    29,    29,    53,    54,    63,    68,    77,    86
 };
 #endif
 
@@ -475,8 +467,8 @@ static const yytype_uint16 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "VAR", "UVAR", "CONST", "PLUS", "MINUS",
-  "MULT", "EQ", "LEQ", "GEQ", "$accept", "S", "LExpr", "RExpr", YY_NULLPTR
+  "$end", "error", "$undefined", "VAR", "CONST", "PLUS", "MULT", "EQ",
+  "LEQ", "GEQ", "$accept", "S", "Expr", YY_NULLPTR
 };
 #endif
 
@@ -485,15 +477,14 @@ static const char *const yytname[] =
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264
 };
 # endif
 
-#define YYPACT_NINF -19
+#define YYPACT_NINF -4
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-19)))
+  (!!((Yystate) == (-4)))
 
 #define YYTABLE_NINF -1
 
@@ -504,13 +495,8 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      17,    15,    20,    -1,     1,    30,     2,    32,    41,   -19,
-     -19,     6,    29,    37,    39,   -19,    17,    22,    22,    22,
-     -19,   -19,   -19,   -19,   -19,   -19,    13,    43,    44,    45,
-      42,    46,    11,    36,    47,    47,    47,   -19,   -19,   -19,
-     -19,    50,    51,   -19,   -19,    38,    31,    49,    52,    22,
-     -19,   -19,   -19,   -19,   -19,   -19,    40,    53,    54,    47,
-     -19,   -19,   -19,   -19
+       1,    -1,     5,    -2,    -4,     2,    -3,     4,     3,    -4,
+       7,    -2,    -4,    -4,     4
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -518,25 +504,20 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     6,     8,    10,     0,     0,     0,     0,     0,    19,
-      21,     0,     0,     7,     9,     1,     0,     0,     0,     0,
-      17,    13,    20,    22,    15,    11,     0,     0,     0,     5,
-      24,    26,    28,     0,     2,     3,     4,    16,    12,    18,
-      14,     0,     0,    37,    39,     0,     0,    25,    27,     0,
-      35,    31,    38,    40,    33,    29,     0,     0,     0,    23,
-      34,    30,    36,    32
+       0,     0,     0,     0,     1,     4,     5,     2,     0,     8,
+       0,     0,     7,     6,     3
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -19,   -19,    48,   -18
+      -4,    -4,     0
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     5,     6,    34
+      -1,     2,     7
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -544,57 +525,34 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      35,    36,     9,    10,    13,    14,    11,    12,    16,    22,
-      23,    17,    18,    19,    43,    44,    37,    38,    45,    46,
-       1,     2,     3,     7,     4,    30,    31,    32,     8,    33,
-      15,    59,    24,    25,    54,    55,    26,    20,    56,    47,
-      48,    52,    53,    60,    61,    27,    21,    28,    39,    40,
-      41,    16,     0,    49,    42,    50,    51,    57,    62,    63,
-      58,     0,     0,     0,    29
+       9,     5,     6,    10,     1,     4,     3,    12,     8,    11,
+      13,    14
 };
 
-static const yytype_int8 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      18,    19,     3,     4,     3,     4,     7,     8,     6,     3,
-       4,     9,    10,    11,     3,     4,     3,     4,     7,     8,
-       3,     4,     5,     8,     7,     3,     4,     5,     8,     7,
-       0,    49,     3,     4,     3,     4,     7,     5,     7,     3,
-       4,     3,     4,     3,     4,     8,     5,     8,     5,     5,
-       8,     6,    -1,     6,     8,     5,     5,     8,     5,     5,
-       8,    -1,    -1,    -1,    16
+       3,     3,     4,     6,     3,     0,     7,     4,     6,     5,
+       3,    11
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     4,     5,     7,    13,    14,     8,     8,     3,
-       4,     7,     8,     3,     4,     0,     6,     9,    10,    11,
-       5,     5,     3,     4,     3,     4,     7,     8,     8,    14,
-       3,     4,     5,     7,    15,    15,    15,     3,     4,     5,
-       5,     8,     8,     3,     4,     7,     8,     3,     4,     6,
-       5,     5,     3,     4,     3,     4,     7,     8,     8,    15,
-       3,     4,     5,     5
+       0,     3,    11,     7,     0,     3,     4,    12,     6,     3,
+       6,     5,     4,     3,    12
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    12,    13,    13,    13,    14,    14,    14,    14,    14,
-      14,    14,    14,    14,    14,    14,    14,    14,    14,    14,
-      14,    14,    14,    15,    15,    15,    15,    15,    15,    15,
-      15,    15,    15,    15,    15,    15,    15,    15,    15,    15,
-      15
+       0,    10,    11,    12,    12,    12,    12,    12,    12
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     3,     3,     3,     3,     1,     2,     1,     2,
-       1,     3,     4,     3,     4,     3,     4,     3,     4,     2,
-       3,     2,     3,     3,     1,     2,     1,     2,     1,     3,
-       4,     3,     4,     3,     4,     3,     4,     2,     3,     2,
-       3
+       0,     2,     3,     3,     1,     1,     3,     3,     2
 };
 
 
@@ -1271,612 +1229,104 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 31 "linexp.ypp" /* yacc.c:1646  */
+#line 29 "reset.ypp" /* yacc.c:1646  */
     {
-														// consider as <=
-														if(!l_coeff.empty() || !r_coeff.empty()){
-															int n = ha.map_size();
-															cff.clear();														
-															cff.resize(n,0);
-															for(unsigned int i=0;i<n;i++)
-															{
-																if(!l_coeff.empty() && l_coeff[i]!=0)
-																	cff[i] = l_coeff[i];
-																else if(!r_coeff.empty() && r_coeff[i]!=0)
-																	cff[i] = -r_coeff[i];
-															}
-															bound = rconstant - lconstant;
-															global_p->setMoreConstraints(cff, bound);
-														
-															
-															// consider as >=
-															cff.clear();
-															cff.resize(n,0);
-															for(unsigned int i=0;i<n;i++)
-															{
-																if(!l_coeff.empty() && l_coeff[i]!=0)
-																	cff[i] = -l_coeff[i];
-																else if(!r_coeff.empty() && r_coeff[i]!=0)
-																	cff[i] = r_coeff[i];
-															}
-															bound =  lconstant - rconstant;
-															global_p->setMoreConstraints(cff, bound);
-															rconstant = 0; lconstant=0;
-															l_coeff.clear(); r_coeff.clear();
-														}
-
-														// setting the input U
-														int m = ha.umap_size();
-														if(m==0) return 0; // no input
-														if(l_ucoeff.empty() && r_ucoeff.empty())
-															return 0; //no input constraint.
-
-														u_coeff.clear();
-														u_coeff.resize(m,0);
-														for(unsigned int i=0;i<m;i++)
-														{
-															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
-																u_coeff[i] = l_ucoeff[i];
-															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
-																u_coeff[i] = -r_ucoeff[i];
-														}
-														bound = rconstant - lconstant;
-														global_U->setMoreConstraints(u_coeff, bound);
-
-														u_coeff.clear();
-														u_coeff.resize(m,0);
-														for(unsigned int i=0;i<m;i++)
-														{
-															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
-																u_coeff[i] = -l_ucoeff[i];
-															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
-																u_coeff[i] = r_ucoeff[i];
-														}
-														bound = lconstant - rconstant;
-														global_U->setMoreConstraints(u_coeff, bound);
-
-														rconstant = 0; lconstant=0;
-														l_ucoeff.clear(); r_ucoeff.clear();
-														return 0; 
-														
+													//printf("Assignment Rule\n");
+											
+													std::string var=(yyvsp[-2].token_str);
+													int lhs_id = ha.get_index(var);
+													unsigned int n = ha.map_size();
+													//printf("ha map size: %d\n",n);
+													//printf("lhs_id: %d\n",lhs_id);
+													
+													if(!cf.empty()){
+														for(unsigned int j=0;j<n;j++)
+															r_map.Map(lhs_id,j)=cf[j];
+														cf.clear();
 													}
-#line 1344 "linexp.tab.cpp" /* yacc.c:1646  */
+													else{ // a constant reset
+														r_map.Map(lhs_id, lhs_id)=0; // unset x'=x map.
+													}	
+													r_map.b[lhs_id] = w;
+													
+													w = 0;
+													return 0;
+												}
+#line 1256 "reset.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 99 "linexp.ypp" /* yacc.c:1646  */
-    {
-														
-														if(!l_coeff.empty() || !r_coeff.empty()){
-															int n = ha.map_size();
-															cff.clear();
-															cff.resize(n,0);
-															for(unsigned int i=0;i<n;i++)
-															{
-																if(!l_coeff.empty() && l_coeff[i]!=0)
-																	cff[i] = l_coeff[i];
-																else if(!r_coeff.empty() && r_coeff[i]!=0)
-																	cff[i] = -r_coeff[i];
-															}
-															bound = rconstant - lconstant;
-															global_p->setMoreConstraints(cff, bound);
-															rconstant = 0; lconstant=0;
-															l_coeff.clear(); r_coeff.clear();									
-														}
-														/*
-														std::cout << "leq constraint:\n";
-														for(unsigned int i=0;i<n;i++)
-															std::cout << coeff[i] << " " ;
-														std::cout << "\nbound = " << bound << std::endl;
-														*/
-
-														// setting the input U
-														int m = ha.umap_size();
-														if(m==0) return 0; // no input
-														if(l_ucoeff.empty() && r_ucoeff.empty())
-															return 0; //no input constraint.
-
-														u_coeff.clear();
-														u_coeff.resize(m,0);
-														for(unsigned int i=0;i<m;i++)
-														{
-															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
-																u_coeff[i] = l_ucoeff[i];
-															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
-																u_coeff[i] = -r_ucoeff[i];
-														}
-														bound = rconstant - lconstant;
-														global_U->setMoreConstraints(u_coeff, bound);
-														rconstant = 0; lconstant=0;
-														l_ucoeff.clear(); r_ucoeff.clear();
-														return 0; 
-													}
-#line 1395 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 53 "reset.ypp" /* yacc.c:1646  */
+    {;}
+#line 1262 "reset.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 145 "linexp.ypp" /* yacc.c:1646  */
+#line 54 "reset.ypp" /* yacc.c:1646  */
     {
-														
-														if(!l_coeff.empty() || !r_coeff.empty()){
-															int n = ha.map_size();
-															cff.clear();
-															cff.resize(n,0);
-															for(unsigned int i=0;i<n;i++)
-															{
-																if(!l_coeff.empty() && l_coeff[i]!=0)
-																	cff[i] = -l_coeff[i];
-																else if(!r_coeff.empty() && r_coeff[i]!=0)
-																	cff[i] = r_coeff[i];
-															}
-															bound = lconstant - rconstant;
-															global_p->setMoreConstraints(cff, bound);
-															rconstant = 0; lconstant=0;
-															l_coeff.clear(); r_coeff.clear();
-														}
-														
-														// setting the input U
-														int m = ha.umap_size();
-														if(m==0) return 0; // no input
-														if(l_ucoeff.empty() && r_ucoeff.empty())
-															return 0; //no input constraint.
-
-														u_coeff.clear();
-														u_coeff.resize(m,0);
-														for(unsigned int i=0;i<m;i++)
-														{
-															if(!l_ucoeff.empty() && l_ucoeff[i]!=0)
-																u_coeff[i] = -l_ucoeff[i];
-															else if(!r_ucoeff.empty() && r_ucoeff[i]!=0)
-																u_coeff[i] = r_ucoeff[i];
-														}
-														bound = lconstant - rconstant;
-														global_U->setMoreConstraints(u_coeff, bound);
-														rconstant = 0; lconstant=0;
-														l_ucoeff.clear(); r_ucoeff.clear();
-														return 0;
-													}
-#line 1440 "linexp.tab.cpp" /* yacc.c:1646  */
+													//printf("var\n");
+													std::string var = (yyvsp[0].token_str);
+													int id = ha.get_index(var);
+													if(cf.empty()) 
+														cf.resize(ha.map_size(),0);
+													cf[id]=1;
+												}
+#line 1275 "reset.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 187 "linexp.ypp" /* yacc.c:1646  */
-    {;}
-#line 1446 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 63 "reset.ypp" /* yacc.c:1646  */
+    {
+													//printf("const\n");
+													w = (yyvsp[0].const_val); 
+												}
+#line 1284 "reset.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 188 "linexp.ypp" /* yacc.c:1646  */
-    {										
+#line 68 "reset.ypp" /* yacc.c:1646  */
+    {
+													//printf("const mult var\n");
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
-													if(l_coeff.empty()) 
-														l_coeff.resize(ha.map_size(),0);
-													l_coeff[id]=1;
+													double c = (yyvsp[-2].const_val);
+													if(cf.empty()) 
+														cf.resize(ha.map_size(),0);						
+													cf[id] = c; 	
 												}
-#line 1458 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1298 "reset.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 195 "linexp.ypp" /* yacc.c:1646  */
-    {										
-													std::string var = (yyvsp[0].token_str);
+#line 77 "reset.ypp" /* yacc.c:1646  */
+    {
+													//printf("var mult const\n");
+													std::string var = (yyvsp[-2].token_str);
 													int id = ha.get_index(var);
-													if(l_coeff.empty()) 
-														l_coeff.resize(ha.map_size(),0);
-													l_coeff[id]=-1;
+													double c = (yyvsp[0].const_val);
+													if(cf.empty()) 
+														cf.resize(ha.map_size(),0);						
+													cf[id] = c;	
 												}
-#line 1470 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1312 "reset.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 202 "linexp.ypp" /* yacc.c:1646  */
+#line 86 "reset.ypp" /* yacc.c:1646  */
     {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													if(l_ucoeff.empty()) 
-														l_ucoeff.resize(ha.umap_size(),0);
-													l_ucoeff[id]=1;
-												}
-#line 1482 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 9:
-#line 209 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													if(l_ucoeff.empty()) 
-														l_ucoeff.resize(ha.umap_size(),0);
-													l_ucoeff[id]=-1;
-												}
-#line 1494 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 10:
-#line 216 "linexp.ypp" /* yacc.c:1646  */
-    {
-													lconstant = (yyvsp[0].const_val); 
-												}
-#line 1502 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 11:
-#line 219 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													double c = (yyvsp[-2].const_val);
-													if(l_ucoeff.empty())
-														l_ucoeff.resize(ha.umap_size(),0);
-													l_ucoeff[id] = c;
-												}
-#line 1515 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 12:
-#line 227 "linexp.ypp" /* yacc.c:1646  */
-    {
-																std::string uvar = (yyvsp[0].token_str);
-																int id = ha.get_u_index(uvar);
-																double c = (yyvsp[-3].const_val);
-																if(l_ucoeff.empty())
-																l_ucoeff.resize(ha.umap_size(),0);
-																l_ucoeff[id] = -c;
-															}
-#line 1528 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 13:
-#line 235 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[-2].token_str);
-													int id = ha.get_u_index(uvar);
-													double c = (yyvsp[0].const_val);
-													if(l_ucoeff.empty()) 
-														l_ucoeff.resize(ha.umap_size(),0);						
-													l_ucoeff[id] = c;
-												}
-#line 1541 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 14:
-#line 243 "linexp.ypp" /* yacc.c:1646  */
-    {
-																std::string uvar = (yyvsp[-2].token_str);
-																int id = ha.get_u_index(uvar);
-																double c = (yyvsp[0].const_val);
-																if(l_ucoeff.empty()) 
-																	l_ucoeff.resize(ha.umap_size(),0);						
-																l_ucoeff[id] = -c;
-															}
-#line 1554 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 15:
-#line 251 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index(var);
-													double c = (yyvsp[-2].const_val);
-													if(l_coeff.empty()) 
-														l_coeff.resize(ha.map_size(),0);						
-													l_coeff[id] = c; 	
-												}
-#line 1567 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 16:
-#line 259 "linexp.ypp" /* yacc.c:1646  */
-    {
-																std::string var = (yyvsp[0].token_str);
-																int id = ha.get_index(var);
-																double c = (yyvsp[-3].const_val);
-																if(l_coeff.empty()) 
-																	l_coeff.resize(ha.map_size(),0);						
-																l_coeff[id] = -c; 	
-															}
-#line 1580 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 17:
-#line 267 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string var = (yyvsp[-2].token_str);
-													int id = ha.get_index(var);
-													double c = (yyvsp[0].const_val);
-													if(l_coeff.empty()) 
-														l_coeff.resize(ha.map_size(),0);						
-													l_coeff[id] = c;	
-												}
-#line 1593 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 18:
-#line 275 "linexp.ypp" /* yacc.c:1646  */
-    {
-																std::string var = (yyvsp[-2].token_str);
-																int id = ha.get_index(var);
-																double c = (yyvsp[0].const_val);
-																if(l_coeff.empty()) 
-																	l_coeff.resize(ha.map_size(),0);						
-																l_coeff[id] = -c;	
-															}
-#line 1606 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 19:
-#line 283 "linexp.ypp" /* yacc.c:1646  */
-    {
+													//printf("const var \n");
 													std::string var = (yyvsp[0].token_str);
 													int id = ha.get_index(var);
 													double c = (yyvsp[-1].const_val);
-													if(l_coeff.empty()) 
-														l_coeff.resize(ha.map_size(),0);						
-													l_coeff[id] = c; 								
+													if(cf.empty()) 
+														cf.resize(ha.map_size(),0);						
+													cf[id] = c; 								
 												}
-#line 1619 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 20:
-#line 291 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index(var);
-													double c = (yyvsp[-2].const_val);
-													if(l_coeff.empty()) 
-														l_coeff.resize(ha.map_size(),0);						
-													l_coeff[id] = -c; 								
-												}
-#line 1632 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 21:
-#line 299 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													double c = (yyvsp[-1].const_val);
-													if(l_ucoeff.empty()) 
-														l_ucoeff.resize(ha.umap_size(),0);						
-													l_ucoeff[id] = c; 								
-												}
-#line 1645 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 22:
-#line 307 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													double c = (yyvsp[-2].const_val);
-													if(l_ucoeff.empty()) 
-														l_ucoeff.resize(ha.umap_size(),0);						
-													l_ucoeff[id] = -c; 								
-												}
-#line 1658 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 23:
-#line 318 "linexp.ypp" /* yacc.c:1646  */
-    {;}
-#line 1664 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 24:
-#line 319 "linexp.ypp" /* yacc.c:1646  */
-    {										
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index(var);
-													if(r_coeff.empty()) 
-														r_coeff.resize(ha.map_size(),0);
-													r_coeff[id]=1;
-												}
-#line 1676 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 25:
-#line 326 "linexp.ypp" /* yacc.c:1646  */
-    {										
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index(var);
-													if(r_coeff.empty()) 
-														r_coeff.resize(ha.map_size(),0);
-													r_coeff[id]=-1;
-												}
-#line 1688 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 26:
-#line 333 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													if(r_ucoeff.empty()) 
-														r_ucoeff.resize(ha.umap_size(),0);
-													r_ucoeff[id]=1;
-												}
-#line 1700 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 27:
-#line 340 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													if(r_ucoeff.empty()) 
-														r_ucoeff.resize(ha.umap_size(),0);
-													r_ucoeff[id]=-1;
-												}
-#line 1712 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 28:
-#line 347 "linexp.ypp" /* yacc.c:1646  */
-    {
-													rconstant = (yyvsp[0].const_val); 
-												}
-#line 1720 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 29:
-#line 350 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													double c = (yyvsp[-2].const_val);
-													if(r_ucoeff.empty())
-														r_ucoeff.resize(ha.umap_size(),0);
-													r_ucoeff[id] = c;
-												}
-#line 1733 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 30:
-#line 358 "linexp.ypp" /* yacc.c:1646  */
-    {
-																std::string uvar = (yyvsp[0].token_str);
-																int id = ha.get_u_index(uvar);
-																double c = (yyvsp[-3].const_val);
-																if(r_ucoeff.empty())
-																	r_ucoeff.resize(ha.umap_size(),0);
-																r_ucoeff[id] = -c;
-															}
-#line 1746 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 31:
-#line 366 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[-2].token_str);
-													int id = ha.get_u_index(uvar);
-													double c = (yyvsp[0].const_val);
-													if(r_ucoeff.empty()) 
-														r_ucoeff.resize(ha.umap_size(),0);						
-													r_ucoeff[id] = c;
-												}
-#line 1759 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 32:
-#line 374 "linexp.ypp" /* yacc.c:1646  */
-    {
-																std::string uvar = (yyvsp[-2].token_str);
-																int id = ha.get_u_index(uvar);
-																double c = (yyvsp[0].const_val);
-																if(r_ucoeff.empty()) 
-																	r_ucoeff.resize(ha.umap_size(),0);						
-																r_ucoeff[id] = -c;
-															}
-#line 1772 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 33:
-#line 382 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index(var);
-													double c = (yyvsp[-2].const_val);
-													if(r_coeff.empty()) 
-														r_coeff.resize(ha.map_size(),0);						
-													r_coeff[id] = c; 	
-												}
-#line 1785 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 34:
-#line 390 "linexp.ypp" /* yacc.c:1646  */
-    {
-																std::string var = (yyvsp[0].token_str);
-																int id = ha.get_index(var);
-																double c = (yyvsp[-3].const_val);
-																if(r_coeff.empty()) 
-																	r_coeff.resize(ha.map_size(),0);						
-																r_coeff[id] = -c; 	
-															}
-#line 1798 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 35:
-#line 398 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string var = (yyvsp[-2].token_str);
-													int id = ha.get_index(var);
-													double c = (yyvsp[0].const_val);
-													if(r_coeff.empty()) 
-														r_coeff.resize(ha.map_size(),0);						
-													r_coeff[id] = c;	
-												}
-#line 1811 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 36:
-#line 406 "linexp.ypp" /* yacc.c:1646  */
-    {
-																std::string var = (yyvsp[-2].token_str);
-																int id = ha.get_index(var);
-																double c = (yyvsp[0].const_val);
-																if(r_coeff.empty()) 
-																	r_coeff.resize(ha.map_size(),0);						
-																r_coeff[id] = -c;	
-															}
-#line 1824 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 37:
-#line 414 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index(var);
-													double c = (yyvsp[-1].const_val);
-													if(r_coeff.empty()) 
-														r_coeff.resize(ha.map_size(),0);						
-													r_coeff[id] = c; 								
-												}
-#line 1837 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 38:
-#line 422 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string var = (yyvsp[0].token_str);
-													int id = ha.get_index(var);
-													double c = (yyvsp[-2].const_val);
-													if(r_coeff.empty()) 
-														r_coeff.resize(ha.map_size(),0);						
-													r_coeff[id] = -c; 								
-												}
-#line 1850 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 39:
-#line 430 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													double c = (yyvsp[-1].const_val);
-													if(r_ucoeff.empty()) 
-														r_ucoeff.resize(ha.umap_size(),0);						
-													r_ucoeff[id] = c; 								
-												}
-#line 1863 "linexp.tab.cpp" /* yacc.c:1646  */
-    break;
-
-  case 40:
-#line 438 "linexp.ypp" /* yacc.c:1646  */
-    {
-													std::string uvar = (yyvsp[0].token_str);
-													int id = ha.get_u_index(uvar);
-													double c = (yyvsp[-2].const_val);
-													if(r_ucoeff.empty()) 
-														r_ucoeff.resize(ha.umap_size(),0);						
-													r_ucoeff[id] = -c; 								
-												}
-#line 1876 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1326 "reset.tab.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1880 "linexp.tab.cpp" /* yacc.c:1646  */
+#line 1330 "reset.tab.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2104,22 +1554,19 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 447 "linexp.ypp" /* yacc.c:1906  */
+#line 97 "reset.ypp" /* yacc.c:1906  */
 
 
-void linexp_parser(polytope::ptr& p, polytope::ptr& U)
+void reset_parser(Assign& reset_map)
 {
-	global_p = p;
-	global_U = U;
-	linexpparse();
-	p = global_p;
-	U = global_U;
+	r_map = reset_map;
+	cf.clear();
+	resetparse();
+	reset_map = r_map;
 }
 
-
-int linexperror(char* s)
+int reseterror(char *s)
 {
-	fprintf(stderr,"Linear Constraint Expression Specification: %s\n", s);
+	fprintf(stderr,"Transition reset specification: %s\n", s);
 	return 0;
 }
-

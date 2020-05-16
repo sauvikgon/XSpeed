@@ -155,7 +155,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			system(cmd_str.c_str());
 			parser _parser("input_model.mdl");
 			_parser.parse();
-			system("rm input_model.mdl"); // remove the mdl file
+			//system("rm input_model.mdl"); // remove the mdl file
 		
 			Hybrid_Automata = _parser.getHa(); // assign the parsed ha
 			init_state.push_back(_parser.getInitState()); // assign the parsed init

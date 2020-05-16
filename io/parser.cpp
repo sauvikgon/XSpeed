@@ -4,6 +4,8 @@
 
 #include <boost/tokenizer.hpp>
 #include <stdio.h>
+#include <algorithm>
+
 using namespace boost;
 
 // defined externally
@@ -30,10 +32,14 @@ extern yy_buffer_state* yy_scan_string ( const char *yy_str  );
 extern void yy_delete_buffer ( yy_buffer_state* b  );
 
 extern yy_buffer_state* linexp_scan_string ( const char *yy_str  );
+extern yy_buffer_state* reset_scan_string ( const char *yy_str  );
+
 extern void linexp_delete_buffer ( yy_buffer_state* b  );
+extern void reset_delete_buffer ( yy_buffer_state* b  );
 
 extern void flow_parser(Dynamics& D);
 extern void linexp_parser(polytope::ptr& p, polytope::ptr& U);
+extern void reset_parser(Assign& r_map);
 
 /* parses the variable names and creates the
  * var_to_id list.
@@ -107,7 +113,9 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 				inv = polytope::ptr(new polytope()); //universe
 				U = polytope::ptr(new polytope()); // universe
 				parse_invariant(inv_str, inv, U);
-	
+				/*std::cout << "The parsed location invariant:\n";
+				inv->printPoly();
+				*/
 				if( U->getColumnVector().size() == 0) 
 					U->setIsEmpty(true);
 		
@@ -226,8 +234,9 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			loc->setSystem_Dynamics(D);
 			
 		}
-		else if((*tok_iter).compare("Transitions")==0){
+		else if((*tok_iter).compare("Transition")==0){
 			transition::ptr t = transition::ptr(new transition());
+			t->setSource_Location_Id(loc->getLocId());
 			parse_transition(file,t);
 			loc->add_Out_Going_Transition(t);
 		}
@@ -297,7 +306,8 @@ void parser::parse()
 				
 				int init_locId = 1; // default initial location
 				parse_initial(mdlFile, p, init_locId);
-				
+				/*std::cout << "Parsed initial polytope:\n";
+				p->printPoly(); */
 				// define the initial_state symbolic state
 				initial_state::ptr ini_ptr = initial_state::ptr(new initial_state(init_locId, p));
 		
@@ -323,30 +333,38 @@ void parser::parse()
 	
 }
 
-/* parses a list of linear inequality expressions string to 
- * create a polytope.
- */
-void parser::gen_polytope(string str, polytope::ptr inv){
-	char_separator<char> sep("&;");
-	tokenizer<char_separator<char> > tokens(str,sep);
-	tokenizer<char_separator<char> >::iterator tok_iter=tokens.begin();
-
-	for(;tok_iter!=tokens.end();tok_iter++){
-		string constr_str = *tok_iter;
-		std::cout << "constraint string=" << constr_str << std::endl;
-	}
-}
-
 /* parses a list of linear equality expressions string to
  * create a reset map
  */
-void parser::gen_reset(string r_str, math::matrix<double>& R, std::vector<double>& w){
+void parser::parse_reset(fstream& file, Assign& t_reset){
+
+	string line;
+	while(getline(file,line)){
+
+		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
+	
+	
+		if(line.compare("#End")==0)
+			return;	
+	
+		// if empty line, then continue
+		if(line.compare("")==0)
+			continue;
+		
+		// parse the line
+		//std::cout << "String sent to bison for parsing:" << line << std::endl;
+		line+="\n"; // To bypass flex issue - not able to detect eos 		
+		yy_buffer_state* my_string_buffer = reset_scan_string(line.c_str());
+		reset_parser(t_reset); // calls bison parser.
+		reset_delete_buffer(my_string_buffer);
+	}
 }
 
 /* parses a list of consecutive odes to create the dynamics */
 void parser::gen_flow(fstream& file, Dynamics& D){
 	string line;	
 	while(getline(file,line)){
+	
 		if(line.compare("#End")==0)
 			return;	
 	
@@ -366,13 +384,66 @@ void parser::gen_flow(fstream& file, Dynamics& D){
 /* parses transition parameters and creates a transition obj */
 void parser::parse_transition(fstream& file, transition::ptr& t)
 {
-	string line;	
+	string line;
+
 	while(getline(file,line)){
 		if(line.compare("#End")==0)
 			return;
 		// if empty line, then continue
 		if(line.compare("")==0)
 			continue;
+		
+		char_separator<char> sep(":");
+		tokenizer<char_separator<char> > tokens(line,sep);
+		tokenizer<char_separator<char> >::iterator tok_iter=tokens.begin();
+
+		string param = *tok_iter;
+		param.erase(std::remove_if(param.begin(), param.end(), ::isspace), param.end());
+
+		if(param.compare("Dest")==0)
+			continue; // dest loc name not stored in transition obj
+	
+		else if(param.compare("DestId")==0){
+			tok_iter++;
+			t->setDestination_Location_Id(std::atoi((*tok_iter).c_str()));
+			//std::cout << "Setting trans dest locId:" << std::atoi((*tok_iter).c_str()) << std::endl;
+		}
+
+		else if(param.compare("Label")==0){
+			tok_iter++;
+			t->setLabel(*tok_iter);
+			//std::cout << "Setting trans label:" << *tok_iter << std::endl;
+		}
+
+		else if(param.compare("Guard")==0){
+			tok_iter++;
+			//std::cout << "Setting trans guard:" << *tok_iter << std::endl;
+			polytope::ptr g = polytope::ptr(new polytope());
+			polytope::ptr u_dummy = polytope::ptr(new polytope());
+			parse_invariant(*tok_iter, g, u_dummy);// inv and guard are both polytope
+			/*std::cout << "parsed transition guard is:\n";
+			g->printPoly();
+			*/
+
+			t->setGuard(g);
+		}
+
+		else if(param.compare("Reset")==0){
+			Assign t_reset;
+			//reset map initialized to identity
+			t_reset.Map.matrix_Identity(ha.map_size(), t_reset.Map);
+			t_reset.b.resize(ha.map_size(),0);
+			parse_reset(file, t_reset);
+			t->setAssignT(t_reset);
+			//debug
+			/*std::cout << "Reset Map:\n";
+			std::cout << t_reset.Map;	
+			std::cout << "\nReset b:\n";
+			for(unsigned int i=0;i<t_reset.b.size();i++)
+				std::cout << t_reset.b[i] << std::endl; */
+			//--
+		}
+		
 	}	
 }
 /* parses the initial condition string */

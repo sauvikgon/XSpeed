@@ -49,15 +49,10 @@ public:
  	 */
 	void parse_vars(fstream& file);
 
-	/* parses a list of linear inequality expressions string to 
-   * create a polytope.
-   */
-	void gen_polytope(string str, polytope::ptr inv);
-
 	/* parses a list of linear equality expressions string to
    * create a reset map
    */
-	void gen_reset(string r_str, math::matrix<double>& R, std::vector<double>& w);
+	void parse_reset(fstream& file, Assign& t_reset);
 
 	/* parses a list of consecutive ode to create the flow matrix */
 	void gen_flow(fstream& file, Dynamics& D);
