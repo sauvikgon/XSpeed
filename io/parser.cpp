@@ -57,7 +57,7 @@ void parser::parse_vars(fstream& file)
 			break;
 		if(var.compare("")==0)
 			continue;
-		//std::cout << "Inserting variable " << var << " id= " << loc_id << std::endl;
+		//std::cout << "Inserting variable " << var << std::endl;
 		if(var[0]=='u' || var[0]=='U') // input variable
 		{
 			//std::cout << "adding " << var << "to umap" << std::endl;
@@ -113,9 +113,10 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 				inv = polytope::ptr(new polytope()); //universe
 				U = polytope::ptr(new polytope()); // universe
 				parse_invariant(inv_str, inv, U);
+				//debug
 				/*std::cout << "The parsed location invariant:\n";
-				inv->printPoly();
-				*/
+				inv->printPoly();*/
+				//--
 				if( U->getColumnVector().size() == 0) 
 					U->setIsEmpty(true);
 		
@@ -141,7 +142,7 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			
 			gen_flow(file, D);
 			//debug
-			/*	
+			/*
 			std::cout << "The generated A matrix:\n";
 			std::cout << D.MatrixA << std::endl;
 			std::cout << "The generated B matrix:\n";
@@ -168,9 +169,9 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 					UMatrix(i+1,j)=-1;	
 				}
 				std::vector<double> Ubound(row,0);
-				for(unsigned int i=0;i<row-1;i+=2){
-					Ubound[i] = D.C[i];
-					Ubound[i+1] = -D.C[i];
+				for(int i=0,j=0;i<dim;i++,j+=2){
+					Ubound[j] = D.C[i];
+					Ubound[j+1] = -D.C[i];
 				}
 				D.U = polytope::ptr(new polytope(UMatrix, Ubound, 1));
 			}	
@@ -306,8 +307,10 @@ void parser::parse()
 				
 				int init_locId = 1; // default initial location
 				parse_initial(mdlFile, p, init_locId);
+				//debug
 				/*std::cout << "Parsed initial polytope:\n";
-				p->printPoly(); */
+				p->printPoly();*/
+				//---
 				// define the initial_state symbolic state
 				initial_state::ptr ini_ptr = initial_state::ptr(new initial_state(init_locId, p));
 		
@@ -421,9 +424,11 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 			polytope::ptr g = polytope::ptr(new polytope());
 			polytope::ptr u_dummy = polytope::ptr(new polytope());
 			parse_invariant(*tok_iter, g, u_dummy);// inv and guard are both polytope
+			// debug
 			/*std::cout << "parsed transition guard is:\n";
-			g->printPoly();
-			*/
+			g->printPoly();*/
+			//--
+			
 
 			t->setGuard(g);
 		}
@@ -438,9 +443,9 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 			//debug
 			/*std::cout << "Reset Map:\n";
 			std::cout << t_reset.Map;	
-			std::cout << "\nReset b:\n";
+			std::cout << "\nReset b:\n";*/
 			for(unsigned int i=0;i<t_reset.b.size();i++)
-				std::cout << t_reset.b[i] << std::endl; */
+				std::cout << t_reset.b[i] << std::endl;
 			//--
 		}
 		
