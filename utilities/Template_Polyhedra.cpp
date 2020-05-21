@@ -107,8 +107,9 @@ std::vector<double> template_polyhedra::getInvariantBoundValue(
 polytope::ptr template_polyhedra::getPolytope(unsigned int Iterations_Number) {
 	polytope::ptr p;
 	p = polytope::ptr(new polytope());
-	p->setCoeffMatrix(this->getTemplateDirections());//no more working with all_directions
-	std::vector<double> boundValue(this->getTotalTemplateDirections());	//no more working with all_directions
+	p->setCoeffMatrix(this->getTemplateDirections());
+	std::vector<double> boundValue(this->getTotalTemplateDirections());	
+
 	for (unsigned int i = 0; i < Matrix_SupportFunction.size1(); i++) {
 		boundValue[i] = Matrix_SupportFunction(i, Iterations_Number);
 	}
@@ -353,7 +354,7 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 
 	if (intersection_started == true && intersection_ended == false) {
 		inte_range.second = this->Matrix_SupportFunction.size2() - 1;
-		intersected_range.push_back(inte_range);  //	cout << "\nIntersection did not End = " << i2 << "\n";
+		intersected_range.push_back(inte_range);
 	}
 	return intersected_range;
 }
@@ -421,99 +422,9 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
 		}//end of multiple intersected region
 	}
 
-	//cout<<"polys.size = "<<polys.size()<<"\n";
 	return polys;
+	
 }
-
-
-/*
- * Use PPL library to implement convex_hull of the flowpipe-guard intersection
- */
-
-/*std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type){
-
-	// debug
-//	if(guard->getIsUniverse()){
-//		std::list<polytope::ptr> polys;
-//		for(unsigned int i=0;i<this->getTotalIterations();i++)
-//			polys.push_back(this->getPolytope(i));
-//		return polys;
-//	}
-
-	//---
-
-
-	std::list<std::pair<unsigned int, unsigned int> > range_list;
-	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type);
-
-	std::cout << "range list size= " << range_list.size() << std::endl;
-	std::list<polytope::ptr> polys;
-	int count=0;//debugging variable
-	math::matrix<double> A_joined;
-	std::vector<double> b_joined;
-	for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
-			range_it++) {
-		count++;
-		unsigned int start = (*range_it).first, end=(*range_it).second;
-		std::cout << "SFM size = " << this->getTotalIterations() << std::endl;
-
-		std::cout << "START=" << start << ", END=" << end << std::endl;
-
-		polytope::ptr start_poly;
-		start_poly = this->getPolytope(start);
-		if (this->getInvariantDirections().size1() != 0){
-			std::vector<double> constraint_bound_values(this->getInvariantDirections().size1());
-			constraint_bound_values = this->getInvariantBoundValue(start);
-			start_poly->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
-		}
-		PPL_Polyhedron::ptr poly_hull=PPL_Polyhedron::ptr(new PPL_Polyhedron(start_poly->getCoeffMatrix(),start_poly->getColumnVector(),start_poly->getInEqualitySign()));
-		poly_hull->convert_to_poly(A_joined, b_joined);
-		std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";
-		for (int x=0;x<b_joined.size();x++){
-			std::cout<<b_joined[x]<<"  ";
-		}
-		//---
-
-		for (unsigned int i = start+1; i <= end; i++) {
-			polytope::ptr p;
-			p = this->getPolytope(i);
-			if (this->getInvariantDirections().size1() != 0){
-				std::vector<double> constraint_bound_values(this->getInvariantDirections().size1());
-				constraint_bound_values = this->getInvariantBoundValue(i);
-				p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
-			}
-			start_poly->print2StdOut(2,0);//for bouncing ball t,x
-			start_poly->printPoly_parm();
-			PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
-			std::cout << "another poly hull-ed \n" << std::endl;
-			poly_hull->convex_hull(p2);
-			poly_hull->convert_to_poly(A_joined, b_joined);
-
-			std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";
-			for (int x=0;x<b_joined.size();x++){
-				std::cout<<b_joined[x]<<"  ";
-			}
-			std::cout<<"Poly hulled "<<i<<",  ";
-		}
-		std::cout<<"Before convert_to_poly called"<<std::endl;
-		poly_hull->convert_to_poly(A_joined, b_joined);
-		std::cout<<"convert_to_poly Successful!!"<<std::endl;
-//debug --
-		if (count==1){
-			std::cout<<"A_joined = "<<A_joined<<std::endl<<"   b_joined = ";
-			for (int x=0;x<b_joined.size();x++){
-				std::cout<<b_joined[x]<<"  ";
-			}
-		}
-//----
-		polys.push_back(polytope::ptr(new polytope(A_joined, b_joined, 1)));
-	}//end of multiple intersected region
-
-	//cout<<"polys.size = "<<polys.size()<<"\n";
-	return polys;
-}*/
-
-
 
 const polytope::ptr template_polyhedra::getTemplate_approx(int lp_solver_type) {
 	/*
@@ -554,20 +465,9 @@ const polytope::ptr template_polyhedra::getTemplate_approx(int lp_solver_type) {
 		}
 		columnVector[i] = Max_sf;//Maximum of sf in one direction of all Omegas
 	}
-//std::cout<<"\nTotal_iterations = " <<this->total_iterations<<"\n";
-	return polytope::ptr(new polytope(this->getTemplateDirections(), columnVector, 1));//1 as all signs are <=
+
+	return polytope::ptr(new polytope(this->getTemplateDirections(), columnVector, 1));
 }
-
-/*const math::matrix<double>& template_polyhedra::getAllDirections() const {
- return All_Directions;
- }
-
- void template_polyhedra::setAllDirections(
- math::matrix<double>& allDirections) {
- this->All_Directions = allDirections;
- this->setTotalDirections(allDirections.size1());
-
- }*/
 
 const math::matrix<double>& template_polyhedra::getMatrixSupportFunction() const {
 	return Matrix_SupportFunction;
@@ -575,9 +475,9 @@ const math::matrix<double>& template_polyhedra::getMatrixSupportFunction() const
 
 void template_polyhedra::setMatrixSupportFunction(
 		math::matrix<double>& matrixSupportFunction) {
-//	cout<<"Called\n";
+
 	Matrix_SupportFunction = matrixSupportFunction;
-	//cout<<"Called 2\n";
+
 	this->setTotalIterations(matrixSupportFunction.size2());
 }
 
@@ -606,12 +506,11 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 			return template_polyhedra::ptr(new template_polyhedra(Tpoly->getMatrixSupportFunction(), Tpoly->getTemplateDirections()));
 		}
 	}
-	//std::cout<<"\nEntered inside Union_templatePolytope\n";
+
 	size_type rows = Tpoly->getMatrixSupportFunction().size1();	//rows will not change only column size will increase
 	unsigned int k;
 	size_type cols = Matrix_SupportFunction.size2()
 			+ Tpoly->getMatrixSupportFunction().size2();
-	//std::cout<<"\nRows = "<<rows<<"Cols = "<<cols<<"\n";
 
 	math::matrix<double> new_SFMatrix;
 	new_SFMatrix = Matrix_SupportFunction;//copy entire calling object's SFmatrix
@@ -622,11 +521,91 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 		for (unsigned int j = 0; j < Tpoly->getMatrixSupportFunction().size2();
 				j++) {
 			new_SFMatrix(i, k) = Tpoly->getMatrixSupportFunction()(i, j);
-			//	std::cout<<Tpoly.getMatrixSupportFunction()(i,j)<<"\t";
+			
 			k++;
 		}
-		//std::cout<<endl;
 	}
 	return template_polyhedra::ptr(
 			new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
+}
+
+std::list<polytope::ptr> template_polyhedra::postD_chull(polytope::ptr guard, polytope::ptr inv, int lp_solver_type)
+{
+	std::list<std::pair<unsigned int, unsigned int> > range_list;
+	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type);
+
+	std::list<polytope::ptr> polys;
+	unsigned int poly_dir_size = this->template_Directions.size1() + this->invariant_Directions.size1();
+	std::vector<double> colVector(poly_dir_size);
+
+	for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end(); range_it++) {
+		unsigned int start = (*range_it).first, end=(*range_it).second;
+
+		// intersect the omegas with guard.
+		std::vector<polytope::ptr> omega_intersect_g;
+		for(unsigned int i=start;i<=end;i++){
+			polytope::ptr p = this->getPolytope(i);
+			p = p->GetPolytope_Intersection(guard);
+			p = p->GetPolytope_Intersection(inv);
+			omega_intersect_g.push_back(p);
+		}
+			
+		//compute the template hull of the polys in omega_intersect_g
+			 
+		for (unsigned int eachTemplateDir=0;eachTemplateDir<this->template_Directions.size1();eachTemplateDir++){
+				
+			double max_sf;
+			std::vector<double> dir(template_Directions.size2());
+			lp_solver lp;
+			//get directions from template
+			for(unsigned int j=0;j<dir.size();j++)
+				dir[j] = template_Directions(eachTemplateDir, j);
+			
+			for(unsigned int j=0;j<omega_intersect_g.size();j++){
+				polytope::ptr p = omega_intersect_g[j];
+				lp.setConstraints(p->getCoeffMatrix(),p->getColumnVector(),1);
+				double sf = p->computeSupportFunction(dir,lp);
+				
+				if(j==0){
+					max_sf = sf; continue;
+				}
+				if(sf>max_sf)
+					max_sf = sf;					
+			}	
+			colVector[eachTemplateDir] = max_sf;
+			
+		}//end of each template direction ALSO HAVE TO PERFORM INVARIANT DIRECTION
+
+		unsigned int total_dir = this->template_Directions.size1();
+		for (unsigned int eachInvDir=0;eachInvDir<this->invariant_Directions.size1();eachInvDir++){
+	
+			double max_sf;
+			std::vector<double> dir(invariant_Directions.size2());
+			lp_solver lp;
+			
+			//get invariant normal directions
+			for(unsigned int j=0;j<dir.size();j++)
+				dir[j] = invariant_Directions(eachInvDir,j);
+
+			for(unsigned int j=0;j<omega_intersect_g.size();j++){
+				polytope::ptr p = omega_intersect_g[j];
+				lp.setConstraints(p->getCoeffMatrix(),p->getColumnVector(),1);
+				double sf = p->computeSupportFunction(dir,lp);
+				if(j==0){
+					max_sf = sf; continue;
+				}
+				if(sf>max_sf)
+					max_sf = sf;					
+			}	
+			colVector[total_dir + eachInvDir] = max_sf;
+		}
+		math::matrix<double> allDirs;
+		this->template_Directions.matrix_join(this->invariant_Directions, allDirs);
+		polytope::ptr p = polytope::ptr(new polytope(allDirs,colVector,1));
+		// intersect with guard again for precision
+		p = p->GetPolytope_Intersection(guard);
+		polys.push_back(p);
+	} //end of multiple intersected region
+
+	return polys;
 }

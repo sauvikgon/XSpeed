@@ -7,8 +7,7 @@ void reachabilityCaller(hybrid_automata& Hybrid_Automata, std::list<initial_stat
 		std::list<abstractCE::ptr>& ce_candidates) {
 
 	 	 //Sequential PostC and PostD
-
-	if ((user_options.get_algorithm() == SEQ_SF)
+		if ((user_options.get_algorithm() == SEQ_SF)
 			|| (user_options.get_algorithm() == PAR_SF)
 			|| (user_options.get_algorithm() == TIME_SLICE)
 			|| (user_options.get_algorithm() == FB_INTERPOL) ) {

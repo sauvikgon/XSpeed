@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
 	// ----Section for Running Exp-Graph. This code is put only for experimental task.
 
-	int	 runExpGraph_WoFC = 0;	// To run Exp-Graph Algorithm, that is, Explore the Graph. Note should assign a valid loc-id in the forbidden set (and not -1, unlike FC algo)
+	int	 runExpGraph_WoFC = 0;	// To run Exp-Graph Algorithm, that is, Explore the Graph, we should assign a valid loc-id in the forbidden set (and not -1, unlike FC algo)
 	if (runExpGraph_WoFC) {
 		bool found_CE = runWoFC_counter_example(Hybrid_Automata, init_state, forbidden_set, user_options);
 
@@ -59,9 +59,7 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-//End of Section Exp-Graph.
-
-
+  //End of Section Exp-Graph.
 
 
 	// Reachability with CE generation

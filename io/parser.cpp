@@ -443,9 +443,9 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 			//debug
 			/*std::cout << "Reset Map:\n";
 			std::cout << t_reset.Map;	
-			std::cout << "\nReset b:\n";*/
+			std::cout << "\nReset b:\n";
 			for(unsigned int i=0;i<t_reset.b.size();i++)
-				std::cout << t_reset.b[i] << std::endl;
+				std::cout << t_reset.b[i] << std::endl;*/
 			//--
 		}
 		

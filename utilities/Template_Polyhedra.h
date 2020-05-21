@@ -90,9 +90,9 @@ public:
 	std::list<polytope::ptr> flowpipe_intersectionSequential(bool aggregation, polytope::ptr guard, int lp_solver_type);
 
 	/*
-	 * using PPL library returns a list of polytopes with each polytopes as the convex_hull approximation of the intersected region of guard with the flowpipe
+	 * Returns a list of polytopes as the convex_hull approximation of intersection of guard and flowpipe
 	 */
-	//std::list<polytope::ptr> flowpipe_intersectionSequential_convex_hull(polytope::ptr guard, int lp_solver_type);
+	std::list<polytope::ptr> postD_chull(polytope::ptr guard, polytope::ptr inv, int lp_solver_type);
 
 	/*
 	 * From the calling TEMPLATE_POLYHEDRA a SINGLE POLYTOPE is returned.
@@ -119,12 +119,6 @@ public:
 	std::vector<double> getInvariantBoundValue(int iterations_number);
 	void resize_matrix_SupportFunction(int dir_nums,
 			int iterations_before_intersection);
-
-	void Testing_print(){
-		std::cout<<"total_template_Directions = "<<total_template_Directions<<std::endl;
-		std::cout<<"total_invariant_Directions = "<<total_invariant_Directions<<std::endl;
-		std::cout<<"total_iterations = "<<total_iterations<<std::endl;
-	}
 
 private:
 	/*polytope*/

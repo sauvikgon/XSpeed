@@ -601,8 +601,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	double tol_inv = 1e-10;
 
 	dimension = x.size();
-	//cout << "Iteration Remaining" << N << "\n";
-
+	
 	reltol = 1e-8;
 	abstol = 1e-8;
 
@@ -614,12 +613,8 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 	cout.precision(17);
 
-	/*for (unsigned int i = 0; i < dimension; i++)
-		cout<<x[i]<<"\t";
-	cout<<"Checking "<<tol_inv <<"  point-distance with Invariant = "<<dist<<endl;*/
-
-
 	if (dist > tol_inv) {
+		std::cout << "Initial point outside the location invariant\n";
 		std::vector<sim_start_point> emptylist;
 		return emptylist;
 	};

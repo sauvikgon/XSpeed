@@ -13,13 +13,11 @@
 void simulationCaller(ReachabilityParameters& reach_parameters,
 		hybrid_automata& ha, std::list<initial_state::ptr> init_state,
 		userOptions& op, std::pair<int, polytope::ptr>& forbidden_set) {
-
-	load_ha_models(init_state, ha, reach_parameters, op); //Loads the model and reach-parameters
-
+	
 	simulation::ptr sim = simulation::ptr(new simulation());
 
 	sim->set_out_dimension(op.get_first_plot_dimension(), op.get_second_plot_dimension()); //output dimensions
-	sim->set_time_step(reach_parameters.time_step);
+	sim->set_time_step(op.get_timeStep());
 
 
 	std::list<initial_state::ptr>::iterator it;
@@ -47,16 +45,16 @@ void simulationCaller(ReachabilityParameters& reach_parameters,
 		bool is_safe = true;
 		unsigned int num_unsafe_traj = 0;
 		for (unsigned int i = 0; i < n; i++) {
-			is_safe = sim->simulateHa(start_pts[i], 0,reach_parameters.TimeBound,ha, forbidden_set, max_jump);
+			is_safe = sim->simulateHa(start_pts[i], 0, op.get_timeHorizon(), ha, forbidden_set, max_jump);
 			if(!is_safe) num_unsafe_traj++;
 		}
-		std::cout << num_unsafe_traj << " trajectories violated safety out of " << n << " simulations\n";
+		std::cout << num_unsafe_traj << " trajectories violated safety constraint out of " << n << std::endl;
 
 	} else if (op.get_simu_algo() == 2) { //Adaptation of Gerard J. Holzmann's algorithm for Simulation
 		std::cout << "\nComputing trajectories in parallel using an adaptation of Gerard J. Holzmann's algorithm.\n";
 		//Take time recording here
-		sim->parSimulateHa(n, initialset, 0, reach_parameters.TimeBound, ha, forbidden_set, max_jump); // Holzmann algorithm adaptation without lock for containment check
-		//stop reading time
+		sim->parSimulateHa(n, initialset, 0, op.get_timeHorizon(), ha, forbidden_set, max_jump); // Holzmann algorithm adaptation without lock for containment check
+
 	}
 	tsim.stop();
 

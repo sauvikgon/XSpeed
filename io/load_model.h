@@ -55,14 +55,17 @@
 #include "benchmarks/ConstantMotion/ConstantMotion.h"
 
 
-/**
- * Creates the pre-defined hybrid automata models in memory with config parameters.
- */
-void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
+/* Sets the reachability options given by the user */
+
+void set_params(std::list<initial_state::ptr>& init_state,
 		userOptions& op, ReachabilityParameters& reach_parameters,
 		std::pair<int, polytope::ptr>& forbidden_set);
 
-void load_ha_models(std::list<initial_state::ptr>& init_state,
+/**
+ * Creates the pre-defined hybrid automata models in memory with config parameters.
+ */
+
+void load_ha_model(std::list<initial_state::ptr>& init_state,
 		hybrid_automata& ha, ReachabilityParameters& reach_parameters, userOptions& op);
 
 #endif

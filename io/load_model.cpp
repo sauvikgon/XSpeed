@@ -7,12 +7,8 @@
 
 #include "../io/load_model.h"
 
-void load_ha_models(std::list<initial_state::ptr>& init_state,
+void load_ha_model(std::list<initial_state::ptr>& init_state,
 		hybrid_automata& ha, ReachabilityParameters& reach_parameters, userOptions& op){
-
-	reach_parameters.TimeBound = op.get_timeHorizon(); //Total Time Interval
-	reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
-	reach_parameters.time_step = op.get_timeStep();
 	
 	unsigned int HybridSystem_Model_Type = op.get_model();
 
@@ -140,14 +136,18 @@ void load_ha_models(std::list<initial_state::ptr>& init_state,
 
 }
 
-void load_model(std::list<initial_state::ptr>& init_state, hybrid_automata& ha,
+/* Sets the reachability options given by the user */
+
+void set_params(std::list<initial_state::ptr>& init_state,
 		userOptions& op, ReachabilityParameters& reach_parameters,
 		std::pair<int, polytope::ptr>& forbidden_set) {
+
 	unsigned int row, col;
 
-	//Loads the HA models and set the reach_parameters from user-options
-	load_ha_models(init_state, ha, reach_parameters,op); //function re-used
-
+	reach_parameters.TimeBound = op.get_timeHorizon(); //Total Time Interval
+	reach_parameters.Iterations = (unsigned int) (op.get_timeHorizon() / op.get_timeStep()); // number of iterations
+	reach_parameters.time_step = op.get_timeStep();
+	
 	//Assigning Directions
 	unsigned int Directions_Type = op.get_directionTemplate(); 
 

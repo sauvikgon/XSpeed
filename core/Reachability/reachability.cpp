@@ -26,13 +26,10 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	traj_splicing_time = 0;
 	set_aggregation = user_options.getSetAggregation();
 	safe = true; // Assumed initially that the model is safe.
-	setUserOp(user_options); //Amit set here for easy access
+	setUserOp(user_options); 
 }
 
 
-//bound is the maximum number of transitions or jumps permitted.
-//reach_parameters includes the different parameters needed in the computation of reachability.
-//I is the initial symbolic state
 std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE::ptr>& symbolic_ce_list){
 
 	std::list <symbolic_states::ptr> Reachability_Region;
@@ -55,12 +52,13 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 	while (!pw_list.isEmpty_WaitingList()) {
 		boost::timer::cpu_timer jump_time;
-		jump_time.start();	//Start recording the entire time for jump
-		symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states()); //required to be pushed into the Reachability_Region
+		jump_time.start();	//Start recording the time for evaluating jump
+		symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states());
+
 		initial_state::ptr U;
 		U = pw_list.WaitingList_delete_front();
-		bfslevel = queue.front(); //get FRONT element
-		queue.pop_front(); //delete from FRONT
+		bfslevel = queue.front();
+		queue.pop_front(); 
 
 		if (bfslevel > bound)
 			break; //stopping since the number of jumps exceeds the bound
@@ -85,10 +83,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		current_location = H.getLocation(location_id);
 		string name = current_location->getName();
 
-		// ******************* Computing Parameters *******************************
-
-		// ******************* Computing Parameters *******************************
-		// ************ Compute flowpipe_cost:: estimation Starts **********************************
 		unsigned int NewTotalIteration = reach_parameters.Iterations;
 
 		 /*
@@ -99,13 +93,13 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		seq_postC_selection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
 		num_flowpipe_computed++;//computed one Flowpipe
 
-		//	************************************ Reach or Flowpipe Computed *********************
+		//	***************** Flowpipe Computed ****************
 
 		if (reach_region->getTotalIterations() != 0) {
 			S->setContinuousSetptr(reach_region);
 			Reachability_Region.push_back(S);
 		}
-		//  ******************************** Safety Verification section ************************
+		//  ********** Safety Verification section ************************
 		std::list < symbolic_states::ptr > list_sym_states;
 		polytope::ptr polyI; //initial polytope of the flowpipe
 		std::list < transition::ptr > list_transitions; // list of transitions leading to the unsafe set
@@ -114,19 +108,16 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				//so perform intersection with forbidden set provided locID matches
 
 			int locID = current_location->getLocId();
-			cout<<"Running Safety Check for Loc = "<<locID<<std::endl;
+			
 			if (forbidden_set.first==-1 || locID == forbidden_set.first) { // forbidden locID matches. loc id of -1 means any location
 				polytope::ptr forbid_poly = forbidden_set.second;
 				std::list < template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
 				if (forbid_intersects.size() != 0){
-					//std::cout << "intersection with forbidden-region found at location: " << locID << std::endl;
 					safety_violation = true;
 					this->safe = false;
 				}
-
-				//if (safety_violation && ce_flag == false) break; // No need to generate CE
 
 				if (safety_violation && ce_flag == true) // CE Generation is requested
 				{
@@ -160,7 +151,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 						if (symb_state_in_abst_ce->getParentPtrSymbolicState() != NULL) { //searching only if not NULL
 
-							//current_forbidden_state = searchSymbolic_state(Reachability_Region, current_forbidden_state->getParentPtrSymbolicState());
 							symb_state_in_abst_ce = symb_state_in_abst_ce->getParentPtrSymbolicState();
 							//2) ******************* list_transitions ********************
 							ds2 = symb_state_in_abst_ce->getDiscreteSet(); //c)
@@ -211,7 +201,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		} //computed flowpipe is not empty
 
 
-		//  ******************************** Safety Verification section Ends********************************
+		//  *********Safety Verification ends *****
+
 		//  ******* ---POST_D Begins--- ******* Check to see if Computed FlowPipe is Empty  **********
 
 		if (reach_region->getTotalIterations() != 0 && bfslevel <= bound) {
@@ -227,11 +218,13 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				current_destination = H.getLocation((*t)->getDestination_Location_Id());
 				string locName = current_destination->getName();
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
-				guard_polytope = (*t)->getGuard(); //	GeneratePolytopePlotter(guard_polytope);
-
-
+				guard_polytope = (*t)->getGuard(); //	
+				polytope::ptr inv = current_location->getInvariant();
+				
+				
 				bool aggregation=true; // TRUE indicates ON, so the template hull of the polytopes intersecting with the guard is taken
-				if (boost::iequals(this->getSetAggregation(),"thull")){
+				string set_aggr_choice = this->getSetAggregation();
+				if (boost::iequals(set_aggr_choice,"thull") || boost::iequals(set_aggr_choice,"chull")){
 					aggregation=true;
 
 				} else if (boost::iequals(this->getSetAggregation(),"none")){
@@ -240,7 +233,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 				//OFF indicate for each Omega(a convex set in flowpipe) a new symbolic state is created and pushed in the Wlist
 
-				if (!guard_polytope->getIsUniverse() && !guard_polytope->getIsEmpty()){	//Todo guard and invariants in the model: True is universal and False is unsatisfiable/empty
+				if (!guard_polytope->getIsUniverse() && !guard_polytope->getIsEmpty()){
 
 					// Returns the template hull of the polytopes that intersect with the guard
 					//default is 100 percent clustering when guard is not universe
@@ -248,8 +241,22 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					 * First find out all Omegas that intersects with the guard_polytope and then push each Omega
 					 * into the polys. Guard intersection is done in the following steps below for each of these Omegas
 					 */
-					//polys = reach_region->flowpipe_intersectionSequential_convex_hull(guard_polytope, lp_solver_type);//Todo::debug PPL
-					polys = reach_region->flowpipe_intersectionSequential(aggregation, guard_polytope, lp_solver_type);
+					if(boost::iequals(set_aggr_choice,"thull") || boost::iequals(set_aggr_choice,"none")){
+						polys = reach_region->flowpipe_intersectionSequential(aggregation, guard_polytope, lp_solver_type);
+
+					// intersect the location inv with the polys
+					
+
+					}
+					else if(boost::iequals(set_aggr_choice,"chull"))
+						polys = reach_region->postD_chull(guard_polytope, inv, lp_solver_type);
+
+					//debug	
+					// plot the first poly
+					polytope::ptr p = polys.front();
+					/*if(polys.size()!=0)
+						p->print2file("postD-poly", 2, 3);*/
+					//--
 
 				} else if (guard_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings
@@ -290,7 +297,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					continue; //do not push into the waitingList
 
 				current_assignment = (*t)->getAssignT();
-				// *** interesected_polyhedra included with invariant_directions also ******
+				// *** intersected_polyhedra included with invariant_directions also ******
 				int destination_locID = (*t)->getDestination_Location_Id();
 				ds.insert_element(destination_locID);
 				std::list<polytope::ptr> intersected_polys;
@@ -298,12 +305,16 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {
 					polytope::ptr intersectedRegion = (*i);
 					polytope::ptr newPolytope, newShiftedPolytope; //created an object here
-
-					if(!guard_polytope->getIsUniverse()){
-						newPolytope = intersectedRegion->GetPolytope_Intersection(guard_polytope);
-					} else{
-						newPolytope = intersectedRegion;
+					if(boost::iequals(set_aggr_choice,"thull") || boost::iequals(set_aggr_choice,"none")){			
+						
+						if(!guard_polytope->getIsUniverse()){
+							newPolytope = intersectedRegion->GetPolytope_Intersection(guard_polytope);
+						} else{
+							newPolytope = intersectedRegion;
+						}
 					}
+					else // chull aggregation. no need to intersect with guard.
+						newPolytope = intersectedRegion;
 
 					if (current_assignment.Map.isInvertible()) {
 						newShiftedPolytope = post_assign_exact(newPolytope, current_assignment.Map, current_assignment.b);
@@ -317,7 +328,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					}
 
 					//debug
-					//newShiftedPolytope->print2file("./nextpoly",0,10);
+					//newShiftedPolytope->print2file("./nextpoly",2,3);
 					//---
 					int is_ContainmentCheckRequired = 0;	//1 will enable Containment Check and Make the code slow; 0 will disable and will make it fast
 					if (is_ContainmentCheckRequired){	//Containment Checking required
@@ -330,7 +341,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 						polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 						newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type);
 						isContain = templated_isContained(destination_locID, newPoly, Reachability_Region, lp_solver_type);//over-approximated but threadSafe
-						//std::cout<<"Before Containment check\n";
+					
 						//Calling with the newShifted polytope to use PPL library
 						//isContain = isContained(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type);//Todo::debug PPL for double data type
 						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
@@ -621,11 +632,9 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			} // End-if  ******* Check for Empty FlowPipe Done *********
 		} //END of parallel FOR-LOOP
 
-		//:: Can be optimized if we can count number_times inside the parallel loop per breadth then we can avoid transaction and intersection
-		//:: computation for next transition if number_times exceeds bound ....
-		number_times++; //One Level or one Breadth Search over
+		number_times++; //One Level of BFS over
 
-		// ************************* BFS Ends *************************************
+		// *********************** BFS Ends *************************
 
 		//Creating a list of objects of "Reachability Set"/Symbolic_states
 		for (unsigned int index = 0; index < count; index++) {
@@ -879,7 +888,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 					string trans_name = (*trans)->getLabel();
 					t100.start();
 					intersected_polyhedra = t_poly->polys_intersectionParallel(guard_polytope, lp_solver_type); //, intersection_start_point);
-					//intersected_polyhedra = t_poly->_intersectionSequential(guard_polytope, lp_solver_type); //, intersection_start_point);
+				
 					t100.stop();
 					if (intersected_polyhedra.size() > 0) { //there is intersection so new symbolic state will be inserted into the waitingList
 #pragma omp critical
@@ -934,7 +943,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 		double clock72;
 		clock72 = t72.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return72 = clock72 / (double) 1000;
-		std::cout << "\nDiscrete Post_D computation Time:Wall(Seconds) = " << return72 << std::endl;
+		std::cout << "\nDiscrete Post_D computation Time:Wall (Seconds) = " << return72 << std::endl;
 
 //  ********** Safety Verification Should be after Flowpipe computation but due to omp-parallel-for NOT POSSIBLE to use break*************
 
@@ -945,13 +954,13 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 		}
 #pragma omp parallel for
 		for (unsigned int index = 0; index < count; index++) {
-			//  ******************************** Safety Verification section ********************************
+			//  *********** Safety Verification section ***************
 			safety_violation = safetyVerify(S[index], Reachability_Region, symbolic_ce_list);
-			//  ******************************** Safety Verification section ********************************
+			
 		} //end-for pushing all computed flowpipe
 
 		t = 1 - t; //Switching Read/Write options for Qpw_list[1-t]
-		number_times++; //One Level or one Breadth Search over
+		number_times++; //One level of BFS over
 		// ************************* BFS Ends *************************************
 	} //end of while loop checking waiting_list not equals empty
 	cout << "\n ***************************************************************************\n";
@@ -1278,8 +1287,7 @@ void reachability::computeBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS) 
 				LoadBalanceDS[i].sf_U[j] = lp_U.Compute_LLP(dirs);
 			}
 		}
-		//cout << "Testing A3\n";
-		//unsigned int tot_dirs = LoadBalanceDS[i].List_dir_X0.size1();
+	
 		LoadBalanceDS[i].sf_X0.resize(LoadBalanceDS[i].List_dir_X0.size1());
 		LoadBalanceDS[i].sf_dotProduct.resize(
 				LoadBalanceDS[i].List_dir_X0.size1());
@@ -1414,56 +1422,6 @@ double reachability::boxLPSolver(polytope::ptr poly, std::vector<double> dir) {
 	}
 	return res;
 }
-
-/*
- * This is NOT thread-safe but uses PPL library with exact computation
- */
-/*bool reachability::isContained(int locID, polytope::ptr poly, std::list<symbolic_states::ptr> Reachability_Region, int lp_solver_type){
-
-	bool contained = false;
-	//std::cout<<"Number of Flowpipes passed so far = "<<Reachability_Region.size()<<"\n";
-
-	for (std::list <symbolic_states::ptr>::iterator it = Reachability_Region.begin(); it !=Reachability_Region.end();it++){
-		discrete_set ds;
-		ds = (*it)->getDiscreteSet();
-		int locationID;
-		for (std::set<int>::iterator i = ds.getDiscreteElements().begin();i != ds.getDiscreteElements().end(); ++i)
-			locationID = (*i);
-		if (locationID == locID){	//found Location matching so perform containment check with the flowpipe
-			template_polyhedra::ptr flowpipe;
-			flowpipe = (*it)->getContinuousSetptr();
-			//std::cout<<"Number of Omegas in the Flowpipe = "<<flowpipe->getTotalIterations()<<"\n";
-			bool intersects=false;
-			for (unsigned int i = 0; i < flowpipe->getMatrixSupportFunction().size2(); i++) {
-				//std::cout<<"\n Inner thread Template_polyhedra omp_get_num_threads() = "<< omp_get_num_threads()<<"\n";
-				polytope::ptr p;
-				p = flowpipe->getPolytope(i);
-				if (flowpipe->getInvariantDirections().size1() !=0){	//bug fix for Platoon model where invariant does not exists
-					std::vector<double> constraint_bound_values(flowpipe->getInvariantDirections().size1());
-					constraint_bound_values = flowpipe->getInvariantBoundValue(i);
-					p->setMoreConstraints(flowpipe->getInvariantDirections(), constraint_bound_values);
-				}
-				intersects = p->check_polytope_intersection(poly, lp_solver_type); //result of intersection
-				if (intersects){
-					//todo:: if Contained in a union of Omegas
-			//		std::cout<<"Intersected = "<<intersects<<std::endl;		//Good testing
-
-					//contained = p->contains(poly, lp_solver_type);//	Our simple polytope Containment Check
-
-					PPL_Polyhedron::ptr p1=PPL_Polyhedron::ptr(new PPL_Polyhedron(p->getCoeffMatrix(),p->getColumnVector(),p->getInEqualitySign()));
-					PPL_Polyhedron::ptr p2=PPL_Polyhedron::ptr(new PPL_Polyhedron(poly->getCoeffMatrix(),poly->getColumnVector(),poly->getInEqualitySign()));
-
-					contained = p1->is_contained(p2);
-					if (contained){
-						//std::cout<<"\n\nFound Fixed-point!!!\n";
-						break;	//No need to check the rest if contained in a single Omega
-					}
-				}
-			}
-		}
-	}
-	return contained;
-}*/
 
 
 /*

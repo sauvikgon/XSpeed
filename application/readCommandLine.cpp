@@ -54,7 +54,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			"8 -- Sequential algorithm (Forward approximation model)\n")
 	("time-slice", po::value<int>(), "Set the number of Time Slice or partitions for the Time-sliced Algorithm")
 	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking (0 for only postC)")
-	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - none : consider each convex set as successor sets for the next depth")
+	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - chull : convex hull \n - none : no set aggregation (precise but costly)")
 
 	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst
 	("CE",po::value<std::string>(), "Search for counter-example to forbidden-region together with state-space exploration:\n - (all): search in all flowpipe feasible paths "
@@ -144,12 +144,12 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 		if (vm.count("model-file") && vm.count("config-file")
 				&& (user_options.get_model()!=0) ) { // model=0 default to no model specified
-			std::cout << "Invalid inputs (Either a model file or a pre-loaded model to be specified, but not both.)\n";
+			std::cout << "Invalid input. Either a model file or a pre-loaded model to be specified, but not both.\n";
 			throw(new exception());
 		}
 		
 		if (vm.count("model-file") && vm.count("config-file")
-					&& ((user_options.get_model()==0))) { // model=0 means no model specified
+					&& ((user_options.get_model()==0))) { // model=0 means no pre-built model specified
 			string cmd_str = "java -jar Model-Translator.jar -t XSpeed \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl"; 
 			system(cmd_str.c_str());
 			parser _parser("input_model.mdl");
@@ -200,12 +200,12 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 		if (vm.count("aggregate")) { //Compulsory Options but set to thull by default
 			user_options.setSetAggregation((vm["aggregate"].as<std::string>()));
-			if (boost::iequals(user_options.getSetAggregation(),"none")==false) {
-				if (boost::iequals(user_options.getSetAggregation(),"thull")==false){
-					std::cout << "Invalid aggregation option specified. Expected \"none\" or \"thull\".\n";
+			string optionVal = user_options.getSetAggregation();
+
+			if ( boost::iequals(optionVal,"none")==false && boost::iequals(optionVal,"thull")==false && boost::iequals(optionVal,"chull")==false){
+					std::cout << "Invalid aggregation option specified. Expected \"none\",\"thull\" or \"chull\".\n";
 					throw(new exception());
 				}
-			}
 		}
 		
 		if (vm.count("output-variable")) {
@@ -278,10 +278,15 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				throw(new exception());
 			}
 		}
-		if (vm.count("model")) { //Compulsory Options but set to 0 by default
+		if (vm["model"].as<int>()!=0) { //Compulsory Options but set to 0 by default
 			user_options.set_model(vm["model"].as<int>());
-			load_model(init_state, Hybrid_Automata, user_options, reach_parameters, forbidden_set);
+			load_ha_model(init_state, Hybrid_Automata, reach_parameters, user_options);
 		}
+
+		/* Set the reachability options given by the user */
+		set_params(init_state, user_options, reach_parameters, forbidden_set);
+		
+
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
 			
@@ -290,7 +295,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		std::cout<<"Output variables not specified. Two variables of the system expected.\n"<<std::endl;
 		throw(new exception());
 	}
-
+ 
 	unsigned int x1, x2;
 	try{
 		x1 = Hybrid_Automata.get_index(output_vars[0]);
