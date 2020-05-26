@@ -8,12 +8,12 @@
 #ifndef DIRECTIONALAPPROXERROR_H_
 #define DIRECTIONALAPPROXERROR_H_
 
-#include "application/sf_utility.h"
+#include <application/sfUtility.h>
+#include <core/continuous/polytope/polytope.h>
 #include <nlopt.hpp>
 #include <math.h>
 #include <vector>
 #include <cassert>
-#include "../core/continuous/Polytope/polytope.h"
 
 extern nlopt::opt optProb1;
 

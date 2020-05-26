@@ -5,10 +5,10 @@
  *      Author: rajarshi
  */
 
+#include <utilities/cpuUtilities/cpuUtilities.h>
+#include <utilities/memUtilities/memUsage.h>
 #include <iostream>
 #include "statistics.h"
-#include "utilities/cpu_utilities/cpu_utilities.h"
-#include "utilities/memory_utilities/memory_usage.h"
 
 
 void print_statistics(boost::timer::cpu_timer timer, double cpu_usage, long mem_usage, unsigned int num_exps, std::string msg)

@@ -8,8 +8,8 @@
 #ifndef ANALYTICODESOL_H_
 #define ANALYTICODESOL_H_
 
+#include <application/structures.h>
 #include <vector>
-#include "application/DataStructureDirections.h"
 
 /*
  * Returns the solution of an ODE of the form X' = A*X+b at some time

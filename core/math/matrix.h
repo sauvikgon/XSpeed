@@ -12,9 +12,9 @@
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <core/math/matrixExponential.hpp>
 
 #include "../../core/math/expm.h"
-#include "../../core/math/matrix_exponential.hpp"
 #include "../../core/math/r8lib.hpp"
 
 namespace math {

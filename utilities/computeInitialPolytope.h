@@ -10,13 +10,13 @@
 #ifndef COMPUTEINITIALPOLYTOPE_H_
 #define COMPUTEINITIALPOLYTOPE_H_
 
+#include <core/continuous/polytope/polytope.h>
+#include <core/reachability/postCParallel.h>
+#include <utilities/templatePolyhedra.h>
 #include <list>
 
-#include "core/continuous/Polytope/polytope.h"
-#include "core/Reachability/postCParallel.h"
 #include "utilities/invariantBoundaryCheck.h"
 #include "utilities/testPolytopePlotting.h"
-#include "utilities/Template_Polyhedra.h"
 
 //#include "MySrc/Reachability/reachabilityParallel_Iterations.h"
 

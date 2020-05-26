@@ -8,17 +8,17 @@
 #ifndef REACHABILITYCALLER_H_
 #define REACHABILITYCALLER_H_
 
+#include <core/reachability/agjh.h>
+#include <core/reachability/asyncBFS.h>
+#include <core/reachability/tpbfs.h>
 #include "userOptions.h"
 #include "counterExample/abstractCE.h"
 #include "application/userOptions.h"
 #include "utilities/statistics.h"
 #include <list>
 
-#include "../core/Reachability/AGJH.h"
-#include "../core/Reachability/AsyncBFS.h"
-#include "../core/Reachability/reachability.h"
-#include "../core/Reachability/TPBFS.h"
-#include "../core/symbolic_states/symbolic_states.h"
+#include "core/reachability/reachability.h"
+#include "core/symbolicStates/symbolicStates.h"
 
 extern unsigned int ce_search_time;
 

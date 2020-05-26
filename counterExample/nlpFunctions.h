@@ -10,8 +10,8 @@
 #define NLP_FUNC_H
 
 
-#include "../core/math/matrix.h"
-#include "../application/DataStructureDirections.h"
+#include "core/math/matrix.h"
+#include "application/structures.h"
 
 #define VALIDATION
 

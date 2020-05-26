@@ -5,8 +5,8 @@
  *      Author: amit
  */
 
+#include <utilities/dataStructures.h>
 #include "../utilities/invariantBoundaryCheck.h"
-#include "../utilities/UtilitiesDataStructure.h"
 
 void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
 		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {

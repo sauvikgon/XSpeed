@@ -11,20 +11,20 @@
 
 #include <list>
 #include <boost/shared_ptr.hpp>
+#include <core/math/lpSolver/lpSolver.h>
 #include "boost/timer/timer.hpp"
 #include "nlopt.hpp"
-#include "counterExample/abstract_symbolic_state.h"
 #include "counterExample/concreteCE.h"
 #include "nlpFunctions.h"
 #include <fstream>
 #include <string>
-#include "../core/continuous/ConvexSet/supportFunctionProvider.h"
-#include "../core/HybridAutomata/Hybrid_Automata.h"
-#include "../core/HybridAutomata/Transition.h"
-#include "../core/symbolic_states/symbolic_states.h"
-#include "core/math/lp_solver/lp_solver.h"
-#include "../core/math/analyticODESol.h"
-#include <application/userOptions.h>
+#include "core/continuous/convexSet/supportFunctionProvider.h"
+#include "core/hybridAutomata/hybridAutomata.h"
+#include "core/hybridAutomata/transition.h"
+#include "core/symbolicStates/symbolicStates.h"
+#include "core/math/analyticODESol.h"
+#include "application/userOptions.h"
+#include "counterExample/abstractSymbolicState.h"
 #include "counterExample/simulation.h"
 
 /**

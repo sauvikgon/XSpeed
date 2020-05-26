@@ -8,12 +8,12 @@
  *      Author: rajarshi
  */
 
+#include <application/structures.h>
+#include <core/continuous/polytope/polytope.h>
 #include "nlpFunctions.h"
 #include "vector"
 
-#include "../core/continuous/Polytope/polytope.h"
 #include "../core/math/analyticODESol.h"
-#include "application/DataStructureDirections.h"
 #include "abstractCE.h"
 
 extern std::vector<double> start_pos; // the start vectors of opt trajectory from LP solving. Useful in the context of CE_ALGO_TYPE 5

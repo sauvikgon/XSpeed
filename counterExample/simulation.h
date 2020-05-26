@@ -8,6 +8,8 @@
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
+#include <application/structures.h>
+#include <core/continuous/hyperbox/hyperbox.h>
 #include <vector>
 #include <utility>
 #include <cvode/cvode.h>
@@ -22,13 +24,11 @@
 
 #include <sundials/sundials_dense.h>
 #include <sundials/sundials_types.h>
-#include "application/DataStructureDirections.h"
 #include <omp.h>
-#include "../core/continuous/Hyperbox/Hyperbox.h"
-#include "../core/HybridAutomata/Hybrid_Automata.h"
-#include "../core/HybridAutomata/Location.h"
-#include "../core/HybridAutomata/Transition.h"
-#include "../utilities/gradient.h"
+#include "core/hybridAutomata/hybridAutomata.h"
+#include "core/hybridAutomata/location.h"
+#include "core/hybridAutomata/transition.h"
+#include "utilities/gradient.h"
 
 /*
  * A structure to return the last point in Invariant and the

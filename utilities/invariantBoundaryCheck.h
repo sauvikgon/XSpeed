@@ -8,14 +8,14 @@
 #ifndef INVARIANTCHECKWITHREACHABILITY_H_
 #define INVARIANTCHECKWITHREACHABILITY_H_
 
-#include "application/DataStructureDirections.h"
-#include "application/sf_utility.h"
+#include <application/sfUtility.h>
+#include <application/structures.h>
+#include <core/continuous/convexSet/transMinkPoly.h>
 #include <omp.h>
 #include <stdlib.h>	//for using abs() absolute function
 
-#include "../core/continuous/ConvexSet/supportFunctionProvider.h"
-#include "../core/continuous/ConvexSet/transMinkPoly.h"
-#include "../core/math/analyticODESol.h"
+#include "core/continuous/convexSet/supportFunctionProvider.h"
+#include "core/math/analyticODESol.h"
 
 /*
  * Sequential Algorithm using support-function-algorithm to perform invariant crossing check

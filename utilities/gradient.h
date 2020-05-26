@@ -8,10 +8,10 @@
 #ifndef GRADIENT_H_
 #define GRADIENT_H_
 
+#include <core/continuous/polytope/polytope.h>
 #include <vector>
 #include <cmath>
-#include "../core/math/analyticODESol.h"
-#include "../core/continuous/Polytope/polytope.h"
+#include "core/math/analyticODESol.h"
 
 /*
  * Computes derivative of vector (x) to polytope distance d w.r.t x.

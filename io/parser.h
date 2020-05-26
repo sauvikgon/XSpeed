@@ -1,9 +1,9 @@
 #ifndef  __PARSER_H
 #define  __PARSER_H
 
-#include "core/HybridAutomata/Hybrid_Automata.h"
-#include "core/symbolic_states/initial_state.h"
-#include "flowParser/flow_yacc.tab.h"
+#include <core/hybridAutomata/hybridAutomata.h>
+#include <core/symbolicStates/initialState.h>
+#include <io/flowParser/flow.tab.h>
 #include "linExpParser/linexp.tab.h"
 
 /**

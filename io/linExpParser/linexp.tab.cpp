@@ -76,9 +76,9 @@
 #include <cstring>
 #include <vector>
 
-#include "application/DataStructureDirections.h"
-#include "core/HybridAutomata/Hybrid_Automata.h"
-#include "core/continuous/Polytope/polytope.h"
+#include <application/structures.h>
+#include <core/hybridAutomata/hybridAutomata.h>
+#include <core/continuous/polytope/polytope.h>
 
 extern int linexplex();
 extern int linexperror(char *);

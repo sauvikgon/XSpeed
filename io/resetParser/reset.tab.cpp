@@ -76,9 +76,9 @@
 #include <cstring>
 #include <vector>
 
-#include "application/DataStructureDirections.h"
-#include "core/HybridAutomata/Transition.h"
-#include "core/HybridAutomata/Hybrid_Automata.h"
+#include <application/structures.h>
+#include <core/hybridAutomata/transition.h>
+#include <core/hybridAutomata/hybridAutomata.h>
 
 extern int resetlex();
 extern int resetparse(void);

@@ -5,11 +5,11 @@
  *      Author: Rajarshi
  */
 
+#include <utilities/dbgMsgLogger.h>
 #include "counterExample/simulation.h"
 #include <fstream>
 #include <iomanip>
-#include "../core/continuous/Polytope/polytope.h"
-#include "../utilities/dbg_msg_logger.h"
+#include "core/continuous/polytope/polytope.h"
 
 
 

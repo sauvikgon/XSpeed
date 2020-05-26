@@ -5,20 +5,20 @@
  *      Author: Rajarshi
  */
 
+#include <application/sfDirections.h>
+#include <application/sfUtility.h>
+#include <io/ioUtility.h>
+#include <utilities/postAssignment.h>
 #include "counterExample/abstractCE.h"
 #include "counterExample/simulation.h"
-#include "application/sf_directions.h"
-#include "application/sf_utility.h"
 #include <fstream>
 #include <sstream>
 
-#include "../core/continuous/Polytope/polytope.h"
-#include "../core/HybridAutomata/Hybrid_Automata.h"
-#include "../core/math/analyticODESol.h"
-#include "../core/math/matrix.h"
-#include "../io/io_utility.h"
-#include "../utilities/gradient.h"
-#include "../utilities/Post_Assignment.h"
+#include "core/continuous/polytope/polytope.h"
+#include "core/hybridAutomata/hybridAutomata.h"
+#include "core/math/analyticODESol.h"
+#include "core/math/matrix.h"
+#include "utilities/gradient.h"
 
 unsigned int dim;
 unsigned int N;

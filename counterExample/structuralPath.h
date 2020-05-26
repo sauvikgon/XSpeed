@@ -15,8 +15,9 @@
  */
 
 #include <boost/shared_ptr.hpp>
-#include "../core/HybridAutomata/Location.h"
-#include "../core/HybridAutomata/Transition.h"
+#include <core/hybridAutomata/location.h>
+
+#include "core/hybridAutomata/transition.h"
 
 class structuralPath
 {
