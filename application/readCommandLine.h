@@ -10,21 +10,21 @@
 #include <boost/algorithm/string.hpp>
 #include <io/ioUtility.h>
 #include <io/loadModel.h>
-#include "../io/parser.h"
-// *********** Command Line Boost Program Options ********
+#include <io/parser.h>
 #include "counterExample/concreteCE.h"
-
 #include "reachabilityCaller.h"
 #include "application/reachabilityCaller.h"
 
 #ifndef APPLICATION_READCOMMANDLINE_H_
 #define APPLICATION_READCOMMANDLINE_H_
 
+typedef std::pair<int, polytope::ptr> forbidden;
+
 void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters,
-		std::pair<int, polytope::ptr>& forbidden_set);
+		std::vector<forbidden>& forbidden_states);
 
 #endif /* APPLICATION_READCOMMANDLINE_H_ */
 

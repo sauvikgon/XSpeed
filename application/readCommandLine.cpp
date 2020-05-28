@@ -7,7 +7,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters,
-		std::pair<int, polytope::ptr>& forbidden_set) {
+		std::vector<forbidden>& forbidden_states) {
 
 	bool isConfigFileAssigned = false;
 
@@ -158,7 +158,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		
 			Hybrid_Automata = _parser.getHa(); // assign the parsed ha
 			init_state.push_back(_parser.getInitState()); // assign the parsed init
-			forbidden_set = _parser.getForbidden(); //assign the forbidden set
+			forbidden_states = _parser.getForbidden(); //assign the forbidden states
 			isConfigFileAssigned = false;// to continue taking the params from cmdline
 		}
 
@@ -284,7 +284,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 
 		/* Set the reachability options given by the user */
-		set_params(init_state, user_options, reach_parameters, forbidden_set);
+		set_params(init_state, user_options, reach_parameters, forbidden_states);
 		
 
 	} //ALL COMMAND-LINE OPTIONS are set completely
@@ -316,6 +316,8 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	}
 	if (!user_options.get_forbidden_set().empty()){
 		try{
+			forbidden forbidden_set;
+			forbidden_set = forbidden_states[0]; // the first symb state
 			forbidden_set.second->print2file("./bad_poly", x1, x2);
 		} catch(...){
 			std::cout << "Cannot print the forbidden polytope because it is unbounded in the print dimensions or may be empty\n";

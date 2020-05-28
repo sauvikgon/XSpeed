@@ -76,6 +76,9 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 	Dynamics D;
 
 	while(getline(file,line)){
+
+		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
+
 		if(line.compare("#End")==0)
 			break;
 	
@@ -104,7 +107,7 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			string inv_str = *tok_iter;
 			polytope::ptr inv, U;
 
-			if(inv_str.compare(" true")==0){
+			if(inv_str.compare("true")==0){
 				inv = polytope::ptr(new polytope()); // universe
 			}
 			else
@@ -140,7 +143,7 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 				D.MatrixB.resize(dim,ha.umap_size());
 			D.MatrixB.clear(); // all elements set to 0
 			
-			gen_flow(file, D);
+			parse_flow(file, D);
 			//debug
 			/*
 			std::cout << "The generated A matrix:\n";
@@ -291,22 +294,22 @@ void parser::parse()
 			else if(line.compare("#Location") == 0){
 				location::ptr loc = location::ptr(new location());
 				parse_loc(mdlFile,loc);
-				int locId = loc->getLocId();
-				std::pair<int, location::ptr> element;
-				element.first = locId;
-				element.second = loc;
-				locs_list.insert(element); // initialized loc added to the list.
+				ha.addLocation(loc); // initialized loc added to the list.
 			}
 			else if(line.compare("")==0) continue; // empty line.
 
 			else if(line.compare("#Init")==0){
+				string init_str;
+				do{
+					getline(mdlFile,init_str);
+				}while(init_str.compare("")==0); // consume white lines
 			
 				polytope::ptr p = polytope::ptr(new polytope());
 				p->setIsEmpty(false);
 				p->setIsUniverse(true);
 				
 				int init_locId = 1; // default initial location
-				parse_initial(mdlFile, p, init_locId);
+				parse_initial(init_str, p, init_locId);
 				//debug
 				/*std::cout << "Parsed initial polytope:\n";
 				p->printPoly();*/
@@ -317,11 +320,11 @@ void parser::parse()
 				this->ini = ini_ptr;
 			}
 			else if(line.compare("#Forbidden")==0){
-				int bad_locId=-1; // default, meaning any location
-				polytope::ptr bad_poly = polytope::ptr(new polytope());
-				parse_initial(mdlFile, bad_poly, bad_locId);
-				this->forbidden.first = bad_locId;
-				this->forbidden.second = bad_poly;
+				string forbidden_str;
+				do{
+					getline(mdlFile,forbidden_str);
+				}while(forbidden_str.compare("")==0); // consume white lines
+				parse_forbidden(forbidden_str);
 			}
 			else{
 				std::cout << "Error in model file. Expected #Variables, #Location, #Init or #forbidden\n";
@@ -330,7 +333,6 @@ void parser::parse()
 		}
 		mdlFile.close();
 	}
-	ha.addMapped_Locations_List(locs_list); // added locs list to ha
 	ha.setInitialLoc(ini->getLocationId());
 	std::cout << "Model parsing complete.\n";
 	
@@ -364,10 +366,10 @@ void parser::parse_reset(fstream& file, Assign& t_reset){
 }
 
 /* parses a list of consecutive odes to create the dynamics */
-void parser::gen_flow(fstream& file, Dynamics& D){
+void parser::parse_flow(fstream& file, Dynamics& D){
 	string line;	
 	while(getline(file,line)){
-	
+
 		if(line.compare("#End")==0)
 			return;	
 	
@@ -390,6 +392,9 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 	string line;
 
 	while(getline(file,line)){
+
+		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
+
 		if(line.compare("#End")==0)
 			return;
 		// if empty line, then continue
@@ -452,51 +457,99 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 	}	
 }
 /* parses the initial condition string */
-void parser::parse_initial(fstream& file, polytope::ptr& p, int& init_locId)
+void parser::parse_initial(string init_str, polytope::ptr& p, int& init_locId)
 {
-		string init_str;
-		do{
-			getline(file,init_str);
-		}while(init_str.compare("")==0); // consume white lines
-	
-		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-		boost::char_separator<char> sep("&;");
-		tokenizer tokens(init_str, sep);
+	init_str.erase(std::remove_if(init_str.begin(), init_str.end(), ::isspace), init_str.end());
 
-		std::list<std::string> all_args;				
-		for (tokenizer::iterator tok_iter = tokens.begin();
-				tok_iter != tokens.end(); ++tok_iter) {
-			all_args.push_back((std::string) *tok_iter);
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep("&;");
+	tokenizer tokens(init_str, sep);
+
+	std::list<std::string> all_args;
+	for (tokenizer::iterator tok_iter = tokens.begin();
+			tok_iter != tokens.end(); ++tok_iter) {
+		all_args.push_back((std::string) *tok_iter);
+	}
+
+	string tokString;
+	tokenizer::iterator tok_iter;
+	for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
+		tokString = *iter;
+		/* check if setting location id*/
+
+		if(tokString.find("loc")!=std::string::npos){
+
+			boost::char_separator<char> sep1("=");
+			tokens = tokenizer(tokString, sep1);
+			tok_iter = tokens.begin();
+			string s(*tok_iter);
+			assert(s.compare("loc")==0);
+
+			tok_iter++;
+			string locName = *tok_iter;
+			init_locId = ha.getLocation(locName)->getLocId();
+			continue;
 		}
 		
-		string tokString;
-		tokenizer::iterator tok_iter;
-		for(std::list<std::string>::iterator iter = all_args.begin(); iter!=all_args.end();iter++){
-			tokString = *iter;	
-			/* check if setting location id*/
-				
-			if(tokString.find("loc")!=std::string::npos){
-				
-				boost::char_separator<char> sep1("=");
-				tokens = tokenizer(tokString, sep1);
-				tok_iter = tokens.begin();
-				string s(*tok_iter);
-				assert(s.compare("loc")==0);
-				
-				tok_iter++;
-				init_locId = std::atoi((*tok_iter).c_str());
-				continue;
-			}
-			
-			/*---end of loc id setting -----*/
-			polytope::ptr U = polytope::ptr(new polytope());
-		 // to satisfy linexp_parser interface.
-			tokString+="\n"; // To bypass flex issue - not able to detect eos 		
-			yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
-			linexp_parser(p,U); // calls bison parser			
-			linexp_delete_buffer(my_string_buffer);
+		/*---end of loc id setting -----*/
+		polytope::ptr U = polytope::ptr(new polytope());
+		tokString+="\n"; // To bypass flex issue - unable to detect eos
+		yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
+		linexp_parser(p,U); // calls bison parser
+		linexp_delete_buffer(my_string_buffer);
 	}
 }
+
+/* parses the forbidden string */
+void parser::parse_forbidden(string forbidden_str)
+{
+	// erase white-spaces
+	forbidden_str.erase(std::remove_if(forbidden_str.begin(), forbidden_str.end(), ::isspace), forbidden_str.end());
+
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep(",");
+	tokenizer tokens(forbidden_str, sep);
+
+	// segregate the forbidden states separated by location
+	std::list<std::string> all_states;
+
+	for (tokenizer::iterator tok_iter = tokens.begin();
+			tok_iter != tokens.end(); ++tok_iter) {
+		all_states.push_back((std::string) *tok_iter);
+	}
+
+	string tokString;
+	tokenizer::iterator tok_iter;
+	for(std::list<std::string>::iterator iter = all_states.begin(); iter!=all_states.end();iter++){
+		tokString = *iter;
+
+		// extract the location name
+		string locName;
+		boost::char_separator<char> delim(":");
+		tokens = tokenizer(tokString, delim);
+		tokenizer::iterator tok_iter = tokens.begin();
+		locName = *tok_iter;
+
+		int locId = ha.getLocation(locName)->getLocId();
+
+		tok_iter++;
+		string constraints = *tok_iter;
+
+		// tokenize constraints with logical OR op (|)
+
+		boost::char_separator<char> dl("|");
+		tokens = tokenizer(constraints, dl);
+		for (tok_iter = tokens.begin();tok_iter != tokens.end(); ++tok_iter) {
+			string and_constraints = *tok_iter;
+			polytope::ptr bad_poly = polytope::ptr(new polytope());
+			parse_initial(and_constraints, bad_poly, locId);
+			forbidden fset;
+			fset.first = locId; fset.second = bad_poly;
+			this->forbidden_states.push_back(fset);
+		}
+	}
+}
+
 /* returns the parsed ha*/
 hybrid_automata parser::getHa()
 {
@@ -510,7 +563,7 @@ initial_state::ptr parser::getInitState()
 }
 
 /* return the parsed forbidden region */
-std::pair<int, polytope::ptr> parser::getForbidden()
+std::vector<forbidden> parser::getForbidden()
 {
-	return this->forbidden;
+	return this->forbidden_states;
 }

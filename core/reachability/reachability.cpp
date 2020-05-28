@@ -9,7 +9,7 @@
 using namespace std;
 
 void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
-		int lp_solver_type, std::pair<int, polytope::ptr> forbidden, userOptions& user_options) {
+		int lp_solver_type, std::vector<forbidden> forbidden_states, userOptions& user_options) {
 	H = h;
 	I = i;
 	reach_parameters = reach_param;
@@ -18,7 +18,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	Total_Partition = user_options.getTotalSliceSize(); //slice size
 	this->lp_solver_type= lp_solver_type;
 	number_of_streams = user_options.getStreamSize();
-	forbidden_set = forbidden;
+	this->forbidden_states = forbidden_states;
 	ce_flag = user_options.get_ce_flag();
 	ce_path = user_options.get_ce_path();
 	refinements = 0;
@@ -103,19 +103,21 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		polytope::ptr polyI; //initial polytope of the flowpipe
 		std::list < transition::ptr > list_transitions; // list of transitions leading to the unsafe set
 
-		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe and forbidden states exists
-				//so perform intersection with forbidden set provided locID matches
-
+		for(unsigned int i=0;i<forbidden_states.size();i++) { // iterate over each forbidden symb state
+			//check intersection with forbidden set provided locID matches
+			forbidden forbidden_set = forbidden_states[i];
 			int locID = current_location->getLocId();
 			
+
 			if (forbidden_set.first==-1 || locID == forbidden_set.first) { // forbidden locID matches. loc id of -1 means any location
 				polytope::ptr forbid_poly = forbidden_set.second;
-				std::list < template_polyhedra::ptr > forbid_intersects;
+				std::list <template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
 				if (forbid_intersects.size() != 0){
 					safety_violation = true;
 					this->safe = false;
+					std::cout << "MODEL UNSAFE\n";
 				}
 
 				if (safety_violation && ce_flag == true) // CE Generation is requested
@@ -197,8 +199,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					}
 				} // end of condition when forbidden state intersects with the flowpipe set
 			} //end of condition when forbidden state loc id matches with flowpipe loc id
-		} //computed flowpipe is not empty
-
+		} //iterator over the forbidden states
 
 		//  *********Safety Verification ends *****
 
@@ -217,7 +218,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				current_destination = H.getLocation((*t)->getDestination_Location_Id());
 				string locName = current_destination->getName();
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
-				guard_polytope = (*t)->getGuard(); //	
+				guard_polytope = (*t)->getGuard();
 				polytope::ptr inv = current_location->getInvariant();
 				
 				
@@ -251,7 +252,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 						polys = reach_region->postD_chull(guard_polytope, inv, lp_solver_type);
 
 					//debug	
-					// plot the first poly
 					polytope::ptr p = polys.front();
 					/*if(polys.size()!=0)
 						p->print2file("postD-poly", 2, 3);*/
@@ -290,13 +290,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					continue;
 				}
 
-				//Todo to make it even procedure with Sequential procedure.... so intersection is done first and then decide to skip this loc
-				if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0)
-						|| (locName.compare("FINAL") == 0) || (locName.compare("UNSAFE") == 0))
-					continue; //do not push into the waitingList
-
 				current_assignment = (*t)->getAssignT();
-				// *** intersected_polyhedra included with invariant_directions also ******
 				int destination_locID = (*t)->getDestination_Location_Id();
 				ds.insert_element(destination_locID);
 				std::list<polytope::ptr> intersected_polys;
@@ -326,12 +320,9 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 						newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
 					}
 
-					//debug
-					//newShiftedPolytope->print2file("./nextpoly",2,3);
-					//---
-					int is_ContainmentCheckRequired = 0;	//1 will enable Containment Check and Make the code slow; 0 will disable and will make it fast
+					int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make the code slow; 0 will disable and will make it fast
 					if (is_ContainmentCheckRequired){	//Containment Checking required
-						bool isContain=false;
+						bool isContained=false;
 						/*
 						 * The function tempaltedDirectionHull() need not be done if we are using
 						 * some efficient library such as PPL we can directly check with the
@@ -339,11 +330,9 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 						 */
 						polytope::ptr newPoly = polytope::ptr(new polytope()); 	//std::cout<<"Before templatedHull\n";
 						newShiftedPolytope->templatedDirectionHull(reach_parameters.Directions, newPoly, lp_solver_type);
-						isContain = templated_isContained(destination_locID, newPoly, Reachability_Region, lp_solver_type);//over-approximated but threadSafe
+						isContained = templated_isContained(destination_locID, newPoly, Reachability_Region, lp_solver_type);//over-approximated but threadSafe
 					
-						//Calling with the newShifted polytope to use PPL library
-						//isContain = isContained(destination_locID, newShiftedPolytope, Reachability_Region, lp_solver_type);//Todo::debug PPL for double data type
-						if (!isContain){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
+						if (!isContained){	//if true has newInitialset is inside the flowpipe so do not insert into WaitingList
 							initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, newShiftedPolytope));
 							newState->setTransitionId(transition_id); // keeps track of the transition_ID
 							newState->setParentPtrSymbolicState(S);
@@ -1118,6 +1107,7 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 	polytope::ptr polyI; // initial polytope of the abstract flowpipe.
 	bool saftey_violated = false;
 	std::list < transition::ptr > list_transitions;
+	forbidden forbidden_set = forbidden_states[0];
 
 	if (computedSymStates->getContinuousSetptr()->getTotalIterations() != 0) { //flowpipe exists
 		//so perform intersection with forbidden set provided locID matches

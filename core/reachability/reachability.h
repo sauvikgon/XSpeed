@@ -14,7 +14,6 @@
 #include "counterExample/abstractCE.h"
 #include <utility>
 #include <set>
-//***************** From Sequential BFS *****************************
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <core/pwl/pwlist.h>
@@ -41,6 +40,8 @@
 #include "utilities/testPolytopePlotting.h"
 #include "utilities/templatePolyhedra.h"
 
+typedef std::pair<int, polytope::ptr> forbidden;
+
 // macro to choose algo_type of ce search.
 // 1 enables search of ce to forbidden region using flowpipe constraints (FC).
 // 2 enables the same with implicit HA constraints, requiring no flowpipe construction (WoFC).
@@ -59,7 +60,7 @@ class reachability {
 public:
 	
 	void setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
-			int lp_solver_type, std::pair<int, polytope::ptr> forbidden, userOptions& user_options);
+			int lp_solver_type, std::vector<forbidden> forbidden_states, userOptions& user_options);
 
 	/*
 	 * Get counter-example trajectories found during reachability analysis
@@ -104,14 +105,14 @@ public:
 	std::list<symbolic_states::ptr> computeParLockFreeBFS(std::list<abstractCE::ptr>& ce_candidates);
 
 	/*
-	 * List of private variables now converted into public due to class inheritance framework
+	 * List of private variables now converted to public due to class inheritance framework
 	 */
 	std::list<initial_state::ptr> I; //converted to a list of initial state
 	unsigned int bound;
 	ReachabilityParameters reach_parameters;
 	hybrid_automata H; //todo:: have to change it to boost::ptr
 	int lp_solver_type;
-	std::pair<int, polytope::ptr> forbidden_set;
+	std::vector<forbidden> forbidden_states;
 	bool ce_flag; // The flag to switch ON/OFF the CE generation functionality.
 	std::string ce_path; // This string can be either "all", "first" or "1,3,4,15,16" type. The last string is a comma separated list of locations to represent a path.
 
@@ -155,10 +156,7 @@ private:
 	std::string set_aggregation; // The aggregation options thull (default) and none
 	std::list<concreteCE::ptr> ce_list; // the list of concrete counter-examples in the HA.
 
-
-	//defining here userOptions for easy access
 	userOptions user_op; //user options
-
 
 	void par_postC_selection(unsigned int NewTotalIteration, location::ptr current_location, polytope::ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);

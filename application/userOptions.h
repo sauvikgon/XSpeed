@@ -14,7 +14,7 @@
 class userOptions {
 	std::string model_filename; // filename of the automata model .xml file
 	std::string config_filename; // filename of the configuration file .cfg
-	std::string forbidden_state; // the string of forbidden state description
+	std::string forbidden_state; // the string of forbidden states description
 	std::string out_filename; // The output filename
 	std::string output_format_type; // the string of output format description
 

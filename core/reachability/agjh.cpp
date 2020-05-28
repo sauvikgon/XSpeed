@@ -8,7 +8,7 @@
 #include <core/reachability/agjh.h>
 #include <utilities/flowpipeCluster.h>
 
-// Holzmann algorithm adaption
+// Holzmann's algorithm adapted
 std::list<symbolic_states::ptr> agjh::ParallelBFS_GH(std::list<abstractCE::ptr>& ce_candidates){
 	std::list < symbolic_states::ptr > Reachability_Region; //	template_polyhedra::ptr reach_region;
 	int t = 0; //0 for Read and 1 for Write
@@ -612,9 +612,11 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 		bool saftey_violated = false;
 
 
-		if (reach_region->getTotalIterations() != 0 && forbidden_set.second != NULL) { //flowpipe exists
-				//so perform intersection with forbidden set provided locID matches
-			int locID =s->getLocationId();
+		for(unsigned int i=0;i<forbidden_states.size();i++) { // iterate over each forbidden symb state
+
+			//check intersection with forbidden set provided locID matches
+			forbidden forbidden_set = forbidden_states[i];
+			int locID = s->getLocationId();
 			cout<<"Running Safety Check for Loc = "<<locID<<std::endl;
 			if (forbidden_set.first==-1 || locID == forbidden_set.first) { //forbidden locID matches
 				polytope::ptr forbid_poly = forbidden_set.second;
@@ -622,7 +624,7 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
 				if (forbid_intersects.size() == 0) {
-					//std::cout << "\nThe model does NOT violate SAFETY property!!!\n";
+					std::cout << "the model is unsafe\n";
 				} else {
 					symbolic_states::ptr current_forbidden_state;
 					current_forbidden_state = S;
@@ -672,7 +674,7 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 					}
 				} // end of condition when forbidden state intersects with the flowpipe set
 			} //end of condition when forbidden state loc id matches with flowpipe loc id
-		} //computed flowpipe is not empty
+		} //end of iterator over forbidden states
 
 		//  ******************************** Safety Verification section Ends********************************
 	return saftey_violated;

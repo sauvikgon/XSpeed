@@ -21,13 +21,15 @@ int main(int argc, char *argv[]) {
 	userOptions user_options;
 	std::list<initial_state::ptr> init_state;
 	hybrid_automata Hybrid_Automata;
-	std::pair<int, polytope::ptr> forbidden_set; //(locID1,Polytope1)
+	typedef std::pair<int, polytope::ptr> forbidden; //(locID1,Polytope1)
+	std::vector<forbidden> forbidden_states; // vector of forbidden symb states.
+
 	std::list<abstractCE::ptr> ce_candidates; //object of class counter_example
 
 	int lp_solver_type = 1;
 
 	try{
-		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters,forbidden_set);
+		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters,forbidden_states);
 	}catch(std::exception e){
 		std::cout << "Exception:" << e.what() << std::endl;
 		std::cout<<"\nTerminating XSpeed, caused due to error in command-line inputs.\n";
@@ -38,14 +40,15 @@ int main(int argc, char *argv[]) {
 	// ----Trajectory Simulation
 	if (boost::iequals(user_options.getEngine(),"simu")==true) {
 		std::cout<<"Running simulation engine ... \n";
+		forbidden forbidden_set = forbidden_states[0]; // take the first forbidden state
 		simulationCaller(reach_parameters, Hybrid_Automata, init_state, user_options, forbidden_set);
 		return 0; //Only Trajectory Simulation is done
 	}
 
 	// ----Section for Running Exp-Graph. This code is put only for experimental task.
-
 	int	 runExpGraph_WoFC = 0;	// To run Exp-Graph Algorithm, that is, Explore the Graph, we should assign a valid loc-id in the forbidden set (and not -1, unlike FC algo)
 	if (runExpGraph_WoFC) {
+		forbidden forbidden_set = forbidden_states[0]; // take the first forbidden state
 		bool found_CE = runWoFC_counter_example(Hybrid_Automata, init_state, forbidden_set, user_options);
 
 		if (found_CE) {
@@ -73,7 +76,7 @@ int main(int argc, char *argv[]) {
 
 		// Calls the reachability computation routine.
 		reachabilityCaller(Hybrid_Automata, init_state, reach_parameters,
-				user_options, lp_solver_type, forbidden_set,
+				user_options, lp_solver_type, forbidden_states,
 				Symbolic_states_list, ce_candidates);
 	}
 	timer.stop();

@@ -54,12 +54,13 @@
 #include "core/symbolicStates/initialState.h"
 #include "application/userOptions.h"
 
+typedef std::pair<int, polytope::ptr> forbidden;
 
 /* Sets the reachability options given by the user */
 
 void set_params(std::list<initial_state::ptr>& init_state,
 		userOptions& op, ReachabilityParameters& reach_parameters,
-		std::pair<int, polytope::ptr>& forbidden_set);
+		std::vector<forbidden>& forbidden_states);
 
 /**
  * Creates the pre-defined hybrid automata models in memory with config parameters.

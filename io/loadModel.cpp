@@ -140,7 +140,7 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 
 void set_params(std::list<initial_state::ptr>& init_state,
 		userOptions& op, ReachabilityParameters& reach_parameters,
-		std::pair<int, polytope::ptr>& forbidden_set) {
+		std::vector<forbidden>& forbidden_states) {
 
 	unsigned int row, col;
 
@@ -189,9 +189,11 @@ void set_params(std::list<initial_state::ptr>& init_state,
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
+	forbidden forbidden_set;
 	if (!op.get_forbidden_set().empty()) {
 		string_to_poly(op.get_forbidden_set(), forbidden_set);
-		//string_to_poly_HystFormat(op.get_forbidden_set(), forbidden_set);
+		forbidden_states.clear(); // erase the cfg parsed input
+		forbidden_states.push_back(forbidden_set); // overwrite with cdmline parsed input
 	}
 }
 

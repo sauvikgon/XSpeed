@@ -39,6 +39,9 @@ public:
 	//returns the location from the list of locations with location_ID as the input parameter
 	location::ptr getLocation(int Loc_ID);
 
+	/* returns the location from the list of locations with locName */
+	location::ptr getLocation(string locName);
+
 	void addMapped_Locations_List(std::map<int, location::ptr>& mapped_location_list);
 
 	void addLocation(location::ptr& loc);	//inserts location into its correctly mapped key

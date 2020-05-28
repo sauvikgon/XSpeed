@@ -16,13 +16,14 @@
  *
  * @author: Rajarshi
  */
+typedef std::pair<int, polytope::ptr> forbidden;
 
 class parser
 {
 	string model_file;
 	hybrid_automata ha;
 	initial_state::ptr ini;
-	std::pair<int, polytope::ptr> forbidden;
+	std::vector<forbidden> forbidden_states;
 
 public:
 	parser(string m_file){
@@ -39,7 +40,7 @@ public:
 	initial_state::ptr getInitState();
 
 	/* return the parsed forbidden region */
-	std::pair<int, polytope::ptr> getForbidden();
+	std::vector<forbidden> getForbidden();
 
 	/* parses the ha locatios and a list of locations.*/
 	void parse_loc(fstream& file, location::ptr loc);
@@ -55,7 +56,7 @@ public:
 	void parse_reset(fstream& file, Assign& t_reset);
 
 	/* parses a list of consecutive ode to create the flow matrix */
-	void gen_flow(fstream& file, Dynamics& D);
+	void parse_flow(fstream& file, Dynamics& D);
 
 	/* parses the location invariant string */
 	void parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& U);
@@ -64,7 +65,10 @@ public:
 	void parse_transition(fstream& file, transition::ptr& t);
 
 	/* parses the initial condition string */
-	void parse_initial(fstream& file, polytope::ptr& p, int& init_locId);
+	void parse_initial(std::string init_str, polytope::ptr& p, int& init_locId);
+
+	/* parses the forbidden states string */
+	void parse_forbidden(std::string forbidden_str);
 };
 
 #endif

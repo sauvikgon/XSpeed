@@ -40,6 +40,21 @@ location::ptr hybrid_automata::getLocation(int Loc_Id){
 	return l;
 }
 
+/* returns the location from the list of locations with locName */
+location::ptr hybrid_automata::getLocation(string locName){
+
+	std::map<int, location::ptr>::iterator locMapIter;
+
+	for(locMapIter = list_locations.begin();locMapIter!=list_locations.end(); locMapIter++){
+		std::pair<int, location::ptr> map_elem = *locMapIter;
+		location::ptr l = this->getLocation(map_elem.first);
+		string name = l->getName();
+		if(locName.compare(name)==0)
+			return l;
+	}
+	throw std::runtime_error("hybrid_automata: getLocation: No location with the asked location name\n");
+}
+
 int hybrid_automata::getDimension() const {
 	return dimension;
 }
