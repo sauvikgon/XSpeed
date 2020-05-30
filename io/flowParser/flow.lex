@@ -1,6 +1,6 @@
 
 %{
-#include "flow_yacc.tab.h"
+#include "flow.tab.h"
 %}
 
 %%

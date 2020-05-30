@@ -372,7 +372,7 @@ void parser::parse_flow(fstream& file, Dynamics& D){
 
 		if(line.compare("#End")==0)
 			return;	
-	
+
 		// if empty line, then continue
 		if(line.compare("")==0)
 			continue;
@@ -459,7 +459,7 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 /* parses the initial condition string */
 void parser::parse_initial(string init_str, polytope::ptr& p, int& init_locId)
 {
-	init_str.erase(std::remove_if(init_str.begin(), init_str.end(), ::isspace), init_str.end());
+	//init_str.erase(std::remove_if(init_str.begin(), init_str.end(), ::isspace), init_str.end());
 
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("&;");

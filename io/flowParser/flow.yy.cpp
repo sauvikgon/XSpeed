@@ -451,7 +451,7 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "flow.lex"
 #line 3 "flow.lex"
-#include <io/flowParser/flow.tab.h>
+#include "flow.tab.h"
 #line 456 "lex.yy.c"
 #line 457 "lex.yy.c"
 

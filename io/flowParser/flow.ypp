@@ -3,8 +3,8 @@
 #include <cstring>
 #include <vector>
 
-#include "application/DataStructureDirections.h"
-#include "core/HybridAutomata/Hybrid_Automata.h"
+#include "application/structures.h"
+#include "core/hybridAutomata/hybridAutomata.h"
 
 extern int yylex();
 extern int yyerror(char *);
@@ -36,14 +36,14 @@ S : VAR EQ Expr					{
 													
 													if(!coeff.empty()){
 														for(unsigned int j=0;j<n;j++)
-															D.MatrixA(lhs_id,j)=coeff[j];
+															D.MatrixA(lhs_id,j)+=coeff[j];
 														D.isEmptyMatrixA = false;
 														coeff.clear();
 													}
 													if(!u_coeff.empty()){
 														unsigned int m = ha.umap_size();
 														for(unsigned int j=0;j<m;j++)
-															D.MatrixB(lhs_id,j)=u_coeff[j];
+															D.MatrixB(lhs_id,j)+=u_coeff[j];
 														D.isEmptyMatrixB = false;
 														u_coeff.clear();
 													}
@@ -74,7 +74,7 @@ Expr : Expr PLUS Expr  	{;}
 												}
 		 | CONST 						{
 													//printf("const\n");
-													constant = $1; 
+													constant += $1; 
 													D.isEmptyC = false;
 													D.C.resize(ha.map_size());
 												}
