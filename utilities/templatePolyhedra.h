@@ -13,6 +13,9 @@
 #include <boost/shared_ptr.hpp>
 #include <core/continuous/polytope/polytope.h>
 #include <utilities/templatePolyhedra.h>
+#include <core/hybridAutomata/hybridAutomata.h>
+#include <application/sfDirections.h>
+#include <application/sfUtility.h>
 #include <omp.h>
 
 #include "core/math/matrix.h"
@@ -21,9 +24,6 @@ using namespace std;
 /*
  * Combination of the matrices All_Directions and
  * Matrix_SupportFunction consists of all the reachable set of only one flow-pipe.
- * getPolytope :
- *
- *
  */
 
 class template_polyhedra {
@@ -141,5 +141,13 @@ private:
 	void setTotalInvariantDirections(unsigned int total_invariant_directions);
 
 };
+
+/* A utility method on template polyhedra
+ * Modifies the direction in the SFM. This method
+ * is useful for plotting reachable set projected on
+ * output variables.
+ */
+
+void transformTemplatePoly(hybrid_automata& ha, template_polyhedra::ptr tpoly);
 
 #endif /* TEMPLATE_POLYHEDRA_H_ */

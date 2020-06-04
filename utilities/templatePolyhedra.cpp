@@ -608,3 +608,26 @@ std::list<polytope::ptr> template_polyhedra::postD_chull(polytope::ptr guard, po
 
 	return polys;
 }
+
+void transformTemplatePoly(hybrid_automata& ha, template_polyhedra::ptr tpoly){
+
+	unsigned int dimOut = ha.ymap_size();
+	unsigned int dim = ha.map_size();
+	unsigned int numDirections = tpoly->getTotalTemplateDirections();
+
+	std::vector<std::vector<double> > yDirections;
+	math::matrix<double> matDirections;
+
+	if(numDirections == 2*dimOut){
+		yDirections = generate_axis_directions(dimOut);
+		get_ublas_matrix(yDirections, matDirections);
+	}
+	else if(numDirections == 2*dimOut*dimOut){
+		yDirections = get_octagonal_directions(dim);
+		get_ublas_matrix(yDirections, matDirections);
+	}
+	tpoly->setTemplateDirections(matDirections);
+	//remove invariant directions
+	math::matrix<double> m;
+	tpoly->setInvariantDirections(m);
+}

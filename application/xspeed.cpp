@@ -16,7 +16,6 @@
 
 int main(int argc, char *argv[]) {
 
-
 	ReachabilityParameters reach_parameters;
 	userOptions user_options;
 	std::list<initial_state::ptr> init_state;
@@ -61,7 +60,7 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-  //End of Section Exp-Graph.
+	//End of Section Exp-Graph.
 
 
 	// Reachability with CE generation
@@ -91,11 +90,26 @@ int main(int argc, char *argv[]) {
 	std::list<symbolic_states::ptr>::iterator it;
 
 	/** Choosing from the output format and showing results	 */
+
+	if(Hybrid_Automata.ymap_size()!=0){
+
+		//transform the sfm to output directions before plotting
+		std::list<symbolic_states::ptr>::iterator it =  Symbolic_states_list.begin();
+		for(;it!=Symbolic_states_list.end(); it++){
+			symbolic_states::ptr symbStatePtr = *it;
+			transformTemplatePoly(Hybrid_Automata, symbStatePtr->getContinuousSetptr());
+			//debug
+			//std::cout << "The transformed sfm directions are:" << std::endl;
+			//std::cout << symbStatePtr->getContinuousSetptr()->getTemplateDirections() << std::endl;
+			//---
+		}
+
+	}
+
 	plottime.start();
 	show(Symbolic_states_list, user_options);
 	plottime.stop();
 	print_statistics(plottime,"Plotting");
-
 
 	return 0;
 }

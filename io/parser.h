@@ -59,7 +59,7 @@ public:
 	void parse_flow(fstream& file, Dynamics& D);
 
 	/* parses the location invariant string */
-	void parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& U);
+	void parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& U, Dynamics& D);
 
 	/* parses transition parameters and creates a transition obj */
 	void parse_transition(fstream& file, transition::ptr& t);

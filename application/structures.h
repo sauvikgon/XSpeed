@@ -64,7 +64,11 @@ struct Dynamics {
 	bool isEmptyMatrixA;	//True if Zero otherwise False
 	/** The transformation matrix of the input convex set U */
 	math::matrix<double> MatrixB;	//polytope U will determine if MatrixB is empty
-	bool isEmptyMatrixB;	//True if Zero otherwise False
+	/* The transformation matrix on the system vars to produce output */
+	bool isEmptyMatrixB;
+	math::matrix<double> MatrixT;
+	bool isEmptyMatrixT;	// True if there are output vars in the model.
+
 	polytope::ptr U;
 	std::vector<double> C;
 	bool isEmptyC;	//True if Zero vector otherwise False

@@ -76,6 +76,6 @@ struct terms
 typedef struct terms terms;
 
 //Objective function for solving max opt. problem
-	double myobjfun(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
+double myobjfun(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
 #endif /* FB_INTERPOL_H_ */

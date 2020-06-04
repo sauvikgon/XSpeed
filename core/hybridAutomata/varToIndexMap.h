@@ -39,6 +39,11 @@ public:
 	std::string get_uvarname(unsigned int index);
 	
 	/**
+	 * Returns the output-variable name with the given index
+	 */
+	std::string get_yvarname(unsigned int index);
+
+	/**
 	 * Returns the index of the parameter var_name
 	 * in the varname to dimension index map
 	 */
@@ -69,6 +74,22 @@ public:
 		};
 		return index;
 	}
+	/**
+	 * Returns the index of the output yvar_name
+	 * in the yname to dimension map. Returns -1
+	 * if the string is not present in the map.
+	 */
+	int get_y_index(std::string yvar_name){
+		unsigned int index;
+		try{
+			index = yvar_index_map_ptr->at(yvar_name);
+		}catch(...)
+		{
+			//std::cout << "index of output not found in the output to index map. Check the output variable name.\n";
+			return -1;
+		};
+		return index;
+	}
 
 	/**
 	 * Inserts a varname, dimension index into the map.
@@ -87,6 +108,14 @@ public:
 	}
 
 	/**
+	 * Inserts an output, dimension index into the ymap.
+	 */
+	void insert_to_output_map(std::string yname, unsigned int val)
+	{
+		yvar_index_map_ptr->insert(std::pair<std::string, unsigned int>(yname,val));
+	}
+
+	/**
 	 * Sets this-> map to the new map passed as parameter
 	 */
 	void set_map(map_ptr m){
@@ -99,6 +128,12 @@ public:
 		uvar_index_map_ptr = umap;
 	}
 	/**
+	 * Sets this->ymap to the new map passed as parameter
+	 */
+	void set_ymap(map_ptr ymap){
+		yvar_index_map_ptr = ymap;
+	}
+	/**
 	 * Prints the var_to_index map in the console
 	 */
 	void print_var_index_map();
@@ -108,17 +143,28 @@ public:
 	 */
 	void print_input_index_map();
 
+	/**
+	 * Prints the output_to_index map in the console
+	 */
+	void print_output_index_map();
+
 	/** Return the size of the map */
 	unsigned int map_size();
 
 	/** Return the size of the umap */
 	unsigned int umap_size();
 
+	/** Return the size of the ymap */
+	unsigned int ymap_size();
+
 	/* The variable to dimension index map */
 	static map_ptr var_index_map_ptr;
 	
 	/* The input to index map */
 	static map_ptr uvar_index_map_ptr;
+
+	/* The output to index map */
+	static map_ptr yvar_index_map_ptr;
 };
 
 #endif /* VARTOINDEXMAP_H_ */

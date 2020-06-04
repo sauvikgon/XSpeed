@@ -45,7 +45,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 	bool safety_violation = false;
 
-	polytope::ptr continuous_initial_polytope;
+	polytope::ptr initial_polytope;
 
 	unsigned int num_flowpipe_computed=0;	//keeping track of number of flowpipe computed
 
@@ -67,11 +67,11 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		discrete_set discrete_state;
 		discrete_state.insert_element(location_id); //creating discrete_state
 
-		continuous_initial_polytope = U->getInitialSet();
-		reach_parameters.X0 = continuous_initial_polytope;
+		initial_polytope = U->getInitialSet();
+		reach_parameters.X0 = initial_polytope;
 
 		S->setDiscreteSet(discrete_state);
-		S->setInitialPolytope(continuous_initial_polytope);
+		S->setInitialPolytope(initial_polytope);
 		S->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 		S->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
@@ -89,7 +89,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		 * This function is to be called for sequential BFS.
 		 */
 
-		seq_postC_selection(NewTotalIteration, current_location, continuous_initial_polytope, reach_region);
+		seq_postC_selection(NewTotalIteration, current_location, initial_polytope, reach_region);
 		num_flowpipe_computed++;//computed one Flowpipe
 
 		//	***************** Flowpipe Computed ****************
@@ -373,20 +373,20 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 }
 
 void reachability::seq_postC_selection(unsigned int NewTotalIteration, location::ptr current_location,
-		polytope::ptr continuous_initial_polytope,
+		polytope::ptr initial_polytope,
 		template_polyhedra::ptr& reach_region) {
 
 	// first order linear approx. model of Colas et. al.
 	if (Algorithm_Type == SEQ_SF) {
 		// Sequential postC computation
 		reach_region = postC_sf(NewTotalIteration, current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
+				initial_polytope, reach_parameters, current_location->getInvariant(),
 				current_location->getInvariantExist(), lp_solver_type);
 	}
 	if (Algorithm_Type == PAR_SF) {
 		reach_region = postC_lazySf(NewTotalIteration,
 				current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters,
+				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
 				current_location->getInvariantExist(),
 				lp_solver_type);
@@ -403,7 +403,7 @@ void reachability::seq_postC_selection(unsigned int NewTotalIteration, location:
 					reach_parameters.A_inv = A_inv;
 				int NCores = Total_Partition; //Number of Partitions (number of threads)
 				reach_region = postC_timeslice(NewTotalIteration, current_location->getSystem_Dynamics(),
-						continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
+						initial_polytope, reach_parameters, current_location->getInvariant(),
 						current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type);
 			}
 			else{
@@ -413,7 +413,7 @@ void reachability::seq_postC_selection(unsigned int NewTotalIteration, location:
 	// forward-backward interpolation approx. model of Goran et. al.
 	if(Algorithm_Type == FB_INTERPOL){
 		std::cout << "\nRunning PostC using the approximation model of forward-backward interpolation.\n";
-		reach_region = postC_fbinterpol(NewTotalIteration, current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist(), lp_solver_type);
+		reach_region = postC_fbinterpol(NewTotalIteration, current_location->getSystem_Dynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist(), lp_solver_type);
 		
 	}
 }
@@ -462,14 +462,14 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			initial_state::ptr U; //local
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
-			polytope::ptr continuous_initial_polytope; //local
+			polytope::ptr initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 
 			int location_id = U->getLocationId();
 			discrete_state.insert_element(location_id);
-			continuous_initial_polytope = U->getInitialSet();
+			initial_polytope = U->getInitialSet();
 			reach_parameter_local = reach_parameters;
-			reach_parameter_local.X0 = continuous_initial_polytope; //	cout<<"\nInside for Loop";
+			reach_parameter_local.X0 = initial_polytope; //	cout<<"\nInside for Loop";
 			//create an instance of Symbolic_states S
 			S[id] = symbolic_states::ptr(new symbolic_states());
 
@@ -489,7 +489,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			// ******************* Computing Parameters *******************************
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
 					current_location->getSystem_Dynamics(),
-					continuous_initial_polytope, lp_solver_type); //2 glpk object created here
+					initial_polytope, lp_solver_type); //2 glpk object created here
 
 			double result_beta = compute_beta(
 					current_location->getSystem_Dynamics(),
@@ -514,12 +514,12 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			// ******************* Computing Parameters Done *******************************
 			unsigned int NewTotalIteration;
 			if (current_location->getInvariantExist()) {
-				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
+				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), initial_polytope,
 						reach_parameter_local, current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 				std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 			}
 			//  ********************* FlowPipe or Reach Computation *************************
-			par_postC_selection(NewTotalIteration, current_location, continuous_initial_polytope, reach_parameter_local, S, id);
+			par_postC_selection(NewTotalIteration, current_location, initial_polytope, reach_parameter_local, S, id);
 			// Returns the Flow_Pipe in reach_region_list[id]
 			//  ********************* FlowPipe or Reach Computation Done ********************
 
@@ -727,19 +727,19 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 				std::cout<<"\nMax Thread in Outer Level = "<< omp_get_num_threads();
 
 			}
-			//there will be different current_location, continuous_initial_polytope, reach_parameters
+			//there will be different current_location, initial_polytope, reach_parameters
 			initial_state::ptr U; //local
 			//	symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states());
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
-			polytope::ptr continuous_initial_polytope; //local
+			polytope::ptr initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 
 			int location_id = U->getLocationId();
 			discrete_state.insert_element(location_id);
-			continuous_initial_polytope = U->getInitialSet();
+			initial_polytope = U->getInitialSet();
 			reach_parameter_local = reach_parameters;
-			reach_parameter_local.X0 = continuous_initial_polytope; //	cout<<"\nInside for Loop";
+			reach_parameter_local.X0 = initial_polytope; //	cout<<"\nInside for Loop";
 			//create an instance of Symbolic_states S
 			S[id] = symbolic_states::ptr(new symbolic_states());
 
@@ -758,7 +758,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			//current_location:: parameters alfa, beta and phi_trans have to be re-computed
 			//cout<<"\nBefore Compute Alfa";
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
-					current_location->getSystem_Dynamics(), continuous_initial_polytope, lp_solver_type); //2 glpk object created here
+					current_location->getSystem_Dynamics(), initial_polytope, lp_solver_type); //2 glpk object created here
 			//cout<<"\nCompute Alfa Done";
 			double result_beta = compute_beta(current_location->getSystem_Dynamics(), reach_parameter_local.time_step, lp_solver_type); // NO glpk object created here
 			//			cout<<"\nCompute Beta Done";
@@ -783,7 +783,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			double return702 = clock702 / (double) 1000;
 			std::cout << "\nReachParameters computation Time:Wall(Seconds) = "<< return702 << std::endl;
 
-			SymDataStruct[id].X0 = continuous_initial_polytope;
+			SymDataStruct[id].X0 = initial_polytope;
 			SymDataStruct[id].current_location = current_location;
 			SymDataStruct[id].reach_param = reach_parameter_local;
 			// ******************* Computing Parameters Done *******************************
@@ -791,7 +791,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			boundCheck.start();
 			unsigned int NewTotalIteration;
 			if (current_location->getInvariantExist()){
-				InvariantBoundaryCheck(SymDataStruct[id].current_location->getSystem_Dynamics(), continuous_initial_polytope,
+				InvariantBoundaryCheck(SymDataStruct[id].current_location->getSystem_Dynamics(), initial_polytope,
 						SymDataStruct[id].reach_param, SymDataStruct[id].current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 				std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
 				//list_invBounaryValue[id] = NewTotalIteration;
@@ -963,7 +963,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 /*** TODO: Have to optimize invariant_boundary_check() for support function computation ***/
 
 void reachability::par_postC_selection(unsigned int NewTotalIteration, location::ptr current_location,
-		polytope::ptr continuous_initial_polytope,
+		polytope::ptr initial_polytope,
 		ReachabilityParameters& reach_parameters,
 		std::vector<symbolic_states::ptr>& S, unsigned int id) {
 
@@ -974,7 +974,7 @@ void reachability::par_postC_selection(unsigned int NewTotalIteration, location:
 
 		reach_region = postC_sf(NewTotalIteration,
 				current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters,
+				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
 				current_location->getInvariantExist(), lp_solver_type);
 		S[id]->setContinuousSetptr(reach_region);
@@ -993,7 +993,7 @@ void reachability::par_postC_selection(unsigned int NewTotalIteration, location:
 
 		reach_region = postC_lazySf(NewTotalIteration,
 				current_location->getSystem_Dynamics(),
-				continuous_initial_polytope, reach_parameters,
+				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
 				current_location->getInvariantExist(), lp_solver_type);
 		AllReach_time.stop();
@@ -1018,7 +1018,7 @@ void reachability::par_postC_selection(unsigned int NewTotalIteration, location:
 				reach_parameters.A_inv = A_inv;
 			int NCores = Total_Partition; //Number of Partitions (number of threads)
 			reach_region = postC_timeslice(NewTotalIteration, current_location->getSystem_Dynamics(),
-					continuous_initial_polytope, reach_parameters, current_location->getInvariant(),
+					initial_polytope, reach_parameters, current_location->getInvariant(),
 					current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type);
 			S[id]->setContinuousSetptr(reach_region);
 			//		std::cout << "Finished computing reachable states\n";

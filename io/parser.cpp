@@ -1,3 +1,9 @@
+/*
+ * parser class that instantiates a ha object
+ * from MDL file.
+ *
+ * @Author: Rajarshi Ray
+ */
 
 #include "parser.h"
 #include <fstream>
@@ -22,8 +28,8 @@ struct yy_buffer_state
 	int yy_is_interactive;
 	int yy_at_bol;
 
-  int yy_bs_lineno; /**< The line count. */
-  int yy_bs_column; /**< The column count. */
+	int yy_bs_lineno; /**< The line count. */
+	int yy_bs_column; /**< The column count. */
 	int yy_fill_buffer;
 	int yy_buffer_status;
 };
@@ -38,7 +44,7 @@ extern void linexp_delete_buffer ( yy_buffer_state* b  );
 extern void reset_delete_buffer ( yy_buffer_state* b  );
 
 extern void flow_parser(Dynamics& D);
-extern void linexp_parser(polytope::ptr& p, polytope::ptr& U);
+extern void linexp_parser(polytope::ptr& p, polytope::ptr& U, Dynamics& D);
 extern void reset_parser(Assign& r_map);
 
 /* parses the variable names and creates the
@@ -50,7 +56,8 @@ void parser::parse_vars(fstream& file)
 	string var;
 	
 	unsigned int dim=0; // dim in ha starts from 0.
-	unsigned int m=0; // the number of inputs in the ha.
+	unsigned int dimIp=0; // the number of inputs in the ha.
+	unsigned int dimOp=0; // the number of outputs in the ha.
 
 	while(getline(file,var)){
 		if(var.compare("#End")==0)
@@ -61,7 +68,11 @@ void parser::parse_vars(fstream& file)
 		if(var[0]=='u' || var[0]=='U') // input variable
 		{
 			//std::cout << "adding " << var << "to umap" << std::endl;
-			ha.insert_to_input_map(var,m++);
+			ha.insert_to_input_map(var,dimIp++);
+		}
+		else if(var[0]=='y' || var[0]=='Y') // output variable
+		{
+			ha.insert_to_output_map(var,dimOp++);
 		}
 		else
 			ha.insert_to_map(var,dim++);
@@ -77,8 +88,6 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 
 	while(getline(file,line)){
 
-		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
-
 		if(line.compare("#End")==0)
 			break;
 	
@@ -92,13 +101,17 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 
 		if((*tok_iter).compare("Locname")==0){
 			tok_iter++;
+			string tokString = *tok_iter;
+			tokString.erase(std::remove_if(tokString.begin(), tokString.end(), ::isspace), tokString.end());
 			//std::cout << "Setting location name:" << *tok_iter << std::endl;
-			loc->setName(*tok_iter);
+			loc->setName(tokString);
 		}
 		else if((*tok_iter).compare("LocId")==0){
 			tok_iter++;
+			string tokString = *tok_iter;
+			tokString.erase(std::remove_if(tokString.begin(), tokString.end(), ::isspace), tokString.end());
 			//std::cout << "Setting location Id:" << *tok_iter << std::endl;
-			unsigned int locId = std::stoi(*tok_iter);
+			unsigned int locId = std::stoi(tokString);
 			loc->setLocId(locId);
 		}
 		else if((*tok_iter).compare("Inv")==0){
@@ -107,18 +120,34 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			string inv_str = *tok_iter;
 			polytope::ptr inv, U;
 
-			if(inv_str.compare("true")==0){
+			if(inv_str.compare(" true")==0){
 				inv = polytope::ptr(new polytope()); // universe
 			}
+
 			else
 			{
 				//initialise inv	
 				inv = polytope::ptr(new polytope()); //universe
 				U = polytope::ptr(new polytope()); // universe
-				parse_invariant(inv_str, inv, U);
+				D.isEmptyMatrixT = true;
+
+				if(ha.ymap_size()!=0){ // output vars exist
+					unsigned int dimOp = ha.ymap_size();
+					unsigned int dim = ha.map_size();
+
+					D.MatrixT = math::matrix<double>(dimOp,dim);
+					D.isEmptyMatrixT = false;
+					D.MatrixT.clear();
+				}
+				parse_invariant(inv_str, inv, U, D);
 				//debug
 				/*std::cout << "The parsed location invariant:\n";
 				inv->printPoly();*/
+				//debug
+				//std::cout << "The parsed output transformation matrix:\n";
+				//std::cout << D.MatrixT << std::endl;
+				//--
+
 				//--
 				if( U->getColumnVector().size() == 0) 
 					U->setIsEmpty(true);
@@ -152,8 +181,8 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			std::cout << D.MatrixB << std::endl;
 			std::cout << "The constant vector:\n";
 			for(unsigned int i=0;i<D.C.size();i++)
-				std::cout << D.C[i] << "\n";
-			*/
+				std::cout << D.C[i] << "\n"; */
+
 			//--
 
 			/* Setting the constants in dynamics to input when U is empty */
@@ -177,6 +206,12 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 					Ubound[j+1] = -D.C[i];
 				}
 				D.U = polytope::ptr(new polytope(UMatrix, Ubound, 1));
+				//std::cout << "Row and Column size of UMatrix resp:" << row  << ", " << col << std::endl;
+				//std::cout << "The input matrix bound vector is:\n";
+				/*for(unsigned int i=0;i<row;i++){
+					std::cout << Ubound[i] << std::endl;
+				}*/
+
 			}	
 			/* Setting D when U as well as C is non-empty */
 			else if(!D.isEmptyMatrixB && !D.isEmptyC)
@@ -249,7 +284,7 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 }
 
 /* parses a location invariant */
-void parser::parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& U)
+void parser::parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& U, Dynamics& D)
 {
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("&;");
@@ -269,7 +304,7 @@ void parser::parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& 
 	 // to satisfy linexp_parser interface.
 		tokString+="\n"; // To bypass flex issue - not able to detect eos 		
 		yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
-		linexp_parser(Inv,U); // calls bison parser			
+		linexp_parser(Inv,U, D); // calls bison parser
 		linexp_delete_buffer(my_string_buffer);
 	}	
 }
@@ -372,7 +407,7 @@ void parser::parse_flow(fstream& file, Dynamics& D){
 
 		if(line.compare("#End")==0)
 			return;	
-
+		//std::cout << "flow string to parse:" << line << std::endl;
 		// if empty line, then continue
 		if(line.compare("")==0)
 			continue;
@@ -428,7 +463,8 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 			//std::cout << "Setting trans guard:" << *tok_iter << std::endl;
 			polytope::ptr g = polytope::ptr(new polytope());
 			polytope::ptr u_dummy = polytope::ptr(new polytope());
-			parse_invariant(*tok_iter, g, u_dummy);// inv and guard are both polytope
+			Dynamics D_dummy;
+			parse_invariant(*tok_iter, g, u_dummy, D_dummy);// inv and guard are both polytope
 			// debug
 			/*std::cout << "parsed transition guard is:\n";
 			g->printPoly();*/
@@ -493,9 +529,10 @@ void parser::parse_initial(string init_str, polytope::ptr& p, int& init_locId)
 		
 		/*---end of loc id setting -----*/
 		polytope::ptr U = polytope::ptr(new polytope());
+		Dynamics D_dummy;
 		tokString+="\n"; // To bypass flex issue - unable to detect eos
 		yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
-		linexp_parser(p,U); // calls bison parser
+		linexp_parser(p,U,D_dummy); // calls bison parser
 		linexp_delete_buffer(my_string_buffer);
 	}
 }

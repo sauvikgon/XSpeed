@@ -132,7 +132,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::scalar_multiply(d
 }
 
 /**
- * Implements the transpose and assings the result to the caller matrix.
+ * Implements the transpose and assings the result to res.
  */
 template<typename scalar_type> void math::matrix<scalar_type>::transpose(
 		matrix& res) {

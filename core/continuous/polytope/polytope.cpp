@@ -1,5 +1,4 @@
 
-
 /*
  * polytope.cpp
  *
@@ -462,8 +461,9 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 		throw std::runtime_error("Cannot enumerate vertices of an empty polytope\n");
 
 	std::set < std::pair<double, double> > All_vertices;
-//	std::cout<<"Called enumerateVertices()!!\n";
+
 	//enumerate the vertices in the first quadrant
+
 	std::vector<double> u(getSystemDimension(), 0);
 	u[i] = 1;
 	std::vector<double> v(getSystemDimension(), 0);

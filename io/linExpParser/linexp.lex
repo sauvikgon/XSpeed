@@ -5,54 +5,60 @@
 
 %%
 
-[\n]							{//printf("EOL token\n");
-										return 0; 
-									}
+[\n]					{
+							return 0; 
+						}
 
-[+]								{//printf("PLUS token\n"); 
-										return(PLUS); 
-									}
+[+]						{
+							return(PLUS); 
+						}
 
-[*]								{//printf("MULT token\n");
-										return(MULT);
-									}
+[*]						{	
+							return(MULT);
+						}
 
-[=]								{//printf("EQ token\n");
-										return(EQ);
-									}
+[=]						{	
+							return(EQ);
+						}
 
-"<="							{
-										//printf("LEQ token\n");
-										return(LEQ);
-									}
-">="							{
-										//printf("GEQ token\n");
-										return(GEQ);
-									}
+"<="					{
+							
+							return(LEQ);
+						}
+">="					{
+							
+							return(GEQ);
+						}
 
-[ \t\r]+					{;}
+[ \t\r]+				{;}
 
 [uU][0-9]*				{
-										//printf("UVAR token\n");
-										linexplval.token_str = strdup(linexptext);
-										return(UVAR);
-									}
-
-[a-zA-Z]+[0-9]* 	{
-										//printf("VAR token\n");
-										linexplval.token_str = strdup(linexptext);
-										return(VAR);
-									}
+							//printf("UVAR token\n");
+							linexplval.token_str = strdup(linexptext);
+							return(UVAR);
+						}
+						
+[yY][0-9]*				{
+							//printf("YVAR token\n");
+							linexplval.token_str = strdup(linexptext);
+							return(YVAR);
+						}
+						
+[a-zA-Z]+[0-9]* 		{
+							//printf("VAR token\n");
+							linexplval.token_str = strdup(linexptext);
+							return(VAR);
+						}
 				
-[+-]?[0-9]+[.]?[0-9]*				{
-															//printf("CONST token\n");
-															linexplval.const_val = atof(linexptext);
-															return(CONST);
-														}
-[-]								{
-										return(MINUS);
-									}	
-[()']							{;}	
+[+-]?[0-9]+[.]?[0-9]*	{
+							//printf("CONST token\n");
+							linexplval.const_val = atof(linexptext);
+							return(CONST);
+						}
+[-]						{
+							return(MINUS);
+						}	
+[()']					{;}	
 %%
 
 int yywrap()

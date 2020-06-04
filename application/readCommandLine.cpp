@@ -283,10 +283,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			load_ha_model(init_state, Hybrid_Automata, reach_parameters, user_options);
 		}
 
-		/* Set the reachability options given by the user */
-		set_params(init_state, user_options, reach_parameters, forbidden_states);
-		
-
 	} //ALL COMMAND-LINE OPTIONS are set completely
 
 			
@@ -296,10 +292,43 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		throw(new exception());
 	}
  
-	unsigned int x1, x2;
+	int x1, x2;
 	try{
-		x1 = Hybrid_Automata.get_index(output_vars[0]);
-		x2 = Hybrid_Automata.get_index(output_vars[1]);
+		if(Hybrid_Automata.ymap_size()!=0){
+			unsigned int m = Hybrid_Automata.ymap_size();
+			x1 = Hybrid_Automata.get_y_index(output_vars[0]);
+			if(x1==-1) // string not present in ymap.
+			{
+				x1 = Hybrid_Automata.get_index(output_vars[0]);
+				Hybrid_Automata.insert_to_output_map(output_vars[0],m);
+				location::ptr loc = Hybrid_Automata.getInitial_Location();
+				Dynamics& D = loc->getSystem_Dynamics();
+				unsigned int sysDim = Hybrid_Automata.map_size();
+				math::matrix<double> rowMat(1,sysDim);
+				rowMat.clear();
+				rowMat(0,x1)=1;
+				D.MatrixT.matrix_join(rowMat,D.MatrixT);
+				x1=m; m++;
+			}
+			x2 = Hybrid_Automata.get_y_index(output_vars[1]);
+			if(x2==-1) // string not present in ymap.
+			{
+				x2 = Hybrid_Automata.get_index(output_vars[1]);
+				Hybrid_Automata.insert_to_output_map(output_vars[1],m);
+				location::ptr loc = Hybrid_Automata.getInitial_Location();
+				Dynamics& D = loc->getSystem_Dynamics();
+				unsigned int sysDim = Hybrid_Automata.map_size();
+				math::matrix<double> rowMat(1,sysDim);
+				rowMat.clear();
+				rowMat(0,x2)=1;
+				D.MatrixT.matrix_join(rowMat,D.MatrixT);
+				x2=m;
+			}
+		}
+		else{
+			x1 = Hybrid_Automata.get_index(output_vars[0]);
+			x2 = Hybrid_Automata.get_index(output_vars[1]);
+		}
 	}catch(const std::out_of_range& oor)
 	{
 		std::cerr << "Output variables not defined in the model: " << oor.what() << '\n';
@@ -323,4 +352,9 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			std::cout << "Cannot print the forbidden polytope because it is unbounded in the print dimensions or may be empty\n";
 		}
 	}
+
+	/* Set the reachability options given by the user */
+	set_params(Hybrid_Automata, init_state, user_options, reach_parameters, forbidden_states);
+
+
 }
