@@ -47,6 +47,10 @@ public:
 		this->my_X0 = X0;
 		this->my_U = U;
 		this->my_delta = delta;
+		my_B.transpose(this->my_B_trans);
+
+		lpX.setConstraints(my_X0->getCoeffMatrix(),my_X0->getColumnVector(),1);
+		lpU.setConstraints(my_U->getCoeffMatrix(),my_U->getColumnVector(),1);
 	}
 	/** virtual destructor */
 	virtual ~approx_model(){};
@@ -86,9 +90,12 @@ public:
 private:
 	math::matrix<double> my_A;
 	math::matrix<double> my_B;
+	math::matrix<double> my_B_trans; // transpose of my_B
 	double my_delta;
 	polytope::ptr my_X0;
 	polytope::ptr my_U;
+	lp_solver lpX;
+	lp_solver lpU;
 
 	/** Computes the support function of Psi w.r.t l
 	 */

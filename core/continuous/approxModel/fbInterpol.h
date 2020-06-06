@@ -33,9 +33,10 @@ class fb_interpol : public approx_model
 	std::vector<double> rho_symhull_AsqrX0_list;
 	std::vector<double> rho_symhull_AsqrPhiX0_list;
 	unsigned int dim; // dimension of the system.
+	nlopt::opt myopt; //  nlopt obj for solving maximization problem
 public:
 	/* constructor */
-	fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double> my_B, double delta, unsigned int num_iters);
+	fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double>& my_B, double delta, unsigned int num_iters);
 
 	/** Virtual destructor class */
 	virtual ~fb_interpol();

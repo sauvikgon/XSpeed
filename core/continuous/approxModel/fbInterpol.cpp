@@ -2,7 +2,7 @@
 
 fb_interpol::~fb_interpol(){}
 
-fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double> my_B, double delta, unsigned int num_iters) : approx_model(my_A, my_B, X0, U, delta) 
+fb_interpol::fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double>& my_B, double delta, unsigned int num_iters) : approx_model(my_A, my_B, X0, U, delta)
 {
 	math::matrix<double> absolute_A;
 	my_A.absolute(absolute_A);
@@ -24,13 +24,16 @@ fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::
 	phi_list.resize(num_iters);
 	my_A.matrix_Identity(my_A.size1(), phi_list[0]);
 
-	for(unsigned int i=1;i<num_iters;i++){
-		t = delta*i;
-		my_A.matrix_exponentiation(expAt,t);
-		expAt.transpose(phi_list[i]);		
+	my_A.matrix_exponentiation(expAt,delta);
+	expAt.transpose(phi_list[1]);
+
+	math::matrix<double> res = expAt;
+	for(unsigned int i=2;i<num_iters;i++){
+		res.multiply(expAt,res);
+		res.transpose(phi_list[i]);
 	}
+
 	if(num_iters == 1){
-		my_A.matrix_exponentiation(expAt,delta);
 		A_square.multiply(expAt, AsquarePhi);
 	}
 	else{
@@ -41,6 +44,18 @@ fb_interpol::fb_interpol(math::matrix<double> my_A, polytope::ptr X0, polytope::
 	dim = get_X0()->getSystemDimension();
 	
 	initialize_rho(); // initialize internal data-structures for memoization.
+
+	unsigned int optD = 1;
+	myopt = nlopt::opt(nlopt::GN_DIRECT, optD); // derivative free
+
+	std::vector<double> ub(1),lb(1);
+	lb[0]=0;
+	ub[0]=1;
+	myopt.set_lower_bounds(lb);
+	myopt.set_upper_bounds(ub);
+
+	unsigned int maxeval = 10;
+	myopt.set_maxeval(maxeval);
 }
 
 void fb_interpol::initialize_rho()
@@ -258,7 +273,6 @@ double myobjfun(const std::vector<double> &x, std::vector<double> &grad, void *m
 	res += lambda * objfun_terms->sup_deltaU;
 	res += lambda * lambda * objfun_terms->sup_epsilon_psi;
 	res += (objfun_terms->fb_interpol_obj)->rho_fb_intersection(dir,lambda);
-	//std::cout << "lambda="<< lambda << ", cost=" << res << std::endl;
 	return res;
 }
 
@@ -302,20 +316,7 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	// This term to compute rho_{sym-hull(\phi. sym-hull(AU)}
 	
 	double term5 = rho_epsilon_psi(l);
-	
-	//This term to cater for fixed input.
-	// get support function of constant input
-	/*double sup_const_input = 0;
-	if(C.size() != 0){
-		unsigned int dim = l.size();
-		assert(C.size() == l.size());
 
-		for(unsigned int i=0;i<dim;i++){
-			sup_const_input += l[i] * C[i] * time_step;	
-		}
-		
-	}*/
-	//--
 	// creating a structure to pass on calculated terms to the obj of nlopt.
 	terms my_terms;
 	my_terms.sup_X0 = sup_X0;
@@ -327,20 +328,7 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	
 	// Now, we create an nlopt obj for solving the maximization problem
 	// over lambda.
-	
-	unsigned int optD = 1;
-	nlopt::opt myopt(nlopt::GN_DIRECT, optD); // derivative free
 
-	unsigned int maxeval = 10; // the max allowed iterations in nlp
-
-	std::vector<double> ub(1),lb(1);
-	lb[0]=0;
-	ub[0]=1;
- 	myopt.set_lower_bounds(lb);
-	myopt.set_upper_bounds(ub);
-
-	myopt.set_maxeval(maxeval);
- 
 	// set the objective function
 	std::vector<double> opt_lambda(1);
 	myopt.set_max_objective(myobjfun, &my_terms);

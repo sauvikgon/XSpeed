@@ -165,13 +165,14 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			D.isEmptyC = true;
 
 			int dim = ha.getDimension();
+
 			D.MatrixA.resize(dim,dim);
 			D.MatrixA.clear(); // all elements set to 0
 			
 			if(ha.umap_size()!=0)
 				D.MatrixB.resize(dim,ha.umap_size());
 			D.MatrixB.clear(); // all elements set to 0
-			
+
 			parse_flow(file, D);
 			//debug
 			/*

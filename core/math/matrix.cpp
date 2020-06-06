@@ -58,7 +58,6 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_exponentia
 			res(i,j) = expm[i*this->size2() + j];
 		}
 	}
-	
 }
 /**
  * returns the exponentiated matrix U = exp(A)
