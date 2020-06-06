@@ -70,12 +70,10 @@ void fb_interpol::initialize_rho()
 	for(unsigned int i=0;i<dim;i++){
 		unit_dir[i] = 1;
 		transpose_A.mult_vector(unit_dir,transformed_dir);
-		double max = rho_U(transformed_dir);
-		rho_AU_list[i*2] = max;
+		rho_AU_list[i*2] = rho_U(transformed_dir);
 		unit_dir[i] = -1;
 		transpose_A.mult_vector(unit_dir,transformed_dir);
-		double neg_min = rho_U(transformed_dir);
-		rho_AU_list[i*2+1] = neg_min;
+		rho_AU_list[i*2+1] = rho_U(transformed_dir);
 
 		unit_dir[i] = 0;		
 	}
@@ -105,38 +103,20 @@ void fb_interpol::initialize_rho()
 		rho_AsqrPhiX0_list[2*i+1] = rho_X0(transformed_dir);
 		unit_dir[i] = 0;		
 	}
-	// initialize rho_symhull_AsquareX0_list
+	// initialize rho_symhull_AsquareX0_list, rho_symhull_AsquarePhiX0_list, rho_symhull_AU_list
 	rho_symhull_AsqrX0_list.resize(N);
+	rho_symhull_AsqrPhiX0_list.resize(N);
+	rho_symhull_AU_list.resize(N);
+
 	for(unsigned int i=0;i<dim;i++){
 		unit_dir[i] = 1;
 		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
 		rho_symhull_AsqrX0_list[2*i] = rho_symhull_AsquareX0(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		rho_symhull_AsqrX0_list[2*i+1] = rho_symhull_AsquareX0(transformed_dir);
-		unit_dir[i] = 0;		
-	}
-	// initialize rho_symhull_AsquarePhiX0_list
-	rho_symhull_AsqrPhiX0_list.resize(N);
-	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
+		rho_symhull_AsqrX0_list[2*i+1] = rho_symhull_AsqrX0_list[2*i];
 		rho_symhull_AsqrPhiX0_list[2*i] = rho_symhull_AsquarePhiX0(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		rho_symhull_AsqrPhiX0_list[2*i+1] = rho_symhull_AsquarePhiX0(transformed_dir);
-		unit_dir[i] = 0;		
-	}
-	// initialize rho_symhull_AU_list
-	rho_symhull_AU_list.resize(N);
-	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
+		rho_symhull_AsqrPhiX0_list[2*i+1] = rho_symhull_AsqrPhiX0_list[2*i];
 		rho_symhull_AU_list[2*i] = rho_symhull_AU(transformed_dir);
-		unit_dir[i] = -1;
-		transpose_phi_2.mult_vector(unit_dir,transformed_dir);
-		rho_symhull_AU_list[2*i+1] = rho_symhull_AU(transformed_dir);
-
+		rho_symhull_AU_list[2*i+1] = rho_symhull_AU_list[2*i];
 		unit_dir[i] = 0;		
 	}
 }

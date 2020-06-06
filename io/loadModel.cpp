@@ -62,7 +62,7 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
-		setbuild48(ha, init_state, reach_parameters);
+		//setbuild48(ha, init_state, reach_parameters);
 
 
 		//setTTEthernet5(ha, init_state, reach_parameters);
