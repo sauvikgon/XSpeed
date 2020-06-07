@@ -398,28 +398,29 @@ template_polyhedra::ptr postC_fbinterpol(unsigned int boundedTotIteration, Dynam
 
 	approx_model::ptr fbinterpol_model = approx_model::ptr(new fb_interpol(SystemDynamics.MatrixA, Initial, SystemDynamics.U, SystemDynamics.MatrixB, ReachParameters.time_step, num_iters) );
 
-	for (unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
-		std::vector<double> direction(dimension);
-
+	// get the direction vectors
+	std::vector<std::vector<double> > direction(num_directions);
+	for(unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
+		direction[eachDirection].resize(dimension);
 		for (unsigned int i = 0; i < dimension; i++) {
-			direction[i] = ReachParameters.Directions(eachDirection, i);
-		}
-		for(unsigned int iters = 0; iters < num_iters; iters++)
-		{
-			// Do some more logic to change the Omega to match with the iters
-			double res = fbinterpol_model->omega_support(direction,iters);
-			SFM(eachDirection,iters) = res;
+			direction[eachDirection][i] = ReachParameters.Directions(eachDirection, i);
 		}
 	}
 
-	unsigned int total_iters = ReachParameters.Iterations;
+	for(unsigned int iter = 0; iter < num_iters; iter++)
+	{
+		for(unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
+			double res = fbinterpol_model->omega_support(direction[eachDirection],iter);
+			SFM(eachDirection,iter) = res;
+		}
+	}
 
 	if (InvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;
 		unsigned int num_inv_constr = invariant->getColumnVector().size(); //number of Invariant's constraints
-		inv_sfm.resize(num_inv_constr, total_iters);
+		inv_sfm.resize(num_inv_constr, num_iters);
 		for (unsigned int eachInvDirection = 0; eachInvDirection < num_inv_constr;eachInvDirection++) {
-			for (unsigned int i = 0; i < total_iters; i++) {
+			for (unsigned int i = 0; i < num_iters; i++) {
 				inv_sfm(eachInvDirection, i) =
 						invariant->getColumnVector()[eachInvDirection];
 			}

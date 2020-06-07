@@ -41,7 +41,7 @@ public:
 	typedef boost::shared_ptr<approx_model> ptr;
 
 	/** Initializing constructor */
-	approx_model(math::matrix<double> my_A, math::matrix<double> my_B, polytope::ptr X0, polytope::ptr U, double delta){
+	approx_model(math::matrix<double>& my_A, math::matrix<double>& my_B, polytope::ptr X0, polytope::ptr U, double delta){
 		this->my_A = my_A;
 		this->my_B = my_B;
 		this->my_X0 = X0;

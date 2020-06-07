@@ -9,35 +9,29 @@ fb_interpol::fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope:
 
 	get_phi_2(absolute_A,delta).transpose(transpose_phi_2);
 
-	math::matrix<double> A_square, AsquarePhi, expAt;
+	math::matrix<double> A_square, AsquarePhi;
 	my_A.multiply(my_A, A_square);
 	A_square.transpose(transpose_A_square);
 	
 	my_A.transpose(transpose_A);
 	this->num_iters = num_iters;
 
-	rho_psi.resize(num_iters);
-	rho_psi[0] = 0;	
+	rho_psi.resize(my_A.size1()*2,0); // the size equals num durections
 
 	// initializing the phi list
-	double t;
-	phi_list.resize(num_iters);
-	my_A.matrix_Identity(my_A.size1(), phi_list[0]);
+
+	my_A.matrix_Identity(my_A.size1(), phi_last);
 
 	my_A.matrix_exponentiation(expAt,delta);
-	expAt.transpose(phi_list[1]);
-
-	math::matrix<double> res = expAt;
-	for(unsigned int i=2;i<num_iters;i++){
-		res.multiply(expAt,res);
-		res.transpose(phi_list[i]);
-	}
+	resMat = expAt;
+	expAt.transpose(phi);
+	my_transpose_expAt = phi;
 
 	if(num_iters == 1){
 		A_square.multiply(expAt, AsquarePhi);
 	}
 	else{
-		A_square.multiply(phi_list[1], AsquarePhi);
+		A_square.multiply(phi, AsquarePhi);
 	}
 	
 	AsquarePhi.transpose(transpose_AsquarePhi);
@@ -56,6 +50,8 @@ fb_interpol::fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope:
 
 	unsigned int maxeval = 10;
 	myopt.set_maxeval(maxeval);
+
+	last_iter = 0; d=1;
 }
 
 void fb_interpol::initialize_rho()
@@ -265,23 +261,18 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	
 	// This term to compute rho_(X0) in the direction transpose(expAt).l
 	double term2;
-	math::matrix<double> expAt;
-	math::matrix<double> *my_transpose_expAt;
+
 	if(time_step != get_delta() || num_iters==1){
 		math::matrix<double> trans_expAt;
 		get_A().matrix_exponentiation(expAt,time_step);
-		expAt.transpose(trans_expAt);
-		my_transpose_expAt = &trans_expAt;
-	}
-	else{
-		my_transpose_expAt = &phi_list[1];
+		expAt.transpose(my_transpose_expAt);
 	}
 	
 	// transform l to transpose(exp^{At}).l
 	 
 	std::vector<double> transformed_l;
 	
-	my_transpose_expAt->mult_vector(l,transformed_l);
+	my_transpose_expAt.mult_vector(l,transformed_l);
 	term2 = rho_X0(transformed_l);
 	//std::cout << "term2 = " << term2 << std::endl;
 	
@@ -321,16 +312,25 @@ double fb_interpol::omega_support(const std::vector<double>& l, unsigned int ite
 {
 	double res;
 
+	if(iter != last_iter){
+		d=0; // reset direction count to beginning
+		if(iter>=2){
+			phi_last=phi;
+			resMat.multiply(expAt,resMat);
+			resMat.transpose(phi);
+		}
+	}
 	// transform l to transpose(exp^{At}).l	 
 	std::vector<double> transformed_l;
 	if(iter==0)
 		transformed_l = l;
 	else
-		phi_list[iter].mult_vector(l,transformed_l);
+		phi.mult_vector(l,transformed_l);
 
 	double first_omega_sup = first_omega_support(transformed_l, get_delta());
 	
 	res = first_omega_sup + psi_support(l,iter) ;
+	last_iter=iter; d++;
 	return res;
 }
 
@@ -341,16 +341,14 @@ double fb_interpol::omega_support(const std::vector<double>& l, unsigned int ite
 double fb_interpol::psi_support(const std::vector<double>& l, unsigned int iter)
 {
 	if(iter == 0) return 0;
-	double res;
-	
+
 	std::vector<double> transformed_l;
-	phi_list[iter-1].mult_vector(l,transformed_l);
+	phi_last.mult_vector(l,transformed_l);
 
 	double term1 = get_delta() * rho_U(transformed_l);
 	double term2 = rho_epsilon_psi(transformed_l);
 
 	double sup_psi_delta = term1 + term2;
-	res = rho_psi[iter-1] + sup_psi_delta;
-	rho_psi[iter] = res;
-	return res;
+	rho_psi[d] = rho_psi[d] + sup_psi_delta;
+	return rho_psi[d];
 }

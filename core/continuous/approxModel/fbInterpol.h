@@ -24,7 +24,9 @@ class fb_interpol : public approx_model
 	math::matrix<double> transpose_A; //A^T
 	unsigned int num_iters; // essential for efficient computation of rho_psi
 	std::vector<double> rho_psi; // stores rho_{psi_k}
-	std::vector<math::matrix<double> > phi_list; 
+	math::matrix<double> expAt, my_transpose_expAt; // for reusing this matrix once computed.
+	math::matrix<double> phi, phi_last, resMat; // kept for code optimization
+
 
 	std::vector<double> rho_AU_list;	
 	std::vector<double> rho_symhull_AU_list;
@@ -33,6 +35,8 @@ class fb_interpol : public approx_model
 	std::vector<double> rho_symhull_AsqrX0_list;
 	std::vector<double> rho_symhull_AsqrPhiX0_list;
 	unsigned int dim; // dimension of the system.
+	unsigned int last_iter; // Remembers the last iter on which omega_support was called. Kept for code optimization.
+	unsigned int d; // remembers the current direction id. kept for dp table indexing.
 	nlopt::opt myopt; //  nlopt obj for solving maximization problem
 public:
 	/* constructor */
