@@ -5,11 +5,11 @@
  *      Author: Rajarshi
  */
 
+#include <utilities/dbgMsgLogger.h>
 #include "counterExample/simulation.h"
 #include <fstream>
 #include <iomanip>
-#include "../core/continuous/Polytope/Polytope.h"
-#include "../utilities/dbg_msg_logger.h"
+#include "core/continuous/polytope/polytope.h"
 
 
 
@@ -324,7 +324,13 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 //				std::cout << "time:" << t << " ";
 			std::cout << "DISTANCE TO INV= " << std::setprecision(10) << dist
 					<< std::endl;
-			std::cout << "tol = " << std::setprecision(10) << tol << std::endl;
+			//std::cout << "tol = " << std::setprecision(10) << tol << std::endl;
+			/*
+			std::cout << "Violating trajectory start point:\n";
+			for(unsigned int j=0;j<dimension;j++)
+				std::cout << x[j] << " ";
+			std::cout << std::endl;
+			*/
 			status = false;
 			trace_point simpoint;
 			simpoint.first = tout;
@@ -580,7 +586,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 			it != outgoingtrans.end(); it++) {
 
 		eligibleTransition trans;
-		polytope::ptr g = (*it)->getGaurd();
+		polytope::ptr g = (*it)->getGuard();
 
 		math::matrix<double> M = g->getCoeffMatrix();
 		std::vector<double> Bounds = g->getColumnVector();
@@ -595,8 +601,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	double tol_inv = 1e-10;
 
 	dimension = x.size();
-	//cout << "Iteration Remaining" << N << "\n";
-
+	
 	reltol = 1e-8;
 	abstol = 1e-8;
 
@@ -608,12 +613,8 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 	cout.precision(17);
 
-	/*for (unsigned int i = 0; i < dimension; i++)
-		cout<<x[i]<<"\t";
-	cout<<"Checking "<<tol_inv <<"  point-distance with Invariant = "<<dist<<endl;*/
-
-
 	if (dist > tol_inv) {
+		std::cout << "Initial point outside the location invariant\n";
 		std::vector<sim_start_point> emptylist;
 		return emptylist;
 	};
@@ -916,7 +917,6 @@ bool simulation::simulateHa(sim_start_point start, double start_time, double tot
 	while (wlist.size() != 0 && jumps_taken <= max_jumps) {
 		sim_start_point s = wlist.front();
 		wlist.pop_front();
-		unsigned int loc_id = s.locptr->getLocId();
 		std::vector<sim_start_point> next_pts;
 		next_pts = simulateHaLocation(s, s.cross_over_time, tot_time, ha, forbidden_set, safety_status);
 		//simulateHaLocation also creates a sim_trace per location per start_point and concatenates
@@ -1069,7 +1069,6 @@ static int jtv (realtype t, N_Vector y, N_Vector fy, SUNMatrix Jac,
 	assert(A.size1() == A.size2());
 	C = D->C;
 
-	double sum;
 	// Input set not included in the dynamics.
 
 	for (unsigned int i = 0; i < A.size1(); i++) {

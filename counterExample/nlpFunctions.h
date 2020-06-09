@@ -10,8 +10,8 @@
 #define NLP_FUNC_H
 
 
-#include "../core/math/matrix.h"
-#include "../application/DataStructureDirections.h"
+#include "core/math/matrix.h"
+#include "application/structures.h"
 
 #define VALIDATION
 
@@ -35,7 +35,7 @@ double myobjfunc1(const std::vector<double> &x, std::vector<double> &grad, void 
 
 /**
  * Objective function for splicing with Flowpipe constraints
- *  only. (Sergiy's Idea)
+ *  only.
  */
 double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
@@ -55,6 +55,15 @@ double myobjfuncOnStateVars(const std::vector<double> &x, std::vector<double> &g
 
 //Objective function for splicing with Iterative LP-NLP
 double myobjfuncIterativeNLP(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
+
+
+/*
+ * Amit:
+ * Function myobjfuncIterativeNLP is replicated to be used for 3D plotting.
+ * Here the function is simplified by removing gradient computation and simplified the parameters
+ */
+double myobjfuncIterativeNLP_Function(const std::vector<double> &t, std::vector<double> *x);
+
 
 // Objective function for splicing with LP solution as objective
 double myobjfunc_LP(const std::vector<double> &t, std::vector<double> &grad,void *my_func_data);

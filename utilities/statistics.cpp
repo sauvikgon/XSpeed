@@ -5,10 +5,10 @@
  *      Author: rajarshi
  */
 
+#include <utilities/cpuUtilities/cpuUtilities.h>
+#include <utilities/memUtilities/memUsage.h>
 #include <iostream>
 #include "statistics.h"
-#include "utilities/cpu_utilities/cpu_utilities.h"
-#include "utilities/memory_utilities/memory_usage.h"
 
 
 void print_statistics(boost::timer::cpu_timer timer, double cpu_usage, long mem_usage, unsigned int num_exps, std::string msg)
@@ -56,6 +56,12 @@ void print_statistics(boost::timer::cpu_timer timer, std::string msg)
 void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, userOptions& user_options, std::string msg)
 {
 	std::cout << "\n\n-----Statistics for " << msg << "-----------" << std::endl;
+	if(reachObj.isSafe()){
+		std::cout << "Model is SAFE w.r.t to safety condition\n";
+	}
+	else{
+		std::cout << "Model is UNSAFE w.r.t to safety condition\n";
+	}
 	std::cout << "number of abstract ce-paths found for exploration: " << ce_candidates.size() << std::endl;
 	std::list<concreteCE::ptr> ce_list = reachObj.get_counter_examples();
 	std::cout << "Number of concrete ce trajectories found: " << ce_list.size() << std::endl;
@@ -63,7 +69,6 @@ void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_
 	std::cout << "Number of refinements performed when searching: " << reachObj.get_refinements() << std::endl;
 	std::cout << "Time to search concrete counter-example(s) from the abstract path(s) (user time in ms):" << reachObj.get_ce_search_time() << std::endl;
 	std::cout << std::endl;
-	unsigned int ce_search_time = reachObj.get_ce_search_time();
 
 	// plot the first counter-example trajectory in the list.
 	if(ce_list.size() !=0){

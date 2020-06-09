@@ -5,11 +5,11 @@
 #ifndef MATRIX_CPP_
 #define MATRIX_CPP_
 
-#include "../../core/math/matrix.h"
+#include <core/math/basicFunctions.h>
+#include "core/math/matrix.h"
 
 #include <iostream>
 
-#include "../../core/math/basic_functions.h"
 
 using namespace std;
 
@@ -31,23 +31,33 @@ template<typename scalar_type> math::matrix<scalar_type>::matrix(size_type r,
 }
 
 /**
- * returns the ublas matrix
-
- const void get_matrix_impl(ublas_matrix_impl &x) const {
- ublas_matrix_impl m(this->size1(), this->size2(), this->data());
- return m;
- } */
-/**
  * returns the exponentiated matrix U = exp(A*time_tau)
  */
 
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_exponentiation(
-		math::matrix<scalar_type>& res, double time_tau) const {
+		math::matrix<scalar_type>& res, double time_tau) {
 
-	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
-	m = expm_pad(m, time_tau);
-	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
+//	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
+//	m = expm_pad(m, time_tau);
+//	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
+	
+	double m[this->size1()*this->size2()*sizeof(double)];
 
+	for(unsigned int i=0;i<this->size1();i++){
+		for(unsigned int j=0;j<this->size2();j++){
+			m[i*this->size2() + j] = this->at_element(i,j)*time_tau;
+		}
+	}
+	
+	assert(this->size1() == this->size2());
+	double *expm = r8mat_expm1(this->size1(), m );
+	res = math::matrix<scalar_type>(this->size1(), this->size2());
+	
+	for(unsigned int i=0;i<this->size1();i++){
+		for(unsigned int j=0;j<this->size2();j++){
+			res(i,j) = expm[i*this->size2() + j];
+		}
+	}
 }
 /**
  * returns the exponentiated matrix U = exp(A)
@@ -60,8 +70,8 @@ void math::matrix<scalar_type>::matrix_exponentiation(
 	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 	m = expm_pad(m);
 	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
-
-}
+	
+}	
 
 /**
  * Matrix Multiply routine with ublas matrix. The matrix passed as parameter is multiplied
@@ -110,7 +120,6 @@ template<typename scalar_type> void math::matrix<scalar_type>::mult_vector(
 
 	for (unsigned int i = 0; i < uv.size(); i++)	//m.size1()  or uv.size()
 		res[i] = uv(i);
-	//cout<<"\n"<<uv.size()<<endl;
 }
 
 template<typename scalar_type> void math::matrix<scalar_type>::scalar_multiply(double c){
@@ -120,38 +129,9 @@ template<typename scalar_type> void math::matrix<scalar_type>::scalar_multiply(d
 		}
 	}
 }
-/**
- * Implements the transpose and assings the result to the caller matrix.
-
- template<typename scalar_type> void math::matrix<scalar_type>::transpose_assign() {
-
- size_type r = this->size2();
- size_type c = this->size1();
- ublas_matrix_impl m(r, c);
- for (size_type i = 0; i < r; i++) {
- for (size_type j = 0; j < c; j++)
- m(i, j) = this(j, i);
- }
- this(r, c, m.data());
- }
- */
-
-/*template<typename scalar_type> void math::matrix<scalar_type>::addColumn(
- std::vector<scalar_type> columnVector,
- math::matrix<scalar_type>& resized_matrix) {
-
- size_type r = this->size2();
- size_type c = this->size1();
- ublas_matrix_impl m(r, c);
- for (size_type i = 0; i < r; i++) {
- for (size_type j = 0; j < c; j++)
- m(i, j) = this->at_element(j, i);
- }
- res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
- }*/
 
 /**
- * Implements the transpose and assings the result to the caller matrix.
+ * Implements the transpose and assings the result to res.
  */
 template<typename scalar_type> void math::matrix<scalar_type>::transpose(
 		matrix& res) {
@@ -165,6 +145,20 @@ template<typename scalar_type> void math::matrix<scalar_type>::transpose(
 	}
 	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
 }
+/**
+  * Gets the absolute matrix M = (|m_{i,j}|) in res
+  */
+template<typename scalar_type> void math::matrix<scalar_type>::absolute(matrix& res){
+	size_type r = this->size1();
+	size_type c = this->size2();
+	ublas_matrix_impl m(r, c);
+	for (size_type i = 0; i < r; i++) {
+		for (size_type j = 0; j < c; j++)
+			m(i, j) = fabs(this->at_element(i, j));
+	}
+	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());	
+}
+
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_copy(
 		math::matrix<scalar_type>& destination) {
 	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
@@ -187,10 +181,9 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_Identity(i
 }
 
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matrix mat2, matrix& joined_matrix) {
-	size_type row, col, index_i;
+	size_type row, col;
 	row = this->size1();
 	col = this->size2();
-//	std::cout <<"sfm-directions = "<<col<<" and invariant/mat2.size2() = "<<mat2.size2()<<"\n";
 	if (mat2.size2()==0){	//second matrix is empty
 		joined_matrix = matrix(row,col,this->data());
 	} else if (col==0){
@@ -218,16 +211,15 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matri
 
 /**
  * returns the infinity norm of the matrix. inf norm of a matrix m is defined as
- * maximum absolute row sum
- *
+ * maximum absolute row sum.
  */
 template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf() {
 	scalar_type norm = 0;
-	double sum=0;
+	scalar_type sum;
 	for (size_type i = 0; i < this->size1(); i++) {
 		sum=0;
 		for (size_type j = 0; j < this->size2(); j++) {
-			sum = sum + abs(this->at_element(i,j));
+			sum = sum + fabs(this->at_element(i,j));
 		}
 		if (sum > norm)
 			norm = sum;
@@ -246,11 +238,8 @@ template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_max()
 		for (size_type j = 0; j < this->size2(); j++) {
 			if (abs(this->at_element(size_type(i), size_type(j))) > norm)
 				norm = abs(this->at_element(size_type(i), size_type(j)));
-			//	if (abs(this(i, j)) > norm)
-			//		norm = abs(this(i, j));
 		}
 	}
-//	std::cout<<"math norm = "<<norm<<std::endl;
 	return norm;
 }
 
@@ -302,7 +291,9 @@ bool math::matrix<scalar_type>::isInvertible()
 template<typename scalar_type>
 bool math::matrix<scalar_type>::isIdentity()
 {
-	assert(this->size1() == this->size2());
+	if(this->size1() != this->size2())
+		return false;
+	
 	using namespace boost::numeric::ublas;
 
 	for(unsigned int i=0;i<this->size1();i++){

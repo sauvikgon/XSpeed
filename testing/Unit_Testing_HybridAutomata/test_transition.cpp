@@ -29,7 +29,7 @@ SUITE(Transition_TestSuite) {
 		string nn;
 		typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 		Dynamics D, outD;
-		polytope::ptr u, Gaurd, GaurdOut, Inv, outInv;
+		polytope::ptr u, Guard, GuardOut, Inv, outInv;
 		math::matrix<double> ConstraintsMatrixI;
 		int boundSignI;
 		std::vector<double> boundValueI;
@@ -104,7 +104,7 @@ SUITE(Transition_TestSuite) {
 		int srcLocID=1,destLocID=2;
 
 		location loc_src(srcLocID, nn, D, Inv, true, t), loc_dest(destLocID, "Good Bye", D, Inv, true, t), loc_src_out, loc_dest_out;
-		Gaurd = polytope::ptr(new polytope(ConstraintsMatrixI,boundValueI,boundSignI));
+		Guard = polytope::ptr(new polytope(ConstraintsMatrixI,boundValueI,boundSignI));
 
 		string name = "Test Transition";
 		math::matrix<double> m(2, 2);
@@ -117,7 +117,7 @@ SUITE(Transition_TestSuite) {
 		T.Map = m;
 		T.b = b;
 
-		transition trans(10, name, srcLocID, destLocID, Gaurd, T);//creating object of location as loc
+		transition trans(10, name, srcLocID, destLocID, Guard, T);//creating object of location as loc
 
 		out << trans.getLabel();
 		proper << "Test Transition";
@@ -138,7 +138,7 @@ SUITE(Transition_TestSuite) {
 		CHECK_ARRAY_EQUAL(b2, Tout.b, b2.size());
 
 
-		GaurdOut = trans.getGaurd();
+		GuardOut = trans.getGuard();
 		int loc_src_id = trans.getSource_Location_Id();
 		int loc_dst_id = trans.getDestination_Location_Id();
 

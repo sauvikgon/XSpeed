@@ -11,20 +11,20 @@
 
 #include <list>
 #include <boost/shared_ptr.hpp>
+#include <core/math/lpSolver/lpSolver.h>
 #include "boost/timer/timer.hpp"
 #include "nlopt.hpp"
-#include "counterExample/abstract_symbolic_state.h"
 #include "counterExample/concreteCE.h"
 #include "nlpFunctions.h"
 #include <fstream>
 #include <string>
-#include "../core/continuous/ConvexSet/supportFunctionProvider.h"
-#include "../core/HybridAutomata/Hybrid_Automata.h"
-#include "../core/HybridAutomata/Transition.h"
-#include "../core/symbolic_states/symbolic_states.h"
-#include "core/math/lp_solver/lp_solver.h"
-#include "../core/math/analyticODESol.h"
-#include <application/userOptions.h>
+#include "core/continuous/convexSet/supportFunctionProvider.h"
+#include "core/hybridAutomata/hybridAutomata.h"
+#include "core/hybridAutomata/transition.h"
+#include "core/symbolicStates/symbolicStates.h"
+#include "core/math/analyticODESol.h"
+#include "application/userOptions.h"
+#include "counterExample/abstractSymbolicState.h"
 #include "counterExample/simulation.h"
 
 /**
@@ -159,11 +159,6 @@ public:
 
 	lp_solver build_lp(std::vector<double> dwell_times);
 
-	/*
-	 * creates an nlp obj for the trajectory splicing problem
-	 */
-	void build_nlp(nlopt::opt &);
-
 private:
 	/**
 	 * The first symbolic state is the initial symbolic state and the last one
@@ -225,16 +220,12 @@ private:
 	 * of a LP formed for splicing with fixed-dwell and varying starts.
 	 */
 	concreteCE::ptr gen_concreteCE_LPobj(double tolerance, const std::list<refinement_point>& refinements);
-	/*
-	 * Interface for trajectory splicing with NLP that returns a dwell-time
-	 * minimal counterexample.
-	 */
-	concreteCE::ptr gen_concreteCE_Opt(double tolerance, const std::list<refinement_point> &refinements);
 
 };
 
 
 std::vector<double> simulate_trajectory(const std::vector<double>& x0,
 		Dynamics& D, const double& time, double& distance, polytope::ptr I, std::vector<double>&);
+
 
 #endif /* ABSTRACTCE_H_ */

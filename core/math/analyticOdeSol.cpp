@@ -204,14 +204,12 @@ std::vector<double> ODESol_inhomogenous(const Dynamics& D, double time){
 	return res2;
 }
 
-
-math::matrix<double> time_slice_component(math::matrix<double>& A, double time){
+void extended_expm(math::matrix<double>& A, double time, math::matrix<double>& res)
+{
 	unsigned int dim = A.size2();
 	math::matrix<double> expAt(dim, dim);
 	math::matrix<double> At(A);
 	At.scalar_multiply(time);
-// compute the expression A^-1 (e^At - I) alternatively as a sub-matrix of the exp(M),
-// as shown in the SpaceEx paper, page 8, phi_1.
 	math::matrix<double> M(3 * dim, 3 * dim);
 // putting this check to see if M is initialized to 0 matrix above
 	for (unsigned int i = 0; i < 3 * dim; i++) {
@@ -230,14 +228,39 @@ math::matrix<double> time_slice_component(math::matrix<double>& A, double time){
 	for (unsigned int i = dim, j = 2 * dim; i < 2 * dim; i++, j++)
 		M(i, j) = time;
 
-// compute the exponential of M
-	math::matrix<double> expM(dim, dim);
-	M.matrix_exponentiation(expM);
-// extract the submatrix [0,dim][dim+2*dim] into the matrix phi
-	math::matrix<double> phi(dim, dim);
+	// compute the exponential of M
+	M.matrix_exponentiation(res);
+}
+/* compute the expression A^-1 (e^At - I) alternatively as a sub-matrix of the exp(M),
+ * as shown in the SpaceEx paper, page 8, phi_1.
+ */
+math::matrix<double> time_slice_component(math::matrix<double>& A, double time)
+{	
+	unsigned int dim = A.size2();
+	math::matrix<double> expM; 
+	extended_expm(A,time,expM);
+	// extract the submatrix [0,dim][dim+2*dim] into the matrix phi
+	math::matrix<double> phi_1(dim, dim);
 	for (unsigned int i = 0; i < dim; i++) {
 		for (unsigned int j = 0; j < dim; j++)
-			phi(i, j) = expM(i, dim + j);
+			phi_1(i, j) = expM(i, dim + j);
 	}
-	return phi;
+	return phi_1;
+}
+
+/*
+ * compute the expression A^-2 (e^At - I - \delta.A) alternatively as a sub-matrix of the exp(M), as shown in the SpaceEx paper, page 8, phi_2.
+ */
+math::matrix<double> get_phi_2(math::matrix<double>& A, double time)
+{
+	unsigned int dim = A.size2();
+	math::matrix<double> expM; 
+	extended_expm(A,time,expM);
+	// extract the submatrix [0,dim][2*dim+3*dim] into the matrix phi
+	math::matrix<double> phi_2(dim, dim);
+	for (unsigned int i = 0; i < dim; i++) {
+		for (unsigned int j = 0; j < dim; j++)
+			phi_2(i, j) = expM(i, 2*dim + j);
+	}
+	return phi_2;	
 }

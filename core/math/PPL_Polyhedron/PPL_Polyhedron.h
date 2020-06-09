@@ -12,7 +12,7 @@
 #include <string>
 #include <sstream>
 #include <boost/shared_ptr.hpp>
-#include "../../../core/continuous/Polytope/Polytope.h"
+#include "../../../core/continuous/Polytope/polytope.h"
 #include "../../../core/math/matrix.h"
 
 

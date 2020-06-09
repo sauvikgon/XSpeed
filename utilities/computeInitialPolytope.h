@@ -1,5 +1,5 @@
 /*
- * computeInitialPolytope.h
+ * computeInitialpolytope.h
  *
  *  Created on: 17-Nov-2014
  *      Author: amit
@@ -10,13 +10,13 @@
 #ifndef COMPUTEINITIALPOLYTOPE_H_
 #define COMPUTEINITIALPOLYTOPE_H_
 
+#include <core/continuous/polytope/polytope.h>
+#include <core/reachability/postCParallel.h>
+#include <utilities/templatePolyhedra.h>
 #include <list>
 
-#include "../core/continuous/Polytope/Polytope.h"
-#include "../core/Reachability/reachPostCParallel.h"
-#include "../utilities/invariantBoundaryCheck.h"
-#include "../utilities/testPolytopePlotting.h"
-#include "../utilities/Template_Polyhedra.h"
+#include "utilities/invariantBoundaryCheck.h"
+#include "utilities/testPolytopePlotting.h"
 
 //#include "MySrc/Reachability/reachabilityParallel_Iterations.h"
 

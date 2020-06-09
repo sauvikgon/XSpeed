@@ -12,9 +12,9 @@
 #include <utility>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
+#include <core/hybridAutomata/hybridAutomata.h>
 #include <vector>
 
-#include "../core/HybridAutomata/Hybrid_Automata.h"
 #include "counterExample/simulation.h"
 
 

@@ -12,7 +12,7 @@
 #include <vector>
 #include <cmath>
 
-#include "../../core/continuous/Polytope/Polytope.h"
+#include "../../core/continuous/Polytope/polytope.h"
 #include "../../core/math/matrix.h"
 #include "../../core/math/nlp_solver/nlp_solver.h"
 #include "../../utilities/dbg_msg_logger.h"

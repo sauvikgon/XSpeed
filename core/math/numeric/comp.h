@@ -8,8 +8,8 @@
 #ifndef COMP_H_
 #define COMP_H_
 
-#include "../../../core/math/numeric/approx_comparator.h"
-#include "../../../core/math/tribool.h"
+#include <core/math/numeric/approxComparator.h>
+#include "tribool.h"
 
 namespace math {
 namespace numeric {

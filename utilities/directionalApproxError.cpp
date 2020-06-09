@@ -5,9 +5,9 @@
  *      Author: amit
  */
 
+#include <utilities/dbgMsgLogger.h>
 #include "../utilities/directionalApproxError.h"
 
-#include "../utilities/dbg_msg_logger.h"
 
 nlopt::opt optProb1; // nlopt object to solve the problem 1
 

@@ -89,7 +89,7 @@ SUITE(HybridAutomata_TestSuite) {
 		string nn;
 		typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 		Dynamics D, outD;
-		polytope::ptr Gaurd, GaurdOut, Inv, outInv;
+		polytope::ptr Guard, GuardOut, Inv, outInv;
 		math::matrix<double> ConstraintsMatrixI;
 		int boundSignI;
 		std::vector<double> boundValueI;
@@ -109,7 +109,7 @@ SUITE(HybridAutomata_TestSuite) {
 	TEST_FIXTURE(ClassHybridAutomata , constructor2_HybridAutomata_Test) {
 
 		std::list<transition::ptr> all_trans;
-		Gaurd = polytope::ptr(new polytope(ConstraintsMatrixI,boundValueI,boundSignI));
+		Guard = polytope::ptr(new polytope(ConstraintsMatrixI,boundValueI,boundSignI));
 
 		int dimen = 2;
 
@@ -128,8 +128,8 @@ SUITE(HybridAutomata_TestSuite) {
 
 		int srcLocID=1, destLocID=2;
 
-		transition::ptr trans1 = transition::ptr(new transition(1, label1, srcLocID, destLocID, Gaurd, T));//creating object of location as loc
-		transition::ptr trans2 = transition::ptr(new transition(2, label2, srcLocID, destLocID, Gaurd, T));//creating object of location as loc
+		transition::ptr trans1 = transition::ptr(new transition(1, label1, srcLocID, destLocID, Guard, T));//creating object of location as loc
+		transition::ptr trans2 = transition::ptr(new transition(2, label2, srcLocID, destLocID, Guard, T));//creating object of location as loc
 		all_trans.push_back(trans1);
 		all_trans.push_back(trans2);
 

@@ -61,10 +61,10 @@ TEST_FIXTURE(ExampleHelicopter_Model, Creating_Identity_Matrix_Test) {
 
 /*
 TEST_FIXTURE(ExampleHelicopter_Model, Boost_Tokenizer_Test) {
-	polytope initial_polytope_I, invariant,	gaurd_polytope;
+	polytope initial_polytope_I, invariant,	guard_polytope;
 	Dynamics system_dynamics;
 	SetHelicopter_Parameters(initial_polytope_I,
-			system_dynamics, invariant,	gaurd_polytope);
+			system_dynamics, invariant,	guard_polytope);
 }
 */
 

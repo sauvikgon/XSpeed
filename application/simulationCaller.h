@@ -8,7 +8,7 @@
 #ifndef SIMULATIONCALLER_H_
 #define SIMULATIONCALLER_H_
 
-#include "../io/load_model.h"
+#include <io/loadModel.h>
 #include "counterExample/simulation.h"
 #include "boost/timer/timer.hpp"
 
