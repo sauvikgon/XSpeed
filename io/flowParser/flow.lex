@@ -29,7 +29,7 @@
 										return(UVAR);
 									}
 
-[a-zA-Z]+[0-9]* 	{
+[a-zA-Z_]+[0-9]* 	{
 										//printf("VAR token\n");
 										yylval.token_str = strdup(yytext);
 										return(VAR);

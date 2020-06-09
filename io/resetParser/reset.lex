@@ -24,7 +24,7 @@
 [[:space:]]+			{;}
 
 
-[a-zA-Z]+[0-9]* 	{
+[a-zA-Z_]+[0-9]* 	{
 										//printf("VAR token\n");
 										resetlval.token_str = strdup(resettext);
 										return(VAR);

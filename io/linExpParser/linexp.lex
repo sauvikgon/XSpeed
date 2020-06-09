@@ -44,7 +44,7 @@
 							return(YVAR);
 						}
 						
-[a-zA-Z]+[0-9]* 		{
+[a-zA-Z_]+[0-9]* 		{
 							//printf("VAR token\n");
 							linexplval.token_str = strdup(linexptext);
 							return(VAR);
