@@ -389,6 +389,7 @@ std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(boo
 			}//end of each intersected region
 		}//end of multiple intersected region
 	} else { //ON for all intersected Omegas create a single template-hull set
+		//std::cout<<"Aggregation is Switched-ON\n";
 
 		for (std::list<std::pair<unsigned int, unsigned int> >::iterator range_it = range_list.begin(); range_it != range_list.end();
 				range_it++) {

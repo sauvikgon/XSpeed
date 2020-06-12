@@ -531,10 +531,17 @@ void parser::parse_initial(string init_str, polytope::ptr& p, int& init_locId)
 		/*---end of loc id setting -----*/
 		polytope::ptr U = polytope::ptr(new polytope());
 		Dynamics D_dummy;
-		tokString+="\n"; // To bypass flex issue - unable to detect eos
-		yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
-		linexp_parser(p,U,D_dummy); // calls bison parser
-		linexp_delete_buffer(my_string_buffer);
+
+		// check if constraint is true.
+		if(tokString.compare("true") == 0){
+			p = polytope::ptr(new polytope()); // set a universe polytope
+		}
+		else{
+			tokString+="\n"; // To bypass flex issue - unable to detect eos
+			yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
+			linexp_parser(p,U,D_dummy); // calls bison parser
+			linexp_delete_buffer(my_string_buffer);
+		}
 	}
 }
 

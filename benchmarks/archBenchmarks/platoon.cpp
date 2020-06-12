@@ -88,7 +88,7 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	system_dynamics.isEmptyMatrixB = false;
 	system_dynamics.MatrixB = Bmatrix;
 
-	C.resize(row );
+	C.resize(row);
 	C.assign(row,0);
 	C[9] = 1.0;
 	C[10] = 1.0;
@@ -359,26 +359,6 @@ void setplatoon(hybrid_automata& Hybrid_Automata,
 	int x1 = Hybrid_Automata.get_index(output_variables[0]);
 	int x2 = Hybrid_Automata.get_index(output_variables[1]);
 
-	std::vector<std::vector<double> > newDirections;
-	math::matrix<double> Real_Directions;
-	unsigned int dir_nums;
-	if (Directions_Type == BOX) {
-		 dir_nums = 2 * dim;
-		 newDirections = generate_axis_directions(dim);
-	}
-	if (Directions_Type == OCT) {
-		 dir_nums = 2 * dim * dim;
-		 newDirections = get_octagonal_directions(dim);
-	}
-	if (Directions_Type > 2) {
-		 dir_nums = Directions_Type;
-		 newDirections = math::uni_sphere(dir_nums, dim, 100, 0.0005);
-	}
-	get_ublas_matrix(newDirections, Real_Directions);
-	row = dir_nums;
-	col = dim;
-	reach_parameters.Directions.resize(row, col);
-	reach_parameters.Directions = Real_Directions;
 }
 
 /**

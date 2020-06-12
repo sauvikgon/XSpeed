@@ -114,6 +114,11 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				std::list <template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
+				if(current_location->getName().compare("BAD")){
+					safety_violation = true;
+					this->safe = false;
+					std::cout << "MODEL UNSAFE\n";
+				}
 				if (forbid_intersects.size() != 0){
 					safety_violation = true;
 					this->safe = false;
@@ -246,16 +251,13 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 					// intersect the location inv with the polys
 					
-
 					}
-					else if(boost::iequals(set_aggr_choice,"chull"))
+					else if(boost::iequals(set_aggr_choice,"chull")){
 						polys = reach_region->postD_chull(guard_polytope, inv, lp_solver_type);
+						std::cout << "Inside thull set aggregation\n";
+					}
 
-					//debug	
-					polytope::ptr p = polys.front();
-					/*if(polys.size()!=0)
-						p->print2file("postD-poly", 2, 3);*/
-					//--
+					std::cout << "polys size = " << polys.size() << std::endl;
 
 				} else if (guard_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings
