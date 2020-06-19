@@ -27,8 +27,6 @@
 #include "utilities/vectorOperations.h"
 
 
-
-
 typedef std::vector<std::pair<double, double> > Intervals;
 
 /**

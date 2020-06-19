@@ -49,10 +49,11 @@ extern int yydebug;
     UVAR = 259,
     CONST = 260,
     PLUS = 261,
-    MULT = 262,
-    EQ = 263,
-    LEQ = 264,
-    GEQ = 265
+    MINUS = 262,
+    MULT = 263,
+    EQ = 264,
+    LEQ = 265,
+    GEQ = 266
   };
 #endif
 
@@ -64,7 +65,7 @@ union YYSTYPE
 #line 20 "flow.ypp" /* yacc.c:1909  */
  char* token_str; double const_val;
 
-#line 68 "flow.tab.hpp" /* yacc.c:1909  */
+#line 69 "flow.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

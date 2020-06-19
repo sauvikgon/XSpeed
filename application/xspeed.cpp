@@ -39,8 +39,11 @@ int main(int argc, char *argv[]) {
 	// ----Trajectory Simulation
 	if (boost::iequals(user_options.getEngine(),"simu")==true) {
 		std::cout<<"Running simulation engine ... \n";
-		forbidden forbidden_set = forbidden_states[0]; // take the first forbidden state
+		forbidden forbidden_set;
+		if(forbidden_states.size()>0)
+			forbidden_set = forbidden_states[0]; // take the first forbidden state
 		simulationCaller(reach_parameters, Hybrid_Automata, init_state, user_options, forbidden_set);
+
 		return 0; //Only Trajectory Simulation is done
 	}
 

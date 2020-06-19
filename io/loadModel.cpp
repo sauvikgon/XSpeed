@@ -24,21 +24,21 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-	//	set_nav04_timed(ha, init_state, reach_parameters);
+		//set_nav04_timed(ha, init_state, reach_parameters);
 		//SetNavigationBenchMark4Var(ha, init_state, reach_parameters); //Paper's Model
 	//	Set_NavTimed_Parameters(ha, init_state, reach_parameters);
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_2) {
-	//	SetNavigationModel2(ha, init_state, reach_parameters); //My own testing Model NAV2
+		//SetNavigationModel2(ha, init_state, reach_parameters); //My own testing Model NAV2
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_3) {
-	//	SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
+		//SetNavigationModel4(ha, init_state, reach_parameters); //Model NAV04
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
-	//	SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+		//SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 		//SetNavigationModel5by5(ha, init_state, reach_parameters); // This is the timed Model of NAV_5by5
 		//SetNavigationNav5by5WithOutTime(ha, init_state, reach_parameters); //This is the un-timed Model NAV_5by5
 	}
@@ -48,13 +48,13 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == OSCILLATOR) {
-	//	setOscillatorTimed(ha, init_state, reach_parameters);
+		//setOscillatorTimed(ha, init_state, reach_parameters);
 	}
 	if (HybridSystem_Model_Type == 14) {
 
 		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
 		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
-		//user_model(ha, init_state,reach_parameters);
+
 		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
 		//SetNavigationModel9by9Timed(ha,init_state,reach_parameters);
 
@@ -62,33 +62,17 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 
 		//setTTEthernetModel2(ha, init_state, reach_parameters);
 
-		//setbuild48(ha, init_state, reach_parameters);
-
-
 		//setTTEthernet5(ha, init_state, reach_parameters);
-
-		//setmesh(ha, init_state, reach_parameters);	//precision issue
 
 		//setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
 		setplatoon(ha, init_state, reach_parameters); // deterministic transitions to communicating (c) and non-communicating modes (nc)
 		//setplatoon_ndt(ha, init_state, reach_parameters); // non-deterministic transitions to c and nc modes.
 		//setplatoon_na(ha, init_state, reach_parameters); // non-deterministic transitios with arbitrary transitions to c and nc modes.
 
-		//setFisher_Star(ha,init_state,reach_parameters);		
-
 		//set_watertank_controller(ha,init_state,reach_parameters);
-		//setISS_270(ha,init_state,reach_parameters); // International Space Station-217 vars, continuous system.
-		//SetTimedZigZag(ha,init_state,reach_parameters);
 	
 	}
-	if(HybridSystem_Model_Type == 16){
-	//	setMotorcade(ha,init_state,reach_parameters);
-	}
-	if(HybridSystem_Model_Type == 17){
-		setNav2u(ha,init_state,reach_parameters);
-		//setNav3u(ha,init_state,reach_parameters);
-		//setNav4u(ha,init_state,reach_parameters);
-	}
+
 	if(HybridSystem_Model_Type == 18){ // Platoon Model
 	//	setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
 	}

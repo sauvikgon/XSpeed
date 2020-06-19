@@ -351,8 +351,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 9
-#define YY_END_OF_BUFFER 10
+#define YY_NUM_RULES 10
+#define YY_END_OF_BUFFER 11
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -362,7 +362,7 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[23] =
     {   0,
-        0,    0,   10,    9,    5,    1,    3,    2,    9,    8,
+        0,    0,   11,   10,    5,    1,    3,    2,    9,    8,
         4,    7,    6,    5,    8,    8,    8,    7,    7,    6,
         8,    0
     } ;
@@ -734,30 +734,30 @@ case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
 #line 8 "flow.lex"
-{//printf("EOL token\n");
+{
 										return 0; 
-									}
+								}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
 #line 12 "flow.lex"
-{//printf("PLUS token\n"); 
+{ 
 										return(PLUS); 
-									}
+								}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
 #line 16 "flow.lex"
-{//printf("MULT token\n");
+{
 										return(MULT);
-									}
+								}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 20 "flow.lex"
-{//printf("EQ token\n");
+{
 										return(EQ);
-									}
+								}
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
@@ -769,35 +769,39 @@ case 6:
 YY_RULE_SETUP
 #line 26 "flow.lex"
 {
-										//printf("UVAR token\n");
-										yylval.token_str = strdup(yytext);
-										return(UVAR);
-									}
+									yylval.token_str = strdup(yytext);
+									return(UVAR);
+								}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 32 "flow.lex"
+#line 31 "flow.lex"
 {
-										//printf("VAR token\n");
-										yylval.token_str = strdup(yytext);
-										return(VAR);
-									}
+									yylval.token_str = strdup(yytext);
+									return(VAR);
+								}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 38 "flow.lex"
+#line 36 "flow.lex"
 {
-															//printf("CONST token\n");
-															yylval.const_val = atof(yytext);
-															return(CONST);
-														}
+									yylval.const_val = atof(yytext);
+									return(CONST);
+								}
 	YY_BREAK
 case 9:
+YY_RULE_SETUP
+#line 40 "flow.lex"
+{
+									return(MINUS);
+								}														
+	YY_BREAK
+case 10:
 YY_RULE_SETUP
 #line 44 "flow.lex"
 ECHO;
 	YY_BREAK
-#line 801 "lex.yy.c"
+#line 805 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

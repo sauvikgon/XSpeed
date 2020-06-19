@@ -108,6 +108,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 			forbidden forbidden_set = forbidden_states[i];
 			int locID = current_location->getLocId();
 			
+			//std::cout << "forbidden_set.loc = " << forbidden_set.first << std::endl;
+			//std::cout << "current.loc = " << locID << std::endl;
 
 			if (forbidden_set.first==-1 || locID == forbidden_set.first) { // forbidden locID matches. loc id of -1 means any location
 				polytope::ptr forbid_poly = forbidden_set.second;
@@ -246,6 +248,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					 * First find out all Omegas that intersects with the guard_polytope and then push each Omega
 					 * into the polys. Guard intersection is done in the following steps below for each of these Omegas
 					 */
+					//std::cout << "transition guard is:\n";
+					//guard_polytope->printPoly();
 					if(boost::iequals(set_aggr_choice,"thull") || boost::iequals(set_aggr_choice,"none")){
 						polys = reach_region->flowpipe_intersectionSequential(aggregation, guard_polytope, lp_solver_type);
 
@@ -254,10 +258,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					}
 					else if(boost::iequals(set_aggr_choice,"chull")){
 						polys = reach_region->postD_chull(guard_polytope, inv, lp_solver_type);
-						std::cout << "Inside thull set aggregation\n";
 					}
-
-					std::cout << "polys size = " << polys.size() << std::endl;
 
 				} else if (guard_polytope->getIsUniverse()) {	//the guard polytope is universal
 					// This alternative introduces a large approximation at switchings

@@ -5,17 +5,7 @@
 #include <application/sfDirections.h>
 #include <application/sfUtility.h>
 #include <application/structures.h>
-#include <benchmarks/archBenchmarks/build48.h>
-#include <benchmarks/archBenchmarks/fisherStar.h>
-#include <benchmarks/archBenchmarks/fwr.h>
-#include <benchmarks/archBenchmarks/iss270.h>
-#include <benchmarks/archBenchmarks/mesh.h>
-#include <benchmarks/archBenchmarks/motorcade.h>
 #include <benchmarks/archBenchmarks/platoon.h>
-#include <benchmarks/archBenchmarks/pll.h>
-#include <benchmarks/archBenchmarks/setNav2u.h>
-#include <benchmarks/archBenchmarks/setNav3u.h>
-#include <benchmarks/archBenchmarks/setNav4u.h>
 #include <benchmarks/archBenchmarks/spacecraft/spacecraft.h>
 #include <benchmarks/bouncingBall.h>
 #include <benchmarks/constantDynamics/constantMotion.h>

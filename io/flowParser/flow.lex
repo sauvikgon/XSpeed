@@ -5,41 +5,41 @@
 
 %%
 
-[\n]							{//printf("EOL token\n");
+[\n]							{
 										return 0; 
-									}
+								}
 
-[+]								{//printf("PLUS token\n"); 
+[+]								{ 
 										return(PLUS); 
-									}
+								}
 
-[*]								{//printf("MULT token\n");
+[*]								{
 										return(MULT);
-									}
+								}
 
-[=]								{//printf("EQ token\n");
+[=]								{
 										return(EQ);
-									}
+								}
 
-[[:space:]]+			{;}
+[[:space:]]+					{;}
 
-[uU][0-9]*				{
-										//printf("UVAR token\n");
-										yylval.token_str = strdup(yytext);
-										return(UVAR);
-									}
+[uU][0-9]*						{
+									yylval.token_str = strdup(yytext);
+									return(UVAR);
+								}
 
-[a-zA-Z_]+[0-9]* 	{
-										//printf("VAR token\n");
-										yylval.token_str = strdup(yytext);
-										return(VAR);
-									}
+[a-zA-Z_]+[0-9]* 				{
+									yylval.token_str = strdup(yytext);
+									return(VAR);
+								}
 				
-[+-]?[0-9]+[.]?[0-9]*				{
-															//printf("CONST token\n");
-															yylval.const_val = atof(yytext);
-															return(CONST);
-														}
+[+-]?[0-9]+[.]?[0-9]*			{
+									yylval.const_val = atof(yytext);
+									return(CONST);
+								}
+[-]								{
+									return(MINUS);
+								}														
 		
 %%
 
