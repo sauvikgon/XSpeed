@@ -5,7 +5,7 @@
 int lp_solver::lp_solver_count = 0;
 lp_solver::lp_solver() {
 
-	lp_solver_count++; //one instance of either glpk or gurobi object is created
+	lp_solver_count++; //one instance of glpk is created
 
 	lp_solver_type = GLPK_SOLVER;	//By default
 
@@ -17,7 +17,7 @@ lp_solver::lp_solver() {
 
 lp_solver::lp_solver(int solver_type) {
 
-	lp_solver_count++; //one instance of either glpk or gurobi object is created
+	lp_solver_count++; //one instance of glpk is created
 
 	lp_solver_type = solver_type;
 
@@ -28,7 +28,6 @@ lp_solver::lp_solver(int solver_type) {
 	// ******* More can be added later  **************
 }
 lp_solver::~lp_solver() {
-	;
 }
 
 void lp_solver::add_variables(int n)

@@ -22,7 +22,7 @@ class fb_interpol : public approx_model
 	math::matrix<double> transpose_A_square; //{A^2}^T
 	math::matrix<double> transpose_AsquarePhi; //{A^2.expAt}^T
 	math::matrix<double> transpose_A; //A^T
-	unsigned int num_iters; // essential for efficient computation of rho_psi
+	unsigned int num_directions, num_iters; // essential for efficient computation of rho_psi
 	std::vector<double> rho_psi; // stores rho_{psi_k}
 	math::matrix<double> expAt, my_transpose_expAt; // for reusing this matrix once computed.
 	math::matrix<double> phi, phi_last, resMat; // kept for code optimization
@@ -34,13 +34,16 @@ class fb_interpol : public approx_model
 	std::vector<double> rho_AsqrPhiX0_list;
 	std::vector<double> rho_symhull_AsqrX0_list;
 	std::vector<double> rho_symhull_AsqrPhiX0_list;
+	nlopt::opt* myopt;
 	unsigned int dim; // dimension of the system.
 	unsigned int last_iter; // Remembers the last iter on which omega_support was called. Kept for code optimization.
 	unsigned int d; // remembers the current direction id. kept for dp table indexing.
-	nlopt::opt myopt; //  nlopt obj for solving maximization problem
 public:
+	typedef boost::shared_ptr<fb_interpol> ptr;
+
 	/* constructor */
-	fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double>& my_B, double delta, unsigned int num_iters);
+	fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double>& my_B, double delta,
+			unsigned int num_directions, unsigned int num_iters);
 
 	/** Virtual destructor class */
 	virtual ~fb_interpol();
@@ -76,7 +79,7 @@ struct terms
 	double sup_deltaU;
 	double sup_epsilon_psi;
 	std::vector<double> direction;
-	fb_interpol* fb_interpol_obj;
+	fb_interpol* fb_interpol_ptr;
 };
 typedef struct terms terms;
 

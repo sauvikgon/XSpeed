@@ -159,13 +159,13 @@ void set_params(hybrid_automata& ha, std::list<initial_state::ptr>& init_state,
 		reach_parameters.Directions = Real_Directions; //Direct Assignment
 	}
 	if (Directions_Type == OCT) {
-		unsigned int dir_nums = 2 * dim * dim; // Octagonal directions
+		unsigned int num_directions = 2 * dim * dim; // Octagonal directions
 		newDirections = get_octagonal_directions(dim);
 		if(ha.ymap_size()!=0){
 			transformDirections(ha, newDirections,newDirections);
 		}
-		get_ublas_matrix(newDirections, Real_Directions); //it returns vector vector so need to do conversion here:: Temporary solution
-		row = dir_nums;
+		get_ublas_matrix(newDirections, Real_Directions);
+		row = num_directions;
 		col = dim;
 		reach_parameters.Directions.resize(row, col);
 		reach_parameters.Directions = Real_Directions; //Direct Assignment

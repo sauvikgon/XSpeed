@@ -87,12 +87,7 @@ public:
 	void setInitial_SimplexControlParameters();
 	unsigned int getStatus();
 
-	/*double Compute_LLP(std::vector<std::vector<double> > coeff_function, std::vector<std::vector <double> > coeff_constraints,
-	 std::vector <double> bounds,std::vector <int> bound_signs);
-	 double Compute_LLP(std::vector<std::vector<double> > coeff_function);
-	 void setConstraints(std::vector<std::vector <double> > coeff_constraints, std::vector <double> bounds,
-	 std::vector <int> bound_signs);
-	 *
+	/*
 	 * Executes the simplex method with the given function.
 	 */
 	double Compute_LLP(std::vector<double> coeff_function) ;
@@ -124,17 +119,12 @@ public:
 private:
 
 	glp_prob *mylp;
-	glp_smcp param; // simplex parameter structure
-	//char *lp_name;
-	int Min_Or_Max;		//1 for Min and 2 for Max
-	/* optimization direction flag:
-	 #define GLP_MIN            1  // minimization
-	 #define GLP_MAX            2  // maximization
-	 */
-	int dimension;				//dimension of the system
-	int number_of_constraints;	//rows in glpk or facets of a polytope
-	std::vector<double> sv;// values of the variable that maximizes the result
-	double result;				//The optimal objective function value
+	glp_smcp param; 			// simplex parameter structure
+	int Min_Or_Max;				// 1 for Min and 2 for Max
+	int dimension;				// dimension of the system
+	int number_of_constraints;	// rows in glpk or facets of a polytope
+	std::vector<double> sv;		// values of the variable that maximizes the result
+	double result;				// The optimal objective function value
 
 };
 

@@ -116,7 +116,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				std::list <template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
-				if(current_location->getName().compare("BAD")){
+				if(current_location->getName().compare("BAD")==0){
 					safety_violation = true;
 					this->safe = false;
 					std::cout << "MODEL UNSAFE\n";
@@ -124,7 +124,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				if (forbid_intersects.size() != 0){
 					safety_violation = true;
 					this->safe = false;
-					std::cout << "MODEL UNSAFE\n";
 				}
 
 				if (safety_violation && ce_flag == true) // CE Generation is requested
@@ -201,7 +200,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					bool continue_search = this->gen_counter_example(abst_ce,CE_ALGO_TYPE);
 
 					if(continue_search == false) { // This status says whether to continue searching for further abstract paths or to stop
-						std::cout << "############# Safety Property is Violated #################\n";
 						return Reachability_Region; // return and report the time to search the counter-example
 					}
 				} // end of condition when forbidden state intersects with the flowpipe set
@@ -253,8 +251,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					if(boost::iequals(set_aggr_choice,"thull") || boost::iequals(set_aggr_choice,"none")){
 						polys = reach_region->flowpipe_intersectionSequential(aggregation, guard_polytope, lp_solver_type);
 
-					// intersect the location inv with the polys
-					
 					}
 					else if(boost::iequals(set_aggr_choice,"chull")){
 						polys = reach_region->postD_chull(guard_polytope, inv, lp_solver_type);

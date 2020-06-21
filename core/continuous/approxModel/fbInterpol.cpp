@@ -1,8 +1,10 @@
 #include <core/continuous/approxModel/fbInterpol.h>
 
-fb_interpol::~fb_interpol(){}
+fb_interpol::~fb_interpol(){
+}
 
-fb_interpol::fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double>& my_B, double delta, unsigned int num_iters) : approx_model(my_A, my_B, X0, U, delta)
+fb_interpol::fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double>& my_B,
+		double delta, unsigned int num_dirs, unsigned int num_iters) : approx_model(my_A, my_B, X0, U, delta)
 {
 	math::matrix<double> absolute_A;
 	my_A.absolute(absolute_A);
@@ -15,8 +17,9 @@ fb_interpol::fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope:
 	
 	my_A.transpose(transpose_A);
 	this->num_iters = num_iters;
+	this->num_directions = num_dirs;
 
-	rho_psi.resize(my_A.size1()*2,0); // the size equals num durections
+	rho_psi.resize(num_directions); // the size equals num directions
 
 	// initializing the phi list
 
@@ -40,16 +43,16 @@ fb_interpol::fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope:
 	initialize_rho(); // initialize internal data-structures for memoization.
 
 	unsigned int optD = 1;
-	myopt = nlopt::opt(nlopt::GN_DIRECT, optD); // derivative free
+	myopt = new nlopt::opt(nlopt::GN_DIRECT, optD); // derivative free
 
 	std::vector<double> ub(1),lb(1);
 	lb[0]=0;
 	ub[0]=1;
-	myopt.set_lower_bounds(lb);
-	myopt.set_upper_bounds(ub);
+	myopt->set_lower_bounds(lb);
+	myopt->set_upper_bounds(ub);
 
-	unsigned int maxeval = 10;
-	myopt.set_maxeval(maxeval);
+	unsigned int maxeval = 70;
+	myopt->set_maxeval(maxeval);
 
 	last_iter = 0; d=1;
 }
@@ -240,15 +243,15 @@ double fb_interpol::rho_epsilon_psi(const std::vector<double>& l)
 double myobjfun(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data)
 {
 	assert(x.size() == 1);
-	struct terms * objfun_terms= reinterpret_cast<struct terms *>(my_func_data);
-	std::vector<double> dir = objfun_terms->direction;
+	struct terms * my_terms = reinterpret_cast<struct terms *>(my_func_data);
+	std::vector<double> dir = my_terms->direction;
 	double lambda = x[0];
 	double res;
-	res = (1-lambda) * objfun_terms->sup_X0;
-	res += lambda * objfun_terms->sup_phiX0;
-	res += lambda * objfun_terms->sup_deltaU;
-	res += lambda * lambda * objfun_terms->sup_epsilon_psi;
-	res += (objfun_terms->fb_interpol_obj)->rho_fb_intersection(dir,lambda);
+	res = (1-lambda) * my_terms->sup_X0;
+	res += lambda * my_terms->sup_phiX0;
+	res += lambda * my_terms->sup_deltaU;
+	res += lambda * lambda * my_terms->sup_epsilon_psi;
+	res += my_terms->fb_interpol_ptr->rho_fb_intersection(dir,lambda);
 	return res;
 }
 
@@ -258,7 +261,6 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	double sup_X0;
 	// This is term1 
 	sup_X0 = rho_X0(l);
-	
 	// This term to compute rho_(X0) in the direction transpose(expAt).l
 	double term2;
 
@@ -274,15 +276,9 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	
 	my_transpose_expAt.mult_vector(l,transformed_l);
 	term2 = rho_X0(transformed_l);
-	//std::cout << "term2 = " << term2 << std::endl;
 	
 	// This term to compute time_step * rho_U(l)
 	double term3 = time_step *  rho_U(l);
-	
-	//std::cout << "term3 =" << term3 << std::endl; 
-	// Term 4 is lambda dependent and will be computed inside
-        // the objective function of nlopt.
-
 	
 	// This term to compute rho_{sym-hull(\phi. sym-hull(AU)}
 	
@@ -295,15 +291,15 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	my_terms.sup_deltaU = term3;
 	my_terms.sup_epsilon_psi = term5;
 	my_terms.direction = l;
-	my_terms.fb_interpol_obj = this;
-	
+	my_terms.fb_interpol_ptr = this;
+
 	// Now, we create an nlopt obj for solving the maximization problem
 	// over lambda.
 
 	// set the objective function
 	std::vector<double> opt_lambda(1);
-	myopt.set_max_objective(myobjfun, &my_terms);
-	myopt.optimize(opt_lambda,res);
+	myopt->set_max_objective(myobjfun, &my_terms);
+	myopt->optimize(opt_lambda,res);
 	
 	return res;
 }
@@ -311,7 +307,6 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 double fb_interpol::omega_support(const std::vector<double>& l, unsigned int iter)
 {
 	double res;
-
 	if(iter != last_iter){
 		d=0; // reset direction count to beginning
 		if(iter>=2){
@@ -321,14 +316,14 @@ double fb_interpol::omega_support(const std::vector<double>& l, unsigned int ite
 		}
 	}
 	// transform l to transpose(exp^{At}).l	 
-	std::vector<double> transformed_l;
+	std::vector<double> transformed_l(l.size());
 	if(iter==0)
 		transformed_l = l;
 	else
 		phi.mult_vector(l,transformed_l);
 
 	double first_omega_sup = first_omega_support(transformed_l, get_delta());
-	
+
 	res = first_omega_sup + psi_support(l,iter) ;
 	last_iter=iter; d++;
 	return res;
@@ -343,12 +338,14 @@ double fb_interpol::psi_support(const std::vector<double>& l, unsigned int iter)
 	if(iter == 0) return 0;
 
 	std::vector<double> transformed_l;
+
 	phi_last.mult_vector(l,transformed_l);
 
 	double term1 = get_delta() * rho_U(transformed_l);
 	double term2 = rho_epsilon_psi(transformed_l);
 
 	double sup_psi_delta = term1 + term2;
+
 	rho_psi[d] = rho_psi[d] + sup_psi_delta;
 	return rho_psi[d];
 }

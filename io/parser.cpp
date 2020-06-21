@@ -208,11 +208,8 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 				}
 				D.U = polytope::ptr(new polytope(UMatrix, Ubound, 1));
 				//std::cout << "Row and Column size of UMatrix resp:" << row  << ", " << col << std::endl;
-				//std::cout << "The input matrix bound vector is:\n";
-				/*for(unsigned int i=0;i<row;i++){
-					std::cout << Ubound[i] << std::endl;
-				}*/
-
+				//std::cout << "Printing U\n";
+				//D.U->printPoly();
 			}	
 			/* Setting D when U as well as C is non-empty */
 			else if(!D.isEmptyMatrixB && !D.isEmptyC)
@@ -383,7 +380,7 @@ void parser::parse_reset(fstream& file, Assign& t_reset){
 	while(getline(file,line)){
 
 		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
-	
+
 	
 		if(line.compare("#End")==0)
 			return;	
@@ -393,7 +390,7 @@ void parser::parse_reset(fstream& file, Assign& t_reset){
 			continue;
 		
 		// parse the line
-		//std::cout << "String sent to bison for parsing:" << line << std::endl;
+		//std::cout << "reset: String sent to bison for parsing:" << line << std::endl;
 		line+="\n"; // To bypass flex issue - not able to detect eos 		
 		yy_buffer_state* my_string_buffer = reset_scan_string(line.c_str());
 		reset_parser(t_reset); // calls bison parser.
@@ -483,7 +480,8 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 			parse_reset(file, t_reset);
 			t->setAssignT(t_reset);
 			//debug
-			/*std::cout << "Reset Map:\n";
+			/*
+			std::cout << "Reset Map:\n";
 			std::cout << t_reset.Map;	
 			std::cout << "\nReset b:\n";
 			for(unsigned int i=0;i<t_reset.b.size();i++)

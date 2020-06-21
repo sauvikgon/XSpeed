@@ -392,17 +392,21 @@ template_polyhedra::ptr postC_fbinterpol(unsigned int boundedTotIteration, Dynam
 
 	
 	unsigned int num_directions = ReachParameters.Directions.size1();
+
 	unsigned int dimension = Initial->getSystemDimension();
+
 	unsigned int num_iters = ReachParameters.Iterations;
+
 	math::matrix<double> SFM(num_directions, num_iters); // The data structure to store the template polytopes
 
-	approx_model::ptr fbinterpol_model = approx_model::ptr(new fb_interpol(SystemDynamics.MatrixA, Initial, SystemDynamics.U, SystemDynamics.MatrixB, ReachParameters.time_step, num_iters) );
-
+	approx_model::ptr fbinterpol_model = approx_model::ptr(new fb_interpol(SystemDynamics.MatrixA, Initial, SystemDynamics.U, SystemDynamics.MatrixB,
+			ReachParameters.time_step, num_directions, num_iters) );
 	// get the direction vectors
 	std::vector<std::vector<double> > direction(num_directions);
 	for(unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
 		direction[eachDirection].resize(dimension);
 		for (unsigned int i = 0; i < dimension; i++) {
+			assert(ReachParameters.Directions.size2() == dimension);
 			direction[eachDirection][i] = ReachParameters.Directions(eachDirection, i);
 		}
 	}
@@ -410,8 +414,7 @@ template_polyhedra::ptr postC_fbinterpol(unsigned int boundedTotIteration, Dynam
 	for(unsigned int iter = 0; iter < num_iters; iter++)
 	{
 		for(unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
-			double res = fbinterpol_model->omega_support(direction[eachDirection],iter);
-			SFM(eachDirection,iter) = res;
+			SFM(eachDirection,iter) = fbinterpol_model->omega_support(direction[eachDirection],iter);
 		}
 	}
 
