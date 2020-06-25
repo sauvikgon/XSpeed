@@ -125,6 +125,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 	bool is_intersected = false, intersection_started = false, intersection_ended = false;
 
 	std::list<template_polyhedra::ptr> intersected_region;
+
 	for (unsigned int i = 0; i < this->Matrix_SupportFunction.size2(); i++) {
 		polytope::ptr p;
 		p = this->getPolytope(i);

@@ -98,6 +98,7 @@ S : LExpr EQ RExpr			{
 								
 							}
 	| LExpr LEQ RExpr 		{
+								//std::cout << "leq constraint:\n";
 														
 								if(!l_coeff.empty() || !r_coeff.empty()){
 									int n = ha.map_size();
@@ -115,12 +116,7 @@ S : LExpr EQ RExpr			{
 									rconstant = 0; lconstant=0;
 									l_coeff.clear(); r_coeff.clear(); cff.clear();									
 								}
-								/*
-								std::cout << "leq constraint:\n";
-								for(unsigned int i=0;i<n;i++)
-									std::cout << coeff[i] << " " ;
-								std::cout << "\nbound = " << bound << std::endl;
-								*/
+							
 
 								// setting the input U
 								int m = ha.umap_size();
@@ -143,7 +139,7 @@ S : LExpr EQ RExpr			{
 								l_ucoeff.clear(); r_ucoeff.clear();
 								return 0; 
 							}
-| LExpr GEQ RExpr			{
+	| LExpr GEQ RExpr		{
 													
 								if(!l_coeff.empty() || !r_coeff.empty()){
 									int n = ha.map_size();
@@ -196,10 +192,11 @@ S : LExpr EQ RExpr			{
 								
 								cff.clear();
 								lconstant = 0;					
-							}						
-	;	
+							}													
+;
 
-LExpr : LExpr PLUS LExpr  	{;}
+LExpr : LExpr PLUS LExpr			{;}
+           	
 		 | VAR					  	{										
 										std::string var = $1;
 										int id = ha.get_index(var);
@@ -546,6 +543,7 @@ void linexp_parser(polytope::ptr& p, polytope::ptr& U, Dynamics& D)
 int linexperror(char* s)
 {
 	fprintf(stderr,"Linear Constraint Expression Specification: %s\n", s);
+	exit(0);
 	return 0;
 }
 

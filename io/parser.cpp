@@ -300,7 +300,7 @@ void parser::parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& 
 		tokString = *iter;	
 		
 	 // to satisfy linexp_parser interface.
-		tokString+="\n"; // To bypass flex issue - not able to detect eos 		
+		tokString+="\n"; // To bypass flex issue - not able to detect eos
 		yy_buffer_state* my_string_buffer = linexp_scan_string(tokString.c_str());
 		linexp_parser(Inv,U, D); // calls bison parser
 		linexp_delete_buffer(my_string_buffer);
@@ -341,6 +341,9 @@ void parser::parse()
 				p->setIsEmpty(false);
 				p->setIsUniverse(true);
 				
+				/*std::cout << "Initial String for parsing:\n";
+				std::cout << init_str << std::endl;*/
+
 				int init_locId = 1; // default initial location
 				parse_initial(init_str, p, init_locId);
 				//debug
@@ -357,6 +360,8 @@ void parser::parse()
 				do{
 					getline(mdlFile,forbidden_str);
 				}while(forbidden_str.compare("")==0); // consume white lines
+				/*std::cout << "The forbidden str is: \n";
+				std::cout << forbidden_str << std::endl; */
 				parse_forbidden(forbidden_str);
 			}
 			else{
@@ -494,7 +499,6 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 /* parses the initial condition string */
 void parser::parse_initial(string init_str, polytope::ptr& p, int& init_locId)
 {
-	//init_str.erase(std::remove_if(init_str.begin(), init_str.end(), ::isspace), init_str.end());
 
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("&;");
@@ -584,8 +588,14 @@ void parser::parse_forbidden(string forbidden_str)
 		tokens = tokenizer(constraints, dl);
 		for (tok_iter = tokens.begin();tok_iter != tokens.end(); ++tok_iter) {
 			string and_constraints = *tok_iter;
+//			std::cout << "Printing constraint string:\n";
+//			std::cout << and_constraints << std::endl;
 			polytope::ptr bad_poly = polytope::ptr(new polytope());
 			parse_initial(and_constraints, bad_poly, locId);
+
+			/*std::cout << "forbidden poly is\n";
+			bad_poly->printPoly();*/
+
 			forbidden fset;
 			fset.first = locId; fset.second = bad_poly;
 			this->forbidden_states.push_back(fset);

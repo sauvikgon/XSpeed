@@ -5,7 +5,6 @@
 #include <application/sfDirections.h>
 #include <application/sfUtility.h>
 #include <application/structures.h>
-#include <benchmarks/archBenchmarks/platoon.h>
 #include <benchmarks/archBenchmarks/spacecraft/spacecraft.h>
 #include <benchmarks/bouncingBall.h>
 #include <benchmarks/constantDynamics/constantMotion.h>

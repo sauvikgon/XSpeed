@@ -65,7 +65,6 @@ int main(int argc, char *argv[]) {
 
 	//End of Section Exp-Graph.
 
-
 	// Reachability with CE generation
 	std::list<symbolic_states::ptr> Symbolic_states_list;
 

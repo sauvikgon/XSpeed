@@ -65,9 +65,6 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 		//setTTEthernet5(ha, init_state, reach_parameters);
 
 		//setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
-		setplatoon(ha, init_state, reach_parameters); // deterministic transitions to communicating (c) and non-communicating modes (nc)
-		//setplatoon_ndt(ha, init_state, reach_parameters); // non-deterministic transitions to c and nc modes.
-		//setplatoon_na(ha, init_state, reach_parameters); // non-deterministic transitios with arbitrary transitions to c and nc modes.
 
 		//set_watertank_controller(ha,init_state,reach_parameters);
 	
