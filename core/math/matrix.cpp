@@ -37,22 +37,18 @@ template<typename scalar_type> math::matrix<scalar_type>::matrix(size_type r,
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_exponentiation(
 		math::matrix<scalar_type>& res, double time_tau) {
 
-//	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
-//	m = expm_pad(m, time_tau);
-//	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
-	
-	double m[this->size1()*this->size2()*sizeof(double)];
+	double *m = new double[this->size1()*this->size2()];
 
 	for(unsigned int i=0;i<this->size1();i++){
 		for(unsigned int j=0;j<this->size2();j++){
 			m[i*this->size2() + j] = this->at_element(i,j)*time_tau;
 		}
 	}
-	
+
 	assert(this->size1() == this->size2());
 	double *expm = r8mat_expm1(this->size1(), m );
 	res = math::matrix<scalar_type>(this->size1(), this->size2());
-	
+
 	for(unsigned int i=0;i<this->size1();i++){
 		for(unsigned int j=0;j<this->size2();j++){
 			res(i,j) = expm[i*this->size2() + j];
@@ -65,12 +61,25 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_exponentia
 
 template<typename scalar_type>
 void math::matrix<scalar_type>::matrix_exponentiation(
-		math::matrix<scalar_type>& res) const {
+		math::matrix<scalar_type>& res) {
 
-	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
-	m = expm_pad(m);
-	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
-	
+	double *m = new double[this->size1()*this->size2()];
+
+	for(unsigned int i=0;i<this->size1();i++){
+		for(unsigned int j=0;j<this->size2();j++){
+			m[i*this->size2() + j] = this->at_element(i,j);
+		}
+	}
+
+	assert(this->size1() == this->size2());
+	double *expm = r8mat_expm1(this->size1(), m );
+	res = math::matrix<scalar_type>(this->size1(), this->size2());
+
+	for(unsigned int i=0;i<this->size1();i++){
+		for(unsigned int j=0;j<this->size2();j++){
+			res(i,j) = expm[i*this->size2() + j];
+		}
+	}
 }	
 
 /**

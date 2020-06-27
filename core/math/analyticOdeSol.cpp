@@ -211,7 +211,7 @@ void extended_expm(math::matrix<double>& A, double time, math::matrix<double>& r
 	math::matrix<double> At(A);
 	At.scalar_multiply(time);
 	math::matrix<double> M(3 * dim, 3 * dim);
-// putting this check to see if M is initialized to 0 matrix above
+
 	for (unsigned int i = 0; i < 3 * dim; i++) {
 		for (unsigned int j = 0; j < 3 * dim; j++)
 			M(i, j) = 0;

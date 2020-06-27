@@ -13,8 +13,6 @@
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <core/math/matrixExponential.hpp>
-
-#include "../../core/math/expm.h"
 #include "../../core/math/r8lib.hpp"
 
 namespace math {
@@ -36,7 +34,7 @@ public:
 	 */
 	matrix(size_type r, size_type c, const scalar_type init_val);
 	void matrix_exponentiation(math::matrix<scalar_type>& res, double time_tau);
-	void matrix_exponentiation(math::matrix<scalar_type>& res) const;
+	void matrix_exponentiation(math::matrix<scalar_type>& res);
 	void multiply(matrix& A, matrix& res);
 
 	//any matrix object can call this function to create another identity matrix

@@ -57,10 +57,10 @@ void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_
 {
 	std::cout << "\n\n-----Statistics for " << msg << "-----------" << std::endl;
 	if(reachObj.isSafe()){
-		std::cout << "Model is SAFE w.r.t safety condition\n";
+		std::cout << "Model is SAFE\n";
 	}
 	else{
-		std::cout << "Model is UNSAFE w.r.t safety condition\n";
+		std::cout << "Model is UNSAFE\n";
 	}
 	std::cout << "number of abstract ce-paths found for exploration: " << ce_candidates.size() << std::endl;
 	std::list<concreteCE::ptr> ce_list = reachObj.get_counter_examples();

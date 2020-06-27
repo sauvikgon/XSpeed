@@ -362,7 +362,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				<< pw_list.getWaitingList().size() << " waiting ..."<< wall_clock <<" seconds";
 	} //end of while loop checking waiting_list != empty
 	if(safety_violation == true){
-		std::cout << "############# Safety Property is Violated #################\n";
 		return Reachability_Region;
 	}
 	if (bfslevel<bound){	//did not reach to the assigned bound

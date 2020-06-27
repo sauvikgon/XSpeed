@@ -116,7 +116,6 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 		}
 		else if((*tok_iter).compare("Inv")==0){
 			tok_iter++;
-			//std::cout << "Setting inv to:" << *tok_iter << std::endl;
 			string inv_str = *tok_iter;
 			polytope::ptr inv, U;
 
@@ -146,9 +145,7 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 				//debug
 				//std::cout << "The parsed output transformation matrix:\n";
 				//std::cout << D.MatrixT << std::endl;
-				//--
 
-				//--
 				if( U->getColumnVector().size() == 0) 
 					U->setIsEmpty(true);
 		
@@ -159,7 +156,7 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			loc->setInvariant(inv);
 		}
 		else if((*tok_iter).compare("Flow")==0){
-			
+
 			D.isEmptyMatrixA = true;
 			D.isEmptyMatrixB = true;
 			D.isEmptyC = true;
@@ -284,6 +281,10 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 /* parses a location invariant */
 void parser::parse_invariant(string inv_str, polytope::ptr& Inv, polytope::ptr& U, Dynamics& D)
 {
+	// erase white-spaces
+	inv_str.erase(std::remove_if(inv_str.begin(), inv_str.end(), ::isspace), inv_str.end());
+
+	//std::cout << "Setting inv to:" << inv_str << std::endl;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("&;");
 	tokenizer tokens(inv_str, sep);
@@ -360,8 +361,7 @@ void parser::parse()
 				do{
 					getline(mdlFile,forbidden_str);
 				}while(forbidden_str.compare("")==0); // consume white lines
-				/*std::cout << "The forbidden str is: \n";
-				std::cout << forbidden_str << std::endl; */
+
 				parse_forbidden(forbidden_str);
 			}
 			else{
@@ -500,6 +500,8 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 void parser::parse_initial(string init_str, polytope::ptr& p, int& init_locId)
 {
 
+	//std::cout << "Parsing initial string:" << init_str << std::endl;
+
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep("&;");
 	tokenizer tokens(init_str, sep);
@@ -578,7 +580,7 @@ void parser::parse_forbidden(string forbidden_str)
 		locName = *tok_iter;
 
 		int locId = ha.getLocation(locName)->getLocId();
-
+		//std::cout << "Location Id = " << locId << std::endl;
 		tok_iter++;
 		string constraints = *tok_iter;
 
@@ -588,8 +590,8 @@ void parser::parse_forbidden(string forbidden_str)
 		tokens = tokenizer(constraints, dl);
 		for (tok_iter = tokens.begin();tok_iter != tokens.end(); ++tok_iter) {
 			string and_constraints = *tok_iter;
-//			std::cout << "Printing constraint string:\n";
-//			std::cout << and_constraints << std::endl;
+			/*std::cout << "Printing constraint string:\n";
+			std::cout << and_constraints << std::endl;*/
 			polytope::ptr bad_poly = polytope::ptr(new polytope());
 			parse_initial(and_constraints, bad_poly, locId);
 
