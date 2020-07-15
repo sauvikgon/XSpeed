@@ -100,13 +100,10 @@ int main(int argc, char *argv[]) {
 		for(;it!=Symbolic_states_list.end(); it++){
 			symbolic_states::ptr symbStatePtr = *it;
 			transformTemplatePoly(Hybrid_Automata, symbStatePtr->getContinuousSetptr());
-			//debug
-			//std::cout << "The transformed sfm directions are:" << std::endl;
-			//std::cout << symbStatePtr->getContinuousSetptr()->getTemplateDirections() << std::endl;
-			//---
 		}
 
 	}
+
 
 	plottime.start();
 	show(Symbolic_states_list, user_options);

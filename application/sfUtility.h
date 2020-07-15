@@ -78,7 +78,7 @@ scalar_type support_unitball_infnorm(std::vector<scalar_type> dir) {
 /**
  * get the dynamics matrix, time step tau and the input polytope V.
  * return the computed beta value to the reachability value.
- * The beta is a value multiplied with the unit ball.
+ * The beta scales the unit ball.
  */
 
 template<typename scalar_type>
@@ -96,7 +96,7 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 	if (!SysD.isEmptyMatrixB) { //if NOT Empty
 
 		SysD.MatrixB.transpose(Btrans);
-		dim_for_Max_norm = SysD.MatrixB.size1();	//dimension for computing Max_Norm(V): V=(B)29x6 . (u)6x1 = (dim of V)29x1
+		dim_for_Max_norm = SysD.MatrixB.size1();
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
 				new transMinkPoly(SysD.U, Btrans));
 		V_max_norm = Vptr->max_norm(lp_solver_type, dim_for_Max_norm);

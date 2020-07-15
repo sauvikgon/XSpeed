@@ -27,11 +27,11 @@ void print_statistics(boost::timer::cpu_timer timer, double cpu_usage, long mem_
 	double Avg_system_clock = system_clock / num_exps;
 
 	std::cout << "\n-----Statistics for " << msg << "-----------" << std::endl;
-	std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << Avg_wall_clock / (double) 1000 << std::endl;
-	std::cout << "\nBoost Time taken:User  (in Seconds) = " << Avg_user_clock / (double) 1000 << std::endl;
-	std::cout << "\nBoost Time taken:System  (in Seconds) = " << Avg_system_clock / (double) 1000 << std::endl;
+	std::cout << "\nWall Time  (in Seconds) = " << Avg_wall_clock / (double) 1000 << std::endl;
+	std::cout << "\nUser Time  (in Seconds) = " << Avg_user_clock / (double) 1000 << std::endl;
+	std::cout << "\nSystem Time  (in Seconds) = " << Avg_system_clock / (double) 1000 << std::endl;
 	std::cout << "\nCPU Usage:(%) = " << Avg_cpu_usage << std::endl;
-	std::cout << "Memory Usages = " << (double) (mem_usage / 1024.0) / num_exps << " MB\n";
+	std::cout << "Memory Used= " << (double) (mem_usage / 1024.0) / num_exps << " MB\n";
 
 }
 void print_statistics(boost::timer::cpu_timer timer, std::string msg)
@@ -48,9 +48,9 @@ void print_statistics(boost::timer::cpu_timer timer, std::string msg)
 	double Avg_system_clock = system_clock;
 
 	std::cout << "\n-----Statistics for " << msg << "-----------" << std::endl;
-	std::cout << "\nBoost Time taken:Wall  (in Seconds) = " << Avg_wall_clock / (double) 1000 << std::endl;
-	std::cout << "\nBoost Time taken:User  (in Seconds) = " << Avg_user_clock / (double) 1000 << std::endl;
-	std::cout << "\nBoost Time taken:System  (in Seconds) = " << Avg_system_clock / (double) 1000 << std::endl;
+	std::cout << "\nWall Time  (in Seconds) = " << Avg_wall_clock / (double) 1000 << std::endl;
+	std::cout << "\nUser Time  (in Seconds) = " << Avg_user_clock / (double) 1000 << std::endl;
+	std::cout << "\nSystem Time  (in Seconds) = " << Avg_system_clock / (double) 1000 << std::endl;
 	std::cout << std::endl;
 }
 void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, userOptions& user_options, std::string msg)

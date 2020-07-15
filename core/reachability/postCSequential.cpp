@@ -5,12 +5,12 @@
  *      Author: amit
  */
 
-
 #include <core/continuous/approxModel/approxModel.h>
 #include <core/continuous/approxModel/fbInterpol.h>
 #include <core/reachability/postCSequential.h>
 
-//postC algorithm after optimization of the duplicate support function computation
+//postC algorithm using support functions
+
 template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type) {
 
@@ -21,8 +21,7 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 	size_type row = numVectors, col = shm_NewTotalIteration;
 	if (InvariantExist == true) { //if invariant exist.
 		shm_NewTotalIteration = boundedTotIteration;
-
-	} //End of Invariant Directions
+	}
 
 	if (shm_NewTotalIteration < 1) {
 		template_polyhedra::ptr poly_emptyp;
@@ -30,22 +29,21 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 	}
 
 	col = shm_NewTotalIteration; //if invariant exists, col will be resized
-	math::matrix<double> MatrixValue(row,col); //Shared Matrix for all child thread(row, col);
+	math::matrix<double> MatrixValue(row,col);
 	
 	int solver_type = lp_solver_type;
 	lp_solver s_per_thread_I(solver_type), s_per_thread_U(solver_type), s_per_thread_inv(solver_type);
 	s_per_thread_I.setMin_Or_Max(2);
 
 	double result_alfa = compute_alfa(ReachParameters.time_step,
-				SystemDynamics,
-				Initial, lp_solver_type); //2 glpk object created here
+				SystemDynamics, Initial, lp_solver_type);
 
-	double result_beta = compute_beta(SystemDynamics, ReachParameters.time_step, lp_solver_type); // NO glpk object created here
+	double result_beta = compute_beta(SystemDynamics, ReachParameters.time_step, lp_solver_type);
 
 	ReachParameters.result_alfa = result_alfa;
 	ReachParameters.result_beta = result_beta;
 	
-	// Intialised the transformation and its transpose matrix
+	// Initialised the transformation and its transpose matrix
 	math::matrix<double> phi_matrix, phi_trans;
 
 	if (!SystemDynamics.isEmptyMatrixA) { //if A not Empty
@@ -61,7 +59,7 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 		ReachParameters.B_trans = B_trans;
 	}
 
-	if (!ReachParameters.X0->getIsEmpty()) //set glpk constraints If not an empty polytope
+	if (!ReachParameters.X0->getIsEmpty()) //set glpk constraints if not an empty polytope
 		s_per_thread_I.setConstraints(ReachParameters.X0->getCoeffMatrix(),
 				ReachParameters.X0->getColumnVector(), ReachParameters.X0->getInEqualitySign());
 
@@ -72,17 +70,11 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 				SystemDynamics.U->getColumnVector(),
 				SystemDynamics.U->getInEqualitySign());
 	}
-	/*Including a check of model correctness*/
-	
-	if(!SystemDynamics.U->getIsEmpty() && SystemDynamics.isEmptyMatrixB)
-	{
-		std::cout << "B matrix is mandatory when input set U is NOT EMPTY" << std::endl;
-		exit(0);
-	}
- 
+
 	double res1, result, term2 = 0.0, result1, term1 = 0.0;
 	std::vector<double> Btrans_dir, phi_trans_dir, phi_trans_dir1;
-	
+
+
 	for (int eachDirection = 0; eachDirection < numVectors; eachDirection++) {
 
 		double zIInitial = 0.0, zI = 0.0, zV = 0.0;
@@ -94,26 +86,31 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 		unsigned int loopIteration = 0;
 		double term3, term3a = 0.0, term3b = 0.0, res2, term3c = 0.0;
 		sVariable = 0.0; //initialize s0
+
 		//  **************    Omega Function   ********************
 		res1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
 
 		if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
 			phi_trans.mult_vector(rVariable, phi_trans_dir);
 			term1 = Initial->computeSupportFunction(phi_trans_dir, s_per_thread_I);
-		}else if (SystemDynamics.isEmptyMatrixA) { 
+		}else if (SystemDynamics.isEmptyMatrixA) { //if A is empty :: {tau.A}' reduces to zero so, e^{tau.A}' reduces to 1
+												   // so, 1 * rVariable give only rVariable.
 			term1 = Initial->computeSupportFunction(rVariable, s_per_thread_I);
-		}//handling constant dynamics
+		}
 
 		if (!SystemDynamics.isEmptyMatrixB) //current_location's SystemDynamics's or ReachParameters
-			B_trans.mult_vector(rVariable, Btrans_dir); 
+			B_trans.mult_vector(rVariable, Btrans_dir);
 
 		if (!SystemDynamics.isEmptyMatrixB && !SystemDynamics.U->getIsEmpty())
 			term2 = ReachParameters.time_step * SystemDynamics.U->computeSupportFunction(Btrans_dir,s_per_thread_U);
 		term3a = ReachParameters.result_alfa;
 		term3b = (double) support_unitball_infnorm(rVariable);
 
+		if (!SystemDynamics.isEmptyC) {
+			term3c = ReachParameters.time_step * dot_product(SystemDynamics.C, rVariable); //Added +tau* sf_C(l) 8/11/2015
+		}
 		term3 = term3a * term3b;
-		res2 = term1 + term2 + term3;
+		res2 = term1 + term2 + term3 + term3c;
 
 		if (res1 > res2)
 			zIInitial = res1;
@@ -130,20 +127,23 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 			result1 = term2;
 			double beta = ReachParameters.result_beta;
 
-			double res_beta = beta * term3b; //Replacing term3b from previous step
-			result = result1 + res_beta + term3c; //Added term3c
+			double res_beta = beta * term3b;
+			result = result1 + res_beta + term3c;
 			zV = result;
 			//  **************  W_Support Function Over  ********************
 			s1Variable = sVariable + zV;
 
-			if (SystemDynamics.isEmptyMatrixA) { 
+			if (SystemDynamics.isEmptyMatrixA) {
 				r1Variable = rVariable;
 			} else {
 				r1Variable = phi_trans_dir;
 			}
 
 			//  **************    Omega Function   ********************
-			res1 = term1; 
+
+			if (!SystemDynamics.isEmptyMatrixA) { //Matrix A is empty for constant dynamics
+				res1 = term1; //A is not empty than r1Variable is computable and so is term1
+			}
 
 			double term3, term3a, res2;
 			if (!SystemDynamics.isEmptyMatrixA) { //current_location's SystemDynamics's or ReachParameters
@@ -159,9 +159,14 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 
 			term3a = ReachParameters.result_alfa;
 			term3b = support_unitball_infnorm(r1Variable);
-	
+
+			if (!SystemDynamics.isEmptyC) {
+				term3c = ReachParameters.time_step
+						* dot_product(SystemDynamics.C, r1Variable); //Added +tau* sf_C(l) 8/11/2015
+
+			}
 			term3 = term3a * term3b;
-			res2 = term1 + term2 + term3;
+			res2 = term1 + term2 + term3 + term3c;
 
 			if (res1 > res2)
 				zI = res1;
@@ -172,9 +177,9 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 			TempOmega = zI + s1Variable; //Y1
 
 			MatrixValue(eachDirection, loopIteration) = TempOmega; //Y1
-			rVariable = r1Variable; //source to destination
+			rVariable = r1Variable;
 			sVariable = s1Variable;
-			loopIteration++; //for the next Omega-iteration or Time-bound
+			loopIteration++;
 		} //end of while for each vector
 	}
 
@@ -413,9 +418,17 @@ template_polyhedra::ptr postC_fbinterpol(unsigned int boundedTotIteration, Dynam
 
 	for(unsigned int iter = 0; iter < num_iters; iter++)
 	{
+		//std::vector<double> b(num_directions,0);
+
 		for(unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
 			SFM(eachDirection,iter) = fbinterpol_model->omega_support(direction[eachDirection],iter);
+			//b[eachDirection] = SFM(eachDirection,iter);
 		}
+
+		//check whether omega is outside the invariant
+		//polytope::ptr omega_ptr = polytope::ptr(new polytope(ReachParameters.Directions,b,1));
+		//polytope::omega_inters_inv_ptr = omega_ptr->GetPolytope_Intersection(invariant);
+
 	}
 
 	if (InvariantExist == true) { //if invariant exist. Computing

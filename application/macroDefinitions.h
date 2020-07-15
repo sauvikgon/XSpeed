@@ -12,7 +12,7 @@
 #define SEQ_SF			1	//Sequential postC with supfunc.
 #define PAR_SF		 	2	//Parallel postC using OpenMP Thread Creation, parallel sampling of supfunc over directions
 #define TIME_SLICE	 	3	//Parallel postC with Time-slicing
-#define FB_INTERPOL	 	4	//postC with fwd-bwd interp. model.
+#define FB_INTERPOL	 	4	//postC with fwd-bwd interpolation model.
 #define AGJH_BFS		5	//Parallel BFS using G.J. Holzmann's Algorithm
 #define TPBFS			6	//Parallel BFS using Load Balancing
 #define ASYNC_BFS 		7	//Parallel Asynchronous BFS

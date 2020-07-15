@@ -43,17 +43,18 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 					"n. 'n' uniform Directions \n")
 	("time-horizon", po::value<double>(), "Set the local time horizon of flowpipe computation.")
 	("time-step", po::value<double>(), "Set the sampling time of flowpipe computation.")
-	("algo,a",po::value<int>()->default_value(1), "Set the algorithm\n"
-			"1 -- Sequential Algorithm (Set to default)\n"
+	("algo,a",po::value<int>()->default_value(4), "Set the algorithm\n"
+			"1 -- Sequential SF Algorithm\n"
 			"2 -- ParSup, Parallel Sampling of Template Directions (Parallellism in PostC) \n"
 			"3 -- Time-sliced Parallel Algorithm (Parallellism in PostC)\n"
-			"4 -- A-GJH, Adaptation of Gerard J. Holzmann Algorithm (Parallel exploration of symbolic states)\n"
+			"4 -- Sequential FB Interpolation (default) \n"
 			"5 -- TP-BFS, Task-parallel Algorithm (Parallel exploration of symbolic states)\n"
 			"6 -- Lazy Evaluation Algorithm, PostC in GPU\n"
 			"7 -- AsyncBFS, Asynchronous Parallel BFS Algorithm (Parallel exploration of symbolic states)\n"
-			"8 -- Sequential algorithm (Forward approximation model)\n")
+			"8 -- A-GJH, Adaptation of Gerard J. Holzmann Algorithm (Parallel exploration of symbolic states)\n")
+
 	("time-slice", po::value<int>(), "Set the number of Time Slice or partitions for the Time-sliced Algorithm")
-	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking (0 for only postC)")
+	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking")
 	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - chull : convex hull \n - none : no set aggregation (precise but costly)")
 
 	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst

@@ -82,14 +82,14 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		current_location = H.getLocation(location_id);
 		string name = current_location->getName();
 
-		unsigned int NewTotalIteration = reach_parameters.Iterations;
+		unsigned int iters = reach_parameters.Iterations;
 
 		 /*
 		 * This method selects the postC computation routine based on the user option. 
 		 * This function is to be called for sequential BFS.
 		 */
 
-		seq_postC_selection(NewTotalIteration, current_location, initial_polytope, reach_region);
+		seq_postC_selection(iters, current_location, initial_polytope, reach_region);
 		num_flowpipe_computed++;//computed one Flowpipe
 
 		//	***************** Flowpipe Computed ****************
@@ -370,19 +370,19 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 	return Reachability_Region;
 }
 
-void reachability::seq_postC_selection(unsigned int NewTotalIteration, location::ptr current_location,
+void reachability::seq_postC_selection(unsigned int iters, location::ptr current_location,
 		polytope::ptr initial_polytope,
 		template_polyhedra::ptr& reach_region) {
 
 	// first order linear approx. model of Colas et. al.
 	if (Algorithm_Type == SEQ_SF) {
 		// Sequential postC computation
-		reach_region = postC_sf(NewTotalIteration, current_location->getSystem_Dynamics(),
+		reach_region = postC_sf(iters, current_location->getSystem_Dynamics(),
 				initial_polytope, reach_parameters, current_location->getInvariant(),
 				current_location->getInvariantExist(), lp_solver_type);
 	}
 	if (Algorithm_Type == PAR_SF) {
-		reach_region = postC_lazySf(NewTotalIteration,
+		reach_region = postC_lazySf(iters,
 				current_location->getSystem_Dynamics(),
 				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
@@ -400,7 +400,7 @@ void reachability::seq_postC_selection(unsigned int NewTotalIteration, location:
 				else
 					reach_parameters.A_inv = A_inv;
 				int NCores = Total_Partition; //Number of Partitions (number of threads)
-				reach_region = postC_timeslice(NewTotalIteration, current_location->getSystem_Dynamics(),
+				reach_region = postC_timeslice(iters, current_location->getSystem_Dynamics(),
 						initial_polytope, reach_parameters, current_location->getInvariant(),
 						current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type);
 			}
@@ -411,7 +411,7 @@ void reachability::seq_postC_selection(unsigned int NewTotalIteration, location:
 	// forward-backward interpolation approx. model of Goran et. al.
 	if(Algorithm_Type == FB_INTERPOL){
 		std::cout << "\nRunning PostC using the approximation model of forward-backward interpolation.\n";
-		reach_region = postC_fbinterpol(NewTotalIteration, current_location->getSystem_Dynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist(), lp_solver_type);
+		reach_region = postC_fbinterpol(iters, current_location->getSystem_Dynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist(), lp_solver_type);
 		
 	}
 }
@@ -510,14 +510,14 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 				reach_parameter_local.B_trans = B_trans;
 			}
 			// ******************* Computing Parameters Done *******************************
-			unsigned int NewTotalIteration;
+			unsigned int iters;
 			if (current_location->getInvariantExist()) {
 				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), initial_polytope,
-						reach_parameter_local, current_location->getInvariant(), lp_solver_type, NewTotalIteration);
-				std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
+						reach_parameter_local, current_location->getInvariant(), lp_solver_type, iters);
+				std::cout << "Iters = " << iters << std::endl;
 			}
 			//  ********************* FlowPipe or Reach Computation *************************
-			par_postC_selection(NewTotalIteration, current_location, initial_polytope, reach_parameter_local, S, id);
+			par_postC_selection(iters, current_location, initial_polytope, reach_parameter_local, S, id);
 			// Returns the Flow_Pipe in reach_region_list[id]
 			//  ********************* FlowPipe or Reach Computation Done ********************
 
@@ -586,7 +586,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 						intersectedRegion = (*i)->getTemplate_approx(
 								lp_solver_type);
 						//Returns a single over-approximated polytope from the list of intersected polytopes
-						polytope::ptr newShiftedPolytope, newPolytope; //created an object here
+						polytope::ptr newShiftedPolytope, newPolytope, Polytope; //created an object here
 						newPolytope =
 								intersectedRegion->GetPolytope_Intersection(
 										guard_polytope); //Retuns only the intersected region as a single newpolytope. ****** with added directions
@@ -787,12 +787,11 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			// ******************* Computing Parameters Done *******************************
 			boost::timer::cpu_timer boundCheck;
 			boundCheck.start();
-			unsigned int NewTotalIteration;
+			unsigned int iters;
 			if (current_location->getInvariantExist()){
 				InvariantBoundaryCheck(SymDataStruct[id].current_location->getSystem_Dynamics(), initial_polytope,
-						SymDataStruct[id].reach_param, SymDataStruct[id].current_location->getInvariant(), lp_solver_type, NewTotalIteration);
-				std::cout << "NewTotalIteration = " << NewTotalIteration << std::endl;
-				//list_invBounaryValue[id] = NewTotalIteration;
+						SymDataStruct[id].reach_param, SymDataStruct[id].current_location->getInvariant(), lp_solver_type, iters);
+				std::cout << "Iters = " << iters << std::endl;
 			}
 			boundCheck.stop();
 			double wall_clockboundcheck;
@@ -800,7 +799,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			double return_TimeBC = wall_clockboundcheck / (double) 1000;
 			std::cout<< "\nBoundary Check for Iterations Number Time taken:Wall  (in Seconds) = " << return_TimeBC << std::endl;
 
-			SymDataStruct[id].newIteration = NewTotalIteration;
+			SymDataStruct[id].newIteration = iters;
 		}
 
 
@@ -960,7 +959,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 
 /*** TODO: Have to optimize invariant_boundary_check() for support function computation ***/
 
-void reachability::par_postC_selection(unsigned int NewTotalIteration, location::ptr current_location,
+void reachability::par_postC_selection(unsigned int iters, location::ptr current_location,
 		polytope::ptr initial_polytope,
 		ReachabilityParameters& reach_parameters,
 		std::vector<symbolic_states::ptr>& S, unsigned int id) {
@@ -970,7 +969,7 @@ void reachability::par_postC_selection(unsigned int NewTotalIteration, location:
 		boost::timer::cpu_timer AllReach_time;
 		AllReach_time.start();
 
-		reach_region = postC_sf(NewTotalIteration,
+		reach_region = postC_sf(iters,
 				current_location->getSystem_Dynamics(),
 				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
@@ -989,7 +988,7 @@ void reachability::par_postC_selection(unsigned int NewTotalIteration, location:
 		boost::timer::cpu_timer AllReach_time;
 		AllReach_time.start();
 
-		reach_region = postC_lazySf(NewTotalIteration,
+		reach_region = postC_lazySf(iters,
 				current_location->getSystem_Dynamics(),
 				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
@@ -1015,7 +1014,7 @@ void reachability::par_postC_selection(unsigned int NewTotalIteration, location:
 			else
 				reach_parameters.A_inv = A_inv;
 			int NCores = Total_Partition; //Number of Partitions (number of threads)
-			reach_region = postC_timeslice(NewTotalIteration, current_location->getSystem_Dynamics(),
+			reach_region = postC_timeslice(iters, current_location->getSystem_Dynamics(),
 					initial_polytope, reach_parameters, current_location->getInvariant(),
 					current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type);
 			S[id]->setContinuousSetptr(reach_region);
