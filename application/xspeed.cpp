@@ -101,9 +101,7 @@ int main(int argc, char *argv[]) {
 			symbolic_states::ptr symbStatePtr = *it;
 			transformTemplatePoly(Hybrid_Automata, symbStatePtr->getContinuousSetptr());
 		}
-
 	}
-
 
 	plottime.start();
 	show(Symbolic_states_list, user_options);

@@ -344,7 +344,12 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
 		user_options.set_third_plot_dimension(x3);
 	}
+
+	/* Set the reachability options given by the user */
+	set_params(Hybrid_Automata, init_state, user_options, reach_parameters, forbidden_states);
+
 	if (!user_options.get_forbidden_set().empty()){
+		assert(forbidden_states.size()!=0);
 		try{
 			forbidden forbidden_set;
 			forbidden_set = forbidden_states[0]; // the first symb state
@@ -353,9 +358,5 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			std::cout << "Cannot print the forbidden polytope because it is unbounded in the print dimensions or may be empty\n";
 		}
 	}
-
-	/* Set the reachability options given by the user */
-	set_params(Hybrid_Automata, init_state, user_options, reach_parameters, forbidden_states);
-
 
 }

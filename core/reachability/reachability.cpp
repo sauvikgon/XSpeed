@@ -128,7 +128,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 				if (safety_violation && ce_flag == true) // CE Generation is requested
 				{
-
+					std::cout << "ce generation loop\n" << std::endl;
 					safety_violation = false; // This reseting to false will correctly visit the violating paths in the following iterations.
 
 					symbolic_states::ptr symb_state_in_abst_ce; // This is a pointer to the current symbolic state in the abstract ce.

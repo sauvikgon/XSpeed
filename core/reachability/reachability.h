@@ -52,7 +52,7 @@ typedef std::pair<int, polytope::ptr> forbidden;
 // 6 gen_concreteCE_Opt: trajectory splicing with NLP that returns a time minimal ce. (Not Functional)
 
 
-#define CE_ALGO_TYPE  3
+#define CE_ALGO_TYPE  1
 
 using namespace std;
 
