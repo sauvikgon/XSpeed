@@ -26,6 +26,7 @@
 #include "application/userOptions.h"
 #include "counterExample/abstractSymbolicState.h"
 #include "counterExample/simulation.h"
+#include "utilities/dbgMsgLogger.h"
 
 /**
  * This class is a data structure to store the abstract counter-example generated

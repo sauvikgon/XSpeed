@@ -24,7 +24,7 @@ void printErrorStatus(int status) {
 	if (status == -3)
 		DEBUG_MSG("nlopt::result:=status = OUT_OF_MEMORY " << std::endl);
 	if (status == -4)
-		DEBUG_MSG(<< "nlopt::result:=status = ROUNDOFF_LIMITED " << std::endl);
+		DEBUG_MSG("nlopt::result:=status = ROUNDOFF_LIMITED " << std::endl);
 	if (status == -5)
 		DEBUG_MSG("nlopt::result:=status = FORCED_STOP " << std::endl);
 	if (status == 1)
@@ -32,9 +32,9 @@ void printErrorStatus(int status) {
 	if (status == 2)
 		DEBUG_MSG("nlopt::result:=status = STOPVAL_REACHED " << std::endl);
 	if (status == 3)
-		DEBUG_MSG(<< "nlopt::result:=status = FTOL_REACHED " << std::endl);
+		DEBUG_MSG("nlopt::result:=status = FTOL_REACHED " << std::endl);
 	if (status == 4)
-		DEBUG_MSG(<< "nlopt::result:=status = XTOL_REACHED " << std::endl);
+		DEBUG_MSG("nlopt::result:=status = XTOL_REACHED " << std::endl);
 	if (status == 5)
 		DEBUG_MSG("nlopt::result:=status = MAXEVAL_REACHED " << std::endl);
 	if (status == 6)

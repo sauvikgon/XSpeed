@@ -140,8 +140,6 @@ bool abstractCE::filter(std::vector<unsigned int> template_seq) {
 concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 		const std::list<refinement_point> &refinements) {
 
-//	 Generate an nlopt object with the constraints defined by the Abstract
-//	 counter example
 
 //	 1. Get the dimension of the optimization problem by
 //	 getting the dimension of the continuous set of the abstract counter example
@@ -155,22 +153,18 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 	bad_poly = this->forbid_poly;
 	ref_pts = refinements;
 
-	//assert that the number of transitions equals 1 less than the length of the abstract CE path
-
-	std::cout << "Length of the CE, N=" << N << std::endl;
-
 	// initialize the global locIdList
 	locIdList.resize(N);
 
-	std::cout << "Location ID sequence in symbolic CE: ";
+	DEBUG_MSG("Seaching counterexample to safety with trajectory splicing (FC)");
+	DEBUG_MSG("Location ID sequence in symbolic CE: ");
 	std::set<int> d;
 	for (unsigned int i = 0; i < N; i++) {
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
-		std::cout << locIdList[i] << " | ";
+		DEBUG_MSG(to_string(locIdList[i]) + " | ");
 	}
-	std::cout << "\n";
 
 //	 2. The dimensionality of the opt problem is N vectors, one starting point
 //	 for each of the abstract sym state of the CE + N dwell times. Moreover,
@@ -178,7 +172,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 //	 variables of the optimization problem are dim*N + N
 
 	unsigned int optD = N * dim + N;
-	std::cout << "nlopt problem dimension = " << optD << std::endl;
+//	std::cout << "nlopt problem dimension = " << optD << std::endl;
 //	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
 //	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
@@ -191,7 +185,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 	unsigned int maxtime = 600; // time-out of 10 mins per abstract ce.
 
 	myopt.set_min_objective(myobjfunc2, NULL);
-	//myopt.set_maxeval(maxeval);
+	myopt.set_maxeval(maxeval);
 	myopt.set_maxtime(maxtime);
 	myopt.set_stopval(tolerance); // search stopping value, set typically to 1e-6.
 
@@ -203,15 +197,17 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 	std::vector<double> lb(optD), ub(optD);
 	double max, min, start_min, start_max;
 
-	// Generate bounds for each start point. Also initialize each start point as the average of min and max
-	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
-			{
+	// Add constraints on the start points of the trajectory
+	for (unsigned int i = 0; i < N; i++)
+	{
 		// dxli: the whole flowpipe is a sequence of sub-flowpipes, each of which
 		// denotes \omega in each location.
-		// S is the sub-flowpipe in i-th sequence; P is the first \omega in S.
+		// S is the sub-flowpipe in i-th sequence; P is the first polytope in S.
+
 		S = get_symbolic_state(i);
 		polytope::ptr P = S->getInitialPolytope();
 
+		// set bound constraints
 		lp_solver lp(GLPK_SOLVER);
 
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
@@ -221,7 +217,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 		std::vector<double> dir(dim, 0);
 		double min, max;
 		for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
-				{
+		{
 			dir[j] = -1;
 			try {
 				min = -1 * lp.Compute_LLP(dir);
@@ -242,15 +238,16 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 			ub[index] = max;
 
 			dir[j] = 0;
-			// dxli: using the (min+max)/2 to initialize variables.
+			// (min+max)/2 initializaion of variables.
 			x[index] = (lb[index] + ub[index]) / 2;
 		}
 	}
+
 //	Set initial value to the time variables
 //	Restrict dwell time within the projections of C_i in time variable
 
 //	We assume that the time variable is named as 't' in the model.
-//	We find out the min,max components of the time variable
+//	We find out the min, max components of the time variable
 
 	unsigned int t_index =
 			get_first_symbolic_state()->getInitialPolytope()->get_index("t");
@@ -331,59 +328,53 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 		// Ensure that the time is positive
 		start_min = -1 * lp1.Compute_LLP(dmin);
 		start_max = lp1.Compute_LLP(dmax);
+
 		ub[N * dim + i] = max - start_min;
+
 		if (min <= start_max)
 			lb[N * dim + i] = 0;
 		else
 			lb[N * dim + i] = min - start_max;
 
 		// We may choose to take the average time as the initial dwell time
-		x[N * dim + i] = (lb[N * dim + i] + ub[N * dim + i]) / 2;
+		x[N * dim + i] = (ub[N * dim + i] + lb[N * dim + i]) / 2;
 
-		// Increment the Transition to the next in the symbolic path
+		// Increment the transition to the next in the symbolic path
 		if (it != transList.end())
 			it++;
 	}
-
+	// set the lower and upper bounds on vars
 	myopt.set_lower_bounds(lb);
 	myopt.set_upper_bounds(ub);
 
 	double minf;
 	try {
-		std::cout << "Local optimization algorithm called:"
-				<< myopt.get_algorithm_name() << std::endl;
 		myopt.set_stopval(tolerance);
 		unsigned int res = myopt.optimize(x, minf);
 
 		if (res == NLOPT_SUCCESS)
-			std::cout
-					<< "Splicing with FC: NLOPT stopped successfully\n";
+			DEBUG_MSG("Splicing with FC: NLOPT stopped successfully");
 		else if (res == NLOPT_STOPVAL_REACHED)
-			std::cout
-					<< "Splicing with FC: NLOPT stopped due to stopping value (1e-6) reached\n";
+			DEBUG_MSG("Splicing with FC: NLOPT stopped due to stopping value (1e-6) reached");
 		else if (res == NLOPT_MAXEVAL_REACHED)
-			std::cout
-					<< "Splicing with FC: NLOPT stopped due to reaching maxeval = "
-					<< maxeval << std::endl;
+			DEBUG_MSG("Splicing with FC: NLOPT stopped due to reaching maxeval = " + to_string(maxeval));
 		else if (res == NLOPT_MAXTIME_REACHED)
-					std::cout
-							<< "Splicing with FC: NLOPT stopped due to reaching maxtime = "
-							<< myopt.get_maxtime() << std::endl;
+			DEBUG_MSG("Splicing with FC: NLOPT stopped due to reaching maxtime = " + to_string(myopt.get_maxtime()));
 
 	} catch (std::exception &e) {
-		std::cout << e.what() << std::endl;
+		string msg = e.what();
+		DEBUG_MSG(msg + "\n");
 	}
-	std::cout << "nlopt returned min : " << minf << "\n";
-	std::cout << "Length of abstract counter example:" << N << "\n";
-	std::cout << "Number of iterations completed:" << myopt.get_maxeval() << "\n";
+
+	DEBUG_MSG("nlopt returned min : " + to_string(minf));
+	DEBUG_MSG("Length of abstract counter example:"+ to_string(N));
+	DEBUG_MSG("Number of iterations completed:" + to_string(myopt.get_maxeval()));
 
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
-		std::cout << "Obtained minimum greater than " << tolerance
-				<< ", No. of refined search:" << refinements.size()
-				<< " No. of iterations completed:" << myopt.get_maxeval()
-				<< std::endl;
+		DEBUG_MSG("Obtained minimum greater than " + to_string(tolerance) + ", No. of refined search:" + to_string(refinements.size()) +
+				" No. of iterations completed:" + to_string(myopt.get_maxeval()));
 		return cexample;
 	} else {
 		std::ofstream ce_trace;
@@ -453,7 +444,6 @@ void abstractCE::construct_bound_constraints(math::matrix<double> &coeff_mat,
 
 			row_temp(0, i * dim + j) = 0;
 		}
-
 	}
 }
 
@@ -905,14 +895,14 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 	// initialize the global locIdList
 	locIdList.resize(N);
-	std::cout << "Location ID sequence in symbolic CE: ";
+	DEBUG_MSG("Location ID sequence in symbolic CE: ");
 
 	std::set<int> d;
 	for (unsigned int i = 0; i < N; i++) {
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
-		std::cout << locIdList[i] << " | ";
+		DEBUG_MSG(to_string(locIdList[i]) + " | ");
 	}
 
 	/* 1. Declare the sub-problem by fixing starting points of each location.
@@ -983,7 +973,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			T = *(it);
 			guard = T->getGuard();
 			if (guard->getIsUniverse())
-				std::cout << "#Guard is Universe#\n" << std::endl;
+				DEBUG_MSG("abstractCE::gen_concreteCE_iterative: Guard is Universe");
 
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
 					aggregation, guard, 1);
@@ -1148,14 +1138,13 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
-		std::cout << "Obtained minimum greater than " << tolerance
-				<< ", with no. of refined search:" << refinements.size()
-				<< std::endl;
+		DEBUG_MSG("Obtained minimum greater than "+ to_string(tolerance) + ", with no. of refined search:" + to_string(refinements.size()));
 		return cexample;
 	} else {
-		std::cout << "Alternating solver returned min : " << minf << "\n";
-		std::cout << "Length of abstract counter example:" << N << "\n";
-		std::cout << "Number of solver restarts:" << num_restart << "\n";
+		DEBUG_MSG("Alternating solver returned min : " + to_string(minf)) ;
+		DEBUG_MSG("Length of abstract counter example:" + to_string(N));
+		DEBUG_MSG("Number of solver restarts:" + to_string(num_restart));
+
 		std::ofstream ce_trace;
 		// one trajectory per symbolic state to be added in the concreteCE
 		for (unsigned int i = 0; i < N; i++) {
@@ -1208,13 +1197,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	ref_pts = refinements;
 
 	//assert that the number of transitions equals 1 less than the length of the abstract CE path
-	std::cout << "CE generation with HA implicit constraints\n";
-	std::cout << "Length of the CE, N = " << N << std::endl;
-	std::cout << "Number of Transitions in the abstract CE: "
-			<< transList.size() << std::endl;
-	std::cout << "gen_concreteCE: dimension =" << dim << ", length of CE=" << N
-			<< std::endl;
+	DEBUG_MSG("CE generation with HA implicit constraints");
+	DEBUG_MSG("Length of the CE, N = " + to_string(N));
 
+	DEBUG_MSG("Number of Transitions in the abstract CE: "+ to_string(transList.size()));
+	DEBUG_MSG("gen_concreteCE: dimension =" + to_string(dim) + ", length of CE=" + to_string(N));
 	// initialize the global locIdList
 	locIdList.resize(N);
 
@@ -1223,16 +1210,15 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 		d = this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements();
 		assert(d.size() == 1);
 		locIdList[i] = *(d.begin());
-		std::cout << locIdList[i] << " | ";
+		DEBUG_MSG(to_string(locIdList[i]) + " | ");
 	}
-	std::cout << "\n";
+
 	//	 2. The dimensionality of the opt problem is N vectors, one starting point
 	//	 for each of the abstract sym state of the CE + N dwell times. Moreover,
 	//	 each starting vector is of dimension dim. Therefore, the total number of
 	//	 variables of the optimization problem are dim*N + N
 
 	unsigned int optD = N * dim + N;
-	std::cout << "nlopt problem dimension = " << optD << std::endl;
 	//	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
 	//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
@@ -1286,7 +1272,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 
 		if (P->getIsUniverse()) {
 			// set arbitrarily large but finite bounds on start points
-			std::cout << "Constraint polytope is universe\n";
+			DEBUG_MSG("Constraint polytope is universe");
 			for (unsigned int j = 0; j < dim; j++) {
 				unsigned int index = i * dim + j;
 				lb[index] = -999;
@@ -1338,33 +1324,25 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 
 	double minf;
 	try {
-		std::cout << "Local optimization algorithm called:"
-				<< myopt.get_algorithm_name() << std::endl;
+
 		myopt.set_stopval(tolerance);
 		unsigned int res = myopt.optimize(x, minf);
 		if (res == NLOPT_SUCCESS)
-			std::cout
-					<< "Splicing WoFC: NLOPT stopped successfully returning the found minimum\n";
+			DEBUG_MSG("Splicing WoFC: NLOPT stopped successfully returning the found minimum");
 		else if (res == NLOPT_STOPVAL_REACHED)
-			std::cout
-					<< "Splicing WoFC: NLOPT stopped due to stopping value (1e-6) reached\n";
+			DEBUG_MSG("Splicing WoFC: NLOPT stopped due to stopping value (1e-6) reached");
 		else if (res == NLOPT_MAXEVAL_REACHED)
-			std::cout
-					<< "Splicing WoFC: NLOPT stopped due to reaching maxeval = "
-					<< maxeval << std::endl;
+			DEBUG_MSG("Splicing WoFC: NLOPT stopped due to reaching maxeval = "+ to_string(maxeval));
 
 	} catch (std::exception &e) {
 		std::cout << e.what() << std::endl;
 	}
-	std::cout << "nlopt returned min : " << minf << "\n";
-	std::cout << "Length of abstract counter example:" << N << "\n";
+	DEBUG_MSG("nlopt returned min : " + to_string(minf));
 
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
-		std::cout << "Obtained minimum greater than " << tolerance
-				<< ", with no. of refined search:" << refinements.size()
-				<< std::endl;
+		DEBUG_MSG("Obtained minimum greater than " + to_string(tolerance) + ", with no. of refined search:" + to_string(refinements.size()));
 		return cexample;
 	} else {
 		std::ofstream ce_trace;
@@ -1424,8 +1402,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 			cexample = gen_concreteCE_LPobj(tolerance, refinements);
 		}
 		else {
-			std::cout
-					<< "Invalid algo type specified for trajectory splicing\n";
+			DEBUG_MSG("Invalid algo type specified for trajectory splicing");
 		}
 
 		if (cexample->is_empty()) {
@@ -1445,12 +1422,11 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 			//debug: print the invalid trajectory in a file, in the first two dimensions
 			//cexample->plot_ce("./invalid_traj.txt", 0, 1);
 		} else {
-			std::cout << "Generated Trace Validated with " << ref_count
-					<< " point Refinements\n";
+			DEBUG_MSG("Generated Trace Validated with " + to_string(ref_count) + " point Refinements");
 			cexample->set_refinement_count(ref_count);
 			return cexample;
 		}
-		std::cout << "Restarting Search with added refinement point\n";
+		DEBUG_MSG("Restarting Search with added refinement point\n");
 	} while (!val_res && ref_count <= max_refinements);
 
 	throw std::runtime_error(
@@ -1479,8 +1455,7 @@ concreteCE::ptr abstractCE::search_concreteCE(double tolerance,
 		if (search_ce) {
 			ce = abs_ce->get_validated_CE(error_tol, algo_type);
 			if (ce->is_empty()) {
-				std::cout
-						<< "Cannot splice trajectory segments with the accepted error tolerance\n";
+				DEBUG_MSG("Cannot splice trajectory segments with the accepted error tolerance");
 			} else {
 				real_ce = true;
 				break;

@@ -19,7 +19,7 @@
 struct polyConstraints {
 	std::vector<double> a;
 	double b;
-	unsigned int sstate_index;
+	unsigned int symb_state_index;
 };
 
 struct boundConstriant {
@@ -28,6 +28,7 @@ struct boundConstriant {
 	bool is_ge; // to mark if bound is a >= constraint
 };
 
+typedef struct polyConstraints polyConstraints;
 /**
  * Objective function for splicing with HA constraints only. (Sriram et. al.)
  */
@@ -45,9 +46,6 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad, void 
 double myobjfunc3(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 
 double myconstraint(const std::vector<double> &x, std::vector<double> &grad, void *data);
-
-double myBoundConstraint(const std::vector<double> &x, std::vector<double> &grad, void *data);
-
 
 double myobjfuncOnDwellTime(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data);
 

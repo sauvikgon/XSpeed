@@ -16,7 +16,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 	if (argc == 1) { //No argument
 		std::cout << "Missing arguments!\n";
-		throw(new exception());
+		exit(0);
 	}
 
 	desc.add_options()

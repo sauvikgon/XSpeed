@@ -103,10 +103,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	/*
 	plottime.start();
 	show(Symbolic_states_list, user_options);
 	plottime.stop();
-	print_statistics(plottime,"Plotting");
+	print_statistics(plottime,"Plotting"); */
 
 	return 0;
 }

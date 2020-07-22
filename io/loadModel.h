@@ -13,14 +13,11 @@
 #include <benchmarks/navigation/nav22Timed.h>
 #include <benchmarks/navigation/nav25Timed.h>
 #include <benchmarks/navigation/nav30Timed.h>
-#include <benchmarks/navigation/navigation5by5WithOutTime.h>
 #include <benchmarks/navigation/navigationBenchmark.h>
 #include <benchmarks/navigation/navigationBenchmark.h>
 #include <benchmarks/navigation/navigationTimed3by3.h>
 #include <benchmarks/navigation/navT02Timed.h>
 #include <benchmarks/navigation/navT04Timed.h>
-#include <benchmarks/navigation/navT07Timed.h>
-#include <benchmarks/navigation/navT13Timed.h>
 #include <benchmarks/oscillatorModel/f_osc_32.h>
 #include <benchmarks/oscillatorModel/f_osc_32_timed.h>
 #include <benchmarks/oscillatorModel/f_osc_8.h>
@@ -32,6 +29,8 @@
 #include <benchmarks/vehiclePlatoon/vehicle10_platoon.h>
 #include <benchmarks/vehiclePlatoon/vehicle5_platoon.h>
 #include <benchmarks/waterlevelController/watertank_controller.h>
+#include <benchmarks/spacecraft.h>
+#include <benchmarks/platoon.h>
 #include <core/math/uniSphere.h>
 #include <cstring>
 #include <utility>

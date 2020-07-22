@@ -3,7 +3,7 @@
 #include <utilities/flowCostEstimate.h>
 #include <utilities/flowpipeCluster.h>
 #include <ctime>
-
+#include <utilities/dbgMsgLogger.h>
 #include "core/symbolicStates/symbolicStates.h"
 
 using namespace std;
@@ -116,11 +116,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				std::list <template_polyhedra::ptr > forbid_intersects;
 				forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, lp_solver_type);
 
-				if(current_location->getName().compare("BAD")==0){
-					safety_violation = true;
-					this->safe = false;
-					std::cout << "MODEL UNSAFE\n";
-				}
 				if (forbid_intersects.size() != 0){
 					safety_violation = true;
 					this->safe = false;
@@ -128,7 +123,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 				if (safety_violation && ce_flag == true) // CE Generation is requested
 				{
-					std::cout << "ce generation loop\n" << std::endl;
 					safety_violation = false; // This reseting to false will correctly visit the violating paths in the following iterations.
 
 					symbolic_states::ptr symb_state_in_abst_ce; // This is a pointer to the current symbolic state in the abstract ce.
@@ -179,8 +173,6 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					}
 					abstractCE::ptr abst_ce = abstractCE::ptr(new abstractCE());
 					abst_ce->set_length(symbolic_ce_length);
-					std::cout<<"Length of symb_ce_length = "<<symbolic_ce_length<<std::endl;
-					std::cout<<"Length/size of list_sym_states = "<<list_sym_states.size()<<std::endl;
 					abst_ce->set_sym_states(list_sym_states);
 					abst_ce->set_transitions(list_transitions);
 					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
@@ -194,9 +186,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					 * by this routine as per the user-options.
 					 */
 
-					std::cout << "CE_ALGO_TYPE "<< CE_ALGO_TYPE << std::endl;
-
-					abst_ce->setUserOptions(this->getUserOp());	//Amit: for easy access
+					abst_ce->setUserOptions(this->getUserOp());
 					bool continue_search = this->gen_counter_example(abst_ce,CE_ALGO_TYPE);
 
 					if(continue_search == false) { // This status says whether to continue searching for further abstract paths or to stop
@@ -358,14 +348,15 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 		wall_clock = jump_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		wall_clock = wall_clock / (double) 1000;	//convert milliseconds to seconds
 
-		std::cout << "\nJump " << bfslevel  << "..." << num_flowpipe_computed << " Symbolic States Passed, "
-				<< pw_list.getWaitingList().size() << " waiting ..."<< wall_clock <<" seconds";
+		DEBUG_MSG("Jump " + to_string(bfslevel) + "..." + to_string(num_flowpipe_computed) +  " Symbolic States Passed, "
+				+ to_string(pw_list.getWaitingList().size()) + " waiting ..." + to_string(wall_clock) + " seconds");
+//		std::cout << "\nJump " << bfslevel  << "..." << num_flowpipe_computed << " Symbolic States Passed, " << pw_list.getWaitingList().size() << " waiting ..."<< wall_clock <<" seconds";
 	} //end of while loop checking waiting_list != empty
 	if(safety_violation == true){
 		return Reachability_Region;
 	}
 	if (bfslevel<bound){	//did not reach to the assigned bound
-		std::cout<<"\n\nFound Fix-point after "<<bfslevel <<" Jumps!!!\n";
+		DEBUG_MSG("\nFixed-point found after " + to_string(bfslevel) + " Jumps.");
 	}
 	return Reachability_Region;
 }

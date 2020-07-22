@@ -20,30 +20,25 @@ extern std::vector<double> start_pos; // the start vectors of opt trajectory fro
 
 double myconstraint(const std::vector<double> &x, std::vector<double> &grad,
 		void *data) {
-	polyConstraints *d = reinterpret_cast<polyConstraints*>(data);
-	unsigned int id = d->sstate_index;
-
-//	unsigned int row_index = d->row_index;
+	polyConstraints *d = (polyConstraints *)data;
+	unsigned int id = d->symb_state_index;
 
 	assert(id >= 0 && id < N);
+	assert(d->a.size() == dim);
+
 	if (!grad.empty()) {
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (unsigned int i = 0; i < dim; i++)
 			grad[i] = 0;
-		}
+
 		for (unsigned int j = 0; j < dim; j++)
 			grad[id * dim + j] = d->a[j];
 	}
 
-	assert(d->a.size() == dim);
-
 	double sum = 0;
 	for (unsigned int j = 0; j < dim; j++) {
-		//	std::cout << "x at " << i*dim+j << " = " << x[i * dim + j] << std::endl;
-		//std::cout << "a at  " << j << " = " << d->a[j] << std::endl;
 		sum += x[id * dim + j] * d->a[j];
 	}
-//	std::cout << "bound " << " = " << d->b << std::endl;
-	sum -= d->b;
+	sum = sum - d->b;
 	return sum;
 }
 
@@ -325,6 +320,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad,
 			grad[i] = deriv[i];
 		}
 	}
+	//std::cout << "cost = " << cost << std::endl;
 	return cost;
 
 }
