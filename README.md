@@ -1,4 +1,7 @@
-The third party libraries required for building XSpeed are:
+Building XSpeed from Source.
+
+The tool uses a number of third party software libraries.
+For building from source, install the following listed libraries:
 
 1. GLPK (GNU Linear Programming Kit)
 
