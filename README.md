@@ -16,6 +16,6 @@ The third party libraries required for building XSpeed are:
 
 	The latest package can be downloaded from https://nlopt.readthedocs.io/en/latest/#download-and-installation
 
-6. UnitTest++ C++ Library
+6. UnitTest++
 	
 	The package can be downloaded from https://github.com/unittest-cpp/unittest-cpp
