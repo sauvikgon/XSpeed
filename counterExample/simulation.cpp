@@ -186,7 +186,8 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time) {
 	}
 	N_VDestroy_Serial(u); /* Free u vector */
 	CVodeFree(&cvode_mem); /* Free integrator memory */
-
+	SUNLinSolFree(LS);
+	SUNMatDestroy_Dense(A);
 	return res;
 }
 
@@ -291,8 +292,7 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 
 	// 11. Attach linear solver module.
 	// ---------------------------------------------------------------------------
-	// Call CVDlsSetLinearSolver to attach the matrix and linear solver this
-	// function is different for direct solvers.
+	// Call CVDlsSetLinearSolver to attach the matrix and linear solver.
 	flag = CVDlsSetLinearSolver(cvode_mem, LS, A);
 	if(check_flag(&flag, "CVDlsSetLinearSolver", 1)){
 	  throw std::runtime_error("CVODE failed\n");
@@ -350,6 +350,8 @@ bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
 
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);
+	SUNLinSolFree(LS);
+	SUNMatDestroy_Dense(A);
 	return b;
 }
 
@@ -472,6 +474,7 @@ std::vector<double> simulation::metric_simulate(std::vector<double> x,
 	}
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);
+	SUNMatDestroy_Dense(A); SUNLinSolFree(LS);
 	return v;
 }
 
@@ -787,6 +790,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 	N_VDestroy_Serial(u);
 	CVodeFree(&cvode_mem);
+	SUNMatDestroy_Dense(A); SUNLinSolFree(LS);
 	return new_start_points;
 }
 
