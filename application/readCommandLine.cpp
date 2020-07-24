@@ -22,15 +22,12 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	desc.add_options()
 	("help", "produce help message")
 	("model", po::value<int>()->default_value(0), "set model for reachability analysis\n"
-					"1.  Bouncing Ball Model: Variables{x,v}\n"
-					"2.  Timed Bouncing Ball Model: Variables{x,v,t}\n"
-					"4.  Five dimensional Benchmark Model: Variables{x1..x5} \n"
-					"5.  Navigation Benchmark Model-NAV01 (3 X 3): Variables{x1,x2,v1,v2}\n"
-					"6.  Navigation Benchmark Model-NAV02 (3 X 3): Variables{x1,x2,v1,v2}\n"
-					"7.  Navigation Benchmark Model-NAV03 (3 X 3): Variables{x1,x2,v1,v2}\n"
-					"8.  Navigation Benchmark Model-NAV04 (5 X 5): Variables{x1,x2,v1,v2}\n"
-					"9.  Navigation Benchmark Model-NAV05 (9 X 9): Variables{x1,x2,v1,v2}\n"
-					"13. Oscillator model without any filters: Variables{x,y}\n")
+					"1.  Bouncing Ball: Variables{x,v}\n"
+					"2.  Timed Bouncing Ball: Variables{x,v,t}\n"
+					"3.  A continuous system of five dimensions: Variables{x1..x5} \n"
+					"4.  Navigation (3 X 3) grid: Variables{x1,x2,v1,v2}\n"
+					"5.  Navigation (5 X 5) grid: Variables{x1,x2,v1,v2}\n"
+					"6.  Oscillator : Variables{x,y}\n")
 	("engine,e", po::value<std::string>()->default_value("supp"), "set the running engine (default supp): \n - supp : Reachability Computation using Support Functions Algorithm \n - simu : Trajectory Simulation\n")
 	("simu-algo",po::value<int>()->default_value(1), "Set the Simulation algorithm\n"
 				"1 -- Sequential Algorithm (Set to default)\n"
@@ -38,9 +35,9 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("simu-init-points",po::value<int>()->default_value(1), "(default 1) Sets the number of initial points "
                 "chosen for sampling the initial states, counted per initial set.") //Todo:: If one, takes the center of the bounding box.")
 	("directions", po::value<int>()->default_value(1), "Set the directions for template polyhedra:\n"
-					"1. Box Directions (Set to default)\n"
-					"2. Octagonal Directions \n"
-					"n. 'n' uniform Directions \n")
+					"1. Box template (Set to default)\n"
+					"2. Octagonal template \n"
+					"n. uniformly oriented n directions \n")
 	("time-horizon", po::value<double>(), "Set the local time horizon of flowpipe computation.")
 	("time-step", po::value<double>(), "Set the sampling time of flowpipe computation.")
 	("algo,a",po::value<int>()->default_value(4), "Set the algorithm\n"
@@ -57,7 +54,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("depth", po::value<int>(), "Set the depth of HA exploration for Bounded Model Checking")
 	("aggregate", po::value<std::string>()->default_value("thull"), "Set-aggregation (default thull): \n - thull : template hull \n - chull : convex hull \n - none : no set aggregation (precise but costly)")
 
-	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location") //better to be handled by hyst
+	("forbidden,F", po::value<std::string>(), "forbidden location_ID and forbidden set/region within that location")
 	("CE",po::value<std::string>(), "Search for counter-example to forbidden-region together with state-space exploration:\n - (all): search in all flowpipe feasible paths "
 			"\n - (first): search for counter-example until the first-one (if any) is found."
 			"\n - search only in the path given as a comma separated list of locations: e.g. 1,2,3 \n")

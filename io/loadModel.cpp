@@ -27,7 +27,7 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 		set_nav04_timed(ha, init_state, reach_parameters);
 	}
 
-	if (HybridSystem_Model_Type == NAVIGATION_4) { // Model 8
+	if (HybridSystem_Model_Type == NAVIGATION_2) { // Model 8
 		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 	}
 
@@ -36,19 +36,7 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 	}
 	if (HybridSystem_Model_Type == 14) {
 
-		//SetConstantMotion(ha, init_state,reach_parameters);	//Call to constant dynamic Model
-		//Set_NavTimed_Parameters(ha, init_state, reach_parameters);
-
-		//Set_NavTimed_5by5(ha, init_state, reach_parameters);
-
 		setNav30Timed(ha,init_state,reach_parameters);
-
-		//setTTEthernetModel2(ha, init_state, reach_parameters);
-
-		//setTTEthernet5(ha, init_state, reach_parameters);
-
-		//setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
-
 		//set_watertank_controller(ha,init_state,reach_parameters);
 	
 	}
@@ -82,8 +70,10 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 	if(HybridSystem_Model_Type == 28){ // Filtered Oscillator model with 32 filters called
 	//	setf_osc_32_timedmodel(ha, init_state, reach_parameters);
 	}
-	if(HybridSystem_Model_Type == 29){ // spacecraft rendezvoud
-		//setSpacecraft(ha, init_state, reach_parameters);
+	if(HybridSystem_Model_Type == 29){ // spacecraft rendezvous with no transition to mission abort
+		setSpacecraft(ha, init_state, reach_parameters);
+	}
+	if(HybridSystem_Model_Type == 30){ // spacecraft rendezvous with mission abort
 		setSpacecraftAbort(ha, init_state, reach_parameters);
 	}
 }

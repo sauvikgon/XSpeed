@@ -20,17 +20,10 @@
 // *********** Various Hybrid System Model ******************
 #define BBALL				1		//Bouncing Ball
 #define TBBALL				2		//Timed Bouncing Ball
-#define HELICOPTER			3		//HELICOPTER Model
-#define FIVEDIMSYS			4		//Model of A Five Dimensional System
-#define NAVIGATION_1		5		//NAVIGATION Benchmark model - NAV01 (3 x 3)
-#define NAVIGATION_2		6		//NAVIGATION Benchmark model - NAV02 (3 x 3)
-#define NAVIGATION_3		7		//NAVIGATION Benchmark model - NAV03 (3 x 3)
-#define NAVIGATION_4		8		//NAVIGATION Benchmark model - NAV04 (5 x 5)
-#define NAVIGATION_5		9		//NAVIGATION Benchmark model - NAV05 (9 x 9)
-#define CIRCLE_ONE_LOC		10		//CIRCLE model with one location
-#define CIRCLE_TWO_LOC		11		//CIRCLE model with two locations
-#define CIRCLE_FOUR_LOC		12		//CIRCLE model with four locations
-#define OSCILLATOR			13		//OSCILLATOR model without any Filter
+#define FIVEDIMSYS			3		//Model of A Five Dimensional System
+#define NAVIGATION_1		4		//NAVIGATION Benchmark model - NAV01 (3 x 3)
+#define NAVIGATION_2		5		//NAVIGATION Benchmark model - NAV04 (5 x 5)
+#define OSCILLATOR			6		//OSCILLATOR model without any Filter
 
 
 // *********** Different Template Directions ******************

@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 		if (found_CE) {
 			string cmdStr1;
 			//cmdStr1.append("graph -TX -BC -W 0.008 out.txt -s -m 3 bad_poly -s -m 2 init_poly");
-			cmdStr1.append("graph -TX -BC -W 0.008 out.txt");
+			//cmdStr1.append("graph -TX -BC -W 0.008 out.txt");
 			system(cmdStr1.c_str());
 		}
 
