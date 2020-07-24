@@ -36,6 +36,7 @@ RM := rm -rf
 -include XSpeed/benchmarks/ttEthernet/subdir.mk
 -include XSpeed/benchmarks/oscillatorModel/subdir.mk
 -include XSpeed/benchmarks/constantDynamics/subdir.mk
+-include XSpeed/benchmarks/navigation/subdir.mk
 -include XSpeed/benchmarks/subdir.mk
 -include XSpeed/application/subdir.mk
 -include subdir.mk

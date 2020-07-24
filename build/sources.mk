@@ -26,6 +26,7 @@ SUBDIRS := \
 XSpeed/application \
 XSpeed/benchmarks \
 XSpeed/benchmarks/constantDynamics \
+XSpeed/benchmarks/navigation \
 XSpeed/benchmarks/oscillatorModel \
 XSpeed/benchmarks/ttEthernet \
 XSpeed/benchmarks/vehiclePlatoon \
@@ -52,5 +53,6 @@ XSpeed/io/resetParser \
 XSpeed/utilities \
 XSpeed/utilities/cpuUtilities \
 XSpeed/utilities/directions \
-XSpeed/utilities/memUtilities \
+XSpeed/utilities/memUtilities
+
 
