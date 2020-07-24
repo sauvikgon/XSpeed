@@ -22,3 +22,13 @@ For building from source, install the following listed libraries:
 6. UnitTest++
 	
 	The package can be downloaded from https://github.com/unittest-cpp/unittest-cpp
+
+Allow default installation of the library header files into the directory `/usr/local/include` and the .a/.so files into the directory `/usr/local/lib`
+
+Compiling the source:
+
+`cd build`
+
+`sudo make all`
+
+The tool executable with the name *XSpeed-plan* will be installed in the build directory.
