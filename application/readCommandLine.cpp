@@ -299,8 +299,8 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			{
 				x1 = Hybrid_Automata.get_index(output_vars[0]);
 				Hybrid_Automata.insert_to_output_map(output_vars[0],m);
-				location::ptr loc = Hybrid_Automata.getInitial_Location();
-				Dynamics& D = loc->getSystem_Dynamics();
+				location::ptr loc = Hybrid_Automata.getInitialLocation();
+				Dynamics& D = loc->getSystemDynamics();
 				unsigned int sysDim = Hybrid_Automata.map_size();
 				math::matrix<double> rowMat(1,sysDim);
 				rowMat.clear();
@@ -313,8 +313,8 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			{
 				x2 = Hybrid_Automata.get_index(output_vars[1]);
 				Hybrid_Automata.insert_to_output_map(output_vars[1],m);
-				location::ptr loc = Hybrid_Automata.getInitial_Location();
-				Dynamics& D = loc->getSystem_Dynamics();
+				location::ptr loc = Hybrid_Automata.getInitialLocation();
+				Dynamics& D = loc->getSystemDynamics();
 				unsigned int sysDim = Hybrid_Automata.map_size();
 				math::matrix<double> rowMat(1,sysDim);
 				rowMat.clear();

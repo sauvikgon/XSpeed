@@ -265,14 +265,14 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 				std::cout << std::endl; */
 			}
 
-			loc->setSystem_Dynamics(D);
+			loc->setSystemDynamics(D);
 			
 		}
 		else if((*tok_iter).compare("Transition")==0){
 			transition::ptr t = transition::ptr(new transition());
-			t->setSource_Location_Id(loc->getLocId());
+			t->setSourceLocationId(loc->getLocId());
 			parse_transition(file,t);
-			loc->add_Out_Going_Transition(t);
+			loc->addOutGoingTransition(t);
 		}
 	}
 	
@@ -451,7 +451,7 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 	
 		else if(param.compare("DestId")==0){
 			tok_iter++;
-			t->setDestination_Location_Id(std::atoi((*tok_iter).c_str()));
+			t->setDestinationLocationId(std::atoi((*tok_iter).c_str()));
 			//std::cout << "Setting trans dest locId:" << std::atoi((*tok_iter).c_str()) << std::endl;
 		}
 

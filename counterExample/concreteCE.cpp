@@ -52,7 +52,7 @@ void concreteCE::plot_ce(std::string filename, unsigned int x1, unsigned int x2)
 		std::cout << "dwell time in this location = " << seg.second.second << std::endl;
 		//---
 		simulation_sample = seg.second;
-		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
+		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystemDynamics()));
 		sim->set_out_dimension(x1, x2);
 
 		sim->simulate(simulation_sample.first, simulation_sample.second);
@@ -79,7 +79,7 @@ bool concreteCE::valid(struct refinement_point& ref_pt, double valid_tol)
 		polytope::ptr Inv;
 		Inv = ha->getLocation(locId)->getInvariant();
 
-		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystem_Dynamics()));
+		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystemDynamics()));
 		bound_sim b; bool status=true;
 		b =  sim->bounded_simulation(simulation_sample.first,simulation_sample.second, Inv, status, valid_tol);
 

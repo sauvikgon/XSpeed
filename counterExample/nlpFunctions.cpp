@@ -77,7 +77,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad,
 		}
 
 		int loc_index = locIdList[i];
-		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+		Dynamics d = HA->getLocation(loc_index)->getSystemDynamics();
 		I = HA->getLocation(loc_index)->getInvariant();
 		assert(d.C.size() == dim);
 
@@ -257,7 +257,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad,
 		if (dwell_time < p.time)
 			continue;
 		// Compute the new point v at p.time units from the new sampled start point.
-		Dynamics d = HA->getLocation(locID)->getSystem_Dynamics();
+		Dynamics d = HA->getLocation(locID)->getSystemDynamics();
 		polytope::ptr I = HA->getLocation(locID)->getInvariant();
 		assert(d.C.size() == dim);
 
@@ -360,7 +360,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 		}
 
 		int loc_index = locIdList[i]; //global variable populated already
-		Dynamics d = HA->getLocation(loc_index)->getSystem_Dynamics();
+		Dynamics d = HA->getLocation(loc_index)->getSystemDynamics();
 		I = HA->getLocation(loc_index)->getInvariant();
 		assert(d.C.size() == dim);
 

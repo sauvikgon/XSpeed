@@ -19,7 +19,7 @@ hybrid_automata::hybrid_automata(std::map<int, location::ptr>& list_locs, locati
 	dimension = dim;
 }
 
-location::ptr& hybrid_automata::getInitial_Location() {
+location::ptr& hybrid_automata::getInitialLocation() {
 	return initial_loc;
 }
 
@@ -63,7 +63,7 @@ void hybrid_automata::setDimension(int dim) {
 	this->dimension = dim;
 }
 
-void hybrid_automata::addMapped_Locations_List(std::map<int, location::ptr>& mapped_location_list){
+void hybrid_automata::addMappedLocationsList(std::map<int, location::ptr>& mapped_location_list){
 	list_locations = mapped_location_list;
 }
 void hybrid_automata::addLocation(location::ptr& loc){
@@ -71,23 +71,23 @@ void hybrid_automata::addLocation(location::ptr& loc){
 	list_locations[key] = loc;	//storing the loc with the proper loc_id as the key
 }
 
-std::list<structuralPath::ptr> hybrid_automata::get_structural_paths(unsigned int forbidden_loc_id, unsigned int depth)
+std::list<structuralPath::ptr> hybrid_automata::getStructuralPaths(unsigned int forbidden_loc_id, unsigned int depth)
 {
 	std::list<structuralPath::ptr> path_list; // It is empty here.
 
-	unsigned int srcLoc = getInitial_Location()->getLocId();
+	unsigned int srcLoc = getInitialLocation()->getLocId();
 	unsigned int destLoc = forbidden_loc_id;
 	path_list = findAllPaths(srcLoc, destLoc, depth);
 
 	return path_list;
 }
 
-void enum_paths(unsigned int forbidden_loc_id, unsigned int depth)
+void satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
 {
 	//todo
 }
 
-void hybrid_automata::printpath(vector<int>& path) {
+void hybrid_automata::printPath(vector<int>& path) {
 	int size = path.size();
 	for (int i = 0; i < size; i++)
 		cout << path[i] << " ";
@@ -131,12 +131,12 @@ std::list<structuralPath::ptr> hybrid_automata::findAllPaths(int src, int dst, i
 		// traverse to all the nodes connected to
 		// current node and push new path to queue
 		location::ptr lastLoc = getLocation(last); //Note:: todo take care if last does not exist (if error occurs)
-		std::list<transition::ptr> allOutTrans = lastLoc->getOut_Going_Transitions();
+		std::list<transition::ptr> allOutTrans = lastLoc->getOutGoingTransitions();
 		std::list<transition::ptr>::iterator it;
 		for (it = allOutTrans.begin(); it != allOutTrans.end(); it++) {
 			// if (isNotVisited(g[last][i], path)) {    //enable this if to avoid Cycle
 			vector<int> newpath(pathDS.first);	//copy constructor
-			newpath.push_back((*it)->getDestination_Location_Id());
+			newpath.push_back((*it)->getDestinationLocationId());
 			vector<transition::ptr> newtrans(pathDS.second);	//copy constructor
 			newtrans.push_back((*it));
 			int depthExplored = newpath.size();    //Size of the path

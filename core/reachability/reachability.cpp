@@ -202,15 +202,15 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 		if (reach_region->getTotalIterations() != 0 && bfslevel <= bound) {
 			//computed reach_region is not empty and bounding depth not reached
-			for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
-					t != current_location->getOut_Going_Transitions().end(); t++) {
+			for (std::list<transition::ptr>::iterator t = current_location->getOutGoingTransitions().begin();
+					t != current_location->getOutGoingTransitions().end(); t++) {
 				// get each destination_location_id and push into the pwl.waiting_list
 				int transition_id = (*t)->getTransitionId();
 				location::ptr current_destination;
 				Assign current_assignment;
 				polytope::ptr guard_polytope;
 				discrete_set ds;
-				current_destination = H.getLocation((*t)->getDestination_Location_Id());
+				current_destination = H.getLocation((*t)->getDestinationLocationId());
 				string locName = current_destination->getName();
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
 				guard_polytope = (*t)->getGuard();
@@ -275,12 +275,12 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					}
 
 				} else{ // empty guard
-					std::cout << "Guard Set is empty. It means that the guard condition is unsatisfiable. \n";
+					DEBUG_MSG("Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
 					continue;
 				}
 
 				current_assignment = (*t)->getAssignT();
-				int destination_locID = (*t)->getDestination_Location_Id();
+				int destination_locID = (*t)->getDestinationLocationId();
 				ds.insert_element(destination_locID);
 				std::list<polytope::ptr> intersected_polys;
 
@@ -368,13 +368,13 @@ void reachability::seq_postC_selection(unsigned int iters, location::ptr current
 	// first order linear approx. model of Colas et. al.
 	if (Algorithm_Type == SEQ_SF) {
 		// Sequential postC computation
-		reach_region = postC_sf(iters, current_location->getSystem_Dynamics(),
+		reach_region = postC_sf(iters, current_location->getSystemDynamics(),
 				initial_polytope, reach_parameters, current_location->getInvariant(),
 				current_location->getInvariantExist(), lp_solver_type);
 	}
 	if (Algorithm_Type == PAR_SF) {
 		reach_region = postC_lazySf(iters,
-				current_location->getSystem_Dynamics(),
+				current_location->getSystemDynamics(),
 				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
 				current_location->getInvariantExist(),
@@ -382,16 +382,16 @@ void reachability::seq_postC_selection(unsigned int iters, location::ptr current
 	}
 	if (Algorithm_Type == TIME_SLICE) {
 			bool invertible;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixA) {
-				math::matrix<double> A_inv(current_location->getSystem_Dynamics().MatrixA.size1(),
-						current_location->getSystem_Dynamics().MatrixA.size2());
-				invertible = current_location->getSystem_Dynamics().MatrixA.inverse(A_inv); //size of A_inv must be declared else error
+			if (!current_location->getSystemDynamics().isEmptyMatrixA) {
+				math::matrix<double> A_inv(current_location->getSystemDynamics().MatrixA.size1(),
+						current_location->getSystemDynamics().MatrixA.size2());
+				invertible = current_location->getSystemDynamics().MatrixA.inverse(A_inv); //size of A_inv must be declared else error
 				if (!invertible)
 					std::cout << "\nDynamics Matrix A is not invertible\n"; //later can give option to stop or select different algorithm
 				else
 					reach_parameters.A_inv = A_inv;
 				int NCores = Total_Partition; //Number of Partitions (number of threads)
-				reach_region = postC_timeslice(iters, current_location->getSystem_Dynamics(),
+				reach_region = postC_timeslice(iters, current_location->getSystemDynamics(),
 						initial_polytope, reach_parameters, current_location->getInvariant(),
 						current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type);
 			}
@@ -401,8 +401,8 @@ void reachability::seq_postC_selection(unsigned int iters, location::ptr current
 	}
 	// forward-backward interpolation approx. model of Goran et. al.
 	if(Algorithm_Type == FB_INTERPOL){
-		std::cout << "\nRunning PostC using the approximation model of forward-backward interpolation.\n";
-		reach_region = postC_fbinterpol(iters, current_location->getSystem_Dynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist(), lp_solver_type);
+		DEBUG_MSG("Running PostC using the approximation model of forward-backward interpolation.");
+		reach_region = postC_fbinterpol(iters, current_location->getSystemDynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist(), lp_solver_type);
 		
 	}
 }
@@ -477,33 +477,33 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 
 			// ******************* Computing Parameters *******************************
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
-					current_location->getSystem_Dynamics(),
+					current_location->getSystemDynamics(),
 					initial_polytope, lp_solver_type); //2 glpk object created here
 
 			double result_beta = compute_beta(
-					current_location->getSystem_Dynamics(),
+					current_location->getSystemDynamics(),
 					reach_parameter_local.time_step, lp_solver_type); // NO glpk object created here
 
 			reach_parameter_local.result_alfa = result_alfa;
 			reach_parameter_local.result_beta = result_beta;
 
 			math::matrix<double> phi_matrix, phi_trans;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
-				current_location->getSystem_Dynamics().MatrixA.matrix_exponentiation(
+			if (!current_location->getSystemDynamics().isEmptyMatrixA) { //if A not Empty
+				current_location->getSystemDynamics().MatrixA.matrix_exponentiation(
 						phi_matrix, reach_parameter_local.time_step);
 				phi_matrix.transpose(phi_trans);
 				reach_parameter_local.phi_trans = phi_trans;
 			}
 			math::matrix<double> B_trans;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
-				current_location->getSystem_Dynamics().MatrixB.transpose(
+			if (!current_location->getSystemDynamics().isEmptyMatrixB) { //if B not Empty
+				current_location->getSystemDynamics().MatrixB.transpose(
 						B_trans);
 				reach_parameter_local.B_trans = B_trans;
 			}
 			// ******************* Computing Parameters Done *******************************
 			unsigned int iters;
 			if (current_location->getInvariantExist()) {
-				InvariantBoundaryCheck(current_location->getSystem_Dynamics(), initial_polytope,
+				InvariantBoundaryCheck(current_location->getSystemDynamics(), initial_polytope,
 						reach_parameter_local, current_location->getInvariant(), lp_solver_type, iters);
 				std::cout << "Iters = " << iters << std::endl;
 			}
@@ -518,8 +518,8 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			if (t_poly->getTotalIterations() != 0 && number_times < bound) { //computed reach_region is empty && optimize computation
 
 				for (std::list<transition::ptr>::iterator t =
-						current_location->getOut_Going_Transitions().begin();
-						t != current_location->getOut_Going_Transitions().end();
+						current_location->getOutGoingTransitions().begin();
+						t != current_location->getOutGoingTransitions().end();
 						t++) { // get each destination_location_id and push into the pwl.waiting_list
 					int transition_id = (*t)->getTransitionId();
 					if (transition_id == -1) { //Indicates empty transition or no transition exists
@@ -532,7 +532,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 					polytope::ptr intersectedRegion; //created two objects here
 					discrete_set ds;
 					current_destination = H.getLocation(
-							(*t)->getDestination_Location_Id());
+							(*t)->getDestinationLocationId());
 					string locName = current_destination->getName();
 
 					guard_polytope = (*t)->getGuard();
@@ -568,7 +568,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 					std::cout << "\nIntersection Time:Wall(Seconds) = "
 							<< return100 << std::endl;
 
-					int destination_locID = (*t)->getDestination_Location_Id();
+					int destination_locID = (*t)->getDestinationLocationId();
 					ds.insert_element(destination_locID);
 					for (std::list<template_polyhedra::ptr>::iterator i =
 							intersected_polyhedra.begin();
@@ -747,22 +747,22 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			//current_location:: parameters alfa, beta and phi_trans have to be re-computed
 			//cout<<"\nBefore Compute Alfa";
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
-					current_location->getSystem_Dynamics(), initial_polytope, lp_solver_type); //2 glpk object created here
+					current_location->getSystemDynamics(), initial_polytope, lp_solver_type); //2 glpk object created here
 			//cout<<"\nCompute Alfa Done";
-			double result_beta = compute_beta(current_location->getSystem_Dynamics(), reach_parameter_local.time_step, lp_solver_type); // NO glpk object created here
+			double result_beta = compute_beta(current_location->getSystemDynamics(), reach_parameter_local.time_step, lp_solver_type); // NO glpk object created here
 			//			cout<<"\nCompute Beta Done";
 			reach_parameter_local.result_alfa = result_alfa;
 			reach_parameter_local.result_beta = result_beta;
 
 			math::matrix<double> phi_matrix, phi_trans;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
-				current_location->getSystem_Dynamics().MatrixA.matrix_exponentiation(phi_matrix, reach_parameter_local.time_step);
+			if (!current_location->getSystemDynamics().isEmptyMatrixA) { //if A not Empty
+				current_location->getSystemDynamics().MatrixA.matrix_exponentiation(phi_matrix, reach_parameter_local.time_step);
 				phi_matrix.transpose(phi_trans);
 				reach_parameter_local.phi_trans = phi_trans;
 			}
 			math::matrix<double> B_trans;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
-				current_location->getSystem_Dynamics().MatrixB.transpose(B_trans);
+			if (!current_location->getSystemDynamics().isEmptyMatrixB) { //if B not Empty
+				current_location->getSystemDynamics().MatrixB.transpose(B_trans);
 				reach_parameter_local.B_trans = B_trans;
 			}
 
@@ -780,7 +780,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			boundCheck.start();
 			unsigned int iters;
 			if (current_location->getInvariantExist()){
-				InvariantBoundaryCheck(SymDataStruct[id].current_location->getSystem_Dynamics(), initial_polytope,
+				InvariantBoundaryCheck(SymDataStruct[id].current_location->getSystemDynamics(), initial_polytope,
 						SymDataStruct[id].reach_param, SymDataStruct[id].current_location->getInvariant(), lp_solver_type, iters);
 				std::cout << "Iters = " << iters << std::endl;
 			}
@@ -841,8 +841,8 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 
 			if (t_poly->getTotalIterations() != 0 && number_times < bound) { //computed reach_region is empty && optimize computation
 
-				for (std::list<transition::ptr>::iterator trans = current_location->getOut_Going_Transitions().begin();
-						trans != current_location->getOut_Going_Transitions().end(); trans++) { // get each destination_location_id and push into the pwl.waiting_list
+				for (std::list<transition::ptr>::iterator trans = current_location->getOutGoingTransitions().begin();
+						trans != current_location->getOutGoingTransitions().end(); trans++) { // get each destination_location_id and push into the pwl.waiting_list
 					int transition_id = (*trans)->getTransitionId();
 					if (transition_id == -1) { //Indicates empty transition or no transition exists
 						break; //out from transition for-loop as there is no transition for this location
@@ -853,7 +853,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 					std::list < template_polyhedra::ptr > intersected_polyhedra;
 					polytope::ptr intersectedRegion; //created two objects here
 					discrete_set ds;
-					current_destination = H.getLocation((*trans)->getDestination_Location_Id());
+					current_destination = H.getLocation((*trans)->getDestinationLocationId());
 					string locName = current_destination->getName();
 
 					guard_polytope = (*trans)->getGuard();
@@ -882,7 +882,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 					clock100 = t100.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 					double return100 = clock100 / (double) 1000;
 					std::cout << "\nIntersection Time:Wall(Seconds) = " << return100 << std::endl;
-					int destination_locID = (*trans)->getDestination_Location_Id();
+					int destination_locID = (*trans)->getDestinationLocationId();
 					ds.insert_element(destination_locID);
 					for (std::list<template_polyhedra::ptr>::iterator it = intersected_polyhedra.begin(); it != intersected_polyhedra.end(); it++) {
 						//cout << "\nNumber of Intersections #1\n";
@@ -961,7 +961,7 @@ void reachability::par_postC_selection(unsigned int iters, location::ptr current
 		AllReach_time.start();
 
 		reach_region = postC_sf(iters,
-				current_location->getSystem_Dynamics(),
+				current_location->getSystemDynamics(),
 				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
 				current_location->getInvariantExist(), lp_solver_type);
@@ -980,7 +980,7 @@ void reachability::par_postC_selection(unsigned int iters, location::ptr current
 		AllReach_time.start();
 
 		reach_region = postC_lazySf(iters,
-				current_location->getSystem_Dynamics(),
+				current_location->getSystemDynamics(),
 				initial_polytope, reach_parameters,
 				current_location->getInvariant(),
 				current_location->getInvariantExist(), lp_solver_type);
@@ -989,23 +989,22 @@ void reachability::par_postC_selection(unsigned int iters, location::ptr current
 		double wall_clock1;
 		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
 		double return_Time1 = wall_clock1 / (double) 1000;
-		std::cout << "\nFlowpipe Time:Wall(Seconds) = " << return_Time1
-				<< std::endl;
+		DEBUG_MSG("Flowpipe Time:Wall(Seconds) = " + to_string(return_Time1));
 	}
 
 	if (Algorithm_Type == TIME_SLICE) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))
 		cout << "\nRunning Parallel-over-Iterations(PARTITIONS/Time-Sliced) Using OMP Thread\n";
 		bool invertible;
-		if (!current_location->getSystem_Dynamics().isEmptyMatrixA) {
-			math::matrix<double> A_inv(current_location->getSystem_Dynamics().MatrixA.size1(),
-					current_location->getSystem_Dynamics().MatrixA.size2());
-			invertible = current_location->getSystem_Dynamics().MatrixA.inverse(A_inv); //size of A_inv must be declared else error
+		if (!current_location->getSystemDynamics().isEmptyMatrixA) {
+			math::matrix<double> A_inv(current_location->getSystemDynamics().MatrixA.size1(),
+					current_location->getSystemDynamics().MatrixA.size2());
+			invertible = current_location->getSystemDynamics().MatrixA.inverse(A_inv); //size of A_inv must be declared else error
 			if (!invertible)
 				std::cout << "\nDynamics Matrix A is not invertible\n"; //later can give option to stop or select different algorithm
 			else
 				reach_parameters.A_inv = A_inv;
 			int NCores = Total_Partition; //Number of Partitions (number of threads)
-			reach_region = postC_timeslice(iters, current_location->getSystem_Dynamics(),
+			reach_region = postC_timeslice(iters, current_location->getSystemDynamics(),
 					initial_polytope, reach_parameters, current_location->getInvariant(),
 					current_location->getInvariantExist(), NCores, TIME_SLICE, lp_solver_type);
 			S[id]->setContinuousSetptr(reach_region);
@@ -1249,7 +1248,7 @@ void reachability::computeBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS) 
 		lp_U.setMin_Or_Max(2);
 		bool U_empty;
 		U_empty =
-				LoadBalanceDS[i].current_location->getSystem_Dynamics().U->getIsEmpty();
+				LoadBalanceDS[i].current_location->getSystemDynamics().U->getIsEmpty();
 		if (!U_empty) {
 			LoadBalanceDS[i].sf_U.resize(LoadBalanceDS[i].List_dir_U.size1());
 			lp_U.setConstraints(LoadBalanceDS[i].U->getCoeffMatrix(),
@@ -1281,7 +1280,7 @@ void reachability::computeBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS) 
 			LoadBalanceDS[i].sf_X0[j] = lp.Compute_LLP(dirs);
 
 			// ******DotProduction and Support Function of UnitBall  *******
-			LoadBalanceDS[i].sf_dotProduct[j] = dot_product(LoadBalanceDS[i].current_location->getSystem_Dynamics().C, dirs);
+			LoadBalanceDS[i].sf_dotProduct[j] = dot_product(LoadBalanceDS[i].current_location->getSystemDynamics().C, dirs);
 			LoadBalanceDS[i].sf_UnitBall[j] = support_unitball_infnorm(dirs);
 		}
 	} //end-for each symbolic-states
@@ -1320,15 +1319,15 @@ void reachability::parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS)
 		LoadBalanceDS[index].sf_X0[j] = LPSolver(LoadBalanceDS[index].X0, dirs);
 
 		// ******DotProduction and Support Function of UnitBall  *******
-		if (!LoadBalanceDS[index].current_location->getSystem_Dynamics().isEmptyC) {
-			LoadBalanceDS[index].sf_dotProduct[j] = dot_product(LoadBalanceDS[index].current_location->getSystem_Dynamics().C,dirs);
+		if (!LoadBalanceDS[index].current_location->getSystemDynamics().isEmptyC) {
+			LoadBalanceDS[index].sf_dotProduct[j] = dot_product(LoadBalanceDS[index].current_location->getSystemDynamics().C,dirs);
 		}
 		LoadBalanceDS[index].sf_UnitBall[j] = support_unitball_infnorm(dirs);
 		// ******DotProduction and Support Function of UnitBall  *******
 	}
 
 	bool U_empty;
-	U_empty = LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();
+	U_empty = LoadBalanceDS[0].current_location->getSystemDynamics().U->getIsEmpty();
 	//todo:: assuming all symbolic states has same setup for polytope U
 	if (!U_empty) {
 		cout<<"polytope U is NOT empty!!!!\n";

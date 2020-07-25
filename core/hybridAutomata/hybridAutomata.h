@@ -34,7 +34,7 @@ public:
 	 */
 	void setInitialLoc(int init_id);
 	
-	location::ptr& getInitial_Location();
+	location::ptr& getInitialLocation();
 
 	//returns the location from the list of locations with location_ID as the input parameter
 	location::ptr getLocation(int Loc_ID);
@@ -42,7 +42,7 @@ public:
 	/* returns the location from the list of locations with locName */
 	location::ptr getLocation(string locName);
 
-	void addMapped_Locations_List(std::map<int, location::ptr>& mapped_location_list);
+	void addMappedLocationsList(std::map<int, location::ptr>& mapped_location_list);
 
 	void addLocation(location::ptr& loc);	//inserts location into its correctly mapped key
 	int getDimension() const;
@@ -59,16 +59,16 @@ public:
 	 * forbidden_location (passed as a parameter). The paths of length at-most depth are considered.
 	 *
 	 */
-	std::list<structuralPath::ptr> get_structural_paths(unsigned int forbidden_loc_id, unsigned int depth);
+	std::list<structuralPath::ptr> getStructuralPaths(unsigned int forbidden_loc_id, unsigned int depth);
 
 	/**
 	 * A sat-based path enumeration procedure.
 	 */
-	void enum_paths(unsigned int forbidden_loc_id, unsigned int depth);
+	void satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth);
 
 	std::list<structuralPath::ptr> findAllPaths(int src, int dst, int depthBound);
 
-	void printpath(std::vector<int>& path);
+	void printPath(std::vector<int>& path);
 
 };
 

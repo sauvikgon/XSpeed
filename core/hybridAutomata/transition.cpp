@@ -50,19 +50,19 @@ void transition::setLabel(const string& label) {
 	this->label = label;
 }
 
-int transition::getDestination_Location_Id() {
+int transition::getDestinationLocationId() {
 	return destination_location_id;
 }
 
-void transition::setDestination_Location_Id(int dest_loc_id) {
+void transition::setDestinationLocationId(int dest_loc_id) {
 	destination_location_id = dest_loc_id;
 }
 
-int transition::getSource_Location_Id() {
+int transition::getSourceLocationId() {
 	return source_location_id;
 }
 
-void transition::setSource_Location_Id(int source_loc_id) {
+void transition::setSourceLocationId(int source_loc_id) {
 	source_location_id = source_loc_id;
 }
 int transition::getTransitionId() const {

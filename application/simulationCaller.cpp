@@ -38,7 +38,7 @@ void simulationCaller(ReachabilityParameters& reach_parameters,
 	if (op.get_simu_algo() == 1) { //Sequential Simulation with 'n' initial sampling-start-points
 		std::cout << "\nComputing trajectories Sequentially.\n";
 		//Computation time of n sampling start_points is to be recorded for a fair comparison with parSimulateHa()
-		std::vector<sim_start_point> start_pts = sim->get_start_points(n, initialset, ha.getInitial_Location());
+		std::vector<sim_start_point> start_pts = sim->get_start_points(n, initialset, ha.getInitialLocation());
 		assert(start_pts.size() == n);
 
 		bool is_safe = true;

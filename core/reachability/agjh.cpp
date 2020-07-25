@@ -364,25 +364,25 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	string name = current_location->getName();
 
 	double result_alfa = compute_alfa(reach_parameters.time_step,
-			current_location->getSystem_Dynamics(), continuous_initial_polytope,
+			current_location->getSystemDynamics(), continuous_initial_polytope,
 			lp_solver_type); //2 glpk object created here
-	double result_beta = compute_beta(current_location->getSystem_Dynamics(),
+	double result_beta = compute_beta(current_location->getSystemDynamics(),
 			reach_parameters.time_step, lp_solver_type); // NO glpk object created here
 
 	reach_parameters.result_alfa = result_alfa;
 	reach_parameters.result_beta = result_beta;
 	math::matrix<double> phi_matrix, phi_trans;
 
-	if (!current_location->getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
-		current_location->getSystem_Dynamics().MatrixA.matrix_exponentiation(
+	if (!current_location->getSystemDynamics().isEmptyMatrixA) { //if A not Empty
+		current_location->getSystemDynamics().MatrixA.matrix_exponentiation(
 				phi_matrix, reach_parameters.time_step);
 		phi_matrix.transpose(phi_trans);
 		reach_parameters.phi_trans = phi_trans;
 	}
 	math::matrix<double> B_trans;
 	// transpose to be done once and stored in the structure of parameters
-	if (!current_location->getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
-		current_location->getSystem_Dynamics().MatrixB.transpose(B_trans);
+	if (!current_location->getSystemDynamics().isEmptyMatrixB) { //if B not Empty
+		current_location->getSystemDynamics().MatrixB.transpose(B_trans);
 		reach_parameters.B_trans = B_trans;
 	}
 
@@ -400,23 +400,23 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 		 * 	For submitting the reading in STT Journal we did not included jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
 
 		 */
-//		if (current_location->getSystem_Dynamics().isEmptyMatrixA==true && current_location->getSystem_Dynamics().isEmptyMatrixB==true && current_location->getSystem_Dynamics().isEmptyC==false){
+//		if (current_location->getSystemDynamics().isEmptyMatrixA==true && current_location->getSystemDynamics().isEmptyMatrixB==true && current_location->getSystemDynamics().isEmptyC==false){
 //			//Approach of Coarse-time-step and Fine-time-step
 //			//std::cout<<"Coarse-time-step and Fine-time-step Flowpipe \n";
-//			jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
+//			jumpInvariantBoundaryCheck(current_location->getSystemDynamics(), continuous_initial_polytope, reach_parameters,
 //				current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 //		}else{
 //			//Approach of Sequential invariant check will work for all case
-			//InvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope,
+			//InvariantBoundaryCheck(current_location->getSystemDynamics(), continuous_initial_polytope,
 			//	reach_parameters, current_location->getInvariant(), lp_solver_type, NewTotalIteration);	//OLD implementation
-			InvariantBoundaryCheckNewLPSolver(current_location->getSystem_Dynamics(), continuous_initial_polytope,
+			InvariantBoundaryCheckNewLPSolver(current_location->getSystemDynamics(), continuous_initial_polytope,
 				reach_parameters, current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 //		}
 
-		/*jumpInvariantBoundaryCheck(current_location->getSystem_Dynamics(), continuous_initial_polytope, reach_parameters,
+		/*jumpInvariantBoundaryCheck(current_location->getSystemDynamics(), continuous_initial_polytope, reach_parameters,
 						current_location->getInvariant(), lp_solver_type, NewTotalIteration);*/
 
-		/*quickInvariantBoundaryCheck(current_location->getSystem_Dynamics(),
+		/*quickInvariantBoundaryCheck(current_location->getSystemDynamics(),
 				continuous_initial_polytope, reach_parameters,
 				current_location->getInvariant(), lp_solver_type,
 				NewTotalIteration);*/
@@ -425,7 +425,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	template_polyhedra::ptr reach_region;
 	
 	reach_region = postC_sf(NewTotalIteration,
-					current_location->getSystem_Dynamics(),
+					current_location->getSystemDynamics(),
 					continuous_initial_polytope, reach_parameters,
 					current_location->getInvariant(),
 					current_location->getInvariantExist(), lp_solver_type);
@@ -443,8 +443,8 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 	std::list<initial_state::ptr> res;
 	if (reach_region->getTotalIterations() != 0) { //computed reach_region is empty && optimize transition BreadthLevel-wise
 	//	cout<<"1\n";
-		for (std::list<transition::ptr>::iterator t = current_location->getOut_Going_Transitions().begin();
-				t != current_location->getOut_Going_Transitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
+		for (std::list<transition::ptr>::iterator t = current_location->getOutGoingTransitions().begin();
+				t != current_location->getOutGoingTransitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
 			int transition_id = (*t)->getTransitionId();
 
 			location::ptr current_destination;
@@ -453,7 +453,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			//std::list < template_polyhedra::ptr > intersected_polyhedra;
 			polytope::ptr intersectedRegion;//created two objects here
 			discrete_set ds;
-			current_destination = H.getLocation((*t)->getDestination_Location_Id());
+			current_destination = H.getLocation((*t)->getDestinationLocationId());
 
 			string locName = current_destination->getName();
 			guard_polytope = (*t)->getGuard();//	GeneratePolytopePlotter(guard_polytope);
@@ -530,7 +530,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			// *** interesected_polyhedra included with invariant_directions also ******
 		//cout<<"size = "<< intersected_polyhedra.size();
 
-			int destination_locID = (*t)->getDestination_Location_Id();
+			int destination_locID = (*t)->getDestinationLocationId();
 			ds.insert_element(destination_locID);
 
 			for (std::list<polytope::ptr>::iterator i = polys.begin(); i != polys.end(); i++) {

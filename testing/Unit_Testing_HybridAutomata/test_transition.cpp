@@ -139,8 +139,8 @@ SUITE(Transition_TestSuite) {
 
 
 		GuardOut = trans.getGuard();
-		int loc_src_id = trans.getSource_Location_Id();
-		int loc_dst_id = trans.getDestination_Location_Id();
+		int loc_src_id = trans.getSourceLocationId();
+		int loc_dst_id = trans.getDestinationLocationId();
 
 		unsigned int res = loc_src_id;
 		unsigned int proper1 = 1;
@@ -151,7 +151,7 @@ SUITE(Transition_TestSuite) {
 		CHECK_EQUAL(proper2, dis);
 
 		Dynamics outD, outDDest;
-		outD = loc_src_out.getSystem_Dynamics();
+		outD = loc_src_out.getSystemDynamics();
 
 		row = outD.MatrixA.size1();
 		col = outD.MatrixA.size2();
@@ -162,7 +162,7 @@ SUITE(Transition_TestSuite) {
 
 		CHECK((row==0) && (col==0));
 
-		outDDest = loc_dest_out.getSystem_Dynamics();
+		outDDest = loc_dest_out.getSystemDynamics();
 		row = outDDest.MatrixA.size1();
 		col = outDDest.MatrixA.size2();
 

@@ -36,14 +36,14 @@ public:
 			polytope::ptr Guard, Assign Assign_T);
 	Assign& getAssignT();
 	void setAssignT(Assign assignT);
-	int getDestination_Location_Id();
-	void setDestination_Location_Id(int dest_loc_id);
+	int getDestinationLocationId();
+	void setDestinationLocationId(int dest_loc_id);
 	polytope::ptr getGuard();
 	void setGuard(polytope::ptr guard);
 	const string& getLabel() const;
 	void setLabel(const string& label);
-	int getSource_Location_Id();
-	void setSource_Location_Id(int source_loc_id);
+	int getSourceLocationId();
+	void setSourceLocationId(int source_loc_id);
 	int getTransitionId() const;
 	void setTransitionId(int transId);
 	/**

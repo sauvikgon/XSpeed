@@ -40,8 +40,8 @@ bool check_continuation(location::ptr src_loc_ptr, location::ptr dest_loc_ptr, t
 {
 	// Check whether the dynamics of the destination and the source location are the same.
 	Dynamics src_d, dest_d;
-	src_d = src_loc_ptr->getSystem_Dynamics();
-	dest_d = dest_loc_ptr->getSystem_Dynamics();
+	src_d = src_loc_ptr->getSystemDynamics();
+	dest_d = dest_loc_ptr->getSystemDynamics();
 
 	if(src_d.MatrixA==dest_d.MatrixA && src_d.MatrixB == dest_d.MatrixB && src_d.C == dest_d.C){
 		// check the transition assignment for identity

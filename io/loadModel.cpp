@@ -150,8 +150,8 @@ void transformDirections(hybrid_automata& ha, std::vector<std::vector<double> >&
 {
 	// transform the directions with the MatrixT transformation matrix
 	res.resize(directions.size());
-	location::ptr locPtr = ha.getInitial_Location();
-	Dynamics& D = locPtr->getSystem_Dynamics();
+	location::ptr locPtr = ha.getInitialLocation();
+	Dynamics& D = locPtr->getSystemDynamics();
 	for(unsigned int i=0;i<directions.size();i++){
 		std::vector<double> ell = directions[i];
 		math::matrix<double> C;

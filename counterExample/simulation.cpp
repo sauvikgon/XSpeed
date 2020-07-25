@@ -562,7 +562,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	N = Tfinal / time_step;
 	double tout1 = start_time;  //New Start Time for new simulation
 
-	Dynamics Dyn = start_point.locptr->getSystem_Dynamics();
+	Dynamics Dyn = start_point.locptr->getSystemDynamics();
 
 	std::vector<double> x = start_point.start_point;
 
@@ -584,7 +584,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 	//Computing guard-invariant intersection and bloating the set with time-step
 	std::list<transition::ptr> outgoingtrans;
-	outgoingtrans = loc->getOut_Going_Transitions();
+	outgoingtrans = loc->getOutGoingTransitions();
 	for (std::list<transition::ptr>::iterator it = outgoingtrans.begin();
 			it != outgoingtrans.end(); it++) {
 
@@ -734,7 +734,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 			if (dist == 0) { //just intersected the guard
 				sim_start_point w;
-				int locID = it->trans->getDestination_Location_Id();
+				int locID = it->trans->getDestinationLocationId();
 				location::ptr loc = ha.getLocation(locID);
 //				cout<<"Intersected with the Guard and Destination LocationID="<<locID<<endl;
 				w.locptr = loc;
@@ -938,7 +938,7 @@ bool simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 		std::pair<int, polytope::ptr>& forbidden_set, unsigned int max_jumps=10) {
 
 	std::vector<sim_start_point> start_points = get_start_points(n, initial_set,
-			ha.getInitial_Location());
+			ha.getInitialLocation());
 
 	unsigned int t = 0, point_count = 0;
 	unsigned int N_cores = omp_get_num_procs();
@@ -969,7 +969,7 @@ bool simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
 					wlist[t][w][q].erase(wlist[t][w][q].begin());
 					unsigned int sys_dimension = s.start_point.size();
 					simulation myobj(sys_dimension, tot_time / this->time_step,
-							s.locptr->getSystem_Dynamics());
+							s.locptr->getSystemDynamics());
 					myobj.set_time_step(this->time_step);
 					std::vector<sim_start_point> newpoints =
 							myobj.simulateHaLocation(s, s.cross_over_time,

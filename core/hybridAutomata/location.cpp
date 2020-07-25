@@ -23,11 +23,11 @@ location::location(int Loc_ID, string name, Dynamics system_dynamics, polytope::
 	Out_Going_Transitions = Out_Going_Trans;
 }
 
-Dynamics& location::getSystem_Dynamics() {
+Dynamics& location::getSystemDynamics() {
 	return System_Dynamics;
 }
 
-void location::setSystem_Dynamics(const Dynamics& system_dynamics) {
+void location::setSystemDynamics(const Dynamics& system_dynamics) {
 	System_Dynamics = system_dynamics;
 }
 
@@ -55,10 +55,10 @@ void location::setLocId(int locId) {
 	loc_id = locId;
 }
 
-std::list<transition::ptr>& location::getOut_Going_Transitions(){
+std::list<transition::ptr>& location::getOutGoingTransitions(){
 	return Out_Going_Transitions;
 }
-void location::add_Out_Going_Transition(transition::ptr t){
+void location::addOutGoingTransition(transition::ptr t){
 	this->Out_Going_Transitions.push_back(t);
 		//Adj_Transitions.max_size()		//returns the size of the adjacent transitions/locations
 }

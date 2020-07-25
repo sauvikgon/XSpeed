@@ -18,7 +18,7 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 	boost::timer::cpu_timer timePaths;
 	//std::cout<<"destLoc= " << destLoc<<"    depth bound = "<<depthBound<<std::endl;
 	timePaths.start();
-	std::list<structuralPath::ptr> allPaths = Hybrid_Automata.get_structural_paths(destLoc, depthBound);
+	std::list<structuralPath::ptr> allPaths = Hybrid_Automata.getStructuralPaths(destLoc, depthBound);
 	timePaths.stop();
 	//std::cout<<"allPaths = "<<allPaths.size()<<"\n";
 			//double wall_clock_timePaths_nanosec, wall_clock_timePaths_millisec, wall_clock_timePaths_sec;

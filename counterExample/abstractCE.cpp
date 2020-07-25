@@ -699,7 +699,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		math::matrix<double> expAt; // To contain the e^At matrix, for the fixed time.
 		unsigned int loc_id = locIdList[i];
 		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
-		D = ha_loc_ptr->getSystem_Dynamics();
+		D = ha_loc_ptr->getSystemDynamics();
 		D.MatrixA.matrix_exponentiation(expAt, dwell_times[i]);
 
 		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
@@ -1255,9 +1255,9 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			T = *(trans_iter);
 			assert(T!=NULL);
 
-			location::ptr src_loc = HA->getLocation(T->getSource_Location_Id());
+			location::ptr src_loc = HA->getLocation(T->getSourceLocationId());
 			location::ptr dest_loc = HA->getLocation(
-					T->getDestination_Location_Id());
+					T->getDestinationLocationId());
 
 			polytope::ptr src_loc_inv = src_loc->getInvariant();
 			polytope::ptr dest_loc_inv = dest_loc->getInvariant();

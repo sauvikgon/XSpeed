@@ -109,7 +109,7 @@ SUITE(Location_TestSuite) {
 		proper << "Hello Testing";
 		CHECK_EQUAL(proper.str(), out.str());
 
-		outD = loc.getSystem_Dynamics();
+		outD = loc.getSystemDynamics();
 
 		const int res[2][2] = { {1,2}, {3,4}};
 		int output[2][2];

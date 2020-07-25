@@ -1,9 +1,3 @@
-/*
- * FiveDimSys.cpp
- *
- *  Created on: 25-Nov-2014
- *      Author: amit
- */
 
 #include <benchmarks/fiveDimSys.h>
 
@@ -246,7 +240,7 @@ void setFiveDimSys(hybrid_automata& Hybrid_Automata,
 	source = location::ptr(new location());
 	source->setLocId(1);
 	source->setName("Round_Figure");
-	source->setSystem_Dynamics(system_dynamics);
+	source->setSystemDynamics(system_dynamics);
 	source->setInvariant(invariant);
 	source->setInvariantExist(false); //no invariant available
 

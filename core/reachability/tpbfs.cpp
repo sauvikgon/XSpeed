@@ -102,22 +102,22 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			// ******************* Computing Parameters ************************ //current_location:: parameters alfa, beta and phi_trans
 
 			double result_alfa = compute_alfa(reach_parameter_local.time_step,
-					current_location->getSystem_Dynamics(), continuous_initial_polytope, lp_solver_type); //cout<<"\nCompute Alfa Done";
+					current_location->getSystemDynamics(), continuous_initial_polytope, lp_solver_type); //cout<<"\nCompute Alfa Done";
 
-			double result_beta = compute_beta(current_location->getSystem_Dynamics(),
+			double result_beta = compute_beta(current_location->getSystemDynamics(),
 					reach_parameter_local.time_step, lp_solver_type); // NO glpk object created here
 
 			reach_parameter_local.result_alfa = result_alfa;
 			reach_parameter_local.result_beta = result_beta;
 			math::matrix<double> phi_matrix, phi_trans;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixA) { //if A not Empty
-				current_location->getSystem_Dynamics().MatrixA.matrix_exponentiation(phi_matrix, reach_parameter_local.time_step);
+			if (!current_location->getSystemDynamics().isEmptyMatrixA) { //if A not Empty
+				current_location->getSystemDynamics().MatrixA.matrix_exponentiation(phi_matrix, reach_parameter_local.time_step);
 				phi_matrix.transpose(phi_trans);
 				reach_parameter_local.phi_trans = phi_trans;
 			}
 			math::matrix<double> B_trans;
-			if (!current_location->getSystem_Dynamics().isEmptyMatrixB) { //if B not Empty
-				current_location->getSystem_Dynamics().MatrixB.transpose(B_trans);
+			if (!current_location->getSystemDynamics().isEmptyMatrixB) { //if B not Empty
+				current_location->getSystemDynamics().MatrixB.transpose(B_trans);
 				reach_parameter_local.B_trans = B_trans;
 			}
 			// ******************* Computing Parameters Done *******************************
@@ -125,10 +125,10 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 
 			LoadBalanceDS[id].X0 = continuous_initial_polytope;
 
-			if (current_location->getSystem_Dynamics().U == NULL){
+			if (current_location->getSystemDynamics().U == NULL){
 				LoadBalanceDS[id].U =polytope::ptr(new polytope(true));
 			}else{
-				LoadBalanceDS[id].U = current_location->getSystem_Dynamics().U;
+				LoadBalanceDS[id].U = current_location->getSystemDynamics().U;
 			}
 			LoadBalanceDS[id].current_location = current_location;
 			LoadBalanceDS[id].symState_ID = id;
@@ -152,16 +152,16 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 				 * 	For submitting the reading in STT Journal we did not included jumpInvariantBoundaryCheck() for eg in TTEthernet benchmark.
 				 *
 				 */
-//				if (LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixA == true && LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyMatrixB == true
-//						&& LoadBalanceDS[id].current_location->getSystem_Dynamics().isEmptyC == false) {
+//				if (LoadBalanceDS[id].current_location->getSystemDynamics().isEmptyMatrixA == true && LoadBalanceDS[id].current_location->getSystemDynamics().isEmptyMatrixB == true
+//						&& LoadBalanceDS[id].current_location->getSystemDynamics().isEmptyC == false) {
 //					//Approach of Coarse-time-step and Fine-time-step
-//					jumpInvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(), LoadBalanceDS[id].X0, LoadBalanceDS[id].reach_param,
+//					jumpInvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystemDynamics(), LoadBalanceDS[id].X0, LoadBalanceDS[id].reach_param,
 //						LoadBalanceDS[id].current_location->getInvariant(), lp_solver_type, NewTotalIteration);
 //				} else {
 					//Approach of Sequential invariant check will work for all case
-					//InvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystem_Dynamics(),LoadBalanceDS[id].X0,
+					//InvariantBoundaryCheck(LoadBalanceDS[id].current_location->getSystemDynamics(),LoadBalanceDS[id].X0,
 					//	LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type, NewTotalIteration);//OLD implementation
-					InvariantBoundaryCheckNewLPSolver(LoadBalanceDS[id].current_location->getSystem_Dynamics(),LoadBalanceDS[id].X0,
+					InvariantBoundaryCheckNewLPSolver(LoadBalanceDS[id].current_location->getSystemDynamics(),LoadBalanceDS[id].X0,
 						LoadBalanceDS[id].reach_param,LoadBalanceDS[id].current_location->getInvariant(),lp_solver_type, NewTotalIteration);
 //				}
 				LoadBalanceDS[id].newIteration = NewTotalIteration; //Important to take care
@@ -213,7 +213,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			for (unsigned int id = 0; id < count; id++) {
 				if (S[id]->getContinuousSetptr()->getTotalIterations() != 0) {	//if flowpipe not Empty
 					loadBalPostD[id].sfm = S[id]->getContinuousSetptr();
-					unsigned int transition_size = LoadBalanceDS[id].current_location->getOut_Going_Transitions().size();
+					unsigned int transition_size = LoadBalanceDS[id].current_location->getOutGoingTransitions().size();
 					loadBalPostD[id].trans_size = transition_size;
 					//cout<<"transition_size = "<<transition_size <<"\n";
 					loadBalPostD[id].guard_list.resize(transition_size);
@@ -225,11 +225,11 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 
 					loadBalPostD[id].polys_list.resize(transition_size);
 					unsigned int index=0; // for guard_list, assign_list if they are vector
-					for (std::list<transition::ptr>::iterator trans =LoadBalanceDS[id].current_location->getOut_Going_Transitions().begin();
-						trans!= LoadBalanceDS[id].current_location->getOut_Going_Transitions().end(); trans++) { // get each destination_location_id and push into the pwl.waiting_list
+					for (std::list<transition::ptr>::iterator trans =LoadBalanceDS[id].current_location->getOutGoingTransitions().begin();
+						trans!= LoadBalanceDS[id].current_location->getOutGoingTransitions().end(); trans++) { // get each destination_location_id and push into the pwl.waiting_list
 						loadBalPostD[id].guard_list[index] = (*trans)->getGuard();
 						loadBalPostD[id].assign_list[index] = (*trans)->getAssignT();
-						loadBalPostD[id].dest_locID[index] = (*trans)->getDestination_Location_Id();
+						loadBalPostD[id].dest_locID[index] = (*trans)->getDestinationLocationId();
 						index++;
 					}	//each transition
 				} else {//EndIf of flowpipe not Empty
@@ -385,7 +385,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 			index_X0 = eachDirection * LoadBalanceDS.newIteration + eachDirection; //only X0(list_X0) has 2 directions for first-iteration
 		}
 	//std::cout<<"before U empty check"<<std::endl;
-		bool U_empty = LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty();
+		bool U_empty = LoadBalanceDS.current_location->getSystemDynamics().U->getIsEmpty();
 		//bool U_empty;// = LoadBalanceDS.U->getIsEmpty();
 		if (LoadBalanceDS.U->getIsEmpty() || LoadBalanceDS.U==NULL)
 			U_empty = true;
@@ -403,7 +403,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 		res1 = LoadBalanceData_sf.sf_X0(index_X0,id); //X0->SF(direction)			//	0
 
 		term3b = (double) LoadBalanceData_sf.sf_UnitBall(index_X0,id); //  needed  0
-		if (!LoadBalanceDS.current_location->getSystem_Dynamics().isEmptyC) {
+		if (!LoadBalanceDS.current_location->getSystemDynamics().isEmptyC) {
 			term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceData_sf.sf_dotProduct(index_X0,id);
 		}
 		index_X0++; //	made 1
@@ -447,7 +447,7 @@ template_polyhedra::ptr tpbfs::substitute_in_ReachAlgorithm(
 
 			term3b = (double) LoadBalanceData_sf.sf_UnitBall(index_X0 - 1,id); //Compute here	//needed 1
 
-			if (!LoadBalanceDS.current_location->getSystem_Dynamics().isEmptyC) {
+			if (!LoadBalanceDS.current_location->getSystemDynamics().isEmptyC) {
 				term3c = LoadBalanceDS.reach_param.time_step * LoadBalanceData_sf.sf_dotProduct(index_X0 - 1,id);
 			}
 			double term3, term3a, res2;
@@ -627,8 +627,8 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 			//	cout<<LoadBalanceDS[index].sf_X0[indexDir]<<"\t";
 				// ******DotProduction and Support Function of UnitBall  *******
 				//TODO: MAKE DECISION TO KEEP IT OUTSIDE AT ONE LOOP-VALUE LIKE BEFORE
-				if (!LoadBalanceDS[index].current_location->getSystem_Dynamics().isEmptyC) {
-					LoadBalanceData_sf.sf_dotProduct(indexDir,index) = dot_product(LoadBalanceDS[index].current_location->getSystem_Dynamics().C,dir);
+				if (!LoadBalanceDS[index].current_location->getSystemDynamics().isEmptyC) {
+					LoadBalanceData_sf.sf_dotProduct(indexDir,index) = dot_product(LoadBalanceDS[index].current_location->getSystemDynamics().C,dir);
 				}
 				LoadBalanceData_sf.sf_UnitBall(indexDir,index) = support_unitball_infnorm(dir);
 				// ******DotProduction and Support Function of UnitBall  *******
@@ -644,10 +644,10 @@ void tpbfs::parallelLoadBalance_Task(std::vector<LoadBalanceData>& LoadBalanceDS
 // ************* Chunk_approach for polytope X ******************************
 //	std::cout<<"Done on X!!!!\n";
 	//bool U_empty;
-	//U_empty = LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty();//assuming all symbolic states has same setup for polytope U
+	//U_empty = LoadBalanceDS[0].current_location->getSystemDynamics().U->getIsEmpty();//assuming all symbolic states has same setup for polytope U
 
 //	if (LoadBalanceDS[0].U != NULL && !(LoadBalanceDS[0].U->getIsEmpty()) ){
-	if (LoadBalanceDS[0].current_location->getSystem_Dynamics().U != NULL && !(LoadBalanceDS[0].current_location->getSystem_Dynamics().U->getIsEmpty())) {
+	if (LoadBalanceDS[0].current_location->getSystemDynamics().U != NULL && !(LoadBalanceDS[0].current_location->getSystemDynamics().U->getIsEmpty())) {
 // ************* Chunk_approach for polytope U ******************************
 	//	cout<<"polytope U is NOT empty!!!!\n";
 		if (countTotal_X <= numCores)
@@ -701,7 +701,7 @@ unsigned int NewTotalIteration;
 	if (NewTotalIteration < 1) {	//Modified from <= 1  to   < 1  for nav04.xml
 		return;
 	}
-	if (LoadBalanceDS.current_location->getSystem_Dynamics().U == NULL || LoadBalanceDS.current_location->getSystem_Dynamics().U->getIsEmpty()) { //polytope U can be empty set
+	if (LoadBalanceDS.current_location->getSystemDynamics().U == NULL || LoadBalanceDS.current_location->getSystemDynamics().U->getIsEmpty()) { //polytope U can be empty set
 		U_empty = true;
 	}
 
@@ -714,7 +714,7 @@ unsigned int NewTotalIteration;
 
 
 	getDirectionList_X0_and_U(numCoresAvail, LoadBalanceDS.reach_param, NewTotalIteration, List_for_X0,
-			List_for_U, U_empty, LoadBalanceDS.current_location->getSystem_Dynamics()); //Optimized into a single function the 2 Tasks
+			List_for_U, U_empty, LoadBalanceDS.current_location->getSystemDynamics()); //Optimized into a single function the 2 Tasks
 
 	LoadBalanceDS.List_dir_X0 = List_for_X0;
 	LoadBalanceDS.List_dir_U = List_for_U;
