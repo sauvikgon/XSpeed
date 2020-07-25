@@ -1,7 +1,6 @@
 Building XSpeed from Source.
 
-The tool uses a number of third party software libraries.
-For building from source, install the following listed libraries:
+For building from source, install the following third party libraries:
 
 1. GLPK (GNU Linear Programming Kit)
 
@@ -11,13 +10,17 @@ For building from source, install the following listed libraries:
 
 	The latest package can be downloaded from https://www.boost.org/
 
-3. SUNDIALS (Solver Suite)
+3. SUNDIALS (SUite of Nonlinear and DIfferential/ALgebraic equation Solvers)
 
 	SUNDIALS package can be downloaded from https://computing.llnl.gov/projects/sundials/sundials-software
 
 4. NLopt (Non-Linear optimization) C++ library
 
 	The latest package can be downloaded from https://nlopt.readthedocs.io/en/latest/#download-and-installation
+
+5. GMP (GNU Multiple Precision arithmetic library)
+
+    The latest package can be downloaded from https://gmplib.org/
 
 6. UnitTest++
 	
