@@ -5,29 +5,14 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../benchmarks/navigation/nav04Timed.cpp \
-../benchmarks/navigation/nav22Timed.cpp \
-../benchmarks/navigation/nav25Timed.cpp \
-../benchmarks/navigation/nav30Timed.cpp \
-../benchmarks/navigation/navT02Timed.cpp \
-../benchmarks/navigation/navT04Timed.cpp \
 ../benchmarks/navigation/navigation5by5.cpp 
 
 OBJS += \
 ./XSpeed/benchmarks/navigation/nav04Timed.o \
-./XSpeed/benchmarks/navigation/nav22Timed.o \
-./XSpeed/benchmarks/navigation/nav25Timed.o \
-./XSpeed/benchmarks/navigation/nav30Timed.o \
-./XSpeed/benchmarks/navigation/navT02Timed.o \
-./XSpeed/benchmarks/navigation/navT04Timed.o \
 ./XSpeed/benchmarks/navigation/navigation5by5.o 
 
 CPP_DEPS += \
 ./XSpeed/benchmarks/navigation/nav04Timed.d \
-./XSpeed/benchmarks/navigation/nav22Timed.d \
-./XSpeed/benchmarks/navigation/nav25Timed.d \
-./XSpeed/benchmarks/navigation/nav30Timed.d \
-./XSpeed/benchmarks/navigation/navT02Timed.d \
-./XSpeed/benchmarks/navigation/navT04Timed.d \
 ./XSpeed/benchmarks/navigation/navigation5by5.d 
 
 
