@@ -82,6 +82,10 @@ std::list<structuralPath::ptr> hybrid_automata::get_structural_paths(unsigned in
 	return path_list;
 }
 
+void enum_paths(unsigned int forbidden_loc_id, unsigned int depth)
+{
+	//todo
+}
 
 void hybrid_automata::printpath(vector<int>& path) {
 	int size = path.size();

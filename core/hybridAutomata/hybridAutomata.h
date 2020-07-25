@@ -30,7 +30,7 @@ public:
 	void addInitialLocation(location::ptr& initLoc);
 
 	/* sets the initial location from its id. Silently does nothing
-   * if the init_id is not in the id to location map.   
+     * if the init_id is not in the id to location map.
 	 */
 	void setInitialLoc(int init_id);
 	
@@ -60,6 +60,11 @@ public:
 	 *
 	 */
 	std::list<structuralPath::ptr> get_structural_paths(unsigned int forbidden_loc_id, unsigned int depth);
+
+	/**
+	 * A sat-based path enumeration procedure.
+	 */
+	void enum_paths(unsigned int forbidden_loc_id, unsigned int depth);
 
 	std::list<structuralPath::ptr> findAllPaths(int src, int dst, int depthBound);
 
