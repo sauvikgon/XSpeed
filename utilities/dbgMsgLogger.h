@@ -8,6 +8,8 @@
 #ifndef XSPEED_UTILITIES_DBG_MSG_LOGGER_H_
 #define XSPEED_UTILITIES_DBG_MSG_LOGGER_H_
 
+#define DEBUG 0
+
 #ifdef DEBUG
 #define DEBUG_MSG(str) do { std::cout << str << std::endl; } while( false )
 #else
