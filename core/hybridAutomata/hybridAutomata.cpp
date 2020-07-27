@@ -1,9 +1,3 @@
-/*
- * HybridAutomata.cpp
- *
- *  Created on: 09-Jul-2014
- *      Author: amit
- */
 
 #include <core/hybridAutomata/hybridAutomata.h>
 
@@ -82,7 +76,7 @@ std::list<structuralPath::ptr> hybrid_automata::getStructuralPaths(unsigned int 
 	return path_list;
 }
 
-void satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
+void hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
 {
 	//todo
 }
