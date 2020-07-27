@@ -115,7 +115,7 @@ bool gen_counter_example_WoFC(abstractCE::ptr abs_path,
 	double splicing_error_tol = 1e-6; // A parameter particular to counter-example searching
 
 
-	unsigned int algo_type = 2; // A parameter particular to mentioning the type of ce search algorithm to use 1 (FC) uses the method using flowpipe constraints and 2 uses the method using flowpipe constraints (WoFC)
+	std::string& algo_type = user_options.getCEProc(); // A parameter particular to mentioning the type of ce search algorithm to use 1 (FC) uses the method using flowpipe constraints and 2 uses the method using flowpipe constraints (WoFC)
 	string ce_path = user_options.get_ce_path();
 	boost::timer::cpu_timer clock; // clocks the time taken to splice a trajectory
 

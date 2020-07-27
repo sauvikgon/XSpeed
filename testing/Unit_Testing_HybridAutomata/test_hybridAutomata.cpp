@@ -1,23 +1,14 @@
-/*
- * test_HybridAutomata.cpp
- *
- *  Created on: 09-Jul-2014
- *      Author: amit
- */
 
 #include <string>
 #include <sstream>
 #include <iostream>
-#include "UnitTest++.h" //manual installation and copy in /usr/local/include/UnitTest++ folder
-//#include "UnitTest++.h"	//installing using sudo aptitude install libunittest++-dev
-#include <list>
-#include <iterator>
-
-#include "../../core/HybridAutomata/Hybrid_Automata.h"
-#include "../../core/HybridAutomata/Location.h"
-#include "../../core/HybridAutomata/Transition.h"
-#include "../../core/math/matrix.h"
-#include "application/DataStructureDirections.h"
+#include "UnitTest++.h"
+#include "core/hybridAutomata/hybridAutomata.h"
+#include "core/hybridAutomata/location.h"
+#include "core/hybridAutomata/transition.h"
+#include "core/math/matrix.h"
+#include "application/structures.h"
+#include <io/parser.h>
 
 using namespace std;
 using namespace math;
@@ -140,7 +131,7 @@ SUITE(HybridAutomata_TestSuite) {
 
 		hybrid_automata ha;
 
-		ha.addInitial_Location(loc);
+		ha.addInitialLocation(loc);
 		ha.addLocation(loc);
 		ha.addLocation(loc_src);
 		ha.addLocation(loc_dest);
@@ -160,8 +151,26 @@ SUITE(HybridAutomata_TestSuite) {
 		out << outLoc->getName();
 		proper << "GoodBye";
 		CHECK_EQUAL(proper.str(), out.str());
-
 	}
 
+	TEST_FIXTURE(ClassHybridAutomata, enumSatPaths_Test){
+		//assumes a test Ha model and cfg file in the directory with the executable.
+		string cmd_str = "java -jar Model-Translator.jar -t XSpeed-plan \"\" -i " + "testCases/test_ha.xml" + " " + "testCases/test_ha.cfg" + " -o input_model.mdl";
+		system(cmd_str.c_str());
+		parser _parser("input_model.mdl");
+		_parser.parse();
+
+		hybrid_automata ha = _parser.getHa(); // assign the parsed ha
+		init_state.push_back(_parser.getInitState()); // assign the parsed init
+
+		std::vector<forbidden>& forbidden_states;
+		forbidden_states = _parser.getForbidden(); //assign the forbidden states
+		forbidden f = forbidden_states[0];
+		unsigned int forbidden_locId= f.first;
+		unsigned int pLenBound = 20;
+		// call ha.enumSatPaths() and insert tests
+		std::cout << "testing enuSatPaths" << std::endl;
+		ha.enumSatPaths(forbidden_locId, 20);
+	}
 }
 

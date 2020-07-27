@@ -52,7 +52,7 @@ typedef std::pair<int, polytope::ptr> forbidden;
 // 6 gen_concreteCE_Opt: trajectory splicing with NLP that returns a time minimal ce. (Not Functional)
 
 
-#define CE_ALGO_TYPE  2
+#define CE_ALGO_TYPE 1
 
 using namespace std;
 
@@ -166,7 +166,7 @@ private:
 	 * to search for further abstract paths or whether to stop. A return value of true indicates the BFS to stop. A false indicates that
 	 * the BFS should continue to further explore for newer abstract counterexamples.
 	 */
-	bool gen_counter_example(abstractCE::ptr abs_ce_path, unsigned int ce_search_algo_type);
+	bool gen_counter_example(abstractCE::ptr abs_ce_path, std::string& ce_search_algo_type);
 
 	/**
 	 * A search for counter-example during BFS.

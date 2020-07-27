@@ -5,8 +5,8 @@
  *      Author: amit
  */
 
-#ifndef ALL_PP_DEFINITION_H_
-#define ALL_PP_DEFINITION_H_
+#ifndef MACRO_DEFINITION_H_
+#define MACRO_DEFINITION_H_
 
 // *********** Various Algorithms ******************
 #define SEQ_SF			1	//Sequential postC with supfunc.
@@ -34,4 +34,4 @@
 #define MAX_ALGO 	8	//Total number of existing Algorithm. This value need to be increased for new Algorithm when implemented
 
 
-#endif /* ALL_PP_DEFINITION_H_ */
+#endif /* MACRO_DEFINITION_H_ */

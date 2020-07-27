@@ -1,9 +1,3 @@
-/*
- * Hybrid_Automata.h
- *
- *  Created on: 09-Jul-2014
- *      Author: amit
- */
 
 #ifndef HYBRID_AUTOMATA_H_
 #define HYBRID_AUTOMATA_H_
@@ -34,7 +28,7 @@ public:
 	 */
 	void setInitialLoc(int init_id);
 	
-	location::ptr& getInitialLocation();
+	location::ptr getInitialLocation();
 
 	//returns the location from the list of locations with location_ID as the input parameter
 	location::ptr getLocation(int Loc_ID);

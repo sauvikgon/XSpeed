@@ -126,7 +126,7 @@ public:
 	 * 	2 specifies to call splicing with no FC
 	 *	3 specifies to call LP-NLP mixed procedure for splicing.
 	 */
-	concreteCE::ptr get_validated_CE(double tolerance, unsigned int alg_type);
+	concreteCE::ptr get_validated_CE(double tolerance, std::string& alg_type);
 
 	/**
 	 * Plot the counter example projected along dimensions passed
@@ -146,7 +146,7 @@ public:
 	 * Returns an instance of the concrete counter-examples, if it exists, by searching the abstract paths in
 	 * the argument. The path-filter argument restricts the search in a unique path.
 	 */
-	static concreteCE::ptr search_concreteCE(double tolerance, std::list<abstractCE::ptr> paths, std::vector<unsigned int> path_filter,unsigned int algo_type);
+	static concreteCE::ptr search_concreteCE(double tolerance, std::list<abstractCE::ptr> paths, std::vector<unsigned int> path_filter,std::string& algo_type);
 	const userOptions& getUserOptions() const;
 	void setUserOptions(const userOptions& userOptions);
 

@@ -1,16 +1,9 @@
-/*
- * HybridAutomata.cpp
- *
- *  Created on: 09-Jul-2014
- *      Author: amit
- */
 
 #include <core/hybridAutomata/hybridAutomata.h>
 #include "z3++.h"
 #include <fstream> 
 #include <string>
 
-using namespace std;
 using namespace z3;
 
 hybrid_automata::hybrid_automata() {
@@ -23,7 +16,7 @@ hybrid_automata::hybrid_automata(std::map<int, location::ptr>& list_locs, locati
 	dimension = dim;
 }
 
-location::ptr& hybrid_automata::getInitialLocation() {
+location::ptr hybrid_automata::getInitialLocation() {
 	return initial_loc;
 }
 
@@ -86,15 +79,15 @@ std::list<structuralPath::ptr> hybrid_automata::getStructuralPaths(unsigned int 
 	return path_list;
 }
 
-void satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
+void hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
 {
-
-	location::ptr *source_ptr = getInitialLocation();
-	int u = source_ptr->loc_id;
-	int v = forbidden_loc_id;
+/*
+	location::ptr source_ptr = getInitialLocation();
+	int u = source_ptr->getLocId();
+	unsigned int v = forbidden_loc_id;
 	int k = depth;
 
-	context c;
+	z3::context c;
 
 	// INIT Step
 
@@ -125,9 +118,9 @@ void satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
 
 	expr exp2 = c.bool_const("exp2");
 	auto it = list_locations.begin();
-	auto neighbor_nodes = it->second.getOutGoingTransitions();
+	auto neighbor_nodes = it->second->getOutGoingTransitions();
 	expr exp2a = c.bool_const("exp2a");
-	arr = "v" + to_string(neighbor_nodes.begin()->destination_location_id) + to_string(1);
+	arr = "v" + to_string(neighbor_nodes.begin()->)) + to_string(1);
 	l = arr.length();
 	char array2[l];
 	for (int i = 0 ; i < l; i++)
@@ -293,7 +286,7 @@ void satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
 		model m = s.get_model();
 		fout<<m<<"\n";
 	}
-	fout.close();
+	fout.close(); */
 }
 
 void hybrid_automata::printPath(vector<int>& path) {

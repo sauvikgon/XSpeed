@@ -195,6 +195,14 @@ void userOptions::setEngine(const std::string& engine) {
 	Engine = engine;
 }
 
+void userOptions::setCEProc(const std::string& ceproc) {
+	ce_procedure = ceproc;
+}
+
+std::string& userOptions::getCEProc() {
+	return ce_procedure;
+}
+
 unsigned int userOptions::get_simu_init_points(){
 	return simu_init_points;
 }

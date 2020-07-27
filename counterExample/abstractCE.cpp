@@ -182,10 +182,10 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 
 	// 	Parameters of the optimization routine
 	unsigned int maxeval = 20000;
-	unsigned int maxtime = 600; // time-out of 10 mins per abstract ce.
+	unsigned int maxtime = 60; // time-out of 1 min per abstract ce.
 
 	myopt.set_min_objective(myobjfunc2, NULL);
-	myopt.set_maxeval(maxeval);
+	//myopt.set_maxeval(maxeval);
 	myopt.set_maxtime(maxtime);
 	myopt.set_stopval(tolerance); // search stopping value, set typically to 1e-6.
 
@@ -223,14 +223,14 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 				min = -1 * lp.Compute_LLP(dir);
 			} catch (...) {
 				// assuming that the exception is caused due to an unbounded solution
-				min = -999;	// an arbitrary value set as solution
+				min = -9999;	// an arbitrary value set as solution
 			}
 			dir[j] = 1;
 			try {
 				max = lp.Compute_LLP(dir);
 			} catch (...) {
 				// assuming that the exception is caused due to an unbounded solution
-				max = +999; // an arbitrary value set as solution
+				max = +9999; // an arbitrary value set as solution
 			}
 			unsigned int index = i * dim + j;
 
@@ -649,14 +649,14 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 				min = -1 * lp.Compute_LLP(dir);
 			} catch (...) {
 				// assuming that the exception is caused due to an unbounded solution
-				min = -999;	// an arbitrary value set as solution
+				min = -9999;	// an arbitrary value set as solution
 			}
 			dir[j] = 1;
 			try {
 				max = lp.Compute_LLP(dir);
 			} catch (...) {
 				// assuming that the exception is caused due to an unbounded solution
-				max = +999; // an arbitrary value set as solution
+				max = +9999; // an arbitrary value set as solution
 			}
 
 			newCol = startPoint + i * dim + j;
@@ -833,14 +833,14 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 			min = -1 * lp.Compute_LLP(dir);
 		} catch (...) {
 			// assuming that the exception is caused due to an unbounded solution
-			min = -999;	// an arbitrary value set as solution
+			min = -9999;	// an arbitrary value set as solution
 		}
 		dir[j] = 1;
 		try {
 			max = lp.Compute_LLP(dir);
 		} catch (...) {
 			// assuming that the exception is caused due to an unbounded solution
-			max = +999; // an arbitrary value set as solution
+			max = +9999; // an arbitrary value set as solution
 		}
 
 		newCol = (X + Y) + (N - 1) * dim + j;
@@ -978,7 +978,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
 					aggregation, guard, 1);
 
-			assert(polys.size() >= 1); // An abstract CE state must have intersection with the trans guard
+			assert(polys.size() >= 1); // An abstract CE state must have intersection with the guard
 			if (polys.size() > 1)
 				P = get_template_hull(S->getContinuousSetptr(), 0,
 						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
@@ -987,7 +987,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			// Now intersect P with guard
 			P = P->GetPolytope_Intersection(loc_inv);
 			P = P->GetPolytope_Intersection(guard);
-
 		}
 
 		lp_solver lp(GLPK_SOLVER);
@@ -998,7 +997,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			max = lp.Compute_LLP(dmax);
 		} catch (...) {
 			// assuming that the exception is caused due to an unbounded solution
-			max = 999; // an arbitrary large value set as solution
+			max = 9999; // an arbitrary large value set as solution
 		}
 		try {
 			min = -1 * lp.Compute_LLP(dmin);
@@ -1049,9 +1048,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	double minf = 1e10; // a large value to start
 	double last_iter_lpopt = 1e10; // stores the opt returned by lp-solver from the last iteration
 								 // A large value in the beginning.
-									 // A large value in the beginning.
-	const double diff = 1e-10; // the constant difference to decide stuck at local minima.
-	bool stuck_at_local_min, success=false;
+	const double diff = 1e-10; // the difference to decide stuck at local minima/saddle point.
+	bool stuck_at_local_min=false, success=false;
 
 	// A random restart algorithm for jumping out of local minima.
 	const unsigned int max_restarts = 20; // the max allowed restarts
@@ -1062,7 +1060,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	using boost::timer::cpu_times;
 	using boost::timer::nanosecond_type;
 	nanosecond_type const sixhundred_seconds(600 * 1000000000LL);
-	// a search in an abstract ce is to timeout after 300 secs.
+	// a search in an abstract ce is to timeout after 600 secs.
 	timer.start();
 
 	for(unsigned int i=0;i<max_restarts;i++){
@@ -1109,12 +1107,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			cpu_times const elapsed_times(timer.elapsed());
 			nanosecond_type const elapsed(elapsed_times.user);
-			/*if (elapsed > sixhundred_seconds)
+			if (elapsed > sixhundred_seconds)
 			{
 				std::cout << "Timed-out on the abstract counterexample\n";
 				success = true; // here, success true is break the restart loop.
 				break;
-			}*/
+			}
 		} // end of alternating lp-nlp loop.
 
 		if(success) break; // splicing complete. terminate.
@@ -1173,8 +1171,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	return cexample;
 }
 
-
-
 /**
  * Generate concrete trajectory using splicing with NLP problem (Zutchi, Sankaranarayanan's  Idea)
  * The approach WoFC in the HSCC 2019 Paper
@@ -1188,7 +1184,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	//	 getting the dimension of the continuous set of the abstract counter example
 
 	symbolic_states::const_ptr S = get_first_symbolic_state();
-	//dim = S->getContinuousSetptr()->get_dimension(); //@Amit modified Since when called from WoFC, will not have this set
 	dim = S->getInitialPolytope()->getSystemDimension();
 	N = get_length(); // the length of the counter example
 	HA = this->get_automaton();
@@ -1219,14 +1214,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	//	 variables of the optimization problem are dim*N + N
 
 	unsigned int optD = N * dim + N;
-	//	nlopt::opt myopt(nlopt::LN_AUGLAG, optD); // derivative free
-	//	nlopt::opt myopt(nlopt::LN_COBYLA, optD); // derivative free
+
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
-	//	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	Optimization routine paramters
 	unsigned int maxeval = 20000;
-	unsigned int maxtime = 1200; //1200 secs.
+	unsigned int maxtime = 60; //60 secs/ 1 minute
 	myopt.set_min_objective(myobjfunc2, NULL);
 	myopt.set_maxtime(maxtime); // times out after maxtime
 	//myopt.set_maxeval(maxeval);
@@ -1241,14 +1234,13 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	transition::ptr T;
 
 	for (unsigned int i = 0; i < N; i++) // iterate over the N locations of the counter-example to get the invariant
-			{
-
+	{
 		if (i == 0) // Initial polytope is given, so initialize the constraint polytope on x_0 to be the initial polytope
-				{
+		{
 			P = this->get_first_symbolic_state()->getInitialPolytope();
 			// set arbitrarily large but finite time bounds
 			lb[N * dim] = 0;
-			ub[N * dim] = 999;
+			ub[N * dim] = 9999;
 
 		} else {
 
@@ -1262,38 +1254,37 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			polytope::ptr src_loc_inv = src_loc->getInvariant();
 			polytope::ptr dest_loc_inv = dest_loc->getInvariant();
 
-			P = dest_loc_inv; // The feasible region for start point of the traj. segment is taken as the loc invariant
+			P = dest_loc_inv;
 			assert(P!=NULL);
 
 			// set arbitrarily large but finite time bounds
 			lb[N * dim + i] = 0;
-			ub[N * dim + i] = 999;
+			ub[N * dim + i] = 9999;
 		}
 
 		if (P->getIsUniverse()) {
 			// set arbitrarily large but finite bounds on start points
-			DEBUG_MSG("Constraint polytope is universe");
 			for (unsigned int j = 0; j < dim; j++) {
 				unsigned int index = i * dim + j;
-				lb[index] = -999;
-				ub[index] = 999;
+				lb[index] = -9999;
+				ub[index] = 9999;
 			}
 		} else {
 			lp_solver lp(GLPK_SOLVER);
 			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
 					P->getInEqualitySign());
 
-			//we add bound constraints on the position parameters, which are required to run global opt routines.
+			//we add bound constraints on the position parameters
 			std::vector<double> dir(dim, 0);
 			double min, max;
 			for (unsigned int j = 0; j < dim; j++) // iterate over each component of the x_i start point vector
-					{
+			{
 				dir[j] = -1;
 				try {
 					min = -1 * lp.Compute_LLP(dir);
 				} catch (...) {
 					// Assuming that the exception is due to unbounded solution in the min direction
-					min = -999; // setting an arbitrary lower bound
+					min = -9999; // setting an arbitrary lower bound
 				}
 				dir[j] = 1;
 
@@ -1301,7 +1292,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 					max = lp.Compute_LLP(dir);
 				} catch (...) {
 					// Assuming that the exception is due to unbounded solution in the max direction
-					max = 999; // setting an arbitrary upper bound
+					max = 9999; // setting an arbitrary upper bound
 				}
 				unsigned int index = i * dim + j;
 				lb[index] = min;
@@ -1311,9 +1302,9 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			}
 		}
 		// Initialize the dwell-time values to 0
-		for (unsigned int i = 0; i < N; i++) {
-			x[N * dim + i] = 0;
-		}
+		//for (unsigned int i = 0; i < N; i++) {
+		//	x[N * dim + i] = 0;
+		//}
 		// increment transition iterator
 		if (trans_iter != transList.end() && i != 0) // do not increment trans iteration at the first iteration
 			trans_iter++;
@@ -1373,8 +1364,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 
 }
 
-concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
-		unsigned int algo_type) {
+concreteCE::ptr abstractCE::get_validated_CE(double tolerance, std::string& algo_type) {
 
 	std::list<struct refinement_point> refinements;
 	refinements.clear(); // No refinement point initially
@@ -1388,19 +1378,19 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 	do {
 		struct refinement_point pt;
 
-		if (algo_type == 1) // FC - Trajectory splicing with constraints over the search-space derived from flowpipe.
+		if (algo_type.compare("FC") == 0) // FC - Trajectory splicing with constraints over the search-space derived from flowpipe.
 			cexample = gen_concreteCE(tolerance, refinements);
-		else if (algo_type == 2) { // WoFC - Trajectory splicing with HA implicit constraints over the search-space.
+		else if (algo_type.compare("WoFC") == 0) { // WoFC - Trajectory splicing with HA implicit constraints over the search-space.
 			cexample = gen_concreteCE_NLP_HA(tolerance, refinements);
-		} else if (algo_type == 3) { // LP-NLP Alt-Min \n";
+		} else if (algo_type.compare("Altmin") == 0) { // LP-NLP Alt-Min \n";
 			cexample = gen_concreteCE_iterative(tolerance, refinements);
 
-		} else if (algo_type == 4) { // Trajectory splicing with fixed-dwell-times (LP), using LP soln as initial point for simulation\n";
+		} /*else if (algo_type == 4) { // Trajectory splicing with fixed-dwell-times (LP), using LP soln as initial point for simulation\n";
 				cexample = gen_concreteCE_Simulation(tolerance, refinements);
 		}
 		else if (algo_type == 5) { // Trajectory splicing with search over dwell-times (NLP), Obj Func as an LP solution.
 			cexample = gen_concreteCE_LPobj(tolerance, refinements);
-		}
+		} */
 		else {
 			DEBUG_MSG("Invalid algo type specified for trajectory splicing");
 		}
@@ -1418,7 +1408,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 		if (!val_res) {
 			refinements.push_back(pt);
 			ref_count++;
-			algo_type=1;
+			algo_type="FC";
 			//debug: print the invalid trajectory in a file, in the first two dimensions
 			//cexample->plot_ce("./invalid_traj.txt", 0, 1);
 		} else {
@@ -1436,7 +1426,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance,
 
 concreteCE::ptr abstractCE::search_concreteCE(double tolerance,
 		std::list<abstractCE::ptr> paths, std::vector<unsigned int> path_filter,
-		unsigned int algo_type) {
+		std::string& algo_type) {
 
 	concreteCE::ptr ce;
 	abstractCE::ptr abs_ce;

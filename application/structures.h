@@ -13,7 +13,6 @@
 
 /*
  * Data Structure required for our Algorithm to improve using the concept of checking glp_optimal
- *
  */
 struct D {
 	std::vector<double> v;		//the transposed directions

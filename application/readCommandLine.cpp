@@ -58,6 +58,11 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 	("CE",po::value<std::string>(), "Search for counter-example to forbidden-region together with state-space exploration:\n - (all): search in all flowpipe feasible paths "
 			"\n - (first): search for counter-example until the first-one (if any) is found."
 			"\n - search only in the path given as a comma separated list of locations: e.g. 1,2,3 \n")
+	("ceproc", po::value<std::string>()->default_value("FC"), "The procedure to use for searching a counterexample to safety."
+			"\n - FC: trajectory splicing with flowpipe constraints (default)"
+			"\n - WoFC: trajectory splicing with HA constraints"
+			"\n - Altmin: trajectory splicing with alternating minimization"
+	)
 	("include-path,I", po::value<std::string>(), "include file path")
 	("model-file,m", po::value<std::string>(), "include model file")
 	("config-file,c", po::value<std::string>(), "include configuration file")
@@ -148,7 +153,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		
 		if (vm.count("model-file") && vm.count("config-file")
 					&& ((user_options.get_model()==0))) { // model=0 means no pre-built model specified
-			string cmd_str = "java -jar Model-Translator.jar -t XSpeed \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl"; 
+			string cmd_str = "java -jar Model-Translator.jar -t XSpeed-plan \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl";
 			system(cmd_str.c_str());
 			parser _parser("input_model.mdl");
 			_parser.parse();
@@ -226,6 +231,20 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if(vm.count("CE") && isConfigFileAssigned == false) {
 			user_options.set_ce_path(vm["CE"].as<std::string>());
 			user_options.set_ce_flag(true);
+		}
+		if(vm.count("ceproc")) {
+
+			std::string userop_ceproc = vm["ceproc"].as<std::string>();
+			user_options.setCEProc(userop_ceproc);
+
+			if (boost::iequals(userop_ceproc,"FC")==false) {
+				if (boost::iequals(userop_ceproc,"WoFC")==false){
+					if(boost::iequals(userop_ceproc,"Altmin")==false){
+						std::cout << "Invalid CE-Procedure. Expected \"FC\",\"WoFC\" of \"Altmin\".\n";
+						throw(new exception());
+					}
+				}
+			}
 		}
 		if (vm.count("time-horizon") && isConfigFileAssigned == false) { //Compulsory Options
 			user_options.set_timeHorizon(vm["time-horizon"].as<double>());

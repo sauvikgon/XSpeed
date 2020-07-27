@@ -14,6 +14,7 @@
 #include "application/simulationCaller.h"
 #include "counterExample/abstractCE.h"
 
+
 int main(int argc, char *argv[]) {
 
 	ReachabilityParameters reach_parameters;
@@ -102,11 +103,11 @@ int main(int argc, char *argv[]) {
 			transformTemplatePoly(Hybrid_Automata, symbStatePtr->getContinuousSetptr());
 		}
 	}
-
+/*
 	plottime.start();
 	show(Symbolic_states_list, user_options);
 	plottime.stop();
 	print_statistics(plottime,"Plotting");
-
+*/
 	return 0;
 }

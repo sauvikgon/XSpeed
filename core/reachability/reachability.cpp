@@ -187,7 +187,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					 */
 
 					abst_ce->setUserOptions(this->getUserOp());
-					bool continue_search = this->gen_counter_example(abst_ce,CE_ALGO_TYPE);
+					bool continue_search = this->gen_counter_example(abst_ce,user_op.getCEProc());
 
 					if(continue_search == false) { // This status says whether to continue searching for further abstract paths or to stop
 						return Reachability_Region; // return and report the time to search the counter-example
@@ -1018,20 +1018,20 @@ void reachability::par_postC_selection(unsigned int iters, location::ptr current
 	}
 }
 
-bool reachability::gen_counter_example(abstractCE::ptr abs_path, unsigned int ce_search_algo_type)
+bool reachability::gen_counter_example(abstractCE::ptr abs_path, std::string& ce_search_algo_type)
 {
 	double splicing_error_tol = 1e-6; // A parameter particular to specify the precision of the search of ce by using trajectory splicing.
 
 	boost::timer::cpu_timer clock; // clocks the time taken to splice a trajectory
 
-/*	if(traj_splicing_time > 3600000){
+	if(traj_splicing_time > 3600000){
 		std::cout << "Seach for CE TIMED-OUT (>1hrs)\n";
 		return false;
-	}*/
+	}
 	if(ce_path.compare("all") == 0) // if all paths are to be searched for ce, then return true in order to collect more paths.
 	{
 		clock.start();
-		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol,ce_search_algo_type);
+		concreteCE::ptr ce = abs_path->get_validated_CE(splicing_error_tol, ce_search_algo_type);
 		clock.stop();
 		traj_splicing_time += clock.elapsed().user /1000000;
 

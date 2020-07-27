@@ -20,6 +20,8 @@ class userOptions {
 
 	std::string set_aggregation; // The aggregation options thull(default), none
 	std::string Engine; // The Engine options supp(default), simu
+	std::string ce_procedure; // the algorithm choice for searching a counterexample
+
 	unsigned int simu_algo;	//Algorithm choice for running Trajectory Simulation
 	unsigned int simu_init_points; //Number of start-points for Simulation Algorithm
 
@@ -87,6 +89,9 @@ public:
 	void setSetAggregation(const std::string& engine);
 	const std::string& getEngine() const;
 	void setEngine(const std::string& engine);
+
+	void setCEProc(const std::string& ceproc);
+	std::string& getCEProc();
 
 	unsigned int get_simu_init_points();
 	void set_simu_init_points(unsigned int sampling_points);

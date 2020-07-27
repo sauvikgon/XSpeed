@@ -1,11 +1,4 @@
-/*
- * lp_solver.h
- *
- *  Created on: 11-Feb-2015
- *      Author: amit
- */
 
-// **** change the file name of glpk_lp_solver to avoid conflict with lp_solver.h *********
 #ifndef LP_SOLVER_H_
 #define LP_SOLVER_H_
 
@@ -13,6 +6,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <core/math/glpkLpSolver/glpkLpSolver.h>
+#include <utilities/dbgMsgLogger.h>
 
 class lp_solver {
 public:
