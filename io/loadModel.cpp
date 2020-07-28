@@ -36,7 +36,7 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 	}
 	if (HybridSystem_Model_Type == 14) {
 
-		setNav30Timed(ha,init_state,reach_parameters);
+		//setNav30Timed(ha,init_state,reach_parameters);
 		//set_watertank_controller(ha,init_state,reach_parameters);
 	
 	}
@@ -45,16 +45,16 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 		setplatoon_const_input(ha, init_state, reach_parameters); // dynamics with a constant input and deterministic transitions to c amd nc.
 	}
 	if(HybridSystem_Model_Type == 19){ // Timed Navigation instance 22 (15 x 15 locations)
-		setNav22Timed(ha, init_state, reach_parameters);
+		//setNav22Timed(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 20){ // Timed Navigation instance 25 (20 x 20 locations)
-		setNav25Timed(ha, init_state, reach_parameters);
+		//setNav25Timed(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 21){ // Timed Navigation instance navT02_Timed (20 x 20 locations) used in Int. J of STTT without input set
-		setnavT02_Timedmodel(ha, init_state, reach_parameters);
+		//setnavT02_Timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 22){ // Timed Navigation instance navT04_Timed (25 x 25 locations) used in Int. J of STTT without input set
-		setnavT04_Timedmodel(ha, init_state, reach_parameters);
+		//setnavT04_Timedmodel(ha, init_state, reach_parameters);
 	}
 
 	if(HybridSystem_Model_Type == 25){ // vehicle_platoon model (5 Vehicles)
