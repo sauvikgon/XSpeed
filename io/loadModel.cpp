@@ -58,10 +58,10 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 	}
 
 	if(HybridSystem_Model_Type == 25){ // vehicle_platoon model (5 Vehicles)
-		set_platoon5_model(ha, init_state, reach_parameters);
+		//set_platoon5_model(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 26){ // vehicle_platoon model (10 Vehicles)
-		set_platoon10_model(ha, init_state, reach_parameters);
+		//set_platoon10_model(ha, init_state, reach_parameters);
 	}
 
 	if(HybridSystem_Model_Type == 27){ // Filtered Oscillator model with 8 filters called
