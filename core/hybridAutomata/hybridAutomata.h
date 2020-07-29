@@ -1,3 +1,9 @@
+/*
+ * Hybrid_Automata.h
+ *
+ *  Created on: 09-Jul-2014
+ *      Author: amit
+ */
 
 #ifndef HYBRID_AUTOMATA_H_
 #define HYBRID_AUTOMATA_H_
