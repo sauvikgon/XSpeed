@@ -22,7 +22,11 @@ For building from source, install the following third party libraries:
 
     The latest package can be downloaded from https://gmplib.org/
 
-6. UnitTest++
+6. Z3 (Theorem Prover)
+
+    The package can be downloaded from https://github.com/Z3Prover/z3
+
+7. UnitTest++ (A unit testing package)
 	
 	The package can be downloaded from https://github.com/unittest-cpp/unittest-cpp
 
