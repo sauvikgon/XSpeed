@@ -13,7 +13,7 @@
 #include "nlpFunctions.h"
 #include "vector"
 
-#include "../core/math/analyticODESol.h"
+#include "core/math/analyticODESol.h"
 #include "abstractCE.h"
 
 extern std::vector<double> start_pos; // the start vectors of opt trajectory from LP solving. Useful in the context of CE_ALGO_TYPE 5
@@ -457,6 +457,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 			grad[i] = deriv[i];
 		}
 	}
+	//std::cout << "cost = " << cost << std::endl;
 	return cost;
 }
 
@@ -472,4 +473,3 @@ double myobjfunc_LP(const std::vector<double> &t, std::vector<double> &grad,void
 
 	return res;
 }
-

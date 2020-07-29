@@ -153,7 +153,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		
 		if (vm.count("model-file") && vm.count("config-file")
 					&& ((user_options.get_model()==0))) { // model=0 means no pre-built model specified
-			string cmd_str = "java -jar Model-Translator.jar -t XSpeed-plan \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl";
+			string cmd_str = "java -jar Model-Translator.jar -t XSpeed \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl";
 			system(cmd_str.c_str());
 			parser _parser("input_model.mdl");
 			_parser.parse();

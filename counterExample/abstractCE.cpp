@@ -223,14 +223,14 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 				min = -1 * lp.Compute_LLP(dir);
 			} catch (...) {
 				// assuming that the exception is caused due to an unbounded solution
-				min = -9999;	// an arbitrary value set as solution
+				min = -999;	// an arbitrary value set as solution
 			}
 			dir[j] = 1;
 			try {
 				max = lp.Compute_LLP(dir);
 			} catch (...) {
 				// assuming that the exception is caused due to an unbounded solution
-				max = +9999; // an arbitrary value set as solution
+				max = +999; // an arbitrary value set as solution
 			}
 			unsigned int index = i * dim + j;
 
@@ -958,11 +958,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			// If last abstract symbolic state, then take time projection of flowpipe \cap bad_poly
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
 					aggregation, bad_poly, 1);
-			assert(polys.size() >= 0); // The last sym state of an abstract CE must intersect with the bad set
+			assert(polys.size() >= 1); // The last sym state of an abstract CE must intersect with the bad set
 
-			if (polys.size() > 1)
-				P = get_template_hull(S->getContinuousSetptr(), 0,
-						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
+			if (polys.size() > 1){
+				std::runtime_error("abstractCE::gen_concreteCE_iterative: impl missing for no set aggregation\n");
+			}
 			else
 				P = polys.front();
 
@@ -980,8 +980,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			assert(polys.size() >= 1); // An abstract CE state must have intersection with the guard
 			if (polys.size() > 1)
-				P = get_template_hull(S->getContinuousSetptr(), 0,
-						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
+				std::runtime_error("abstractCE::gen_concreteCE_iterative: impl missing for no set aggregation\n");
 			else
 				P = polys.front();
 			// Now intersect P with guard
@@ -1059,8 +1058,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	boost::timer::cpu_timer timer;
 	using boost::timer::cpu_times;
 	using boost::timer::nanosecond_type;
-	nanosecond_type const sixhundred_seconds(600 * 1000000000LL);
-	// a search in an abstract ce is to timeout after 600 secs.
+	nanosecond_type const sixhundred_seconds(60 * 1000000000LL);
+	// a ce search in an abstract path is to timeout after 600 secs.
 	timer.start();
 
 	for(unsigned int i=0;i<max_restarts;i++){
@@ -1071,6 +1070,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			lp_solver fixed_time_Lp = build_lp(dwell_times);
 
 			double lp_res = fixed_time_Lp.solve();
+			std::cout << "lp returned res = " << lp_res << std::endl;
 
 			std::vector<double> x = fixed_time_Lp.get_sv();
 
@@ -1082,7 +1082,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 				}
 			}
 
-//			cout << "\nLP returned opt.  = " << lp_res << "\n";
 			minf = lp_res;
 			if (lp_res < tolerance){
 				success = true;
@@ -1098,7 +1097,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
 			double nlp_res;
 			myoptDwellTime.optimize(dwell_times, nlp_res);
-	//		cout << "nlp returned opt. = " << nlp_res << "\n";
+			cout << "nlp returned opt. = " << nlp_res << "\n";
 			minf = nlp_res;
 			if (nlp_res < tolerance){
 				success = true;
@@ -1127,7 +1126,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			}
 			stuck_at_local_min = false;
 			num_restart = i++;
-			last_iter_lpopt=1e10; // last lp res set to a large value;		
+			last_iter_lpopt=1e10; // last lp res set to a large value;
 		}
 
 	} // end of search restart loop/

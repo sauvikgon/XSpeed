@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 		readCommandLine(argc, argv,user_options,Hybrid_Automata,init_state,reach_parameters,forbidden_states);
 	}catch(std::exception e){
 		std::cout << "Exception:" << e.what() << std::endl;
-		std::cout<<"\nTerminating XSpeed, caused due to error in command-line inputs.\n";
+		std::cout << "\nTerminating XSpeed, caused due to error in command-line inputs.\n";
 		std::cout << "Try XSpeed --help to see the command-line options\n";
 		exit(0);
 	}
@@ -103,11 +103,11 @@ int main(int argc, char *argv[]) {
 			transformTemplatePoly(Hybrid_Automata, symbStatePtr->getContinuousSetptr());
 		}
 	}
-/*
+
 	plottime.start();
 	show(Symbolic_states_list, user_options);
 	plottime.stop();
 	print_statistics(plottime,"Plotting");
-*/
+
 	return 0;
 }
