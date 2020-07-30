@@ -49,15 +49,15 @@ SUBDIRS := \
 ../io \
 ../io/linExpParser \
 ../io/resetParser \
-../testFiles/Unit_Testing_Continuous \
-../testFiles/Unit_Testing_HybridAutomata \
-../testFiles/Unit_Testing_Math \
-../testFiles/Unit_Testing_Utilities/Unit_Testing_Directions \
-../testFiles/Unit_Testing_Utilities \
-../testFiles \
+../testers/Unit_Testing_Continuous \
+../testers/Unit_Testing_HybridAutomata \
+../testers/Unit_Testing_Math \
+../testers/Unit_Testing_Utilities/Unit_Testing_Directions \
+../testers/Unit_Testing_Utilities \
+../testers \
 ../utilities \
 ../utilities/cpuUtilities \
 ../utilities/directions \
 ../utilities/memUtilities \
-../testFiles/Unit_Testing_HAModels \
+../testers/Unit_Testing_HAModels \
 

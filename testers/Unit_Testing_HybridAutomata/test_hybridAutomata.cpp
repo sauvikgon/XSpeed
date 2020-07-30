@@ -156,7 +156,7 @@ SUITE(HybridAutomata_TestSuite) {
 
 	TEST_FIXTURE(ClassHybridAutomata, enumSatPaths_Test){
 		//assumes a test Ha model and cfg file in the directory with the executable.
-		string cmd_str = "java -jar ../build/Model-Translator.jar -t XSpeed -i  \"\" ./testCases/test_ha.xml ./testCases/test_ha.cfg -o input_model.mdl";
+		string cmd_str = "java -jar ../build/Model-Translator.jar -t XSpeed \"\" -i ../testcases/NAV_3_4.xml ../testcases/NAV_3_4.cfg -o input_model.mdl";
 		system(cmd_str.c_str());
 		parser _parser("input_model.mdl");
 		_parser.parse();
@@ -173,7 +173,7 @@ SUITE(HybridAutomata_TestSuite) {
 
 		// call ha.enumSatPaths() and insert tests
 		unsigned int num_paths = ha.satEnumPaths(forbidden_locId, 20);
-		unsigned int expected = 0;
+		unsigned int expected = 0; //todo
 		CHECK_EQUAL(num_paths, expected);
 	}
 }
