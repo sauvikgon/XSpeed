@@ -42,7 +42,7 @@ The tool executable with the name *XSpeed-plan* will be created in the *build* d
 
 **Testing**
 
-Contributors should write unit-tests for their code contributions and keep them in the *testFiles* directory.
+Contributors should write unit-tests for their code contributions and keep them in the *testers* directory.
 If test-cases as files are required, then all test-cases should be kept in the *testcases* directory
 
 Running the tests:
