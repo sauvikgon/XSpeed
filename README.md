@@ -38,4 +38,15 @@ Compiling the source:
 
 `sudo make all`
 
-The tool executable with the name *XSpeed-plan* will be installed in the build directory.
+The tool executable with the name *XSpeed-plan* will be created in the *build* directory.
+
+Testing:
+Contributors should write unit-tests for their code contributions and keep them in the *testFiles* directory.
+If test-cases as files are required, then all test-cases should be kept in the *testcases* directory
+To run the tests, 
+
+`cd tests`
+
+`sudo make all`
+
+The test executable with the name *XSpeed-test* will be created in the *test* directory.
