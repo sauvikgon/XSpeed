@@ -85,7 +85,7 @@ std::list<structuralPath::ptr> hybrid_automata::getStructuralPaths(unsigned int 
 	return path_list;
 }
 
-void hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
+unsigned int hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth)
 {
 
 	location::ptr source_ptr = getInitialLocation();
@@ -306,6 +306,7 @@ void hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsigned int d
 		fout<<m<<"\n";
 	}
 	fout.close();
+	return 0; // todo
 }
 
 void hybrid_automata::printPath(vector<int>& path) {

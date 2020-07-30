@@ -111,7 +111,6 @@ double computeNLP(polytope::ptr Y, std::vector<double>& objfunc) {
 		nlopt::result status = minopt.optimize(v, minf);
 		printStatus(status);
 
-		std::cout << "  v[0]=" << v[0] << "   v[1]=" << v[1] << std::endl;
 		if (status < 0)
 			throw std::runtime_error("Nlopt returned error\n");
 

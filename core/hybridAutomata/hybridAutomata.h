@@ -63,8 +63,9 @@ public:
 
 	/**
 	 * A sat-based path enumeration procedure.
+	 * Returns the number of paths enumerated from src to dst of length bounded by depthBound
 	 */
-	void satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth);
+	unsigned int satEnumPaths(unsigned int forbidden_loc_id, unsigned int depth);
 
 	std::list<structuralPath::ptr> findAllPaths(int src, int dst, int depthBound);
 
