@@ -1,4 +1,4 @@
-Building XSpeed from Source.
+**Building XSpeed from Source**
 
 For building from source, install the following third party libraries:
 
@@ -40,10 +40,12 @@ Compiling the source:
 
 The tool executable with the name *XSpeed-plan* will be created in the *build* directory.
 
-Testing:
+**Testing**
+
 Contributors should write unit-tests for their code contributions and keep them in the *testFiles* directory.
 If test-cases as files are required, then all test-cases should be kept in the *testcases* directory
-To run the tests, 
+
+Running the tests:
 
 `cd tests`
 
