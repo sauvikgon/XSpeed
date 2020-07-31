@@ -135,8 +135,8 @@ unsigned int hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsign
 		arr = "v" + to_string(loc_id) + to_string(i+1);
 		l = arr.length();
 		char array2[l];
-		for (unsigned int i = 0 ; i < l; i++)
-			array2[i] = char(arr[i]);
+		for (unsigned int j = 0 ; j < l; j++)
+			array2[j] = char(arr[j]);
 		z3::expr x2 = c.bool_const(array2);
 		exp2a = x2;
 
@@ -155,8 +155,8 @@ unsigned int hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsign
 		arr = "v" + to_string(it->first) + to_string(i);
 		l = arr.length();
 		char array4[l];
-		for (unsigned int i = 0 ; i < l; i++)
-			array4[i] = char(arr[i]);
+		for (unsigned int j = 0 ; j < l; j++)
+			array4[j] = char(arr[j]);
 		z3::expr x4 = c.bool_const(array4);
 		exp2 = implies(x4, exp2a);
 	}
@@ -294,19 +294,51 @@ unsigned int hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsign
 	s.add(exp3);
 	s.add(exp4);
 
-	// Writing the solution to a new file
+	// Writing all the solutions to a new file
 
 	ofstream fout;
 	fout.open("NewDataFile.txt");
-	if (s.check() == z3::unsat)
-		fout<<"unsat";
-	else
+	int count = 1;
+	while(true)
 	{
-		z3::model m = s.get_model();
-		fout<<m<<"\n";
+		if (s.check() == z3::unsat)
+		{
+			if (count == 1)
+				fout<<"unsat";
+			break;
+		}
+		else
+		{
+			z3::model m = s.get_model();
+			unsigned int w = m.size();
+			z3::func_decl v = m[0];
+			assert(v.arity() == 0);
+			arr = v.name().str();
+			l = arr.length();
+			char array15[l];
+			for (unsigned int i = 0 ; i < l; i++)
+				array15[i] = char(arr[i]);
+			z3::expr exp = c.bool_const(array15);
+			exp = !(m.get_const_interp(v));
+			fout<<m<<"\n\n";
+			for (unsigned int i = 1; i <= w; i++)
+			{
+				z3::func_decl v1 = m[i];
+				assert(v1.arity() == 0);
+				arr = v1.name().str();
+				l = arr.length();
+				char array16[l];
+				for (unsigned int j = 0 ; j < l; j++)
+					array16[j] = char(arr[j]);
+				z3::expr x15 = c.bool_const(array16);
+				exp = (exp || x15 != m.get_const_interp(v1));
+			}
+			s.add(exp);
+		}
+		count++;
 	}
 	fout.close();
-	return 0; // todo
+	return count;
 }
 
 void hybrid_automata::printPath(vector<int>& path) {
