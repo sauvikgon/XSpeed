@@ -40,6 +40,26 @@ Compiling the source:
 
 The tool executable with the name *XSpeed-plan* will be created in the *build* directory.
 
+**Running XSpeed**
+
+Requirements:
+
+Running XSpeed requires JDK 14 or higher installed and set as default.
+
+It can be downloaded from https://jdk.java.net/14/
+
+
+XSpeed can analyze hybrid automata models in *SpaceEx input format*. The in-built parser
+parses the hybrid automata model file (*.xml) and the configuration file (*.cfg) when given as inputs
+from the command-line:
+
+`./XSpeed-plan -m <path-to-model.xml> -c <path-to-model.cfg>`
+
+To see the help menu of the tool, run:
+
+`XSpeed-plan --help`
+
+
 **Testing**
 
 Contributors should write unit-tests for their code contributions and keep them in the *testers* directory.
