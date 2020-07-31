@@ -160,6 +160,7 @@ SUITE(HybridAutomata_TestSuite) {
 		system(cmd_str.c_str());
 		parser _parser("input_model.mdl");
 		_parser.parse();
+		system("rm ./input_model.mdl");
 
 		hybrid_automata ha = _parser.getHa(); // assign the parsed ha
 		std::list<initial_state::ptr> init_state;
