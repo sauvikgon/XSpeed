@@ -47,7 +47,7 @@ If test-cases as files are required, then all test-cases should be kept in the *
 
 Running the tests:
 
-`cd tests`
+`cd test`
 
 `sudo make all`
 
