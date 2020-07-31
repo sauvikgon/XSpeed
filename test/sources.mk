@@ -27,6 +27,7 @@ SUBDIRS := \
 ../benchmarks \
 ../benchmarks/constantDynamics \
 ../benchmarks/oscillatorModel \
+../benchmarks/navigation \
 ../benchmarks/ttEthernet \
 ../benchmarks/vehiclePlatoon \
 ../benchmarks/waterlevelController \

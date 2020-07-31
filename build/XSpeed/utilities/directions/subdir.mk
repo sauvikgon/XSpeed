@@ -4,13 +4,13 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../utilities/directions/Convert_To_BestDirection.cpp 
+../utilities/directions/convertToBestDirection.cpp 
 
 OBJS += \
-./XSpeed/utilities/directions/Convert_To_BestDirection.o 
+./XSpeed/utilities/directions/convertToBestDirection.o 
 
 CPP_DEPS += \
-./XSpeed/utilities/directions/Convert_To_BestDirection.d 
+./XSpeed/utilities/directions/convertToBestDirection.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

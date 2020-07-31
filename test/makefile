@@ -40,6 +40,7 @@ RM := rm -rf
 -include XSpeed/core/continuous/approxModel/subdir.mk
 -include XSpeed/benchmarks/waterlevelController/subdir.mk
 -include XSpeed/benchmarks/vehiclePlatoon/subdir.mk
+-include XSpeed/benchmarks/navigation/subdir.mk
 -include XSpeed/benchmarks/ttEthernet/subdir.mk
 -include XSpeed/benchmarks/oscillatorModel/subdir.mk
 -include XSpeed/benchmarks/constantDynamics/subdir.mk
