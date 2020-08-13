@@ -9,8 +9,8 @@
 using namespace std;
 
 void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
-		int lp_solver_type, std::vector<forbidden> forbidden_states, userOptions& user_options) {
-	H = h;
+		int lp_solver_type, std::vector<forbidden>& forbidden_states, userOptions& user_options) {
+	H = &h;
 	I = i;
 	reach_parameters = reach_param;
 	bound = user_options.get_bfs_level();	//bfs_level
@@ -28,6 +28,7 @@ void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state
 	setUserOp(user_options); 
 }
 
+reachability::~reachability(){}
 
 std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE::ptr>& symbolic_ce_list){
 
@@ -79,7 +80,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 		location::ptr current_location;
 
-		current_location = H.getLocation(location_id);
+		current_location = H->getLocation(location_id);
 		string name = current_location->getName();
 
 		unsigned int iters = reach_parameters.Iterations;
@@ -158,7 +159,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 							for (std::set<int>::iterator it = ds2.getDiscreteElements().begin(); it != ds2.getDiscreteElements().end(); ++it)
 								locationID2 = (*it); //c)
 							location::ptr object_location;
-							object_location = H.getLocation(locationID2); //d)
+							object_location = H->getLocation(locationID2); //d)
 							transition::ptr temp = object_location->getTransition(transID); //e)
 							list_transitions.push_front(temp); //pushing the transition in the stack
 							//2) ******************* list_transitions Ends ********************
@@ -175,9 +176,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 					abst_ce->set_length(symbolic_ce_length);
 					abst_ce->set_sym_states(list_sym_states);
 					abst_ce->set_transitions(list_transitions);
-					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
-					abst_ce->set_automaton(ha);
-					abst_ce->setHa(H);
+					abst_ce->set_automaton(H);
 					abst_ce->set_forbid_poly(forbidden_set.second);
 
 					symbolic_ce_list.push_back(abst_ce); // This abstract counter-example path is added to the list of all such identified paths.
@@ -210,7 +209,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				Assign current_assignment;
 				polytope::ptr guard_polytope;
 				discrete_set ds;
-				current_destination = H.getLocation((*t)->getDestinationLocationId());
+				current_destination = H->getLocation((*t)->getDestinationLocationId());
 				string locName = current_destination->getName();
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
 				guard_polytope = (*t)->getGuard();
@@ -305,8 +304,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 								current_assignment.Map, current_assignment.b, reach_parameters.Directions,lp_solver_type);
 					}
 					// @Rajarshi: the newShifted must satisfy the destination location invariant
-					if (H.getLocation(destination_locID)->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
-						newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+					if (H->getLocation(destination_locID)->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
+						newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H->getLocation(destination_locID)->getInvariant());
 					}
 
 					int is_ContainmentCheckRequired = 1;	//1 will enable Containment Check and Make the code slow; 0 will disable and will make it fast
@@ -468,7 +467,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 
 
 			location::ptr current_location;
-			current_location = H.getLocation(location_id);
+			current_location = H->getLocation(location_id);
 			string name = current_location->getName();
 			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
 					|| (name.compare("UNSAFE") == 0)
@@ -531,7 +530,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 					std::list < template_polyhedra::ptr > intersected_polyhedra;
 					polytope::ptr intersectedRegion; //created two objects here
 					discrete_set ds;
-					current_destination = H.getLocation(
+					current_destination = H->getLocation(
 							(*t)->getDestinationLocationId());
 					string locName = current_destination->getName();
 
@@ -737,7 +736,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
 			location::ptr current_location;
-			current_location = H.getLocation(location_id);
+			current_location = H->getLocation(location_id);
 			string name = current_location->getName();
 			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
 					|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0))
@@ -853,7 +852,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 					std::list < template_polyhedra::ptr > intersected_polyhedra;
 					polytope::ptr intersectedRegion; //created two objects here
 					discrete_set ds;
-					current_destination = H.getLocation((*trans)->getDestinationLocationId());
+					current_destination = H->getLocation((*trans)->getDestinationLocationId());
 					string locName = current_destination->getName();
 
 					guard_polytope = (*trans)->getGuard();
@@ -1182,7 +1181,7 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 							it != ds2.getDiscreteElements().end(); ++it)
 						locationID2 = (*it); //c)
 					location::ptr object_location;
-					object_location = H.getLocation(locationID2); //d)
+					object_location = H->getLocation(locationID2); //d)
 					transition::ptr temp = object_location->getTransition(
 							transID); //e)
 					list_transitions.push_front(temp); //pushing the transition in the stack
@@ -1221,9 +1220,7 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 					ce->set_length(cc);
 					ce->set_sym_states(list_sym_states);
 					ce->set_transitions(list_transitions);
-					hybrid_automata::ptr h = hybrid_automata::ptr(
-							new hybrid_automata(H));
-					ce->set_automaton(h);
+					ce->set_automaton(H);
 					ce->set_forbid_poly(forbid_poly);
 					symbolic_ce_list.push_back(ce); // ce added to the candidates list
 				}

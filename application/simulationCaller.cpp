@@ -1,17 +1,10 @@
-/*
- * simulationCaller.cpp
- *
- *  Created on: 26-Feb-2018
- *      Author: amit
- */
 
 #include "application/simulationCaller.h"
 #include "core/continuous/polytope/polytope.h"
 
 
-void simulationCaller(ReachabilityParameters& reach_parameters,
-		hybrid_automata& ha, std::list<initial_state::ptr> init_state,
-		userOptions& op, std::pair<int, polytope::ptr>& forbidden_set) {
+void simulationCaller(hybrid_automata& ha, std::list<initial_state::ptr>& init_state, ReachabilityParameters& reach_parameters,
+		std::pair<int, polytope::ptr>& forbidden_set, userOptions& op) {
 	
 	simulation::ptr sim = simulation::ptr(new simulation());
 

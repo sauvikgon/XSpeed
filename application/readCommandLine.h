@@ -14,6 +14,7 @@
 #include "counterExample/concreteCE.h"
 #include "reachabilityCaller.h"
 #include "application/reachabilityCaller.h"
+#include "application/themeSelector.h"
 
 #ifndef APPLICATION_READCOMMANDLINE_H_
 #define APPLICATION_READCOMMANDLINE_H_

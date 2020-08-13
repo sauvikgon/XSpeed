@@ -27,6 +27,10 @@ public:
 	hybrid_automata();
 	hybrid_automata(std::map<int, location::ptr>& list_locs, location::ptr init_loc,
 			int dim);
+	/* returns a boost pointer */
+	ptr getSharedPtr(){
+		return ptr(this);
+	}
 	void addInitialLocation(location::ptr& initLoc);
 
 	/* sets the initial location from its id. Silently does nothing

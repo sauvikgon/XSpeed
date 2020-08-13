@@ -23,7 +23,7 @@
 unsigned int dim;
 unsigned int N;
 
-hybrid_automata::ptr HA;
+hybrid_automata* HA;
 std::vector<int> locIdList;
 std::list<transition::ptr> transList;
 polytope::ptr bad_poly;
@@ -67,13 +67,13 @@ std::vector<double> simulate_trajectory(const std::vector<double> &x0,
 
 //constructor method
 abstractCE::abstractCE(std::list<symbolic_states::ptr> s_states,
-		std::list<transition::ptr> ts, hybrid_automata::ptr h,
+		std::list<transition::ptr> ts, hybrid_automata* h,
 		polytope::ptr fpoly) {
 
 	sym_states = s_states;
 	trans = ts;
 	length = sym_states.size();
-	H = h;
+	ha = h;
 	forbid_poly = fpoly;
 }
 
@@ -1459,4 +1459,3 @@ concreteCE::ptr abstractCE::search_concreteCE(double tolerance,
 	}
 }
 
-#include "abstractCE.hpp"

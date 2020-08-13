@@ -156,7 +156,6 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			loc->setInvariant(inv);
 		}
 		else if((*tok_iter).compare("Flow")==0){
-
 			D.isEmptyMatrixA = true;
 			D.isEmptyMatrixB = true;
 			D.isEmptyC = true;
@@ -169,7 +168,6 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			if(ha.umap_size()!=0)
 				D.MatrixB.resize(dim,ha.umap_size());
 			D.MatrixB.clear(); // all elements set to 0
-
 			parse_flow(file, D);
 			//debug
 			/*

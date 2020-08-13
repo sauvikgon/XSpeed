@@ -360,7 +360,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 
 	location::ptr current_location;
 
-	current_location = H.getLocation(location_id);
+	current_location = H->getLocation(location_id);
 	string name = current_location->getName();
 
 	double result_alfa = compute_alfa(reach_parameters.time_step,
@@ -439,7 +439,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 	template_polyhedra::ptr reach_region= symb->getContinuousSetptr();
 	int locId = *(symb->getDiscreteSet().getDiscreteElements().begin());
 
-	location::ptr current_location = H.getLocation(locId);
+	location::ptr current_location = H->getLocation(locId);
 	std::list<initial_state::ptr> res;
 	if (reach_region->getTotalIterations() != 0) { //computed reach_region is empty && optimize transition BreadthLevel-wise
 	//	cout<<"1\n";
@@ -453,7 +453,7 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 			//std::list < template_polyhedra::ptr > intersected_polyhedra;
 			polytope::ptr intersectedRegion;//created two objects here
 			discrete_set ds;
-			current_destination = H.getLocation((*t)->getDestinationLocationId());
+			current_destination = H->getLocation((*t)->getDestinationLocationId());
 
 			string locName = current_destination->getName();
 			guard_polytope = (*t)->getGuard();//	GeneratePolytopePlotter(guard_polytope);
@@ -565,11 +565,11 @@ std::list<initial_state::ptr> agjh::postD(symbolic_states::ptr symb, std::list<s
 				}
 				//std::cout<<"Before Invariant intersection called\n";
 				// @Amit: the newShifted satisfy the destination location invariant
-				if (H.getLocation(destination_locID)->getInvariant() == NULL){
+				if (H->getLocation(destination_locID)->getInvariant() == NULL){
 					//std::cout<<"Invariant is NULL"<<std::endl;//so do not perform intersection
 					//so new shifted polytope will not change
 				}else
-					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(destination_locID)->getInvariant());
+					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H->getLocation(destination_locID)->getInvariant());
 
 				bool is_ContainmentCheckRequired = 0;	//1 will enable Containment Check and Make Slow; 0 will disable so Fast
 				if (is_ContainmentCheckRequired){	//Containment Checking required
@@ -649,7 +649,7 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 
 							location::ptr object_location;
 
-							object_location = H.getLocation(locationID2);
+							object_location = H->getLocation(locationID2);
 							transition::ptr temp = object_location->getTransition(transID); //e)
 							list_transitions.push_front(temp); //pushing the transition in the stack
 							//2) ******************* list_transitions Ends ********************
@@ -665,8 +665,7 @@ bool agjh::checkSafety(template_polyhedra::ptr& reach_region, initial_state::ptr
 					ce->set_length(cc);
 					ce->set_sym_states(list_sym_states);
 					ce->set_transitions(list_transitions);
-					hybrid_automata::ptr ha = hybrid_automata::ptr(new hybrid_automata(H));
-					ce->set_automaton(ha);
+					ce->set_automaton(H);
 					ce->set_forbid_poly(forbidden_set.second);
 #pragma omp critical
 					{

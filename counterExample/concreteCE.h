@@ -59,14 +59,14 @@ public:
 	/**
 	 * Setter method to initialize the hybrid automaton
 	 */
-	void set_automaton(hybrid_automata::ptr h)
+	void set_automaton(hybrid_automata* h)
 	{
 		ha = h;
 	}
 	/**
 	 * Getter method to initialize the hybrid automaton
 	 */
-	hybrid_automata::ptr get_automaton(hybrid_automata::ptr h)
+	hybrid_automata* get_automaton()
 	{
 		return ha;
 	}
@@ -115,7 +115,7 @@ private:
 	/**
 	 * pointer to the hybrid automaton to which this counter example refer
 	 */
-	hybrid_automata::ptr ha;
+	hybrid_automata* ha;
 	unsigned int refinements; // This is the number of refined searches carried out in order to obtain this trajectory. This is initially set to 0.
 };
 

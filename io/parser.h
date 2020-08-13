@@ -55,7 +55,7 @@ public:
    */
 	void parse_reset(fstream& file, Assign& t_reset);
 
-	/* parses a list of consecutive ode to create the flow matrix */
+	/* parses a list of consecutive odes to create the flow matrix */
 	void parse_flow(fstream& file, Dynamics& D);
 
 	/* parses the location invariant string */

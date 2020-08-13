@@ -4,11 +4,7 @@
 #include <iostream>
 #include "UnitTest++/UnitTest++.h"
 #include "core/hybridAutomata/hybridAutomata.h"
-#include "core/hybridAutomata/location.h"
-#include "core/hybridAutomata/transition.h"
 #include "core/math/matrix.h"
-#include "application/structures.h"
-#include "core/symbolicStates/initialState.h"
 #include <io/parser.h>
 
 using namespace std;
@@ -154,20 +150,24 @@ SUITE(HybridAutomata_TestSuite) {
 		CHECK_EQUAL(proper.str(), out.str());
 	}
 
-	TEST_FIXTURE(ClassHybridAutomata, enumSatPaths_Test){
+	TEST_FIXTURE(ClassHybridAutomata, satEnumPaths_Test){
 		//assumes a test Ha model and cfg file in the directory with the executable.
-		string cmd_str = "java -jar ../build/Model-Translator.jar -t XSpeed \"\" -i ../testcases/NAV_3_4.xml ../testcases/NAV_3_4.cfg -o input_model.mdl";
+		//string cmd_str = "java -jar ../build/Model-Translator.jar -t XSpeed \"\" -i ../testcases/NAV_3_4.xml ../testcases/NAV_3_4.cfg -o input_model.mdl";
+
+		string cmd_str = "java -jar ../XSpeed/build/Model-Translator.jar -t XSpeed \"\" -i ../XSpeed/testcases/NAV_3_4.xml ../XSpeed/testcases/NAV_3_4.cfg -o input_model.mdl";
 		system(cmd_str.c_str());
 		parser _parser("input_model.mdl");
 		_parser.parse();
-		system("rm ./input_model.mdl");
 
-		hybrid_automata ha = _parser.getHa(); // assign the parsed ha
+/*		hybrid_automata ha = _parser.getHa(); // assign the parsed ha
 		std::list<initial_state::ptr> init_state;
 		init_state.push_back(_parser.getInitState()); // assign the parsed init
 
 		std::vector<forbidden> forbidden_states;
 		forbidden_states = _parser.getForbidden(); //assign the forbidden states
+
+		assert(forbidden_states.size()>0);
+
 		forbidden f = forbidden_states[0];
 
 		unsigned int forbidden_locId= f.first;
@@ -176,6 +176,8 @@ SUITE(HybridAutomata_TestSuite) {
 		unsigned int num_paths = ha.satEnumPaths(forbidden_locId, 20);
 		unsigned int expected = 0; //todo
 		CHECK_EQUAL(num_paths, expected);
+		system("rm ./input_model.mdl"); */
+
 	}
 }
 

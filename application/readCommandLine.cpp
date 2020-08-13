@@ -28,7 +28,9 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 					"4.  Navigation (3 X 3) grid: Variables{x1,x2,v1,v2}\n"
 					"5.  Navigation (5 X 5) grid: Variables{x1,x2,v1,v2}\n"
 					"6.  Oscillator : Variables{x,y}\n")
-	("engine,e", po::value<std::string>()->default_value("supp"), "set the running engine (default supp): \n - supp : Reachability Computation using Support Functions Algorithm \n - simu : Trajectory Simulation\n")
+	("engine,e", po::value<std::string>()->default_value("reach"), "set the running engine (default reachability): \n - reach : Reachability Analysis"
+					" \n - simu : Trajectory Simulation"
+					" \n - fal : Falsification of safety property")
 	("simu-algo",po::value<int>()->default_value(1), "Set the Simulation algorithm\n"
 				"1 -- Sequential Algorithm (Set to default)\n"
 				"2 -- A-GJH, Adaptation of Gerard J. Holzmann Algorithm\n")
@@ -160,6 +162,9 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			//system("rm input_model.mdl"); // remove the mdl file
 		
 			Hybrid_Automata = _parser.getHa(); // assign the parsed ha
+			//std::cout << "Number of paths of length bounded by 5:" << Hybrid_Automata.satEnumPaths(80,5);
+			//std::cout << "Number of paths of length bounded by 5:" << (Hybrid_Automata.findAllPaths(1,4,5)).size();
+
 			init_state.push_back(_parser.getInitState()); // assign the parsed init
 			forbidden_states = _parser.getForbidden(); //assign the forbidden states
 			isConfigFileAssigned = false;// to continue taking the params from cmdline
@@ -182,8 +187,9 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		if (vm.count("engine")) { //Compulsory Options but set to thull by default
 			user_options.setEngine((vm["engine"].as<std::string>()));
 			if (boost::iequals(user_options.getEngine(),"simu")==false) {
-				if (boost::iequals(user_options.getEngine(),"supp")==false){
-					std::cout << "Invalid engine option specified. Expected \"supp\" or \"simu\".\n";
+				if (boost::iequals(user_options.getEngine(),"reach")==false){
+					if(boost::iequals(user_options.getEngine(),"fal")==false)
+					std::cout << "Invalid engine option specified. Expected \"reach\", \"simu\" or \"fal\".\n";
 					throw(new exception());
 				}
 			}
@@ -300,7 +306,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			load_ha_model(init_state, Hybrid_Automata, reach_parameters, user_options);
 		}
 
-	} //ALL COMMAND-LINE OPTIONS are set completely
+	}
 
 			
 	if(output_vars[0].empty() && output_vars[1].empty())
@@ -360,6 +366,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
 		user_options.set_third_plot_dimension(x3);
 	}
+	//ALL COMMAND-LINE OPTIONS are set
 
 	/* Set the reachability options given by the user */
 	set_params(Hybrid_Automata, init_state, user_options, reach_parameters, forbidden_states);

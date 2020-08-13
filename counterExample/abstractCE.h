@@ -39,7 +39,7 @@
 
 extern unsigned int N;
 extern unsigned int dim;
-extern hybrid_automata::ptr HA;
+extern hybrid_automata* HA;
 extern std::vector<int> locIdList;
 extern std::list<transition::ptr> transList;
 extern polytope::ptr bad_poly;
@@ -60,7 +60,7 @@ public:
 	;
 	/* another constructor */
 	abstractCE(std::list<symbolic_states::ptr> s_states,
-			std::list<transition::ptr> ts, hybrid_automata::ptr h, polytope::ptr fpoly);
+			std::list<transition::ptr> ts, hybrid_automata* h, polytope::ptr fpoly);
 	/* destructor */
 	~abstractCE() {
 	}
@@ -107,8 +107,8 @@ public:
 	/**
 	 * Sets the reference to the hybrid automaton to which this CE refers.
 	 */
-	void set_automaton(hybrid_automata::ptr h){
-		H = h;
+	void set_automaton(hybrid_automata* h){
+		ha = h;
 	}
 	/**
 	 * Sets the forbidden polytope of this abstract counter example
@@ -116,8 +116,8 @@ public:
 	void set_forbid_poly(polytope::ptr fpoly){
 		forbid_poly = fpoly;
 	}
-	hybrid_automata::ptr get_automaton(){
-		return H;
+	hybrid_automata* get_automaton(){
+		return ha;
 	}
 	/**
 	 * returns a validated counterexample trace, a trace that satisfies the HA constraints
@@ -150,14 +150,6 @@ public:
 	const userOptions& getUserOptions() const;
 	void setUserOptions(const userOptions& userOptions);
 
-	hybrid_automata& getHa() {
-		return Ha;
-	}
-
-	void setHa(hybrid_automata& ha) {
-		Ha = ha;
-	}
-
 	lp_solver build_lp(std::vector<double> dwell_times);
 
 private:
@@ -181,8 +173,7 @@ private:
 	/**
 	 * The reference to the automaton to which this is an abstract counter example
 	 */
-	hybrid_automata::ptr H;
-	hybrid_automata Ha; //Just the object without pointer for easy of access, to call simulationHa function
+	hybrid_automata* ha;
 
 	/**
 	 * The reference to the forbidden polytope given by the user

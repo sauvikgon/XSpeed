@@ -56,8 +56,6 @@ struct LoadBalanceData_PostD{
 	std::vector<int> dest_locID;	//Destination_locationID
 	std::vector<int> trans_ID;	//transition_ID
 
-	//std::vector<std::vector<bool> > bool_arr; //Race Condition Occurred
-
 	math::matrix<bool> bool_arr; //each row is the guard and elements are booleans indicating intersected or not
 
 	std::vector<std::list<std::pair<unsigned int, unsigned int> > > range_list;	//each guard can generate
@@ -69,10 +67,9 @@ struct LoadBalanceData_PostD{
 
 //Data structure required for AsyncBFS as auxiliary storage
 struct AsyncBFSData{
-	//std::list<initial_state::ptr> I; //converted to a list of initial state
 	int bound;
 	ReachabilityParameters reach_parameters;
-	hybrid_automata H; //todo:: have to change it to boost::ptr
+	hybrid_automata* H;
 	int lp_solver_type;
 	std::pair<int, polytope::ptr> forbidden_set;
 	std::string set_aggregation; // The aggregation options thull(default), none

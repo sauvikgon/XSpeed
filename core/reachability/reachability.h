@@ -59,8 +59,10 @@ using namespace std;
 class reachability {
 public:
 	
+	/* virtual destructor */
+	virtual ~reachability();
 	void setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
-			int lp_solver_type, std::vector<forbidden> forbidden_states, userOptions& user_options);
+			int lp_solver_type, std::vector<forbidden>& forbidden_states, userOptions& user_options);
 
 	/*
 	 * Get counter-example trajectories found during reachability analysis
@@ -110,7 +112,7 @@ public:
 	std::list<initial_state::ptr> I; //converted to a list of initial state
 	unsigned int bound;
 	ReachabilityParameters reach_parameters;
-	hybrid_automata H; //todo:: have to change it to boost::ptr
+	hybrid_automata* H;
 	int lp_solver_type;
 	std::vector<forbidden> forbidden_states;
 	bool ce_flag; // The flag to switch ON/OFF the CE generation functionality.

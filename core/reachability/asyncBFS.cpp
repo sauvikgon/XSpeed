@@ -16,12 +16,12 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 
 
 
-	LocklessDS L[H.getTotalLocations()];	//Creating an array of Lockless data structure of size total number of locations
+	LocklessDS L[H->getTotalLocations()];	//Creating an array of Lockless data structure of size total number of locations
 
 
-	initializeLocklessDS(L,H.getTotalLocations()); //initialize all flags to unlocked initially
+	initializeLocklessDS(L,H->getTotalLocations()); //initialize all flags to unlocked initially
 
-	printLocklessDS(L, H.getTotalLocations());
+	printLocklessDS(L, H->getTotalLocations());
 
 	std::list<symbolic_states::ptr> PASSED;	//List of all flowpipes computed
 
@@ -62,7 +62,7 @@ std::list<symbolic_states::ptr> AsyncBFS::reachComputeAsynBFS(std::list<abstract
 
 	/*******This may or may not be expensive have to verify, If possible avoid recording time for this operation*********** */
 
-	for (int i=0;i<H.getTotalLocations();i++){
+	for (int i=0;i<H->getTotalLocations();i++){
 		PASSED.insert(PASSED.end(),L[i].PASSED.begin(),L[i].PASSED.end());
 	}
 
@@ -146,7 +146,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 
 	location::ptr current_location;
 
-	current_location = myData.H.getLocation(location_id);
+	current_location = myData.H->getLocation(location_id);
 	string name = current_location->getName();
 
 	double result_alfa = compute_alfa(reach_parameters.time_step,
@@ -227,7 +227,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 	template_polyhedra::ptr reach_region= symb->getContinuousSetptr();
 	int locId = *(symb->getDiscreteSet().getDiscreteElements().begin());
 
-	location::ptr current_location = myData.H.getLocation(locId);
+	location::ptr current_location = myData.H->getLocation(locId);
 	std::list<initial_state::ptr> res;
 
 	if (reach_region->getTotalIterations() != 0) { //computed reach_region is empty && optimize transition BreadthLevel-wise
@@ -242,7 +242,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 			//std::list < template_polyhedra::ptr > intersected_polyhedra;
 			polytope::ptr intersectedRegion;//created two objects here
 			discrete_set ds;
-			current_destination = myData.H.getLocation((*t)->getDestinationLocationId());
+			current_destination = myData.H->getLocation((*t)->getDestinationLocationId());
 
 			string locName = current_destination->getName();
 			guard_polytope = (*t)->getGuard();//	GeneratePolytopePlotter(guard_polytope);
@@ -350,8 +350,8 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 							myData.lp_solver_type);
 				}
 				// @Amit: the newShifted satisfy the destination location invariant
-				if (myData.H.getLocation(destination_locID)->getInvariant() != NULL)
-					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(myData.H.getLocation(destination_locID)->getInvariant());
+				if (myData.H->getLocation(destination_locID)->getInvariant() != NULL)
+					newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(myData.H->getLocation(destination_locID)->getInvariant());
 				/*
 				 * Now perform containment check similar to sequential algorithm.
 				 */

@@ -62,8 +62,7 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 		abst_ce->set_sym_states(list_sym_states);
 
 		abst_ce->set_transitions((*it)->get_path_transitions());
-		hybrid_automata::ptr ha = hybrid_automata::ptr( new hybrid_automata(Hybrid_Automata));
-		abst_ce->set_automaton(ha);
+		abst_ce->set_automaton(&Hybrid_Automata);
 		abst_ce->set_forbid_poly(forbidden_set.second);
 
 		std::cout << "CE_ALGO_TYPE "<< 2 << std::endl;

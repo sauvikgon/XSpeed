@@ -87,7 +87,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			S[id]->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 			location::ptr current_location;
-			current_location = H.getLocation(location_id);
+			current_location = H->getLocation(location_id);
 			string name = current_location->getName();
 			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
 					|| (name.compare("UNSAFE") == 0) || (name.compare("FINAL") == 0)){
@@ -263,7 +263,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 					{
 						iter_max += polys.size();
 					}
-					string locName = H.getLocation(loadBalPostD[id].dest_locID[trans])->getName();
+					string locName = H->getLocation(loadBalPostD[id].dest_locID[trans])->getName();
 					if ((locName.compare("BAD") == 0) || (locName.compare("GOOD") == 0) || (locName.compare("FINAL") == 0)
 							|| (locName.compare("UNSAFE") == 0)) {
 						continue; //do not push into the waitingList
@@ -296,8 +296,8 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 									reach_parameters.Directions, lp_solver_type);
 						}
 						// @Amit: the newShifted satisfy the destination location invariant
-						if (H.getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant() != NULL)
-							newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H.getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant());
+						if (H->getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant() != NULL)
+							newShiftedPolytope = newShiftedPolytope->GetPolytope_Intersection(H->getLocation(loadBalPostD[id].dest_locID[trans])->getInvariant());
 
 						/*
 						 * Now perform containment check similar to sequential algorithm.
