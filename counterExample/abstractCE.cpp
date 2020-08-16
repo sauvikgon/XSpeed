@@ -1058,7 +1058,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	boost::timer::cpu_timer timer;
 	using boost::timer::cpu_times;
 	using boost::timer::nanosecond_type;
-	nanosecond_type const sixhundred_seconds(60 * 1000000000LL);
+	nanosecond_type const sixhundred_seconds(600 * 1000000000LL);
 	// a ce search in an abstract path is to timeout after 600 secs.
 	timer.start();
 
@@ -1070,7 +1070,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			lp_solver fixed_time_Lp = build_lp(dwell_times);
 
 			double lp_res = fixed_time_Lp.solve();
-			std::cout << "lp returned res = " << lp_res << std::endl;
+			//std::cout << "lp returned res = " << lp_res << std::endl;
 
 			std::vector<double> x = fixed_time_Lp.get_sv();
 
@@ -1097,7 +1097,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
 			double nlp_res;
 			myoptDwellTime.optimize(dwell_times, nlp_res);
-			cout << "nlp returned opt. = " << nlp_res << "\n";
+			//cout << "nlp returned opt. = " << nlp_res << "\n";
 			minf = nlp_res;
 			if (nlp_res < tolerance){
 				success = true;
@@ -1131,7 +1131,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 	} // end of search restart loop/
 
-
+	std::cout << "#random restarts = " << num_restart << std::endl;
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {

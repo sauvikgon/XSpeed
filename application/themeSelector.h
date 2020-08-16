@@ -49,9 +49,18 @@ public:
 	forbidden_states& getForbidden();
 
 	/*
-	 * Selects reachability, simulation or falsification
+	 * Selects reachability, simulation or falsification based on user option
 	 */
 	void select();
+
+	/* selects the reachability routine */
+	void selectReach();
+
+	/* selects the simulation routine */
+	void selectSim();
+
+	/* selects falsification routine */
+	void selectFal();
 
 	virtual ~themeSelector();
 private:

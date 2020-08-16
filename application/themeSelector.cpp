@@ -47,62 +47,73 @@ forbidden_states& themeSelector::getForbidden(){
 	return this->forbidden;
 }
 
+void themeSelector::selectReach()
+{
+	std::list<symbolic_states::ptr> symbolic_states;
+	std::list<abstractCE::ptr> ce_candidates; //object of class counter_example
+
+	boost::timer::cpu_timer timer, plottime;
+	unsigned int number_of_times = 1;	//For reporting average time
+	unsigned int lp_solver_type = 1;	// choose the glpk solver
+	timer.start();
+	init_cpu_usage(); //initializing the CPU Usage utility to start recording usages
+	for (unsigned int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
+		// Calls the reachability computation routine.
+		reachabilityCaller(ha, init, reach_params, userOps, lp_solver_type, forbidden, symbolic_states, ce_candidates);
+	}
+	timer.stop();
+	double cpu_usage = getCurrent_ProcessCPU_usage();
+	long mem_usage = getCurrentProcess_PhysicalMemoryUsed();
+	print_statistics(timer,cpu_usage,mem_usage, number_of_times, "Reachability Analysis and CE Search");
+
+
+	// Choosing from the output format and showing results
+
+	if(ha.ymap_size()!=0){
+		//transform the sfm to output directions before plotting
+		std::list<symbolic_states::ptr>::iterator it =  symbolic_states.begin();
+		for(;it!=symbolic_states.end(); it++){
+			symbolic_states::ptr symbStatePtr = *it;
+			transformTemplatePoly(ha, symbStatePtr->getContinuousSetptr());
+		}
+	}
+
+	plottime.start();
+	show(symbolic_states, userOps);
+	plottime.stop();
+	print_statistics(plottime,"Plotting");
+
+	// printing the first initial polytope in the init_poly file
+	polytope::ptr init_poly = (*init.begin())->getInitialSet();
+	init_poly->print2file("./init_poly",userOps.get_first_plot_dimension(),userOps.get_second_plot_dimension());
+
+}
+void themeSelector::selectSim(){
+	std::cout << "Running simulation engine ... \n";
+	assert(forbidden.size() > 0);
+	simulationCaller(ha, init, reach_params, forbidden[0], userOps);
+}
+void themeSelector::selectFal(){
+	//todo: call the path-oriented falsification routine.
+}
+
 void themeSelector::select(){
 
 	// ----Selects trajectory simulation
 	if (boost::algorithm::iequals(userOps.getEngine(),"simu")==true) {
-		std::cout << "Running simulation engine ... \n";
-		assert(forbidden.size() > 0);
-		simulationCaller(ha, init, reach_params, forbidden[0], userOps);
+		selectSim();
 		return;
 	}
 
 	// Select reachability with CE generation
 	if(boost::algorithm::iequals(userOps.getEngine(),"reach")==true){
-		std::list<symbolic_states::ptr> symbolic_states;
-		std::list<abstractCE::ptr> ce_candidates; //object of class counter_example
-
-		boost::timer::cpu_timer timer, plottime;
-		unsigned int number_of_times = 1;	//For reporting average time
-		unsigned int lp_solver_type = 1;	// choose the glpk solver
-		timer.start();
-		init_cpu_usage(); //initializing the CPU Usage utility to start recording usages
-		for (unsigned int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
-			// Calls the reachability computation routine.
-			reachabilityCaller(ha, init, reach_params, userOps, lp_solver_type, forbidden, symbolic_states, ce_candidates);
-		}
-		timer.stop();
-		double cpu_usage = getCurrent_ProcessCPU_usage();
-		long mem_usage = getCurrentProcess_PhysicalMemoryUsed();
-		print_statistics(timer,cpu_usage,mem_usage, number_of_times, "Reachability Analysis and CE Search");
-
-
-		// Choosing from the output format and showing results
-
-		if(ha.ymap_size()!=0){
-			//transform the sfm to output directions before plotting
-			std::list<symbolic_states::ptr>::iterator it =  symbolic_states.begin();
-			for(;it!=symbolic_states.end(); it++){
-				symbolic_states::ptr symbStatePtr = *it;
-				transformTemplatePoly(ha, symbStatePtr->getContinuousSetptr());
-			}
-		}
-
-		plottime.start();
-		show(symbolic_states, userOps);
-		plottime.stop();
-		print_statistics(plottime,"Plotting");
-
-		// printing the first initial polytope in the init_poly file
-		polytope::ptr init_poly = (*init.begin())->getInitialSet();
-		init_poly->print2file("./init_poly",userOps.get_first_plot_dimension(),userOps.get_second_plot_dimension());
-
+		selectReach();
 		return;
 	}
 
 	//select falsification
 	if(boost::algorithm::iequals(userOps.getEngine(),"fal")==true){
-		//todo: call the path-oriented falsification routine.
+		selectFal();
 		return;
 	}
 
