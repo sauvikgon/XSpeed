@@ -13,6 +13,7 @@ int main(int argc, char *argv[]) {
 
 	themeSelector tool_theme;
 
+	// parse input and user options
 	try{
 		readCommandLine(argc, argv, tool_theme.getUserOps(), tool_theme.getHa(), tool_theme.getInit(),
 				tool_theme.getReachParams(), tool_theme.getForbidden());
@@ -22,7 +23,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "Try XSpeed --help to see the command-line options\n";
 		exit(0);
 	}
-
+	// call the appropriate analysis engine
 	tool_theme.select();
 
 	return 0;

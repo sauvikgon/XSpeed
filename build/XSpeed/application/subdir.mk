@@ -10,6 +10,7 @@ CPP_SRCS += \
 ../application/sfDirections.cpp \
 ../application/sfUtility.cpp \
 ../application/simulationCaller.cpp \
+../application/themeSelector.cpp \
 ../application/userOptions.cpp \
 ../application/xspeed.cpp 
 
@@ -20,6 +21,7 @@ OBJS += \
 ./XSpeed/application/sfDirections.o \
 ./XSpeed/application/sfUtility.o \
 ./XSpeed/application/simulationCaller.o \
+./XSpeed/application/themeSelector.o \
 ./XSpeed/application/userOptions.o \
 ./XSpeed/application/xspeed.o 
 
@@ -30,6 +32,7 @@ CPP_DEPS += \
 ./XSpeed/application/sfDirections.d \
 ./XSpeed/application/sfUtility.d \
 ./XSpeed/application/simulationCaller.d \
+./XSpeed/application/themeSelector.d \
 ./XSpeed/application/userOptions.d \
 ./XSpeed/application/xspeed.d 
 
