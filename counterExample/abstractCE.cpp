@@ -649,14 +649,14 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 				min = -1 * lp.Compute_LLP(dir);
 			} catch (...) {
 				// assuming that the exception is caused due to an unbounded solution
-				min = -9999;	// an arbitrary value set as solution
+				min = -999;	// an arbitrary value set as solution
 			}
 			dir[j] = 1;
 			try {
 				max = lp.Compute_LLP(dir);
 			} catch (...) {
 				// assuming that the exception is caused due to an unbounded solution
-				max = +9999; // an arbitrary value set as solution
+				max = +999; // an arbitrary value set as solution
 			}
 
 			newCol = startPoint + i * dim + j;
@@ -833,14 +833,14 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 			min = -1 * lp.Compute_LLP(dir);
 		} catch (...) {
 			// assuming that the exception is caused due to an unbounded solution
-			min = -9999;	// an arbitrary value set as solution
+			min = -999;	// an arbitrary value set as solution
 		}
 		dir[j] = 1;
 		try {
 			max = lp.Compute_LLP(dir);
 		} catch (...) {
 			// assuming that the exception is caused due to an unbounded solution
-			max = +9999; // an arbitrary value set as solution
+			max = +999; // an arbitrary value set as solution
 		}
 
 		newCol = (X + Y) + (N - 1) * dim + j;
@@ -996,7 +996,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			max = lp.Compute_LLP(dmax);
 		} catch (...) {
 			// assuming that the exception is caused due to an unbounded solution
-			max = 9999; // an arbitrary large value set as solution
+			max = 999; // an arbitrary large value set as solution
 		}
 		try {
 			min = -1 * lp.Compute_LLP(dmin);
@@ -1026,6 +1026,10 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		// We may choose to take the average time as the initial dwell time
 		dwell_times[i] = (lb_t[i] + ub_t[i]) / 2;
 
+		//debug
+		std::cout << "segment id:" << i << ", dwell-time LB: " << lb_t[i] << std::endl;
+		std::cout << "segment id:" << i << ", dwell-time UB: " << ub_t[i] << std::endl;
+		//--
 		// Increment the transition to the next in the symbolic path
 		if (it != transList.end())
 			it++;
@@ -1058,7 +1062,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	boost::timer::cpu_timer timer;
 	using boost::timer::cpu_times;
 	using boost::timer::nanosecond_type;
-	nanosecond_type const sixhundred_seconds(600 * 1000000000LL);
+	nanosecond_type const sixhundred_seconds(60 * 1000000000LL);
 	// a ce search in an abstract path is to timeout after 600 secs.
 	timer.start();
 
@@ -1092,6 +1096,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 				break;
 			}
 			last_iter_lpopt = lp_res; // storing this lp_res for comparison in the next iteration.
+			//std::cout << "last lp_res = " << lp_res << std::endl;
 
 			// solve the nlp with fixed start points.
 			myoptDwellTime.set_min_objective(myobjfuncIterativeNLP, x0);
@@ -1112,10 +1117,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 				success = true; // here, success true is break the restart loop.
 				break;
 			}
+			//std::cout << "last nlp_res = " << nlp_res << std::endl;
+
 		} // end of alternating lp-nlp loop.
 
 		if(success) break; // splicing complete. terminate.
-
+		//std::cout << "Number of solver restarts:" << num_restart << std::endl;
 		if(stuck_at_local_min){
 			// get a new random start value of the dwell times, and restart search.
 			for(unsigned int j=0;j<N;j++){
@@ -1125,7 +1132,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 				dwell_times[j] = new_start; // This is done so that for the same Location Uniform generation can be maintained
 			}
 			stuck_at_local_min = false;
-			num_restart = i++;
+			num_restart++;
 			last_iter_lpopt=1e10; // last lp res set to a large value;
 		}
 

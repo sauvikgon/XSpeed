@@ -7,10 +7,6 @@
 
 #include <benchmarks/navigation/nav04Timed.h>
 
-// Created by Hyst v1.3
-// Hybrid Automaton in XSpeed
-// Converted from file: /home/rajarshi/Benchmarks/Nav-timed/04_timed.xml
-// Command Line arguments: -tool xspeed "" -passes flatten "" -debug -output /home/rajarshi/Benchmarks/Nav-timed/Nav04.cpp -input /home/rajarshi/Benchmarks/Nav-timed/04_timed.xml /home/rajarshi/Benchmarks/benchmarks-parallelization/navigation/PDBconcrete/04.cfg
 
 void set_nav04_timed(hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state_list,
