@@ -1,4 +1,3 @@
-
 #include <application/readCommandLine.h>
 
 namespace po = boost::program_options;
