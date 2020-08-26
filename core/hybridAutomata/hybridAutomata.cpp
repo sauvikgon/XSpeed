@@ -89,256 +89,223 @@ unsigned int hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsign
 {
 
 	location::ptr source_ptr = getInitialLocation();
-	unsigned int u = source_ptr->getLocId();
+	int u = source_ptr->getLocId();
 	unsigned int v = forbidden_loc_id;
-	unsigned int k = depth;
+	unsigned int bound = depth;    // bound = # locations in a path.
 
 	z3::context c;
+	unsigned int count1 = 0;
+	
+	for (unsigned int k = 0; k < bound; k++)    
+	{						
 
-	// INIT Step
-
-	z3::expr exp1 = c.bool_const("exp1");
-	string arr = "v" + to_string(u) + "0";
-	unsigned int l = arr.length();
-	char array[l];
-	for (unsigned int i = 0 ; i < l; i++)
-		array[i] = char(arr[i]);
-	z3::expr x = c.bool_const(array);
-	exp1 = x;
-
-	for(auto it = list_locations.begin(); it != list_locations.end(); it++)
-	{
-		arr = "v" + to_string(it->first) + "0";
-		l = arr.length();
-		char array1[l];
+		// INIT Step
+		z3::expr exp1 = c.bool_const("exp1");
+		string arr = "v" + to_string(u)+"_"+ "0";
+		unsigned int l = arr.length();
+		char array[l];
 		for (unsigned int i = 0 ; i < l; i++)
-			array1[i] = char(arr[i]);
-		if (it->first != u)
+			array[i] = char(arr[i]);
+		z3::expr x = c.bool_const(array);
+		exp1 = x;
+		for(auto it = list_locations.begin(); it != list_locations.end(); it++)
 		{
-			z3::expr x1 = c.bool_const(array1);
-			exp1 = (exp1 && !(x1));
-		}
-	}
-
-	// NEXT Step
-
-	z3::expr exp2 = c.bool_const("exp2");
-	auto it = list_locations.begin();
-	auto neighbor_nodes = it->second->getOutGoingTransitions();
-
-	for (unsigned int i = 0; i < k; i++)
-	{
-		z3::expr exp2a = c.bool_const("exp2a");
-		transition::ptr trans_ptr = *(neighbor_nodes.begin());
-		unsigned int loc_id = trans_ptr->getDestinationLocationId();
-
-		arr = "v" + to_string(loc_id) + to_string(i+1);
-		l = arr.length();
-		char array2[l];
-		for (unsigned int j = 0 ; j < l; j++)
-			array2[j] = char(arr[j]);
-		z3::expr x2 = c.bool_const(array2);
-		exp2a = x2;
-
-		for (auto it2 = ++neighbor_nodes.begin(); it2 != neighbor_nodes.end(); it2++)
-		{
-
-			unsigned int dest_id = (*it2)->getDestinationLocationId();
-			arr = "v" + to_string(dest_id) + to_string(i+1);
+			arr = "v" + to_string(it->first)+"_"+ "0";
 			l = arr.length();
-			char array3[l];
-			for (unsigned int j = 0 ; j < l; j++)
-				array3[j] = char(arr[j]);
-			z3::expr x3 = c.bool_const(array3);
-			exp2a = (exp2a || x3);
-		}
-		arr = "v" + to_string(it->first) + to_string(i);
-		l = arr.length();
-		char array4[l];
-		for (unsigned int j = 0 ; j < l; j++)
-			array4[j] = char(arr[j]);
-		z3::expr x4 = c.bool_const(array4);
-		exp2 = implies(x4, exp2a);
-	}
-
-	for (unsigned int i = 0; i < k; i++)
-	{
-		for (auto it1 = ++list_locations.begin(); it1 != list_locations.end(); it1++)
-		{
-			auto neighbor_nodes = it1->second->getOutGoingTransitions();
-			z3::expr exp2b = c.bool_const("exp2b");
-			transition::ptr trans_ptr = *(neighbor_nodes.begin());
-			unsigned int loc_id = trans_ptr->getDestinationLocationId();
-			arr = "v" + to_string(loc_id) + to_string(i+1);
-			l = arr.length();
-			char array5[l];
-			for (unsigned int j = 0 ; j < l; j++)
-				array5[j] = char(arr[j]);
-			z3::expr x5 = c.bool_const(array5);
-			exp2b = x5;
-			for (auto it2 = ++neighbor_nodes.begin(); it2 != neighbor_nodes.end(); it2++)
-			{
-				unsigned int dest_loc_id = (*it2)->getDestinationLocationId();
-				arr = "v" + to_string(dest_loc_id) + to_string(i+1);
-				l = arr.length();
-				char array6[l];
-				for (unsigned int j = 0 ; j < l; j++)
-					array6[j] = char(arr[j]);
-				z3::expr x6 = c.bool_const(array6);
-				exp2b = (exp2b || x6);
-			}
-			arr = "v" + to_string(it1->first) + to_string(i);
-			l = arr.length();
-			char array7[l];
-			for (unsigned int j = 0 ; j < l; j++)
-				array7[j] = char(arr[j]);
-			z3::expr x7 = c.bool_const(array7);
-			exp2 = (exp2 && implies(x7, exp2b));
-		}
-	}
-
-	// EXCLUDE Step
-
-	z3::expr exp3 = c.bool_const("exp3");
-	it = list_locations.begin();
-	arr = "v" + to_string(it->first) + "0";
-	l = arr.length();
-	char array8[l];
-	for (unsigned int i = 0 ; i < l; i++)
-		array8[i] = char(arr[i]);
-	z3::expr x8 = c.bool_const(array8);
-	exp3 = x8;
-
-	for (auto it1 = list_locations.begin(); it1 != list_locations.end(); it1++)
-	{
-		z3::expr exp3a = c.bool_const("exp3a");
-		arr = "v" + to_string(it->first) + to_string(1);
-		l = arr.length();
-		char array9[l];
-		for (unsigned int i = 0 ; i < l; i++)
-			array9[i] = char(arr[i]);
-		z3::expr x9 = c.bool_const(array9);
-		exp3a = !x9;
-
-		for (auto it2 = list_locations.begin(); it2 != list_locations.end(); it2++)
-		{
-			if (it2->first != it1->first)
-			{
-				arr = "v" + to_string(it2->first) + to_string(1);
-				l = arr.length();
-				char array10[l];
-				for (unsigned int j = 0 ; j < l; j++)
-					array10[j] = char(arr[j]);
-				z3::expr x10 = c.bool_const(array10);
-				exp3a = (exp3a && !(x10));
-			}
-		}
-		exp3 = (exp3 && implies(x9, exp3a));
-	}
-
-	for (unsigned int i = 1; i < k; i++)
-	{
-		for (auto it1 = list_locations.begin(); it1 != list_locations.end(); it1++)
-		{
-			z3::expr exp3b = c.bool_const("exp3b");
-			arr = "v" + to_string(it->first) + to_string(i+1);
-			l = arr.length();
-			char array11[l];
-			for (unsigned int j = 0 ; j < l; j++)
-				array11[j] = char(arr[j]);
-			z3::expr x11 = c.bool_const(array11);
-			exp3b = !x11;
-
-			for (auto it2 = list_locations.begin(); it2 != list_locations.end(); it2++)
-			{
-				if (it2->first != it1->first)
-				{
-					arr = "v" + to_string(it2->first) + to_string(i+1);
-					l = arr.length();
-					char array12[l];
-					for (unsigned int j = 0 ; j < l; j++)
-						array12[j] = char(arr[j]);
-					z3::expr x12 = c.bool_const(array12);
-					exp3b = (exp3b && !(x12));
-				}
-			}
-			exp3 = (exp3 && implies(x11, exp3b));
-		}
-	}
-
-	// TARGET Step
-
-	z3::expr exp4 = c.bool_const("exp4");
-	arr = "v" + to_string(v) + "0";
-	l = arr.length();
-	char array13[l];
-	for (unsigned int i = 0 ; i < l; i++)
-		array13[i] = char(arr[i]);
-	z3::expr x13 = c.bool_const(array13);
-	exp4 = x13;
-
-	for (unsigned int i = 1; i <= k; i++)
-	{
-		arr = "v" + to_string(v) + to_string(i);
-		l = arr.length();
-		char array14[l];
-		for (unsigned int j = 0 ; j < l; j++)
-			array14[j] = char(arr[j]);
-		z3::expr x14 = c.bool_const(array14);
-		exp4 = (exp4 || x14);
-	}
-
-	z3::solver s(c);
-	s.add(exp1);
-	s.add(exp2);
-	s.add(exp3);
-	s.add(exp4);
-
-	// Writing all the solutions to a new file
-
-	ofstream fout;
-	fout.open("NewDataFile.txt");
-	int count = 1;
-	while(true)
-	{
-		if (s.check() == z3::unsat)
-		{
-			if (count == 1)
-				fout<<"unsat";
-			break;
-		}
-		else
-		{
-			z3::model m = s.get_model();
-			unsigned int w = m.size();
-			z3::func_decl v = m[0];
-			assert(v.arity() == 0);
-			arr = v.name().str();
-			l = arr.length();
-			char array15[l];
+			char array1[l];
 			for (unsigned int i = 0 ; i < l; i++)
-				array15[i] = char(arr[i]);
-			z3::expr exp = c.bool_const(array15);
-			exp = !(m.get_const_interp(v));
-			fout<<m<<"\n\n";
-			for (unsigned int i = 1; i <= w; i++)
+				array1[i] = char(arr[i]);
+			if (it->first != u)
 			{
-				z3::func_decl v1 = m[i];
-				assert(v1.arity() == 0);
-				arr = v1.name().str();
-				l = arr.length();
-				char array16[l];
-				for (unsigned int j = 0 ; j < l; j++)
-					array16[j] = char(arr[j]);
-				z3::expr x15 = c.bool_const(array16);
-				exp = (exp || x15 != m.get_const_interp(v1));
+				z3::expr x1 = c.bool_const(array1);
+				exp1 = (exp1 && !(x1));
 			}
-			s.add(exp);
+		}				   					
+		z3::solver s(c);
+		s.add(exp1);
+
+		// NEXT Step
+
+		z3::expr exp2 = c.bool_const("exp2");
+		z3::expr exp22 = c.bool_const("exp22");
+		if(k == 0)   
+		{
+			for (unsigned int i =0; i <= k; i++)   
+			{
+			
+				for (auto it = list_locations.begin(); it != list_locations.end(); it++)
+				{
+					auto neighbor_nodes = it->second->getOutGoingTransitions();			
+					arr = "v"+ to_string(it->first)+"_"+ to_string(i);
+					l = arr.length();
+					char array2[l];
+					for (unsigned int j = 0 ; j < l; j++)
+						array2[j] = char(arr[j]);
+					z3::expr x2 = c.bool_const(array2);
+					exp2 = x2;
+					z3::expr exp2a = c.bool_const("exp2a");
+					unsigned int count = 1;
+					for (auto it2 = neighbor_nodes.begin(); it2 != neighbor_nodes.end(); it2++)
+					{
+						transition::ptr trans_ptr = *(it2);
+						unsigned int loc_id = trans_ptr->getDestinationLocationId();
+						arr = "v" + to_string(loc_id) +"_"+ to_string(i+1);
+						l = arr.length();
+						char array2[l];
+						for (unsigned int j = 0 ; j < l; j++)
+							array2[j] = char(arr[j]);
+						z3::expr x2 = c.bool_const(array2);
+						if(count == 1)
+						{
+							exp2a = x2;
+						}
+						if(count >= 2)
+						{	
+							exp2a = (exp2a || x2);
+						}
+						count++;
+					}
+					exp22 = implies(exp2, exp2a);
+					s.add(exp22);
+				}
+			} 						
 		}
-		count++;
+		if(k >= 1)   
+		{
+			for (unsigned int i =0; i <= k-1; i++)   
+			{		
+				for (auto it = list_locations.begin(); it != list_locations.end(); it++)
+				{
+					auto neighbor_nodes = it->second->getOutGoingTransitions();			
+					arr = "v"+ to_string(it->first)+"_"+ to_string(i);
+					l = arr.length();
+					char array2[l];
+					for (unsigned int j = 0 ; j < l; j++)
+						array2[j] = char(arr[j]);
+					z3::expr x2 = c.bool_const(array2);
+					exp2 = x2;
+					z3::expr exp2a = c.bool_const("exp2a");
+					unsigned int count = 1;
+					for (auto it2 = neighbor_nodes.begin(); it2 != neighbor_nodes.end(); it2++)
+					{
+						transition::ptr trans_ptr = *(it2);
+						unsigned int loc_id = trans_ptr->getDestinationLocationId();
+						arr = "v" + to_string(loc_id) +"_"+ to_string(i+1);
+						l = arr.length();
+						char array2[l];
+						for (unsigned int j = 0 ; j < l; j++)
+							array2[j] = char(arr[j]);
+						z3::expr x2 = c.bool_const(array2);
+						if(count == 1)
+						{
+							exp2a = x2;
+						}
+						if(count >= 2)
+						{	
+							exp2a = (exp2a || x2);
+						}
+						count++;
+					}
+					exp22 = implies(exp2, exp2a);
+					s.add(exp22);
+				}
+			} 	
+		}						
+
+		//EXCLUDE
+		z3::expr exp3 = c.bool_const("exp3");
+		z3::expr exp33 = c.bool_const("exp33");
+		for (unsigned int i =0; i <= k; i++)
+		{
+			for(auto it1 = list_locations.begin(); it1 != list_locations.end(); it1++)
+			{
+				string arr = "v" + to_string(it1->first)+"_" + to_string(i);
+				unsigned int l = arr.length();
+				char array[l];
+				for (unsigned int ii = 0 ; ii < l; ii++)
+					array[ii] = char(arr[ii]);
+				z3::expr x = c.bool_const(array);
+				exp3 = x;
+				z3::expr exp31 = c.bool_const("exp31");
+				unsigned int count = 0;
+				for(auto it2 = list_locations.begin(); it2 != list_locations.end(); it2++)
+				{
+					arr = "v" + to_string(it2->first)+"_"+ to_string(i);
+					l = arr.length();
+					char array1[l];
+					for (unsigned int ii = 0 ; ii < l; ii++)
+						array1[ii] = char(arr[ii]);
+					if (it2->first != it1->first)
+					{
+						z3::expr x1 = c.bool_const(array1);
+						if(count == 0)
+						{
+							exp31 = !(x1);
+						}
+						if(count >= 1)
+						{	
+							exp31 = (exp31 && !(x1));
+						}
+						count++;
+					}
+				}
+				exp33 = implies(exp3, exp31);	
+				s.add(exp33);
+			}
+		}						//End of Exclude Constraint.
+
+		//TARGET
+		z3::expr exp4 = c.bool_const("exp4");
+		arr = "v" + to_string(v)+"_" + to_string(k);
+		l = arr.length();
+		char array13[l];
+		for (unsigned int i = 0 ; i < l; i++)
+			array13[i] = char(arr[i]);
+		z3::expr x13 = c.bool_const(array13);
+		exp4 = x13;						
+		s.add(exp4);
+							
+
+		
+		//Negation
+		int count = 1;
+		while(true)
+		{
+			if (s.check() == z3::sat)
+			{	
+				z3::model m = s.get_model();
+				unsigned int w = m.size();
+				z3::expr exp = c.bool_const("exp");
+				int co = 0;
+				for (unsigned int i = 0; i < w; i++)
+				{
+					z3::func_decl v1 = m[i];
+					assert(v1.arity() == 0);
+					arr = v1.name().str();
+					l = arr.length();
+					char array16[l];
+					for (unsigned int j = 0 ; j < l; j++)
+						array16[j] = char(arr[j]);
+					z3::expr x15 = c.bool_const(array16);
+					if(co == 0)
+					{
+						exp = (x15 != m.get_const_interp(v1));
+					}
+					if(co >= 1)
+					{	
+						exp = (exp || (x15 != m.get_const_interp(v1)));
+					}
+					co++;
+				}
+				s.add(exp);
+				count++;
+			}
+			else
+				break;
+		}	
+	count1 += --count;
 	}
-	fout.close();
-	return count;
+	return count1;
 }
 
 void hybrid_automata::printPath(vector<int>& path) {
