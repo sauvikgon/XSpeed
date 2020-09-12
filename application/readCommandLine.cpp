@@ -161,8 +161,10 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			//system("rm input_model.mdl"); // remove the mdl file
 		
 			Hybrid_Automata = _parser.getHa(); // assign the parsed ha
-			//std::cout << "Number of paths of length bounded by 5:" << Hybrid_Automata.satEnumPaths(9,5);
-			//std::cout << "Number of paths of length bounded by 5:" << (Hybrid_Automata.findAllPaths(1,4,5)).size();
+			//std::cout << "Number of paths of length bounded (SAT):" << Hybrid_Automata.satEnumPaths(5,5);
+			std::cout << "Number of paths of length bounded (BFS):" << Hybrid_Automata.findAllPaths(1,9,10).size();
+			std::cout << "Number of paths of length bounded (SAT):" << Hybrid_Automata.satEnumPaths(9,10);
+			exit(0);
 
 			init_state.push_back(_parser.getInitState()); // assign the parsed init
 			forbidden_states = _parser.getForbidden(); //assign the forbidden states

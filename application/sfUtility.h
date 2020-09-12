@@ -102,6 +102,10 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 		V_max_norm = Vptr->max_norm(lp_solver_type, dim_for_Max_norm);
 	}
 
+	if(!SysD.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
+		V_max_norm = get_infinity_norm(SysD.C);
+	}
+
 	if (SysD.isEmptyMatrixA){ //if A is Empty
 		result = 0;	//norm_A will be zero
 	}else {
@@ -147,6 +151,10 @@ scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
 		dim_for_Max_norm = system_dynamics.MatrixB.size1();
 		V_max_norm = Vptr->max_norm(lp_solver_type, dim_for_Max_norm);
 
+	}
+
+	if(!system_dynamics.isEmptyC){// C is not empty, meaning that there is a singleton input set. Check that when C is not empty, U must be empty
+		V_max_norm = get_infinity_norm(system_dynamics.C);
 	}
 
 	if (system_dynamics.isEmptyMatrixA){ //if A is Empty

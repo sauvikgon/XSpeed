@@ -156,7 +156,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 	// initialize the global locIdList
 	locIdList.resize(N);
 
-	DEBUG_MSG("Seaching counterexample to safety with trajectory splicing (FC)");
+	DEBUG_MSG("Searching counterexample to safety with trajectory splicing (FC)");
 	DEBUG_MSG("Location ID sequence in symbolic CE: ");
 	std::set<int> d;
 	for (unsigned int i = 0; i < N; i++) {
@@ -706,53 +706,6 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		// Now, we calculate v = A^{-1}.(e^{At} - I)* D.C
 		std::vector<double> v = ODESol_inhomogenous(D, dwell_times[i]);
 
-		// @Rajarshi:Here, we add the bounds constraints on the end-pts.
-		/*		
-		if(i!= (N-1)){
-			// assign the transition pointer
-			T = *(it);	//runs based on the for-i-loop except the last iteration
-			guard = T->getGuard();
-			polytope::ptr P;
-			P = loc_inv->GetPolytope_Intersection(guard); //Invariant with Bad poly
-			lp_solver lp(GLPK_SOLVER);
-			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
-			
-			std::vector<double> dir(dim, 0);
-			double min[dim], max[dim];
-			for (unsigned int j = 0; j < dim; j++) // iterate over each component
-			{
-				dir[j] = -1;
-				try {
-					min[j] = -1 * lp.Compute_LLP(dir);
-				} catch (...) {
-				// assuming that the exception is caused due to an unbounded solution
-				min[j] = -999;	// an arbitrary value set as solution
-				}
-				dir[j] = 1;
-				try {
-					max[j] = lp.Compute_LLP(dir);
-				} catch (...) {
-				// assuming that the exception is caused due to an unbounded solution
-				max[j] = +999; // an arbitrary value set as solution
-				}
-				dir[j]=0;
-			}
-
-			for (unsigned int j = 0; j < dim; j++) {
-				
-				for (unsigned int k = 0; k < expAt.size2(); k++) {
-					newCol = X + i * dim + k;
-					A(newRow, newCol) = expAt(j,k); //first inequality
-
-					A(newRow + 1, newCol) = -1*expAt(j,k); //second inequality
-				}
-				b[newRow] = max[j] - v[j];
-				newRow++;
-				b[newRow] = -1 * min[j] + v[j];
-				newRow++;
-			}
-		} */
-		/* End of code to add bound constraints of end-pts. */
 
 		// Using expAt and v, add the constraints on the end-points to the LP
 		/*
@@ -926,7 +879,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 	std::vector<double> dwell_times(N); // contains the fixed dwell_times
 
-	get_first_symbolic_state()->getInitialPolytope();
 
 	unsigned int t_index =
 			get_first_symbolic_state()->getInitialPolytope()->get_index("t");
@@ -961,7 +913,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			assert(polys.size() >= 1); // The last sym state of an abstract CE must intersect with the bad set
 
 			if (polys.size() > 1){
-				std::runtime_error("abstractCE::gen_concreteCE_iterative: impl missing for no set aggregation\n");
+				std::runtime_error("abstractCE::gen_concreteCE_iterative: Impl missing for no set aggregation\n");
 			}
 			else
 				P = polys.front();
@@ -973,14 +925,14 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			T = *(it);
 			guard = T->getGuard();
 			if (guard->getIsUniverse())
-				DEBUG_MSG("abstractCE::gen_concreteCE_iterative: Guard is Universe");
+				DEBUG_MSG("abstractCE::gen_concreteCE_iterative: Guard is Universally true predicate");
 
 			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
 					aggregation, guard, 1);
 
 			assert(polys.size() >= 1); // An abstract CE state must have intersection with the guard
 			if (polys.size() > 1)
-				std::runtime_error("abstractCE::gen_concreteCE_iterative: impl missing for no set aggregation\n");
+				std::runtime_error("abstractCE::gen_concreteCE_iterative: Impl missing for no set aggregation\n");
 			else
 				P = polys.front();
 			// Now intersect P with guard
@@ -1002,7 +954,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 			min = -1 * lp.Compute_LLP(dmin);
 		} catch (...) {
 			// assuming that the exception is caused due to an unbounded solution
-			min = 0; // the min value a time can take is 0.
+			min = 0; // the min value that time can take is 0.
 		}
 
 		// we add the bounds as constraints in the nlopt
@@ -1026,10 +978,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		// We may choose to take the average time as the initial dwell time
 		dwell_times[i] = (lb_t[i] + ub_t[i]) / 2;
 
-		//debug
-		std::cout << "segment id:" << i << ", dwell-time LB: " << lb_t[i] << std::endl;
-		std::cout << "segment id:" << i << ", dwell-time UB: " << ub_t[i] << std::endl;
-		//--
 		// Increment the transition to the next in the symbolic path
 		if (it != transList.end())
 			it++;
@@ -1390,13 +1338,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, std::string& algo
 			cexample = gen_concreteCE_NLP_HA(tolerance, refinements);
 		} else if (algo_type.compare("Altmin") == 0) { // LP-NLP Alt-Min \n";
 			cexample = gen_concreteCE_iterative(tolerance, refinements);
-
-		} /*else if (algo_type == 4) { // Trajectory splicing with fixed-dwell-times (LP), using LP soln as initial point for simulation\n";
-				cexample = gen_concreteCE_Simulation(tolerance, refinements);
 		}
-		else if (algo_type == 5) { // Trajectory splicing with search over dwell-times (NLP), Obj Func as an LP solution.
-			cexample = gen_concreteCE_LPobj(tolerance, refinements);
-		} */
 		else {
 			DEBUG_MSG("Invalid algo type specified for trajectory splicing");
 		}

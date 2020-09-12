@@ -304,6 +304,7 @@ unsigned int hybrid_automata::satEnumPaths(unsigned int forbidden_loc_id, unsign
 				break;
 		}	
 	count1 += --count;
+
 	}
 	return count1;
 }
@@ -337,11 +338,11 @@ std::list<structuralPath::ptr> hybrid_automata::findAllPaths(int src, int dst, i
 			//std::cout << " Solution path: ";
 			//printpath(pathDS.first);
 			std::list<location::ptr> path_locations;
-			for (int i = 0; i < pathDS.first.size(); i++) {
+			for (unsigned int i = 0; i < pathDS.first.size(); i++) {
 				path_locations.push_back(getLocation(pathDS.first[i]));
 			}
 			std::list<transition::ptr> path_transitions;
-			for (int i = 0; i < pathDS.second.size(); i++) {
+			for (unsigned int i = 0; i < pathDS.second.size(); i++) {
 				path_transitions.push_back(pathDS.second[i]);
 			}
 			structuralPath::ptr solutionPath = structuralPath::ptr(new structuralPath(path_locations, path_transitions));

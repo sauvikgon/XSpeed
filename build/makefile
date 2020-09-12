@@ -74,7 +74,7 @@ all: XSpeed-plan
 XSpeed-plan: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	g++ -L/usr/local/lib/ -o "XSpeed-plan" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -std=c++11 -L/usr/local/lib/ -o "XSpeed-plan" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

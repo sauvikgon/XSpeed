@@ -30,7 +30,7 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 
 	col = shm_NewTotalIteration; //if invariant exists, col will be resized
 	math::matrix<double> MatrixValue(row,col);
-	
+
 	int solver_type = lp_solver_type;
 	lp_solver s_per_thread_I(solver_type), s_per_thread_U(solver_type), s_per_thread_inv(solver_type);
 	s_per_thread_I.setMin_Or_Max(2);
@@ -42,7 +42,7 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 
 	ReachParameters.result_alfa = result_alfa;
 	ReachParameters.result_beta = result_beta;
-	
+
 	// Initialised the transformation and its transpose matrix
 	math::matrix<double> phi_matrix, phi_trans;
 
