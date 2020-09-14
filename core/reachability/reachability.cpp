@@ -1024,7 +1024,7 @@ bool reachability::gen_counter_example(abstractCE::ptr abs_path, std::string& ce
 	boost::timer::cpu_timer clock; // clocks the time taken to splice a trajectory
 
 	if(traj_splicing_time > 3600000){
-		std::cout << "Seach for CE TIMED-OUT (>1hrs)\n";
+		std::cout << "Search for CE TIMED-OUT (>1hrs)\n";
 		return false;
 	}
 	if(ce_path.compare("all") == 0) // if all paths are to be searched for ce, then return true in order to collect more paths.

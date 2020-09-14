@@ -44,8 +44,7 @@ public:
 
 	/* returns the dimension of the template polyhedra/flowpipe*/
 	unsigned int get_dimension();
-	/*const math::matrix<double>& getAllDirections() const;
-	 void setAllDirections(math::matrix<double>& allDirections);*/
+
 	const math::matrix<double>& getMatrixSupportFunction() const;
 	void setMatrixSupportFunction(math::matrix<double>& matrixSupportFunction);
 	const math::matrix<double>& getTemplateDirections() const;

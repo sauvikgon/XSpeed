@@ -839,7 +839,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		const std::list<refinement_point> &refinements) {
 	symbolic_states::const_ptr S = get_first_symbolic_state();
 	dim = S->getContinuousSetptr()->get_dimension();
-
+	//debug
+	//std::cout << "gen_concreteCE_iterative:Number of SFM cols:" << S->getContinuousSetptr()->getTotalIterations() << std::endl;
+	//concreteCE::ptr cexample1 = concreteCE::ptr(new concreteCE());
+	//return cexample1;
+	//---
 	HA = this->get_automaton();
 	transList = this->get_CE_transitions();
 	N = transList.size() + 1; // the length of the counter example
@@ -880,8 +884,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	std::vector<double> dwell_times(N); // contains the fixed dwell_times
 
 
-	unsigned int t_index =
-			get_first_symbolic_state()->getInitialPolytope()->get_index("t");
+	unsigned int t_index = S->getInitialPolytope()->get_index("t");
 
 	assert((t_index >= 0) && (t_index < dim));
 
@@ -1011,7 +1014,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	using boost::timer::cpu_times;
 	using boost::timer::nanosecond_type;
 	nanosecond_type const sixhundred_seconds(60 * 1000000000LL);
-	// a ce search in an abstract path is to timeout after 600 secs.
+	// a ce search in an abstract path is to timeout after 60 secs.
 	timer.start();
 
 	for(unsigned int i=0;i<max_restarts;i++){
@@ -1069,7 +1072,10 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 		} // end of alternating lp-nlp loop.
 
-		if(success) break; // splicing complete. terminate.
+		if(success){
+			std::cout << "#random restarts = " << num_restart << std::endl;
+			break; // splicing complete. terminate.
+		}
 		//std::cout << "Number of solver restarts:" << num_restart << std::endl;
 		if(stuck_at_local_min){
 			// get a new random start value of the dwell times, and restart search.
@@ -1086,7 +1092,6 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 	} // end of search restart loop/
 
-	std::cout << "#random restarts = " << num_restart << std::endl;
 	concreteCE::ptr cexample = concreteCE::ptr(new concreteCE());
 	cexample->set_automaton(HA);
 	if (minf > tolerance) {
@@ -1360,7 +1365,8 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, std::string& algo
 			//debug: print the invalid trajectory in a file, in the first two dimensions
 			//cexample->plot_ce("./invalid_traj.txt", 0, 1);
 		} else {
-			DEBUG_MSG("Generated Trace Validated with " + to_string(ref_count) + " point Refinements");
+			//DEBUG_MSG("Generated Trace Validated with " + to_string(ref_count) + " point Refinements");
+			std::cout << "#Refinements for trace validation: " + to_string(ref_count) << std::endl;
 			cexample->set_refinement_count(ref_count);
 			return cexample;
 		}
