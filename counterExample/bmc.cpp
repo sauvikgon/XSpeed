@@ -7,7 +7,7 @@
 
 #include <counterExample/bmc.h>
 
-bmc::bmc() {
+bmc::bmc() : c(), ha_encoding(c), sol(c)  {
 	// TODO Auto-generated constructor stub
 }
 
@@ -15,7 +15,7 @@ bmc::~bmc() {
 	// TODO Auto-generated destructor stub
 }
 
-bmc::bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k){
+bmc::bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k) : c(), ha_encoding(c), sol(c){
 	this->ha = ha_ptr;
 	this->forbidden_s = forbidden;
 	this->k = k;

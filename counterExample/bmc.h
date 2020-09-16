@@ -34,8 +34,9 @@ class bmc {
 	hybrid_automata* ha;
 	forbidden_states forbidden_s;
 	z3::context c;
-	z3::expr ha_encoding(c);
-	z3::solver sol(c);
+	z3::expr ha_encoding;
+	z3::solver sol;
+
 	unsigned int k; // The BMC bound on path-length, i.e., the number of edges.
 
 	/* bmc uses this private member function to initialize the ha_encoding for the given
@@ -47,7 +48,7 @@ public:
 
 	bmc();
 
-	/* To be used for BMC when a set of ha locations together assoc. polytopes are forbidden */
+	/* To be used for BMC when a set of ha locations together with assoc. polytopes are forbidden */
 	bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k);
 
 	virtual ~bmc();
@@ -66,7 +67,7 @@ public:
 
 	/*
 	 * Returns false if the ha is found to be unsafe in the given bound.
-	 * a return of true however, does not decide the safty of ha faithfully.
+	 * a return of true however, does not decide the safety of ha faithfully.
 	 * This is due to the incompleteness of the ce search mechanism.
 	 */
 	bool isSafe();
