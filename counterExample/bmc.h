@@ -32,9 +32,14 @@ typedef std::vector<forbidden> forbidden_states; // vector of forbidden symb sta
 class bmc {
 
 	hybrid_automata* ha;
-	forbidden_states forbidden;
+	forbidden_states forbidden_s;
 	z3::expr ha_encoding(z3::context c);
 	unsigned int k; // The BMC bound on path-length, i.e., the number of edges.
+
+	/* bmc uses this private member function to initialize the ha_encoding for the given
+	 * forbidden location id
+	 */
+	void init_solver(unsigned int forbidden_loc_id);
 
 public:
 
@@ -55,7 +60,21 @@ public:
 	 * in the z3 expression ha_encoding. The implementation is a SAT solver
 	 * based path enumeration algorithm.
 	 */
-	path getNextPath(unsigned int forbidden_loc_id);
+	path getNextPath();
+
+	/*
+	 * Returns false if the ha is found to be unsafe in the given bound.
+	 * a return of true however, does not decide the safty of ha faithfully.
+	 * This is due to the incompleteness of the ce search mechanism.
+	 */
+	bool isSafe();
+
+	/*
+	 * Updates the ha encoding with a given forbidden location in such a way
+	 * that the next paths in the enumeration does not return any path containing
+	 * the path p.
+	 */
+	void update_encoding(path p);
 };
 
 #endif /* XSPEED_PLAN_COUNTEREXAMPLE_BMC_H_ */

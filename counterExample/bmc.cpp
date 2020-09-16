@@ -17,23 +17,23 @@ bmc::~bmc() {
 
 bmc::bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k){
 	this->ha = ha;
-	this->forbidden = forbidden;
+	this->forbidden_s = forbidden;
 	this->k = k;
 }
 
 /*
- *
+ * Initializes the z3 solver with bounded ha encoding.
  */
-path bmc::getNextPath(unsigned int forbid_locId)
+void bmc::init_solver(unsigned int forbidden_loc_id)
 {
 	location::ptr source_ptr = ha->getInitialLocation();
 	int u = source_ptr->getLocId();
-	unsigned int v = forbid_locId;
+	unsigned int v = forbidden_loc_id;
 	unsigned int k = this->k;
 	auto list_locations = ha->getAllLocations();
 
 	z3::context c;
-	
+
 	// INIT Step
 	z3::expr exp1 = c.bool_const("exp1");
 	string arr = "v" + to_string(u)+"_"+ "0";
@@ -55,7 +55,7 @@ path bmc::getNextPath(unsigned int forbid_locId)
 			z3::expr x1 = c.bool_const(array1);
 			exp1 = (exp1 && !(x1));
 		}
-	}				   					
+	}
 	z3::solver s(c);
 	s.add(exp1);
 
@@ -63,14 +63,14 @@ path bmc::getNextPath(unsigned int forbid_locId)
 
 	z3::expr exp2 = c.bool_const("exp2");
 	z3::expr exp22 = c.bool_const("exp22");
-	if(k == 0)   
+	if(k == 0)
 	{
-		for (unsigned int i =0; i <= k; i++)   
+		for (unsigned int i =0; i <= k; i++)
 		{
-		
+
 			for (auto it = list_locations.begin(); it != list_locations.end(); it++)
 			{
-				auto neighbor_nodes = it->second->getOutGoingTransitions();			
+				auto neighbor_nodes = it->second->getOutGoingTransitions();
 				arr = "v"+ to_string(it->first)+"_"+ to_string(i);
 				l = arr.length();
 				char array2[l];
@@ -95,7 +95,7 @@ path bmc::getNextPath(unsigned int forbid_locId)
 						exp2a = x2;
 					}
 					if(count >= 2)
-					{	
+					{
 						exp2a = (exp2a || x2);
 					}
 					count++;
@@ -103,15 +103,15 @@ path bmc::getNextPath(unsigned int forbid_locId)
 				exp22 = implies(exp2, exp2a);
 				s.add(exp22);
 			}
-		} 						
+		}
 	}
-	if(k >= 1)   
+	if(k >= 1)
 	{
-		for (unsigned int i =0; i <= k-1; i++)   
-		{		
+		for (unsigned int i =0; i <= k-1; i++)
+		{
 			for (auto it = list_locations.begin(); it != list_locations.end(); it++)
 			{
-				auto neighbor_nodes = it->second->getOutGoingTransitions();			
+				auto neighbor_nodes = it->second->getOutGoingTransitions();
 				arr = "v"+ to_string(it->first)+"_"+ to_string(i);
 				l = arr.length();
 				char array2[l];
@@ -136,7 +136,7 @@ path bmc::getNextPath(unsigned int forbid_locId)
 						exp2a = x2;
 					}
 					if(count >= 2)
-					{	
+					{
 						exp2a = (exp2a || x2);
 					}
 					count++;
@@ -144,8 +144,8 @@ path bmc::getNextPath(unsigned int forbid_locId)
 				exp22 = implies(exp2, exp2a);
 				s.add(exp22);
 			}
-		} 	
-	}						
+		}
+	}
 
 	//EXCLUDE
 	z3::expr exp3 = c.bool_const("exp3");
@@ -178,13 +178,13 @@ path bmc::getNextPath(unsigned int forbid_locId)
 						exp31 = !(x1);
 					}
 					if(count >= 1)
-					{	
+					{
 						exp31 = (exp31 && !(x1));
 					}
 					count++;
 				}
 			}
-			exp33 = implies(exp3, exp31);	
+			exp33 = implies(exp3, exp31);
 			s.add(exp33);
 		}
 	}						//End of Exclude Constraint.
@@ -197,12 +197,12 @@ path bmc::getNextPath(unsigned int forbid_locId)
 	for (unsigned int i = 0 ; i < l; i++)
 		array13[i] = char(arr[i]);
 	z3::expr x13 = c.bool_const(array13);
-	exp4 = x13;						
+	exp4 = x13;
 	s.add(exp4);
-						
+
 	//Returning the path vector to checkfeasibility()
 	if (s.check() == z3::sat)
-	{	
+	{
 		path p;
 		p.resize(k);
 		z3::model m = s.get_model();
@@ -223,16 +223,23 @@ path bmc::getNextPath(unsigned int forbid_locId)
 				}
 			}
 		}
-		return p;
+		//return p;
 	}
-	
+
 	else
 	{
 		path p;
 		p.resize(1);
 		p.at(0) = list_locations.begin()->first;
-		return p;
+		//return p;
 	}
+}
+/*
+ *
+ */
+path bmc::getNextPath()
+{
+	
 }
 
 /*
@@ -242,4 +249,26 @@ path bmc::getNextPath(unsigned int forbid_locId)
 region bmc::getPathRegion(path p){
 	region r;
 	return r;
+}
+
+void bmc::update_encoding(path p){
+
+}
+
+bool bmc::isSafe(){
+
+	// iterate over the forbidden states
+	for(unsigned int i=0;i<forbidden_s.size();i++){
+		forbidden forbid_s = forbidden_s[i];
+		unsigned int forbid_loc_id = forbid_s.first;
+		init_solver(forbid_loc_id); // initialize the ha_encoding for this forbidden location
+
+		path p = getNextPath();
+		while(p.size()!=0){ // A path is returned above
+			// do something smart
+			update_encoding(p); // update the encoding such that no path containing p is returned further.
+			p = getNextPath();
+		}
+	}
+	return true; // no counterexample trajectory could be found. Hence returning safe.
 }
