@@ -33,7 +33,9 @@ class bmc {
 
 	hybrid_automata* ha;
 	forbidden_states forbidden_s;
-	z3::expr ha_encoding(z3::context c);
+	z3::context c;
+	z3::expr ha_encoding(c);
+	z3::solver sol(c);
 	unsigned int k; // The BMC bound on path-length, i.e., the number of edges.
 
 	/* bmc uses this private member function to initialize the ha_encoding for the given
