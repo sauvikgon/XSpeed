@@ -30,6 +30,7 @@ path bmc::getNextPath(unsigned int forbid_locId)
 	int u = source_ptr->getLocId();
 	unsigned int v = forbid_locId;
 	unsigned int k = this->k;
+	auto list_locations = ha->getAllLocations();
 
 	z3::context c;
 	
