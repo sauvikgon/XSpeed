@@ -16,7 +16,7 @@ bmc::~bmc() {
 }
 
 bmc::bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k){
-	this->ha = ha;
+	this->ha = ha_ptr;
 	this->forbidden_s = forbidden;
 	this->k = k;
 }
@@ -31,8 +31,6 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 	unsigned int v = forbidden_loc_id;
 	unsigned int k = this->k;
 	auto list_locations = ha->getAllLocations();
-
-	z3::context c;
 
 	// INIT Step
 	z3::expr exp1 = c.bool_const("exp1");
@@ -56,8 +54,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 			exp1 = (exp1 && !(x1));
 		}
 	}
-	z3::solver s(c);
-	s.add(exp1);
+	this->sol.add(exp1);
 
 	// NEXT Step
 
@@ -101,7 +98,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 					count++;
 				}
 				exp22 = implies(exp2, exp2a);
-				s.add(exp22);
+				this->sol.add(exp22);
 			}
 		}
 	}
@@ -142,7 +139,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 					count++;
 				}
 				exp22 = implies(exp2, exp2a);
-				s.add(exp22);
+				this->sol.add(exp22);
 			}
 		}
 	}
@@ -185,7 +182,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 				}
 			}
 			exp33 = implies(exp3, exp31);
-			s.add(exp33);
+			this->sol.add(exp33);
 		}
 	}						//End of Exclude Constraint.
 
@@ -198,14 +195,14 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 		array13[i] = char(arr[i]);
 	z3::expr x13 = c.bool_const(array13);
 	exp4 = x13;
-	s.add(exp4);
+	this->sol.add(exp4);
 
 	//Returning the path vector to checkfeasibility()
-	if (s.check() == z3::sat)
+	path p;
+	if (this->sol.check() == z3::sat)
 	{
-		path p;
 		p.resize(k);
-		z3::model m = s.get_model();
+		z3::model m = this->sol.get_model();
 		for (unsigned int i = 0; i <= k; i++)
 		{
 			for (auto it = list_locations.begin(); it != list_locations.end(); it++)
@@ -228,7 +225,6 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 
 	else
 	{
-		path p;
 		p.resize(1);
 		p.at(0) = list_locations.begin()->first;
 		//return p;
