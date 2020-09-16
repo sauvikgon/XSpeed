@@ -58,6 +58,11 @@ public:
 	int getTotalLocations(){
 		return list_locations.size();
 	}
+	
+	std::map<int, location::ptr> getAllLocations(){
+		return list_locations;
+	}
+	
 	/**
 	 * Returns all structural paths in the HA starting from the initial location and ending at the
 	 * forbidden_location (passed as a parameter). The paths of length at-most depth are considered.
