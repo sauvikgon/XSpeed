@@ -33,8 +33,7 @@ class bmc {
 
 	hybrid_automata* ha;
 	forbidden_states forbidden;
-	z3::context c;
-	z3::expr ha_encoding;
+	z3::expr ha_encoding(z3::context c);
 	unsigned int k; // The BMC bound on path-length, i.e., the number of edges.
 
 public:

@@ -26,9 +26,9 @@ bmc::bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k){
  */
 path bmc::getNextPath(unsigned int forbid_locId)
 {
-	location::ptr source_ptr = getInitialLocation();
+	location::ptr source_ptr = ha->getInitialLocation();
 	int u = source_ptr->getLocId();
-	unsigned int v = forbidden_loc_id;
+	unsigned int v = forbid_locId;
 	unsigned int k = this->k;
 
 	z3::context c;
