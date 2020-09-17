@@ -47,7 +47,7 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 		//setNav22Timed(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 20){ // Timed Navigation instance 25 (20 x 20 locations)
-		//setNav25Timed(ha, init_state, reach_parameters);
+		setNav25Timed(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 21){ // Timed Navigation instance navT02_Timed (20 x 20 locations) used in Int. J of STTT without input set
 		//setnavT02_Timedmodel(ha, init_state, reach_parameters);
