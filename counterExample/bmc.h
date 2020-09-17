@@ -34,12 +34,10 @@ class bmc {
 	hybrid_automata* ha;
 	forbidden_states forbidden;
 	z3::context c;
-	z3::expr ha_encoding;
+	z3::expr ha_encoding(z3::context);
 	unsigned int k; // The BMC bound on path-length, i.e., the number of edges.
 
 public:
-
-	bmc();
 
 	/* To be used for BMC when a set of ha locations together assoc. polytopes are forbidden */
 	bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k);

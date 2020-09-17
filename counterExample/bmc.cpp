@@ -7,10 +7,6 @@
 
 #include <counterExample/bmc.h>
 
-bmc::bmc() {
-	// TODO Auto-generated constructor stub
-}
-
 bmc::~bmc() {
 	// TODO Auto-generated destructor stub
 }
