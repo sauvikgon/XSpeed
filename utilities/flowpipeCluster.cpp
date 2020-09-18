@@ -36,7 +36,7 @@ poly_list flowpipe_cluster(template_polyhedra::ptr template_poly, int cluster)
 	return poly_cluster;
 };
 
-bool check_continuation(location::ptr src_loc_ptr, location::ptr dest_loc_ptr, transition::ptr trans_ptr)
+bool check_continuation(location::const_ptr src_loc_ptr, location::const_ptr dest_loc_ptr, transition::ptr trans_ptr)
 {
 	// Check whether the dynamics of the destination and the source location are the same.
 	Dynamics src_d, dest_d;

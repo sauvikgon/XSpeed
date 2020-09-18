@@ -168,7 +168,7 @@ public:
 	 * is violated. If the Inv violation distance is < tol, then it is tolerated.
 	 * Returns the last point of the simulation trace.
 	 */
-	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I, bool &status, double tol);
+	bound_sim bounded_simulation(std::vector<double>, double time, polytope::const_ptr I, bool &status, double tol);
 
 	/**
 	 * Simulate and also compute the distance of the trajectory with a polytope,

@@ -31,7 +31,7 @@ struct LoadBalanceData{
 	std::vector<double> sf_UnitBall;	//Result Support Function of UnitBall for List_dir_X0;
 	std::vector<double> sf_dotProduct;	//Result dotProduct of List_dir_X0 and C (dynamic's expression + C);
 
-	location::ptr current_location;
+	location::const_ptr current_location;
 //location current_location;	//placed here as it is comfortable here
 	unsigned int newIteration;	//placed here as it is comfortable here
 	ReachabilityParameters reach_param;	//placed here as it is comfortable here

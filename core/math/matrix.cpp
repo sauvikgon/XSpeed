@@ -35,13 +35,13 @@ template<typename scalar_type> math::matrix<scalar_type>::matrix(size_type r,
  */
 
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_exponentiation(
-		math::matrix<scalar_type>& res, double time_tau) {
+		math::matrix<scalar_type>& res, double time_tau) const {
 
 	double *m = new double[this->size1()*this->size2()];
 
 	for(unsigned int i=0;i<this->size1();i++){
 		for(unsigned int j=0;j<this->size2();j++){
-			m[i*this->size2() + j] = this->at_element(i,j)*time_tau;
+			m[i*this->size2() + j] = (*this)(i,j)*time_tau;
 		}
 	}
 
@@ -63,13 +63,13 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_exponentia
 
 template<typename scalar_type>
 void math::matrix<scalar_type>::matrix_exponentiation(
-		math::matrix<scalar_type>& res) {
+		math::matrix<scalar_type>& res) const {
 
 	double *m = new double[this->size1()*this->size2()];
 
 	for(unsigned int i=0;i<this->size1();i++){
 		for(unsigned int j=0;j<this->size2();j++){
-			m[i*this->size2() + j] = this->at_element(i,j);
+			m[i*this->size2() + j] = (*this)(i,j);
 		}
 	}
 
@@ -92,7 +92,7 @@ void math::matrix<scalar_type>::matrix_exponentiation(
  */
 
 template<typename scalar_type> void math::matrix<scalar_type>::multiply(
-		matrix& A, matrix& res) {
+		const matrix& A, matrix& res) const {
 
 	assert(this->size2() == A.size1());
 
@@ -147,39 +147,40 @@ template<typename scalar_type> void math::matrix<scalar_type>::scalar_multiply(d
  * Implements the transpose and assings the result to res.
  */
 template<typename scalar_type> void math::matrix<scalar_type>::transpose(
-		matrix& res) {
+		matrix& res) const {
 
 	size_type r = this->size2();
 	size_type c = this->size1();
 	ublas_matrix_impl m(r, c);
 	for (size_type i = 0; i < r; i++) {
 		for (size_type j = 0; j < c; j++)
-			m(i, j) = this->at_element(j, i);
+			m(i, j) = (*this)(j, i);
 	}
 	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
 }
 /**
   * Gets the absolute matrix M = (|m_{i,j}|) in res
   */
-template<typename scalar_type> void math::matrix<scalar_type>::absolute(matrix& res){
+template<typename scalar_type> void math::matrix<scalar_type>::absolute(matrix& res) const {
 	size_type r = this->size1();
 	size_type c = this->size2();
 	ublas_matrix_impl m(r, c);
 	for (size_type i = 0; i < r; i++) {
 		for (size_type j = 0; j < c; j++)
-			m(i, j) = fabs(this->at_element(i, j));
+			m(i, j) = fabs((*this)(i, j));
 	}
 	res = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());	
 }
 
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_copy(
-		math::matrix<scalar_type>& destination) {
+		math::matrix<scalar_type>& destination) const
+{
 	ublas_matrix_impl m(this->size1(), this->size2(), this->data());
 	destination = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
 }
 
 template<typename scalar_type> void math::matrix<scalar_type>::matrix_Identity(int dimension,
-		math::matrix<scalar_type>& newIdentityMatrix) {
+		math::matrix<scalar_type>& newIdentityMatrix) const {
 	//boost::numeric::ublas::identity_matrix<scalar_type> iden(dimension);
 	ublas_matrix_impl m(dimension, dimension);
 	for (int i=0;i<dimension;i++){
@@ -193,7 +194,7 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_Identity(i
 	newIdentityMatrix = math::matrix<scalar_type>(m.size1(), m.size2(), m.data());
 }
 
-template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matrix mat2, matrix& joined_matrix) {
+template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matrix mat2, matrix& joined_matrix) const {
 	size_type row, col;
 	row = this->size1();
 	col = this->size2();
@@ -226,13 +227,13 @@ template<typename scalar_type> void math::matrix<scalar_type>::matrix_join(matri
  * returns the infinity norm of the matrix. inf norm of a matrix m is defined as
  * maximum absolute row sum.
  */
-template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf() {
+template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf() const {
 	scalar_type norm = 0;
 	scalar_type sum;
 	for (size_type i = 0; i < this->size1(); i++) {
 		sum=0;
 		for (size_type j = 0; j < this->size2(); j++) {
-			sum = sum + fabs(this->at_element(i,j));
+			sum = sum + fabs((*this)(i,j));
 		}
 		if (sum > norm)
 			norm = sum;
@@ -245,12 +246,12 @@ template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_inf()
  * max_norm = max(a_{i,j}), 0<=i<r, 0<=j<c
  *
  */
-template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_max() {
+template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_max() const {
 	scalar_type norm = 0;
 	for (size_type i = 0; i < this->size1(); i++) {
 		for (size_type j = 0; j < this->size2(); j++) {
-			if (abs(this->at_element(size_type(i), size_type(j))) > norm)
-				norm = abs(this->at_element(size_type(i), size_type(j)));
+			if (abs((*this)(size_type(i), size_type(j))) > norm)
+				norm = abs((*this)(size_type(i), size_type(j)));
 		}
 	}
 	return norm;
@@ -266,7 +267,7 @@ template<typename scalar_type> scalar_type math::matrix<scalar_type>::norm_max()
 /* Matrix inversion routine.
  Uses lu_factorize and lu_substitute in uBLAS to invert a matrix */
 template<typename scalar_type>
-bool math::matrix<scalar_type>::inverse(math::matrix<scalar_type>& inverse) {
+bool math::matrix<scalar_type>::inverse(math::matrix<scalar_type>& inverse) const {
 	if(!isInvertible())
 		return false;
 	using namespace boost::numeric::ublas;
@@ -283,7 +284,7 @@ bool math::matrix<scalar_type>::inverse(math::matrix<scalar_type>& inverse) {
 }
 
 template<typename scalar_type>
-bool math::matrix<scalar_type>::isInvertible()
+bool math::matrix<scalar_type>::isInvertible() const
 {
 	assert(this->size1() == this->size2());
 	using namespace boost::numeric::ublas;
@@ -302,7 +303,7 @@ bool math::matrix<scalar_type>::isInvertible()
 }
 
 template<typename scalar_type>
-bool math::matrix<scalar_type>::isIdentity()
+bool math::matrix<scalar_type>::isIdentity() const
 {
 	if(this->size1() != this->size2())
 		return false;
@@ -311,9 +312,9 @@ bool math::matrix<scalar_type>::isIdentity()
 
 	for(unsigned int i=0;i<this->size1();i++){
 		for(unsigned int j=0;j<this->size2();j++){
-			if(i==j && this->at_element(size_type(i), size_type(j))!=1)
+			if(i==j && (*this)(size_type(i), size_type(j))!=1)
 				return false;
-			if(i!=j && this->at_element(size_type(i), size_type(j))!=0)
+			if(i!=j && (*this)(size_type(i), size_type(j))!=0)
 				return false;
 		}
 	}

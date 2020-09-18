@@ -78,15 +78,15 @@ void themeSelector::selectReach()
 		}
 	}
 
-/*	plottime.start();
+	plottime.start();
 	show(symbolic_states, userOps);
 	plottime.stop();
-	print_statistics(plottime,"Plotting");
+//	print_statistics(plottime,"Plotting");
 
 	// printing the first initial polytope in the init_poly file
 	polytope::ptr init_poly = (*init.begin())->getInitialSet();
 	init_poly->print2file("./init_poly",userOps.get_first_plot_dimension(),userOps.get_second_plot_dimension());
-	*/
+
 
 }
 void themeSelector::selectSim(){
@@ -96,6 +96,8 @@ void themeSelector::selectSim(){
 }
 void themeSelector::selectFal(){
 	//todo: call the path-oriented falsification routine.
+	bmc bmc_fal(ha, init, forbidden, reach_params, userOps);
+	bool safety = bmc_fal.safe();
 }
 
 void themeSelector::select(){

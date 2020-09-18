@@ -38,8 +38,8 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
  * it returns based on "1-indexing" i.e., if Omega_0, Omega_1 and Omega_2 are completely inside it returns 3 as the
  * number of Omega's that need to be constructed in flowpipe is three.
  */
-void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type, unsigned int &newTotIters);
+void InvariantBoundaryCheck(const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,	int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Sequential Algorithm using support-function-algorithm to perform invariant crossing check
@@ -67,8 +67,8 @@ void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider
  * //Using independent lp_solver object for initial and U polytopes for each invariant faces so that for all iteration same lp_solver object can be called
 //--- this is an optimization technique/property provided by GLPK (glpk being the lp_solver)
  */
-void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters);
+void InvariantBoundaryCheckNewLPSolver(const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::const_ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Using Binary Search Algorithm to perform a Quick Check if an Omega crossing the invariant (uses actual set computation)

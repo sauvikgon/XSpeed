@@ -10,6 +10,9 @@
 
 #include <core/hybridAutomata/hybridAutomata.h>
 #include <core/symbolicStates/symbolicStates.h>
+#include <core/symbolicStates/initialState.h>
+#include <core/continuous/approxModel/fbInterpol.h>
+#include <application/userOptions.h>
 #include <vector>
 #include <list>
 #include <z3++.h>
@@ -31,8 +34,11 @@ typedef std::vector<forbidden> forbidden_states; // vector of forbidden symb sta
 
 class bmc {
 
-	hybrid_automata* ha;
-	forbidden_states forbidden_s;
+	const hybrid_automata& ha;
+	const std::list<initial_state::ptr>& init;
+	const forbidden_states& forbidden_s;
+	const ReachabilityParameters& reach_params;
+	const userOptions& user_ops;
 	z3::context c;
 	z3::expr ha_encoding;
 	z3::solver sol;
@@ -47,7 +53,8 @@ class bmc {
 public:
 
 	/* To be used for BMC when a set of ha locations together with assoc. polytopes are forbidden */
-	bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k);
+	bmc(const hybrid_automata& ha, const std::list<initial_state::ptr>& init, const forbidden_states& forbidden,
+			const ReachabilityParameters& r_params, const userOptions& user_ops);
 
 	virtual ~bmc();
 	/*
@@ -68,7 +75,7 @@ public:
 	 * a return of true however, does not decide the safety of ha faithfully.
 	 * This is due to the incompleteness of the ce search mechanism.
 	 */
-	bool isSafe();
+	bool safe();
 
 	/*
 	 * Updates the ha encoding with a given forbidden location in such a way

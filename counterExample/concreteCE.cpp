@@ -76,7 +76,7 @@ bool concreteCE::valid(struct refinement_point& ref_pt, double valid_tol)
 		locId = seg.first;
 		simulation_sample = seg.second;
 
-		polytope::ptr Inv;
+		polytope::const_ptr Inv;
 		Inv = ha->getLocation(locId)->getInvariant();
 
 		sim = simulation::ptr(new simulation(simulation_sample.first.size(),steps,ha->getLocation(locId)->getSystemDynamics()));

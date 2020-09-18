@@ -31,6 +31,6 @@ poly_list flowpipe_cluster(template_polyhedra::ptr template_poly, int cluster);
  * as the new symbolic state in the waiting list. The reachability is still guaranteed
  * and avoids the loss of precision due to clustering of flowpipe polytopes.
  */
-bool check_continuation(location::ptr src_loc_ptr, location::ptr dest_loc_ptr, transition::ptr trans_ptr);
+bool check_continuation(location::const_ptr src_loc_ptr, location::const_ptr dest_loc_ptr, transition::ptr trans_ptr);
 
 #endif /* UTILITIES_FLOWPIPE_CLUSTER_H_ */

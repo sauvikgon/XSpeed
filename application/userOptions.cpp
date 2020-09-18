@@ -22,7 +22,7 @@ userOptions::userOptions() {
 
 	stream_size =1;	//default set to 1 streams
 }
-std::string userOptions::get_modelFile()
+std::string userOptions::get_modelFile() const
 {
 	return model_filename;
 }
@@ -30,7 +30,7 @@ void userOptions::set_modelFile(std::string modelfile)
 {
 	model_filename = modelfile;
 }
-std::string userOptions::get_configFile()
+std::string userOptions::get_configFile() const
 {
 	return config_filename;
 }
@@ -38,7 +38,7 @@ void userOptions::set_configFile(std::string configfile)
 {
 	config_filename = configfile;
 }
-unsigned int userOptions::get_first_plot_dimension()
+unsigned int userOptions::get_first_plot_dimension() const
 {
 	return output_var_X;
 }
@@ -46,7 +46,7 @@ void userOptions::set_first_plot_dimension(unsigned int outdim)
 {
 	output_var_X = outdim;
 }
-unsigned int userOptions::get_second_plot_dimension()
+unsigned int userOptions::get_second_plot_dimension() const
 {
 	return output_var_Y;
 }
@@ -55,7 +55,7 @@ void userOptions::set_second_plot_dimension(unsigned int outdim)
 	output_var_Y = outdim;
 }
 
-unsigned int userOptions::get_third_plot_dimension()
+unsigned int userOptions::get_third_plot_dimension() const
 {
 	return output_var_Z;
 }
@@ -64,7 +64,7 @@ void userOptions::set_third_plot_dimension(unsigned int outdim)
 	output_var_Z = outdim;
 }
 
-double userOptions::get_timeStep()
+double userOptions::get_timeStep() const
 {
 	return time_step;
 }
@@ -72,7 +72,7 @@ void userOptions::set_timeStep(double t)
 {
 	time_step = t;
 }
-double userOptions::get_timeHorizon()
+double userOptions::get_timeHorizon() const
 {
 	return time_horizon;
 }
@@ -80,7 +80,7 @@ void userOptions::set_timeHorizon(double timeHorizon)
 {
 	time_horizon = timeHorizon;
 }
-unsigned int userOptions::get_model()
+unsigned int userOptions::get_model() const
 {
 	return model;
 }
@@ -88,7 +88,7 @@ void userOptions::set_model(unsigned int m)
 {
 	model = m;
 }
-unsigned int userOptions::get_directionTemplate()
+unsigned int userOptions::get_directionTemplate() const
 {
 	return direction_template;
 }
@@ -96,7 +96,7 @@ void userOptions::set_directionTemplate(unsigned int d)
 {
 	 direction_template = d;
 }
-unsigned int userOptions::get_bfs_level()
+unsigned int userOptions::get_bfs_level() const
 {
 	return level;
 }
@@ -121,7 +121,7 @@ void userOptions::set_automata_exploration_algorithm(unsigned int exp_alg)
 	automata_exploration_algorithm = exp_alg;
 }*/
 
-std::string userOptions::get_forbidden_set()
+std::string userOptions::get_forbidden_set() const
 {
 	return forbidden_state;
 }
@@ -135,7 +135,7 @@ userOptions::~userOptions() {
 }
 
 
-unsigned int userOptions::get_algorithm() {
+unsigned int userOptions::get_algorithm() const {
 	return algo;	//returns the selected Algorithm
 }
 
@@ -143,7 +143,7 @@ void userOptions::set_algorithm(unsigned int alg) {
 	algo =alg;	//assigns the Algorithm selected by the user
 }
 
-unsigned int userOptions::get_simu_algo() {
+unsigned int userOptions::get_simu_algo() const {
 	return simu_algo;	//returns the selected simulation Algorithm
 }
 
@@ -199,22 +199,22 @@ void userOptions::setCEProc(const std::string& ceproc) {
 	ce_procedure = ceproc;
 }
 
-std::string& userOptions::getCEProc() {
+std::string userOptions::getCEProc() const {
 	return ce_procedure;
 }
 
-unsigned int userOptions::get_simu_init_points(){
+unsigned int userOptions::get_simu_init_points() const{
 	return simu_init_points;
 }
 void userOptions::set_simu_init_points(unsigned int sampling_points){
 	simu_init_points = sampling_points;
 }
 
-void userOptions::setOutFilename(const std::string& outFilename) {
+void userOptions::setOutFilename(const std::string& outFilename){
 	out_filename = outFilename;
 }
 
-std::string  userOptions::get_ce_path(){
+std::string  userOptions::get_ce_path() const {
 	return this->ce_path;
 }
 
@@ -223,7 +223,7 @@ void userOptions::set_ce_path(std::string path)
 	this->ce_path = path;
 }
 
-bool userOptions::get_ce_flag()
+bool userOptions::get_ce_flag() const
 {
 	return this->ce_flag;
 }

@@ -18,6 +18,6 @@
  * The definition of point to polytope distance is as defined in the
  * polytope.cpp class implementation
  */
-std::vector<double> dist_grad(std::vector<double> x, polytope::ptr I);
+std::vector<double> dist_grad(std::vector<double> x, polytope::const_ptr I);
 
 #endif /* GRADIENT_H_ */

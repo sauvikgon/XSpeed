@@ -82,7 +82,7 @@ scalar_type support_unitball_infnorm(std::vector<scalar_type> dir) {
  */
 
 template<typename scalar_type>
-scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
+scalar_type compute_beta(const Dynamics& SysD, scalar_type& tau,
 		int lp_solver_type) {
 
 	scalar_type norm_A = 0.0, result;
@@ -94,7 +94,6 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
 	double V_max_norm = 0.0;
 
 	if (!SysD.isEmptyMatrixB) { //if NOT Empty
-
 		SysD.MatrixB.transpose(Btrans);
 		dim_for_Max_norm = SysD.MatrixB.size1();
 		supportFunctionProvider::ptr Vptr = transMinkPoly::ptr(
@@ -126,7 +125,7 @@ scalar_type compute_beta(Dynamics& SysD, scalar_type& tau,
  */
 
 template<typename scalar_type>
-scalar_type compute_alfa(scalar_type tau, Dynamics& system_dynamics,
+scalar_type compute_alfa(scalar_type tau, const Dynamics& system_dynamics,
 		supportFunctionProvider::ptr I, int lp_solver_type) // polytope V
 {
 

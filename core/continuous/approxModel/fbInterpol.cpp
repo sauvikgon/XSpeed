@@ -3,7 +3,7 @@
 fb_interpol::~fb_interpol(){
 }
 
-fb_interpol::fb_interpol(math::matrix<double>& my_A, polytope::ptr X0, polytope::ptr U, math::matrix<double>& my_B,
+fb_interpol::fb_interpol(const math::matrix<double>& my_A, polytope::const_ptr X0, polytope::const_ptr U, const math::matrix<double>& my_B,
 		double delta, unsigned int num_dirs, unsigned int num_iters) : approx_model(my_A, my_B, X0, U, delta)
 {
 	math::matrix<double> absolute_A;

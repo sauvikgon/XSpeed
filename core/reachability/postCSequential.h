@@ -37,21 +37,21 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
  */
 
 // A sequential postC - approximation model of Colas et. al.
-template_polyhedra::ptr postC_sf(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
+template_polyhedra::ptr postC_sf(unsigned int NewTotalIteration, const Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
+		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
 		bool InvariantExist, int lp_solver_type);
 
 // A sequential postC - forward-backward interpolation model of CAV'11.
-template_polyhedra::ptr postC_fbinterpol(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
+template_polyhedra::ptr postC_fbinterpol(unsigned int NewTotalIteration, const Dynamics& SystemDynamics,
 		polytope::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
-		bool InvariantExist, int lp_solver_type);
+		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
+		bool InvariantExist);
 
 //--
-template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned int NewTotalIteration, Dynamics& SystemDynamics,
+template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned int NewTotalIteration, const Dynamics& SystemDynamics,
 		supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
+		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
 		bool InvariantExist, int lp_solver_type);
 
 #endif /* REACHABILITY_SEQ_H_ */

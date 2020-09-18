@@ -200,7 +200,7 @@ std::vector<double> simulation::simulate(std::vector<double> x, double time) {
  */
 
 bound_sim simulation::bounded_simulation(std::vector<double> x, double time,
-		polytope::ptr I, bool& status, double tol) {
+		polytope::const_ptr I, bool& status, double tol) {
 
 	int flag;
 	realtype T0 = 0;
@@ -579,7 +579,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 	std::list<eligibleTransition> etrans_list;
 
 	location::ptr loc = start_point.locptr;
-	polytope::ptr inv = loc->getInvariant();
+	polytope::const_ptr inv = loc->getInvariant();
 	unsigned int this_loc_id = loc->getLocId();
 
 	//Computing guard-invariant intersection and bloating the set with time-step
@@ -735,9 +735,9 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 			if (dist == 0) { //just intersected the guard
 				sim_start_point w;
 				int locID = it->trans->getDestinationLocationId();
-				location::ptr loc = ha.getLocation(locID);
-//				cout<<"Intersected with the Guard and Destination LocationID="<<locID<<endl;
-				w.locptr = loc;
+				location::const_ptr loc = ha.getLocation(locID);
+				location::ptr l = location::ptr(new location(*loc));
+				w.locptr = l;
 				w.cross_over_time = tout1 + tout;
 //				cout<<"w.cross_over_time = "<<w.cross_over_time<<endl;
 				//Now assignment operation of the transition to be performed
@@ -746,7 +746,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 				mapped_point = it->trans->applyTransitionMap(v);
 
 				w.start_point = mapped_point;
-				polytope::ptr new_inv = w.locptr->getInvariant();
+				polytope::const_ptr new_inv = w.locptr->getInvariant();
 
 				double dist1 = new_inv->point_distance(w.start_point);
 				if (dist1 == 0){ // the new point is within the invariant of the new location
