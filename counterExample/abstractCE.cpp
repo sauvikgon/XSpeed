@@ -1330,7 +1330,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, std::string& algo
 
 	concreteCE::ptr cexample;
 	bool val_res = true;
-	unsigned int max_refinements = 3, ref_count = 0; // maximum limit to refinement points to be added.
+	unsigned int max_refinements = 10, ref_count = 0; // maximum limit to refinement points to be added.
 
 	double valid_tol = 1e-5; // validation error tolerance, on invariant crossing.
 
