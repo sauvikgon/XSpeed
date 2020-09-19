@@ -12,7 +12,7 @@
  * The definition of point to polytope distance is as defined in the
  * polytope.cpp class implementation
  */
-std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::ptr I) {
+std::vector<double> dist_grad(std::vector<double> trace_end_pt, polytope::const_ptr I) {
 	if(I->getIsUniverse() || I->getIsEmpty())
 		return std::vector<double>(trace_end_pt.size(),0);
 

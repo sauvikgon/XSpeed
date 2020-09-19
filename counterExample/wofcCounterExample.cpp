@@ -40,11 +40,11 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 		abst_ce->set_length(symbolic_ce_length);
 
 		std::list<symbolic_states::ptr> list_sym_states;
-		std::list<location::ptr> locs_path = (*it)->get_path_locations();
+		std::list<location::const_ptr> locs_path = (*it)->get_path_locations();
 
 		unsigned int path_index = 0; // This is an index to the location on the path during a traversal.
 
-		for (std::list<location::ptr>::iterator itloc = locs_path.begin();
+		for (std::list<location::const_ptr>::iterator itloc = locs_path.begin();
 				itloc != locs_path.end(); itloc++, path_index++) {
 			symbolic_states::ptr sym_states = symbolic_states::ptr(new symbolic_states());
 			if(path_index==0)
@@ -114,7 +114,7 @@ bool gen_counter_example_WoFC(abstractCE::ptr abs_path,
 	double splicing_error_tol = 1e-6; // A parameter particular to counter-example searching
 
 
-	std::string& algo_type = user_options.getCEProc(); // A parameter particular to mentioning the type of ce search algorithm to use 1 (FC) uses the method using flowpipe constraints and 2 uses the method using flowpipe constraints (WoFC)
+	std::string algo_type = user_options.getCEProc(); // A parameter particular to mentioning the type of ce search algorithm to use 1 (FC) uses the method using flowpipe constraints and 2 uses the method using flowpipe constraints (WoFC)
 	string ce_path = user_options.get_ce_path();
 	boost::timer::cpu_timer clock; // clocks the time taken to splice a trajectory
 

@@ -102,7 +102,8 @@ bool polytope::isBounded() const
 	 * A true algorithm to check for boundeded is to be implemented. later.
 	 */
 }
-math::matrix<double>& polytope::getCoeffMatrix() {
+
+const math::matrix<double>& polytope::getCoeffMatrix() const {
 	return this->coeffMatrix;
 }
 void polytope::setCoeffMatrix(const math::matrix<double> coeffMatrix) {
@@ -178,7 +179,7 @@ void polytope::setColumnVector(const std::vector<double> columnVector) {
 	this->columnVector = columnVector;
 	this->setNumberFacets(columnVector.size());
 }
-std::vector<double> polytope::getColumnVector() {
+std::vector<double> polytope::getColumnVector() const {
 	return columnVector;
 }
 
@@ -261,27 +262,30 @@ double polytope::max_norm(int lp_solver_type,
 	return Max;
 }
 
-const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
+polytope::ptr polytope::GetPolytope_Intersection(polytope::const_ptr gPoly) const{
+
+	polytope::ptr res_poly = polytope::ptr(new polytope(*gPoly));
 
 	assert(gPoly != NULL);
-	if(gPoly->IsUniverse)
+	if(res_poly->IsUniverse)
 	{
 		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign()));
 	}
-	if(gPoly->IsEmpty)
-		return gPoly; // return empty polytope pointer
+
+	if(res_poly->IsEmpty)
+		return res_poly; // return empty polytope pointer
 
 	if(this->IsUniverse) // This polytope is universe
-		return gPoly; // Intersection of universe polytope with any polytope P results in P
+		return res_poly; // Intersection of universe polytope with any polytope P results in P
 
 	if(this->IsEmpty) // Intersection of an empty polytope with any polytope will result in an empty polytope.
 		return polytope::ptr(new polytope(true));
 
 	math::matrix<double> total_coeffMatrix, m1;
 	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
-	m1.matrix_join(gPoly->getCoeffMatrix(), total_coeffMatrix);
+	m1.matrix_join(res_poly->getCoeffMatrix(), total_coeffMatrix);
 	std::vector<double> total_columnVector;
-	total_columnVector = vector_join(this->getColumnVector(), gPoly->getColumnVector());
+	total_columnVector = vector_join(this->getColumnVector(), res_poly->getColumnVector());
 
 	polytope::ptr newp = polytope::ptr(
 			new polytope(total_coeffMatrix, total_columnVector, 1));
@@ -361,7 +365,7 @@ void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytop
 	resPoly->setPolytope(templatedDir,colVector,this->getInEqualitySign());
 }
 
-bool polytope::contains(polytope::ptr poly, int lp_solver_type){
+bool polytope::contains(polytope::const_ptr poly, int lp_solver_type) const {
 
 	assert(this->getCoeffMatrix().size2() == poly->getCoeffMatrix().size2());	//same dimension
 	//assert(this->getCoeffMatrix().size1() == poly->getCoeffMatrix().size1());	//same number of constraints
@@ -494,7 +498,7 @@ math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
 	return my_vertices;
 }
 
-double polytope::point_distance(std::vector<double> v){
+double polytope::point_distance(std::vector<double> v) const{
 	if(this->IsUniverse)
 		return 0;
 	if(this->IsEmpty){

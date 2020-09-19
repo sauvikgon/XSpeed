@@ -22,7 +22,7 @@
 class structuralPath
 {
 
-	std::list<location::ptr> path_locations; // the list containing the locations of the path, in order
+	std::list<location::const_ptr> path_locations; // the list containing the locations of the path, in order
 	std::list<transition::ptr> path_transitions; // the list containing the transitions of the path, in order
 
 public:
@@ -30,7 +30,7 @@ public:
 	typedef boost::shared_ptr<structuralPath> ptr;
 
 	structuralPath(){};
-	structuralPath(std::list<location::ptr> path_locs, std::list<transition::ptr> path_trans){
+	structuralPath(std::list<location::const_ptr> path_locs, std::list<transition::ptr> path_trans){
 		this->path_locations = path_locs;
 		this->path_transitions = path_trans;
 	}
@@ -44,7 +44,7 @@ public:
 	/**
 	 * Returns the list of locations in the structural HA path
 	 */
-	std::list<location::ptr> get_path_locations(){return this->path_locations;};
+	std::list<location::const_ptr> get_path_locations(){return this->path_locations;};
 
 	/**
 	 * Returns the list of transitions in the structural HA path

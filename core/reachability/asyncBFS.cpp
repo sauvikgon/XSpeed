@@ -144,7 +144,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 	reach_parameters.X0 = continuous_initial_polytope;
 	symbolic_states::ptr S;
 
-	location::ptr current_location;
+	location::const_ptr current_location;
 
 	current_location = myData.H->getLocation(location_id);
 	string name = current_location->getName();
@@ -160,8 +160,7 @@ template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 	math::matrix<double> phi_matrix, phi_trans;
 
 	if (!current_location->getSystemDynamics().isEmptyMatrixA) { //if A not Empty
-		current_location->getSystemDynamics().MatrixA.matrix_exponentiation(
-				phi_matrix, reach_parameters.time_step);
+		current_location->getSystemDynamics().MatrixA.matrix_exponentiation(phi_matrix, reach_parameters.time_step);
 		phi_matrix.transpose(phi_trans);
 		reach_parameters.phi_trans = phi_trans;
 	}
@@ -227,16 +226,16 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 	template_polyhedra::ptr reach_region= symb->getContinuousSetptr();
 	int locId = *(symb->getDiscreteSet().getDiscreteElements().begin());
 
-	location::ptr current_location = myData.H->getLocation(locId);
+	location::const_ptr current_location = myData.H->getLocation(locId);
 	std::list<initial_state::ptr> res;
 
 	if (reach_region->getTotalIterations() != 0) { //computed reach_region is empty && optimize transition BreadthLevel-wise
 
-		for (std::list<transition::ptr>::iterator t = current_location->getOutGoingTransitions().begin();
+		for (std::list<transition::ptr>::const_iterator t = current_location->getOutGoingTransitions().begin();
 				t != current_location->getOutGoingTransitions().end(); t++) { // get each destination_location_id and push into the pwl.waiting_list
 			int transition_id = (*t)->getTransitionId();
 
-			location::ptr current_destination;
+			location::const_ptr current_destination;
 			Assign current_assignment;
 			polytope::ptr guard_polytope;
 			//std::list < template_polyhedra::ptr > intersected_polyhedra;

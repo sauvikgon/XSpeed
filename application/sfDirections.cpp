@@ -66,7 +66,7 @@ std::vector<std::vector<double> > get_octagonal_directions(unsigned int dim) {
  * Now making the index suitable for parallelizing using #pragma OMP parallel for each numVectors
  */
 void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachParameters,
-		unsigned int newiters, math::matrix<float> &list_X0, math::matrix<float> &list_U, bool U_empty, Dynamics& SystemDynamics) {
+		unsigned int newiters, math::matrix<float> &list_X0, math::matrix<float> &list_U, bool U_empty, const Dynamics& SystemDynamics) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = ReachParameters.Directions.size2();

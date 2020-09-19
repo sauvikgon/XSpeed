@@ -9,8 +9,8 @@
 
 
 //Parallel sf sampling  using OMP
-const template_polyhedra::ptr postC_lazySf(unsigned int boundedTotIteration, Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, polytope::ptr invariant,
+const template_polyhedra::ptr postC_lazySf(unsigned int boundedTotIteration, const Dynamics& SystemDynamics,
+		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
 		bool InvariantExist, int lp_solver_type) {
 
 	int numVectors = ReachParameters.Directions.size1();
@@ -181,8 +181,8 @@ const template_polyhedra::ptr postC_lazySf(unsigned int boundedTotIteration, Dyn
 	}
 }
 
-const template_polyhedra::ptr postC_timeslice(unsigned int NewTotalIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool invariantExist, int CORES,
+const template_polyhedra::ptr postC_timeslice(unsigned int NewTotalIteration, const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant, bool invariantExist, int CORES,
 		unsigned int Algorithm_Type, int lp_solver_type) {
 	double T = ReachParameters.TimeBound;
 	//double original_time_step = ReachParameters.time_step;
@@ -214,7 +214,6 @@ const template_polyhedra::ptr postC_timeslice(unsigned int NewTotalIteration, Dy
 		template_polyhedra::ptr Tpoly=template_polyhedra::ptr(new template_polyhedra());
 		math::matrix<double> phi, phi_trans, A_inv_phi, y_matrix, y_trans;
 		double START_TIME = i * newTimeBound; //first iteration START_TIME = i = 0 which make beta = 0
-		//std::cout<<"i and START_TIME are = "<<i<< "    "<< START_TIME<<"\n";
 		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
 		phi.transpose(phi_trans); //phi_trans computed
 

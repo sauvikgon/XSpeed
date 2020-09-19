@@ -66,7 +66,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad,
 
 	std::ofstream myfile;
 
-	polytope::ptr I;
+	polytope::const_ptr I;
 
 	for (unsigned int i = 0; i < N; i++) {
 
@@ -350,7 +350,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 	math::matrix<double> A;
 	std::vector < double > myAxPlusb(dim), mapAxplusb;
 
-	polytope::ptr I;
+	polytope::const_ptr I;
 
 	for (unsigned int i = 0; i < N; i++) {
 

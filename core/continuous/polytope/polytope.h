@@ -51,6 +51,7 @@ private:
 
 public:
 	typedef boost::shared_ptr<polytope> ptr;
+	typedef boost::shared_ptr<const polytope> const_ptr;
 	polytope();
 	polytope(bool empty);
 	polytope(math::matrix<double> coeffMatrix, std::vector<double> columnVector,
@@ -76,13 +77,13 @@ public:
 	 */
 	void setMoreConstraints(math::matrix<double> coeff_constraints,std::vector<double> bound_values);
 
-	math::matrix<double>& getCoeffMatrix();
+	const math::matrix<double>& getCoeffMatrix() const;
 	void setCoeffMatrix(const math::matrix<double> coeffMatrix);
 	void setColumnVector(const std::vector<double> columnVector);
 
 	int getInEqualitySign() const;
 	void setInEqualitySign(int inEqualitySign);
-	std::vector<double> getColumnVector();
+	std::vector<double> getColumnVector() const;
 
 	unsigned int getSystemDimension() const; //returns the number of variables of the polytopes.
 	void setSystemDimension(unsigned int systemDimension); 
@@ -105,7 +106,7 @@ public:
 	 * Returns a new polytope after appending the constraints of P2
 	 * which is an intersection-region
 	 */
-	const polytope::ptr GetPolytope_Intersection(polytope::ptr P2);
+	polytope::ptr GetPolytope_Intersection(polytope::const_ptr P2) const;
 
 	/*
 	 * Returns as reference parameter resPoly by taking a Hull in the templated direction
@@ -123,7 +124,7 @@ public:
 	 *
 	 * 		Such an operations can be done by solving LPs of order equal to the number of templated directions
 	 */
-	bool contains(polytope::ptr poly, int lp_solver_type);
+	bool contains(polytope::const_ptr poly, int lp_solver_type) const;
 
 	/**
 	 * Enumerate all vertices of the polytope between the two vectors
@@ -153,7 +154,7 @@ public:
 	 * is returned. Otherwise, the distance is the sum of
 	 * distances of the point to all the faces.
 	 */
-	double point_distance(std::vector<double> v);
+	double point_distance(std::vector<double> v) const;
 
 	/*
 	 * Prints the vertices of the polytope on the std::cout, passed as parameter.

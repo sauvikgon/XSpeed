@@ -8,8 +8,8 @@
 #include <utilities/dataStructures.h>
 #include "../utilities/invariantBoundaryCheck.h"
 
-void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
+void InvariantBoundaryCheck(const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::const_ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	//std::cout<<"\nTotal is "<<shm_NewTotalIteration <<std::endl;
@@ -361,8 +361,8 @@ void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider
 
 //Using independent lp_solver object for initial and U polytopes for each invariant faces so that for all iteration same lp_solver object can be called
 //--- this is an optimization technique/property provided by GLPK (glpk being the lp_solver)
-void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
+void InvariantBoundaryCheckNewLPSolver(const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::const_ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	newTotIters = shm_NewTotalIteration;	//by default full iterations. This is modified if smaller value found

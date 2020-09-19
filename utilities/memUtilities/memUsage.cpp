@@ -10,8 +10,9 @@
 #include  <iostream>
 #include <sys/sysctl.h>
 #include <sys/types.h>
-
 #include <utilities/memUtilities/memUsage.h>
+
+
 using namespace std;
 
 #if defined(__MACH__)

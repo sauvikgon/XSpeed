@@ -50,7 +50,7 @@ public:
 	const math::matrix<double>& getTemplateDirections() const;
 	void setTemplateDirections(math::matrix<double>& template_Directions);
 	const math::matrix<double>& getInvariantDirections() const;
-	void setInvariantDirections(math::matrix<double>& invariant_Directions);
+	void setInvariantDirections(const math::matrix<double>& invariant_Directions);
 
 	const math::matrix<double>& getMatrix_InvariantBound() const;
 	void setMatrix_InvariantBound(math::matrix<double>& matrix_invariantBound);
@@ -92,7 +92,7 @@ public:
 	/*
 	 * Returns a list of polytopes as the convex_hull approximation of intersection of guard and flowpipe
 	 */
-	std::list<polytope::ptr> postD_chull(polytope::ptr guard, polytope::ptr inv, int lp_solver_type);
+	std::list<polytope::ptr> postD_chull(polytope::ptr guard, polytope::const_ptr inv, int lp_solver_type);
 
 	/*
 	 * From the calling TEMPLATE_POLYHEDRA a SINGLE POLYTOPE is returned.

@@ -7,18 +7,15 @@
 
 #include <counterExample/bmc.h>
 
-bmc::bmc() : c(), ha_encoding(c), sol(c)  {
-	// TODO Auto-generated constructor stub
-}
-
 bmc::~bmc() {
 	// TODO Auto-generated destructor stub
 }
 
-bmc::bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k) : c(), ha_encoding(c), sol(c){
-	this->ha = ha_ptr;
-	this->forbidden_s = forbidden;
-	this->k = k;
+bmc::bmc(const hybrid_automata& ha, const std::list<initial_state::ptr>& init,
+		const forbidden_states& forbidden, const ReachabilityParameters& r_params,
+		const userOptions& user_ops) : ha(ha), init(init), forbidden_s(forbidden),
+				reach_params(r_params), user_ops(user_ops), c(), ha_encoding(c), sol(c){
+	this->k = user_ops.get_bfs_level();
 }
 
 /*
@@ -26,11 +23,10 @@ bmc::bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k) :
  */
 void bmc::init_solver(unsigned int forbidden_loc_id)
 {
-	location::ptr source_ptr = ha->getInitialLocation();
+	location::ptr source_ptr = ha.getInitialLocation();
 	int u = source_ptr->getLocId();
 	unsigned int v = forbidden_loc_id;
-	unsigned int k = this->k;
-	auto list_locations = ha->getAllLocations();
+	auto list_locations = ha.getAllLocations();
 
 	// INIT Step
 	z3::expr exp1 = c.bool_const("exp1");
@@ -197,8 +193,15 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 	exp4 = x13;
 	this->sol.add(exp4);
 
-	//Returning the path vector to checkfeasibility()
+}
+/*
+ *
+ */
+path bmc::getNextPath()
+{
 	path p;
+	auto list_locations = ha.getAllLocations();
+
 	if (this->sol.check() == z3::sat)
 	{
 		p.resize(k);
@@ -207,8 +210,8 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 		{
 			for (auto it = list_locations.begin(); it != list_locations.end(); it++)
 			{
-				arr = "v" + to_string(it->first)+"_" + to_string(i);
-				l = arr.length();
+				string arr = "v" + to_string(it->first)+"_" + to_string(i);
+				unsigned int l = arr.length();
 				char array14[l];
 				for (unsigned int i = 0 ; i < l; i++)
 					array14[i] = char(arr[i]);
@@ -220,22 +223,13 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 				}
 			}
 		}
-		//return p;
 	}
-
 	else
 	{
 		p.resize(1);
 		p.at(0) = list_locations.begin()->first;
-		//return p;
 	}
-}
-/*
- *
- */
-path bmc::getNextPath()
-{
-	
+	return p;
 }
 
 /*
@@ -243,15 +237,21 @@ path bmc::getNextPath()
  * and return the result as a list of symbolic states.
  */
 region bmc::getPathRegion(path p){
-	region r;
-	return r;
+	region reach_region;
+
+	for(unsigned int i=0;i<p.size();i++){
+		unsigned int locId = p[i];
+		auto current_location = ha.getLocation(locId);
+		//reach_region = postC_fbinterpol(iters, current_location->getSystemDynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist());
+	}
+	return reach_region;
 }
 
 void bmc::update_encoding(path p){
 
 }
 
-bool bmc::isSafe(){
+bool bmc::safe(){
 
 	// iterate over the forbidden states
 	for(unsigned int i=0;i<forbidden_s.size();i++){

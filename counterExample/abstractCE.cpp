@@ -698,11 +698,11 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		Dynamics D;
 		math::matrix<double> expAt; // To contain the e^At matrix, for the fixed time.
 		unsigned int loc_id = locIdList[i];
-		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
+		location::const_ptr ha_loc_ptr = HA->getLocation(loc_id);
 		D = ha_loc_ptr->getSystemDynamics();
 		D.MatrixA.matrix_exponentiation(expAt, dwell_times[i]);
 
-		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+		polytope::const_ptr loc_inv = ha_loc_ptr->getInvariant();
 		// Now, we calculate v = A^{-1}.(e^{At} - I)* D.C
 		std::vector<double> v = ODESol_inhomogenous(D, dwell_times[i]);
 
@@ -769,8 +769,8 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	S = get_symbolic_state(N - 1);
 	polytope::ptr P;
 	unsigned int loc_id = locIdList[N - 1];	//last location
-	location::ptr ha_loc_ptr = HA->getLocation(loc_id);
-	polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+	location::const_ptr ha_loc_ptr = HA->getLocation(loc_id);
+	polytope::const_ptr loc_inv = ha_loc_ptr->getInvariant();
 
 	P = bad_poly->GetPolytope_Intersection(loc_inv); //Invariant with Bad poly
 	lp_solver lp(GLPK_SOLVER);
@@ -905,8 +905,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		S = get_symbolic_state(i);
 
 		unsigned int loc_id = locIdList[i];	//location ID
-		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
-		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+		location::const_ptr ha_loc_ptr = HA->getLocation(loc_id);
+		polytope::const_ptr loc_inv = ha_loc_ptr->getInvariant();
 
 		polytope::ptr P;
 		if (i == N - 1) {
@@ -1184,7 +1184,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	//myopt.set_maxeval(maxeval);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
-	polytope::ptr P;
+	polytope::const_ptr P;
 
 	// A random objective function created for lp solving
 	std::vector<double> lb(optD), ub(optD);
@@ -1206,12 +1206,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			T = *(trans_iter);
 			assert(T!=NULL);
 
-			location::ptr src_loc = HA->getLocation(T->getSourceLocationId());
-			location::ptr dest_loc = HA->getLocation(
+			location::const_ptr src_loc = HA->getLocation(T->getSourceLocationId());
+			location::const_ptr dest_loc = HA->getLocation(
 					T->getDestinationLocationId());
 
-			polytope::ptr src_loc_inv = src_loc->getInvariant();
-			polytope::ptr dest_loc_inv = dest_loc->getInvariant();
+			polytope::const_ptr src_loc_inv = src_loc->getInvariant();
+			polytope::const_ptr dest_loc_inv = dest_loc->getInvariant();
 
 			P = dest_loc_inv;
 			assert(P!=NULL);
@@ -1230,8 +1230,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			}
 		} else {
 			lp_solver lp(GLPK_SOLVER);
-			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-					P->getInEqualitySign());
+			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 
 			//we add bound constraints on the position parameters
 			std::vector<double> dir(dim, 0);

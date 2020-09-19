@@ -86,7 +86,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			S[id]->setDiscreteSet(discrete_state);
 			S[id]->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
-			location::ptr current_location;
+			location::const_ptr current_location;
 			current_location = H->getLocation(location_id);
 			string name = current_location->getName();
 			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
@@ -225,7 +225,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 
 					loadBalPostD[id].polys_list.resize(transition_size);
 					unsigned int index=0; // for guard_list, assign_list if they are vector
-					for (std::list<transition::ptr>::iterator trans =LoadBalanceDS[id].current_location->getOutGoingTransitions().begin();
+					for (std::list<transition::ptr>::const_iterator trans =LoadBalanceDS[id].current_location->getOutGoingTransitions().begin();
 						trans!= LoadBalanceDS[id].current_location->getOutGoingTransitions().end(); trans++) { // get each destination_location_id and push into the pwl.waiting_list
 						loadBalPostD[id].guard_list[index] = (*trans)->getGuard();
 						loadBalPostD[id].assign_list[index] = (*trans)->getAssignT();
