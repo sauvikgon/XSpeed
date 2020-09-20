@@ -29,8 +29,7 @@ polytope::ptr create_polytope_set(supportFunctionProvider::ptr Initial,
 		}
 		columnvector[i] = Initial->computeSupportFunction(direction, lp);
 	}
-	polytope::ptr p = polytope::ptr(
-			new polytope(ReachParameters.Directions, columnvector, 1));
+	polytope::ptr p = polytope::ptr(new polytope(ReachParameters.Directions, columnvector, 1));
 
 	return p;
 }

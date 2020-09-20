@@ -38,7 +38,7 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
  * it returns based on "1-indexing" i.e., if Omega_0, Omega_1 and Omega_2 are completely inside it returns 3 as the
  * number of Omega's that need to be constructed in flowpipe is three.
  */
-void InvariantBoundaryCheck(const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+void InvariantBoundaryCheck(const Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,	int lp_solver_type, unsigned int &newTotIters);
 
 /*
@@ -51,7 +51,7 @@ void InvariantBoundaryCheck(const Dynamics& SystemDynamics, supportFunctionProvi
  * it returns based on "1-indexing" i.e., if Omega_0, Omega_1 and Omega_2 are completely inside it returns 3 as the
  * number of Omega's that need to be constructed in flowpipe is three.
  */
-void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,	int lp_solver_type, unsigned int &newTotIters);
 
 
@@ -67,20 +67,20 @@ void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider
  * //Using independent lp_solver object for initial and U polytopes for each invariant faces so that for all iteration same lp_solver object can be called
 //--- this is an optimization technique/property provided by GLPK (glpk being the lp_solver)
  */
-void InvariantBoundaryCheckNewLPSolver(const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+void InvariantBoundaryCheckNewLPSolver(const Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial, ReachabilityParameters& ReachParameters,
 		polytope::const_ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Using Binary Search Algorithm to perform a Quick Check if an Omega crossing the invariant (uses actual set computation)
  * Returns the iterations(=Time-horizon/time-step), when the flowpipe is completely outside
  */
-void quickInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+void quickInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 /*
  * Returns an initialSet at time equals to START_TIME uses the transMinkPoly class to get the transposed Set at time equals to START_TIME
  */
-supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics);
+supportFunctionProvider::const_ptr getInitialSet(double START_TIME, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics);
 
 /*
  * Uses the Binary Search algorithm to perform invariant boundary check
@@ -88,13 +88,13 @@ supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParame
  * iterations that is supplied by the user otherwise, when the invariant is in-between then Binary Search Algo is performed
  */
 unsigned int invariantCheck(std::vector<double>& pos_dir, std::vector<double>& neg_dir, double SearchKey, ReachabilityParameters& ReachParameters,
-		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, int lp_solver_type);
+		Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial, int lp_solver_type);
 
 
 //Invariant check using Slow-Start incremental time-step
 //NOTE :: this approach of increasing the time-step does not work in support-function algorithm
 // as change in time-step increases rate of bloating 'error'
-void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,supportFunctionProvider::ptr Initial,
+void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParametersOld, polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 /*
@@ -106,7 +106,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,supportFunctionPro
  * it returns based on "1-indexing" i.e., if Omega_0, Omega_1 and Omega_2 are completely inside it returns 3 as the
  * number of Omega's that need to be constructed in flowpipe is three.
  */
-void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters);
 
 
@@ -121,7 +121,7 @@ double invariantFaceCrossingCheck(std::vector<double>& neg_dir, double invBound,
  * Returns the time-bound when a convex set represented by support-function (Initial), just crosses the invariant bound
  * efficient approach to detect flowpipe cost estimation.
  */
-double invariantCrossingCheck1(double START_TIME, double time_step, double time_horizon, supportFunctionProvider::ptr Initial,
+double invariantCrossingCheck1(double START_TIME, double time_step, double time_horizon, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, Dynamics& SystemDynamics, int lp_solver_type, std::string fileName);
 
 /*

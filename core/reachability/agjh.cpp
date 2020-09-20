@@ -348,7 +348,7 @@ template_polyhedra::ptr agjh::postC(initial_state::ptr s){
 	d.insert_element(location_id); //creating discrete_state
 
 	//continuous_initial_polytope = U.getInitial_ContinousSetptr();
-	polytope::ptr continuous_initial_polytope;
+	polytope::const_ptr continuous_initial_polytope;
 	continuous_initial_polytope = s->getInitialSet();
 
 	ReachabilityParameters reach_parameters; //local

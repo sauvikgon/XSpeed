@@ -234,15 +234,125 @@ path bmc::getNextPath()
 
 /*
  * Performs symbolic reachability analysis on a given path p
- * and return the result as a list of symbolic states.
+ * and returns the result as a list of symbolic states.
+ * the feasible flag is set false if the path is found not reachable
+ * in the ha dynamics.
  */
-region bmc::getPathRegion(path p){
+region bmc::getPathRegion(path p, bool& feasible){
+
 	region reach_region;
 
-	for(unsigned int i=0;i<p.size();i++){
-		unsigned int locId = p[i];
-		auto current_location = ha.getLocation(locId);
-		//reach_region = postC_fbinterpol(iters, current_location->getSystemDynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist());
+	for(auto it = init.begin(); it!=init.end();it++){
+		template_polyhedra::ptr flowpipe;
+		initial_state::ptr ini= *it;
+		polytope::const_ptr init_poly = ini->getInitialSet();
+
+		for(unsigned int i=0;i<p.size();i++){
+
+			unsigned int locId = p[i];
+			auto current_location = ha.getLocation(locId);
+			flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), init_poly, reach_params,
+					current_location->getInvariant(), current_location->getInvariantExist());
+
+			discrete_set d;
+			d.insert_element(locId);
+			symbolic_states::ptr symb = symbolic_states::ptr(new symbolic_states(d,flowpipe));
+			reach_region.push_back(symb);
+
+			if(i == p.size()-1){
+				feasible = true;
+				break;
+			}
+			// apply postD on this flowpipe
+			transition::ptr path_transition = NULL;
+			unsigned int nextLocId;
+			auto out_transitions = current_location->getOutGoingTransitions();
+			for(std::list<transition::ptr>::const_iterator it = out_transitions.begin();
+					it!=out_transitions.end();it++){
+				nextLocId = (*it)->getDestinationLocationId();
+				if(nextLocId == p[i+1]){
+					path_transition = *it;
+					break;
+				}
+			}
+
+			assert(path_transition!=NULL);
+			auto next_location = ha.getLocation(nextLocId);
+
+			polytope::ptr trans_guard = path_transition->getGuard();
+			std::string postd_aggregation = user_ops.getSetAggregation();
+			std::list<polytope::ptr> polys;
+			polytope::const_ptr inv = current_location->getInvariant();
+
+			bool aggregation=true; // set aggregation is set to true by default.
+
+			if (boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"chull")){
+				aggregation=true;
+
+			} else if (boost::iequals(postd_aggregation,"none")){
+				aggregation=false;
+			}
+
+			if (!trans_guard->getIsEmpty()){
+
+				if(boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"none")){
+					polys = flowpipe->flowpipe_intersectionSequential(aggregation, trans_guard, 1);
+				}
+				else if(boost::iequals(postd_aggregation,"chull")){
+					polys = flowpipe->postD_chull(trans_guard, inv, 1);
+				}
+
+			} else{ // empty guard
+				DEBUG_MSG("bmc::getPathRegion: Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
+				exit(0);
+			}
+			// apply transition map
+			assert(polys.size()<=1);
+
+			if (polys.size() == 0){
+				feasible = false;
+				break;
+			}
+			// Intersect with guard
+			polytope::ptr g_flowpipe_intersect;
+			polytope::ptr hull_poly = *(polys.begin());
+
+			if(boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"none")){
+
+				polytope::const_ptr trans_g_const = polytope::const_ptr(trans_guard.get());
+				if(!trans_guard->getIsUniverse()){
+					g_flowpipe_intersect = hull_poly->GetPolytope_Intersection(trans_g_const);
+				} else{
+					g_flowpipe_intersect = hull_poly;
+				}
+			}
+			else // chull aggregation. no need to intersect with guard.
+				g_flowpipe_intersect = hull_poly;
+
+			Assign& t_map = path_transition->getAssignT();
+			polytope::ptr shift_polytope;
+
+			if (t_map.Map.isInvertible()) {
+				shift_polytope = post_assign_exact(g_flowpipe_intersect, t_map.Map, t_map.b);
+			} else {
+				shift_polytope = post_assign_approx_deterministic(g_flowpipe_intersect,
+						t_map.Map, t_map.b, reach_params.Directions,1);
+			}
+			// The newShifted must satisfy the destination location invariant
+			if (next_location->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
+				shift_polytope = shift_polytope->GetPolytope_Intersection(next_location->getInvariant());
+			}
+
+			if(shift_polytope->getIsEmpty()){
+				feasible = false;
+				break; // test for other initial regions
+			}
+
+			init_poly = polytope::const_ptr(shift_polytope.get());
+		}
+
+		if(feasible)
+			break;
 	}
 	return reach_region;
 }
@@ -261,8 +371,14 @@ bool bmc::safe(){
 
 		path p = getNextPath();
 		while(p.size()!=0){ // A path is returned above
-			// do something smart
-			update_encoding(p); // update the encoding such that no path containing p is returned further.
+
+			bool feasible = false;
+			region r = getPathRegion(p,feasible);
+			if(!feasible)
+				update_encoding(p); // update the encoding such that no path containing p is returned further.
+			else{
+				// search for a concrete ce trajectory using the path region r
+			}
 			p = getNextPath();
 		}
 	}

@@ -46,7 +46,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 	bool safety_violation = false;
 
-	polytope::ptr initial_polytope;
+	polytope::const_ptr initial_polytope;
 
 	unsigned int num_flowpipe_computed=0;	//keeping track of number of flowpipe computed
 
@@ -361,7 +361,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 }
 
 void reachability::seq_postC_selection(unsigned int iters, location::const_ptr current_location,
-		polytope::ptr initial_polytope,
+		polytope::const_ptr initial_polytope,
 		template_polyhedra::ptr& reach_region) {
 
 	// first order linear approx. model of Colas et. al.
@@ -450,7 +450,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			initial_state::ptr U; //local
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
-			polytope::ptr initial_polytope; //local
+			polytope::const_ptr initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 
 			int location_id = U->getLocationId();
@@ -719,7 +719,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			//	symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states());
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
-			polytope::ptr initial_polytope; //local
+			polytope::const_ptr initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 
 			int location_id = U->getLocationId();
@@ -946,10 +946,10 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 	return Reachability_Region;
 }
 
-/*** TODO: Have to optimize invariant_boundary_check() for support function computation ***/
+/* TODO: Have to optimize invariant_boundary_check() for support function computation ***/
 
 void reachability::par_postC_selection(unsigned int iters, location::const_ptr current_location,
-		polytope::ptr initial_polytope,
+		polytope::const_ptr initial_polytope,
 		ReachabilityParameters& reach_parameters,
 		std::vector<symbolic_states::ptr>& S, unsigned int id) {
 
@@ -1086,7 +1086,7 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 	std::list < symbolic_states::ptr > list_sym_states;
 	std::list < abstract_symbolic_state::ptr > list_abstract_sym_states;
 	polytope::ptr abs_flowpipe; //bounding_box Polytope
-	polytope::ptr polyI; // initial polytope of the abstract flowpipe.
+	polytope::const_ptr polyI; // initial polytope of the abstract flowpipe.
 	bool saftey_violated = false;
 	std::list < transition::ptr > list_transitions;
 	forbidden forbidden_set = forbidden_states[0];
@@ -1346,7 +1346,7 @@ void reachability::setSetAggregation(const std::string& setAggregation) {
 	set_aggregation = setAggregation;
 }
 
-double reachability::LPSolver(polytope::ptr poly, std::vector<double> dirs) {
+double reachability::LPSolver(polytope::const_ptr poly, std::vector<double> dirs) {
 	double res;
 	if (poly->getIsEmpty())
 		res = 0.0;

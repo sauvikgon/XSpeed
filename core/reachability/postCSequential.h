@@ -38,14 +38,14 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 
 // A sequential postC - approximation model of Colas et. al.
 template_polyhedra::ptr postC_sf(unsigned int NewTotalIteration, const Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
+		supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
 		bool InvariantExist, int lp_solver_type);
 
 // A sequential postC - forward-backward interpolation model of CAV'11.
-template_polyhedra::ptr postC_fbinterpol(unsigned int NewTotalIteration, const Dynamics& SystemDynamics,
-		polytope::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
+template_polyhedra::ptr postC_fbinterpol(const unsigned int NewTotalIteration, const Dynamics& SystemDynamics,
+		polytope::const_ptr Initial,
+		const ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
 		bool InvariantExist);
 
 //--

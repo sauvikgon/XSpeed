@@ -11,7 +11,7 @@
 
 //postC algorithm using support functions
 
-template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, const Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant, bool InvariantExist, int lp_solver_type) {
 
 	int numVectors = ReachParameters.Directions.size1();
@@ -392,8 +392,8 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
  * algorithm.
  */
 
-template_polyhedra::ptr postC_fbinterpol(unsigned int boundedTotIteration, const Dynamics& SystemDynamics, polytope::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant, bool InvariantExist) {
+template_polyhedra::ptr postC_fbinterpol(const unsigned int boundedTotIteration, const Dynamics& SystemDynamics, polytope::const_ptr Initial,
+		const ReachabilityParameters& ReachParameters, polytope::const_ptr invariant, bool InvariantExist) {
 
 	
 	unsigned int num_directions = ReachParameters.Directions.size1();

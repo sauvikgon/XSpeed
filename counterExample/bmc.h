@@ -12,7 +12,11 @@
 #include <core/symbolicStates/symbolicStates.h>
 #include <core/symbolicStates/initialState.h>
 #include <core/continuous/approxModel/fbInterpol.h>
+#include <core/reachability/postCSequential.h>
+#include <utilities/templatePolyhedra.h>
+#include <utilities/postAssignment.h>
 #include <application/userOptions.h>
+#include <boost/algorithm/string.hpp>
 #include <vector>
 #include <list>
 #include <z3++.h>
@@ -58,9 +62,10 @@ public:
 
 	virtual ~bmc();
 	/*
-	 * Computes the reachable states along the given path p
+	 * Computes the reachable states along the given path p and gets the path feasibility
+	 * as a boolean flag.
 	 */
-	region getPathRegion(path p);
+	region getPathRegion(path p, bool& feasible);
 
 	/*
 	 * Returns the next unexplored path in the HA from the given source

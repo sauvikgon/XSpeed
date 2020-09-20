@@ -827,7 +827,7 @@ std::vector<sim_start_point> simulation::get_start_points(unsigned int n,
 ;
 
 std::vector<sim_start_point> simulation::get_start_points(unsigned int n,
-		polytope::ptr initialset, location::ptr locptr) {
+		polytope::const_ptr initialset, location::ptr locptr) {
 	/**
 	 * Check if the polytope is a hyperbox. If so, convert it into hyperbox and
 	 * get random start points using the hyperbox class routine
@@ -933,7 +933,7 @@ bool simulation::simulateHa(sim_start_point start, double start_time, double tot
 	return true; // the simulated trajectory is safe.
 }
 
-bool simulation::parSimulateHa(unsigned int n, polytope::ptr initial_set,
+bool simulation::parSimulateHa(unsigned int n, polytope::const_ptr initial_set,
 		double start_time, double tot_time, hybrid_automata& ha,
 		std::pair<int, polytope::ptr>& forbidden_set, unsigned int max_jumps=10) {
 

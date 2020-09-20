@@ -67,6 +67,6 @@ void symbolic_states::setTransitionId(int transitionId) {
 	transition_id = transitionId;
 }
 
-polytope::ptr symbolic_states::getInitialPolytope() const {
+polytope::const_ptr symbolic_states::getInitialPolytope() const {
 	return initial_polytope;
 }

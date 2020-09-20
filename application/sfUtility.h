@@ -126,7 +126,7 @@ scalar_type compute_beta(const Dynamics& SysD, scalar_type& tau,
 
 template<typename scalar_type>
 scalar_type compute_alfa(scalar_type tau, const Dynamics& system_dynamics,
-		supportFunctionProvider::ptr I, int lp_solver_type) // polytope V
+		supportFunctionProvider::const_ptr I, int lp_solver_type) // polytope V
 {
 
 	scalar_type norm_A = 0.0, result;

@@ -17,7 +17,7 @@ void set_nav04_timed(hybrid_automata& Hybrid_Automata,
 	unsigned int dim;
 	size_type row, col;
 
-	polytope::ptr initial_polytope_I0, forbid_polytope;
+	polytope::const_ptr initial_polytope_I0, forbid_polytope;
 	location::ptr l;
 	transition::ptr t;
 	polytope::ptr invariant;
@@ -752,7 +752,7 @@ void set_nav04_timed(hybrid_automata& Hybrid_Automata,
 	boundValueI[6] = 0.25;
 	boundValueI[7] = -0.05;
 
-	initial_polytope_I0 = polytope::ptr(
+	initial_polytope_I0 = polytope::const_ptr(
 			new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
 	dim = initial_polytope_I0->getSystemDimension();

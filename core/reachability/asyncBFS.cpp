@@ -125,20 +125,19 @@ void AsyncBFS_recursiveFunc(LocklessDS L[], initial_state::ptr s, int level, Asy
 }
 
 
-
 template_polyhedra::ptr postC(initial_state::ptr s, AsyncBFSData myData){
 	int location_id;
 
 	discrete_set d;
 	location_id = s->getLocationId();
 	d.insert_element(location_id); //creating discrete_state
-//std::cout<<"Loc ID = "<<location_id <<std::endl;
+
 	//continuous_initial_polytope = U.getInitial_ContinousSetptr();
-	polytope::ptr continuous_initial_polytope;
+	polytope::const_ptr continuous_initial_polytope;
 	continuous_initial_polytope = s->getInitialSet();
 
 	ReachabilityParameters reach_parameters; //local
-	//cout<<"No error 111!!!!\n";
+
 	reach_parameters = myData.reach_parameters;
 // 	cout<<"No error 2222!!!!\n";
 	reach_parameters.X0 = continuous_initial_polytope;

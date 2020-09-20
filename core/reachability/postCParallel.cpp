@@ -10,7 +10,7 @@
 
 //Parallel sf sampling  using OMP
 const template_polyhedra::ptr postC_lazySf(unsigned int boundedTotIteration, const Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
+		supportFunctionProvider::const_ptr Initial, ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
 		bool InvariantExist, int lp_solver_type) {
 
 	int numVectors = ReachParameters.Directions.size1();
@@ -181,7 +181,7 @@ const template_polyhedra::ptr postC_lazySf(unsigned int boundedTotIteration, con
 	}
 }
 
-const template_polyhedra::ptr postC_timeslice(unsigned int NewTotalIteration, const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+const template_polyhedra::ptr postC_timeslice(unsigned int NewTotalIteration, const Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant, bool invariantExist, int CORES,
 		unsigned int Algorithm_Type, int lp_solver_type) {
 	double T = ReachParameters.TimeBound;

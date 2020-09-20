@@ -42,7 +42,7 @@ public:
 	typedef boost::shared_ptr<fb_interpol> ptr;
 
 	/* constructor */
-	fb_interpol(const math::matrix<double>& my_A, polytope::const_ptr X0, polytope::const_ptr U, const math::matrix<double>& my_B, double delta,
+	fb_interpol(const math::matrix<double>& my_A, polytope::const_ptr X0, polytope::const_ptr U, const math::matrix<double>& my_B, const double delta,
 			unsigned int num_directions, unsigned int num_iters);
 
 	/** Virtual destructor class */

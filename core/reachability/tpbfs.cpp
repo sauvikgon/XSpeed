@@ -75,7 +75,7 @@ std::list<symbolic_states::ptr> tpbfs::LoadBalanceAll(std::list<abstractCE::ptr>
 			initial_state::ptr U; //local
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
-			polytope::ptr continuous_initial_polytope; //local
+			polytope::const_ptr continuous_initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 			int location_id = U->getLocationId();
 			discrete_state.insert_element(location_id);

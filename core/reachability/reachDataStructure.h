@@ -21,7 +21,7 @@ struct LoadBalanceData{
 
 	unsigned int symState_ID;	// ID of the symbolic_state or flowpipe whose details are stored. #Redundant actually
 	// As every symbolic_state will have different
-	polytope::ptr X0;	//initial polytope for the specific symbolic_state
+	polytope::const_ptr X0;	//initial polytope for the specific symbolic_state
 	polytope::ptr U;	//non-deterministic input polytope for the specific symbolic_state
 	math::matrix<float> List_dir_X0;//directions for computing Support Function on X0 (or Initial) polytope
 	math::matrix<float> List_dir_U;	//directions for computing Support Function on U (or non-deterministic input) polytope

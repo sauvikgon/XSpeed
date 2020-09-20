@@ -18,6 +18,8 @@ class supportFunctionProvider : public var_to_index_map
 
 public:
 	typedef boost::shared_ptr<supportFunctionProvider> ptr;
+	typedef boost::shared_ptr<const supportFunctionProvider> const_ptr;
+
 	supportFunctionProvider() {
 	}
 	;
@@ -34,7 +36,7 @@ public:
 	virtual double computeSupportFunction(const std::vector<double>& direction,
 			lp_solver &lp) const = 0;
 	virtual double max_norm(int lp_solver_type,
-			unsigned int dim_size) = 0;
+			unsigned int dim_size) const = 0;
 };
 
 #endif

@@ -118,7 +118,7 @@ public:
 	bool ce_flag; // The flag to switch ON/OFF the CE generation functionality.
 	std::string ce_path; // This string can be either "all", "first" or "1,3,4,15,16" type. The last string is a comma separated list of locations to represent a path.
 
-	void seq_postC_selection(unsigned int NewTotalIteration, location::const_ptr current_location, polytope::ptr continuous_initial_polytope,
+	void seq_postC_selection(unsigned int NewTotalIteration, location::const_ptr current_location, polytope::const_ptr continuous_initial_polytope,
 					template_polyhedra::ptr& reach_region);
 
 /*
@@ -160,7 +160,7 @@ private:
 
 	userOptions user_op; //user options
 
-	void par_postC_selection(unsigned int NewTotalIteration, location::const_ptr current_location, polytope::ptr continuous_initial_polytope,
+	void par_postC_selection(unsigned int NewTotalIteration, location::const_ptr current_location, polytope::const_ptr continuous_initial_polytope,
 			ReachabilityParameters& reach_parameters, std::vector<symbolic_states::ptr>& S, unsigned int id);
 
 	/*
@@ -186,7 +186,7 @@ private:
 	void parallelBIG_Task(std::vector<LoadBalanceData>& LoadBalanceDS);
 
 	double boxLPSolver(polytope::ptr poly, std::vector<double> dir);
-	double LPSolver(polytope::ptr poly, std::vector<double> dirs);
+	double LPSolver(polytope::const_ptr poly, std::vector<double> dirs);
 
 };
 

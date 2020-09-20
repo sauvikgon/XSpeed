@@ -28,7 +28,7 @@
 
 const template_polyhedra::ptr postC_lazySf(
 			unsigned int NewTotalIteration, const Dynamics& SystemDynamics,
-			supportFunctionProvider::ptr Initial,
+			supportFunctionProvider::const_ptr Initial,
 			ReachabilityParameters& ReachParameters, polytope::const_ptr invariant,
 			bool isInvariantExist, int lp_solver_type);
 
@@ -43,7 +43,7 @@ const template_polyhedra::ptr postC_lazySf(
  * CORES: Its the number of parallel compute cores available in the hardware architecture.
  */
 const template_polyhedra::ptr postC_timeslice(unsigned int NewTotalIteration, const Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
+		supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, const polytope::const_ptr invariant,
 		bool isInvariantExist, int CORES, unsigned int Algorithm_Type,
 		int lp_solver_type);

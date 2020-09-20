@@ -221,7 +221,7 @@ void polytope::setSystemDimension(unsigned int systemDimension) {
 }
 
 double polytope::max_norm(int lp_solver_type,
-		unsigned int dim_for_Max_Norm) {
+		unsigned int dim_for_Max_Norm) const {
 	//unsigned int dimension_size = this->system_dimension;
 	unsigned int dimension_size = dim_for_Max_Norm;
 	double Max_A, sf, Max = 0.0;
@@ -262,7 +262,7 @@ double polytope::max_norm(int lp_solver_type,
 	return Max;
 }
 
-polytope::ptr polytope::GetPolytope_Intersection(polytope::const_ptr gPoly) const{
+polytope::ptr polytope::GetPolytope_Intersection(polytope::const_ptr gPoly) const {
 
 	polytope::ptr res_poly = polytope::ptr(new polytope(*gPoly));
 
@@ -299,7 +299,7 @@ polytope::ptr polytope::GetPolytope_Intersection(polytope::const_ptr gPoly) cons
  */
 
 bool polytope::check_polytope_intersection(polytope::ptr p2,
-		int lp_solver_type) {
+		int lp_solver_type) const {
 	// if the parameter polytope is a univserse, then return true
 	if(p2->getIsUniverse())
 		return true;
@@ -348,7 +348,7 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 	return flag;
 }
 
-void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytope::ptr &resPoly, int lp_solver_type){
+void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytope::ptr &resPoly, int lp_solver_type) const {
 
 	std::vector<double> colVector(templatedDir.size1());
 	lp_solver lp(lp_solver_type);
@@ -398,7 +398,7 @@ bool polytope::contains(polytope::const_ptr poly, int lp_solver_type) const {
 
 void polytope::enum_2dVert_restrict(std::vector<double> u,
 		std::vector<double> v, int i, int j,
-		std::set<std::pair<double, double> >& pts) {
+		std::set<std::pair<double, double> >& pts) const {
 
 //	std::cout<<"Entered inside enumerateVertices_restrict()!!\n";
 	std::vector<double> sv_u(getSystemDimension(), 0), sv_v(
@@ -458,7 +458,7 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 }
 
 std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
-		int j) {
+		int j) const {
 	if(this->IsUniverse)
 		throw std::runtime_error("Cannot enumerate vertices of universe polytope\n");
 	if(this->IsEmpty)
@@ -490,7 +490,7 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 	return All_vertices;
 }
 
-math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
+math::matrix<double> polytope::get_2dVertices(int dim1, int dim2) const {
 	std::set<std::pair<double, double> > set_vertices;
 	set_vertices = enumerate_2dVertices(dim1,dim2);
 	math::matrix<double> my_vertices;
@@ -533,7 +533,7 @@ double polytope::point_distance(std::vector<double> v) const{
 
 }
 
-void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
+void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2) const
 {
 	assert(dim1 < this->map_size() && dim2 < this->map_size());
 	assert(dim1 >= 0 && dim2 >= 0);
@@ -549,7 +549,7 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 	myfile.close();
 }
 
-void polytope::print2StdOut(unsigned int dim1, unsigned int dim2)
+void polytope::print2StdOut(unsigned int dim1, unsigned int dim2) const
 {
 	assert(dim1 < this->map_size() && dim2 < this->map_size());
 	assert(dim1 >= 0 && dim2 >= 0);
@@ -562,7 +562,7 @@ void polytope::print2StdOut(unsigned int dim1, unsigned int dim2)
 		std::cout << "\n";
 	}
 }
-void polytope::printPoly(){
+void polytope::printPoly() const{
 
 	std::cout<<this->coeffMatrix;
 	std::cout<<"\nVector\n";

@@ -14,7 +14,7 @@ typedef typename boost::numeric::ublas::matrix<double>::size_type size_type;
 unsigned int dim;
 size_type row, col;
 
-polytope::ptr initial_polytope_I0, forbid_polytope;
+polytope::const_ptr initial_polytope_I0, forbid_polytope;
 location::ptr l;
 transition::ptr t;
 polytope::ptr invariant;
@@ -7990,7 +7990,7 @@ boundValueI[6]=-0.1;
 boundValueI[7]=0.4;
 
 
-initial_polytope_I0 = polytope::ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
+initial_polytope_I0 = polytope::const_ptr(new polytope(ConstraintsMatrixI, boundValueI, boundSignI));
 
 dim = initial_polytope_I0->getSystemDimension();
 int transition_id = 0;

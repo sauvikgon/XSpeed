@@ -26,7 +26,7 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 	user_clock_timePaths_millisec = timePaths.elapsed().user / (double) 1000000; //convert nanoseconds to milliseconds
 	usertime_Paths_sec = user_clock_timePaths_millisec / (double) 1000;
 
-	polytope::ptr initialSet = (*init_state.begin())->getInitialSet();
+	polytope::const_ptr initialSet = (*init_state.begin())->getInitialSet();
 
 	double traj_splicing_time=0;	//global reference variable
 

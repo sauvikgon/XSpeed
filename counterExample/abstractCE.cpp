@@ -205,7 +205,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 		// S is the sub-flowpipe in i-th sequence; P is the first polytope in S.
 
 		S = get_symbolic_state(i);
-		polytope::ptr P = S->getInitialPolytope();
+		polytope::const_ptr P = S->getInitialPolytope();
 
 		// set bound constraints
 		lp_solver lp(GLPK_SOLVER);
@@ -320,7 +320,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 
 		// Get the min and max time projection of start set
 		lp_solver lp1(GLPK_SOLVER);
-		polytope::ptr init_of_symb = S->getInitialPolytope();
+		polytope::const_ptr init_of_symb = S->getInitialPolytope();
 
 		lp1.setConstraints(init_of_symb->getCoeffMatrix(),
 				init_of_symb->getColumnVector(),
@@ -633,7 +633,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
 		S = get_symbolic_state(i);
-		polytope::ptr P = S->getInitialPolytope();
+		polytope::const_ptr P = S->getInitialPolytope();
 
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
@@ -964,7 +964,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 		// Get the min and max time projection of start set
 		lp_solver lp1(GLPK_SOLVER);
-		polytope::ptr init_of_symb = S->getInitialPolytope();
+		polytope::const_ptr init_of_symb = S->getInitialPolytope();
 
 		lp1.setConstraints(init_of_symb->getCoeffMatrix(),
 				init_of_symb->getColumnVector(),

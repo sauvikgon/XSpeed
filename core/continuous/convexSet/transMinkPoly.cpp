@@ -9,7 +9,7 @@
 #include <core/continuous/convexSet/transMinkPoly.h>
 
 
-transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU,
+transMinkPoly::transMinkPoly(polytope::const_ptr myX0, polytope::ptr myU,
 		math::matrix<double> myTRANS, math::matrix<double> myB_TRANS,
 		double mytime, double mybeta) {
 	X0 = myX0;
@@ -20,7 +20,7 @@ transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU,
 	beta = mybeta;
 	Cempty = true;	//C is empty here as not supplied
 }
-transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU, std::vector<double> c,
+transMinkPoly::transMinkPoly(polytope::const_ptr myX0, polytope::ptr myU, std::vector<double> c,
 			math::matrix<double> myTRANS, math::matrix<double> myB_TRANS, double mytime, double mybeta){
 	X0 = myX0;
 	if (myU==NULL)
@@ -35,7 +35,7 @@ transMinkPoly::transMinkPoly(polytope::ptr myX0, polytope::ptr myU, std::vector<
 	Cempty = false;	//C is NOT empty here as it is supplied
 	C = c;
 }
-transMinkPoly::transMinkPoly(polytope::ptr myX0, math::matrix<double> myTRANS) {
+transMinkPoly::transMinkPoly(polytope::const_ptr myX0, math::matrix<double> myTRANS) {
 	X0 = myX0; //This is POINTER COPY
 	U = polytope::ptr(new polytope(true));
 	TRANS = myTRANS;
@@ -90,7 +90,7 @@ double transMinkPoly::computeSupportFunction(const std::vector<double>& directio
 }
 
 double transMinkPoly::max_norm(int lp_solver_type,
-		unsigned int dim_for_Max_norm) {
+		unsigned int dim_for_Max_norm) const {
 	unsigned int dimension_size = dim_for_Max_norm;
 	double Max_A, sf, Max = 0.0;
 
