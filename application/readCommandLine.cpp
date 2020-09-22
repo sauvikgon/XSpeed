@@ -189,9 +189,10 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			user_options.setEngine((vm["engine"].as<std::string>()));
 			if (boost::iequals(user_options.getEngine(),"simu")==false) {
 				if (boost::iequals(user_options.getEngine(),"reach")==false){
-					if(boost::iequals(user_options.getEngine(),"fal")==false)
-					std::cout << "Invalid engine option specified. Expected \"reach\", \"simu\" or \"fal\".\n";
-					throw(new exception());
+					if(boost::iequals(user_options.getEngine(),"fal")==false){
+						std::cout << "Invalid engine option specified. Expected \"reach\", \"simu\" or \"fal\".\n";
+						throw(new exception());
+					}
 				}
 			}
 		}
