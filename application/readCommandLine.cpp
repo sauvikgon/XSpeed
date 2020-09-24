@@ -190,8 +190,8 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			if (boost::iequals(user_options.getEngine(),"simu")==false) {
 				if (boost::iequals(user_options.getEngine(),"reach")==false){
 					if(boost::iequals(user_options.getEngine(),"fal")==false){
-					std::cout << "Invalid engine option specified. Expected \"reach\", \"simu\" or \"fal\".\n";
-					throw(new exception());
+						std::cout << "Invalid engine option specified. Expected \"reach\", \"simu\" or \"fal\".\n";
+						throw(new exception());
 					}
 				}
 			}
