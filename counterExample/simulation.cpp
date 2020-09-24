@@ -580,7 +580,7 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 
 	location::ptr loc = start_point.locptr;
 	polytope::const_ptr inv = loc->getInvariant();
-	unsigned int this_loc_id = loc->getLocId();
+	int this_loc_id = loc->getLocId();
 
 	//Computing guard-invariant intersection and bloating the set with time-step
 	std::list<transition::ptr> outgoingtrans;

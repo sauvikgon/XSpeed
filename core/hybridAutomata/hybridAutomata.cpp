@@ -37,6 +37,8 @@ void hybrid_automata::setInitialLoc(int loc_id)
 }
 
 location::const_ptr hybrid_automata::getLocation(int Loc_Id) const {
+	std::cout << "getLocation: loc ID = " << Loc_Id << std::endl;
+	std::cout<< "getLocation: num locations:" << list_locations.size() << std::endl;
 	assert(list_locations.count(Loc_Id)!=0);
 	return list_locations.at(Loc_Id);
 }

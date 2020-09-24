@@ -31,22 +31,14 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 	// INIT Step
 	z3::expr exp1 = c.bool_const("exp1");
 	string arr = "v" + to_string(u)+"_"+ "0";
-	unsigned int l = arr.length();
-	char array[l];
-	for (unsigned int i = 0 ; i < l; i++)
-		array[i] = char(arr[i]);
-	z3::expr x = c.bool_const(array);
+	z3::expr x = c.bool_const(arr.c_str());
 	exp1 = x;
 	for(auto it = list_locations.begin(); it != list_locations.end(); it++)
 	{
 		arr = "v" + to_string(it->first)+"_"+ "0";
-		l = arr.length();
-		char array1[l];
-		for (unsigned int i = 0 ; i < l; i++)
-			array1[i] = char(arr[i]);
 		if (it->first != u)
 		{
-			z3::expr x1 = c.bool_const(array1);
+			z3::expr x1 = c.bool_const(arr.c_str());
 			exp1 = (exp1 && !(x1));
 		}
 	}
@@ -65,11 +57,8 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 			{
 				auto neighbor_nodes = it->second->getOutGoingTransitions();
 				arr = "v"+ to_string(it->first)+"_"+ to_string(i);
-				l = arr.length();
-				char array2[l];
-				for (unsigned int j = 0 ; j < l; j++)
-					array2[j] = char(arr[j]);
-				z3::expr x2 = c.bool_const(array2);
+				z3::expr x2 = c.bool_const(arr.c_str());
+
 				exp2 = x2;
 				z3::expr exp2a = c.bool_const("exp2a");
 				unsigned int count = 1;
@@ -78,11 +67,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 					transition::ptr trans_ptr = *(it2);
 					unsigned int loc_id = trans_ptr->getDestinationLocationId();
 					arr = "v" + to_string(loc_id) +"_"+ to_string(i+1);
-					l = arr.length();
-					char array2[l];
-					for (unsigned int j = 0 ; j < l; j++)
-						array2[j] = char(arr[j]);
-					z3::expr x2 = c.bool_const(array2);
+					z3::expr x2 = c.bool_const(arr.c_str());
 					if(count == 1)
 					{
 						exp2a = x2;
@@ -106,11 +91,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 			{
 				auto neighbor_nodes = it->second->getOutGoingTransitions();
 				arr = "v"+ to_string(it->first)+"_"+ to_string(i);
-				l = arr.length();
-				char array2[l];
-				for (unsigned int j = 0 ; j < l; j++)
-					array2[j] = char(arr[j]);
-				z3::expr x2 = c.bool_const(array2);
+				z3::expr x2 = c.bool_const(arr.c_str());
 				exp2 = x2;
 				z3::expr exp2a = c.bool_const("exp2a");
 				unsigned int count = 1;
@@ -119,11 +100,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 					transition::ptr trans_ptr = *(it2);
 					unsigned int loc_id = trans_ptr->getDestinationLocationId();
 					arr = "v" + to_string(loc_id) +"_"+ to_string(i+1);
-					l = arr.length();
-					char array2[l];
-					for (unsigned int j = 0 ; j < l; j++)
-						array2[j] = char(arr[j]);
-					z3::expr x2 = c.bool_const(array2);
+					z3::expr x2 = c.bool_const(arr.c_str());
 					if(count == 1)
 					{
 						exp2a = x2;
@@ -148,24 +125,16 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 		for(auto it1 = list_locations.begin(); it1 != list_locations.end(); it1++)
 		{
 			string arr = "v" + to_string(it1->first)+"_" + to_string(i);
-			unsigned int l = arr.length();
-			char array[l];
-			for (unsigned int ii = 0 ; ii < l; ii++)
-				array[ii] = char(arr[ii]);
-			z3::expr x = c.bool_const(array);
+			z3::expr x = c.bool_const(arr.c_str());
 			exp3 = x;
 			z3::expr exp31 = c.bool_const("exp31");
 			unsigned int count = 0;
 			for(auto it2 = list_locations.begin(); it2 != list_locations.end(); it2++)
 			{
 				arr = "v" + to_string(it2->first)+"_"+ to_string(i);
-				l = arr.length();
-				char array1[l];
-				for (unsigned int ii = 0 ; ii < l; ii++)
-					array1[ii] = char(arr[ii]);
 				if (it2->first != it1->first)
 				{
-					z3::expr x1 = c.bool_const(array1);
+					z3::expr x1 = c.bool_const(arr.c_str());
 					if(count == 0)
 					{
 						exp31 = !(x1);
@@ -185,11 +154,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 	//TARGET
 	z3::expr exp4 = c.bool_const("exp4");
 	arr = "v" + to_string(v)+"_" + to_string(k);
-	l = arr.length();
-	char array13[l];
-	for (unsigned int i = 0 ; i < l; i++)
-		array13[i] = char(arr[i]);
-	z3::expr x13 = c.bool_const(array13);
+	z3::expr x13 = c.bool_const(arr.c_str());
 	exp4 = x13;
 	this->sol.add(exp4);
 
@@ -204,19 +169,16 @@ path bmc::getNextPath()
 
 	if (this->sol.check() == z3::sat)
 	{
-		p.resize(k);
+		p.resize(k+1);
 		z3::model m = this->sol.get_model();
+
 		for (unsigned int i = 0; i <= k; i++)
 		{
 			for (auto it = list_locations.begin(); it != list_locations.end(); it++)
 			{
-				string arr = "v" + to_string(it->first)+"_" + to_string(i);
-				unsigned int l = arr.length();
-				char array14[l];
-				for (unsigned int i = 0 ; i < l; i++)
-					array14[i] = char(arr[i]);
-				z3::expr expp = c.bool_const(array14);
-				if(m.eval(expp))
+				string loc = "v" + to_string(it->first) + "_" + to_string(i);
+				z3::expr expp = c.bool_const(loc.c_str());
+				if(m.eval(expp).is_true())
 				{
 					p.at(i) = it->first;
 					break;
@@ -225,10 +187,8 @@ path bmc::getNextPath()
 		}
 	}
 	else
-	{
-		p.resize(1);
-		p.at(0) = list_locations.begin()->first;
-	}
+		p.clear();
+
 	return p;
 }
 
@@ -241,7 +201,16 @@ path bmc::getNextPath()
 region bmc::getPathRegion(path p, bool& feasible){
 
 	region reach_region;
+	feasible = false;
+	//debug
+	std::cout << "The path p is "<< std::endl;
+	for(unsigned int i=0;i<p.size();i++){
+		std::cout << p[i] << " " ;
+	}
+	std::cout << std::endl;
+	return reach_region;
 
+	//--
 	for(auto it = init.begin(); it!=init.end();it++){
 		template_polyhedra::ptr flowpipe;
 		initial_state::ptr ini= *it;
@@ -362,7 +331,7 @@ void bmc::update_encoding(path p){
 }
 
 bool bmc::safe(){
-
+	int cnt = 0;
 	// iterate over the forbidden states
 	for(unsigned int i=0;i<forbidden_s.size();i++){
 		forbidden forbid_s = forbidden_s[i];
@@ -370,17 +339,31 @@ bool bmc::safe(){
 		init_solver(forbid_loc_id); // initialize the ha_encoding for this forbidden location
 
 		path p = getNextPath();
-		while(p.size()!=0){ // A path is returned above
 
-			bool feasible = false;
-			region r = getPathRegion(p,feasible);
-			if(!feasible)
-				update_encoding(p); // update the encoding such that no path containing p is returned further.
-			else{
-				// search for a concrete ce trajectory using the path region r
+		while(p.size()!=0){ // A path is returned above
+			cnt++;
+			//debug
+			std::cout << "The path p is "<< std::endl;
+			for(unsigned int i=0;i<p.size();i++){
+				std::cout << p[i] << " " ;
 			}
+			std::cout << std::endl;
+			//bool feasible = false;
+			//region r = getPathRegion(p,feasible);
+		//	show(r, user_ops);
+		//	exit(0);
+
+		//	if(!feasible)
+		//		update_encoding(p); // update the encoding such that no path containing p is returned further.
+		//	else{
+				// search for a concrete ce trajectory using the path region r
+				//print the path region
+
+		//	}
 			p = getNextPath();
+
 		}
 	}
+	std::cout << "Total paths = " << cnt << std::endl;
 	return true; // no counterexample trajectory could be found. Hence returning safe.
 }

@@ -17,6 +17,7 @@
 #include <utilities/postAssignment.h>
 #include <application/userOptions.h>
 #include <boost/algorithm/string.hpp>
+#include <io/ioUtility.h>
 #include <vector>
 #include <list>
 #include <z3++.h>
