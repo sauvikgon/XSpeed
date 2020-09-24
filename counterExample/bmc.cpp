@@ -149,7 +149,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id)
 			exp33 = implies(exp3, exp31);
 			this->sol.add(exp33);
 		}
-	}						//End of Exclude Constraint.
+	}	//End of Exclude Constraint.
 
 	//TARGET
 	z3::expr exp4 = c.bool_const("exp4");
@@ -177,8 +177,8 @@ path bmc::getNextPath()
 			for (auto it = list_locations.begin(); it != list_locations.end(); it++)
 			{
 				string loc = "v" + to_string(it->first) + "_" + to_string(i);
-				z3::expr expp = c.bool_const(loc.c_str());
-				if(m.eval(expp).is_true())
+				z3::expr exp = c.bool_const(loc.c_str());
+				if(m.eval(exp).is_true())
 				{
 					p.at(i) = it->first;
 					break;
@@ -198,19 +198,11 @@ path bmc::getNextPath()
  * the feasible flag is set false if the path is found not reachable
  * in the ha dynamics.
  */
-region bmc::getPathRegion(path p, bool& feasible){
+region bmc::getPathRegion(path p, bool& feasible) const{
 
 	region reach_region;
 	feasible = false;
-	//debug
-	std::cout << "The path p is "<< std::endl;
-	for(unsigned int i=0;i<p.size();i++){
-		std::cout << p[i] << " " ;
-	}
-	std::cout << std::endl;
-	return reach_region;
 
-	//--
 	for(auto it = init.begin(); it!=init.end();it++){
 		template_polyhedra::ptr flowpipe;
 		initial_state::ptr ini= *it;
@@ -219,6 +211,7 @@ region bmc::getPathRegion(path p, bool& feasible){
 		for(unsigned int i=0;i<p.size();i++){
 
 			unsigned int locId = p[i];
+
 			auto current_location = ha.getLocation(locId);
 			flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), init_poly, reach_params,
 					current_location->getInvariant(), current_location->getInvariantExist());
@@ -236,6 +229,7 @@ region bmc::getPathRegion(path p, bool& feasible){
 			transition::ptr path_transition = NULL;
 			unsigned int nextLocId;
 			auto out_transitions = current_location->getOutGoingTransitions();
+
 			for(std::list<transition::ptr>::const_iterator it = out_transitions.begin();
 					it!=out_transitions.end();it++){
 				nextLocId = (*it)->getDestinationLocationId();
@@ -308,7 +302,7 @@ region bmc::getPathRegion(path p, bool& feasible){
 						t_map.Map, t_map.b, reach_params.Directions,1);
 			}
 			// The newShifted must satisfy the destination location invariant
-			if (next_location->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
+			if (next_location->getInvariant()!=NULL) {
 				shift_polytope = shift_polytope->GetPolytope_Intersection(next_location->getInvariant());
 			}
 
@@ -316,8 +310,7 @@ region bmc::getPathRegion(path p, bool& feasible){
 				feasible = false;
 				break; // test for other initial regions
 			}
-
-			init_poly = polytope::const_ptr(shift_polytope.get());
+			init_poly = shift_polytope;
 		}
 
 		if(feasible)
@@ -331,39 +324,39 @@ void bmc::update_encoding(path p){
 }
 
 bool bmc::safe(){
-	int cnt = 0;
+
 	// iterate over the forbidden states
+
 	for(unsigned int i=0;i<forbidden_s.size();i++){
 		forbidden forbid_s = forbidden_s[i];
 		unsigned int forbid_loc_id = forbid_s.first;
 		init_solver(forbid_loc_id); // initialize the ha_encoding for this forbidden location
 
 		path p = getNextPath();
-
+		//debug
+		std::cout << "The path p is "<< std::endl;
+		for(unsigned int i=0;i<p.size();i++){
+			std::cout << p[i] << " " ;
+		}
+		std::cout << std::endl;
+		//--
 		while(p.size()!=0){ // A path is returned above
-			cnt++;
-			//debug
-			std::cout << "The path p is "<< std::endl;
-			for(unsigned int i=0;i<p.size();i++){
-				std::cout << p[i] << " " ;
-			}
-			std::cout << std::endl;
-			//bool feasible = false;
-			//region r = getPathRegion(p,feasible);
-		//	show(r, user_ops);
-		//	exit(0);
 
-		//	if(!feasible)
-		//		update_encoding(p); // update the encoding such that no path containing p is returned further.
-		//	else{
+			bool feasible = false;
+			region r = getPathRegion(p,feasible);
+			show(r, user_ops);
+			exit(0);
+
+			if(!feasible)
+				update_encoding(p); // update the encoding such that no path containing p is returned further.
+			else{
 				// search for a concrete ce trajectory using the path region r
 				//print the path region
 
-		//	}
+			}
 			p = getNextPath();
-
 		}
 	}
-	std::cout << "Total paths = " << cnt << std::endl;
+
 	return true; // no counterexample trajectory could be found. Hence returning safe.
 }
