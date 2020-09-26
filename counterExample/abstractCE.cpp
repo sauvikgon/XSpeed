@@ -181,7 +181,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	Parameters of the optimization routine
-	unsigned int maxeval = 20000;
+	//unsigned int maxeval = 20000;
 	unsigned int maxtime = 60; // time-out of 1 min per abstract ce.
 
 	myopt.set_min_objective(myobjfunc2, NULL);
@@ -915,9 +915,9 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 					aggregation, bad_poly, 1);
 			assert(polys.size() >= 1); // The last sym state of an abstract CE must intersect with the bad set
 
-			if (polys.size() > 1){
-				std::runtime_error("abstractCE::gen_concreteCE_iterative: Impl missing for no set aggregation\n");
-			}
+			if (polys.size() > 1)
+				P = get_template_hull(S->getContinuousSetptr(), 0,
+						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
 			else
 				P = polys.front();
 
@@ -935,7 +935,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			assert(polys.size() >= 1); // An abstract CE state must have intersection with the guard
 			if (polys.size() > 1)
-				std::runtime_error("abstractCE::gen_concreteCE_iterative: Impl missing for no set aggregation\n");
+				P = get_template_hull(S->getContinuousSetptr(), 0,
+						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
 			else
 				P = polys.front();
 			// Now intersect P with guard
@@ -1177,7 +1178,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 
 	// 	Optimization routine paramters
-	unsigned int maxeval = 20000;
+	// unsigned int maxeval = 20000;
 	unsigned int maxtime = 60; //60 secs/ 1 minute
 	myopt.set_min_objective(myobjfunc2, NULL);
 	myopt.set_maxtime(maxtime); // times out after maxtime

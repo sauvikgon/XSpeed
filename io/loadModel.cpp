@@ -53,7 +53,7 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 		//setnavT02_Timedmodel(ha, init_state, reach_parameters);
 	}
 	if(HybridSystem_Model_Type == 22){ // Timed Navigation instance navT04_Timed (25 x 25 locations) used in Int. J of STTT without input set
-		//setnavT04_Timedmodel(ha, init_state, reach_parameters);
+		setnavT04_Timedmodel(ha, init_state, reach_parameters);
 	}
 
 	if(HybridSystem_Model_Type == 25){ // vehicle_platoon model (5 Vehicles)

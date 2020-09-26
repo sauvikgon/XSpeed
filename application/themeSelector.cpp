@@ -78,9 +78,9 @@ void themeSelector::selectReach()
 		}
 	}
 
-	plottime.start();
+/*	plottime.start();
 	show(symbolic_states, userOps);
-	plottime.stop();
+	plottime.stop();*/
 //	print_statistics(plottime,"Plotting");
 
 	// printing the first initial polytope in the init_poly file

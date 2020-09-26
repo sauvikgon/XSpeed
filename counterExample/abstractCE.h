@@ -28,6 +28,7 @@
 #include "counterExample/simulation.h"
 #include "utilities/dbgMsgLogger.h"
 
+#define VALIDATION
 /**
  * This class is a data structure to store the abstract counter-example generated
  * by XSpeed when given an unsafe symbolic state. An abstract counter example
