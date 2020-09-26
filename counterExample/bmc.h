@@ -17,6 +17,7 @@
 #include <utilities/postAssignment.h>
 #include <application/userOptions.h>
 #include <boost/algorithm/string.hpp>
+#include <io/ioUtility.h>
 #include <vector>
 #include <list>
 #include <z3++.h>
@@ -65,7 +66,7 @@ public:
 	 * Computes the reachable states along the given path p and gets the path feasibility
 	 * as a boolean flag.
 	 */
-	region getPathRegion(path p, bool& feasible);
+	region getPathRegion(path p, bool& feasible) const;
 
 	/*
 	 * Returns the next unexplored path in the HA from the given source

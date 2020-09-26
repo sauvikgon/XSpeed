@@ -91,13 +91,23 @@ void themeSelector::selectReach()
 }
 void themeSelector::selectSim(){
 	std::cout << "Running simulation engine ... \n";
-	assert(forbidden.size() > 0);
-	simulationCaller(ha, init, reach_params, forbidden[0], userOps);
+	if (forbidden.size() > 0)
+		simulationCaller(ha, init, reach_params, forbidden[0], userOps);
+	else{
+		// create an empty forbidden region
+		std::pair<int, polytope::ptr> forbidden_s;
+		forbidden_s.first = -10; // implies no location
+		forbidden_s.second = polytope::ptr(new polytope(true)); // empty polytope
+		simulationCaller(ha, init, reach_params, forbidden_s, userOps);
+	}
 }
+
 void themeSelector::selectFal(){
 	//todo: call the path-oriented falsification routine.
 	bmc bmc_fal(ha, init, forbidden, reach_params, userOps);
+
 	bool safety = bmc_fal.safe();
+
 }
 
 void themeSelector::select(){
