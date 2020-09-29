@@ -53,7 +53,7 @@ class bmc {
 	/* bmc uses this private member function to initialize the ha_encoding for the given
 	 * forbidden location id
 	 */
-	void init_solver(unsigned int forbidden_loc_id);
+	void init_solver(unsigned int forbidden_loc_id, unsigned int k1);
 
 public:
 
@@ -66,7 +66,7 @@ public:
 	 * Computes the reachable states along the given path p and gets the path feasibility
 	 * as a boolean flag.
 	 */
-	region getPathRegion(path p, bool& feasible) const;
+	region getPathRegion(path p, bool& feasible);
 
 	/*
 	 * Returns the next unexplored path in the HA from the given source
@@ -74,7 +74,7 @@ public:
 	 * in the z3 expression ha_encoding. The implementation is a SAT solver
 	 * based path enumeration algorithm.
 	 */
-	path getNextPath();
+	path getNextPath(unsigned int k1);
 
 	/*
 	 * Returns false if the ha is found to be unsafe in the given bound.
