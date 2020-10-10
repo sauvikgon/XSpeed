@@ -104,6 +104,7 @@ void themeSelector::selectSim(){
 void themeSelector::selectFal(){
 	//todo: call the path-oriented falsification routine.
 	bmc bmc_fal(ha, init, forbidden, reach_params, userOps);
+
 	bool safe = bmc_fal.safe();
 
 	if(safe)
