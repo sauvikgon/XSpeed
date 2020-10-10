@@ -204,7 +204,7 @@ std::vector<double> ODESol_inhomogenous(const Dynamics& D, double time){
 	return res2;
 }
 
-void extended_expm(math::matrix<double>& A, double time, math::matrix<double>& res)
+void extended_expm(const math::matrix<double>& A, double time, math::matrix<double>& res)
 {
 	unsigned int dim = A.size2();
 	math::matrix<double> expAt(dim, dim);
@@ -234,7 +234,7 @@ void extended_expm(math::matrix<double>& A, double time, math::matrix<double>& r
 /* compute the expression A^-1 (e^At - I) alternatively as a sub-matrix of the exp(M),
  * as shown in the SpaceEx paper, page 8, phi_1.
  */
-math::matrix<double> time_slice_component(math::matrix<double>& A, double time)
+math::matrix<double> time_slice_component(const math::matrix<double>& A, double time)
 {	
 	unsigned int dim = A.size2();
 	math::matrix<double> expM; 

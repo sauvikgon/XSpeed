@@ -51,7 +51,7 @@ void getDirectionList_X0_and_U_OLD(std::vector<AllDirection> &directionList,
 
 void getDirectionList_X0_and_U(int numCoresAvail, ReachabilityParameters &ReachParameters,
 		unsigned int newiters, math::matrix<float> &list_X0,
-		math::matrix<float> &list_U, bool U_empty, Dynamics& SystemDynamics);
+		math::matrix<float> &list_U, bool U_empty, const Dynamics& SystemDynamics);
 
 void getDirectionList_X0_and_U_OnlyForGLPK(
 		ReachabilityParameters &ReachParameters, unsigned int newiters,

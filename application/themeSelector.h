@@ -20,6 +20,7 @@
 #include "utilities/statistics.h"
 #include "application/reachabilityCaller.h"
 #include <counterExample/wofcCounterExample.h>
+#include <counterExample/bmc.h>
 
 /*
  * Selects one out of the three themes of the tool:

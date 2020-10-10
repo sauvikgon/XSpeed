@@ -47,62 +47,57 @@ public:
 	userOptions();
 	virtual ~userOptions();
 
-	std::string get_modelFile();
 	void set_modelFile(std::string modefile);
-	std::string get_configFile();
 	void set_configFile(std::string configfile);
-	unsigned int get_first_plot_dimension();
 	void set_first_plot_dimension(unsigned int outdim);
-	unsigned int get_second_plot_dimension();
 	void set_second_plot_dimension(unsigned int outdim);
-	unsigned int get_third_plot_dimension();
 	void set_third_plot_dimension(unsigned int outdim);
-
-	double get_timeStep();
 	void set_timeStep(double t);
-	double get_timeHorizon();
 	void set_timeHorizon(double timeHorizon);
-	unsigned int get_model();
 	void set_model(unsigned int m);
-	unsigned int get_directionTemplate();
 	void set_directionTemplate(unsigned int d);
-	unsigned int get_bfs_level();
 	void set_bfs_level(unsigned int l);
-	std::string get_forbidden_set();
 	void set_forbidden_set(std::string);
-
-	unsigned int get_algorithm();	//returns the selected Algorithm
 	void set_algorithm(unsigned int alg);	//assigns the Algorithm selected by the user
-
-	unsigned int get_simu_algo();	//returns the selected simulation Algorithm
 	void set_simu_algo(unsigned int alg);	//assigns the simulation Algorithm selected by the user
-
-	unsigned int getStreamSize() const;
 	void setStreamSize(unsigned int streamSize);
-	unsigned int getTotalSliceSize() const;
 	void setTotalSliceSize(unsigned int totalSliceSize);
-	const std::string& getOutputFormatType() const;
 	void setOutputFormatType(const std::string& outputFormatType);
-	const std::string& getOutFilename() const;
 	void setOutFilename(const std::string& outFilename);
-	const std::string& getSetAggregation() const;
 	void setSetAggregation(const std::string& engine);
-	const std::string& getEngine() const;
 	void setEngine(const std::string& engine);
-
 	void setCEProc(const std::string& ceproc);
-	std::string& getCEProc();
-
-	unsigned int get_simu_init_points();
 	void set_simu_init_points(unsigned int sampling_points);
-
-	/* This is the path to search for a concrete trajectory to a specified forbidden state */
-	std::string get_ce_path();
 	void set_ce_path(std::string path);
-
 	/* This is the flag to trigger a search to a counter-example trajectory to a specified forbidden state */
 	void set_ce_flag(bool value);
-	bool get_ce_flag();
+
+
+	std::string get_configFile() const;
+	unsigned int get_third_plot_dimension() const;
+	unsigned int get_model() const;
+	unsigned int get_directionTemplate() const;
+	unsigned int get_bfs_level() const;
+	std::string get_forbidden_set() const;
+	unsigned int get_first_plot_dimension() const;
+	unsigned int get_second_plot_dimension() const;
+	std::string get_modelFile() const;
+	double get_timeStep() const;
+	double get_timeHorizon() const;
+	unsigned int get_algorithm() const;	//returns the selected Algorithm
+	unsigned int get_simu_algo() const;	//returns the selected simulation Algorithm
+	unsigned int getStreamSize() const;
+	unsigned int getTotalSliceSize() const;
+	const std::string& getOutputFormatType() const;
+	const std::string& getOutFilename() const;
+	const std::string& getSetAggregation() const;
+	const std::string& getEngine() const;
+	std::string getCEProc() const;
+	unsigned int get_simu_init_points() const;
+
+	/* This is the path to search for a concrete trajectory to a specified forbidden state */
+	std::string get_ce_path() const;
+	bool get_ce_flag() const;
 
 };
 

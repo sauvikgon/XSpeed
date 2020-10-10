@@ -66,7 +66,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad,
 
 	std::ofstream myfile;
 
-	polytope::ptr I;
+	polytope::const_ptr I;
 
 	for (unsigned int i = 0; i < N; i++) {
 
@@ -257,8 +257,8 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad,
 		if (dwell_time < p.time)
 			continue;
 		// Compute the new point v at p.time units from the new sampled start point.
-		Dynamics d = HA->getLocation(locID)->getSystemDynamics();
-		polytope::ptr I = HA->getLocation(locID)->getInvariant();
+		const Dynamics& d = HA->getLocation(locID)->getSystemDynamics();
+		polytope::const_ptr I = HA->getLocation(locID)->getInvariant();
 		assert(d.C.size() == dim);
 
 		std::vector<double> v(dim);
@@ -350,7 +350,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 	math::matrix<double> A;
 	std::vector < double > myAxPlusb(dim), mapAxplusb;
 
-	polytope::ptr I;
+	polytope::const_ptr I;
 
 	for (unsigned int i = 0; i < N; i++) {
 

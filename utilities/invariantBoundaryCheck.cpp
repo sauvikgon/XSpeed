@@ -8,8 +8,8 @@
 #include <utilities/dataStructures.h>
 #include "../utilities/invariantBoundaryCheck.h"
 
-void InvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
+void InvariantBoundaryCheck(const Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::const_ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	//std::cout<<"\nTotal is "<<shm_NewTotalIteration <<std::endl;
@@ -361,8 +361,8 @@ void InvariantBoundaryCheckNew(Dynamics& SystemDynamics, supportFunctionProvider
 
 //Using independent lp_solver object for initial and U polytopes for each invariant faces so that for all iteration same lp_solver object can be called
 //--- this is an optimization technique/property provided by GLPK (glpk being the lp_solver)
-void InvariantBoundaryCheckNewLPSolver(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
+void InvariantBoundaryCheckNewLPSolver(const Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::const_ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	unsigned int shm_NewTotalIteration = ReachParameters.Iterations; //Shared Variable for resize iterations number on crossing with invariant
 	newTotIters = shm_NewTotalIteration;	//by default full iterations. This is modified if smaller value found
@@ -830,36 +830,28 @@ void InvariantBoundaryCheck1(Dynamics& SystemDynamics, supportFunctionProvider::
 				zI_min = res2_minus;
 			//  **************  Omega Function Over  ********************
 			TempOmega_min = zI_min + s1Variable_min; //Y1
-			//		cout<<"TempOmega_min = "<<TempOmega_min<<"\t";
+
 			// ************************************************   Negative Direction Ends *******************************************
 			loopIteration++; // Placed here as Omega_0 and Omega_1 is computed so loopIteration value == 2
-			//Debug --- Invariant check
-			//***** Intersection Detection Section *****
-			//---taken from here
 
 			rVariable = r1Variable; //source to destination		//Also works   rVariable=r1Variable
 			sVariable = s1Variable;
 			rVariable_minus = r1Variable_minus;
 			sVariable_min = s1Variable_min;
 		} //end of iterations
-		//	if (invariantCrossed)	//We need to check all invariants as we are taking the min of all the directions
-		//		break;//boundary crossed so no need to check other invariant's directions
 	} //end of parallel for each Iterations or Time-Bound
 // At the end of the For-Loop or all invariant_Directions we have boundaryIterations vector with the different limit to stop iterations
 // The Minimum(boundaryIterations) will be the final Boundary Limit for the number of iterations
 	unsigned int min_Total_Iteration;
 	min_Total_Iteration = *min_element(boundaryIterations.begin(),
 			boundaryIterations.end()); // - 1 ;//excluding the last outside Omega
-//#pragma omp critical
-//	{
+
 	newTotIters = min_Total_Iteration;
-//	}
-//	cout<<"\nmin_Total_Iteration = "<<min_Total_Iteration<<endl;
-//	return min_Total_Iteration;
+
 }
 
 void quickInvariantBoundaryCheck(Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
+		supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant,
 		int lp_solver_type, unsigned int &newTotIters) {
 
@@ -906,8 +898,8 @@ void quickInvariantBoundaryCheck(Dynamics& SystemDynamics,
 }
 
 unsigned int invariantCheck(std::vector<double>& pos_dir, std::vector<double>& neg_dir, double SearchKey, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial, int lp_solver_type) {
-	supportFunctionProvider::ptr p;
+		supportFunctionProvider::const_ptr Initial, int lp_solver_type) {
+	supportFunctionProvider::const_ptr p;
 	unsigned int start_iter = 0, end_iter = ReachParameters.Iterations;
 // ************************************************ object creations ************************************************
 	lp_solver pos_lp(lp_solver_type);
@@ -968,7 +960,7 @@ unsigned int invariantCheck(std::vector<double>& pos_dir, std::vector<double>& n
 	return end_iter;
 }
 
-supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics) {
+supportFunctionProvider::const_ptr getInitialSet(double START_TIME, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics) {
 
 	math::matrix<double> phi, phi_trans;
 
@@ -976,8 +968,8 @@ supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParame
 		//cout <<"Matrix B and Vector C is Empty!!, Dynamics is x'(t) = Ax(t)\n";
 		SystemDynamics.MatrixA.matrix_exponentiation(phi, START_TIME); //if MatrixA is empty will not perform this function
 		phi.transpose(phi_trans); //phi_trans computed
-		//std::cout << "\ncomputing initial when B and C are Empty !!\n";
-		supportFunctionProvider::ptr Initial = transMinkPoly::ptr( new transMinkPoly(ReachParameters.X0, SystemDynamics.U,
+
+		supportFunctionProvider::const_ptr Initial = transMinkPoly::ptr(new transMinkPoly(ReachParameters.X0, SystemDynamics.U,
 						phi_trans, phi_trans, 0, 0));//when  Bu(t) and C are empty
 		return Initial;
 	}
@@ -1031,7 +1023,7 @@ supportFunctionProvider::ptr getInitialSet(double START_TIME, ReachabilityParame
 
 //NOTE :: this approach of increasing the time-step does not work in support-function algorithm
 void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
-		supportFunctionProvider::ptr Initial,
+		supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParametersOld, polytope::ptr invariant,
 		int lp_solver_type, unsigned int &newTotIters) {
 
@@ -1354,7 +1346,7 @@ void SlowStartInvariantBoundaryCheck(Dynamics& SystemDynamics,
 //	return min_Total_Iteration;
 }
 
-void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
+void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, int lp_solver_type, unsigned int &newTotIters) {
 
 	//-- get the time-horizon and time-step and discritization_factor=10 times
@@ -1394,9 +1386,9 @@ void jumpInvariantBoundaryCheck(Dynamics& SystemDynamics, supportFunctionProvide
 }
 
 double invariantFaceCrossingCheck(std::vector<double>& neg_dir, double invBound, double START_TIME, double time_step, double time_horizon,
-		supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type){
+		supportFunctionProvider::const_ptr Initial, ReachabilityParameters& ReachParameters, Dynamics& SystemDynamics, int lp_solver_type){
 
-	supportFunctionProvider::ptr p;
+	supportFunctionProvider::const_ptr p;
 	// ************************************************ object creations ************************************************
 	lp_solver neg_lp(lp_solver_type);
 	neg_lp.setMin_Or_Max(2);
@@ -1416,9 +1408,9 @@ double invariantFaceCrossingCheck(std::vector<double>& neg_dir, double invBound,
 	return time_horizon; //crossed time-horizon without crossing the invariant bound or didnot find intersecting with invariant face
 }
 
-double invariantCrossingCheck1(double START_TIME, double time_step, double time_horizon, supportFunctionProvider::ptr Initial,
+double invariantCrossingCheck1(double START_TIME, double time_step, double time_horizon, supportFunctionProvider::const_ptr Initial,
 		ReachabilityParameters& ReachParameters, polytope::ptr invariant, Dynamics& SystemDynamics, int lp_solver_type, std::string fileName){
-	supportFunctionProvider::ptr p;
+	supportFunctionProvider::const_ptr p;
 	// ************************************************ object creations ************************************************
 	lp_solver neg_lp(lp_solver_type);
 	neg_lp.setMin_Or_Max(2);

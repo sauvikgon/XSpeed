@@ -22,7 +22,7 @@ hybrid_automata::hybrid_automata(std::map<int, location::ptr>& list_locs, locati
 	dimension = dim;
 }
 
-location::ptr hybrid_automata::getInitialLocation() {
+location::ptr hybrid_automata::getInitialLocation() const {
 	return initial_loc;
 }
 
@@ -32,25 +32,23 @@ void hybrid_automata::addInitialLocation(location::ptr& initLoc) {
 
 void hybrid_automata::setInitialLoc(int loc_id)
 {
-	location::ptr init_loc_ptr = this->getLocation(loc_id);
-	addInitialLocation(init_loc_ptr);
+	initial_loc = list_locations[loc_id];
+
 }
 
-location::ptr hybrid_automata::getLocation(int Loc_Id){
+location::const_ptr hybrid_automata::getLocation(int Loc_Id) const {
 	assert(list_locations.count(Loc_Id)!=0);
-	location::ptr l;
-	l = list_locations[Loc_Id];
-	return l;
+	return list_locations.at(Loc_Id);
 }
 
 /* returns the location from the list of locations with locName */
-location::ptr hybrid_automata::getLocation(string locName){
+location::const_ptr hybrid_automata::getLocation(string locName) const {
 
-	std::map<int, location::ptr>::iterator locMapIter;
+	std::map<int, location::ptr>::const_iterator locMapIter;
 
 	for(locMapIter = list_locations.begin();locMapIter!=list_locations.end(); locMapIter++){
 		std::pair<int, location::ptr> map_elem = *locMapIter;
-		location::ptr l = this->getLocation(map_elem.first);
+		location::const_ptr l = this->getLocation(map_elem.first);
 		string name = l->getName();
 		if(locName.compare(name)==0)
 			return l;
@@ -337,7 +335,7 @@ std::list<structuralPath::ptr> hybrid_automata::findAllPaths(int src, int dst, i
 		if (last == dst) {
 			//std::cout << " Solution path: ";
 			//printpath(pathDS.first);
-			std::list<location::ptr> path_locations;
+			std::list<location::const_ptr> path_locations;
 			for (unsigned int i = 0; i < pathDS.first.size(); i++) {
 				path_locations.push_back(getLocation(pathDS.first[i]));
 			}
@@ -346,13 +344,13 @@ std::list<structuralPath::ptr> hybrid_automata::findAllPaths(int src, int dst, i
 				path_transitions.push_back(pathDS.second[i]);
 			}
 			structuralPath::ptr solutionPath = structuralPath::ptr(new structuralPath(path_locations, path_transitions));
-			allStructralPaths.push_back(solutionPath);
+			//allStructralPaths.push_back(solutionPath);
 			//Disable instruction continue to avoid repeated bad location (applicable for discrete systems)
 			//continue;	//avoiding traversing further from here: bad location not repeated (applicable for hybrid systems)
 		}
 		// traverse to all the nodes connected to
 		// current node and push new path to queue
-		location::ptr lastLoc = getLocation(last); //Note:: todo take care if last does not exist (if error occurs)
+		location::const_ptr lastLoc = getLocation(last); //Note:: todo take care if last does not exist (if error occurs)
 		std::list<transition::ptr> allOutTrans = lastLoc->getOutGoingTransitions();
 		std::list<transition::ptr>::iterator it;
 		for (it = allOutTrans.begin(); it != allOutTrans.end(); it++) {

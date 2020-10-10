@@ -10,6 +10,14 @@
 
 #include <core/hybridAutomata/hybridAutomata.h>
 #include <core/symbolicStates/symbolicStates.h>
+#include <core/symbolicStates/initialState.h>
+#include <core/continuous/approxModel/fbInterpol.h>
+#include <core/reachability/postCSequential.h>
+#include <utilities/templatePolyhedra.h>
+#include <utilities/postAssignment.h>
+#include <application/userOptions.h>
+#include <boost/algorithm/string.hpp>
+#include <io/ioUtility.h>
 #include <vector>
 #include <list>
 #include <z3++.h>
@@ -31,8 +39,11 @@ typedef std::vector<forbidden> forbidden_states; // vector of forbidden symb sta
 
 class bmc {
 
-	hybrid_automata* ha;
-	forbidden_states forbidden_s;
+	const hybrid_automata& ha;
+	const std::list<initial_state::ptr>& init;
+	const forbidden_states& forbidden_s;
+	const ReachabilityParameters& reach_params;
+	const userOptions& user_ops;
 	z3::context c;
 	z3::expr ha_encoding;
 	z3::solver sol;
@@ -42,20 +53,20 @@ class bmc {
 	/* bmc uses this private member function to initialize the ha_encoding for the given
 	 * forbidden location id
 	 */
-	void init_solver(unsigned int forbidden_loc_id);
+	void init_solver(unsigned int forbidden_loc_id, unsigned int k1);
 
 public:
 
-	bmc();
-
 	/* To be used for BMC when a set of ha locations together with assoc. polytopes are forbidden */
-	bmc(hybrid_automata* ha_ptr, forbidden_states& forbidden, unsigned int k);
+	bmc(const hybrid_automata& ha, const std::list<initial_state::ptr>& init, const forbidden_states& forbidden,
+			const ReachabilityParameters& r_params, const userOptions& user_ops);
 
 	virtual ~bmc();
 	/*
-	 * Computes the reachable states along the given path p
+	 * Computes the reachable states along the given path p and gets the path feasibility
+	 * as a boolean flag.
 	 */
-	region getPathRegion(path p);
+	region getPathRegion(path p, bool& feasible);
 
 	/*
 	 * Returns the next unexplored path in the HA from the given source
@@ -63,14 +74,14 @@ public:
 	 * in the z3 expression ha_encoding. The implementation is a SAT solver
 	 * based path enumeration algorithm.
 	 */
-	path getNextPath();
+	path getNextPath(unsigned int k1);
 
 	/*
 	 * Returns false if the ha is found to be unsafe in the given bound.
 	 * a return of true however, does not decide the safety of ha faithfully.
 	 * This is due to the incompleteness of the ce search mechanism.
 	 */
-	bool isSafe();
+	bool safe();
 
 	/*
 	 * Updates the ha encoding with a given forbidden location in such a way

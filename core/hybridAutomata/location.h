@@ -26,20 +26,24 @@ private:
 	std::list<transition::ptr> Out_Going_Transitions;
 public:
 	typedef boost::shared_ptr<location> ptr;
+	typedef boost::shared_ptr<const location> const_ptr;
+
 	location();
 	location(int Loc_ID, string Name, Dynamics System_Dynamics, polytope::ptr Invariant,  bool inv_exists, std::list<transition::ptr> Out_Going_Trans);
+	const Dynamics& getSystemDynamics() const;
+	/* polymorphic member function which may modify the caller object due to non-constness */
 	Dynamics& getSystemDynamics();
 	void setSystemDynamics(const Dynamics& d);
-	polytope::ptr getInvariant();
+	polytope::const_ptr getInvariant() const;
 	void setInvariant(polytope::ptr invariant);
 	const string& getName() const;
 	void setName(const string& Name);
 
 	void addOutGoingTransition(transition::ptr t);
 
-	transition::ptr getTransition(int trans_id);	//returns a specific transition for a given trans_id
+	transition::ptr getTransition(int trans_id) const;	//returns a specific transition for a given trans_id
 
-	std::list<transition::ptr>& getOutGoingTransitions();
+	const std::list<transition::ptr>& getOutGoingTransitions() const;
 	int getLocId() const;
 	void setLocId(int locId);
 	bool getInvariantExist() const;

@@ -46,7 +46,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 	bool safety_violation = false;
 
-	polytope::ptr initial_polytope;
+	polytope::const_ptr initial_polytope;
 
 	unsigned int num_flowpipe_computed=0;	//keeping track of number of flowpipe computed
 
@@ -78,7 +78,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 		pw_list.PassedList_insert(U);
 
-		location::ptr current_location;
+		location::const_ptr current_location;
 
 		current_location = H->getLocation(location_id);
 		string name = current_location->getName();
@@ -158,7 +158,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 							ds2 = symb_state_in_abst_ce->getDiscreteSet(); //c)
 							for (std::set<int>::iterator it = ds2.getDiscreteElements().begin(); it != ds2.getDiscreteElements().end(); ++it)
 								locationID2 = (*it); //c)
-							location::ptr object_location;
+							location::const_ptr object_location;
 							object_location = H->getLocation(locationID2); //d)
 							transition::ptr temp = object_location->getTransition(transID); //e)
 							list_transitions.push_front(temp); //pushing the transition in the stack
@@ -201,11 +201,11 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 
 		if (reach_region->getTotalIterations() != 0 && bfslevel <= bound) {
 			//computed reach_region is not empty and bounding depth not reached
-			for (std::list<transition::ptr>::iterator t = current_location->getOutGoingTransitions().begin();
+			for (std::list<transition::ptr>::const_iterator t = current_location->getOutGoingTransitions().begin();
 					t != current_location->getOutGoingTransitions().end(); t++) {
 				// get each destination_location_id and push into the pwl.waiting_list
 				int transition_id = (*t)->getTransitionId();
-				location::ptr current_destination;
+				location::const_ptr current_destination;
 				Assign current_assignment;
 				polytope::ptr guard_polytope;
 				discrete_set ds;
@@ -213,7 +213,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				string locName = current_destination->getName();
 				std::list<polytope::ptr> polys; // list of template hull of flowpipe-guard intersections.
 				guard_polytope = (*t)->getGuard();
-				polytope::ptr inv = current_location->getInvariant();
+				polytope::const_ptr inv = current_location->getInvariant();
 				
 				
 				bool aggregation=true; // TRUE indicates ON, so the template hull of the polytopes intersecting with the guard is taken
@@ -360,8 +360,8 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 	return Reachability_Region;
 }
 
-void reachability::seq_postC_selection(unsigned int iters, location::ptr current_location,
-		polytope::ptr initial_polytope,
+void reachability::seq_postC_selection(unsigned int iters, location::const_ptr current_location,
+		polytope::const_ptr initial_polytope,
 		template_polyhedra::ptr& reach_region) {
 
 	// first order linear approx. model of Colas et. al.
@@ -401,7 +401,7 @@ void reachability::seq_postC_selection(unsigned int iters, location::ptr current
 	// forward-backward interpolation approx. model of Goran et. al.
 	if(Algorithm_Type == FB_INTERPOL){
 		DEBUG_MSG("Running PostC using the approximation model of forward-backward interpolation.");
-		reach_region = postC_fbinterpol(iters, current_location->getSystemDynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist(), lp_solver_type);
+		reach_region = postC_fbinterpol(iters, current_location->getSystemDynamics(), initial_polytope, reach_parameters, current_location->getInvariant(), current_location->getInvariantExist());
 		
 	}
 }
@@ -450,7 +450,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			initial_state::ptr U; //local
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
-			polytope::ptr initial_polytope; //local
+			polytope::const_ptr initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 
 			int location_id = U->getLocationId();
@@ -466,7 +466,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
 
-			location::ptr current_location;
+			location::const_ptr current_location;
 			current_location = H->getLocation(location_id);
 			string name = current_location->getName();
 			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
@@ -495,8 +495,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 			}
 			math::matrix<double> B_trans;
 			if (!current_location->getSystemDynamics().isEmptyMatrixB) { //if B not Empty
-				current_location->getSystemDynamics().MatrixB.transpose(
-						B_trans);
+				current_location->getSystemDynamics().MatrixB.transpose(B_trans);
 				reach_parameter_local.B_trans = B_trans;
 			}
 			// ******************* Computing Parameters Done *******************************
@@ -516,7 +515,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 
 			if (t_poly->getTotalIterations() != 0 && number_times < bound) { //computed reach_region is empty && optimize computation
 
-				for (std::list<transition::ptr>::iterator t =
+				for (std::list<transition::ptr>::const_iterator t =
 						current_location->getOutGoingTransitions().begin();
 						t != current_location->getOutGoingTransitions().end();
 						t++) { // get each destination_location_id and push into the pwl.waiting_list
@@ -524,7 +523,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 					if (transition_id == -1) { //Indicates empty transition or no transition exists
 						break; //out from transition for-loop as there is no transition for this location
 					}
-					location::ptr current_destination;
+					location::const_ptr current_destination;
 					Assign current_assignment;
 					polytope::ptr guard_polytope;
 					std::list < template_polyhedra::ptr > intersected_polyhedra;
@@ -720,7 +719,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			//	symbolic_states::ptr S = symbolic_states::ptr(new symbolic_states());
 			U = list_U[id]; //independent symbolic state to work with
 			discrete_set discrete_state; //local
-			polytope::ptr initial_polytope; //local
+			polytope::const_ptr initial_polytope; //local
 			ReachabilityParameters reach_parameter_local; //local
 
 			int location_id = U->getLocationId();
@@ -735,7 +734,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 			S[id]->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
 			S[id]->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
 
-			location::ptr current_location;
+			location::const_ptr current_location;
 			current_location = H->getLocation(location_id);
 			string name = current_location->getName();
 			if ((name.compare("GOOD") == 0) || (name.compare("BAD") == 0)
@@ -831,7 +830,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 #pragma omp parallel for // num_threads(2)
 		for (unsigned int id = 0; id < count; id++) {
 
-			location::ptr current_location;
+			location::const_ptr current_location;
 
 			current_location = SymDataStruct[id].current_location;
 
@@ -840,13 +839,13 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 
 			if (t_poly->getTotalIterations() != 0 && number_times < bound) { //computed reach_region is empty && optimize computation
 
-				for (std::list<transition::ptr>::iterator trans = current_location->getOutGoingTransitions().begin();
+				for (std::list<transition::ptr>::const_iterator trans = current_location->getOutGoingTransitions().begin();
 						trans != current_location->getOutGoingTransitions().end(); trans++) { // get each destination_location_id and push into the pwl.waiting_list
 					int transition_id = (*trans)->getTransitionId();
 					if (transition_id == -1) { //Indicates empty transition or no transition exists
 						break; //out from transition for-loop as there is no transition for this location
 					}
-					location::ptr current_destination;
+					location::const_ptr current_destination;
 					Assign current_assignment;
 					polytope::ptr guard_polytope;
 					std::list < template_polyhedra::ptr > intersected_polyhedra;
@@ -947,10 +946,10 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 	return Reachability_Region;
 }
 
-/*** TODO: Have to optimize invariant_boundary_check() for support function computation ***/
+/* TODO: Have to optimize invariant_boundary_check() for support function computation ***/
 
-void reachability::par_postC_selection(unsigned int iters, location::ptr current_location,
-		polytope::ptr initial_polytope,
+void reachability::par_postC_selection(unsigned int iters, location::const_ptr current_location,
+		polytope::const_ptr initial_polytope,
 		ReachabilityParameters& reach_parameters,
 		std::vector<symbolic_states::ptr>& S, unsigned int id) {
 
@@ -985,9 +984,6 @@ void reachability::par_postC_selection(unsigned int iters, location::ptr current
 				current_location->getInvariantExist(), lp_solver_type);
 		AllReach_time.stop();
 		S[id]->setContinuousSetptr(reach_region);
-		double wall_clock1;
-		wall_clock1 = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
-		double return_Time1 = wall_clock1 / (double) 1000;
 		DEBUG_MSG("Flowpipe Time:Wall(Seconds) = " + to_string(return_Time1));
 	}
 
@@ -1017,7 +1013,7 @@ void reachability::par_postC_selection(unsigned int iters, location::ptr current
 	}
 }
 
-bool reachability::gen_counter_example(abstractCE::ptr abs_path, std::string& ce_search_algo_type)
+bool reachability::gen_counter_example(abstractCE::ptr abs_path, std::string ce_search_algo_type)
 {
 	double splicing_error_tol = 1e-6; // A parameter particular to specify the precision of the search of ce by using trajectory splicing.
 
@@ -1090,7 +1086,7 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 	std::list < symbolic_states::ptr > list_sym_states;
 	std::list < abstract_symbolic_state::ptr > list_abstract_sym_states;
 	polytope::ptr abs_flowpipe; //bounding_box Polytope
-	polytope::ptr polyI; // initial polytope of the abstract flowpipe.
+	polytope::const_ptr polyI; // initial polytope of the abstract flowpipe.
 	bool saftey_violated = false;
 	std::list < transition::ptr > list_transitions;
 	forbidden forbidden_set = forbidden_states[0];
@@ -1180,7 +1176,7 @@ bool reachability::safetyVerify(symbolic_states::ptr& computedSymStates,
 							ds2.getDiscreteElements().begin();
 							it != ds2.getDiscreteElements().end(); ++it)
 						locationID2 = (*it); //c)
-					location::ptr object_location;
+					location::const_ptr object_location;
 					object_location = H->getLocation(locationID2); //d)
 					transition::ptr temp = object_location->getTransition(
 							transID); //e)
@@ -1350,7 +1346,7 @@ void reachability::setSetAggregation(const std::string& setAggregation) {
 	set_aggregation = setAggregation;
 }
 
-double reachability::LPSolver(polytope::ptr poly, std::vector<double> dirs) {
+double reachability::LPSolver(polytope::const_ptr poly, std::vector<double> dirs) {
 	double res;
 	if (poly->getIsEmpty())
 		res = 0.0;

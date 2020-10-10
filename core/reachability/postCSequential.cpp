@@ -11,8 +11,8 @@
 
 //postC algorithm using support functions
 
-template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type) {
+template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, const Dynamics& SystemDynamics, supportFunctionProvider::const_ptr Initial,
+		ReachabilityParameters& ReachParameters, polytope::const_ptr invariant, bool InvariantExist, int lp_solver_type) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
@@ -47,11 +47,11 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
 	math::matrix<double> phi_matrix, phi_trans;
 
 	if (!SystemDynamics.isEmptyMatrixA) { //if A not Empty
-		SystemDynamics.MatrixA.matrix_exponentiation(
-				phi_matrix, ReachParameters.time_step);
+		SystemDynamics.MatrixA.matrix_exponentiation( phi_matrix, ReachParameters.time_step);
 		phi_matrix.transpose(phi_trans);
 		ReachParameters.phi_trans = phi_trans;
 	}
+
 	math::matrix<double> B_trans;
 	// transpose to be done once and stored in the structure of parameters
 	if (!SystemDynamics.isEmptyMatrixB) { //if B not Empty
@@ -211,8 +211,8 @@ template_polyhedra::ptr postC_sf(unsigned int boundedTotIteration, Dynamics& Sys
  * @Amit: Modifying to match with the always updated Sequential algorithm.
  */
 template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned int boundedTotIteration,
-		Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
-		polytope::ptr invariant, bool InvariantExist, int lp_solver_type) {
+		const Dynamics& SystemDynamics, supportFunctionProvider::ptr Initial, ReachabilityParameters& ReachParameters,
+		polytope::const_ptr invariant, bool InvariantExist, int lp_solver_type) {
 
 	int numVectors = ReachParameters.Directions.size1();
 	int dimension = Initial->getSystemDimension();
@@ -392,8 +392,8 @@ template_polyhedra::ptr reachabilitySequential_For_Parallel_Iterations(unsigned 
  * algorithm.
  */
 
-template_polyhedra::ptr postC_fbinterpol(unsigned int boundedTotIteration, Dynamics& SystemDynamics, polytope::ptr Initial,
-		ReachabilityParameters& ReachParameters, polytope::ptr invariant, bool InvariantExist, int lp_solver_type) {
+template_polyhedra::ptr postC_fbinterpol(const unsigned int boundedTotIteration, const Dynamics& SystemDynamics, polytope::const_ptr Initial,
+		const ReachabilityParameters& ReachParameters, polytope::const_ptr invariant, bool InvariantExist) {
 
 	
 	unsigned int num_directions = ReachParameters.Directions.size1();
@@ -422,13 +422,7 @@ template_polyhedra::ptr postC_fbinterpol(unsigned int boundedTotIteration, Dynam
 
 		for(unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
 			SFM(eachDirection,iter) = fbinterpol_model->omega_support(direction[eachDirection],iter);
-			//b[eachDirection] = SFM(eachDirection,iter);
 		}
-
-		//check whether omega is outside the invariant
-		//polytope::ptr omega_ptr = polytope::ptr(new polytope(ReachParameters.Directions,b,1));
-		//polytope::omega_inters_inv_ptr = omega_ptr->GetPolytope_Intersection(invariant);
-
 	}
 
 	if (InvariantExist == true) { //if invariant exist. Computing

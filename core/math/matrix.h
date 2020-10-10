@@ -33,12 +33,12 @@ public:
 	 * every member of the matrix.
 	 */
 	matrix(size_type r, size_type c, const scalar_type init_val);
-	void matrix_exponentiation(math::matrix<scalar_type>& res, double time_tau);
-	void matrix_exponentiation(math::matrix<scalar_type>& res);
-	void multiply(matrix& A, matrix& res);
+	void matrix_exponentiation(math::matrix<scalar_type>& res, double time_tau) const;
+	void matrix_exponentiation(math::matrix<scalar_type>& res) const;
+	void multiply(const matrix& A, matrix& res) const;
 
 	//any matrix object can call this function to create another identity matrix
-	void matrix_Identity(int dimension, math::matrix<scalar_type>& newIdentityMatrix);
+	void matrix_Identity(int dimension, math::matrix<scalar_type>& newIdentityMatrix) const;
 
 	//calling matrix as minuend, passed as subtrahend and result as difference (minuend − subtrahend =	difference)
 	void minus(matrix& B, matrix& res);
@@ -49,34 +49,34 @@ public:
 	/**
     	  * Gets the transpose of the current matrix in res
 	  */
-	void transpose(matrix& res );
+	void transpose(matrix& res) const;
 
 	/**
 	  * Gets the absolute matrix M = (|m_{i,j}|) in res
 	  */
-	void absolute(matrix& res);
+	void absolute(matrix& res) const;
 	/*
 	 * Appends a column vector to the end of the calling matrix and returns the new resized matrix
 	 */
 //	void addColumn(std::vector <scalar_type> columnVector, math::matrix<scalar_type>& resized_matrix);
-	scalar_type norm_inf();
+	scalar_type norm_inf() const;
 
-	scalar_type norm_max();
+	scalar_type norm_max() const;
 
-	void matrix_copy(math::matrix<scalar_type>& destination);
+	void matrix_copy(math::matrix<scalar_type>& destination) const;
 	void matrix_join(math::matrix<scalar_type> mat2,
-			math::matrix<scalar_type>& joined_matrix);
+			math::matrix<scalar_type>& joined_matrix) const;
 	//void matrix_Identity(math::matrix<scalar_type>& newIdentityMatrix);
 	/*
 	 * inverse of a matrix : Returns True if Inverse Exists otherwise returns False
 	 */
-	bool inverse(math::matrix<scalar_type>& res);
+	bool inverse(math::matrix<scalar_type>& res) const;
 	/* Returns the boolean status of invertibility */
-	bool isInvertible();
+	bool isInvertible() const;
 	/**
 	 * Returns true if identity, false othwerwise
 	 */
-	bool isIdentity();
+	bool isIdentity() const;
 
 	/*private:
 	 ublas_matrix_impl my_matrix;*/

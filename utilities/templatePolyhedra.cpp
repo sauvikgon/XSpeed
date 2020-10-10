@@ -64,7 +64,7 @@ const math::matrix<double>& template_polyhedra::getInvariantDirections() const {
 	return invariant_Directions;
 }
 void template_polyhedra::setInvariantDirections(
-		math::matrix<double>& invariant_Directions) {
+		const math::matrix<double>& invariant_Directions) {
 	this->invariant_Directions = invariant_Directions;
 	this->setTotalInvariantDirections(invariant_Directions.size1());
 }
@@ -530,7 +530,7 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 			new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
 }
 
-std::list<polytope::ptr> template_polyhedra::postD_chull(polytope::ptr guard, polytope::ptr inv, int lp_solver_type)
+std::list<polytope::ptr> template_polyhedra::postD_chull(polytope::ptr guard, polytope::const_ptr inv, int lp_solver_type)
 {
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
 	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type);

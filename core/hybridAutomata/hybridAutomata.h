@@ -38,13 +38,13 @@ public:
 	 */
 	void setInitialLoc(int init_id);
 	
-	location::ptr getInitialLocation();
+	location::ptr getInitialLocation() const;
 
 	//returns the location from the list of locations with location_ID as the input parameter
-	location::ptr getLocation(int Loc_ID);
+	location::const_ptr getLocation(int Loc_ID) const;
 
 	/* returns the location from the list of locations with locName */
-	location::ptr getLocation(string locName);
+	location::const_ptr getLocation(string locName) const;
 
 	void addMappedLocationsList(std::map<int, location::ptr>& mapped_location_list);
 
@@ -55,11 +55,11 @@ public:
 	/*
 	 * Returns the total number of Locations in the hybrid automata with ID = 1 to returned size
 	 */
-	int getTotalLocations(){
+	int getTotalLocations() const {
 		return list_locations.size();
 	}
 	
-	std::map<int, location::ptr> getAllLocations(){
+	std::map<int, location::ptr> getAllLocations() const {
 		return list_locations;
 	}
 	

@@ -181,7 +181,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	Parameters of the optimization routine
-	unsigned int maxeval = 20000;
+	//unsigned int maxeval = 20000;
 	unsigned int maxtime = 60; // time-out of 1 min per abstract ce.
 
 	myopt.set_min_objective(myobjfunc2, NULL);
@@ -205,7 +205,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 		// S is the sub-flowpipe in i-th sequence; P is the first polytope in S.
 
 		S = get_symbolic_state(i);
-		polytope::ptr P = S->getInitialPolytope();
+		polytope::const_ptr P = S->getInitialPolytope();
 
 		// set bound constraints
 		lp_solver lp(GLPK_SOLVER);
@@ -320,7 +320,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 
 		// Get the min and max time projection of start set
 		lp_solver lp1(GLPK_SOLVER);
-		polytope::ptr init_of_symb = S->getInitialPolytope();
+		polytope::const_ptr init_of_symb = S->getInitialPolytope();
 
 		lp1.setConstraints(init_of_symb->getCoeffMatrix(),
 				init_of_symb->getColumnVector(),
@@ -633,7 +633,7 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	for (unsigned int i = 0; i < N; i++) // iterate over the N flowpipes of the counter-example
 	{
 		S = get_symbolic_state(i);
-		polytope::ptr P = S->getInitialPolytope();
+		polytope::const_ptr P = S->getInitialPolytope();
 
 		lp_solver lp(GLPK_SOLVER);
 		lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
@@ -698,11 +698,11 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 		Dynamics D;
 		math::matrix<double> expAt; // To contain the e^At matrix, for the fixed time.
 		unsigned int loc_id = locIdList[i];
-		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
+		location::const_ptr ha_loc_ptr = HA->getLocation(loc_id);
 		D = ha_loc_ptr->getSystemDynamics();
 		D.MatrixA.matrix_exponentiation(expAt, dwell_times[i]);
 
-		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+		polytope::const_ptr loc_inv = ha_loc_ptr->getInvariant();
 		// Now, we calculate v = A^{-1}.(e^{At} - I)* D.C
 		std::vector<double> v = ODESol_inhomogenous(D, dwell_times[i]);
 
@@ -769,8 +769,8 @@ lp_solver abstractCE::build_lp(std::vector<double> dwell_times) {
 	S = get_symbolic_state(N - 1);
 	polytope::ptr P;
 	unsigned int loc_id = locIdList[N - 1];	//last location
-	location::ptr ha_loc_ptr = HA->getLocation(loc_id);
-	polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+	location::const_ptr ha_loc_ptr = HA->getLocation(loc_id);
+	polytope::const_ptr loc_inv = ha_loc_ptr->getInvariant();
 
 	P = bad_poly->GetPolytope_Intersection(loc_inv); //Invariant with Bad poly
 	lp_solver lp(GLPK_SOLVER);
@@ -905,8 +905,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 		S = get_symbolic_state(i);
 
 		unsigned int loc_id = locIdList[i];	//location ID
-		location::ptr ha_loc_ptr = HA->getLocation(loc_id);
-		polytope::ptr loc_inv = ha_loc_ptr->getInvariant();
+		location::const_ptr ha_loc_ptr = HA->getLocation(loc_id);
+		polytope::const_ptr loc_inv = ha_loc_ptr->getInvariant();
 
 		polytope::ptr P;
 		if (i == N - 1) {
@@ -915,9 +915,9 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 					aggregation, bad_poly, 1);
 			assert(polys.size() >= 1); // The last sym state of an abstract CE must intersect with the bad set
 
-			if (polys.size() > 1){
-				std::runtime_error("abstractCE::gen_concreteCE_iterative: Impl missing for no set aggregation\n");
-			}
+			if (polys.size() > 1)
+				P = get_template_hull(S->getContinuousSetptr(), 0,
+						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
 			else
 				P = polys.front();
 
@@ -935,7 +935,8 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			assert(polys.size() >= 1); // An abstract CE state must have intersection with the guard
 			if (polys.size() > 1)
-				std::runtime_error("abstractCE::gen_concreteCE_iterative: Impl missing for no set aggregation\n");
+				P = get_template_hull(S->getContinuousSetptr(), 0,
+						S->getContinuousSetptr()->getTotalIterations() - 1); // 100% clustering
 			else
 				P = polys.front();
 			// Now intersect P with guard
@@ -964,7 +965,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 		// Get the min and max time projection of start set
 		lp_solver lp1(GLPK_SOLVER);
-		polytope::ptr init_of_symb = S->getInitialPolytope();
+		polytope::const_ptr init_of_symb = S->getInitialPolytope();
 
 		lp1.setConstraints(init_of_symb->getCoeffMatrix(),
 				init_of_symb->getColumnVector(),
@@ -1013,11 +1014,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	boost::timer::cpu_timer timer;
 	using boost::timer::cpu_times;
 	using boost::timer::nanosecond_type;
-	nanosecond_type const sixhundred_seconds(60 * 1000000000LL);
+	nanosecond_type const sixty_seconds(60 * 1000000000LL);
 	// a ce search in an abstract path is to timeout after 60 secs.
 	timer.start();
 
-	for(unsigned int i=0;i<max_restarts;i++){
+	while(true){
 
 		while (minf > tolerance) {
 
@@ -1031,7 +1032,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			//From this vector, get the N start vectors in x0
 			for (unsigned int i = 0; i < N; i++) {
-				x0[i].resize(dim);	//declaring each array element its size		
+				x0[i].resize(dim);	//declaring each array element its size
 				for (unsigned int j = 0; j < dim; j++) {
 					x0[i][j] = x[X1 + i * dim + j];
 				}
@@ -1062,13 +1063,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			cpu_times const elapsed_times(timer.elapsed());
 			nanosecond_type const elapsed(elapsed_times.user);
-			if (elapsed > sixhundred_seconds)
+			if (elapsed > sixty_seconds)
 			{
 				std::cout << "Timed-out on the abstract counterexample\n";
 				success = true; // here, success true is break the restart loop.
 				break;
 			}
-			//std::cout << "last nlp_res = " << nlp_res << std::endl;
 
 		} // end of alternating lp-nlp loop.
 
@@ -1177,14 +1177,14 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 
 	// 	Optimization routine paramters
-	unsigned int maxeval = 20000;
+	// unsigned int maxeval = 20000;
 	unsigned int maxtime = 60; //60 secs/ 1 minute
 	myopt.set_min_objective(myobjfunc2, NULL);
 	myopt.set_maxtime(maxtime); // times out after maxtime
 	//myopt.set_maxeval(maxeval);
 	myopt.set_stopval(1e-6);
 	std::vector<double> x(optD, 0);
-	polytope::ptr P;
+	polytope::const_ptr P;
 
 	// A random objective function created for lp solving
 	std::vector<double> lb(optD), ub(optD);
@@ -1206,12 +1206,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			T = *(trans_iter);
 			assert(T!=NULL);
 
-			location::ptr src_loc = HA->getLocation(T->getSourceLocationId());
-			location::ptr dest_loc = HA->getLocation(
+			location::const_ptr src_loc = HA->getLocation(T->getSourceLocationId());
+			location::const_ptr dest_loc = HA->getLocation(
 					T->getDestinationLocationId());
 
-			polytope::ptr src_loc_inv = src_loc->getInvariant();
-			polytope::ptr dest_loc_inv = dest_loc->getInvariant();
+			polytope::const_ptr src_loc_inv = src_loc->getInvariant();
+			polytope::const_ptr dest_loc_inv = dest_loc->getInvariant();
 
 			P = dest_loc_inv;
 			assert(P!=NULL);
@@ -1230,8 +1230,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 			}
 		} else {
 			lp_solver lp(GLPK_SOLVER);
-			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(),
-					P->getInEqualitySign());
+			lp.setConstraints(P->getCoeffMatrix(), P->getColumnVector(), P->getInEqualitySign());
 
 			//we add bound constraints on the position parameters
 			std::vector<double> dir(dim, 0);
@@ -1330,7 +1329,7 @@ concreteCE::ptr abstractCE::get_validated_CE(double tolerance, std::string& algo
 
 	concreteCE::ptr cexample;
 	bool val_res = true;
-	unsigned int max_refinements = 3, ref_count = 0; // maximum limit to refinement points to be added.
+	unsigned int max_refinements = 10, ref_count = 0; // maximum limit to refinement points to be added.
 
 	double valid_tol = 1e-5; // validation error tolerance, on invariant crossing.
 

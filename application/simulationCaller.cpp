@@ -14,7 +14,7 @@ void simulationCaller(hybrid_automata& ha, std::list<initial_state::ptr>& init_s
 
 	std::list<initial_state::ptr>::iterator it;
 	it = init_state.begin();
-	polytope::ptr initialset = (*it)->getInitialSet();
+	polytope::const_ptr initialset = (*it)->getInitialSet();
 
 	// testing HA location simulation
 	unsigned int n = op.get_simu_init_points(); // the number of start points

@@ -27,7 +27,7 @@ public:
 
 	abstract_symbolic_state();
 	abstract_symbolic_state(discrete_set& discreteSet,
-			polytope::ptr continuousSet, polytope::ptr polyI);
+			polytope::ptr continuousSet, polytope::const_ptr polyI);
 
 	/**
 	 * Returns the polyhedral abstraction of the flowpipe
@@ -36,7 +36,7 @@ public:
 	/**
 	 * Returns the initial polytope of the abstract flowpipe.
 	 */
-	polytope::ptr getInitialSet(){
+	polytope::const_ptr getInitialSet(){
 		return I;
 	};
 	void setContinuousSet(polytope::ptr continuousSet);
@@ -49,14 +49,14 @@ public:
 
 	const discrete_set& getDiscreteSet() const;
 	void setDiscreteSet(const discrete_set& discreteSet);
-	void setInitialSet(polytope::ptr polyI){
+	void setInitialSet(polytope::const_ptr polyI){
 		I=polyI;
 	};
 
 private:
 	discrete_set DiscreteSet; //locationID
 	polytope::ptr ContinuousSet;	// flowpipe abstraction as a polytope
-	polytope::ptr I; // The class ptr with the exact initial set of the flow-pipe
+	polytope::const_ptr I; // The class ptr with the exact initial set of the flow-pipe
 };
 
 #endif /* ABSTRACT_SYMBOLIC_STATE_H_ */

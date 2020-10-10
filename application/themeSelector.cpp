@@ -78,24 +78,39 @@ void themeSelector::selectReach()
 		}
 	}
 
-/*	plottime.start();
+	plottime.start();
 	show(symbolic_states, userOps);
 	plottime.stop();
-	print_statistics(plottime,"Plotting");
+	//	print_statistics(plottime,"Plotting");
 
 	// printing the first initial polytope in the init_poly file
-	polytope::ptr init_poly = (*init.begin())->getInitialSet();
+	polytope::const_ptr init_poly = (*init.begin())->getInitialSet();
 	init_poly->print2file("./init_poly",userOps.get_first_plot_dimension(),userOps.get_second_plot_dimension());
-	*/
+
 
 }
 void themeSelector::selectSim(){
 	std::cout << "Running simulation engine ... \n";
-	assert(forbidden.size() > 0);
-	simulationCaller(ha, init, reach_params, forbidden[0], userOps);
+	if (forbidden.size() > 0)
+		simulationCaller(ha, init, reach_params, forbidden[0], userOps);
+	else{
+		// create an empty forbidden region
+		std::pair<int, polytope::ptr> forbidden_s;
+		forbidden_s.first = -10; // implies no location
+		forbidden_s.second = polytope::ptr(new polytope(true)); // empty polytope
+		simulationCaller(ha, init, reach_params, forbidden_s, userOps);
+	}
 }
+
 void themeSelector::selectFal(){
 	//todo: call the path-oriented falsification routine.
+	bmc bmc_fal(ha, init, forbidden, reach_params, userOps);
+	bool safe = bmc_fal.safe();
+
+	if(safe)
+		std::cout << "BMC: The model is safe" << std::endl;
+	else
+		std::cout << "BMC: The model is unsafe" << std::endl;
 }
 
 void themeSelector::select(){
@@ -118,6 +133,7 @@ void themeSelector::select(){
 		return;
 	}
 
+
 	// ----Section for Running Exp-Graph. This code is put only for experimental task.
 	int	 runExpGraph_WoFC = 0;	// To run Exp-Graph Algorithm, that is, Explore the Graph, we should assign a valid loc-id in the forbidden set (and not -1, unlike FC algo)
 	if (runExpGraph_WoFC) {
@@ -127,7 +143,7 @@ void themeSelector::select(){
 			string cmdStr1;
 			//cmdStr1.append("graph -TX -BC -W 0.008 out.txt -s -m 3 bad_poly -s -m 2 init_poly");
 			//cmdStr1.append("graph -TX -BC -W 0.008 out.txt");
-			system(cmdStr1.c_str());
+			//system(cmdStr1.c_str());
 		}
 		return;
 	}

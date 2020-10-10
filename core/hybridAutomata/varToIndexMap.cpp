@@ -29,7 +29,7 @@ var_to_index_map::~var_to_index_map() {
 	// TODO Auto-generated destructor stub
 }
 
-void var_to_index_map::print_var_index_map()
+void var_to_index_map::print_var_index_map() const
 {
 	unsigned int i = 0;
 	std::cout << "The variable to index map is:\n";
@@ -40,7 +40,7 @@ void var_to_index_map::print_var_index_map()
 	}
 }
 
-void var_to_index_map::print_input_index_map()
+void var_to_index_map::print_input_index_map() const
 {
 	unsigned int i = 0;
 	std::cout << "The input to index map is:\n";
@@ -51,7 +51,7 @@ void var_to_index_map::print_input_index_map()
 	}
 }
 
-void var_to_index_map::print_output_index_map()
+void var_to_index_map::print_output_index_map() const
 {
 	unsigned int i = 0;
 	std::cout << "The output to index map is:\n";
@@ -63,7 +63,7 @@ void var_to_index_map::print_output_index_map()
 }
 
 /* returns the variable name with the given index */
-std::string var_to_index_map::get_varname(unsigned int index)
+std::string var_to_index_map::get_varname(unsigned int index) const
 {
 	for(std::map<std::string, unsigned int>::iterator it = var_index_map_ptr->begin(); it!=var_index_map_ptr->end();it++){
 		if(index == (*it).second)
@@ -73,7 +73,7 @@ std::string var_to_index_map::get_varname(unsigned int index)
 }
 
 /* returns the input name with the given index */
-std::string var_to_index_map::get_uvarname(unsigned int index)
+std::string var_to_index_map::get_uvarname(unsigned int index) const
 {
 	for(std::map<std::string, unsigned int>::iterator it = uvar_index_map_ptr->begin(); it!=uvar_index_map_ptr->end();it++){
 		if(index == (*it).second)
@@ -83,7 +83,7 @@ std::string var_to_index_map::get_uvarname(unsigned int index)
 }
 
 /* returns the output name with the given index */
-std::string var_to_index_map::get_yvarname(unsigned int index)
+std::string var_to_index_map::get_yvarname(unsigned int index) const
 {
 	for(std::map<std::string, unsigned int>::iterator it = yvar_index_map_ptr->begin(); it!=yvar_index_map_ptr->end();it++){
 		if(index == (*it).second)
@@ -94,7 +94,7 @@ std::string var_to_index_map::get_yvarname(unsigned int index)
 /**
  * Returns the size of the map, i.e., the number of variables of the map
  */
-unsigned int var_to_index_map::map_size()
+unsigned int var_to_index_map::map_size() const
 {
 	return var_index_map_ptr->size();
 }
@@ -102,7 +102,7 @@ unsigned int var_to_index_map::map_size()
 /**
  * Returns the size of the umap, i.e., the number of inputs in the map
  */
-unsigned int var_to_index_map::umap_size()
+unsigned int var_to_index_map::umap_size() const
 {
 	return uvar_index_map_ptr->size();
 }
@@ -110,7 +110,7 @@ unsigned int var_to_index_map::umap_size()
 /**
  * Returns the size of the ymap, i.e., the number of outputs in the map
  */
-unsigned int var_to_index_map::ymap_size()
+unsigned int var_to_index_map::ymap_size() const
 {
 	return yvar_index_map_ptr->size();
 }

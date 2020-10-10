@@ -22,7 +22,7 @@
 
 class transMinkPoly : public supportFunctionProvider
 {
-	polytope::ptr X0;
+	polytope::const_ptr X0;
 	polytope::ptr U;
 	math::matrix<double> TRANS;
 	math::matrix<double> B_TRANS;
@@ -35,16 +35,16 @@ class transMinkPoly : public supportFunctionProvider
 public:
 	typedef boost::shared_ptr<transMinkPoly> ptr;
 
-	/* most explicit constructor */
-	transMinkPoly(polytope::ptr myX0, polytope::ptr myU, math::matrix<double> myTRANS, math::matrix<double> myB_TRANS, double mytime, double mybeta);
+	/* Explicit constructor */
+	transMinkPoly(polytope::const_ptr myX0, polytope::ptr myU, math::matrix<double> myTRANS, math::matrix<double> myB_TRANS, double mytime, double mybeta);
 
 	/** Constructor to represent convex sets which is a linear transformation of another convex set only: C' = Trans. C */
-	transMinkPoly(polytope::ptr myX0, math::matrix<double> myTRANS);
+	transMinkPoly(polytope::const_ptr myX0, math::matrix<double> myTRANS);
 
 	/*
 	 * constructor with x(t), u(t) and + C of the ODE x'(t) = Ax(t) + Bu(t) + C
 	 */
-	transMinkPoly(polytope::ptr myX0, polytope::ptr myU, std::vector<double> c,
+	transMinkPoly(polytope::const_ptr myX0, polytope::ptr myU, std::vector<double> c,
 			math::matrix<double> myTRANS, math::matrix<double> myB_TRANS, double mytime, double mybeta);
 
 	unsigned int getSystemDimension() const;
@@ -56,7 +56,7 @@ public:
 	bool getIsEmpty() const;
 
 	double computeSupportFunction(const std::vector<double>& direction, lp_solver &lp) const;
-	double max_norm(int lp_solver_type, unsigned int dim_for_Max_Norm);
+	double max_norm(int lp_solver_type, unsigned int dim_for_Max_Norm) const;
 
 };
 

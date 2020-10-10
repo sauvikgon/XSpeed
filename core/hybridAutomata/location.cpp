@@ -23,15 +23,18 @@ location::location(int Loc_ID, string name, Dynamics system_dynamics, polytope::
 	Out_Going_Transitions = Out_Going_Trans;
 }
 
-Dynamics& location::getSystemDynamics() {
+const Dynamics& location::getSystemDynamics() const {
 	return System_Dynamics;
 }
 
+Dynamics& location::getSystemDynamics() {
+	return System_Dynamics;
+}
 void location::setSystemDynamics(const Dynamics& system_dynamics) {
 	System_Dynamics = system_dynamics;
 }
 
-polytope::ptr location::getInvariant() {
+polytope::const_ptr location::getInvariant() const {
 	return Invariant;
 }
 
@@ -55,7 +58,7 @@ void location::setLocId(int locId) {
 	loc_id = locId;
 }
 
-std::list<transition::ptr>& location::getOutGoingTransitions(){
+const std::list<transition::ptr>& location::getOutGoingTransitions() const {
 	return Out_Going_Transitions;
 }
 void location::addOutGoingTransition(transition::ptr t){
@@ -63,9 +66,9 @@ void location::addOutGoingTransition(transition::ptr t){
 		//Adj_Transitions.max_size()		//returns the size of the adjacent transitions/locations
 }
 
-transition::ptr location::getTransition(int trans_id){
+transition::ptr location::getTransition(int trans_id) const {
 	transition::ptr temp;
-	std::list<transition::ptr>::iterator it;
+	std::list<transition::ptr>::const_iterator it;
 	for (it=Out_Going_Transitions.begin(); it != Out_Going_Transitions.end(); it++){
 		int transID = (*it)->getTransitionId();
 		if (transID==trans_id){

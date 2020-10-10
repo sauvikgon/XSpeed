@@ -31,23 +31,23 @@ public:
 	/**
 	 * Returns the variable name with the given index
 	 */
-	std::string get_varname(unsigned int index);
+	std::string get_varname(unsigned int index) const;
 
 	/**
 	 * Returns the input-variable name with the given index
 	 */
-	std::string get_uvarname(unsigned int index);
+	std::string get_uvarname(unsigned int index) const;
 	
 	/**
 	 * Returns the output-variable name with the given index
 	 */
-	std::string get_yvarname(unsigned int index);
+	std::string get_yvarname(unsigned int index) const;
 
 	/**
 	 * Returns the index of the parameter var_name
 	 * in the varname to dimension index map
 	 */
-	unsigned int get_index(std::string var_name){
+	unsigned int get_index(std::string var_name) const {
 		unsigned int index;
 		try{
 			index = var_index_map_ptr->at(var_name);
@@ -63,7 +63,7 @@ public:
 	 * Returns the index of the input uvar_name
 	 * in the uname to dimension map
 	 */
-	unsigned int get_u_index(std::string uvar_name){
+	unsigned int get_u_index(std::string uvar_name) const{
 		unsigned int index;
 		try{
 			index = uvar_index_map_ptr->at(uvar_name);
@@ -79,7 +79,7 @@ public:
 	 * in the yname to dimension map. Returns -1
 	 * if the string is not present in the map.
 	 */
-	int get_y_index(std::string yvar_name){
+	int get_y_index(std::string yvar_name) const {
 		unsigned int index;
 		try{
 			index = yvar_index_map_ptr->at(yvar_name);
@@ -136,26 +136,26 @@ public:
 	/**
 	 * Prints the var_to_index map in the console
 	 */
-	void print_var_index_map();
+	void print_var_index_map() const;
 
 	/**
 	 * Prints the input_to_index map in the console
 	 */
-	void print_input_index_map();
+	void print_input_index_map() const;
 
 	/**
 	 * Prints the output_to_index map in the console
 	 */
-	void print_output_index_map();
+	void print_output_index_map() const;
 
 	/** Return the size of the map */
-	unsigned int map_size();
+	unsigned int map_size() const;
 
 	/** Return the size of the umap */
-	unsigned int umap_size();
+	unsigned int umap_size() const;
 
 	/** Return the size of the ymap */
-	unsigned int ymap_size();
+	unsigned int ymap_size() const;
 
 	/* The variable to dimension index map */
 	static map_ptr var_index_map_ptr;

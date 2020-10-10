@@ -14,14 +14,15 @@
 class initial_state {
 public:
 	typedef boost::shared_ptr<initial_state> ptr;
+	typedef boost::shared_ptr<const initial_state> const_ptr;
 	initial_state();
-	initial_state(int locationId, polytope::ptr initialSet);
-	initial_state(int locationId, polytope::ptr initialSet,
+	initial_state(int locationId, polytope::const_ptr initialSet);
+	initial_state(int locationId, polytope::const_ptr initialSet,
 			symbolic_states::ptr parentPtrSymbolicState, int transitionId);
 	~initial_state();
 
-	const polytope::ptr getInitialSet() const;
-	void setInitialSet(const polytope::ptr initialSet);
+	polytope::const_ptr getInitialSet() const;
+	void setInitialSet(const polytope::const_ptr initialSet);
 	int getLocationId() const;
 	void setLocationId(int locationId);
 
@@ -34,7 +35,7 @@ public:
 
 private:
 	int location_id;
-	polytope::ptr initial_set;
+	polytope::const_ptr initial_set;
 
 	/*
 	 * For ease of implementation transition_id  and parent_pointer_symbolic_states is kept here

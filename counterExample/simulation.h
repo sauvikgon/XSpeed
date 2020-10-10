@@ -168,7 +168,7 @@ public:
 	 * is violated. If the Inv violation distance is < tol, then it is tolerated.
 	 * Returns the last point of the simulation trace.
 	 */
-	bound_sim bounded_simulation(std::vector<double>, double time, polytope::ptr I, bool &status, double tol);
+	bound_sim bounded_simulation(std::vector<double>, double time, polytope::const_ptr I, bool &status, double tol);
 
 	/**
 	 * Simulate and also compute the distance of the trajectory with a polytope,
@@ -201,7 +201,7 @@ public:
 	 * Parallel Simulation of Ha with N uniformly distributed random start points from the initial set.
 	 * Returns true when the simulated trajectory is safe, and return false otherwise.
 	 */
-	bool parSimulateHa(unsigned int N, polytope::ptr initial_set, double start_time, double tot_time,
+	bool parSimulateHa(unsigned int N, polytope::const_ptr initial_set, double start_time, double tot_time,
 			hybrid_automata& ha, std::pair<int, polytope::ptr>& forbidden_set, unsigned int max_jumps);
 
 	/**
@@ -219,7 +219,7 @@ public:
 	 */
 	std::vector<sim_start_point> get_start_points(unsigned int n, hyperbox<double>::ptr hbox, location::ptr locptr);
 
-	std::vector<sim_start_point> get_start_points(unsigned int n, polytope::ptr initialset, location::ptr locptr);
+	std::vector<sim_start_point> get_start_points(unsigned int n, polytope::const_ptr initialset, location::ptr locptr);
 	void Hyperplane_to_Halfspace(math::matrix<double>& M, std::vector<double>& Bounds, std::vector<double> x);
 
 	/**

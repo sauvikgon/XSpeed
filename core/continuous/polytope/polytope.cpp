@@ -102,7 +102,8 @@ bool polytope::isBounded() const
 	 * A true algorithm to check for boundeded is to be implemented. later.
 	 */
 }
-math::matrix<double>& polytope::getCoeffMatrix() {
+
+const math::matrix<double>& polytope::getCoeffMatrix() const {
 	return this->coeffMatrix;
 }
 void polytope::setCoeffMatrix(const math::matrix<double> coeffMatrix) {
@@ -178,7 +179,7 @@ void polytope::setColumnVector(const std::vector<double> columnVector) {
 	this->columnVector = columnVector;
 	this->setNumberFacets(columnVector.size());
 }
-std::vector<double> polytope::getColumnVector() {
+std::vector<double> polytope::getColumnVector() const {
 	return columnVector;
 }
 
@@ -220,7 +221,7 @@ void polytope::setSystemDimension(unsigned int systemDimension) {
 }
 
 double polytope::max_norm(int lp_solver_type,
-		unsigned int dim_for_Max_Norm) {
+		unsigned int dim_for_Max_Norm) const {
 	//unsigned int dimension_size = this->system_dimension;
 	unsigned int dimension_size = dim_for_Max_Norm;
 	double Max_A, sf, Max = 0.0;
@@ -261,27 +262,30 @@ double polytope::max_norm(int lp_solver_type,
 	return Max;
 }
 
-const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
+polytope::ptr polytope::GetPolytope_Intersection(polytope::const_ptr gPoly) const {
+
+	polytope::ptr res_poly = polytope::ptr(new polytope(*gPoly));
 
 	assert(gPoly != NULL);
-	if(gPoly->IsUniverse)
+	if(res_poly->IsUniverse)
 	{
 		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign()));
 	}
-	if(gPoly->IsEmpty)
-		return gPoly; // return empty polytope pointer
+
+	if(res_poly->IsEmpty)
+		return res_poly; // return empty polytope pointer
 
 	if(this->IsUniverse) // This polytope is universe
-		return gPoly; // Intersection of universe polytope with any polytope P results in P
+		return res_poly; // Intersection of universe polytope with any polytope P results in P
 
 	if(this->IsEmpty) // Intersection of an empty polytope with any polytope will result in an empty polytope.
 		return polytope::ptr(new polytope(true));
 
 	math::matrix<double> total_coeffMatrix, m1;
 	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
-	m1.matrix_join(gPoly->getCoeffMatrix(), total_coeffMatrix);
+	m1.matrix_join(res_poly->getCoeffMatrix(), total_coeffMatrix);
 	std::vector<double> total_columnVector;
-	total_columnVector = vector_join(this->getColumnVector(), gPoly->getColumnVector());
+	total_columnVector = vector_join(this->getColumnVector(), res_poly->getColumnVector());
 
 	polytope::ptr newp = polytope::ptr(
 			new polytope(total_coeffMatrix, total_columnVector, 1));
@@ -295,7 +299,7 @@ const polytope::ptr polytope::GetPolytope_Intersection(polytope::ptr gPoly) {
  */
 
 bool polytope::check_polytope_intersection(polytope::ptr p2,
-		int lp_solver_type) {
+		int lp_solver_type) const {
 	// if the parameter polytope is a univserse, then return true
 	if(p2->getIsUniverse())
 		return true;
@@ -344,7 +348,7 @@ bool polytope::check_polytope_intersection(polytope::ptr p2,
 	return flag;
 }
 
-void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytope::ptr &resPoly, int lp_solver_type){
+void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytope::ptr &resPoly, int lp_solver_type) const {
 
 	std::vector<double> colVector(templatedDir.size1());
 	lp_solver lp(lp_solver_type);
@@ -361,7 +365,7 @@ void polytope::templatedDirectionHull(math::matrix<double> templatedDir, polytop
 	resPoly->setPolytope(templatedDir,colVector,this->getInEqualitySign());
 }
 
-bool polytope::contains(polytope::ptr poly, int lp_solver_type){
+bool polytope::contains(polytope::const_ptr poly, int lp_solver_type) const {
 
 	assert(this->getCoeffMatrix().size2() == poly->getCoeffMatrix().size2());	//same dimension
 	//assert(this->getCoeffMatrix().size1() == poly->getCoeffMatrix().size1());	//same number of constraints
@@ -394,7 +398,7 @@ bool polytope::contains(polytope::ptr poly, int lp_solver_type){
 
 void polytope::enum_2dVert_restrict(std::vector<double> u,
 		std::vector<double> v, int i, int j,
-		std::set<std::pair<double, double> >& pts) {
+		std::set<std::pair<double, double> >& pts) const {
 
 //	std::cout<<"Entered inside enumerateVertices_restrict()!!\n";
 	std::vector<double> sv_u(getSystemDimension(), 0), sv_v(
@@ -454,7 +458,7 @@ void polytope::enum_2dVert_restrict(std::vector<double> u,
 }
 
 std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
-		int j) {
+		int j) const {
 	if(this->IsUniverse)
 		throw std::runtime_error("Cannot enumerate vertices of universe polytope\n");
 	if(this->IsEmpty)
@@ -486,7 +490,7 @@ std::set<std::pair<double, double> > polytope::enumerate_2dVertices(int i,
 	return All_vertices;
 }
 
-math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
+math::matrix<double> polytope::get_2dVertices(int dim1, int dim2) const {
 	std::set<std::pair<double, double> > set_vertices;
 	set_vertices = enumerate_2dVertices(dim1,dim2);
 	math::matrix<double> my_vertices;
@@ -494,7 +498,7 @@ math::matrix<double> polytope::get_2dVertices(int dim1, int dim2){
 	return my_vertices;
 }
 
-double polytope::point_distance(std::vector<double> v){
+double polytope::point_distance(std::vector<double> v) const{
 	if(this->IsUniverse)
 		return 0;
 	if(this->IsEmpty){
@@ -529,7 +533,7 @@ double polytope::point_distance(std::vector<double> v){
 
 }
 
-void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2)
+void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim2) const
 {
 	assert(dim1 < this->map_size() && dim2 < this->map_size());
 	assert(dim1 >= 0 && dim2 >= 0);
@@ -545,7 +549,7 @@ void polytope::print2file(std::string fname, unsigned int dim1, unsigned int dim
 	myfile.close();
 }
 
-void polytope::print2StdOut(unsigned int dim1, unsigned int dim2)
+void polytope::print2StdOut(unsigned int dim1, unsigned int dim2) const
 {
 	assert(dim1 < this->map_size() && dim2 < this->map_size());
 	assert(dim1 >= 0 && dim2 >= 0);
@@ -558,7 +562,7 @@ void polytope::print2StdOut(unsigned int dim1, unsigned int dim2)
 		std::cout << "\n";
 	}
 }
-void polytope::printPoly(){
+void polytope::printPoly() const{
 
 	std::cout<<this->coeffMatrix;
 	std::cout<<"\nVector\n";

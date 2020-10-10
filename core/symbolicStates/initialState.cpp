@@ -4,12 +4,12 @@ initial_state::initial_state() {
 	;
 }
 
-initial_state::initial_state(int locationId, polytope::ptr initialSet) {
+initial_state::initial_state(int locationId, polytope::const_ptr initialSet) {
 	location_id = locationId;
 	initial_set = initialSet;
 }
 
-initial_state::initial_state(int locationId, polytope::ptr initialSet,
+initial_state::initial_state(int locationId, polytope::const_ptr initialSet,
 		symbolic_states::ptr parentPtrSymbolicState, int transitionId) {
 	location_id = locationId;
 	initial_set = initialSet;
@@ -21,11 +21,11 @@ initial_state::~initial_state() {
 	;
 }
 
-const polytope::ptr initial_state::getInitialSet() const {
+polytope::const_ptr initial_state::getInitialSet() const {
 	return initial_set;
 }
 
-void initial_state::setInitialSet(const polytope::ptr initialSet) {
+void initial_state::setInitialSet(const polytope::const_ptr initialSet) {
 	initial_set = initialSet;
 }
 

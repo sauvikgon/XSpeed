@@ -54,7 +54,7 @@ struct ReachabilityParameters {
 	math::matrix<double> A_inv;		//inverse of the matrix A
 	double result_alfa;		// placed here for the same above reason
 	double result_beta;		// placed here for the same above reason
-	polytope::ptr X0;  // The polytope representing the initial set
+	polytope::const_ptr X0;  // The polytope representing the initial set
 	std::vector<int> Stop_locID;	//List of Locations for which Flowpipe need not be computed
 };
 typedef struct ReachabilityParameters ReachabilityParameters;

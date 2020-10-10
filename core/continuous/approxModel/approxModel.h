@@ -41,11 +41,8 @@ public:
 	typedef boost::shared_ptr<approx_model> ptr;
 
 	/** Initializing constructor */
-	approx_model(math::matrix<double>& my_A, math::matrix<double>& my_B, polytope::ptr X0, polytope::ptr U, double delta){
-		this->my_A = my_A;
-		this->my_B = my_B;
-		this->my_X0 = X0;
-		this->my_U = U;
+	approx_model(const math::matrix<double>& A, const math::matrix<double>& B, polytope::const_ptr X0,
+			polytope::const_ptr U, double delta) : my_A(A), my_B(B), my_X0(X0), my_U(U) {
 		this->my_delta = delta;
 		my_B.transpose(this->my_B_trans);
 
@@ -61,18 +58,18 @@ public:
 	inline double get_delta() const {return my_delta;}
 	
 	/** Returns the dynamics matrix A*/
-	inline math::matrix<double> get_A() const
+	inline const math::matrix<double>& get_A() const
 	{return my_A;}
 
 	/** Returns the input-transformation matrix B*/
-	inline math::matrix<double> get_B() const
+	inline const math::matrix<double>& get_B() const
 	{return my_B;}
 
 	/** Returns the initial_set */
-	inline polytope::ptr get_X0() const{return my_X0;}
+	inline polytope::const_ptr get_X0() const{return my_X0;}
 
 	/** Returns the input set */
-	inline polytope::ptr get_U() const {return my_U;}
+	inline polytope::const_ptr get_U() const {return my_U;}
 	
 	/** Computes the support of X0 w.r.t. direction l. */
 	virtual double rho_X0(const std::vector<double>& l);
@@ -90,12 +87,12 @@ public:
 	virtual double omega_support(const std::vector<double>& l, unsigned int iter)  = 0;
 
 private:
-	math::matrix<double> my_A;
-	math::matrix<double> my_B;
+	const math::matrix<double>& my_A;
+	const math::matrix<double>& my_B;
 	math::matrix<double> my_B_trans; // transpose of my_B
 	double my_delta;
-	polytope::ptr my_X0;
-	polytope::ptr my_U;
+	polytope::const_ptr my_X0;
+	polytope::const_ptr my_U;
 	lp_solver::lp_solver_ptr lpX;
 	lp_solver::lp_solver_ptr lpU;
 

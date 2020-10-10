@@ -51,6 +51,7 @@ private:
 
 public:
 	typedef boost::shared_ptr<polytope> ptr;
+	typedef boost::shared_ptr<const polytope> const_ptr;
 	polytope();
 	polytope(bool empty);
 	polytope(math::matrix<double> coeffMatrix, std::vector<double> columnVector,
@@ -76,13 +77,13 @@ public:
 	 */
 	void setMoreConstraints(math::matrix<double> coeff_constraints,std::vector<double> bound_values);
 
-	math::matrix<double>& getCoeffMatrix();
+	const math::matrix<double>& getCoeffMatrix() const;
 	void setCoeffMatrix(const math::matrix<double> coeffMatrix);
 	void setColumnVector(const std::vector<double> columnVector);
 
 	int getInEqualitySign() const;
 	void setInEqualitySign(int inEqualitySign);
-	std::vector<double> getColumnVector();
+	std::vector<double> getColumnVector() const;
 
 	unsigned int getSystemDimension() const; //returns the number of variables of the polytopes.
 	void setSystemDimension(unsigned int systemDimension); 
@@ -94,25 +95,25 @@ public:
 	/*
 	 * Returns Max norm of the polytope
 	 */
-	double max_norm(int lp_solver_type, unsigned int dim_for_Max_Norm);
+	double max_norm(int lp_solver_type, unsigned int dim_for_Max_Norm) const;
 	/*
 	 * Returns True if polytope P1(the calling polytope object) and P2 intersects each other
 	 *  i.e., True iff	P1 intersection P2 != empty set
 	 */
 	bool check_polytope_intersection(polytope::ptr P2,
-			int lp_solver_type);
+			int lp_solver_type) const ;
 	/*
 	 * Returns a new polytope after appending the constraints of P2
 	 * which is an intersection-region
 	 */
-	const polytope::ptr GetPolytope_Intersection(polytope::ptr P2);
+	polytope::ptr GetPolytope_Intersection(polytope::const_ptr P2) const;
 
 	/*
 	 * Returns as reference parameter resPoly by taking a Hull in the templated direction
 	 * of the system of the calling polytope.
 	 * This is an operation that takes an over-approximation of a given input/calling polytope
 	 */
-	void templatedDirectionHull(math::matrix<double> templateDir, polytope::ptr &resPoly, int lp_solver_type);
+	void templatedDirectionHull(math::matrix<double> templateDir, polytope::ptr &resPoly, int lp_solver_type) const;
 
 	/*
 	 * Performs containment check. If poly is contained in the calling polytope then returns TRUE
@@ -123,14 +124,14 @@ public:
 	 *
 	 * 		Such an operations can be done by solving LPs of order equal to the number of templated directions
 	 */
-	bool contains(polytope::ptr poly, int lp_solver_type);
+	bool contains(polytope::const_ptr poly, int lp_solver_type) const;
 
 	/**
 	 * Enumerate all vertices of the polytope between the two vectors
 	 * given as arguments
 	 */
 	void enum_2dVert_restrict(std::vector<double> u, std::vector<double> v,
-			int i, int j, std::set<std::pair<double, double> >&pts);
+			int i, int j, std::set<std::pair<double, double> >&pts) const;
 
 	/**
 	 * enumerate all vertices of the polytope
@@ -138,14 +139,14 @@ public:
 	 * 	   j is the second projecting variable
 	 * 	   the value/index of i and j begins with 0 to n-1
 	 */
-	std::set<std::pair<double, double> > enumerate_2dVertices(int i, int j);
+	std::set<std::pair<double, double> > enumerate_2dVertices(int i, int j) const;
 
 	/*
 	 * Returns the list of vertices of the polytope in 2d with the given inputs as
 	 * i and j where i and j are the 1st and 2nd projecting variables
 	 */
 
-	math::matrix<double> get_2dVertices(int dim1, int dim2);
+	math::matrix<double> get_2dVertices(int dim1, int dim2) const;
 
 	/**
 	 * Computes the distance of a point from the polytope.
@@ -153,21 +154,21 @@ public:
 	 * is returned. Otherwise, the distance is the sum of
 	 * distances of the point to all the faces.
 	 */
-	double point_distance(std::vector<double> v);
+	double point_distance(std::vector<double> v) const;
 
 	/*
 	 * Prints the vertices of the polytope on the std::cout, passed as parameter.
 	 */
-	void print2StdOut(unsigned int dim1, unsigned int dim2);
+	void print2StdOut(unsigned int dim1, unsigned int dim2) const;
 
 	//Prints the coefficient matrix and vector
-	void printPoly();
+	void printPoly() const;
 	/*
 	 * Prints the vertices of the polytope to a file, passed as parameter.
 	 * The file could be called with any plotting utility.
 	 *
 	 */
-	void print2file(std::string fname, unsigned int dim1, unsigned int dim2);
+	void print2file(std::string fname, unsigned int dim1, unsigned int dim2) const;
 
 };
 
