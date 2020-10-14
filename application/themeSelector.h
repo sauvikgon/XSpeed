@@ -38,13 +38,12 @@ public:
 	themeSelector();
 
 	void setUserOps(userOptions& op);
-	void setHa(hybrid_automata& ha);
 	void setInit(std::list<initial_state::ptr>& init);
 	void setReachParams(ReachabilityParameters& params);
 	void setForbidden(forbidden_states& forbidden);
 
 	userOptions& getUserOps();
-	hybrid_automata& getHa();
+	static hybrid_automata::ptr getHaInstance();
 	std::list<initial_state::ptr>& getInit();
 	ReachabilityParameters& getReachParams();
 	forbidden_states& getForbidden();
@@ -64,12 +63,16 @@ public:
 	void selectFal();
 
 	virtual ~themeSelector();
+	// static member
+	static hybrid_automata::ptr ha_ptr;
+
 private:
-	hybrid_automata ha;
 	std::list<initial_state::ptr> init;
 	forbidden_states forbidden;
 	userOptions userOps;
 	ReachabilityParameters reach_params;
 };
+
+//definition of a static member variable
 
 #endif /* XSPEED_THEMESELECTOR_H_ */

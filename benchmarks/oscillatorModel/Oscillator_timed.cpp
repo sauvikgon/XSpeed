@@ -19,7 +19,7 @@ void setOscillatorTimed(hybrid_automata& Hybrid_Automata,
 	transition::ptr t;
 	polytope::ptr invariant;
 
-	polytope::ptr guard_polytope;
+	polytope::const_ptr guard_polytope;
 
 	Dynamics system_dynamics;
 
@@ -92,7 +92,7 @@ void setOscillatorTimed(hybrid_automata& Hybrid_Automata,
 
 	guardBoundValue.resize(row);
 	guardBoundValue.assign(row, 0);
-	guard_polytope = polytope::ptr(
+	guard_polytope = polytope::const_ptr(
 			new polytope(guardConstraintsMatrix, guardBoundValue,
 					guardBoundSign));
 
@@ -109,8 +109,7 @@ void setOscillatorTimed(hybrid_automata& Hybrid_Automata,
 	assignment.Map = R;
 	assignment.b = w;
 
-	t = transition::ptr(
-			new transition(1, "hop1", 1, 2, guard_polytope, assignment));
+	t = transition::ptr(new transition(1, "hop1", 1, 2, guard_polytope, assignment));
 
 	Out_Going_Trans_fromloc1.push_back(t);
 	l = location::ptr(

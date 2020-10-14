@@ -207,7 +207,7 @@ std::list<symbolic_states::ptr> reachability::computeSeqBFS(std::list<abstractCE
 				int transition_id = (*t)->getTransitionId();
 				location::const_ptr current_destination;
 				Assign current_assignment;
-				polytope::ptr guard_polytope;
+				polytope::const_ptr guard_polytope;
 				discrete_set ds;
 				current_destination = H->getLocation((*t)->getDestinationLocationId());
 				string locName = current_destination->getName();
@@ -525,7 +525,7 @@ std::list<symbolic_states::ptr> reachability::computeParBFS(
 					}
 					location::const_ptr current_destination;
 					Assign current_assignment;
-					polytope::ptr guard_polytope;
+					polytope::const_ptr guard_polytope;
 					std::list < template_polyhedra::ptr > intersected_polyhedra;
 					polytope::ptr intersectedRegion; //created two objects here
 					discrete_set ds;
@@ -847,7 +847,7 @@ std::list<symbolic_states::ptr> reachability::computeParLockFreeBFS(std::list<ab
 					}
 					location::const_ptr current_destination;
 					Assign current_assignment;
-					polytope::ptr guard_polytope;
+					polytope::const_ptr guard_polytope;
 					std::list < template_polyhedra::ptr > intersected_polyhedra;
 					polytope::ptr intersectedRegion; //created two objects here
 					discrete_set ds;

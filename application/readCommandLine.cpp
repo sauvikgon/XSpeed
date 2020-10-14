@@ -2,8 +2,9 @@
 
 namespace po = boost::program_options;
 
+hybrid_automata::ptr themeSelector::ha_ptr = nullptr;
+
 void readCommandLine(int argc, char *argv[], userOptions& user_options,
-		hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters,
 		std::vector<forbidden>& forbidden_states) {
@@ -160,7 +161,10 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			_parser.parse();
 			//system("rm input_model.mdl"); // remove the mdl file
 		
-			Hybrid_Automata = _parser.getHa(); // assign the parsed ha
+			hybrid_automata haObj = _parser.getHa();
+			//hybrid_automata::ptr ha_shared_ptr = hybrid_automata::ptr(new hybrid_automata(_parser.getHa())); // assign the parsed ha
+			hybrid_automata::ptr ha_shared_ptr = hybrid_automata::ptr(new hybrid_automata(haObj)); // assign the parsed ha
+			themeSelector::ha_ptr = ha_shared_ptr; // initializing the static member of themeSelector
 			//std::cout << "Number of paths of length bounded (SAT):" << Hybrid_Automata.satEnumPaths(5,5);
 			//std::cout << "Number of paths of length bounded (BFS):" << Hybrid_Automata.findAllPaths(1,81,11).size();
 			//std::cout << "Number of paths of length bounded (SAT):" << Hybrid_Automata.satEnumPaths(9,10);
@@ -305,7 +309,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 		if (vm["model"].as<int>()!=0) { //Compulsory Options but set to 0 by default
 			user_options.set_model(vm["model"].as<int>());
-			load_ha_model(init_state, Hybrid_Automata, reach_parameters, user_options);
+			load_ha_model(init_state, *(themeSelector::getHaInstance()), reach_parameters, user_options);
 		}
 
 	}
@@ -319,30 +323,30 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
  
 	int x1, x2;
 	try{
-		if(Hybrid_Automata.ymap_size()!=0){
-			unsigned int m = Hybrid_Automata.ymap_size();
-			x1 = Hybrid_Automata.get_y_index(output_vars[0]);
+		if(themeSelector::getHaInstance()->ymap_size()!=0){
+			unsigned int m = themeSelector::getHaInstance()->ymap_size();
+			x1 = themeSelector::getHaInstance()->get_y_index(output_vars[0]);
 			if(x1==-1) // string not present in ymap.
 			{
-				x1 = Hybrid_Automata.get_index(output_vars[0]);
-				Hybrid_Automata.insert_to_output_map(output_vars[0],m);
-				location::ptr loc = Hybrid_Automata.getInitialLocation();
+				x1 = themeSelector::getHaInstance()->get_index(output_vars[0]);
+				themeSelector::getHaInstance()->insert_to_output_map(output_vars[0],m);
+				location::ptr loc = themeSelector::getHaInstance()->getInitialLocation();
 				Dynamics& D = loc->getSystemDynamics();
-				unsigned int sysDim = Hybrid_Automata.map_size();
+				unsigned int sysDim = themeSelector::getHaInstance()->map_size();
 				math::matrix<double> rowMat(1,sysDim);
 				rowMat.clear();
 				rowMat(0,x1)=1;
 				D.MatrixT.matrix_join(rowMat,D.MatrixT);
 				x1=m; m++;
 			}
-			x2 = Hybrid_Automata.get_y_index(output_vars[1]);
+			x2 = themeSelector::getHaInstance()->get_y_index(output_vars[1]);
 			if(x2==-1) // string not present in ymap.
 			{
-				x2 = Hybrid_Automata.get_index(output_vars[1]);
-				Hybrid_Automata.insert_to_output_map(output_vars[1],m);
-				location::ptr loc = Hybrid_Automata.getInitialLocation();
+				x2 = themeSelector::getHaInstance()->get_index(output_vars[1]);
+				themeSelector::getHaInstance()->insert_to_output_map(output_vars[1],m);
+				location::ptr loc = themeSelector::getHaInstance()->getInitialLocation();
 				Dynamics& D = loc->getSystemDynamics();
-				unsigned int sysDim = Hybrid_Automata.map_size();
+				unsigned int sysDim = themeSelector::getHaInstance()->map_size();
 				math::matrix<double> rowMat(1,sysDim);
 				rowMat.clear();
 				rowMat(0,x2)=1;
@@ -351,27 +355,27 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			}
 		}
 		else{
-			x1 = Hybrid_Automata.get_index(output_vars[0]);
-			x2 = Hybrid_Automata.get_index(output_vars[1]);
+			x1 = themeSelector::getHaInstance()->get_index(output_vars[0]);
+			x2 = themeSelector::getHaInstance()->get_index(output_vars[1]);
 		}
 	}catch(const std::out_of_range& oor)
 	{
 		std::cerr << "Output variables not defined in the model: " << oor.what() << '\n';
 		std::cerr << "Please use two output variables from the following list of model variables\n";
-		Hybrid_Automata.print_var_index_map();
+		themeSelector::getHaInstance()->print_var_index_map();
 		exit(0);
 	}
 
 	user_options.set_first_plot_dimension(x1);
 	user_options.set_second_plot_dimension(x2);
 	if (!(output_vars[2].empty())) {
-		unsigned int x3 = Hybrid_Automata.get_index(output_vars[2]);
+		unsigned int x3 = themeSelector::getHaInstance()->get_index(output_vars[2]);
 		user_options.set_third_plot_dimension(x3);
 	}
 	//ALL COMMAND-LINE OPTIONS are set
 
 	/* Set the reachability options given by the user */
-	set_params(Hybrid_Automata, init_state, user_options, reach_parameters, forbidden_states);
+	set_params(*themeSelector::getHaInstance(), init_state, user_options, reach_parameters, forbidden_states);
 
 	if (!user_options.get_forbidden_set().empty()){
 		assert(forbidden_states.size()!=0);

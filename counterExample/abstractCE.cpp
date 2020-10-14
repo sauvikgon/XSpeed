@@ -259,7 +259,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 	dmin[t_index] = -1;
 
 	std::list<polytope::ptr> polys;
-	polytope::ptr guard;
+	polytope::const_ptr guard;
 
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
@@ -893,7 +893,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	dmin[t_index] = -1;
 
 	std::list<polytope::ptr> polys;
-	polytope::ptr guard;
+	polytope::const_ptr guard;
 
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;

@@ -11,9 +11,9 @@ bmc::~bmc() {
 	// TODO Auto-generated destructor stub
 }
 
-bmc::bmc(const hybrid_automata& ha, const std::list<initial_state::ptr>& init,
+bmc::bmc(const hybrid_automata::ptr haPtr, const std::list<initial_state::ptr>& init,
 		const forbidden_states& forbidden, const ReachabilityParameters& r_params,
-		const userOptions& user_ops) : ha(ha), init(init), forbidden_s(forbidden),
+		const userOptions& user_ops) : ha_ptr(haPtr), init(init), forbidden_s(forbidden),
 				reach_params(r_params), user_ops(user_ops), c(), ha_encoding(c), sol(c){
 	this->k = user_ops.get_bfs_level();
 }
@@ -23,10 +23,10 @@ bmc::bmc(const hybrid_automata& ha, const std::list<initial_state::ptr>& init,
  */
 void bmc::init_solver(unsigned int forbidden_loc_id, unsigned int k1)
 {
-	location::ptr source_ptr = ha.getInitialLocation();
+	location::ptr source_ptr = ha_ptr->getInitialLocation();
 	int u = source_ptr->getLocId();
 	unsigned int v = forbidden_loc_id;
-	auto list_locations = ha.getAllLocations();
+	auto list_locations = ha_ptr->getAllLocations();
 
 	// INIT Step
 	z3::expr exp1 = c.bool_const("exp1");
@@ -180,7 +180,7 @@ void bmc::init_solver(unsigned int forbidden_loc_id, unsigned int k1)
 path bmc::getNextPath(unsigned int k1)
 {
 	path p;
-	auto list_locations = ha.getAllLocations();
+	auto list_locations = ha_ptr->getAllLocations();
 
 	if (this->sol.check() == z3::sat)
 	{
@@ -209,31 +209,24 @@ path bmc::getNextPath(unsigned int k1)
 /*
  * Performs symbolic reachability analysis on a given path p
  * and returns the result as a list of symbolic states.
- * the feasible flag is set false if the path is found not reachable
+ * the feasible flag is set false if the path is found not infeasible
  * in the ha dynamics.
  */
 region bmc::getPathRegion(path p, bool& feasible){
 
 	region reach_region;
 	feasible = false;
-	//debug
-	std::cout << "The path p is "<< std::endl;
-	for(unsigned int i=0;i<p.size();i++){
-		std::cout << p[i] << " " ;
-	}
-	std::cout << std::endl;
-	return reach_region;
 
-	//--
 	for(auto it = init.begin(); it!=init.end();it++){
 		template_polyhedra::ptr flowpipe;
 		initial_state::ptr ini= *it;
 		polytope::const_ptr init_poly = ini->getInitialSet();
+		reach_region.clear();
 
 		for(unsigned int i=0;i<p.size();i++){
 
 			unsigned int locId = p[i];
-			auto current_location = ha.getLocation(locId);
+			auto current_location = ha_ptr->getLocation(locId);
 			flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), init_poly, reach_params,
 					current_location->getInvariant(), current_location->getInvariantExist());
 
@@ -242,16 +235,18 @@ region bmc::getPathRegion(path p, bool& feasible){
 			symbolic_states::ptr symb = symbolic_states::ptr(new symbolic_states(d,flowpipe));
 			reach_region.push_back(symb);
 
-			if(i == p.size()-1){
+			if(i == p.size()-2){
 				feasible = true;
+				std::cout << "Found a feasible path\n";
 				break;
 			}
 			// apply postD on this flowpipe
-			transition::ptr path_transition = NULL;
-			unsigned int nextLocId;
+			transition::ptr path_transition = nullptr;
+			int nextLocId;
 			auto out_transitions = current_location->getOutGoingTransitions();
 			for(std::list<transition::ptr>::const_iterator it = out_transitions.begin();
 					it!=out_transitions.end();it++){
+
 				nextLocId = (*it)->getDestinationLocationId();
 				if(nextLocId == p[i+1]){
 					path_transition = *it;
@@ -259,10 +254,12 @@ region bmc::getPathRegion(path p, bool& feasible){
 				}
 			}
 
-			assert(path_transition!=NULL);
-			auto next_location = ha.getLocation(nextLocId);
+			assert(path_transition!=nullptr);
 
-			polytope::ptr trans_guard = path_transition->getGuard();
+			auto next_location = ha_ptr->getLocation(nextLocId);
+
+			polytope::const_ptr trans_guard = path_transition->getGuard();
+
 			std::string postd_aggregation = user_ops.getSetAggregation();
 			std::list<polytope::ptr> polys;
 			polytope::const_ptr inv = current_location->getInvariant();
@@ -275,6 +272,8 @@ region bmc::getPathRegion(path p, bool& feasible){
 			} else if (boost::iequals(postd_aggregation,"none")){
 				aggregation=false;
 			}
+
+			assert(trans_guard!=nullptr);
 
 			if (!trans_guard->getIsEmpty()){
 
@@ -289,6 +288,7 @@ region bmc::getPathRegion(path p, bool& feasible){
 				DEBUG_MSG("bmc::getPathRegion: Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
 				exit(0);
 			}
+
 			// apply transition map
 			assert(polys.size()<=1);
 
@@ -302,9 +302,8 @@ region bmc::getPathRegion(path p, bool& feasible){
 
 			if(boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"none")){
 
-				polytope::const_ptr trans_g_const = polytope::const_ptr(trans_guard.get());
 				if(!trans_guard->getIsUniverse()){
-					g_flowpipe_intersect = hull_poly->GetPolytope_Intersection(trans_g_const);
+					g_flowpipe_intersect = hull_poly->GetPolytope_Intersection(trans_guard);
 				} else{
 					g_flowpipe_intersect = hull_poly;
 				}
@@ -331,13 +330,15 @@ region bmc::getPathRegion(path p, bool& feasible){
 				break; // test for other initial regions
 			}
 
-			init_poly = polytope::const_ptr(shift_polytope.get());
+			init_poly = shift_polytope;
 		}
 
-		if(feasible)
+		if(feasible){
 			break;
+		}
 	}
 	return reach_region;
+
 }
 
 void bmc::update_encoding(path p){
@@ -375,19 +376,20 @@ bool bmc::safe(){
 					std::cout << p[i] << " " ;
 				}
 				std::cout << std::endl;
-				update_encoding(p);
-				//bool feasible = false;
-				//region r = getPathRegion(p,feasible);
+				//update_encoding(p);
+				bool feasible = false;
+				region r = getPathRegion(p,feasible);
 			//	show(r, user_ops);
 			//	exit(0);
-	
-			//	if(!feasible)
-			//		update_encoding(p); // update the encoding such that no path containing p is returned further.
-			//	else{
+
+				if(!feasible)
+					update_encoding(p); // update the encoding such that no path containing p is returned further.
+				else{
 					// search for a concrete ce trajectory using the path region r
 					//print the path region
-	
-			//	}
+					std::cout << "Found a reachability feasible path\n";
+					return false; // the model is unsafe
+				}
 				p = getNextPath(k1);
 		
 			}

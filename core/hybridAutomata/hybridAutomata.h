@@ -25,6 +25,7 @@ class hybrid_automata : public var_to_index_map {
 public:
 	typedef boost::shared_ptr<hybrid_automata> ptr;
 	hybrid_automata();
+
 	hybrid_automata(std::map<int, location::ptr>& list_locs, location::ptr init_loc,
 			int dim);
 	/* returns a boost pointer */

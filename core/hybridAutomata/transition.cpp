@@ -9,13 +9,13 @@ transition::transition() {
 	source_location_id = -1; // default null value
 	destination_location_id = -1; // default null value
 	math::matrix<double> m;
-	Guard = polytope::ptr(new polytope()); // universal guard, always true
+	Guard = polytope::const_ptr(new polytope()); // universal guard, always true
 	unsigned int dim = Guard->map_size();
 	m.matrix_Identity(dim, Assign_T.Map);
 	Assign_T.b = std::vector<double>(dim,0);
 }
 transition::transition(int transition_id, string label_name, int source_id,
-		int dest_id, polytope::ptr guard, Assign assign_Trans) {
+		int dest_id, polytope::const_ptr guard, Assign assign_Trans) {
 	trans_id = transition_id;
 	label = label_name;
 	source_location_id =source_id;
@@ -34,7 +34,7 @@ void transition::setAssignT(Assign assignT) {
 	 Assign_T.b = assignT.b;	*/
 }
 
-polytope::ptr transition::getGuard() {
+polytope::const_ptr transition::getGuard() const {
 	return Guard;
 }
 

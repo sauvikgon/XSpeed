@@ -236,7 +236,7 @@ std::list<initial_state::ptr> postD(symbolic_states::ptr symb, LocklessDS L[], A
 
 			location::const_ptr current_destination;
 			Assign current_assignment;
-			polytope::ptr guard_polytope;
+			polytope::const_ptr guard_polytope;
 			//std::list < template_polyhedra::ptr > intersected_polyhedra;
 			polytope::ptr intersectedRegion;//created two objects here
 			discrete_set ds;

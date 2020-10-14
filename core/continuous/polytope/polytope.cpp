@@ -34,15 +34,13 @@ polytope::polytope() {
 	InEqualitySign = 1;
 	number_facets = 0;
 	system_dimension = 0;
-	// The default polytope inequality sign is <=
-	InEqualitySign = 1;
 	this->IsUniverse = true; //It is a Universe polytope
 	this->IsEmpty = false;
 }
 polytope::polytope(bool empty) {
 
-	polytope();
-	if(empty==true) // make this an empty polytope
+	//polytope();
+	if(empty) // make this an empty polytope
 	{
 			this->IsEmpty = true;
 			this->IsUniverse = false;
@@ -98,7 +96,7 @@ bool polytope::isBounded() const
 		return false;
 	else
 		return true;
-	/* Note that the above is a simple check of boundedness.
+	/* Note that the above is an incomplete simple check of boundedness.
 	 * A true algorithm to check for boundeded is to be implemented. later.
 	 */
 }
@@ -264,9 +262,10 @@ double polytope::max_norm(int lp_solver_type,
 
 polytope::ptr polytope::GetPolytope_Intersection(polytope::const_ptr gPoly) const {
 
+	assert(gPoly != NULL);
+
 	polytope::ptr res_poly = polytope::ptr(new polytope(*gPoly));
 
-	assert(gPoly != NULL);
 	if(res_poly->IsUniverse)
 	{
 		return polytope::ptr(new polytope(this->getCoeffMatrix(), this->getColumnVector(), this->getInEqualitySign()));
@@ -298,7 +297,7 @@ polytope::ptr polytope::GetPolytope_Intersection(polytope::const_ptr gPoly) cons
  * Return True if it intersects otherwise False
  */
 
-bool polytope::check_polytope_intersection(polytope::ptr p2,
+bool polytope::check_polytope_intersection(polytope::const_ptr p2,
 		int lp_solver_type) const {
 	// if the parameter polytope is a univserse, then return true
 	if(p2->getIsUniverse())

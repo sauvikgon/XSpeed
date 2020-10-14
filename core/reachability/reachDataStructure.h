@@ -51,7 +51,7 @@ struct LoadBalanceDataSF{
 struct LoadBalanceData_PostD{
 	template_polyhedra::ptr sfm;
 	unsigned int trans_size;
-	std::vector<polytope::ptr> guard_list;	//std::vector may be better for implementation
+	std::vector<polytope::const_ptr> guard_list;	//std::vector may be better for implementation
 	std::vector<Assign> assign_list;
 	std::vector<int> dest_locID;	//Destination_locationID
 	std::vector<int> trans_ID;	//transition_ID

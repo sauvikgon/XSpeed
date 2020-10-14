@@ -15,6 +15,7 @@ using namespace std;
 hybrid_automata::hybrid_automata() {
 	dimension = 0;
 }
+
 hybrid_automata::hybrid_automata(std::map<int, location::ptr>& list_locs, location::ptr init_loc,
 		int dim) {
 	list_locations = list_locs;	//assigning a map to another map

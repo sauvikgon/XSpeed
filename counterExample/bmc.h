@@ -39,7 +39,7 @@ typedef std::vector<forbidden> forbidden_states; // vector of forbidden symb sta
 
 class bmc {
 
-	const hybrid_automata& ha;
+	const hybrid_automata::ptr ha_ptr;
 	const std::list<initial_state::ptr>& init;
 	const forbidden_states& forbidden_s;
 	const ReachabilityParameters& reach_params;
@@ -58,7 +58,7 @@ class bmc {
 public:
 
 	/* To be used for BMC when a set of ha locations together with assoc. polytopes are forbidden */
-	bmc(const hybrid_automata& ha, const std::list<initial_state::ptr>& init, const forbidden_states& forbidden,
+	bmc(const hybrid_automata::ptr haPtr, const std::list<initial_state::ptr>& init, const forbidden_states& forbidden,
 			const ReachabilityParameters& r_params, const userOptions& user_ops);
 
 	virtual ~bmc();
