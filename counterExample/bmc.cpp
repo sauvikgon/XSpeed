@@ -212,131 +212,135 @@ path bmc::getNextPath(unsigned int k1)
  * the feasible flag is set false if the path is found not infeasible
  * in the ha dynamics.
  */
-region bmc::getPathRegion(path p, bool& feasible){
+region bmc::getPathRegion(path& p, bool& feasible){
 
 	region reach_region;
 	feasible = false;
 
-	for(auto it = init.begin(); it!=init.end();it++){
-		template_polyhedra::ptr flowpipe;
-		initial_state::ptr ini= *it;
-		polytope::const_ptr init_poly = ini->getInitialSet();
-		reach_region.clear();
+	assert(p.size()>=1); // The given path must not be empty
 
-		for(unsigned int i=0;i<p.size();i++){
+	assert(init.size()==1); // Implementation assumption
 
-			unsigned int locId = p[i];
-			auto current_location = ha_ptr->getLocation(locId);
-			flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), init_poly, reach_params,
-					current_location->getInvariant(), current_location->getInvariantExist());
+	template_polyhedra::ptr flowpipe;
+	initial_state::ptr ini= *(init.begin());
 
-			discrete_set d;
-			d.insert_element(locId);
-			symbolic_states::ptr symb = symbolic_states::ptr(new symbolic_states(d,flowpipe));
-			reach_region.push_back(symb);
+	polytope::const_ptr init_poly = ini->getInitialSet();
+	reach_region.clear();
 
-			if(i == p.size()-2){
-				feasible = true;
-				std::cout << "Found a feasible path\n";
-				break;
-			}
-			// apply postD on this flowpipe
-			transition::ptr path_transition = nullptr;
-			int nextLocId;
-			auto out_transitions = current_location->getOutGoingTransitions();
-			for(std::list<transition::ptr>::const_iterator it = out_transitions.begin();
-					it!=out_transitions.end();it++){
+	path smallest_inf_path;
+	smallest_inf_path.push_back(p[0]);
 
-				nextLocId = (*it)->getDestinationLocationId();
-				if(nextLocId == p[i+1]){
-					path_transition = *it;
-					break;
-				}
-			}
+	for(unsigned int i=0;i<p.size();i++){
 
-			assert(path_transition!=nullptr);
+		unsigned int locId = p[i];
 
-			auto next_location = ha_ptr->getLocation(nextLocId);
+		auto current_location = ha_ptr->getLocation(locId);
+		flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), init_poly, reach_params,
+				current_location->getInvariant(), current_location->getInvariantExist());
 
-			polytope::const_ptr trans_guard = path_transition->getGuard();
+		discrete_set d;
+		d.insert_element(locId);
+		symbolic_states::ptr symb = symbolic_states::ptr(new symbolic_states(d,flowpipe));
+		reach_region.push_back(symb);
 
-			std::string postd_aggregation = user_ops.getSetAggregation();
-			std::list<polytope::ptr> polys;
-			polytope::const_ptr inv = current_location->getInvariant();
-
-			bool aggregation=true; // set aggregation is set to true by default.
-
-			if (boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"chull")){
-				aggregation=true;
-
-			} else if (boost::iequals(postd_aggregation,"none")){
-				aggregation=false;
-			}
-
-			assert(trans_guard!=nullptr);
-
-			if (!trans_guard->getIsEmpty()){
-
-				if(boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"none")){
-					polys = flowpipe->flowpipe_intersectionSequential(aggregation, trans_guard, 1);
-				}
-				else if(boost::iequals(postd_aggregation,"chull")){
-					polys = flowpipe->postD_chull(trans_guard, inv, 1);
-				}
-
-			} else{ // empty guard
-				DEBUG_MSG("bmc::getPathRegion: Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
-				exit(0);
-			}
-
-			// apply transition map
-			assert(polys.size()<=1);
-
-			if (polys.size() == 0){
-				feasible = false;
-				break;
-			}
-			// Intersect with guard
-			polytope::ptr g_flowpipe_intersect;
-			polytope::ptr hull_poly = *(polys.begin());
-
-			if(boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"none")){
-
-				if(!trans_guard->getIsUniverse()){
-					g_flowpipe_intersect = hull_poly->GetPolytope_Intersection(trans_guard);
-				} else{
-					g_flowpipe_intersect = hull_poly;
-				}
-			}
-			else // chull aggregation. no need to intersect with guard.
-				g_flowpipe_intersect = hull_poly;
-
-			Assign& t_map = path_transition->getAssignT();
-			polytope::ptr shift_polytope;
-
-			if (t_map.Map.isInvertible()) {
-				shift_polytope = post_assign_exact(g_flowpipe_intersect, t_map.Map, t_map.b);
-			} else {
-				shift_polytope = post_assign_approx_deterministic(g_flowpipe_intersect,
-						t_map.Map, t_map.b, reach_params.Directions,1);
-			}
-			// The newShifted must satisfy the destination location invariant
-			if (next_location->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
-				shift_polytope = shift_polytope->GetPolytope_Intersection(next_location->getInvariant());
-			}
-
-			if(shift_polytope->getIsEmpty()){
-				feasible = false;
-				break; // test for other initial regions
-			}
-
-			init_poly = shift_polytope;
-		}
-
-		if(feasible){
+		if(i == p.size()-2){
+			feasible = true;
 			break;
 		}
+		// apply postD on this flowpipe
+		transition::ptr path_transition = nullptr;
+		int nextLocId;
+		auto out_transitions = current_location->getOutGoingTransitions();
+		for(std::list<transition::ptr>::const_iterator it = out_transitions.begin();
+				it!=out_transitions.end();it++){
+
+			nextLocId = (*it)->getDestinationLocationId();
+			if(nextLocId == p[i+1]){
+				smallest_inf_path.push_back(nextLocId);
+				path_transition = *it;
+				break;
+			}
+		}
+
+		assert(path_transition!=nullptr);
+
+		auto next_location = ha_ptr->getLocation(nextLocId);
+
+		polytope::const_ptr trans_guard = path_transition->getGuard();
+
+		std::string postd_aggregation = user_ops.getSetAggregation();
+		std::list<polytope::ptr> polys;
+		polytope::const_ptr inv = current_location->getInvariant();
+
+		bool aggregation=true; // set aggregation is set to true by default.
+
+		if (boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"chull")){
+			aggregation=true;
+
+		} else if (boost::iequals(postd_aggregation,"none")){
+			aggregation=false;
+		}
+
+		assert(trans_guard!=nullptr);
+
+		if (!trans_guard->getIsEmpty()){
+
+			if(boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"none")){
+				polys = flowpipe->flowpipe_intersectionSequential(aggregation, trans_guard, 1);
+			}
+			else if(boost::iequals(postd_aggregation,"chull")){
+				polys = flowpipe->postD_chull(trans_guard, inv, 1);
+			}
+
+		} else{ // empty guard
+			DEBUG_MSG("bmc::getPathRegion: Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
+			exit(0);
+		}
+
+		// apply transition map
+		assert(polys.size()<=1);
+
+		if (polys.size() == 0){
+			feasible = false;
+			break;
+		}
+		// Intersect with guard
+		polytope::ptr g_flowpipe_intersect;
+		polytope::ptr hull_poly = *(polys.begin());
+
+		if(boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"none")){
+
+			if(!trans_guard->getIsUniverse()){
+				g_flowpipe_intersect = hull_poly->GetPolytope_Intersection(trans_guard);
+			} else{
+				g_flowpipe_intersect = hull_poly;
+			}
+		}
+		else // chull aggregation. no need to intersect with guard.
+			g_flowpipe_intersect = hull_poly;
+
+		Assign& t_map = path_transition->getAssignT();
+		polytope::ptr shift_polytope;
+
+		if (t_map.Map.isInvertible()) {
+			shift_polytope = post_assign_exact(g_flowpipe_intersect, t_map.Map, t_map.b);
+		} else {
+			shift_polytope = post_assign_approx_deterministic(g_flowpipe_intersect,
+					t_map.Map, t_map.b, reach_params.Directions,1);
+		}
+		// The newShifted must satisfy the destination location invariant
+		if (next_location->getInvariant()!=NULL) { // ASSUMPTION IS THAT NULL INV=> UNIVERSE INV
+			shift_polytope = shift_polytope->GetPolytope_Intersection(next_location->getInvariant());
+		}
+
+		if(shift_polytope->getIsEmpty()){
+			feasible = false;
+			break; // test for other initial regions
+		}
+
+		init_poly = shift_polytope;
 	}
+	p = smallest_inf_path;
 	return reach_region;
 
 }
@@ -379,6 +383,13 @@ bool bmc::safe(){
 				//update_encoding(p);
 				bool feasible = false;
 				region r = getPathRegion(p,feasible);
+				//debug
+				std::cout << "The smallest infeasible path is:\n";
+				for(unsigned int i=0;i<p.size();i++){
+					std::cout << p[i] << " " ;
+				}
+				std::cout << std::endl;
+				//
 			//	show(r, user_ops);
 			//	exit(0);
 

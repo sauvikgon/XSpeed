@@ -66,7 +66,7 @@ public:
 	 * Computes the reachable states along the given path p and gets the path feasibility
 	 * as a boolean flag.
 	 */
-	region getPathRegion(path p, bool& feasible);
+	region getPathRegion(path& p, bool& feasible);
 
 	/*
 	 * Returns the next unexplored path in the HA from the given source
