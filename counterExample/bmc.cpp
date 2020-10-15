@@ -215,7 +215,6 @@ path bmc::getNextPath(unsigned int k1)
 region bmc::getPathRegion(path& p, bool& feasible){
 
 	region reach_region;
-	feasible = false;
 
 	assert(p.size()>=1); // The given path must not be empty
 
@@ -232,24 +231,25 @@ region bmc::getPathRegion(path& p, bool& feasible){
 
 	for(unsigned int i=0;i<p.size();i++){
 
+		if(i == p.size()-1){
+			feasible = true;
+			break;
+		}
+
 		unsigned int locId = p[i];
 
 		auto current_location = ha_ptr->getLocation(locId);
 		flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), init_poly, reach_params,
-				current_location->getInvariant(), current_location->getInvariantExist());
 
+				current_location->getInvariant(), current_location->getInvariantExist());
 		discrete_set d;
 		d.insert_element(locId);
 		symbolic_states::ptr symb = symbolic_states::ptr(new symbolic_states(d,flowpipe));
 		reach_region.push_back(symb);
 
-		if(i == p.size()-2){
-			feasible = true;
-			break;
-		}
 		// apply postD on this flowpipe
 		transition::ptr path_transition = nullptr;
-		int nextLocId;
+		unsigned int nextLocId;
 		auto out_transitions = current_location->getOutGoingTransitions();
 		for(std::list<transition::ptr>::const_iterator it = out_transitions.begin();
 				it!=out_transitions.end();it++){
@@ -292,7 +292,7 @@ region bmc::getPathRegion(path& p, bool& feasible){
 				polys = flowpipe->postD_chull(trans_guard, inv, 1);
 			}
 
-		} else{ // empty guard
+		} else { // empty guard
 			DEBUG_MSG("bmc::getPathRegion: Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
 			exit(0);
 		}
@@ -304,6 +304,7 @@ region bmc::getPathRegion(path& p, bool& feasible){
 			feasible = false;
 			break;
 		}
+
 		// Intersect with guard
 		polytope::ptr g_flowpipe_intersect;
 		polytope::ptr hull_poly = *(polys.begin());
@@ -380,7 +381,7 @@ bool bmc::safe(){
 					std::cout << p[i] << " " ;
 				}
 				std::cout << std::endl;
-				//update_encoding(p);
+
 				bool feasible = false;
 				region r = getPathRegion(p,feasible);
 				//debug
