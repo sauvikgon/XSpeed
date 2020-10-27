@@ -589,15 +589,16 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 			it != outgoingtrans.end(); it++) {
 
 		eligibleTransition trans;
-		polytope::ptr g = (*it)->getGuard();
+		polytope::const_ptr g = (*it)->getGuard();
 
 		math::matrix<double> M = g->getCoeffMatrix();
 		std::vector<double> Bounds = g->getColumnVector();
 
 		Hyperplane_to_Halfspace(M, Bounds, x);  // Convert guard as half-space to detect line crossing
-		g->setCoeffMatrix(M);
-		g->setColumnVector(Bounds);
-		trans.inv_g_intersection = g;
+		trans.inv_g_intersection = polytope::ptr(new polytope(M,Bounds,1));
+//		g->setCoeffMatrix(M);
+//		g->setColumnVector(Bounds);
+//		trans.inv_g_intersection = g;
 		trans.trans = *it;
 		etrans_list.push_back(trans);
 	}

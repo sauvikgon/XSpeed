@@ -22,7 +22,6 @@
 typedef std::pair<int, polytope::ptr> forbidden;
 
 void readCommandLine(int argc, char *argv[], userOptions& user_options,
-		hybrid_automata& Hybrid_Automata,
 		std::list<initial_state::ptr>& init_state,
 		ReachabilityParameters& reach_parameters,
 		std::vector<forbidden>& forbidden_states);

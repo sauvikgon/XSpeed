@@ -117,7 +117,7 @@ polytope::ptr template_polyhedra::getPolytope(unsigned int Iterations_Number) {
 	return p;
 }
 
-const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionSequential(polytope::ptr G, int lp_solver_type) { //need testing due to modification
+const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionSequential(polytope::const_ptr G, int lp_solver_type) { //need testing due to modification
 
 	size_type row = 0;
 	size_type col = 0;
@@ -180,7 +180,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 }
 
 const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionParallel(
-		polytope::ptr G, int lp_solver_type) { //need testing due to modification
+		polytope::const_ptr G, int lp_solver_type) { //need testing due to modification
 
 	size_type row = 0;
 	size_type col = 0;
@@ -286,7 +286,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 	return intersected_region;
 }
 
-std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_intersectionSequential_optimize(polytope::ptr G, int lp_solver_type) {
+std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_intersectionSequential_optimize(polytope::const_ptr G, int lp_solver_type) {
 
 	// Check special case:  G is empty
 	if(G->getIsEmpty()){
@@ -361,7 +361,7 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 /*
  * returns the template hull of the flowpipe-guard intersected template polytopes
  */
-std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(bool aggregation, polytope::ptr guard, int lp_solver_type){
+std::list<polytope::ptr> template_polyhedra::flowpipe_intersectionSequential(bool aggregation, polytope::const_ptr guard, int lp_solver_type){
 
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
 	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type);
@@ -530,7 +530,7 @@ template_polyhedra::ptr template_polyhedra::union_TemplatePolytope(
 			new template_polyhedra(new_SFMatrix, this->getTemplateDirections()));
 }
 
-std::list<polytope::ptr> template_polyhedra::postD_chull(polytope::ptr guard, polytope::const_ptr inv, int lp_solver_type)
+std::list<polytope::ptr> template_polyhedra::postD_chull(polytope::const_ptr guard, polytope::const_ptr inv, int lp_solver_type)
 {
 	std::list<std::pair<unsigned int, unsigned int> > range_list;
 	range_list = polys_intersectionSequential_optimize(guard,lp_solver_type);

@@ -164,7 +164,7 @@ double myobjfunc2(const std::vector<double> &x, std::vector<double> &grad,
 
 			break;
 		} else {
-			polytope::ptr g;
+			polytope::const_ptr g;
 			Assign R;
 			math::matrix<double> mapExpAt(expAt);
 			// assign the transition pointer
@@ -402,7 +402,7 @@ double myobjfuncIterativeNLP(const std::vector<double> &t,
 
 			break;
 		} else {
-			polytope::ptr g;
+			polytope::const_ptr g;
 			Assign R;
 
 			// assign the transition pointer

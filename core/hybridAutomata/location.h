@@ -29,6 +29,7 @@ public:
 	typedef boost::shared_ptr<const location> const_ptr;
 
 	location();
+	~location(){};
 	location(int Loc_ID, string Name, Dynamics System_Dynamics, polytope::ptr Invariant,  bool inv_exists, std::list<transition::ptr> Out_Going_Trans);
 	const Dynamics& getSystemDynamics() const;
 	/* polymorphic member function which may modify the caller object due to non-constness */

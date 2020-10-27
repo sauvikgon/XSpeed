@@ -60,7 +60,7 @@ public:
 	bool getIsEmpty() const;
 	void setIsUniverse(bool universe);
 	bool getIsUniverse() const;
-	/* Returns true if the constraints make it bounded, i.e., a polytope */
+	/* Returns true if the constraints make it bounded */
 	bool isBounded() const;
 
 	void setPolytope(math::matrix<double> coeffMatrix,
@@ -100,7 +100,7 @@ public:
 	 * Returns True if polytope P1(the calling polytope object) and P2 intersects each other
 	 *  i.e., True iff	P1 intersection P2 != empty set
 	 */
-	bool check_polytope_intersection(polytope::ptr P2,
+	bool check_polytope_intersection(polytope::const_ptr P2,
 			int lp_solver_type) const ;
 	/*
 	 * Returns a new polytope after appending the constraints of P2

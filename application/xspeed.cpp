@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 
 	// parse input and user options
 	try{
-		readCommandLine(argc, argv, tool_theme.getUserOps(), tool_theme.getHa(), tool_theme.getInit(),
+		readCommandLine(argc, argv, tool_theme.getUserOps(), tool_theme.getInit(),
 				tool_theme.getReachParams(), tool_theme.getForbidden());
 	}catch(std::exception& e){
 		std::cout << "Exception:" << e.what() << std::endl;

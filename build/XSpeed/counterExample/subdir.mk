@@ -9,7 +9,8 @@ CPP_SRCS += \
 ../counterExample/concreteCE.cpp \
 ../counterExample/nlpFunctions.cpp \
 ../counterExample/simulation.cpp \
-../counterExample/wofcCounterExample.cpp 
+../counterExample/wofcCounterExample.cpp \
+../counterExample/bmc.cpp
 
 OBJS += \
 ./XSpeed/counterExample/abstractCE.o \
@@ -17,7 +18,8 @@ OBJS += \
 ./XSpeed/counterExample/concreteCE.o \
 ./XSpeed/counterExample/nlpFunctions.o \
 ./XSpeed/counterExample/simulation.o \
-./XSpeed/counterExample/wofcCounterExample.o 
+./XSpeed/counterExample/wofcCounterExample.o \
+./XSpeed/counterExample/bmc.o   
 
 CPP_DEPS += \
 ./XSpeed/counterExample/abstractCE.d \
@@ -25,7 +27,9 @@ CPP_DEPS += \
 ./XSpeed/counterExample/concreteCE.d \
 ./XSpeed/counterExample/nlpFunctions.d \
 ./XSpeed/counterExample/simulation.d \
-./XSpeed/counterExample/wofcCounterExample.d 
+./XSpeed/counterExample/wofcCounterExample.d \
+./XSpeed/counterExample/wofcCounterExample.d \
+./XSpeed/counterExample/bmc.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

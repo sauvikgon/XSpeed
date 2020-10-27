@@ -15,6 +15,7 @@ using namespace std;
 hybrid_automata::hybrid_automata() {
 	dimension = 0;
 }
+
 hybrid_automata::hybrid_automata(std::map<int, location::ptr>& list_locs, location::ptr init_loc,
 		int dim) {
 	list_locations = list_locs;	//assigning a map to another map
@@ -344,7 +345,7 @@ std::list<structuralPath::ptr> hybrid_automata::findAllPaths(int src, int dst, i
 				path_transitions.push_back(pathDS.second[i]);
 			}
 			structuralPath::ptr solutionPath = structuralPath::ptr(new structuralPath(path_locations, path_transitions));
-			allStructralPaths.push_back(solutionPath);
+			//allStructralPaths.push_back(solutionPath);
 			//Disable instruction continue to avoid repeated bad location (applicable for discrete systems)
 			//continue;	//avoiding traversing further from here: bad location not repeated (applicable for hybrid systems)
 		}

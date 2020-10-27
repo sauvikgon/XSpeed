@@ -259,7 +259,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 	dmin[t_index] = -1;
 
 	std::list<polytope::ptr> polys;
-	polytope::ptr guard;
+	polytope::const_ptr guard;
 
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
@@ -893,7 +893,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	dmin[t_index] = -1;
 
 	std::list<polytope::ptr> polys;
-	polytope::ptr guard;
+	polytope::const_ptr guard;
 
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
@@ -1014,11 +1014,11 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 	boost::timer::cpu_timer timer;
 	using boost::timer::cpu_times;
 	using boost::timer::nanosecond_type;
-	nanosecond_type const sixhundred_seconds(60 * 1000000000LL);
+	nanosecond_type const sixty_seconds(60 * 1000000000LL);
 	// a ce search in an abstract path is to timeout after 60 secs.
 	timer.start();
 
-	for(unsigned int i=0;i<max_restarts;i++){
+	while(true){
 
 		while (minf > tolerance) {
 
@@ -1032,7 +1032,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			//From this vector, get the N start vectors in x0
 			for (unsigned int i = 0; i < N; i++) {
-				x0[i].resize(dim);	//declaring each array element its size		
+				x0[i].resize(dim);	//declaring each array element its size
 				for (unsigned int j = 0; j < dim; j++) {
 					x0[i][j] = x[X1 + i * dim + j];
 				}
@@ -1063,13 +1063,12 @@ concreteCE::ptr abstractCE::gen_concreteCE_iterative(double tolerance,
 
 			cpu_times const elapsed_times(timer.elapsed());
 			nanosecond_type const elapsed(elapsed_times.user);
-			if (elapsed > sixhundred_seconds)
+			if (elapsed > sixty_seconds)
 			{
 				std::cout << "Timed-out on the abstract counterexample\n";
 				success = true; // here, success true is break the restart loop.
 				break;
 			}
-			//std::cout << "last nlp_res = " << nlp_res << std::endl;
 
 		} // end of alternating lp-nlp loop.
 

@@ -27,18 +27,20 @@ class transition {
 	string label;
 	int source_location_id;
 	int destination_location_id;
-	polytope::ptr Guard;
+	polytope::const_ptr Guard;
 	Assign Assign_T;
 public:
 	typedef boost::shared_ptr<transition> ptr;
 	transition();
+	~transition(){
+	}
 	transition(int trans_id, string label, int source_id, int destination_id,
-			polytope::ptr Guard, Assign Assign_T);
+			polytope::const_ptr Guard, Assign Assign_T);
 	Assign& getAssignT();
 	void setAssignT(Assign assignT);
 	int getDestinationLocationId();
 	void setDestinationLocationId(int dest_loc_id);
-	polytope::ptr getGuard();
+	polytope::const_ptr getGuard() const;
 	void setGuard(polytope::ptr guard);
 	const string& getLabel() const;
 	void setLabel(const string& label);

@@ -15,10 +15,6 @@ void themeSelector::setUserOps(userOptions& op) {
 	this->userOps = op;
 }
 
-void themeSelector::setHa(hybrid_automata& ha){
-	this->ha = ha;
-}
-
 void themeSelector::setInit(std::list<initial_state::ptr>& init){
 	this->init = init;
 }
@@ -34,8 +30,8 @@ void themeSelector::setForbidden(forbidden_states& forbidden) {
 userOptions& themeSelector::getUserOps(){
 	return this->userOps;
 }
-hybrid_automata& themeSelector::getHa() {
-	return this->ha;
+hybrid_automata::ptr themeSelector::getHaInstance() {
+	return ha_ptr;
 }
 std::list<initial_state::ptr>& themeSelector::getInit() {
 	return this->init;
@@ -59,7 +55,7 @@ void themeSelector::selectReach()
 	init_cpu_usage(); //initializing the CPU Usage utility to start recording usages
 	for (unsigned int i = 1; i <= number_of_times; i++) { //Running in a loop of number_of_times to compute the average result
 		// Calls the reachability computation routine.
-		reachabilityCaller(ha, init, reach_params, userOps, lp_solver_type, forbidden, symbolic_states, ce_candidates);
+		reachabilityCaller(*ha_ptr, init, reach_params, userOps, lp_solver_type, forbidden, symbolic_states, ce_candidates);
 	}
 	timer.stop();
 	double cpu_usage = getCurrent_ProcessCPU_usage();
@@ -69,12 +65,12 @@ void themeSelector::selectReach()
 
 	// Choosing from the output format and showing results
 
-	if(ha.ymap_size()!=0){
+	if(ha_ptr->ymap_size()!=0){
 		//transform the sfm to output directions before plotting
 		std::list<symbolic_states::ptr>::iterator it =  symbolic_states.begin();
 		for(;it!=symbolic_states.end(); it++){
 			symbolic_states::ptr symbStatePtr = *it;
-			transformTemplatePoly(ha, symbStatePtr->getContinuousSetptr());
+			transformTemplatePoly(*ha_ptr, symbStatePtr->getContinuousSetptr());
 		}
 	}
 
@@ -92,22 +88,27 @@ void themeSelector::selectReach()
 void themeSelector::selectSim(){
 	std::cout << "Running simulation engine ... \n";
 	if (forbidden.size() > 0)
-		simulationCaller(ha, init, reach_params, forbidden[0], userOps);
+		simulationCaller(*ha_ptr, init, reach_params, forbidden[0], userOps);
 	else{
 		// create an empty forbidden region
 		std::pair<int, polytope::ptr> forbidden_s;
 		forbidden_s.first = -10; // implies no location
 		forbidden_s.second = polytope::ptr(new polytope(true)); // empty polytope
-		simulationCaller(ha, init, reach_params, forbidden_s, userOps);
+		simulationCaller(*ha_ptr, init, reach_params, forbidden_s, userOps);
 	}
 }
 
 void themeSelector::selectFal(){
 	//todo: call the path-oriented falsification routine.
-	bmc bmc_fal(ha, init, forbidden, reach_params, userOps);
 
-	bool safety = bmc_fal.safe();
+	bmc bmc_fal(ha_ptr, init, forbidden, reach_params, userOps);
 
+	bool safe = bmc_fal.safe();
+
+	if(safe)
+		std::cout << "BMC: The model is safe" << std::endl;
+	else
+		std::cout << "BMC: The model is unsafe" << std::endl;
 }
 
 void themeSelector::select(){
@@ -130,16 +131,18 @@ void themeSelector::select(){
 		return;
 	}
 
+
 	// ----Section for Running Exp-Graph. This code is put only for experimental task.
-	int	 runExpGraph_WoFC = 0;	// To run Exp-Graph Algorithm, that is, Explore the Graph, we should assign a valid loc-id in the forbidden set (and not -1, unlike FC algo)
+	int	 runExpGraph_WoFC = 0;	// To run Exp-Graph Algorithm, that is, Explore the Graph,
+	//we should assign a valid loc-id in the forbidden set (and not -1, unlike FC algo)
 	if (runExpGraph_WoFC) {
-		bool found_CE = runWoFC_counter_example(ha, init, forbidden[0], userOps);
+		bool found_CE = runWoFC_counter_example(*ha_ptr, init, forbidden[0], userOps);
 
 		if (found_CE) {
 			string cmdStr1;
 			//cmdStr1.append("graph -TX -BC -W 0.008 out.txt -s -m 3 bad_poly -s -m 2 init_poly");
 			//cmdStr1.append("graph -TX -BC -W 0.008 out.txt");
-			system(cmdStr1.c_str());
+			//system(cmdStr1.c_str());
 		}
 		return;
 	}
@@ -147,6 +150,7 @@ void themeSelector::select(){
 
 }
 themeSelector::~themeSelector() {
+
 	// TODO Auto-generated destructor stub
 }
 

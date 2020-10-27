@@ -92,17 +92,6 @@ bool runWoFC_counter_example(hybrid_automata& Hybrid_Automata,
 	std::cout << "Total time to search all structural paths (in secs) = " << usertime_Paths_sec <<endl;
 	std::cout << "Total time to Falsify (in secs) = " << (ce_search_time_sec + usertime_Paths_sec) <<endl;
 
-	// recording statistics in a file to include in the paper
-	std::ofstream myfile;
-	myfile.open("statistics_WoFC.txt",ios::out | ios::app);
-	myfile << "New Table 4 data (using HA structural paths with Exp-Graph): \n";
-
-	myfile << "model number: " << user_options.get_model() << "; #Paths = " << allPaths.size()
-			<< "; Time to search all structural paths (in secs):" << usertime_Paths_sec
-			<< "; #CEs = " << ce_list.size() << ", #Refs = " << refinements
-			<< ", Total Time to search concrete CEs (in secs) = " << ce_search_time_sec << std::endl;
-	myfile.close();
-
 	return true;
 
 }
@@ -119,7 +108,7 @@ bool gen_counter_example_WoFC(abstractCE::ptr abs_path,
 	boost::timer::cpu_timer clock; // clocks the time taken to splice a trajectory
 
 	if(WoFC_traj_splicing_time > 3600000){
-		std::cout << "Seach for CE TIMED-OUT (>1hrs)\n";
+		std::cout << "Search for CE TIMED-OUT (>1hrs)\n";
 		return false;
 	}
 	if(ce_path.compare("all") == 0) // if all paths are to be searched for ce, then return true in order to collect more paths.
