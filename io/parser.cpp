@@ -465,14 +465,13 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 			polytope::ptr g = polytope::ptr(new polytope());
 			polytope::ptr u_dummy = polytope::ptr(new polytope());
 			Dynamics D_dummy;
-			parse_invariant(*tok_iter, g, u_dummy, D_dummy);// inv and guard are both polytope
-			// debug
-			/*std::cout << "parsed transition guard is:\n";
-			g->printPoly();*/
-			//--
-			
 
-			t->setGuard(g);
+			if((*tok_iter).compare("true")==0)
+				t->setGuard(g);
+			else{
+				parse_invariant(*tok_iter, g, u_dummy, D_dummy);// inv and guard are both polytope
+				t->setGuard(g);
+			}
 		}
 
 		else if(param.compare("Reset")==0){
