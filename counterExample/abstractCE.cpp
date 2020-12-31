@@ -35,6 +35,7 @@ std::vector<double> start_pos; // the start vectors of opt trajectory from LP so
 
 unsigned int samples = 0;
 
+
 /*
  * Computes the distance of the trajectory to the invariant, gradient of the distance of the trace
  * to the given invariant polytope w.r.t the trace start point. It returns the end point of the
@@ -181,7 +182,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 //	nlopt::opt myopt(nlopt::GN_ISRES,optD); // derivative free global
 
 	// 	Parameters of the optimization routine
-	//unsigned int maxeval = 20000;
+	unsigned int maxeval = 20000;
 	unsigned int maxtime = 60; // time-out of 1 min per abstract ce.
 
 	myopt.set_min_objective(myobjfunc2, NULL);
@@ -259,7 +260,7 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 	dmin[t_index] = -1;
 
 	std::list<polytope::ptr> polys;
-	polytope::const_ptr guard;
+	polytope::const_ptr guard, inv;
 
 	std::list<transition::ptr>::iterator it = transList.begin();
 	transition::ptr T;
@@ -283,11 +284,29 @@ concreteCE::ptr abstractCE::gen_concreteCE(double tolerance,
 
 			P = P->GetPolytope_Intersection(bad_poly);
 		} else {
+
 			// Take time projection of flowpipe \cap transition guard
 			T = *(it);
+
 			guard = T->getGuard();
-			polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(
-					aggregation, guard, 1);
+			unsigned int loc_id = *(this->get_symbolic_state(i)->getDiscreteSet().getDiscreteElements()).begin();
+			inv = HA->getLocation(loc_id)->getInvariant();
+
+			if (!guard->getIsEmpty()){
+				aggregation = false;
+				if(aggregation){
+					polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation, guard, 1);
+				}
+				else {
+					polys = S->getContinuousSetptr()->postD_chull(guard, inv, 1);
+				}
+
+			} else { // empty guard
+				DEBUG_MSG("abstractCE::gen_concreteCE: Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
+				exit(0);
+			}
+
+			//polys = S->getContinuousSetptr()->flowpipe_intersectionSequential(aggregation, guard, 1);
 
 			assert(polys.size() >= 1); // An abstract CE state must have intersection with the trans guard
 			if (polys.size() > 1)
@@ -1177,7 +1196,7 @@ concreteCE::ptr abstractCE::gen_concreteCE_NLP_HA(double tolerance,
 	nlopt::opt myopt(nlopt::LD_MMA, optD); // derivative based
 
 	// 	Optimization routine paramters
-	// unsigned int maxeval = 20000;
+	unsigned int maxeval = 20000;
 	unsigned int maxtime = 60; //60 secs/ 1 minute
 	myopt.set_min_objective(myobjfunc2, NULL);
 	myopt.set_maxtime(maxtime); // times out after maxtime

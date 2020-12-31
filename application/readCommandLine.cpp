@@ -155,6 +155,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		
 		if (vm.count("model-file") && vm.count("config-file")
 					&& ((user_options.get_model()==0))) { // model=0 means no pre-built model specified
+
 			string cmd_str = "java -jar Model-Translator.jar -t XSpeed \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl";
 			system(cmd_str.c_str());
 			parser _parser("input_model.mdl");
@@ -309,6 +310,8 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		}
 		if (vm["model"].as<int>()!=0) { //Compulsory Options but set to 0 by default
 			user_options.set_model(vm["model"].as<int>());
+			// get an empty ha object
+			themeSelector::ha_ptr = hybrid_automata::ptr(new hybrid_automata());
 			load_ha_model(init_state, *(themeSelector::getHaInstance()), reach_parameters, user_options);
 		}
 
@@ -321,8 +324,14 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 		throw(new exception());
 	}
  
+	// Check if the ha_ptr has been initialized
+	if(themeSelector::getHaInstance()==nullptr){
+		std::cerr << "HA not initialized by the parser: Check for missing '-m' option in the commandline, or check the specified model Id.\n";
+		exit(0);
+	}
 	int x1, x2;
 	try{
+
 		if(themeSelector::getHaInstance()->ymap_size()!=0){
 			unsigned int m = themeSelector::getHaInstance()->ymap_size();
 			x1 = themeSelector::getHaInstance()->get_y_index(output_vars[0]);

@@ -427,6 +427,9 @@ void parser::parse_transition(fstream& file, transition::ptr& t)
 {
 	string line;
 
+	static int trans_id;
+	t->setTransitionId(++trans_id); // giving a unique
+
 	while(getline(file,line)){
 
 		line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());

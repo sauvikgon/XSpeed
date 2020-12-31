@@ -984,7 +984,10 @@ void reachability::par_postC_selection(unsigned int iters, location::const_ptr c
 				current_location->getInvariantExist(), lp_solver_type);
 		AllReach_time.stop();
 		S[id]->setContinuousSetptr(reach_region);
-		DEBUG_MSG("Flowpipe Time:Wall(Seconds) = " + to_string(return_Time1));
+		double wall_clock;
+		wall_clock = AllReach_time.elapsed().wall / 1000000; //convert nanoseconds to milliseconds
+		double return_time = wall_clock / (double) 1000;
+		DEBUG_MSG("Flowpipe Time:Wall(Seconds) = " + to_string(return_time));
 	}
 
 	if (Algorithm_Type == TIME_SLICE) { //Continuous Parallel Algorithm parallelizing the Iterations :: to be debugged (compute initial polytope(s))

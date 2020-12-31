@@ -27,7 +27,9 @@
 #include "counterExample/abstractSymbolicState.h"
 #include "counterExample/simulation.h"
 #include "utilities/dbgMsgLogger.h"
+#include <boost/algorithm/string.hpp>
 
+#define DEBUG
 #define VALIDATION
 /**
  * This class is a data structure to store the abstract counter-example generated
