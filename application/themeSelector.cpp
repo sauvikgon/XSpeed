@@ -77,6 +77,7 @@ void themeSelector::selectReach()
 	plottime.start();
 	show(symbolic_states, userOps);
 	plottime.stop();
+//	print_statistics(plottime,"Plotting");
 
 	// printing the first initial polytope in the init_poly file
 	polytope::const_ptr init_poly = (*init.begin())->getInitialSet();
