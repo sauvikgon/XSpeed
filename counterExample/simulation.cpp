@@ -778,9 +778,11 @@ std::vector<sim_start_point> simulation::simulateHaLocation(
 			}
 		} // end of for loop
 
-		// Add the point to the sim_trace because it does not intersect with the guard yet
+		// Comment this below for removing the restriction of urgent simulation semantics.
+
 		if (new_start_points.size() > 0) // stop simulation since the next simulation point is found.
 			break;
+
 
 		//Checking validity of the trace
 		double dist = inv->point_distance(v);

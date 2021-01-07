@@ -177,8 +177,8 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 			std::cout << D.MatrixB << std::endl;
 			std::cout << "The constant vector:\n";
 			for(unsigned int i=0;i<D.C.size();i++)
-				std::cout << D.C[i] << "\n"; */
-
+				std::cout << D.C[i] << "\n";
+			*/
 			//--
 
 			/* Setting the constants in dynamics to input when U is empty */
@@ -503,7 +503,7 @@ void parser::parse_initial(string init_str, polytope::ptr& p, int& init_locId)
 	//std::cout << "Parsing initial string:" << init_str << std::endl;
 
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	boost::char_separator<char> sep("&;");
+	boost::char_separator<char> sep("&;:");
 	tokenizer tokens(init_str, sep);
 
 	std::list<std::string> all_args;
