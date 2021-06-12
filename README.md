@@ -59,7 +59,8 @@ To see the help menu of the tool, run:
 
 `XSpeed-plan --help`
 
-** Running from Docker Image **
+**Running Docker Image**
+
 Building the Dockerfile will create a docker container of
 XSpeed in your local machine, which you can use to run the tool.
 Follow the steps below to build the Dockerfile
