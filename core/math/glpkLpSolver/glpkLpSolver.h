@@ -31,12 +31,7 @@ public:
 	typedef boost::shared_ptr<glpk_lp_solver> glpk_ptr;
 
 	void setDefaultObject(); // same as calling a constructor
-	/*
-	 glpk_lp_solver(std::vector<std::vector <double> > coeff_constraints, std::vector <double> bounds,
-	 std::vector <int> bound_signs);
-	 void setConstraints(std::vector<std::vector <double> > coeff_constraints, std::vector <double> bounds,
-	 int bound_signs);
-	 */
+
 	glpk_lp_solver(math::matrix<double> coeff_constraints,
 			std::vector<double> bounds, std::vector<int> bound_signs);
 	void setConstraints(math::matrix<double> coeff_constraints,
@@ -100,7 +95,7 @@ public:
 	 * This results in checking if the specified constraints has feasible solution or solution is infeasible or has no feasible solution
 	 * This application can be used to test the intersection of polytope with guard or with another polytope.
 	 */
-	unsigned int TestConstraints();
+	unsigned int testConstraints();
 
 	// ******* Functions to be Interfaced later to the common LP_Solver class **********
 	void displayMaxVariables();

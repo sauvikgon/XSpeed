@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="16.0.1" class="java.beans.XMLDecoder">
+ <object class="com.verivital.hyst.main.GuiState" id="GuiState0">
+  <void property="printerParams">
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+   <void method="add">
+    <string></string>
+   </void>
+  </void>
+ </object>
+</java>

@@ -746,7 +746,7 @@ void tpbfs::loadBalancedPostD(std::vector<LoadBalanceData_PostD>& loadBalPostD){
 			p->setMoreConstraints(loadBalPostD[sfmIndex].sfm->getInvariantDirections(),constraint_bound_values);
 		}
 		for (unsigned int trans = 0; trans < loadBalPostD[sfmIndex].trans_size; trans++) {
-			loadBalPostD[sfmIndex].bool_arr(trans, sfmColIndex) = p->check_polytope_intersection(loadBalPostD[sfmIndex].guard_list[trans], lp_solver_type);//result of intersection
+			loadBalPostD[sfmIndex].bool_arr(trans, sfmColIndex) = p->check_polytope_intersection(loadBalPostD[sfmIndex].guard_list[trans]);//result of intersection
 		}
 	} //end of parallel-loop :: we have the list of intersected polys
 }

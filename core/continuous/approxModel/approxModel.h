@@ -30,7 +30,7 @@
  * It says that the reachable states in the time interval [t, t+\delta] can be
  * obtained by applying the linear transformation on Reach_{0,\delta}(X_0,U) to
  * and then bloating this with Reach_{\delta,\delta}({0},U), the reachable
- * states at time \delta under the influence of ofinputs on the origin {0} .
+ * states at time \delta under the influence of inputs on the origin {0} .
  */
 
 class approx_model

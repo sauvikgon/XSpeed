@@ -171,17 +171,12 @@ void lp_solver::setInitial_SimplexControlParameters() {
 unsigned int lp_solver::getStatus() {
 	return status;
 }
-unsigned int lp_solver::TestConstraints() {
-	//unsigned int status=0;
-	unsigned int status = 5, glpk_status = 5;
+unsigned int lp_solver::testConstraints() {
+
+	unsigned int status = 5;
 
 	if (lp_solver_type == GLPK_SOLVER) {
-		glpk_status = glpk_lp_problem->TestConstraints();
-	}
-
-	// ******* I have to return a uniform meaning for the status returned by Gurobi and GLPK  *****
-	if (lp_solver_type == GLPK_SOLVER) {
-		status = glpk_status;
+		status = glpk_lp_problem->testConstraints();
 	}
 
 	return status;

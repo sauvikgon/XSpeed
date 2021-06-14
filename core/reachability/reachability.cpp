@@ -1421,7 +1421,7 @@ bool reachability::templated_isContained(int locID, polytope::ptr poly,
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
 
-				intersects = p->check_polytope_intersection(poly, lp_solver_type); //result of intersection
+				intersects = p->check_polytope_intersection(poly); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
 
@@ -1465,7 +1465,7 @@ bool reachability::isContained_withLock(int locID, polytope::ptr poly,
 				polytope::ptr p;
 				p = flowpipe->getPolytope(i);
 
-				intersects = p->check_polytope_intersection(poly, lp_solver_type); //result of intersection
+				intersects = p->check_polytope_intersection(poly); //result of intersection
 				if (intersects){
 					//todo:: if Contained in a union of Omegas
 					contained = p->contains(poly, lp_solver_type);//	Our simple polytope Containment Check

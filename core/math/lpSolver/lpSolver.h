@@ -66,7 +66,7 @@ public:
 	void setIteration_Limit(int limits);
 	void setInitial_SimplexControlParameters();	//reset to default parameters
 	unsigned int getStatus();
-	unsigned int TestConstraints();
+	unsigned int testConstraints();
 	/*
 	 * deletes the LP problem
 	 */

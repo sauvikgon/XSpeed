@@ -145,6 +145,9 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 				//debug
 				//std::cout << "The parsed output transformation matrix:\n";
 				//std::cout << D.MatrixT << std::endl;
+				//debug
+				/*std::cout << " Printing the U polytope\n";
+				U->printPoly();*/
 
 				if( U->getColumnVector().size() == 0) 
 					U->setIsEmpty(true);
@@ -260,7 +263,11 @@ void parser::parse_loc(fstream& file, location::ptr loc){
 				std::cout << "elements of col vector are:\n";
 				for(unsigned int i=0;i<D.U->getColumnVector().size();i++)
 					std::cout << D.U->getColumnVector()[i] << " ";
-				std::cout << std::endl; */
+				std::cout << std::endl;
+				std::cout << "modified U to address constant:\n";
+				D.U->printPoly();
+				std::cout << "Modified B matrix:\n";
+				std::cout << D.MatrixB;*/
 			}
 
 			loc->setSystemDynamics(D);

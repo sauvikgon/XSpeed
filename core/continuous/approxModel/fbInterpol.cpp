@@ -51,7 +51,7 @@ fb_interpol::fb_interpol(const math::matrix<double>& my_A, polytope::const_ptr X
 	myopt->set_lower_bounds(lb);
 	myopt->set_upper_bounds(ub);
 
-	unsigned int maxeval = 70;
+	unsigned int maxeval = 1000;
 	myopt->set_maxeval(maxeval);
 
 	last_iter = 0; d=1;

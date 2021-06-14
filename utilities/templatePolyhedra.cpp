@@ -134,7 +134,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionS
 
 		/* from the reach_region that is the calling template_polyhedra add the invariant constraint and bound_value to p*/
 		p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
-		is_intersected = p->check_polytope_intersection(G, lp_solver_type);	//result of intersection
+		is_intersected = p->check_polytope_intersection(G);	//result of intersection
 
 		if (is_intersected == true) {//if intersects create a new template_polyhedra subset
 //#pragma omp critical
@@ -209,7 +209,7 @@ const std::list<template_polyhedra::ptr> template_polyhedra::polys_intersectionP
 		p->setMoreConstraints(this->getInvariantDirections(),
 				constraint_bound_values);
 
-		intersects[i] = p->check_polytope_intersection(G, lp_solver_type);	//result of intersection
+		intersects[i] = p->check_polytope_intersection(G);	//result of intersection
 	} //end of parallel-loop :: we have the list of intersected polys
 
 	t100.stop();
@@ -325,7 +325,7 @@ std::list<std::pair<unsigned int, unsigned int> > template_polyhedra::polys_inte
 			constraint_bound_values = this->getInvariantBoundValue(i);
 			p->setMoreConstraints(this->getInvariantDirections(), constraint_bound_values);
 		}
-		intersects[i] = p->check_polytope_intersection(G, lp_solver_type); //result of intersection
+		intersects[i] = p->check_polytope_intersection(G); //result of intersection
 	} //end of parallel-loop :: we have the list of intersected polys
 
 	std::list<std::pair<unsigned int, unsigned int> > intersected_range;

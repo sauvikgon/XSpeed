@@ -294,12 +294,11 @@ polytope::ptr polytope::GetPolytope_Intersection(polytope::const_ptr gPoly) cons
 
 /*
  * Checks if the calling Polytope intersects with the polytope P2
- * Return True if it intersects otherwise False
+ * Return True if there is an intersection, otherwise returns False
  */
 
-bool polytope::check_polytope_intersection(polytope::const_ptr p2,
-		int lp_solver_type) const {
-	// if the parameter polytope is a univserse, then return true
+bool polytope::check_polytope_intersection(polytope::const_ptr p2) const {
+	// if the parameter polytope is a universe, then return true
 	if(p2->getIsUniverse())
 		return true;
 	// if the parameter polytope is empty, return false
@@ -312,34 +311,17 @@ bool polytope::check_polytope_intersection(polytope::const_ptr p2,
 	 * then run lp_solver's TestConstraints function to test if the constraints have No Feasible Solution,
 	 *
 	 */
-	int Min_Or_Max = 2;
-	int type = lp_solver_type;
-	lp_solver lp2(type);
-	//lp2.setDefalultObject();		//executed by default now
-	lp2.setMin_Or_Max(Min_Or_Max);
+	polytope::ptr res = this->GetPolytope_Intersection(p2);
 
-	math::matrix<double> total_coeffMatrix, m1;
-	m1 = this->getCoeffMatrix(); //assigning constant matrix to matrix m1 so that matrix_join function can be called
-	m1.matrix_join(p2->getCoeffMatrix(), total_coeffMatrix);
+	glpk_lp_solver lp_res;
 
-	std::vector<double> total_columnVector;
+	lp_res.setConstraints(res->getCoeffMatrix(), res->getColumnVector(), this->InEqualitySign);
 
-	total_columnVector = vector_join(this->getColumnVector(),
-			p2->getColumnVector());
+	unsigned int checkStatus = lp_res.testConstraints();
 
-	/*cout<<"Printing the total ColumnVector = "<<endl;
-	 for(unsigned int i=0;i<total_columnVector.size();i++)
-	 cout<<total_columnVector[i]<<"\t";
-	 cout<<endl;*/
-
-	lp2.setConstraints(total_coeffMatrix, total_columnVector,
-			this->InEqualitySign);
-
-	unsigned int checkStatus = lp2.TestConstraints();
-	//Later i may have to perform checking if its an empty polytope should not execute this.
-	//cout << "\n\nResult of TestConstriants = " << checkStatus << endl;
+	//cout << "\n\nResult of TestConstraints = " << checkStatus << endl;
 	//4 for GLP_NOFEAS; 3 for GLP_INFEAS; 6 for solution is unbounded
-	if (checkStatus == 4 || checkStatus == 3 || checkStatus == 6)
+	if (checkStatus == GLP_INFEAS || checkStatus == GLP_NOFEAS)
 		flag = false;
 	else
 		flag = true;
@@ -566,7 +548,7 @@ void polytope::printPoly() const{
 	std::cout<<this->coeffMatrix;
 	std::cout<<"\nVector\n";
 	for(unsigned int j=0;j<columnVector.size();j++)
-		std::cout << this->columnVector[j] << "    " ;
+		std::cout << setprecision(12) << this->columnVector[j] << "    " ;
 	std::cout << "\n";
 }
 

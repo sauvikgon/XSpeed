@@ -166,10 +166,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			//hybrid_automata::ptr ha_shared_ptr = hybrid_automata::ptr(new hybrid_automata(_parser.getHa())); // assign the parsed ha
 			hybrid_automata::ptr ha_shared_ptr = hybrid_automata::ptr(new hybrid_automata(haObj)); // assign the parsed ha
 			themeSelector::ha_ptr = ha_shared_ptr; // initializing the static member of themeSelector
-			//std::cout << "Number of paths of length bounded (SAT):" << Hybrid_Automata.satEnumPaths(5,5);
-			//std::cout << "Number of paths of length bounded (BFS):" << Hybrid_Automata.findAllPaths(1,81,11).size();
-			//std::cout << "Number of paths of length bounded (SAT):" << Hybrid_Automata.satEnumPaths(9,10);
-			//exit(0);
 
 			init_state.push_back(_parser.getInitState()); // assign the parsed init
 			forbidden_states = _parser.getForbidden(); //assign the forbidden states

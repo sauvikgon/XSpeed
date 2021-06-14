@@ -24,11 +24,11 @@ void load_ha_model(std::list<initial_state::ptr>& init_state,
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_1) {
-		set_nav04_timed(ha, init_state, reach_parameters);
+		//set_nav04_timed(ha, init_state, reach_parameters);
 	}
 
 	if (HybridSystem_Model_Type == NAVIGATION_2) { // Model 8
-		SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
+		//SetNavigationModel5by5Timed(ha, init_state, reach_parameters);
 	}
 
 	if (HybridSystem_Model_Type == OSCILLATOR) {

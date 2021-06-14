@@ -403,7 +403,16 @@ template_polyhedra::ptr postC_fbinterpol(const unsigned int boundedTotIteration,
 	unsigned int num_iters = ReachParameters.Iterations;
 
 	math::matrix<double> SFM(num_directions, num_iters); // The data structure to store the template polytopes
-
+	//debug
+	/*std::cout << "A-mat passed to fbinterpol\n";
+	std::cout << SystemDynamics.MatrixA;
+	std::cout << "B-mat passed to fbinterpol\n";
+	std::cout << SystemDynamics.MatrixB;
+	std::cout << "U passed to fbinterpol\n";
+	SystemDynamics.U->printPoly();
+	std::cout << "Initial passed to fbinterpol\n";
+	Initial->printPoly();*/
+	//---
 	approx_model::ptr fbinterpol_model = approx_model::ptr(new fb_interpol(SystemDynamics.MatrixA, Initial, SystemDynamics.U, SystemDynamics.MatrixB,
 			ReachParameters.time_step, num_directions, num_iters) );
 	// get the direction vectors
@@ -415,15 +424,34 @@ template_polyhedra::ptr postC_fbinterpol(const unsigned int boundedTotIteration,
 			direction[eachDirection][i] = ReachParameters.Directions(eachDirection, i);
 		}
 	}
+	// create a polytope with template directions and uninitialized column vector
+
+	std::vector<double> bounds(ReachParameters.Directions.size1());
+	polytope::ptr omega = polytope::ptr(new polytope(ReachParameters.Directions, bounds, 1));
 
 	for(unsigned int iter = 0; iter < num_iters; iter++)
 	{
-		//std::vector<double> b(num_directions,0);
-
 		for(unsigned int eachDirection = 0; eachDirection < num_directions; eachDirection++){
 			SFM(eachDirection,iter) = fbinterpol_model->omega_support(direction[eachDirection],iter);
+
+			bounds[eachDirection] = SFM(eachDirection,iter);
+		}
+
+		if(InvariantExist == true){
+			// initialize the column vector
+			omega->setColumnVector(bounds);
+			bool not_empty = omega->check_polytope_intersection(invariant);
+
+			if(!not_empty){ // the flowpipe is completely outside the invariant
+				// resize the sfm to contain omegas which are fully or partially inside the invariant
+				SFM.resize(SFM.size1(), iter);
+				num_iters = iter;
+				break;
+			}
 		}
 	}
+
+	// intersect the omegas with the location invariant
 
 	if (InvariantExist == true) { //if invariant exist. Computing
 		math::matrix<double> inv_sfm;

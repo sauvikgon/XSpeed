@@ -232,14 +232,15 @@ unsigned int glpk_lp_solver::getStatus() {
 	return val;
 }
 
-unsigned int glpk_lp_solver::TestConstraints() {
+unsigned int glpk_lp_solver::testConstraints() {
 
-	for (int i = 0; i < dimension; i++) {
-		glp_set_obj_coef(mylp, i + 1, 0.0);	//assigning objective coefficients to zero
-	}
-	glp_term_out(GLP_OFF);
-	glp_simplex(mylp, &param);
-	return getStatus();
+	// presolve to remove redundant constraints
+	param.presolve = GLP_ON;
+
+	glp_exact(mylp, &param);
+	int status = glp_get_status(mylp);
+
+	return status;
 }
 
 double glpk_lp_solver::Compute_LLP(const std::vector<double> coeff_function) {//Here argument is a Vector
