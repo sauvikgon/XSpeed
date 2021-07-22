@@ -61,8 +61,8 @@ public:
 	
 	/* virtual destructor */
 	virtual ~reachability();
-	void setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
-			int lp_solver_type, std::vector<forbidden>& forbidden_states, userOptions& user_options);
+	void setReachParameter( hybrid_automata& h, const std::list<initial_state::ptr>& i, const ReachabilityParameters& reach_param,
+			int lp_solver_type, const std::vector<forbidden>& forbidden_states, const userOptions& user_options);
 
 	/*
 	 * Get counter-example trajectories found during reachability analysis
@@ -145,6 +145,8 @@ public:
 	void setSetAggregation(const std::string& setAggregation);
 	const userOptions& getUserOp() const;
 	void setUserOp(const userOptions& userOp);
+	friend class bmc;
+	
 
 private:
 	bool safe;

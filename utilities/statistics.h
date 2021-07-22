@@ -22,6 +22,11 @@
 
 void print_statistics(boost::timer::cpu_timer timer, double cpu_usage, long mem_usage, unsigned int num_exps, std::string msg);
 void print_statistics(boost::timer::cpu_timer timer, std::string msg);
-void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, userOptions& user_options, std::string msg);
+void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, const userOptions& user_options, std::string msg);
+/*
+ * This function print the statistics of bounded model checking proceddure with SAT.
+ *
+ */
+void print_bmc_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, const userOptions& user_options, std::string msg);
 
 #endif
