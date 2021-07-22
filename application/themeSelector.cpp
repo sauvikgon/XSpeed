@@ -100,15 +100,31 @@ void themeSelector::selectSim(){
 
 void themeSelector::selectFal(){
 	//todo: call the path-oriented falsification routine.
+	boost::timer::cpu_timer timer;
+	unsigned int number_of_times = 1;
 
 	bmc bmc_fal(ha_ptr, init, forbidden, reach_params, userOps);
 
-	bool safe = bmc_fal.safe();
+	timer.start();
+	init_cpu_usage();
 
-	if(safe)
-		std::cout << "BMC: The model is safe" << std::endl;
+	unsigned int safe = bmc_fal.safe();
+	timer.stop();
+	double cpu_usage = getCurrent_ProcessCPU_usage();
+	long mem_usage = getCurrentProcess_PhysicalMemoryUsed();
+	print_statistics(timer,cpu_usage,mem_usage, number_of_times, "Bounded Model Checking");
+	
+	// printing the first initial polytope in the init_poly file
+	polytope::const_ptr init_poly = (*init.begin())->getInitialSet();
+	init_poly->print2file("./init_poly",userOps.get_first_plot_dimension(),userOps.get_second_plot_dimension());
+
+
+	if(safe == 1)
+		std::cout << "BMC: The model is SAFE" << std::endl;
+	else if(safe == 0)
+		std::cout << "BMC: The model is UNSAFE" << std::endl;
 	else
-		std::cout << "BMC: The model is unsafe" << std::endl;
+		std::cout<<"BMC: The safety of the model is UNKNOWN"<<std::endl;
 }
 
 void themeSelector::select(){

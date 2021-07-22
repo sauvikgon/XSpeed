@@ -8,8 +8,8 @@
 
 using namespace std;
 
-void reachability::setReachParameter(hybrid_automata& h, std::list<initial_state::ptr>& i, ReachabilityParameters& reach_param,
-		int lp_solver_type, std::vector<forbidden>& forbidden_states, userOptions& user_options) {
+void reachability::setReachParameter( hybrid_automata& h, const std::list<initial_state::ptr>& i, const ReachabilityParameters& reach_param,
+		int lp_solver_type, const std::vector<forbidden>& forbidden_states, const userOptions& user_options) {
 	H = &h;
 	I = i;
 	reach_parameters = reach_param;
@@ -1016,6 +1016,7 @@ void reachability::par_postC_selection(unsigned int iters, location::const_ptr c
 	}
 }
 
+
 bool reachability::gen_counter_example(abstractCE::ptr abs_path, std::string ce_search_algo_type)
 {
 	double splicing_error_tol = 1e-6; // A parameter particular to specify the precision of the search of ce by using trajectory splicing.
@@ -1049,6 +1050,7 @@ bool reachability::gen_counter_example(abstractCE::ptr abs_path, std::string ce_
 		refinements += ce->get_refinements();
 		if(!ce->is_empty()){
 			this->ce_list.push_back(ce);
+			this->safe = false;
 			return false; 		// In order to terminate the BFS.
 		}
 		else

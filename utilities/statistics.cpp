@@ -53,7 +53,7 @@ void print_statistics(boost::timer::cpu_timer timer, std::string msg)
 	std::cout << "\nSystem Time  (in Seconds) = " << Avg_system_clock / (double) 1000 << std::endl;
 	std::cout << std::endl;
 }
-void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, userOptions& user_options, std::string msg)
+void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, const userOptions& user_options, std::string msg)
 {
 	std::cout << "\n\n-----Statistics for " << msg << "-----------" << std::endl;
 	if(reachObj.isSafe()){
@@ -77,4 +77,39 @@ void print_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_
 		first_ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
 	}
 }
+
+
+void print_bmc_ce_statistics(reachability& reachObj, std::list<abstractCE::ptr>& ce_candidates, const userOptions& user_options, std::string msg)
+{
+	std::cout << "\n\n-----Statistics for " << msg << "-----------" << std::endl;
+	std::list<concreteCE::ptr> ce_list = reachObj.get_counter_examples();
+	if(reachObj.isSafe()== true && ce_candidates.size()==0)
+	{
+		std::cout<<"Model is SAFE\n";
+	}
+	if(ce_candidates.size()>0 && ce_list.size()==0)
+	{
+		std::cout<<"The safety of the model is UNKNOWN\n";
+	}
+	if(reachObj.isSafe()== false)
+	{
+		std::cout<<"Model is UNSAFE\n";	
+	}
+	std::cout << "number of abstract ce-paths found for exploration: " << ce_candidates.size() << std::endl;
+
+	std::cout << "Number of concrete ce trajectories found: " << ce_list.size() << std::endl;
+
+	std::cout << "Number of refinements performed when searching: " << reachObj.get_refinements() << std::endl;
+	std::cout << "Time to search concrete counter-example(s) from the abstract path(s) (user time in seconds):" << reachObj.get_ce_search_time()/(double)1000 << std::endl;
+	std::cout << std::endl;
+
+	// plot the first counter-example trajectory in the list.
+	if(ce_list.size() !=0){
+		concreteCE::ptr first_ce = *(ce_list.begin());
+		std::string tracefile = "./bad_trace.o";
+		first_ce->plot_ce(tracefile,user_options.get_first_plot_dimension(),user_options.get_second_plot_dimension());
+	}
+
+}
+
 
