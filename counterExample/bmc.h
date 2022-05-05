@@ -5,8 +5,8 @@
  *      Author: rajarshi
  */
 
-#ifndef XSPEED_PLAN_COUNTEREXAMPLE_BMC_H_
-#define XSPEED_PLAN_COUNTEREXAMPLE_BMC_H_
+#ifndef SATReach_COUNTEREXAMPLE_BMC_H_
+#define SATReach_COUNTEREXAMPLE_BMC_H_
 
 #include <core/hybridAutomata/hybridAutomata.h>
 #include <core/symbolicStates/symbolicStates.h>
@@ -21,13 +21,10 @@
 #include <vector>
 #include <list>
 #include <z3++.h>
-
 #include <counterExample/abstractCE.h>
 #include <core/symbolicStates/initialState.h>
 #include <core/reachability/reachability.h>
 #include "utilities/statistics.h"
-#include <ppl.hh>
-
 
 
 
@@ -42,6 +39,7 @@
  * paths for ce searching.
  */
 typedef std::vector<unsigned int> path;
+typedef std::vector<unsigned int> Run;
 typedef std::list<symbolic_states::ptr> region;
 typedef std::pair<int, polytope::ptr> forbidden; //(locId,Polytope)
 typedef std::vector<forbidden> forbidden_states; // vector of forbidden symb states.
@@ -50,10 +48,10 @@ typedef std::vector<forbidden> forbidden_states; // vector of forbidden symb sta
  *
  * let a state(v_0,x_0) of the HA can jump to (v_1,x_1) by taking a transition t_1, 
  * where v_0 is the source location, x_0 is the initial set of location v_0, and 
- * x_1 is the initial set of the target location v_1.
+ * x_1= postd(postC(v_0,x_0),(v_0,v_1)).
  *
- * make a pair of locId and it's initial_set <locId,Initial_set>. and it wiil be used as a key to store 
- * the flowpipe of a location.
+ * make a pair of locId and it's initial_set pointer <locId,Initial_set>. and it wiil be used as a key to store 
+ * the flowpipe of a location. It also used as a data to store the postd(postc(),()) in the 2nd DS.
  */  
  typedef std::pair<unsigned int, polytope::const_ptr> initialInLocation;
 /*
@@ -69,21 +67,13 @@ typedef std::map<initialInLocation, template_polyhedra::ptr> flowForInitial;
  */
 typedef std::pair<template_polyhedra::ptr, unsigned int> flowWithTid;
 
-
-/*
- * make a pair of target location id and initial set of that location after satisfying 
- * the guard,map,and invariant constraints.{nextLocId, Initial_set}. This pair will be
- * stored as data in the nextInitForFlow data structure.
- */
- typedef std::pair<unsigned int , polytope::ptr> nextInitInLocation;
-
 /*
  * store initial set of the target location for each unique combination of flow in source location 
  * and outgoing transition from that location {<flowpipe,transId>,<nextLocId,Initial_set>}. This data structure
  * skips the computation of initial set of the target location, if our algoritm finds a match of <flowpipe,transId>.
  * 
  */
-typedef std::map<flowWithTid,nextInitInLocation> nextInitForFlow;
+typedef std::map<flowWithTid,initialInLocation> nextInitForFlow;
 
 class bmc {
 
@@ -98,25 +88,28 @@ class bmc {
 	z3::context c;
 	z3::expr ha_encoding;
 	z3::solver sol;
+	z3::solver s1; //for second solver.
 
 	unsigned int k; // The BMC bound on path-length, i.e., the number of edges.
+
+	unsigned int postc_counter = 0;
 
 	/* bmc uses this private member function to initialize the ha_encoding for the given
 	 * forbidden location id
 	 */
-	void init_solver(unsigned int forbidden_loc_id, unsigned int k1);
+	void init_solver(unsigned int k1);
 
 	/*
-	 * To store all the paths which are feasible but can't generate a concreteCE or 
+	 * To store all the paths/Runs which are feasible but can't generate a concreteCE or 
 	 * infeasible path segment returned by our getPathRechability routine.
 	 *
 	 */
 	vector<path> p_array;
+	std::vector<Run> Run_array;
 
 
 	initialInLocation initialSetInLocation; 
 	flowWithTid flowWithTrans_id;
-	nextInitInLocation nextInitialIn_nextLoc;
 	flowForInitial flowForInit;  
 	nextInitForFlow nextInitForFlowWithT_id;
 	
@@ -130,15 +123,7 @@ public:
 			const ReachabilityParameters& r_params, const userOptions& user_ops);
 
 	virtual ~bmc();
-	/*
-	 * Computes the reachable states along the given path p and gets the path feasibility
-	 * as a boolean flag. it uses two data structures to skip the reachable states computation 
-	 * of the repeated sub path. One is used to store the flowpipe for a location and it's initial set.
-	 * another one is used to store the initial set of the target location. If a location has multiple
-	 * initial sets, our algorithm proceeds by taking the superset of these initial sets.
-	 * 
-	 */
-	region getPathReachability(path& p, bool& feasible, forbidden forbid_s, std::list<abstractCE::ptr> &symbolic_ce_list); 
+	
 
 	/*
 	 * Returns the next unexplored path in the HA from the given source
@@ -149,10 +134,10 @@ public:
 	path getNextPath(unsigned int k1);
 
 	/*
-	 * Returns an integer 0 if the ha is found to be unsafe in the given bound.
+	 * Returns an integer 0 if the HA is found to be unsafe in the given bound.
 	 * a return of non zero(positive) however, does not decide the safety of ha faithfully.
 	 * This is due to the incompleteness of the ce search mechanism.
-	 * return 1 if the algorithm can't find an abstractCE for the given ha with the given bound i.e
+	 * return 1 if the algorithm can't find an abstractCE for the given HA with the given bound i.e
          * model is safe. when the algorithm finds at least one abstractCE but not able to find
          * a concreteCE, it returns 2 means the safety of the model is unknown.
 	 */
@@ -173,10 +158,35 @@ public:
 			std::list<abstractCE::ptr> &symbolic_ce_list, abstractCE::ptr abst_ce);
 
 	/*
-	 * To check the newly computed Initial set is subset or not using ppl package.
+	 * Checks the computed symblic states in a location is subset or not using ppl package.
 	 */
-	bool containmentChecking(polytope::ptr oldNextInit, polytope::ptr nextInit);
+	/*bool containmentChecking(polytope::const_ptr oldNextInit, polytope::const_ptr nextInit); */
+	/*
+	 * Return all the runs(v_0,T_1,v_1,T_2,...v_n) with different transition from a concrete path(v_0,v_1,...v_n).
+	 */
+	path getARun(path p);
+	/*
+	 * Second solver for encoding edges. It encodes possible unique run for a path P. 
+	 */
+	void second_solver(path p);
+	/*
+	 * Updates the ha encoding with a given forbidden location in such a way
+	 * that the next paths in the enumeration does not return any path containing
+	 * the Run run.
+	 */
+	 void update_run_encoding(Run p);
+
+	 /*
+	 * Computes the reachable states along with the given Run run and gets the path feasibility
+	 * as a boolean flag. it uses two data structures to skip the reachable states computation 
+	 * of the repeated sub path. One is used to store the flowpipe for a location and it's initial set.
+	 * another one is used to store the computed symbolic states of the target location. If a location has multiple
+	 * initial sets, our algorithm proceeds by taking the tightest superset of these initial sets.
+	 * 
+	 */
+	  region getRunReachability(Run& run, bool& feasible, forbidden forbid_s, std::list<abstractCE::ptr> &symbolic_ce_list); 
+	
 
 };
 
-#endif /* XSPEED_PLAN_COUNTEREXAMPLE_BMC_H_ */
+#endif /* SATReach_COUNTEREXAMPLE_BMC_H_ */

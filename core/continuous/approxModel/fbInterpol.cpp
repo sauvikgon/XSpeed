@@ -43,7 +43,8 @@ fb_interpol::fb_interpol(const math::matrix<double>& my_A, polytope::const_ptr X
 	initialize_rho(); // initialize internal data-structures for memoization.
 
 	unsigned int optD = 1;
-	myopt = new nlopt::opt(nlopt::GN_DIRECT, optD); // derivative free
+	//myopt = new nlopt::opt(nlopt::GN_DIRECT, optD); // derivative free
+	myopt = new nlopt::opt(nlopt::LD_MMA, optD); // derivative-based
 
 	std::vector<double> ub(1),lb(1);
 	lb[0]=0;
@@ -51,8 +52,9 @@ fb_interpol::fb_interpol(const math::matrix<double>& my_A, polytope::const_ptr X
 	myopt->set_lower_bounds(lb);
 	myopt->set_upper_bounds(ub);
 
-	unsigned int maxeval = 1000;
-	myopt->set_maxeval(maxeval);
+	//unsigned int maxeval = 1000;
+	//myopt->set_maxeval(maxeval);
+	myopt->set_ftol_abs(1e-10);
 
 	last_iter = 0; d=1;
 }
@@ -199,24 +201,29 @@ double fb_interpol::rho_symhull_AU(const std::vector<double>& l)
   * Computes the support function of the intersection between
   * omega_plus and omega_minus w.r.t l.
   */
-double fb_interpol::rho_fb_intersection(const std::vector<double>& l, double lambda)
+double fb_interpol::rho_fb_intersection(const std::vector<double>& l, double lambda,
+		std::vector<double> rho_omega_plus, std::vector<double> rho_omega_minus, std::vector<double>& grad)
 {
 	unsigned int dim = get_X0()->getSystemDimension();
 	std::vector<double> unit_dir(dim,0);
 	
 	double res=0;
 	for(unsigned int i=0;i<dim;i++){
-		unit_dir[i] = 1;
-		double lambda_max = lambda * rho_omega_plus(unit_dir);
-		
-		double one_minus_lambda_max = (1-lambda)* rho_omega_minus(unit_dir);
+
+		double lambda_max = lambda * rho_omega_plus[i];
+		double one_minus_lambda_max = (1-lambda)*rho_omega_minus[i];
 
 		// Take the min and multiply with |l_i|
-		if(lambda_max < one_minus_lambda_max)
+		if(lambda_max < one_minus_lambda_max){
 			res+= lambda_max * fabs(l[i]);
-		else
-			res+= one_minus_lambda_max * fabs(l[i]);
-		unit_dir[i] = 0;		
+			if(!grad.empty())
+				grad[0] += rho_omega_plus[i]*fabs(l[i]);
+		}
+		else{
+			res += one_minus_lambda_max * fabs(l[i]);
+			if(!grad.empty())
+				grad[0] += -fabs(l[i]) * rho_omega_minus[i];
+		}
 	}
 	return res;
 }
@@ -247,11 +254,19 @@ double myobjfun(const std::vector<double> &x, std::vector<double> &grad, void *m
 	std::vector<double> dir = my_terms->direction;
 	double lambda = x[0];
 	double res;
+
 	res = (1-lambda) * my_terms->sup_X0;
 	res += lambda * my_terms->sup_phiX0;
 	res += lambda * my_terms->sup_deltaU;
 	res += lambda * lambda * my_terms->sup_epsilon_psi;
-	res += my_terms->fb_interpol_ptr->rho_fb_intersection(dir,lambda);
+	if(!grad.empty()){
+		 grad[0] = -my_terms->sup_X0;
+		 grad[0] += my_terms->sup_phiX0;
+		 grad[0] += my_terms->sup_deltaU;
+		 grad[0] += 2*lambda*my_terms->sup_epsilon_psi;
+	}
+	res += my_terms->fb_interpol_ptr->rho_fb_intersection(dir,lambda,my_terms->rho_omega_plus,my_terms->rho_omega_minus,grad);
+
 	return res;
 }
 
@@ -293,12 +308,30 @@ double fb_interpol::first_omega_support(const std::vector<double>& l, double tim
 	my_terms.direction = l;
 	my_terms.fb_interpol_ptr = this;
 
+	unsigned int dim = get_X0()->getSystemDimension();
+	std::vector<double> unit_dir(dim,0);
+
+	my_terms.rho_omega_plus = std::vector<double>(dim,0);
+	my_terms.rho_omega_minus = std::vector<double>(dim,0);
+
+	// some book-keeping
+	for(unsigned int i=0;i<dim;i++){
+		unit_dir[i] = 1;
+		my_terms.rho_omega_plus[i] = rho_omega_plus(unit_dir);
+		my_terms.rho_omega_minus[i] = rho_omega_minus(unit_dir);
+		unit_dir[i] = 0;
+	}
+
+
+
 	// Now, we create an nlopt obj for solving the maximization problem
 	// over lambda.
+
 
 	// set the objective function
 	std::vector<double> opt_lambda(1);
 	myopt->set_max_objective(myobjfun, &my_terms);
+	myopt->set_ftol_abs(1e-18);
 	myopt->optimize(opt_lambda,res);
 	
 	return res;

@@ -57,7 +57,8 @@ public:
 	/** Computes the support function of Psi w.r.t l */
 	virtual double psi_support(const std::vector<double>& l, unsigned int iter);
 	/** Called by nlp objective routine from outside class */ 
-	double rho_fb_intersection(const std::vector<double>& l, double lambda);
+	double rho_fb_intersection(const std::vector<double>& l, double lambda,
+			std::vector<double> rho_omega_plus, std::vector<double> rho_omega_minus, std::vector<double>& grad);
 private:
 	double rho_symhull_AU(const std::vector<double>& l);
 	double rho_epsilon_psi(const std::vector<double>& l);
@@ -79,6 +80,8 @@ struct terms
 	double sup_deltaU;
 	double sup_epsilon_psi;
 	std::vector<double> direction;
+	std::vector<double> rho_omega_plus;
+	std::vector<double> rho_omega_minus;
 	fb_interpol* fb_interpol_ptr;
 };
 typedef struct terms terms;

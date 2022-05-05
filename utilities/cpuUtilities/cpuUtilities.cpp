@@ -10,12 +10,12 @@
 #include "stdio.h"
 #include "string.h"
 #include "sys/times.h"
-#include <sys/sysctl.h>
+#include <linux/sysctl.h>
 #include <sys/param.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <utilities/cpuUtilities/cpuUtilities.h>
-//#include "sys/vtimes.h"
+
 using namespace std;
 
 static clock_t lastCPU, lastSysCPU, lastUserCPU;
@@ -72,5 +72,4 @@ double getCurrent_ProcessCPU_usage() {
 	lastUserCPU = timeSample.tms_utime;
 
 	return percent;
-//	std::cout << "\nCpu percentage: \n" << percent;
 }

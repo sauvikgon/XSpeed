@@ -31,13 +31,6 @@ RM := rm -rf
 -include XSpeed/core/continuous/polytope/subdir.mk
 -include XSpeed/core/continuous/convexSet/subdir.mk
 -include XSpeed/core/continuous/approxModel/subdir.mk
--include XSpeed/benchmarks/waterlevelController/subdir.mk
--include XSpeed/benchmarks/vehiclePlatoon/subdir.mk
--include XSpeed/benchmarks/ttEthernet/subdir.mk
--include XSpeed/benchmarks/oscillatorModel/subdir.mk
--include XSpeed/benchmarks/constantDynamics/subdir.mk
--include XSpeed/benchmarks/navigation/subdir.mk
--include XSpeed/benchmarks/subdir.mk
 -include XSpeed/application/subdir.mk
 -include subdir.mk
 -include objects.mk
@@ -68,19 +61,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: XSpeed-plan
+all: xspeed
 
 # Tool invocations
-XSpeed-plan: $(OBJS) $(USER_OBJS)
+xspeed: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	g++ -std=c++11 -L/usr/local/lib/ -o "XSpeed-plan" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -std=c++11 -I/usr/local/include/ -L/usr/local/lib/ -L/usr/local/lib/lib/ -L/usr/local/lib/x86_64-linux-gnu/ -o "xspeed" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(C_DEPS)$(CPP_DEPS) XSpeed-plan
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(C_DEPS)$(CPP_DEPS) xspeed
 	-@echo ' '
 
 .PHONY: all clean dependents

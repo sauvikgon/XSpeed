@@ -24,13 +24,6 @@ CPP_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 XSpeed/application \
-XSpeed/benchmarks \
-XSpeed/benchmarks/constantDynamics \
-XSpeed/benchmarks/navigation \
-XSpeed/benchmarks/oscillatorModel \
-XSpeed/benchmarks/ttEthernet \
-XSpeed/benchmarks/vehiclePlatoon \
-XSpeed/benchmarks/waterlevelController \
 XSpeed/core/continuous/approxModel \
 XSpeed/core/continuous/convexSet \
 XSpeed/core/continuous/polytope \

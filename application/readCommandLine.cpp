@@ -21,13 +21,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 
 	desc.add_options()
 	("help", "produce help message")
-	("model", po::value<int>()->default_value(0), "set model for reachability analysis\n"
-					"1.  Bouncing Ball: Variables{x,v}\n"
-					"2.  Timed Bouncing Ball: Variables{x,v,t}\n"
-					"3.  A continuous system of five dimensions: Variables{x1..x5} \n"
-					"4.  Navigation (3 X 3) grid: Variables{x1,x2,v1,v2}\n"
-					"5.  Navigation (5 X 5) grid: Variables{x1,x2,v1,v2}\n"
-					"6.  Oscillator : Variables{x,y}\n")
 	("engine,e", po::value<std::string>()->default_value("reach"), "set the running engine (default reachability): \n - reach : Reachability Analysis"
 					" \n - simu : Trajectory Simulation"
 					" \n - fal : Falsification of safety property")
@@ -153,8 +146,7 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 			throw(new exception());
 		}
 		
-		if (vm.count("model-file") && vm.count("config-file")
-					&& ((user_options.get_model()==0))) { // model=0 means no pre-built model specified
+		if (vm.count("model-file") && vm.count("config-file")) {
 
 			string cmd_str = "java -jar Model-Translator.jar -t XSpeed \"\" -i " + vm["model-file"].as<std::string>() + " " + vm["config-file"].as<std::string>() + " -o input_model.mdl";
 			system(cmd_str.c_str());
@@ -303,12 +295,6 @@ void readCommandLine(int argc, char *argv[], userOptions& user_options,
 				std::cout << "Missing value for parameter \"time-slice\" \n";
 				throw(new exception());
 			}
-		}
-		if (vm["model"].as<int>()!=0) { //Compulsory Options but set to 0 by default
-			user_options.set_model(vm["model"].as<int>());
-			// get an empty ha object
-			themeSelector::ha_ptr = hybrid_automata::ptr(new hybrid_automata());
-			load_ha_model(init_state, *(themeSelector::getHaInstance()), reach_parameters, user_options);
 		}
 
 	}

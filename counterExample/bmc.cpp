@@ -14,7 +14,7 @@ bmc::~bmc() {
 bmc::bmc(const hybrid_automata::ptr haPtr,  const std::list<initial_state::ptr>& init,
 		const forbidden_states& forbidden, const ReachabilityParameters& r_params,
 		const userOptions& user_ops) : ha_ptr(haPtr), init(init), forbidden_s(forbidden),
-				reach_params(r_params), user_ops(user_ops), c(), ha_encoding(c), sol(c){
+				reach_params(r_params), user_ops(user_ops), c(), ha_encoding(c), sol(c),s1(c){
 	this->k = user_ops.get_bfs_level();
 }
 
@@ -22,27 +22,46 @@ bmc::bmc(const hybrid_automata::ptr haPtr,  const std::list<initial_state::ptr>&
  * Initializes the z3 solver with bounded ha encoding. 
  * It generates all the z3 constraints for bound k1 and add these constraints to the SAT solver.
  */
-void bmc::init_solver(unsigned int forbidden_loc_id, unsigned int k1)
+void bmc::init_solver(unsigned int k1)
 {
 	location::ptr source_ptr = ha_ptr->getInitialLocation();
 	int u = source_ptr->getLocId();
-	unsigned int v = forbidden_loc_id;
 	auto list_locations = ha_ptr->getAllLocations();
+
+	// This will stores all the initial location id as per HA may have multiple initial location.
+	std::vector<unsigned int> initial_locations;
+	initial_locations.push_back(u); //due to Hyst does not support multiple initial location. thats why we only add one location.
 
 	// Initial clause
 	z3::expr exp1 = c.bool_const("exp1");
-	string arr = "v" + to_string(u)+"_"+ "0";
-	z3::expr x = c.bool_const(arr.c_str());
-	exp1 = x;
+	string arr = "v" + to_string(initial_locations[0])+"_"+ "0";
+	z3::expr exp1a = c.bool_const(arr.c_str());
 	for(auto it = list_locations.begin(); it != list_locations.end(); it++)
 	{
 		arr = "v" + to_string(it->first)+"_"+ "0";
-		if (it->first != u)
+		if (it->first != initial_locations[0])
 		{
 			z3::expr x1 = c.bool_const(arr.c_str());
-			exp1 = (exp1 && !(x1));
+			exp1a = (exp1a && !(x1));
 		}
 	}
+	exp1 = exp1a;
+	for (int i = 1; i < initial_locations.size(); i++)
+	{
+		arr = "v" + to_string(initial_locations[i])+"_"+ "0";
+		exp1a = c.bool_const(arr.c_str());
+		for(auto it = list_locations.begin(); it != list_locations.end(); it++)
+		{
+			arr = "v" + to_string(it->first)+"_"+ "0";
+			if (it->first != initial_locations[i])
+			{
+				z3::expr x1 = c.bool_const(arr.c_str());
+				exp1a = (exp1a && !(x1));
+			}
+		}
+		exp1 = (!(exp1) && exp1a) || (!(exp1a) && exp1); // exp1 = exp1 XOR exp1a
+	}
+
 	this->sol.add(exp1);
 
 	//Movement clause
@@ -166,21 +185,33 @@ void bmc::init_solver(unsigned int forbidden_loc_id, unsigned int k1)
 		}
 	}						//End of Exclude Constraint.
 
-	//Destination clause
+
+	//Movement clause
 	z3::expr exp4 = c.bool_const("exp4");
-	arr = "v" + to_string(v)+"_" + to_string(k1);
-	z3::expr x13 = c.bool_const(arr.c_str());
-	exp4 = x13;
+	z3::expr exp4a = c.bool_const("exp4a");
+	arr = "v" + to_string(forbidden_s[0].first)+"_" + to_string(k1);
+	exp4 = c.bool_const(arr.c_str());;
+	for (int i = 1; i < forbidden_s.size(); i++)
+	{	
+		int v = forbidden_s[i].first;
+		arr = "v" + to_string(v)+"_" + to_string(k1);
+		exp4a = c.bool_const(arr.c_str());
+		exp4 = exp4 || exp4a;
+	}
+
+	//this->sol.add(exp4a || exp4b); // exp4 = exp4a || exp4b
 	this->sol.add(exp4);
 
 
-      //path purning -all retrieved paths are stored in the p_array data structure(DS). Negates each path from DS and adds them to the solver
-	for (unsigned int i = 0; i < p_array.size(); i++)
+	
+    //path purning -all retrieved paths are stored in the p_array data structure(DS). Negates each path from DS and adds them to the solver
+	for (unsigned int i = 1; i < p_array.size(); i = i+2)
 	{
 		z3::expr exp5 = c.bool_const("exp5");
+		unsigned int time_step = 0;
 		for (unsigned int j = 0; j < p_array.at(i).size(); j++)
 		{
-			string arr = "v" + to_string(p_array.at(i).at(j))+"_" + to_string(j);
+			string arr = "v" + to_string(p_array.at(i).at(j))+"_" + to_string(time_step);
 			z3::expr x = c.bool_const(arr.c_str());
 			if (j == 0)
 				exp5 = x;
@@ -188,11 +219,13 @@ void bmc::init_solver(unsigned int forbidden_loc_id, unsigned int k1)
 				exp5 = implies(exp5, !(x));
 			else
 				exp5 = (exp5 && x);
+			time_step++;
 		}
 		this->sol.add(exp5);
-	}
+	} 
 
 }
+
 
 /*
  *  This function encodes the path p as Negation clause of p and add it to SAT solver, 
@@ -210,14 +243,14 @@ void bmc::update_encoding(path p){
 		z3::expr x14 = c.bool_const(arr.c_str());
 		exp5 = (exp5 || !(x14));
 	}	
-	this->sol.add(exp5);
+	this->sol.add(exp5); 
 }
 
 
 
 /*
  * Call SAT solver to check all z3 constraints are satisfied or not. 
- *If SAT,it generates a path from the truthvalue of the model and return the path. 
+ * If SAT,it generates a path from the truthvalue of the model and return the path. 
  */
 path bmc::getNextPath(unsigned int k1)
 {
@@ -228,7 +261,6 @@ path bmc::getNextPath(unsigned int k1)
 	{
 		p.resize(k1+1);
 		z3::model m = this->sol.get_model();
-
 		for (unsigned int i = 0; i <= k1; i++)
 		{
 			for (auto it = list_locations.begin(); it != list_locations.end(); it++)
@@ -245,14 +277,153 @@ path bmc::getNextPath(unsigned int k1)
 	}
 	else
 		p.clear();
-	return p;
+	return p; 
 }
+
+/*
+ * This solver returns a path with unique transition Id between two locations, we called in this class
+ * as run. Whereas path p was a sequence of locations, from a p this function enumerates possible set of runs.
+ */
+void bmc::second_solver(path p)
+{
+	z3::expr exp_11 = c.bool_const("exp_11");
+	
+	path run;
+	for (unsigned int i = 0; i < p.size()-1; i++)
+	{
+		z3::expr exp_1 = c.bool_const("exp_1");
+		unsigned int count = 1;
+		unsigned int u = p[i];
+		unsigned int v = p[i+1];
+		
+		location::const_ptr source_loc = ha_ptr->getLocation(u);
+		location::const_ptr Dest_loc = ha_ptr->getLocation(v);
+		std::list<transition::ptr> neighbor_nodes = source_loc->getOutGoingTransitions();
+		for (auto it2 = neighbor_nodes.begin(); it2 != neighbor_nodes.end(); it2++)
+		{
+			transition::ptr trans_ptr = *(it2);
+			unsigned int dest_loc_id = trans_ptr->getDestinationLocationId();
+			if (v == dest_loc_id)
+			{
+				string arr = "v" + to_string(u) +"_"+ "v"+ to_string(v)+ "_" + "t" + to_string(trans_ptr->getTransitionId()) + "_" + to_string(i);
+				z3::expr exp_1a = c.bool_const(arr.c_str());
+				if(count == 1)
+				{
+					exp_1 = exp_1a;
+				}
+				if(count >= 2)
+				{
+					exp_1 = (exp_1 || exp_1a);
+				}
+				count++;
+			}
+		}
+		if (i == 0)
+			exp_11 = exp_1;
+		else 
+			exp_11 = (exp_11 && exp_1);
+	}
+	s1.add(exp_11);
+
+
+	/*
+	 * Run_array is the data structure that stores infeasible run segment which we want to not enumerate further.
+	 * For this purpose we add this negated segments into the second_solver.
+	 */
+	for (unsigned int i = 1; i < Run_array.size(); i=i+2)
+	{
+		z3::expr exp_33 = c.bool_const("exp_33");
+		unsigned int run_time_step = 0;
+		for (unsigned int j = 0; j < Run_array.at(i).size()-1; j = j+2)
+		{
+			string arr = "v" + to_string(Run_array.at(i)[j]) +"_"+ "v"+ to_string(Run_array.at(i)[j+2])+ "_" + "t" + to_string(Run_array.at(i)[j+1]) + "_" + to_string(run_time_step);
+			z3::expr exp_3a = c.bool_const(arr.c_str());
+			if (run_time_step == 0)
+				exp_33 = ! (exp_3a);
+			if (run_time_step >= 1)
+				exp_33 = (exp_33 || ! (exp_3a));
+			run_time_step++;
+		}
+		s1.add(exp_33);
+	}
+}
+
+
+/*
+ * It returns an exact run for a path p of same langth.
+ * example of a run r = v_1 t_1 v_2 t_2 v_4.
+ */
+Run bmc::getARun(path p)
+{
+	path new_path,set_of_edges;
+	Run run;
+	if (s1.check() == z3::sat)
+	{
+		z3::model m = s1.get_model();
+		new_path.resize(p.size());
+		set_of_edges.resize(new_path.size()-1);
+		run.resize(new_path.size() + set_of_edges.size());
+		for (unsigned int i = 0; i < p.size()-1; i++)
+		{
+			std::list<transition::ptr> neighbor_nodes = ha_ptr->getLocation(p[i])->getOutGoingTransitions();
+			for (auto it2 = neighbor_nodes.begin(); it2 != neighbor_nodes.end(); it2++)
+			{
+				transition::ptr trans_ptr = *(it2);
+				unsigned int dest_loc_id = trans_ptr->getDestinationLocationId();
+				if (p[i+1] == dest_loc_id)
+				{
+					string arr = "v" + to_string(p[i]) +"_"+ "v"+ to_string(p[i+1])+ "_" + "t" + to_string(trans_ptr->getTransitionId()) + "_" + to_string(i);
+					z3::expr exp_1b = c.bool_const(arr.c_str());
+					if(m.eval(exp_1b).is_true())
+					{
+						new_path[i] = p[i];
+						new_path[i+1] = p[i+1];
+						set_of_edges[i] = trans_ptr->getTransitionId();
+						run[2*i] = p[i];
+						run[(2*i)+1] = set_of_edges[i];
+						run[(2*i)+2] = p[i+1]; 
+						break;
+					}
+				}
+			}
+		}
+	}
+	else
+		run.clear();
+
+	return run;
+}
+
+/*
+ *
+ */
+void bmc::update_run_encoding(Run run)
+{
+	//This functionis written for encoding negation for Run.
+	z3::expr exp_22 = c.bool_const("exp_22");
+	z3::model m = s1.get_model();
+	unsigned int time_step = 0;
+	for (unsigned int i = 0; i < run.size()-1; i=i+2)
+	{
+		string arr = "v" + to_string(run[i]) +"_"+ "v"+ to_string(run[i+2])+ "_" + "t" + to_string(run[i+1]) + "_" + to_string(time_step);
+		z3::expr exp_1b = c.bool_const(arr.c_str());
+		if (i == 0)
+			exp_22 = ! (exp_1b);
+		if (i >= 2)
+			exp_22 = (exp_22 || ! (exp_1b));
+		time_step++;
+	}
+	s1.add(exp_22);
+
+}
+
 
 /*
  * check a polytope is superset or not using ppl libraries and return true if the first polytope is superset.
  *
  */
-bool bmc::containmentChecking(polytope::ptr oldNextInit, polytope::ptr nextInit)
+/*
+bool bmc::containmentChecking(polytope::const_ptr oldNextInit, polytope::const_ptr nextInit)
 {
 	auto matrix_nextInit = nextInit->getCoeffMatrix();
 	std::vector<double> vector_nextInit = nextInit->getColumnVector();
@@ -298,64 +469,61 @@ bool bmc::containmentChecking(polytope::ptr oldNextInit, polytope::ptr nextInit)
 	return(oldNextInit_poly.contains(nextInit_poly));	
 
 } 
-
+*/
 
 /*
- * Performs symbolic reachability analysis on a given path p
+ * Performs symbolic reachability analysis on a given run r
  * and returns the result as a list of symbolic states.
  * the feasible flag is set false if the path is found not infeasible
  * in the ha dynamics. If the path is feasible, call generate_counterexample
  * routine to get a concreteCE.
  * 
  */
-
-region bmc::getPathReachability(path& p, bool& feasible, forbidden forbid_s, std::list<abstractCE::ptr>& symbolic_ce_list){
-
+region bmc::getRunReachability(Run& run, bool& feasible, forbidden forbid_s, std::list<abstractCE::ptr>& symbolic_ce_list)
+{
 	region reach_region;
 
-	assert(p.size()>=1); // The given path must not be empty
-
-	assert(init.size()==1); // Implementation assumption
+	assert(run.size()>=1); // The given path must not be empty
 
 	template_polyhedra::ptr flowpipe = template_polyhedra::ptr(new template_polyhedra());
-	initial_state::ptr ini= *(init.begin());
+	initial_state::ptr initial_set = *(init.begin());
 
-	polytope::const_ptr init_poly = ini->getInitialSet();
+	polytope::const_ptr init_poly = initial_set->getInitialSet();
 	reach_region.clear();
 
-	path smallest_inf_path;
-	smallest_inf_path.push_back(p[0]);
+	path smallest_inf_run;
+	smallest_inf_run.push_back(run[0]);
 
-	//Amit
-	initial_state::ptr U;
-	U = ini;
-	symbolic_states::ptr symb_previous;
+	polytope::const_ptr nextInit;
+	polytope::ptr shift_polytope;
 	
-	polytope::ptr nextInit;
-
-	for(unsigned int i=0;i<p.size();i++)
+	for(unsigned int i = 0; i < run.size(); i = i+2)
 	{
-		unsigned int locId = p[i];
-		if(i == p.size()-1) { //The last location is the forbidden Location 
-			feasible = true;
-			polytope::const_ptr forbid_loc_inv = ha_ptr->getLocation(locId)->getInvariant();
-			auto current_location = ha_ptr->getLocation(locId);
-			flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), init_poly, reach_params,
-				current_location->getInvariant(), current_location->getInvariantExist());
+		unsigned int locId = run[i];
+		unsigned int transId = run[i+1];
+		unsigned int nextLocId = run[i+2];
 
-			//creates symbolic state for forbidden location.
-			polytope::const_ptr initial_polytope = U->getInitialSet();
+		location::const_ptr current_location = ha_ptr->getLocation(locId);
+
+		polytope::const_ptr initial_polytope = initial_set->getInitialSet();
+		if(i == run.size()-1)
+		{
+			feasible = true;
+
+			flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), initial_polytope, reach_params,
+				current_location->getInvariant(), current_location->getInvariantExist());
+			postc_counter++;
 			discrete_set d;
 			d.insert_element(locId);
 			symbolic_states::ptr symb = symbolic_states::ptr(new symbolic_states(d,flowpipe));
 			reach_region.push_back(symb);
 			symb->setInitialPolytope(initial_polytope);
-			symb->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
-			symb->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
-			symb_previous = symb; 
+			symb->setParentPtrSymbolicState(initial_set->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
+			symb->setTransitionId(initial_set->getTransitionId()); //keeps track of originating transition_ID
+
 			abstractCE::ptr abst_ce = abstractCE::ptr(new abstractCE());
 			bool safety_violation = false;
-			safety_violation = createAbstractCE(forbid_s, i, locId, flowpipe, symb_previous, symbolic_ce_list, abst_ce);
+			safety_violation = createAbstractCE(forbid_s, i, locId, flowpipe, symb, symbolic_ce_list, abst_ce);
 			if (safety_violation) {	//Safety violation found with the over-approximated flowpipe with the forbidden set
 				abst_ce->setUserOptions(user_ops);
 				bool continue_search = reach_for_CE.gen_counter_example(abst_ce,user_ops.getCEProc());
@@ -371,63 +539,55 @@ region bmc::getPathReachability(path& p, bool& feasible, forbidden forbid_s, std
 				}
 					
 			}
+
+			
 			break;
 		}
-		polytope::const_ptr initial_polytope = U->getInitialSet();
-		auto current_location = ha_ptr->getLocation(locId);
-		initialSetInLocation = make_pair(locId,init_poly); // Initial set in locId. 
+
+		initialSetInLocation = make_pair(locId,initial_polytope); // Initial set in locId. 
 		auto it = flowForInit.find(initialSetInLocation);
 		if(it == flowForInit.cend())
-			flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), init_poly, reach_params,
-				current_location->getInvariant(), current_location->getInvariantExist());
-		else 
-			flowpipe = (*it).second;   // If Inittial set for locId is already computed.
-	
-		flowForInit.insert({initialSetInLocation, flowpipe});	// store flow for specific intial set.		
-		transition::ptr path_transition = nullptr;
-		unsigned int nextLocId;
-		auto out_transitions = current_location->getOutGoingTransitions();
-		for(std::list<transition::ptr>::const_iterator it = out_transitions.begin();it!=out_transitions.end();it++)
 		{
-			nextLocId = (*it)->getDestinationLocationId();
-			if(nextLocId == p[i+1])
-			{
-				smallest_inf_path.push_back(nextLocId);
-				path_transition = *it;
-				break;
-			}
+			flowpipe = postC_fbinterpol(reach_params.Iterations, current_location->getSystemDynamics(), initial_polytope, reach_params,
+				current_location->getInvariant(), current_location->getInvariantExist());
+			postc_counter++;
+			flowForInit.insert({initialSetInLocation, flowpipe});	// store flow for specific intial set.
 		}
+		else
+			flowpipe = (*it).second;   // If Inittial set for locId is already computed.	
+
+		transition::ptr current_transition = current_location->getTransition(transId);
+	
 		discrete_set d;
 		d.insert_element(locId);
 		symbolic_states::ptr symb = symbolic_states::ptr(new symbolic_states(d,flowpipe));
 		reach_region.push_back(symb);
 		symb->setInitialPolytope(initial_polytope);
-		symb->setParentPtrSymbolicState(U->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
-		symb->setTransitionId(U->getTransitionId()); //keeps track of originating transition_ID
-		symb_previous = symb;
+		symb->setParentPtrSymbolicState(initial_set->getParentPtrSymbolicState()); //keeps track of parent pointer to symbolic_states
+		symb->setTransitionId(initial_set->getTransitionId()); //keeps track of originating transition_ID
 
-		unsigned int transId = path_transition->getTransitionId();
-		polytope::ptr shift_polytope;
+		assert(current_transition!=nullptr);
+
 		flowWithTrans_id = make_pair(flowpipe, transId); // make a pair flow with out going trans_id.
 		auto iterator = nextInitForFlowWithT_id.find(flowWithTrans_id);
 		// Found a initial set for a specific flow with outgoing transition. 
 		if (iterator != nextInitForFlowWithT_id.cend())
 		{
 			nextInit = (*iterator).second.second;
-			init_poly = nextInit;  // skip the computation of next intial set.
 			initial_state::ptr newState = initial_state::ptr(new initial_state(nextLocId, nextInit));  //shift_polytope
-			newState->setTransitionId(path_transition->getTransitionId()); // keeps track of the transition_ID
+			newState->setTransitionId(transId); // keeps track of the transition_ID
 			newState->setParentPtrSymbolicState(symb);
-			U = newState;
+			initial_set = newState;
+			smallest_inf_run.push_back(run[i+1]);
+			smallest_inf_run.push_back(run[i+2]);
 			continue;
 		}
 		else
 		{
-			assert(path_transition!=nullptr);
 
-			auto next_location = ha_ptr->getLocation(nextLocId);
+			location::const_ptr next_location = ha_ptr->getLocation(nextLocId);
 
-			polytope::const_ptr trans_guard = path_transition->getGuard();
+			polytope::const_ptr trans_guard = current_transition->getGuard();
 
 			std::string postd_aggregation = user_ops.getSetAggregation();
 			std::list<polytope::ptr> polys;
@@ -438,7 +598,9 @@ region bmc::getPathReachability(path& p, bool& feasible, forbidden forbid_s, std
 			if (boost::iequals(postd_aggregation,"thull") || boost::iequals(postd_aggregation,"chull")){
 				aggregation=true;
 
-			} else if (boost::iequals(postd_aggregation,"none")){
+			} 
+			else if (boost::iequals(postd_aggregation,"none"))
+			{
 				aggregation=false;
 			}
 
@@ -453,19 +615,23 @@ region bmc::getPathReachability(path& p, bool& feasible, forbidden forbid_s, std
 					polys = flowpipe->postD_chull(trans_guard, inv, 1);
 				}
 
-			} else { // empty guard
-				DEBUG_MSG("bmc::getPathRegion: Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
+			} 
+			else 
+			{ // empty guard
+				DEBUG_MSG("bmc::getRunReachability: Guard Set is empty. It means that the guard condition is unsatisfiable. \n");
 				exit(0);
 			}
 			// apply transition map
 			assert(polys.size()<=1);
-			
 
-			if (polys.size() == 0){
+			smallest_inf_run.push_back(run[i+1]);
+			smallest_inf_run.push_back(run[i+2]);
+			
+			if (polys.size() == 0)
+			{
 				feasible = false;
 				break;
 			}
-
 			// Intersect with guard
 			polytope::ptr g_flowpipe_intersect;
 			polytope::ptr hull_poly = *(polys.begin());
@@ -474,14 +640,16 @@ region bmc::getPathReachability(path& p, bool& feasible, forbidden forbid_s, std
 
 				if(!trans_guard->getIsUniverse()){
 					g_flowpipe_intersect = hull_poly->GetPolytope_Intersection(trans_guard);
-				} else{
+				} 
+				else
+				{
 					g_flowpipe_intersect = hull_poly;
 				}
 			}
 			else // chull aggregation. no need to intersect with guard.
 				g_flowpipe_intersect = hull_poly;
 
-			Assign& t_map = path_transition->getAssignT();
+			Assign& t_map = current_transition->getAssignT();
 			
 
 			if (t_map.Map.isInvertible()) {
@@ -500,49 +668,63 @@ region bmc::getPathReachability(path& p, bool& feasible, forbidden forbid_s, std
 				break; // test for other initial regions
 			}
 
-
-			init_poly = shift_polytope;  // set initial set for the next location.
 			nextInit = shift_polytope;
-		
-		
-			int destination_locID = path_transition->getDestinationLocationId();
-			initial_state::ptr newState = initial_state::ptr(new initial_state(destination_locID, nextInit));
-			newState->setTransitionId(path_transition->getTransitionId()); // keeps track of the transition_ID
-			newState->setParentPtrSymbolicState(symb);
-			U = newState;
-	
-			polytope::ptr oldNextInit;
-			for(auto it = nextInitForFlowWithT_id.cbegin(); it != nextInitForFlowWithT_id.cend(); ++it)
+
+			initialSetInLocation = make_pair(nextLocId,nextInit); // Initial set in locId. 
+			auto it1 = flowForInit.find(initialSetInLocation);
+			if(it1 == flowForInit.cend())
 			{
-				if((*it).second.first == nextLocId)
+				unsigned int count = 0;
+				bool found_superset = false;
+				polytope::const_ptr oldNextInit, temp_poly;
+				for(auto it = flowForInit.cbegin(); it != flowForInit.cend(); ++it)
 				{
-					//std::cout<<"\033[31mInit stored in location id:"<<nextLocId<<"\033[0m"<<endl;
-					oldNextInit = (*it).second.second;
-					bool contain = containmentChecking(oldNextInit,nextInit); // checking oldNextInit is superset or not using ppl.
-					if(contain)
+					if((*it).first.first == nextLocId)
 					{
-						nextInit = oldNextInit;  //taking superset...
-						std::cout<<"\033[32mfound superset\033[0m"<<endl;
+						oldNextInit = (*it).first.second;
+						//bool contain = containmentChecking(oldNextInit,nextInit); // checking oldNextInit is superset or not using ppl.
+						bool contain = oldNextInit->contains(nextInit,1);  //use the previous function.
+						if(contain)
+						{
+							found_superset = true;
+							if(count==0)
+								temp_poly = oldNextInit; 
+							if(count >= 1)
+							{
+								//bool contain1 = containmentChecking(temp_poly, oldNextInit);
+								bool contain1 = oldNextInit->contains(nextInit,1);  //use the previous function.
+								if(contain1)
+								{
+									//std::cout<<"\033[32mfound tightest superset\033[0m"<<endl; 
+									temp_poly = oldNextInit;
+								}
+							}
+							count = count + 1;
+							//std::cout<<"\033[32mfound superset\033[0m"<<endl; 
+						}
 					}
-					else
-						std::cout<<"\033[31msuperset not found \033[0m"<<endl;
 				}
+				if(found_superset)
+					nextInit = temp_poly;
 			}
+
+			initial_state::ptr newState = initial_state::ptr(new initial_state(nextLocId, nextInit));
+			newState->setTransitionId(transId); // keeps track of the transition_ID
+			newState->setParentPtrSymbolicState(symb);
+			initial_set = newState;
+
 			// store initial set of the next location for flow with incoming trans-id.
 			flowWithTrans_id = make_pair(flowpipe, transId);
-			nextInitialIn_nextLoc = make_pair(nextLocId,nextInit);
-			nextInitForFlowWithT_id.insert({flowWithTrans_id, nextInitialIn_nextLoc}); 
-
-		}		
-		
+			initialSetInLocation = make_pair(nextLocId,nextInit);
+			nextInitForFlowWithT_id.insert({flowWithTrans_id, initialSetInLocation}); 
+		}
 
 	}
-	p = smallest_inf_path;
-	
+
+	run = smallest_inf_run;
 	return reach_region;
-
-
 }
+
 
 bool bmc::createAbstractCE(forbidden forbidden_set, unsigned int i, unsigned int current_locId,
 		template_polyhedra::ptr reach_region, symbolic_states::ptr S,
@@ -561,8 +743,8 @@ bool bmc::createAbstractCE(forbidden forbidden_set, unsigned int i, unsigned int
 	if (forbidden_set.first==-1 || locID == forbidden_set.first) { // forbidden locID matches. loc id of -1 means any location
 		polytope::ptr forbid_poly = forbidden_set.second;
 		std::list <template_polyhedra::ptr > forbid_intersects;
-		forbid_intersects.push_back(reach_region);
-		//forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, 1);
+		//forbid_intersects.push_back(reach_region);
+		forbid_intersects = reach_region->polys_intersectionSequential(forbid_poly, 1);
 		//std::cout<<"intersect:"<<forbid_intersects.size()<<endl;
 		
 		if (forbid_intersects.size() != 0) {
@@ -605,58 +787,127 @@ bool bmc::createAbstractCE(forbidden forbidden_set, unsigned int i, unsigned int
 
 
 unsigned int bmc::safe(){
-	int cnt = 0;
-	region r;
+	int cnt = 0, run_counter = 0;
+	region r, R;
 	std::list<abstractCE::ptr> symbolic_ce_list;
 	reach_for_CE.setReachParameter(*(ha_ptr), init, reach_params, 1, forbidden_s, user_ops);
-	// iterate over the forbidden states
-	for(unsigned int i=0;i<forbidden_s.size();i++){
-		forbidden forbid_s = forbidden_s[i];
-		unsigned int forbid_loc_id = forbid_s.first;
-		for (unsigned int k1 = 0; k1 <= k; k1++)
-		{
-			init_solver(forbid_loc_id, k1); // initialize the ha_encoding for this forbidden location
-			path p = getNextPath(k1);
-			while(p.size()!=0){ // A path is returned above
+	forbidden forbid_s = forbidden_s[0]; //qucik fix. todo: pass this member into the absctreCE onject.
+	// iterate over the bound.
+	boost::timer::cpu_timer timer;
+	timer.start();
+	for(unsigned int k1=0;k1 <= k; k1++)
+	{
+		init_solver(k1); // initialize the ha_encoding for this forbidden location
+		path p = getNextPath(k1);
+		while(p.size()!=0){ // A path is returned above
+			if(timer.elapsed().user/1000000 <= 3600000)
+			{
+				second_solver(p);
+				Run run = getARun(p);
 				cnt++;
+				unsigned int feasiable_tracker = 1; // track a feasible path for a sequence of locations. 0--> feasible run found for a path. 1--> no feasible run found for p.
+
 				/*//debug
 				std::cout << "The path p is "<< std::endl;
 				for(unsigned int i=0;i<p.size();i++){
 					std::cout << p[i] << " " ;
 				}
-				std::cout << std::endl; */ 
+				std::cout << std::endl; */
+				path smallest_inf_run_segment; //keep track of smallest inf path to prune all the extension from the search space.
+				while(run.size() != 0)
+				{
+					run_counter++;
+					/*std::cout<<"the run returned by the getARun:\n";
+					for (unsigned int i =0; i < run.size(); i++)
+					{
+						std::cout<<run[i]<<" ";
+					}
+					std::cout<<endl; */
+					bool feasible = false;
+					path run_before_reach;
+					run_before_reach = run;
+					R = getRunReachability(run,feasible, forbid_s, symbolic_ce_list);
+
+					/*//debug
+					std::cout << "The smallest infeasible run is:\n";
+					for(unsigned int i=0;i<run.size();i++){
+						std::cout << run[i] << " " ;
+					}
+					std::cout << std::endl; */ 	
+					if (!feasible)
+					{
+						update_run_encoding(run);
+						if (run.size() == run_before_reach.size())
+							feasiable_tracker *= 0;
+						if (run.size() < run_before_reach.size())
+						{
+							Run_array.resize(Run_array.size()+1);
+							Run_array.push_back(run);
+							feasiable_tracker *= 1;
+							smallest_inf_run_segment = (smallest_inf_run_segment.size() < run.size()) ? run : smallest_inf_run_segment;
+						}
+							
+						/*//debug
+						std::cout << "The smallest infeasible run segment is:\n";
+						for(unsigned int i=0;i<smallest_inf_run_segment.size();i++){
+							std::cout << smallest_inf_run_segment[i] << " " ;
+						}
+						std::cout << std::endl; */
+					}	
+					else
+					{
+						print_bmc_ce_statistics(reach_for_CE, symbolic_ce_list, user_ops, "Safety Analysis");
+						std::cout<< "\nTotal paths visited by our old Algorithm: "<<cnt<<endl;
+						std::cout<< "\nTotal paths visited by our new Algorithm: "<<run_counter<<endl;
+						std::cout<<"\nNumber of postC operation done: "<<postc_counter<<endl;
+						show(R, user_ops);
+						return 0; // the model is unsafe
+					}
+					run = getARun(p);
+				}
+				s1.reset(); 
 				bool feasible = false;
-				r = getPathReachability(p,feasible, forbid_s, symbolic_ce_list);
-				//debug
-				/* std::cout << "The smallest infeasible path is:\n";
+				if (feasiable_tracker)
+				{
+					if(!smallest_inf_run_segment.empty())
+					{
+						p.clear();
+						p.resize((smallest_inf_run_segment.size()/2)+1);
+						for (unsigned int i = 0; i <= (smallest_inf_run_segment.size()/2); i++)
+							p.at(i) = smallest_inf_run_segment.at(2*i);
+					}
+					
+					p_array.resize(p_array.size()+1);
+					p_array.push_back(p);
+				} 
+				/*//debug
+					std::cout << "The smallest infeasible path is:\n";
 				for(unsigned int i=0;i<p.size();i++){
 					std::cout << p[i] << " " ;
 				}
 				std::cout << std::endl; */
-				p_array.resize(p_array.size()+1);
-				p_array.push_back(p);
 				if(!feasible)
 					update_encoding(p); // update the encoding such that no path containing p is returned further.
-				else{
-					print_bmc_ce_statistics(reach_for_CE, symbolic_ce_list, user_ops, "Safety Analysis");
-					std::cout<< "\nTotal paths visited by our Algorithm: "<<cnt<<endl;
-					show(r, user_ops);
-					return 0; // the model is unsafe
-				}
-				p = getNextPath(k1);		
+
+				p = getNextPath(k1);
 			}
-			this->sol.reset();
+			else
+				break;		
 		}
+		this->sol.reset();
 	}
+	
 	print_bmc_ce_statistics(reach_for_CE, symbolic_ce_list, user_ops, "Safety Analysis");
-	std::cout<< "\nTotal paths visited by our Algorithm: "<<cnt<<endl;
-	show(r, user_ops);
+	std::cout<< "\nTotal paths visited by our old Algorithm: "<<cnt<<endl;
+	std::cout<< "\nTotal paths visited by our new Algorithm: "<<run_counter<<endl;
+	std::cout<<"\nNumber of postC operation done: "<<postc_counter<<endl;
+	show(R, user_ops);
 	if(symbolic_ce_list.size()==0 && reach_for_CE.get_counter_examples().size()==0)
 	{
 		return 1; //model is safe
 	}
 	if(symbolic_ce_list.size()>0 && reach_for_CE.get_counter_examples().size()==0)
 	{
-		return 2; // model is unknown
+		return 2; // The safety of the model is unknown
 	}
 }
